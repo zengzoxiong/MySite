@@ -1,0 +1,33 @@
+{
+  "categories": ["视频音频", "图片处理", "文档工具"],
+  "links": [
+    {
+      "title": "免费在线视频和音频工具",
+      "url": "https://tools.video",
+      "description": "最快、最全能的在线音视频处理工具合集。内置 22 个视频、音频处理工具，一个网站搞定视频压缩、格式转换、裁剪、合并、提取音频！",
+      "category": "视频音频",
+      "icon": "🎬"
+    },
+    {
+      "title": "抠抠图",
+      "url": "https://www.koukoutu.com/removebgtool/all?v=xhpt.AI",
+      "description": "一个免费在线AI抠图神器。抠图功能永久免费，主打精准抠图，复杂的背景和发丝也能轻松识别。支持在线免费AI抠图和批量抠图，最多支持一次上传 100 张图片。",
+      "category": "图片处理",
+      "icon": "🖼️"
+    },
+    {
+      "title": "马克配音",
+      "url": "https://ttsmaker.cn",
+      "description": "一款免费在线文本转语音工具。提供了 50 多种语言和 300 种语音风格，包含了男声、女声、爆款短视频、演讲、小说阅读、新闻播音等各种类型，风格多样。",
+      "category": "视频音频",
+      "icon": "🎙️"
+    },
+    {
+      "title": "ImagesTool PDF TOOL",
+      "url": "https://pdf.imagestool.com",
+      "description": "一款 100% 免费的本地处理 PDF 工具。无需长传文件到服务器，完全本地处理，网站加载完成后，断网也可以使用。支持 PDF 合并、拆分、提取、压缩、转换、水印、加密等几十个功能。",
+      "category": "文档工具",
+      "icon": "📄"
+    }
+  ]
+}
