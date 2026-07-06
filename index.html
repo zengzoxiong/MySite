@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏导航</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <header class="header">
+            <h1>📚 我的收藏导航</h1>
+            <p class="subtitle">快速访问你收藏的网站</p>
+        </header>
+
+        <!-- 搜索和筛选区域 -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜索链接..." autocomplete="off">
+            </div>
+            <div class="category-tags" id="categoryTags">
+                <button class="tag active" data-category="all">全部</button>
+            </div>
+        </div>
+
+        <!-- 链接卡片容器 -->
+        <main class="links-grid" id="linksGrid">
+            <!-- 卡片将通过 JavaScript 动态生成 -->
+        </main>
+
+        <!-- 空状态提示 -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <p>😅 没有找到匹配的链接</p>
+        </div>
+
+        <!-- 主题切换按钮 -->
+        <button class="theme-toggle" id="themeToggle" title="切换主题">
+            <span class="theme-icon">🌙</span>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
