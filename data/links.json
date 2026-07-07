@@ -1,8 +1,14 @@
 {
-  "categories": ["视频音频", "图片处理", "文档工具"],
+  "categories": [
+    "代码工具",
+    "视频音频",
+    "图片处理",
+    "文档工具",
+    "教程网站"
+  ],
   "links": [
     {
-      "title": "免费在线视频和音频工具",
+      "title": "tools.video",
       "url": "https://tools.video",
       "description": "最快、最全能的在线音视频处理工具合集。内置 22 个视频、音频处理工具，一个网站搞定视频压缩、格式转换、裁剪、合并、提取音频！",
       "category": "视频音频",
@@ -28,6 +34,27 @@
       "description": "一款 100% 免费的本地处理 PDF 工具。无需长传文件到服务器，完全本地处理，网站加载完成后，断网也可以使用。支持 PDF 合并、拆分、提取、压缩、转换、水印、加密等几十个功能。",
       "category": "文档工具",
       "icon": "📄"
+    },
+    {
+      "title": "Highlight code",
+      "url": "https://highlightcode.parryqiu.com/",
+      "description": "粘贴源代码、选择语言，然后将高亮后的内容复制到 Microsoft Word、OneNote、Google Docs 或技术文档中。HighlightCode 适合代码粘贴到 Word 的写作流程，让教程、报告、论文和开发文档中的代码块更易阅读。",
+      "category": "代码工具",
+      "icon": "📄"
+    },
+    {
+      "title": "在线分割长图片",
+      "url": "https://www.wdku.net/image/imagesplit",
+      "description": "在线长图片分割，支持平均分割，固定高度分割，还有比例分割。支持智能分割，自动寻找最优路径分割，自动避开文字分割。",
+      "category": "图片处理",
+      "icon": "🖼️"
+    },
+    {
+      "title": "西风阁",
+      "url": "https://www.slzxf.cn/",
+      "description": "一个个人博客页面。Python、Markdown、Linux、机器学习等学习教程的集合。",
+      "category": "教程网站",
+      "icon": "🖼️"
     }
   ]
 }
