@@ -1,0 +1,24 @@
+# ---- 操作系统文件 ----
+.DS_Store
+Thumbs.db
+
+# ---- IDE 配置 ----
+.vscode/
+.idea/
+*.swp
+
+# ---- 环境与配置 ----
+.env
+.env.local
+*.env
+
+# ---- 日志 ----
+*.log
+logs/
+
+# ---- 临时文件 ----
+*.tmp
+*.temp
+
+# ---- Claude 中间文件 ----
+.claude/.claude_temp/
