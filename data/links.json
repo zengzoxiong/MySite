@@ -55,6 +55,20 @@
       "description": "一个个人博客页面。Python、Markdown、Linux、机器学习等学习教程的集合。",
       "category": "教程网站",
       "icon": "🖼️"
+    },
+    {
+      "title": "中文网字计划",
+      "url": "https://chinese-font.netlify.app/zh-cn/",
+      "description": "免费可商用中文字体平台。自研分包引擎按需加载，内置 Google Fonts 查询与免费 CDN，开发者引用 CSS 即可接入，支持 Vite/Next/Nuxt 等主流框架。",
+      "category": "代码工具",
+      "icon": "🔤"
+    },
+    {
+      "title": "kkFileView",
+      "url": "https://www.kkview.cn/zh-cn/index.html",
+      "description": "一个预览地址覆盖 Office、PDF、图片、音视频、压缩包、CAD、3D 模型等常见文件类型。独立部署，快速接入业务系统，提供统一的在线预览体验。",
+      "category": "文档工具",
+      "icon": "👁️"
     }
   ]
 }
