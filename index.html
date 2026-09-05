@@ -7,55 +7,56 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- 头部区域 -->
-        <header class="header">
-            <h1>📚 我的收藏导航</h1>
-            <p class="subtitle">快速访问你收藏的网站</p>
-        </header>
+    <!-- 移动端遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- 自建工具区 -->
-        <section class="tools-section" aria-label="我的工具">
-            <div class="tools-title">🧰 我的工具</div>
-            <div class="tools-grid">
-                <a class="tool-card" href="svg-editor.html" target="_blank" rel="noopener noreferrer"
-                   title="在线 SVG 可视化编辑器：绘图、连线、模板、导出">
-                    <span class="tool-icon">✏️</span>
-                    <div class="tool-info">
-                        <div class="tool-name">SVG 可视化编辑器</div>
-                        <div class="tool-desc">在线绘制架构图 / 流程图，支持保存与导出</div>
-                    </div>
-                    <span class="tool-open">打开 ↗</span>
-                </a>
-                <!-- 后续自建工具在此追加 tool-card -->
-            </div>
-        </section>
-
-        <!-- 搜索和筛选区域 -->
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 搜索链接..." autocomplete="off">
-            </div>
-            <div class="category-tags" id="categoryTags">
-                <button class="tag active" data-category="all">全部</button>
-            </div>
+    <!-- 左侧侧栏 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-logo">Nav</span>
+            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收缩侧栏">‹</button>
         </div>
 
-        <!-- 链接卡片容器 -->
-        <main class="links-grid" id="linksGrid">
-            <!-- 卡片将通过 JavaScript 动态生成 -->
-        </main>
+        <div class="sidebar-search">
+            <input type="text" id="searchInput" placeholder="搜索..." autocomplete="off">
+        </div>
 
-        <!-- 空状态提示 -->
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">工具</div>
+                <div class="sidebar-tools" id="sidebarTools">
+                    <!-- JS 动态渲染 -->
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">收藏</div>
+                <div class="sidebar-categories" id="sidebarCategories">
+                    <!-- JS 动态渲染 -->
+                </div>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggle" title="切换主题">
+                <span class="theme-icon">🌙</span>
+                <span class="theme-label">主题</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" title="打开菜单">☰</button>
+
+    <!-- 右侧内容区 -->
+    <main class="main-content" id="mainContent">
+        <div class="links-grid" id="linksGrid"></div>
         <div class="empty-state" id="emptyState" style="display: none;">
-            <p>😅 没有找到匹配的链接</p>
+            <p>没有找到匹配的内容</p>
         </div>
-
-        <!-- 主题切换按钮 -->
-        <button class="theme-toggle" id="themeToggle" title="切换主题">
-            <span class="theme-icon">🌙</span>
-        </button>
-    </div>
+    </main>
 
     <script src="script.js"></script>
 </body>
