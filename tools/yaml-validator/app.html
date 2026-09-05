@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 转 YAML 验证器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/yaml-validator/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .editor-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .editor-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 450px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        .status-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .status-box.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .status-box.active {
+            display: block;
+        }
+
+        .status-box p {
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .status-box.error p {
+            color: #c62828;
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .editor-textarea {
+                min-height: 300px;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>YAML 验证器</h1>
+            <p>验证 YAML 语法并转换为 JSON</p>
+        </div>
+
+        <div class="card">
+            <div class="status-box" id="status-box">
+                <p id="status-message">YAML 格式正确</p>
+            </div>
+
+            <div class="action-bar">
+                <div class="btn-group">
+                    <button class="btn" onclick="validateAndConvert()">验证并转换</button>
+                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <span class="editor-title">YAML 输入</span>
+                    </div>
+                    <textarea class="editor-textarea" id="yaml-input" placeholder="在此输入 YAML..."></textarea>
+                </div>
+
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <span class="editor-title">JSON 输出</span>
+                    </div>
+                    <textarea class="editor-textarea" id="json-output" placeholder="转换后的 JSON 将显示在这里..." readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateAndConvert() {
+            const yaml = document.getElementById('yaml-input').value.trim();
+            const statusBox = document.getElementById('status-box');
+            const statusMessage = document.getElementById('status-message');
+            const jsonOutput = document.getElementById('json-output');
+
+            if (!yaml) {
+                statusBox.className = 'status-box error active';
+                statusMessage.textContent = '请输入 YAML 内容';
+                jsonOutput.value = '';
+                return;
+            }
+
+            try {
+                // Simple YAML to JSON conversion
+                const json = parseYAML(yaml);
+                jsonOutput.value = JSON.stringify(json, null, 2);
+
+                statusBox.className = 'status-box active';
+                statusMessage.textContent = '✓ YAML 格式正确，已成功转换为 JSON';
+            } catch (error) {
+                statusBox.className = 'status-box error active';
+                statusMessage.textContent = '✗ YAML 格式错误: ' + error.message;
+                jsonOutput.value = '';
+            }
+        }
+
+        function parseYAML(yaml) {
+            const lines = yaml.split('\n');
+            const result = {};
+            const stack = [{ obj: result, indent: -1 }];
+
+            for (let line of lines) {
+                if (line.trim() === '' || line.trim().startsWith('#')) continue;
+
+                const indent = line.search(/\S/);
+                const trimmed = line.trim();
+
+                // Pop stack to find parent level
+                while (stack.length > 0 && stack[stack.length - 1].indent >= indent) {
+                    stack.pop();
+                }
+
+                const parent = stack[stack.length - 1].obj;
+
+                if (trimmed.includes(':')) {
+                    const [key, ...valueParts] = trimmed.split(':');
+                    const value = valueParts.join(':').trim();
+                    const cleanKey = key.trim();
+
+                    if (value === '' || value.startsWith('|') || value.startsWith('>')) {
+                        // Multi-line value
+                        parent[cleanKey] = '';
+                    } else if (value === '~' || value === 'null') {
+                        parent[cleanKey] = null;
+                    } else if (value === 'true' || value === 'yes') {
+                        parent[cleanKey] = true;
+                    } else if (value === 'false' || value === 'no') {
+                        parent[cleanKey] = false;
+                    } else if (!isNaN(value)) {
+                        parent[cleanKey] = parseFloat(value);
+                    } else if (value.startsWith('"') || value.startsWith("'")) {
+                        parent[cleanKey] = value.slice(1, -1);
+                    } else {
+                        parent[cleanKey] = value;
+                    }
+                } else if (trimmed.startsWith('- ')) {
+                    // Array item
+                    const value = trimmed.slice(2).trim();
+                    if (!Array.isArray(parent)) {
+                        throw new Error('无法解析数组，父级不是数组');
+                    }
+                    parent.push(value);
+                }
+            }
+
+            return result;
+        }
+
+        function clearAll() {
+            document.getElementById('yaml-input').value = '';
+            document.getElementById('json-output').value = '';
+            document.getElementById('status-box').classList.remove('active');
+        }
+
+        function loadSample() {
+            document.getElementById('yaml-input').value = `# 配置文件示例
+app:
+  name: "My Application"
+  version: 1.0.0
+  debug: true
+
+database:
+  host: localhost
+  port: 5432
+  name: mydb
+  credentials:
+    username: admin
+    password: secret123
+
+features:
+  - authentication
+  - logging
+  - caching
+
+limits:
+  max_users: 100
+  timeout: 30`;
+            validateAndConvert();
+        }
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

@@ -69,6 +69,13 @@
       "description": "一个预览地址覆盖 Office、PDF、图片、音视频、压缩包、CAD、3D 模型等常见文件类型。独立部署，快速接入业务系统，提供统一的在线预览体验。",
       "category": "文档工具",
       "icon": "👁️"
+    },
+    {
+      "title": "ToolHub",
+      "url": "https://toolhub.changhui.org.cn/tools.html",
+      "description": "免费在线工具平台，提供二维码生成与解码、IP查询、正则表达式测试、随机密码生成、Base64编解码等多种实用功能。",
+      "category": "代码工具",
+      "icon": "️"
     }
   ]
 }

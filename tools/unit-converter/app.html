@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单位换算器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/unit-converter/app.html">
+    <style>
+        :root {
+            --accent: #ec4899;
+            --accent-soft: #ec489933;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ec4899 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .output-box {
+            background: #f8fafc;
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .preview {
+            width: 100%;
+            min-height: 180px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .result {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>单位换算器</h1>
+            <p>长度、重量、温度等单位快速换算</p>
+        </div>
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>单位类型</label>
+                    <select id="category">
+                        <option value="length">长度</option>
+                        <option value="weight">重量</option>
+                        <option value="temperature">温度</option>
+                    </select>
+                </div>
+                <div>
+                    <label>输入数值</label>
+                    <input type="number" id="value" placeholder="输入数值">
+                </div>
+            </div>
+            <div class="grid" style="margin-top: 12px;">
+                <div>
+                    <label>从</label>
+                    <select id="fromUnit"></select>
+                </div>
+                <div>
+                    <label>到</label>
+                    <select id="toUnit"></select>
+                </div>
+            </div>
+            <div class="output-box" style="margin-top: 16px;">
+                <p class="muted">换算结果</p>
+                <div class="result" id="result">--</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const categorySelect = document.getElementById('category');
+        const valueInput = document.getElementById('value');
+        const fromUnitSelect = document.getElementById('fromUnit');
+        const toUnitSelect = document.getElementById('toUnit');
+        const resultEl = document.getElementById('result');
+
+        const units = {
+            length: {
+                name: '长度',
+                base: 'm',
+                items: {
+                    m: 1,
+                    km: 1000,
+                    cm: 0.01,
+                    mm: 0.001,
+                    inch: 0.0254,
+                    ft: 0.3048,
+                },
+            },
+            weight: {
+                name: '重量',
+                base: 'kg',
+                items: {
+                    kg: 1,
+                    g: 0.001,
+                    lb: 0.45359237,
+                    oz: 0.0283495231,
+                },
+            },
+            temperature: {
+                name: '温度',
+                items: {
+                    c: '摄氏度 (°C)',
+                    f: '华氏度 (°F)',
+                    k: '开尔文 (K)',
+                },
+            },
+        };
+
+        function populateUnits() {
+            const category = categorySelect.value;
+            const unitSet = units[category];
+            fromUnitSelect.innerHTML = '';
+            toUnitSelect.innerHTML = '';
+            if (category === 'temperature') {
+                Object.entries(unitSet.items).forEach(([key, label]) => {
+                    const option1 = new Option(label, key);
+                    const option2 = new Option(label, key);
+                    fromUnitSelect.add(option1);
+                    toUnitSelect.add(option2);
+                });
+            } else {
+                Object.keys(unitSet.items).forEach((key) => {
+                    const option1 = new Option(key, key);
+                    const option2 = new Option(key, key);
+                    fromUnitSelect.add(option1);
+                    toUnitSelect.add(option2);
+                });
+            }
+            toUnitSelect.selectedIndex = 1;
+            calculate();
+        }
+
+        function convertTemperature(value, from, to) {
+            let celsius = value;
+            if (from === 'f') celsius = (value - 32) * 5 / 9;
+            if (from === 'k') celsius = value - 273.15;
+            let result = celsius;
+            if (to === 'f') result = celsius * 9 / 5 + 32;
+            if (to === 'k') result = celsius + 273.15;
+            return result;
+        }
+
+        function calculate() {
+            const value = parseFloat(valueInput.value);
+            if (Number.isNaN(value)) {
+                resultEl.textContent = '--';
+                return;
+            }
+            const category = categorySelect.value;
+            if (category === 'temperature') {
+                const result = convertTemperature(value, fromUnitSelect.value, toUnitSelect.value);
+                resultEl.textContent = `${result.toFixed(2)}`;
+                return;
+            }
+            const factorFrom = units[category].items[fromUnitSelect.value];
+            const factorTo = units[category].items[toUnitSelect.value];
+            const baseValue = value * factorFrom;
+            const result = baseValue / factorTo;
+            resultEl.textContent = result.toFixed(4);
+        }
+
+        categorySelect.addEventListener('change', populateUnits);
+        valueInput.addEventListener('input', calculate);
+        fromUnitSelect.addEventListener('change', calculate);
+        toUnitSelect.addEventListener('change', calculate);
+
+        populateUnits();
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>
+

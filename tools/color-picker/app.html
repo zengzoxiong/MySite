@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颜色选择器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/color-picker/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .picker-container {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 120px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .color-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .color-input label {
+            display: block;
+            margin-bottom: 8px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .color-input input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Monaco', monospace;
+        }
+
+        .color-input input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .hue-slider, .alpha-slider {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .hue-slider input, .alpha-slider input {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .hue-slider input {
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+        }
+
+        .alpha-slider input {
+            background: linear-gradient(to right, transparent, #ff6b6b);
+        }
+
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .format-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .format-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .format-value {
+            font-family: 'Monaco', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            color: #ff6b6b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+        }
+
+        .preset-colors {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .preset-color {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.1);
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <a href="../.." class="back-link">
+            <span>←</span> 返回 JustHTMLs
+        </a>
+
+        <div class="header">
+            <h1>颜色选择器</h1>
+        </div>
+
+        <div class="picker-container">
+            <div class="color-preview" id="preview"></div>
+
+            <div class="preset-colors">
+                <div class="preset-color" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                <div class="preset-color" style="background: #feca57" data-color="#feca57"></div>
+                <div class="preset-color" style="background: #48dbfb" data-color="#48dbfb"></div>
+                <div class="preset-color" style="background: #ff9ff3" data-color="#ff9ff3"></div>
+                <div class="preset-color" style="background: #54a0ff" data-color="#54a0ff"></div>
+                <div class="preset-color" style="background: #00d2d3" data-color="#00d2d3"></div>
+                <div class="preset-color" style="background: #1dd1a1" data-color="#1dd1a1"></div>
+                <div class="preset-color" style="background: #5f27cd" data-color="#5f27cd"></div>
+            </div>
+
+            <div class="color-input-wrapper">
+                <div class="color-input">
+                    <label>HEX</label>
+                    <input type="text" id="hex" value="#ff6b6b">
+                </div>
+                <div class="color-input">
+                    <label>RGB</label>
+                    <input type="text" id="rgb" value="rgb(255, 107, 107)">
+                </div>
+            </div>
+
+            <div class="hue-slider">
+                <input type="range" id="hue" min="0" max="360" value="0">
+            </div>
+
+            <div class="alpha-slider">
+                <input type="range" id="alpha" min="0" max="100" value="100">
+            </div>
+
+            <div class="formats">
+                <div class="format-item">
+                    <div class="format-label">HEX</div>
+                    <div class="format-value" id="format-hex">#ff6b6b</div>
+                    <button class="copy-btn" onclick="copyValue('format-hex')">复制</button>
+                </div>
+                <div class="format-item">
+                    <div class="format-label">RGB</div>
+                    <div class="format-value" id="format-rgb">rgb(255, 107, 107)</div>
+                    <button class="copy-btn" onclick="copyValue('format-rgb')">复制</button>
+                </div>
+                <div class="format-item">
+                    <div class="format-label">HSL</div>
+                    <div class="format-value" id="format-hsl">hsl(0, 100%, 71%)</div>
+                    <button class="copy-btn" onclick="copyValue('format-hsl')">复制</button>
+                </div>
+                <div class="format-item">
+                    <div class="format-label">HSV</div>
+                    <div class="format-value" id="format-hsv">hsv(0, 58%, 100%)</div>
+                    <button class="copy-btn" onclick="copyValue('format-hsv')">复制</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const preview = document.getElementById('preview');
+        const hexInput = document.getElementById('hex');
+        const rgbInput = document.getElementById('rgb');
+        const hueSlider = document.getElementById('hue');
+        const alphaSlider = document.getElementById('alpha');
+
+        let currentColor = { r: 255, g: 107, b: 107, a: 1 };
+
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const d = max - min;
+            let h, s, v = max;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                s = d / max;
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: h * 360, s: s * 100, v: v * 100 };
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const d = max - min;
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function updateColor(color) {
+            currentColor = color;
+            const { r, g, b, a } = color;
+
+            preview.style.background = `rgb(${r}, ${g}, ${b})`;
+
+            const hex = rgbToHex(r, g, b);
+            const hsv = rgbToHsv(r, g, b);
+            const hsl = rgbToHsl(r, g, b);
+
+            hexInput.value = hex;
+            rgbInput.value = `rgb(${r}, ${g}, ${b})`;
+
+            document.getElementById('format-hex').textContent = hex;
+            document.getElementById('format-rgb').textContent = `rgb(${r}, ${g}, ${b})`;
+            document.getElementById('format-hsl').textContent = `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%)`;
+            document.getElementById('format-hsv').textContent = `hsv(${Math.round(hsv.h)}, ${Math.round(hsv.s)}%, ${Math.round(hsv.v)}%)`;
+
+            alphaSlider.style.background = `linear-gradient(to right, transparent, ${hex})`;
+        }
+
+        function copyValue(id) {
+            const text = document.getElementById(id).textContent;
+            navigator.clipboard.writeText(text);
+            const btn = event.target;
+            btn.textContent = '已复制!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '复制';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        hexInput.addEventListener('input', () => {
+            const rgb = hexToRgb(hexInput.value);
+            if (rgb) {
+                updateColor({ ...rgb, a: 1 });
+            }
+        });
+
+        hueSlider.addEventListener('input', () => {
+            const hsv = rgbToHsv(currentColor.r, currentColor.g, currentColor.b);
+            // Simple hue rotation
+            const h = parseInt(hueSlider.value);
+            // This is simplified - proper implementation would convert HSV->RGB with new H
+        });
+
+        document.querySelectorAll('.preset-color').forEach(el => {
+            el.addEventListener('click', () => {
+                const rgb = hexToRgb(el.dataset.color);
+                if (rgb) updateColor({ ...rgb, a: 1 });
+            });
+        });
+
+        // Initialize
+        updateColor(currentColor);
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

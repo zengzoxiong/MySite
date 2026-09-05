@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大小写转换工具</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/case-converter/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-area {
+            margin-bottom: 25px;
+        }
+
+        .input-area label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .result-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            color: #333;
+            min-height: 50px;
+        }
+
+        .copy-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #3a9bdc;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>大小写转换工具</h1>
+            <p>在各种命名格式之间转换文本</p>
+        </div>
+
+        <div class="card">
+            <div class="input-area">
+                <label>输入文本</label>
+                <textarea id="input" placeholder="输入要转换的文本... 例如: hello world" oninput="convert()"></textarea>
+            </div>
+
+            <div class="results">
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">小写 (lowercase)</span>
+                    </div>
+                    <div class="result-value" id="lowercase">hello world</div>
+                    <button class="copy-btn" onclick="copy('lowercase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">大写 (UPPERCASE)</span>
+                    </div>
+                    <div class="result-value" id="uppercase">HELLO WORLD</div>
+                    <button class="copy-btn" onclick="copy('uppercase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">首字母大写 (Title Case)</span>
+                    </div>
+                    <div class="result-value" id="titlecase">Hello World</div>
+                    <button class="copy-btn" onclick="copy('titlecase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">句首大写 (Sentence case)</span>
+                    </div>
+                    <div class="result-value" id="sentencecase">Hello world</div>
+                    <button class="copy-btn" onclick="copy('sentencecase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">驼峰命名 (camelCase)</span>
+                    </div>
+                    <div class="result-value" id="camelcase">helloWorld</div>
+                    <button class="copy-btn" onclick="copy('camelcase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">帕斯卡命名 (PascalCase)</span>
+                    </div>
+                    <div class="result-value" id="pascalcase">HelloWorld</div>
+                    <button class="copy-btn" onclick="copy('pascalcase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">蛇形命名 (snake_case)</span>
+                    </div>
+                    <div class="result-value" id="snakecase">hello_world</div>
+                    <button class="copy-btn" onclick="copy('snakecase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">常量命名 (CONSTANT_CASE)</span>
+                    </div>
+                    <div class="result-value" id="constantcase">HELLO_WORLD</div>
+                    <button class="copy-btn" onclick="copy('constantcase')">复制</button>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-name">烤串命名 (kebab-case)</span>
+                    </div>
+                    <div class="result-value" id="kebabcase">hello-world</div>
+                    <button class="copy-btn" onclick="copy('kebabcase')">复制</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function convert() {
+            const input = document.getElementById('input').value;
+
+            if (!input.trim()) {
+                ['lowercase', 'uppercase', 'titlecase', 'sentencecase', 'camelcase', 'pascalcase', 'snakecase', 'constantcase', 'kebabcase'].forEach(id => {
+                    document.getElementById(id).textContent = '';
+                });
+                return;
+            }
+
+            // Lowercase
+            document.getElementById('lowercase').textContent = input.toLowerCase();
+
+            // Uppercase
+            document.getElementById('uppercase').textContent = input.toUpperCase();
+
+            // Title Case
+            document.getElementById('titlecase').textContent = toTitleCase(input);
+
+            // Sentence case
+            document.getElementById('sentencecase').textContent = toSentenceCase(input);
+
+            // camelCase
+            document.getElementById('camelcase').textContent = toCamelCase(input);
+
+            // PascalCase
+            document.getElementById('pascalcase').textContent = toPascalCase(input);
+
+            // snake_case
+            document.getElementById('snakecase').textContent = toSnakeCase(input);
+
+            // CONSTANT_CASE
+            document.getElementById('constantcase').textContent = toSnakeCase(input).toUpperCase();
+
+            // kebab-case
+            document.getElementById('kebabcase').textContent = toKebabCase(input);
+        }
+
+        function toTitleCase(str) {
+            return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+        }
+
+        function toSentenceCase(str) {
+            return str.toLowerCase().replace(/(^\w|\.\s+\w)/g, s => s.toUpperCase());
+        }
+
+        function toCamelCase(str) {
+            return str
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+                .replace(/^[A-Z]/, s => s.toLowerCase());
+        }
+
+        function toPascalCase(str) {
+            return str
+                .toLowerCase()
+                .replace(/(^|[^a-zA-Z0-9]+)(.)/g, (m, sep, chr) => chr.toUpperCase());
+        }
+
+        function toSnakeCase(str) {
+            return str
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+
+        function toKebabCase(str) {
+            return str
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function copy(id) {
+            const text = document.getElementById(id).textContent;
+            if (!text) {
+                showToast('没有可复制的内容');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制到剪贴板');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #333;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: fadeInOut 2s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

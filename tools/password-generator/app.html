@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全密码生成器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/password-generator/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .password-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .password-display:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #passwordOutput {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: #333;
+            word-break: break-all;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .password-display:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #48bb78;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .length-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .length-display {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label {
+            color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked ~ .checkmark {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked ~ .checkmark::after {
+            opacity: 1;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            font-size: 14px;
+            color: #555;
+            transition: color 0.3s ease;
+        }
+
+        .checkmark {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #cbd5e0;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .strength-meter {
+            margin-bottom: 25px;
+        }
+
+        .strength-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .strength-text {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .generate-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .history {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .history-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #555;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-password {
+            font-family: 'Courier New', monospace;
+            flex: 1;
+            margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            color: #999;
+            font-size: 11px;
+        }
+
+        .clear-history {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history:hover {
+            background: #e9ecef;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <a href="../.." class="back-link">
+        <span>←</span> 返回 JustHTMLs
+    </a>
+
+    <div class="container">
+        <h1>🔐 安全密码生成器</h1>
+        <p class="subtitle">创建强大且安全的密码，保护您的数字生活</p>
+
+        <div class="password-display">
+            <div id="passwordOutput">点击下方按钮生成密码</div>
+            <button class="copy-btn" onclick="copyPassword()">复制</button>
+        </div>
+
+        <div class="control-group">
+            <label>密码长度</label>
+            <div class="length-control">
+                <input type="range" id="lengthSlider" min="8" max="32" value="16">
+                <div class="length-display" id="lengthDisplay">16</div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>包含字符类型</label>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="uppercase" checked>
+                    <span class="checkbox-label">大写字母 (A-Z)</span>
+                    <span class="checkmark"></span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="lowercase" checked>
+                    <span class="checkbox-label">小写字母 (a-z)</span>
+                    <span class="checkmark"></span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="numbers" checked>
+                    <span class="checkbox-label">数字 (0-9)</span>
+                    <span class="checkmark"></span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="symbols" checked>
+                    <span class="checkbox-label">特殊字符 (!@#$%)</span>
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="strength-meter">
+            <label>密码强度</label>
+            <div class="strength-bar">
+                <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText">请生成密码</div>
+        </div>
+
+        <button class="generate-btn" onclick="generatePassword()">
+            生成新密码
+        </button>
+
+        <div class="history">
+            <div class="history-title">最近生成的密码</div>
+            <div class="history-list" id="historyList"></div>
+            <button class="clear-history" onclick="clearHistory()">清除历史</button>
+        </div>
+    </div>
+
+    <script>
+        let passwordHistory = JSON.parse(localStorage.getItem('passwordHistory')) || [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const lengthSlider = document.getElementById('lengthSlider');
+            const lengthDisplay = document.getElementById('lengthDisplay');
+
+            lengthSlider.addEventListener('input', function() {
+                lengthDisplay.textContent = this.value;
+            });
+
+            displayHistory();
+            generatePassword();
+        });
+
+        function generatePassword() {
+            const length = parseInt(document.getElementById('lengthSlider').value);
+            const includeUppercase = document.getElementById('uppercase').checked;
+            const includeLowercase = document.getElementById('lowercase').checked;
+            const includeNumbers = document.getElementById('numbers').checked;
+            const includeSymbols = document.getElementById('symbols').checked;
+
+            if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                alert('请至少选择一种字符类型');
+                return;
+            }
+
+            let charset = '';
+            if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+            if (includeNumbers) charset += '0123456789';
+            if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            let password = '';
+            const array = new Uint32Array(length);
+            crypto.getRandomValues(array);
+
+            for (let i = 0; i < length; i++) {
+                password += charset[array[i] % charset.length];
+            }
+
+            if (includeUppercase && !/[A-Z]/.test(password)) {
+                const pos = Math.floor(Math.random() * length);
+                password = password.substring(0, pos) +
+                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)] +
+                          password.substring(pos + 1);
+            }
+            if (includeLowercase && !/[a-z]/.test(password)) {
+                const pos = Math.floor(Math.random() * length);
+                password = password.substring(0, pos) +
+                          'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)] +
+                          password.substring(pos + 1);
+            }
+            if (includeNumbers && !/[0-9]/.test(password)) {
+                const pos = Math.floor(Math.random() * length);
+                password = password.substring(0, pos) +
+                          '0123456789'[Math.floor(Math.random() * 10)] +
+                          password.substring(pos + 1);
+            }
+            if (includeSymbols && !/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)) {
+                const pos = Math.floor(Math.random() * length);
+                password = password.substring(0, pos) +
+                          '!@#$%^&*()_+-=[]{}|;:,.<>?'[Math.floor(Math.random() * 26)] +
+                          password.substring(pos + 1);
+            }
+
+            document.getElementById('passwordOutput').textContent = password;
+            updateStrength(password);
+            addToHistory(password);
+        }
+
+        function updateStrength(password) {
+            let strength = 0;
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+
+            if (password.length >= 8) strength += 20;
+            if (password.length >= 12) strength += 20;
+            if (password.length >= 16) strength += 10;
+            if (/[a-z]/.test(password)) strength += 15;
+            if (/[A-Z]/.test(password)) strength += 15;
+            if (/[0-9]/.test(password)) strength += 10;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+
+            strengthFill.style.width = strength + '%';
+
+            if (strength < 50) {
+                strengthFill.style.background = '#f56565';
+                strengthText.textContent = '弱';
+                strengthText.style.color = '#f56565';
+            } else if (strength < 70) {
+                strengthFill.style.background = '#ed8936';
+                strengthText.textContent = '中等';
+                strengthText.style.color = '#ed8936';
+            } else if (strength < 90) {
+                strengthFill.style.background = '#ecc94b';
+                strengthText.textContent = '强';
+                strengthText.style.color = '#ecc94b';
+            } else {
+                strengthFill.style.background = '#48bb78';
+                strengthText.textContent = '非常强';
+                strengthText.style.color = '#48bb78';
+            }
+        }
+
+        function copyPassword() {
+            const password = document.getElementById('passwordOutput').textContent;
+
+            if (password === '点击下方按钮生成密码') {
+                return;
+            }
+
+            navigator.clipboard.writeText(password).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = '已复制';
+                copyBtn.classList.add('copied');
+
+                setTimeout(() => {
+                    copyBtn.textContent = '复制';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function addToHistory(password) {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' +
+                              now.getMinutes().toString().padStart(2, '0');
+
+            passwordHistory.unshift({
+                password: password,
+                time: timeString
+            });
+
+            if (passwordHistory.length > 10) {
+                passwordHistory = passwordHistory.slice(0, 10);
+            }
+
+            localStorage.setItem('passwordHistory', JSON.stringify(passwordHistory));
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+
+            if (passwordHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">暂无历史记录</div>';
+                return;
+            }
+
+            historyList.innerHTML = passwordHistory.map(item => `
+                <div class="history-item">
+                    <span class="history-password">${item.password}</span>
+                    <span class="history-time">${item.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            passwordHistory = [];
+            localStorage.removeItem('passwordHistory');
+            displayHistory();
+        }
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

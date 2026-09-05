@@ -1,0 +1,70 @@
+{
+  "tools": [
+    {
+      "name": "SVG 编辑器",
+      "path": "svg-editor.html",
+      "description": "在线绘制架构图 / 流程图，支持保存与导出",
+      "icon": "✏️"
+    },
+    {
+      "name": "Base64 编解码",
+      "path": "base64-encode/index.html",
+      "description": "Base64 编码和解码工具",
+      "icon": ""
+    },
+    {
+      "name": "JSON 格式化",
+      "path": "json-formatter/index.html",
+      "description": "JSON 数据格式化、验证和美化",
+      "icon": ""
+    },
+    {
+      "name": "二维码生成器",
+      "path": "qr-generator/index.html",
+      "description": "生成 QR Code 二维码图片",
+      "icon": ""
+    },
+    {
+      "name": "正则表达式测试",
+      "path": "regex-tester/index.html",
+      "description": "测试和调试正则表达式",
+      "icon": ""
+    },
+    {
+      "name": "密码生成器",
+      "path": "password-generator/index.html",
+      "description": "生成随机安全密码",
+      "icon": ""
+    },
+    {
+      "name": "UUID 生成器",
+      "path": "uuid-generator/index.html",
+      "description": "生成 UUID v4 唯一标识符",
+      "icon": ""
+    },
+    {
+      "name": "URL 编解码",
+      "path": "url-encode/index.html",
+      "description": "URL 编码和解码工具",
+      "icon": ""
+    },
+    {
+      "name": "文本对比",
+      "path": "text-diff/index.html",
+      "description": "比较两段文本的差异",
+      "icon": ""
+    },
+    {
+      "name": "时间戳转换",
+      "path": "timestamp-converter/index.html",
+      "description": "Unix 时间戳与日期互转",
+      "icon": ""
+    },
+    {
+      "name": "颜色选择器",
+      "path": "color-picker/index.html",
+      "description": "选取和转换颜色值",
+      "icon": ""
+    }
+  ]
+}

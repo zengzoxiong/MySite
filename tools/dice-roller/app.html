@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掷骰子工具</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/dice-roller/app.html">
+    <style>
+        :root {
+            --accent: #f59e0b;
+            --accent-soft: #f59e0b33;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="number"],
+        select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .dice-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            min-height: 200px;
+            padding: 20px;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: roll 0.5s ease-out;
+        }
+
+        .dice.rolling {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+        }
+
+        @keyframes roll {
+            from {
+                transform: rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(360deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 24px;
+            padding: 16px;
+            background: #fef3c7;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result .total {
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .dice-dots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 掷骰子工具</h1>
+            <p>模拟掷骰子，支持多种骰子类型</p>
+        </div>
+        <div class="card">
+            <div class="controls">
+                <div>
+                    <label>骰子数量</label>
+                    <input type="number" id="diceCount" min="1" max="12" value="1">
+                </div>
+                <div>
+                    <label>骰子类型</label>
+                    <select id="diceType">
+                        <option value="6">6面 (D6)</option>
+                        <option value="4">4面 (D4)</option>
+                        <option value="8">8面 (D8)</option>
+                        <option value="10">10面 (D10)</option>
+                        <option value="12">12面 (D12)</option>
+                        <option value="20">20面 (D20)</option>
+                        <option value="100">100面 (D100)</option>
+                    </select>
+                </div>
+                <button class="btn" id="rollBtn">🎲 掷骰子</button>
+            </div>
+            <div class="dice-container" id="diceContainer">
+                <p class="muted">点击按钮开始掷骰子</p>
+            </div>
+            <div class="result" id="result">
+                <div class="total">总点数: <span id="total">0</span></div>
+                <p class="muted" id="details"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const diceContainer = document.getElementById('diceContainer');
+        const rollBtn = document.getElementById('rollBtn');
+        const result = document.getElementById('result');
+        const totalEl = document.getElementById('total');
+        const detailsEl = document.getElementById('details');
+        const diceCountInput = document.getElementById('diceCount');
+        const diceTypeSelect = document.getElementById('diceType');
+
+        function rollDice() {
+            const count = parseInt(diceCountInput.value) || 1;
+            const sides = parseInt(diceTypeSelect.value);
+
+            if (count < 1 || count > 12) {
+                alert('骰子数量必须在 1-12 之间');
+                return;
+            }
+
+            // 清空容器
+            diceContainer.innerHTML = '';
+            result.classList.remove('show');
+
+            // 创建骰子元素
+            const diceElements = [];
+            for (let i = 0; i < count; i++) {
+                const dice = document.createElement('div');
+                dice.className = 'dice rolling';
+                dice.textContent = '?';
+                diceContainer.appendChild(dice);
+                diceElements.push(dice);
+            }
+
+            // 模拟掷骰子
+            setTimeout(() => {
+                const results = [];
+                let total = 0;
+
+                diceElements.forEach((dice, index) => {
+                    const value = Math.floor(Math.random() * sides) + 1;
+                    results.push(value);
+                    total += value;
+
+                    dice.classList.remove('rolling');
+                    dice.textContent = value;
+                });
+
+                totalEl.textContent = total;
+                detailsEl.textContent = `单次结果: [${results.join(', ')}]`;
+                result.classList.add('show');
+            }, 500);
+        }
+
+        rollBtn.addEventListener('click', rollDice);
+
+        // 空格键掷骰子
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                rollDice();
+            }
+        });
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

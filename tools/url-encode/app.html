@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL 编码解码</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/url-encode/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            border-color: transparent;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr;
+            gap: 20px;
+            height: calc(100vh - 200px);
+            min-height: 400px;
+        }
+
+        .panel {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            background: rgba(6, 182, 212, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            color: #06b6d4;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(6, 182, 212, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: #666;
+        }
+
+        .arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #06b6d4;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: #06b6d4;
+        }
+
+        .info {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto 1fr;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <a href="../.." class="back-link">
+            <span>←</span> 返回 JustHTMLs
+        </a>
+
+        <div class="header">
+            <h1>URL 编码解码</h1>
+        </div>
+
+        <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="encode">编码</button>
+            <button class="mode-btn" data-mode="decode">解码</button>
+        </div>
+
+        <div class="editor-container">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="input-title">输入文本</span>
+                    <button class="copy-btn" onclick="copyInput()">复制</button>
+                </div>
+                <textarea id="input-text" placeholder="输入要编码的文本...">https://example.com/search?q=测试&page=1</textarea>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" id="output-title">编码结果</span>
+                    <button class="copy-btn" id="copy-output" onclick="copyOutput()">复制</button>
+                </div>
+                <textarea id="output-text" readonly placeholder="编码结果将显示在这里..."></textarea>
+            </div>
+        </div>
+
+        <p class="info">将中文、特殊字符等转换为 URL 安全格式</p>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+
+        let currentMode = 'encode';
+
+        function encode(str) {
+            try {
+                return encodeURIComponent(str);
+            } catch (e) {
+                return '错误: ' + e.message;
+            }
+        }
+
+        function decode(str) {
+            try {
+                return decodeURIComponent(str);
+            } catch (e) {
+                return '错误: 无效的 URL 编码字符串';
+            }
+        }
+
+        function convert() {
+            const input = inputText.value;
+            if (!input) {
+                outputText.value = '';
+                return;
+            }
+            outputText.value = currentMode === 'encode' ? encode(input) : decode(input);
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            modeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+            document.getElementById('input-title').textContent = mode === 'encode' ? '输入文本' : 'URL 编码输入';
+            document.getElementById('output-title').textContent = mode === 'encode' ? '编码结果' : '解码结果';
+            inputText.placeholder = mode === 'encode' ? '输入要编码的文本...' : '输入 URL 编码字符串...';
+            outputText.placeholder = mode === 'encode' ? '编码结果将显示在这里...' : '解码结果将显示在这里...';
+            convert();
+        }
+
+        function copyOutput() {
+            if (!outputText.value) return;
+            navigator.clipboard.writeText(outputText.value);
+            const btn = document.getElementById('copy-output');
+            btn.textContent = '已复制!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '复制';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        function copyInput() {
+            if (!inputText.value) return;
+            navigator.clipboard.writeText(inputText.value);
+            event.target.textContent = '已复制!';
+            setTimeout(() => {
+                event.target.textContent = '复制';
+            }, 2000);
+        }
+
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => setMode(btn.dataset.mode));
+        });
+
+        inputText.addEventListener('input', convert);
+
+        // Initial conversion
+        convert();
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

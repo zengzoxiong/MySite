@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 转 CSV</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/json-to-csv/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fce7f3;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #9d174d;
+        }
+
+        .options input {
+            border: 1px solid #fbcfe8;
+            padding: 6px 8px;
+            border-radius: 8px;
+            width: 60px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 260px;
+            border: 2px solid #fbcfe8;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ec4899;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #ec4899;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+
+        .hint {
+            margin-top: 12px;
+            color: #9d174d;
+            font-size: 13px;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>JSON 转 CSV</h1>
+            <p>适合导出表格数据，支持自定义分隔符</p>
+        </div>
+
+        <div class="card">
+            <div class="options">
+                <label>分隔符
+                    <input type="text" id="delimiter" value="," maxlength="1">
+                </label>
+                <label><input type="checkbox" id="include-header" checked> 输出表头</label>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">JSON 输入</h3>
+                    <textarea id="input" placeholder='[{"name":"Alice","age":18}]'></textarea>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">CSV 输出</h3>
+                    <textarea id="output" readonly placeholder="结果会显示在这里"></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="convert-btn">转换</button>
+                <button class="btn secondary" id="copy-btn">复制结果</button>
+                <button class="btn secondary" id="clear-btn">清空</button>
+            </div>
+
+            <div class="hint" id="status">输入 JSON 数组即可转换。</div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const delimiterInput = document.getElementById('delimiter');
+        const includeHeader = document.getElementById('include-header');
+        const status = document.getElementById('status');
+
+        function escapeCSV(value, delimiter) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            const str = String(value);
+            if (str.includes('"') || str.includes('\n') || str.includes('\r') || str.includes(delimiter)) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        }
+
+        function convert() {
+            const delimiter = delimiterInput.value || ',';
+            try {
+                const data = JSON.parse(input.value || '[]');
+                if (!Array.isArray(data)) {
+                    throw new Error('not-array');
+                }
+                if (data.length === 0) {
+                    output.value = '';
+                    status.textContent = '没有可转换的数据。';
+                    status.classList.remove('error');
+                    return;
+                }
+
+                let csvRows = [];
+                if (Array.isArray(data[0])) {
+                    csvRows = data.map((row) => row.map((cell) => escapeCSV(cell, delimiter)).join(delimiter));
+                } else {
+                    const headers = [];
+                    data.forEach((item) => {
+                        Object.keys(item || {}).forEach((key) => {
+                            if (!headers.includes(key)) {
+                                headers.push(key);
+                            }
+                        });
+                    });
+                    if (includeHeader.checked) {
+                        csvRows.push(headers.map((h) => escapeCSV(h, delimiter)).join(delimiter));
+                    }
+                    data.forEach((item) => {
+                        const row = headers.map((key) => escapeCSV(item ? item[key] : '', delimiter));
+                        csvRows.push(row.join(delimiter));
+                    });
+                }
+
+                output.value = csvRows.join('\n');
+                status.textContent = `已转换 ${data.length} 行数据。`;
+                status.classList.remove('error');
+            } catch (error) {
+                output.value = '';
+                status.textContent = '解析失败，请确认 JSON 格式正确。';
+                status.classList.add('error');
+            }
+        }
+
+        function copyResult() {
+            if (!output.value) {
+                return;
+            }
+            output.select();
+            output.setSelectionRange(0, output.value.length);
+            document.execCommand('copy');
+        }
+
+        function clearAll() {
+            input.value = '';
+            output.value = '';
+            status.textContent = '输入 JSON 数组即可转换。';
+            status.classList.remove('error');
+        }
+
+        document.getElementById('convert-btn').addEventListener('click', convert);
+        document.getElementById('copy-btn').addEventListener('click', copyResult);
+        document.getElementById('clear-btn').addEventListener('click', clearAll);
+        [input, delimiterInput, includeHeader].forEach((el) => {
+            el.addEventListener('input', convert);
+            el.addEventListener('change', convert);
+        });
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

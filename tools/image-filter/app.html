@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片滤镜</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/image-filter/app.html">
+    <style>
+        :root {
+            --accent: #14b8a6;
+            --accent-soft: #14b8a633;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #14b8a6 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="file"],
+        input[type="color"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .preview {
+            width: 100%;
+            min-height: 200px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview canvas {
+            max-width: 100%;
+            max-height: 380px;
+            display: block;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 12px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>图片滤镜</h1>
+            <p>调整亮度、对比度、饱和度等参数</p>
+        </div>
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>选择图片</label>
+                    <input type="file" id="file" accept="image/*">
+                    <div style="margin-top: 12px;">
+                        <label>亮度：<span class="chip" id="brightness-value">100%</span></label>
+                        <input type="range" id="brightness" min="0" max="200" value="100">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>对比度：<span class="chip" id="contrast-value">100%</span></label>
+                        <input type="range" id="contrast" min="0" max="200" value="100">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>饱和度：<span class="chip" id="saturation-value">100%</span></label>
+                        <input type="range" id="saturation" min="0" max="200" value="100">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>灰度：<span class="chip" id="grayscale-value">0%</span></label>
+                        <input type="range" id="grayscale" min="0" max="100" value="0">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>复古：<span class="chip" id="sepia-value">0%</span></label>
+                        <input type="range" id="sepia" min="0" max="100" value="0">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>模糊：<span class="chip" id="blur-value">0px</span></label>
+                        <input type="range" id="blur" min="0" max="10" value="0">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label>输出格式</label>
+                        <select id="format">
+                            <option value="image/png">PNG</option>
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/webp">WebP</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button class="btn" id="reset">重置参数</button>
+                        <button class="btn" id="render">生成新图片</button>
+                        <a class="btn btn-secondary" id="download" download>下载图片</a>
+                    </div>
+                </div>
+                <div>
+                    <label>预览</label>
+                    <div class="preview">
+                        <canvas id="canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const brightnessInput = document.getElementById('brightness');
+        const contrastInput = document.getElementById('contrast');
+        const saturationInput = document.getElementById('saturation');
+        const grayscaleInput = document.getElementById('grayscale');
+        const sepiaInput = document.getElementById('sepia');
+        const blurInput = document.getElementById('blur');
+        const formatSelect = document.getElementById('format');
+        const renderBtn = document.getElementById('render');
+        const resetBtn = document.getElementById('reset');
+        const downloadLink = document.getElementById('download');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const labels = {
+            brightness: document.getElementById('brightness-value'),
+            contrast: document.getElementById('contrast-value'),
+            saturation: document.getElementById('saturation-value'),
+            grayscale: document.getElementById('grayscale-value'),
+            sepia: document.getElementById('sepia-value'),
+            blur: document.getElementById('blur-value')
+        };
+        let sourceImage = new Image();
+        let downloadUrl = '';
+
+        function revokeDownload() {
+            if (downloadUrl) {
+                URL.revokeObjectURL(downloadUrl);
+                downloadUrl = '';
+            }
+        }
+
+        function updateLabels() {
+            labels.brightness.textContent = `${brightnessInput.value}%`;
+            labels.contrast.textContent = `${contrastInput.value}%`;
+            labels.saturation.textContent = `${saturationInput.value}%`;
+            labels.grayscale.textContent = `${grayscaleInput.value}%`;
+            labels.sepia.textContent = `${sepiaInput.value}%`;
+            labels.blur.textContent = `${blurInput.value}px`;
+        }
+
+        function renderImage() {
+            if (!sourceImage.src) return;
+            const width = sourceImage.naturalWidth;
+            const height = sourceImage.naturalHeight;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+            ctx.filter = `brightness(${brightnessInput.value}%) contrast(${contrastInput.value}%) saturate(${saturationInput.value}%) grayscale(${grayscaleInput.value}%) sepia(${sepiaInput.value}%) blur(${blurInput.value}px)`;
+            ctx.drawImage(sourceImage, 0, 0);
+            ctx.filter = 'none';
+
+            const format = formatSelect.value;
+            revokeDownload();
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                downloadUrl = URL.createObjectURL(blob);
+                downloadLink.href = downloadUrl;
+                downloadLink.download = `filter.${format.split('/')[1]}`;
+            }, format, 0.92);
+        }
+
+        function resetFilters() {
+            brightnessInput.value = 100;
+            contrastInput.value = 100;
+            saturationInput.value = 100;
+            grayscaleInput.value = 0;
+            sepiaInput.value = 0;
+            blurInput.value = 0;
+            updateLabels();
+            renderImage();
+        }
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                sourceImage = new Image();
+                sourceImage.onload = () => {
+                    renderImage();
+                };
+                sourceImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        [brightnessInput, contrastInput, saturationInput, grayscaleInput, sepiaInput, blurInput, formatSelect].forEach((el) => {
+            el.addEventListener('input', () => {
+                updateLabels();
+                renderImage();
+            });
+            el.addEventListener('change', renderImage);
+        });
+
+        renderBtn.addEventListener('click', renderImage);
+        resetBtn.addEventListener('click', resetFilters);
+        updateLabels();
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

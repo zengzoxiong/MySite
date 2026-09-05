@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工资计算器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/salary-calculator/app.html">
+    <style>
+        :root {
+            --accent: #f97316;
+            --accent-soft: #ffedd5;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --card: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at 20% 20%, #ffedd5 0%, transparent 35%),
+                radial-gradient(circle at 80% 0%, #fde68a 0%, transparent 40%),
+                linear-gradient(135deg, #f97316 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .output-card {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .output-card h3 {
+            font-size: 13px;
+            color: #9a3412;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #7c2d12;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .detail {
+            margin-top: 18px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px dashed var(--border);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #9a3412;
+            font-size: 12px;
+        }
+
+        .tips {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .tip {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tip h4 {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #1f2937;
+        }
+
+        .tip p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>工资计算器</h1>
+            <p>估算税后工资与个税支出（按中国综合所得月度税率）</p>
+        </div>
+
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>税前月薪 (元)</label>
+                    <input type="number" id="gross" placeholder="例如 15000">
+                </div>
+                <div>
+                    <label>社保比例 (%)</label>
+                    <input type="number" id="insuranceRate" value="8" step="0.1">
+                </div>
+                <div>
+                    <label>公积金比例 (%)</label>
+                    <input type="number" id="housingRate" value="7" step="0.1">
+                </div>
+                <div>
+                    <label>专项附加扣除 (元)</label>
+                    <input type="number" id="specialDeduction" value="0" step="100">
+                </div>
+                <div>
+                    <label>起征点 (元)</label>
+                    <input type="number" id="threshold" value="5000" step="100">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="calculate">开始计算</button>
+                <button class="btn btn-secondary" id="reset">清空</button>
+                <span class="badge" id="taxBadge">税率档位: --</span>
+            </div>
+
+            <div class="output-grid">
+                <div class="output-card">
+                    <h3>税后到手</h3>
+                    <div class="value" id="netSalary">--</div>
+                    <p class="muted">扣除税费与社保公积金</p>
+                </div>
+                <div class="output-card">
+                    <h3>个税</h3>
+                    <div class="value" id="taxAmount">--</div>
+                    <p class="muted">应缴个人所得税</p>
+                </div>
+                <div class="output-card">
+                    <h3>社保公积金</h3>
+                    <div class="value" id="socialAmount">--</div>
+                    <p class="muted">按比例估算</p>
+                </div>
+                <div class="output-card">
+                    <h3>应纳税所得额</h3>
+                    <div class="value" id="taxableIncome">--</div>
+                    <p class="muted">税前 - 扣除项</p>
+                </div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-item"><span>税率</span><strong id="taxRate">--</strong></div>
+                <div class="detail-item"><span>速算扣除数</span><strong id="quickDeduction">--</strong></div>
+                <div class="detail-item"><span>税前工资</span><strong id="grossDisplay">--</strong></div>
+                <div class="detail-item"><span>专项附加扣除</span><strong id="specialDisplay">--</strong></div>
+            </div>
+
+            <div class="tips">
+                <div class="tip">
+                    <h4>适用税率</h4>
+                    <p>综合所得月度税率表：3% / 10% / 20% / 25% / 30% / 35% / 45%。</p>
+                </div>
+                <div class="tip">
+                    <h4>注意事项</h4>
+                    <p>不同城市社保、公积金比例不同，可手动调整以贴近实际。</p>
+                </div>
+                <div class="tip">
+                    <h4>隐私保护</h4>
+                    <p>所有计算在本地完成，不会上传到服务器。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const grossInput = document.getElementById('gross');
+        const insuranceRateInput = document.getElementById('insuranceRate');
+        const housingRateInput = document.getElementById('housingRate');
+        const specialDeductionInput = document.getElementById('specialDeduction');
+        const thresholdInput = document.getElementById('threshold');
+        const calculateBtn = document.getElementById('calculate');
+        const resetBtn = document.getElementById('reset');
+
+        const netSalaryEl = document.getElementById('netSalary');
+        const taxAmountEl = document.getElementById('taxAmount');
+        const socialAmountEl = document.getElementById('socialAmount');
+        const taxableIncomeEl = document.getElementById('taxableIncome');
+        const taxRateEl = document.getElementById('taxRate');
+        const quickDeductionEl = document.getElementById('quickDeduction');
+        const grossDisplayEl = document.getElementById('grossDisplay');
+        const specialDisplayEl = document.getElementById('specialDisplay');
+        const taxBadgeEl = document.getElementById('taxBadge');
+
+        const taxBrackets = [
+            { limit: 3000, rate: 0.03, quick: 0 },
+            { limit: 12000, rate: 0.10, quick: 210 },
+            { limit: 25000, rate: 0.20, quick: 1410 },
+            { limit: 35000, rate: 0.25, quick: 2660 },
+            { limit: 55000, rate: 0.30, quick: 4410 },
+            { limit: 80000, rate: 0.35, quick: 7160 },
+            { limit: Infinity, rate: 0.45, quick: 15160 }
+        ];
+
+        function formatMoney(value) {
+            if (Number.isNaN(value)) return '--';
+            return value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getTaxInfo(taxableIncome) {
+            if (taxableIncome <= 0) {
+                return { rate: 0, quick: 0, label: '免税' };
+            }
+            for (const bracket of taxBrackets) {
+                if (taxableIncome <= bracket.limit) {
+                    const label = `${Math.round(bracket.rate * 100)}%`;
+                    return { rate: bracket.rate, quick: bracket.quick, label };
+                }
+            }
+            return { rate: 0, quick: 0, label: '免税' };
+        }
+
+        function updateResult() {
+            const gross = parseFloat(grossInput.value);
+            const insuranceRate = parseFloat(insuranceRateInput.value) || 0;
+            const housingRate = parseFloat(housingRateInput.value) || 0;
+            const specialDeduction = parseFloat(specialDeductionInput.value) || 0;
+            const threshold = parseFloat(thresholdInput.value) || 0;
+
+            if (!gross || gross <= 0) {
+                netSalaryEl.textContent = '--';
+                taxAmountEl.textContent = '--';
+                socialAmountEl.textContent = '--';
+                taxableIncomeEl.textContent = '--';
+                taxRateEl.textContent = '--';
+                quickDeductionEl.textContent = '--';
+                grossDisplayEl.textContent = '--';
+                specialDisplayEl.textContent = '--';
+                taxBadgeEl.textContent = '税率档位: --';
+                return;
+            }
+
+            const socialAmount = gross * (insuranceRate + housingRate) / 100;
+            const taxableIncome = Math.max(gross - socialAmount - specialDeduction - threshold, 0);
+            const taxInfo = getTaxInfo(taxableIncome);
+            const tax = taxableIncome > 0 ? Math.max(taxableIncome * taxInfo.rate - taxInfo.quick, 0) : 0;
+            const netSalary = gross - socialAmount - tax;
+
+            netSalaryEl.textContent = `${formatMoney(netSalary)} 元`;
+            taxAmountEl.textContent = `${formatMoney(tax)} 元`;
+            socialAmountEl.textContent = `${formatMoney(socialAmount)} 元`;
+            taxableIncomeEl.textContent = `${formatMoney(taxableIncome)} 元`;
+            taxRateEl.textContent = taxInfo.rate === 0 ? '免税' : `${(taxInfo.rate * 100).toFixed(0)}%`;
+            quickDeductionEl.textContent = `${formatMoney(taxInfo.quick)} 元`;
+            grossDisplayEl.textContent = `${formatMoney(gross)} 元`;
+            specialDisplayEl.textContent = `${formatMoney(specialDeduction)} 元`;
+            taxBadgeEl.textContent = `税率档位: ${taxInfo.label}`;
+        }
+
+        function resetForm() {
+            grossInput.value = '';
+            insuranceRateInput.value = '8';
+            housingRateInput.value = '7';
+            specialDeductionInput.value = '0';
+            thresholdInput.value = '5000';
+            updateResult();
+        }
+
+        calculateBtn.addEventListener('click', updateResult);
+        resetBtn.addEventListener('click', resetForm);
+
+        [grossInput, insuranceRateInput, housingRateInput, specialDeductionInput, thresholdInput].forEach((input) => {
+            input.addEventListener('input', updateResult);
+        });
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

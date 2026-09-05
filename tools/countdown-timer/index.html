@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时器 - JustHTMLs</title>
+    <meta name="description" content="在线倒计时工具，可自定义时间，带有进度环显示和声音提示">
+    <link rel="canonical" href="https://www.htmls.dev/tools/countdown-timer/app.html">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --text: #f1f5f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .feature {
+            background: #334155;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏱️ 倒计时器</h1>
+            <p>设置时间，专注当下</p>
+        </div>
+        <div class="card">
+            <p style="margin-bottom: 20px; color: #94a3b8;">
+                一个简单好用的倒计时工具，支持自定义时间，带有可视化进度环显示和声音提示。适合工作学习计时、运动健身、烹饪烘焙等场景。
+            </p>
+            <a href="app.html" class="btn">🚀 开始使用</a>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⏰</div>
+                    <h3>自定义时间</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">支持时/分/秒设置</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>快捷预设</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">常用时间一键设置</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔔</div>
+                    <h3>声音提示</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">倒计时结束播放提示</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

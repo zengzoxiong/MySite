@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日一言</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/daily-quote/app.html">
+    <style>
+        :root {
+            --accent: #8b5cf6;
+            --accent-soft: #8b5cf633;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .quote-container {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .quote-mark {
+            font-size: 64px;
+            color: var(--accent);
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .quote-text {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.6;
+            color: #1e293b;
+            margin-bottom: 24px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quote-author {
+            font-size: 18px;
+            color: var(--accent);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quote-author::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        .quote-author::after {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        .quote-source {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .category-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .category-tag {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .category-tag:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .category-tag.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .date-display {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>📜 每日一言</h1>
+            <p>每日一句名言，点亮人生智慧</p>
+        </div>
+        <div class="card">
+            <div class="category-tags">
+                <button class="category-tag active" data-category="all">全部</button>
+                <button class="category-tag" data-category="life">人生</button>
+                <button class="category-tag" data-category="success">成功</button>
+                <button class="category-tag" data-category="wisdom">智慧</button>
+                <button class="category-tag" data-category="love">爱情</button>
+                <button class="category-tag" data-category="motivation">励志</button>
+            </div>
+
+            <div class="quote-container">
+                <div class="quote-mark">"</div>
+                <div class="quote-text" id="quoteText">点击下方按钮获取今日名言</div>
+                <div class="quote-author" id="quoteAuthor"></div>
+                <div class="quote-source" id="quoteSource"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="newQuoteBtn">✨ 获取新名言</button>
+                <button class="btn btn-secondary" id="copyBtn">📋 复制</button>
+            </div>
+
+            <div class="date-display" id="dateDisplay"></div>
+        </div>
+    </div>
+
+    <div class="copy-toast" id="copyToast">已复制到剪贴板</div>
+
+    <script>
+        const quotes = [
+            // 人生
+            { text: "人生如逆旅，我亦是行人。", author: "苏轼", category: "life" },
+            { text: "人生天地之间，若白驹之过隙，忽然而已。", author: "庄子", category: "life" },
+            { text: "人生不是一支蜡烛，而是一盏灯。", author: "萧伯纳", category: "life" },
+            { text: "人生苦短，我用Python。", author: "程序员", category: "life" },
+            { text: "人生没有彩排，每一天都是现场直播。", author: "佚名", category: "life" },
+
+            // 成功
+            { text: "成功就是从失败到失败，也依然不改热情。", author: "丘吉尔", category: "success" },
+            { text: "成功的秘诀在于坚持自己的目标和信念。", author: "本杰明·迪斯雷利", category: "success" },
+            { text: "成功是99%的汗水加1%的灵感。", author: "爱迪生", category: "success" },
+            { text: "不积跬步，无以至千里；不积小流，无以成江海。", author: "荀子", category: "success" },
+            { text: "天才是1%的灵感加上99%的汗水。", author: "爱迪生", category: "success" },
+
+            // 智慧
+            { text: "知之者不如好之者，好之者不如乐之者。", author: "孔子", category: "wisdom" },
+            { text: "学而不思则罔，思而不学则殆。", author: "孔子", category: "wisdom" },
+            { text: "知识就是力量。", author: "培根", category: "wisdom" },
+            { text: "读万卷书，行万里路。", author: "刘彝", category: "wisdom" },
+            { text: "温故而知新，可以为师矣。", author: "孔子", category: "wisdom" },
+
+            // 爱情
+            { text: "愿得一心人，白头不相离。", author: "卓文君", category: "love" },
+            { text: "两情若是久长时，又岂在朝朝暮暮。", author: "秦观", category: "love" },
+            { text: "身无彩凤双飞翼，心有灵犀一点通。", author: "李商隐", category: "love" },
+            { text: "曾经沧海难为水，除却巫山不是云。", author: "元稹", category: "love" },
+            { text: "爱情就像一场感冒，无论谁都得经历。", author: "村上春树", category: "love" },
+
+            // 励志
+            { text: "长风破浪会有时，直挂云帆济沧海。", author: "李白", category: "motivation" },
+            { text: "天生我材必有用，千金散尽还复来。", author: "李白", category: "motivation" },
+            { text: "路漫漫其修远兮，吾将上下而求索。", author: "屈原", category: "motivation" },
+            { text: "宝剑锋从磨砺出，梅花香自苦寒来。", author: "佚名", category: "motivation" },
+            { text: "不经历风雨，怎么见彩虹。", author: "佚名", category: "motivation" },
+            { text: "世上无难事，只怕有心人。", author: "佚名", category: "motivation" },
+            { text: "海阔凭鱼跃，天高任鸟飞。", author: "僧云览", category: "motivation" },
+
+            // 更多名言
+            { text: "时间就像海绵里的水，只要愿挤，总还是有的。", author: "鲁迅", category: "wisdom" },
+            { text: "路是脚踏出来的，历史是写出来的。", author: "吉鸿昌", category: "success" },
+            { text: "人生的道路很漫长，但关键的只有几步。", author: "柳青", category: "life" },
+            { text: "人生的价值，即以其人对于当代所做的工作为尺度。", author: "徐玮", category: "life" },
+            { text: "人生应该如蜡烛一样，从顶燃到底，一直都是光明的。", author: "萧楚女", category: "life" },
+            { text: "春蚕到死丝方尽，蜡炬成灰泪始干。", author: "李商隐", category: "motivation" },
+            { text: "落红不是无情物，化作春泥更护花。", author: "龚自珍", category: "motivation" },
+            { text: "鞠躬尽瘁，死而后已。", author: "诸葛亮", category: "motivation" },
+            { text: "先天下之忧而忧，后天下之乐而乐。", author: "范仲淹", category: "motivation" },
+            { text: "人生自古谁无死，留取丹心照汗青。", author: "文天祥", category: "motivation" },
+        ];
+
+        let currentCategory = 'all';
+        let currentQuote = null;
+
+        const quoteText = document.getElementById('quoteText');
+        const quoteAuthor = document.getElementById('quoteAuthor');
+        const quoteSource = document.getElementById('quoteSource');
+        const newQuoteBtn = document.getElementById('newQuoteBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const categoryTags = document.querySelectorAll('.category-tag');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const copyToast = document.getElementById('copyToast');
+
+        function getFilteredQuotes() {
+            if (currentCategory === 'all') {
+                return quotes;
+            }
+            return quotes.filter(q => q.category === currentCategory);
+        }
+
+        function getRandomQuote() {
+            const filtered = getFilteredQuotes();
+            if (filtered.length === 0) return quotes[0];
+            return filtered[Math.floor(Math.random() * filtered.length)];
+        }
+
+        function getDailyQuote() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const filtered = getFilteredQuotes();
+            return filtered[dayOfYear % filtered.length];
+        }
+
+        function displayQuote(quote) {
+            currentQuote = quote;
+            quoteText.textContent = quote.text;
+            quoteAuthor.textContent = quote.author;
+            quoteSource.textContent = getCategoryName(quote.category);
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'life': '人生感悟',
+                'success': '成功励志',
+                'wisdom': '智慧箴言',
+                'love': '爱情感悟',
+                'motivation': '励志语录'
+            };
+            return names[category] || '';
+        }
+
+        function newQuote() {
+            const quote = getRandomQuote();
+            displayQuote(quote);
+        }
+
+        function copyQuote() {
+            if (!currentQuote) return;
+            const text = `"${currentQuote.text}" —— ${currentQuote.author}`;
+            navigator.clipboard.writeText(text).then(() => {
+                copyToast.classList.add('show');
+                setTimeout(() => {
+                    copyToast.classList.remove('show');
+                }, 2000);
+            });
+        }
+
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            dateDisplay.textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        newQuoteBtn.addEventListener('click', newQuote);
+        copyBtn.addEventListener('click', copyQuote);
+
+        categoryTags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                categoryTags.forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+                currentCategory = tag.dataset.category;
+                newQuote();
+            });
+        });
+
+        // 初始化
+        updateDate();
+        displayQuote(getDailyQuote());
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

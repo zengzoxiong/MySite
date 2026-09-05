@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 转 YAML</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/json-to-yaml/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: calc(100vh - 180px);
+            min-height: 400px;
+        }
+
+        .panel {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title .icon {
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: #666;
+        }
+
+        .error {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .error.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .example-btn {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #8b5cf6;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 8px;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .panel {
+                height: 300px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <a href="../.." class="back-link">
+            <span>←</span> 返回 JustHTMLs
+        </a>
+
+        <div class="header">
+            <h1>JSON 转 YAML</h1>
+            <p>在左侧输入 JSON，右侧自动转换为 YAML</p>
+        </div>
+
+        <div class="editor-container">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="icon">{}</span> JSON 输入</span>
+                    <div>
+                        <button class="example-btn" onclick="loadExample()">加载示例</button>
+                        <button class="copy-btn" onclick="copyInput()">复制</button>
+                    </div>
+                </div>
+                <textarea id="json-input" placeholder='粘贴或输入 JSON，例如：
+{
+  "name": "张三",
+  "age": 25,
+  "hobbies": ["读书", "旅游"]
+}'></textarea>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="icon">📄</span> YAML 输出</span>
+                    <button class="copy-btn" id="copy-output" onclick="copyOutput()">复制</button>
+                </div>
+                <textarea id="yaml-output" readonly placeholder="YAML 输出将显示在这里..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <script>
+        const jsonInput = document.getElementById('json-input');
+        const yamlOutput = document.getElementById('yaml-output');
+        const errorEl = document.getElementById('error');
+
+        // Simple JSON to YAML converter
+        function jsonToYaml(obj, indent = 0) {
+            const spaces = '  '.repeat(indent);
+
+            if (obj === null) {
+                return 'null';
+            }
+
+            if (typeof obj !== 'object') {
+                return String(obj);
+            }
+
+            if (Array.isArray(obj)) {
+                if (obj.length === 0) {
+                    return '[]';
+                }
+                return obj.map(item => {
+                    if (typeof item === 'object' && item !== null) {
+                        return '-\n' + jsonToYaml(item, indent + 1).split('\n').map(line => spaces + line).join('\n');
+                    }
+                    return '- ' + jsonToYaml(item, 0);
+                }).join('\n' + spaces);
+            }
+
+            const lines = [];
+            for (const [key, value] of Object.entries(obj)) {
+                if (typeof value === 'object' && value !== null) {
+                    if (Array.isArray(value)) {
+                        if (value.length === 0) {
+                            lines.push(`${spaces}${key}: []`);
+                        } else if (typeof value[0] !== 'object' || value[0] === null) {
+                            // Simple array
+                            lines.push(`${spaces}${key}: ${jsonToYaml(value, indent)}`);
+                        } else {
+                            // Array of objects
+                            lines.push(`${spaces}${key}:`);
+                            value.forEach(item => {
+                                lines.push(spaces + '  -');
+                                const inner = jsonToYaml(item, indent + 2);
+                                lines.push(inner);
+                            });
+                        }
+                    } else {
+                        lines.push(`${spaces}${key}:`);
+                        lines.push(jsonToYaml(value, indent + 1));
+                    }
+                } else {
+                    lines.push(`${spaces}${key}: ${jsonToYaml(value, indent)}`);
+                }
+            }
+            return lines.join('\n');
+        }
+
+        function convert() {
+            const input = jsonInput.value.trim();
+
+            if (!input) {
+                yamlOutput.value = '';
+                return;
+            }
+
+            try {
+                const obj = JSON.parse(input);
+                const result = jsonToYaml(obj);
+                yamlOutput.value = result;
+                hideError();
+            } catch (e) {
+                showError('JSON 格式错误: ' + e.message);
+            }
+        }
+
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 5000);
+        }
+
+        function hideError() {
+            errorEl.classList.remove('show');
+        }
+
+        function copyOutput() {
+            if (!yamlOutput.value) return;
+            navigator.clipboard.writeText(yamlOutput.value);
+            const btn = document.getElementById('copy-output');
+            btn.textContent = '已复制!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '复制';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        function copyInput() {
+            if (!jsonInput.value) return;
+            navigator.clipboard.writeText(jsonInput.value);
+            event.target.textContent = '已复制!';
+            setTimeout(() => {
+                event.target.textContent = '复制';
+            }, 2000);
+        }
+
+        function loadExample() {
+            jsonInput.value = `{
+  "name": "张三",
+  "age": 28,
+  "city": "北京",
+  "hobbies": ["阅读", "旅游", "摄影"],
+  "education": {
+    "degree": "本科",
+    "major": "计算机科学",
+    "university": "清华大学"
+  },
+  "projects": [
+    {
+      "name": "项目A",
+      "role": "负责人",
+      "status": "进行中"
+    },
+    {
+      "name": "项目B",
+      "role": "参与者",
+      "status": "已完成"
+    }
+  ]
+}`;
+            convert();
+        }
+
+        jsonInput.addEventListener('input', convert);
+
+        // Auto-resize textareas
+        function autoResize() {
+            // Optional: auto-resize functionality
+        }
+
+        // Initial load
+        loadExample();
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

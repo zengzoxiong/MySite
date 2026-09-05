@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL 解析器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/url-parser/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .input-row input[type="text"] {
+            flex: 1 1 320px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid #bae6fd;
+            font-size: 14px;
+        }
+
+        .input-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #e0f2fe;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #0c4a6e;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #0ea5e9;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .result-item {
+            background: #f0f9ff;
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+
+        .result-item strong {
+            display: block;
+            font-size: 12px;
+            color: #0c4a6e;
+            margin-bottom: 4px;
+        }
+
+        .query-table {
+            margin-top: 18px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .query-table th,
+        .query-table td {
+            border-bottom: 1px solid #bae6fd;
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 14px;
+            color: #0c4a6e;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #0c4a6e;
+        }
+
+        .status.error {
+            color: #b91c1c;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>URL 解析器</h1>
+            <p>快速拆分协议、域名、路径和参数</p>
+        </div>
+
+        <div class="card">
+            <div class="input-row">
+                <input type="text" id="url-input" placeholder="https://example.com/path?foo=1&bar=2">
+                <label><input type="checkbox" id="auto-protocol" checked> 自动补全协议</label>
+                <button class="btn" id="parse-btn">解析</button>
+            </div>
+
+            <div class="result-grid" id="result"></div>
+
+            <table class="query-table" id="query-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>参数名</th>
+                        <th>参数值</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="status" id="status">输入 URL 后点击解析。</div>
+        </div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('url-input');
+        const autoProtocol = document.getElementById('auto-protocol');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+        const queryTable = document.getElementById('query-table');
+        const queryBody = queryTable.querySelector('tbody');
+
+        function formatItem(label, value) {
+            return `
+                <div class="result-item">
+                    <strong>${label}</strong>
+                    <div>${value || '-'}</div>
+                </div>
+            `;
+        }
+
+        function parseUrl() {
+            const raw = urlInput.value.trim();
+            if (!raw) {
+                status.textContent = '请输入需要解析的 URL。';
+                status.classList.add('error');
+                result.innerHTML = '';
+                queryTable.style.display = 'none';
+                return;
+            }
+
+            let formatted = raw;
+            if (autoProtocol.checked && !/^https?:\/\//i.test(formatted)) {
+                formatted = `https://${formatted}`;
+            }
+
+            try {
+                const url = new URL(formatted);
+                result.innerHTML = [
+                    formatItem('协议', url.protocol.replace(':', '')),
+                    formatItem('主机', url.host),
+                    formatItem('域名', url.hostname),
+                    formatItem('端口', url.port || '默认'),
+                    formatItem('路径', url.pathname),
+                    formatItem('查询参数', url.search || '-'),
+                    formatItem('锚点', url.hash || '-'),
+                    formatItem('完整地址', url.href)
+                ].join('');
+
+                queryBody.innerHTML = '';
+                if ([...url.searchParams.keys()].length > 0) {
+                    queryTable.style.display = 'table';
+                    url.searchParams.forEach((value, key) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+                        queryBody.appendChild(row);
+                    });
+                } else {
+                    queryTable.style.display = 'none';
+                }
+
+                status.textContent = '解析完成。';
+                status.classList.remove('error');
+            } catch (error) {
+                result.innerHTML = '';
+                queryTable.style.display = 'none';
+                status.textContent = 'URL 无法解析，请检查格式。';
+                status.classList.add('error');
+            }
+        }
+
+        document.getElementById('parse-btn').addEventListener('click', parseUrl);
+        urlInput.addEventListener('input', parseUrl);
+        autoProtocol.addEventListener('change', parseUrl);
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

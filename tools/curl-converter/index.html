@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CURL 转代码工具 - JustHTMLs</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/curl-converter/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+            background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.18), transparent 45%),
+                linear-gradient(135deg, #0f172a 0%, #0b1224 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #94a3b8;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+        }
+
+        .card h2 {
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+        }
+
+        .card p {
+            color: #cbd5f5;
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .features li {
+            padding: 8px 0;
+            color: #cbd5f5;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #22d3ee;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.7), rgba(234, 179, 8, 0.5));
+            color: #1f2937;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin: 8px 10px 8px 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: rgba(148, 163, 184, 0.15);
+            color: #e2e8f0;
+        }
+
+        .preview {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .preview iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CURL 转代码工具</h1>
+            <p>把 curl 命令转换成 JavaScript / Python / Java / Go 请求代码</p>
+        </div>
+
+        <div class="card">
+            <h2>关于这个工具</h2>
+            <p>在浏览器中直接解析 curl 命令，自动生成可运行的 JavaScript 与 Python 请求代码，帮助你快速复用抓包请求。</p>
+
+            <h2>功能特点</h2>
+            <ul class="features">
+                <li>解析 Copy as cURL 输出，识别 method、headers、body 等关键字段</li>
+                <li>生成 JavaScript fetch、Python requests、Java HttpClient、Go net/http 代码</li>
+                <li>自动检测 JSON、表单、multipart 请求</li>
+                <li>内置示例与一键复制</li>
+                <li>全程本地运行，保护请求隐私</li>
+            </ul>
+
+            <h2>使用场景</h2>
+            <ul class="features">
+                <li>快速把抓包请求还原成脚本代码</li>
+                <li>复制浏览器请求到爬虫/接口调试脚本</li>
+                <li>排查 header、鉴权与 body 格式</li>
+            </ul>
+
+            <div style="margin-top: 26px;">
+                <a href="app.html" class="btn">开始使用</a>
+                <a href="https://github.com/justhtmls/html-tools/tree/main/tools/curl-converter" target="_blank" class="btn secondary">查看源码</a>
+                <a href="../../index.html" class="btn secondary">返回首页</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>快速预览</h2>
+            <div class="preview">
+                <iframe src="app.html" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

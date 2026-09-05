@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颜色对比度检测</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/contrast-checker/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .color-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .color-block {
+            background: #f5f3ff;
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .color-block label {
+            font-size: 13px;
+            color: #4c1d95;
+        }
+
+        .color-block input[type="text"] {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd6fe;
+            font-size: 14px;
+        }
+
+        .preview {
+            margin-top: 20px;
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .ratio {
+            margin-top: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #4c1d95;
+            text-align: center;
+        }
+
+        .badges {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .badge {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #ede9fe;
+            color: #4c1d95;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .badge.pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #8b5cf6;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>颜色对比度检测</h1>
+            <p>符合 WCAG 标准的对比度计算</p>
+        </div>
+
+        <div class="card">
+            <div class="color-row">
+                <div class="color-block">
+                    <label>前景色</label>
+                    <input type="color" id="color-1" value="#111827">
+                    <input type="text" id="color-1-text" value="#111827">
+                </div>
+                <div class="color-block">
+                    <label>背景色</label>
+                    <input type="color" id="color-2" value="#ffffff">
+                    <input type="text" id="color-2-text" value="#ffffff">
+                </div>
+            </div>
+
+            <div class="preview" id="preview">示例文本 ABC 123</div>
+            <div class="ratio" id="ratio">对比度：--</div>
+
+            <div class="badges" id="badges"></div>
+
+            <div class="actions">
+                <button class="btn" id="swap-btn">交换颜色</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const color1 = document.getElementById('color-1');
+        const color2 = document.getElementById('color-2');
+        const color1Text = document.getElementById('color-1-text');
+        const color2Text = document.getElementById('color-2-text');
+        const preview = document.getElementById('preview');
+        const ratio = document.getElementById('ratio');
+        const badges = document.getElementById('badges');
+
+        function hexToRgb(hex) {
+            const cleaned = hex.replace('#', '');
+            if (cleaned.length !== 6) {
+                return null;
+            }
+            const num = parseInt(cleaned, 16);
+            if (Number.isNaN(num)) {
+                return null;
+            }
+            return {
+                r: (num >> 16) & 255,
+                g: (num >> 8) & 255,
+                b: num & 255
+            };
+        }
+
+        function channelToLinear(channel) {
+            const value = channel / 255;
+            return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+        }
+
+        function luminance(rgb) {
+            return 0.2126 * channelToLinear(rgb.r) + 0.7152 * channelToLinear(rgb.g) + 0.0722 * channelToLinear(rgb.b);
+        }
+
+        function update() {
+            const rgb1 = hexToRgb(color1Text.value.trim());
+            const rgb2 = hexToRgb(color2Text.value.trim());
+
+            if (!rgb1 || !rgb2) {
+                ratio.textContent = '对比度：请输入有效颜色';
+                badges.innerHTML = '';
+                return;
+            }
+
+            color1.value = `#${color1Text.value.replace('#', '')}`;
+            color2.value = `#${color2Text.value.replace('#', '')}`;
+
+            const l1 = luminance(rgb1);
+            const l2 = luminance(rgb2);
+            const lighter = Math.max(l1, l2);
+            const darker = Math.min(l1, l2);
+            const contrast = (lighter + 0.05) / (darker + 0.05);
+
+            preview.style.color = color1Text.value;
+            preview.style.background = color2Text.value;
+            ratio.textContent = `对比度：${contrast.toFixed(2)} : 1`;
+
+            const checks = [
+                { label: '普通文本 AA (≥ 4.5)', pass: contrast >= 4.5 },
+                { label: '大文本 AA (≥ 3.0)', pass: contrast >= 3.0 },
+                { label: '普通文本 AAA (≥ 7.0)', pass: contrast >= 7.0 },
+                { label: '大文本 AAA (≥ 4.5)', pass: contrast >= 4.5 }
+            ];
+
+            badges.innerHTML = checks
+                .map((item) => `
+                    <div class="badge ${item.pass ? 'pass' : ''}">
+                        <span>${item.label}</span>
+                        <strong>${item.pass ? '通过' : '不通过'}</strong>
+                    </div>
+                `)
+                .join('');
+        }
+
+        function syncFromPicker(event) {
+            const target = event.target.id === 'color-1' ? color1Text : color2Text;
+            target.value = event.target.value;
+            update();
+        }
+
+        function swapColors() {
+            const temp = color1Text.value;
+            color1Text.value = color2Text.value;
+            color2Text.value = temp;
+            update();
+        }
+
+        color1.addEventListener('input', syncFromPicker);
+        color2.addEventListener('input', syncFromPicker);
+        color1Text.addEventListener('input', update);
+        color2Text.addEventListener('input', update);
+        document.getElementById('swap-btn').addEventListener('click', swapColors);
+
+        update();
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

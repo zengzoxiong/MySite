@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全密码生成器 - JustHTMLs</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/password-generator/">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        main {
+            padding: 40px 0 80px;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tool-icon-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .tool-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .tool-description {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tool-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .tool-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .info-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .info-section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .info-section ul {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: var(--text-muted);
+        }
+
+        .info-section li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: var(--primary);
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            background: var(--bg-hover);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="../../" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tool-header">
+            <div class="tool-icon-large">🔐</div>
+            <h1 class="tool-title">安全密码生成器</h1>
+            <p class="tool-description">创建强大且安全的随机密码，保护您的账户安全</p>
+            <div class="tool-meta">
+                <div class="tool-meta-item">
+                    <i class="fas fa-user"></i>
+                    <span>JustHTMLs</span>
+                </div>
+                <div class="tool-meta-item">
+                    <i class="fas fa-code-branch"></i>
+                    <span>v1.0.0</span>
+                </div>
+                <div class="tool-meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>2025-12-22</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-actions">
+            <a href="app.html" target="_blank" class="btn btn-primary">
+                <i class="fas fa-external-link-alt"></i>
+                打开工具
+            </a>
+            <a href="https://github.com/justhtmls/html-tools/tree/main/tools/password-generator" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-github"></i>
+                查看源码
+            </a>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-info-circle" style="color: var(--primary);"></i> 工具介绍</h2>
+            <p>安全密码生成器使用密码学安全的随机数生成器创建强密码，帮助您保护在线账户的安全。支持自定义密码长度、字符类型，并提供密码强度评估。</p>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-star" style="color: var(--primary);"></i> 主要功能</h2>
+            <ul>
+                <li>使用 crypto.getRandomValues() 生成密码学安全的随机数</li>
+                <li>可调节密码长度（8-32位）</li>
+                <li>支持大小写字母、数字、特殊字符</li>
+                <li>实时密码强度评估</li>
+                <li>本地历史记录（存储在 localStorage）</li>
+                <li>一键复制到剪贴板</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-shield-alt" style="color: var(--primary);"></i> 安全特性</h2>
+            <ul>
+                <li>密码在浏览器本地生成，不会发送到服务器</li>
+                <li>使用 Web Crypto API 的密码学安全随机数生成器</li>
+                <li>确保每种选中的字符类型至少出现一次</li>
+                <li>历史记录仅存储在本地浏览器中</li>
+            </ul>
+        </div>
+
+        <div class="tags">
+            <span class="tag">password</span>
+            <span class="tag">security</span>
+            <span class="tag">generator</span>
+            <span class="tag">utility</span>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 JustHTMLs</p>
+    </footer>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

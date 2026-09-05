@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Slug 生成器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/slug-generator/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-area {
+            margin-bottom: 25px;
+        }
+
+        .input-area label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #a8edea;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            color: #555;
+            margin: 0;
+        }
+
+        .result-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .btn {
+            background: #a8edea;
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #8de0dc;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>URL Slug 生成器</h1>
+            <p>将标题或文本转换为 URL 友好的 slug</p>
+        </div>
+
+        <div class="card">
+            <div class="input-area">
+                <label>输入标题或文本</label>
+                <textarea id="input" placeholder="输入要转换的标题，例如：如何使用 JavaScript 创建动态网页" oninput="generate()"></textarea>
+            </div>
+
+            <div class="options">
+                <div class="option-item">
+                    <input type="checkbox" id="lowercase" checked onchange="generate()">
+                    <label for="lowercase">小写</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="remove-stopwords" onchange="generate()">
+                    <label for="remove-stopwords">移除停用词</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="allow-numbers" checked onchange="generate()">
+                    <label for="allow-numbers">保留数字</label>
+                </div>
+                <div class="option-item">
+                    <label for="separator">分隔符:</label>
+                    <select id="separator" onchange="generate()" style="padding: 6px; border-radius: 5px; border: 2px solid #e0e0e0;">
+                        <option value="-">连字符 (-)</option>
+                        <option value="_">下划线 (_)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="result-area">
+                <div class="result-header">
+                    <span class="result-title">生成的 Slug</span>
+                    <button class="btn" onclick="copyResult()">复制</button>
+                </div>
+                <div class="result-value" id="result">等待输入...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stopwords = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', '这', '的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'];
+
+        function generate() {
+            const input = document.getElementById('input').value;
+            const lowercase = document.getElementById('lowercase').checked;
+            const removeStopwords = document.getElementById('remove-stopwords').checked;
+            const allowNumbers = document.getElementById('allow-numbers').checked;
+            const separator = document.getElementById('separator').value;
+
+            if (!input.trim()) {
+                document.getElementById('result').textContent = '等待输入...';
+                return;
+            }
+
+            let slug = input;
+
+            // 转换为小写
+            if (lowercase) {
+                slug = slug.toLowerCase();
+            }
+
+            // 移除特殊字符，保留字母、数字、中文、空格和连字符
+            slug = slug.replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s-_]/g, '');
+
+            // 转换中文为拼音（简化处理：直接移除或保留）
+            // 这里保留中文，让用户手动输入拼音或使用其他工具
+
+            // 替换空格和下划线为分隔符
+            slug = slug.replace(/[\s_]+/g, separator);
+
+            // 移除多余的分隔符
+            slug = slug.replace(new RegExp(separator + '+', 'g'), separator);
+
+            // 移除开头和结尾的分隔符
+            slug = slug.replace(new RegExp('^' + separator + '|' + separator + '$', 'g'), '');
+
+            // 移除停用词
+            if (removeStopwords) {
+                const words = slug.split(separator);
+                const filtered = words.filter(word => !stopwords.includes(word.toLowerCase()));
+                slug = filtered.join(separator);
+            }
+
+            // 移除数字（如果不需要）
+            if (!allowNumbers) {
+                slug = slug.replace(/\d+/g, '');
+            }
+
+            // 再次清理多余的分隔符
+            slug = slug.replace(new RegExp(separator + '+', 'g'), separator);
+            slug = slug.replace(new RegExp('^' + separator + '|' + separator + '$', 'g'), '');
+
+            if (!slug) {
+                slug = '（空）';
+            }
+
+            document.getElementById('result').textContent = slug;
+        }
+
+        function copyResult() {
+            const result = document.getElementById('result').textContent;
+            if (result === '等待输入...' || result === '（空）') {
+                showToast('没有可复制的内容');
+                return;
+            }
+
+            navigator.clipboard.writeText(result).then(() => {
+                showToast('已复制到剪贴板');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #333;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: fadeInOut 2s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

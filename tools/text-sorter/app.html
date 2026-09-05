@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本排序工具</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/text-sorter/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .options label,
+        .options select {
+            background: #fff7ed;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #78350f;
+            border: none;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 240px;
+            border: 2px solid #fed7aa;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #f59e0b;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>文本排序工具</h1>
+            <p>按行排序，支持数字、去重、正反序</p>
+        </div>
+
+        <div class="card">
+            <div class="options">
+                <select id="order">
+                    <option value="asc">升序</option>
+                    <option value="desc">降序</option>
+                </select>
+                <label><input type="checkbox" id="numeric"> 数字排序</label>
+                <label><input type="checkbox" id="trim" checked> 去掉首尾空格</label>
+                <label><input type="checkbox" id="remove-empty" checked> 移除空行</label>
+                <label><input type="checkbox" id="unique"> 去重</label>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">原始文本</h3>
+                    <textarea id="input" placeholder="每行一个条目"></textarea>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">排序结果</h3>
+                    <textarea id="output" readonly placeholder="结果会显示在这里"></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="sort-btn">开始排序</button>
+                <button class="btn secondary" id="copy-btn">复制结果</button>
+                <button class="btn secondary" id="clear-btn">清空</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const order = document.getElementById('order');
+        const numeric = document.getElementById('numeric');
+        const trim = document.getElementById('trim');
+        const removeEmpty = document.getElementById('remove-empty');
+        const unique = document.getElementById('unique');
+
+        function sortLines() {
+            const raw = input.value.replace(/\r\n/g, '\n');
+            let lines = raw.split('\n').map((line) => (trim.checked ? line.trim() : line));
+            if (removeEmpty.checked) {
+                lines = lines.filter((line) => line !== '');
+            }
+            if (unique.checked) {
+                const seen = new Set();
+                lines = lines.filter((line) => {
+                    if (seen.has(line)) {
+                        return false;
+                    }
+                    seen.add(line);
+                    return true;
+                });
+            }
+
+            const sorted = lines.slice().sort((a, b) => {
+                if (numeric.checked) {
+                    const na = Number(a);
+                    const nb = Number(b);
+                    if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+                        return na - nb;
+                    }
+                }
+                return a.localeCompare(b, 'zh-Hans-CN');
+            });
+
+            if (order.value === 'desc') {
+                sorted.reverse();
+            }
+
+            output.value = sorted.join('\n');
+        }
+
+        function copyResult() {
+            if (!output.value) {
+                return;
+            }
+            output.select();
+            output.setSelectionRange(0, output.value.length);
+            document.execCommand('copy');
+        }
+
+        function clearAll() {
+            input.value = '';
+            output.value = '';
+        }
+
+        document.getElementById('sort-btn').addEventListener('click', sortLines);
+        document.getElementById('copy-btn').addEventListener('click', copyResult);
+        document.getElementById('clear-btn').addEventListener('click', clearAll);
+        [input, order, numeric, trim, removeEmpty, unique].forEach((el) => {
+            el.addEventListener('input', sortLines);
+            el.addEventListener('change', sortLines);
+        });
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

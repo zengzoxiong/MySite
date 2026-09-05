@@ -1,5 +1,6 @@
 // 全局状态
 let allLinks = [];
+let allTools = [];
 let currentCategory = 'all';
 
 // DOM 元素
@@ -26,26 +27,31 @@ document.addEventListener('DOMContentLoaded', () => {
 // 加载链接数据
 async function loadLinks() {
     try {
-        const response = await fetch('data/links.json');
-        const data = await response.json();
-        allLinks = data.links;
+        const [linksRes, toolsRes] = await Promise.all([
+            fetch('data/links.json'),
+            fetch('data/tools.json')
+        ]);
+        const linksData = await linksRes.json();
+        const toolsData = await toolsRes.json();
+        allLinks = linksData.links;
+        allTools = toolsData.tools;
         renderSidebarTools();
-        renderSidebarCategories(data.categories);
+        renderSidebarCategories(linksData.categories);
         renderLinks();
     } catch (error) {
-        console.error('加载链接数据失败:', error);
+        console.error('加载数据失败:', error);
         linksGrid.innerHTML = '<p class="empty-state">加载数据失败</p>';
     }
 }
 
 // 渲染侧栏工具区
 function renderSidebarTools() {
-    sidebarTools.innerHTML = `
-        <a class="sidebar-item" href="svg-editor.html" target="_blank" rel="noopener noreferrer">
-            <span class="item-icon">✏️</span>
-            <span class="item-text">SVG 编辑器</span>
+    sidebarTools.innerHTML = allTools.map(tool => `
+        <a class="sidebar-item" href="tools/${tool.path}" target="_blank" rel="noopener noreferrer">
+            <span class="item-icon">${tool.icon}</span>
+            <span class="item-text">${tool.name}</span>
         </a>
-    `;
+    `).join('');
 }
 
 // 渲染侧栏分类区

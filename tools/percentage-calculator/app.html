@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百分比计算器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/percentage-calculator/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .calc-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .calc-item h4 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #fcb69f;
+        }
+
+        .input-group span {
+            color: #666;
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.4);
+        }
+
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fcb69f;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>百分比计算器</h1>
+            <p>快速计算百分比相关问题</p>
+        </div>
+
+        <div class="card">
+            <h3>百分比计算</h3>
+            <div class="calc-grid">
+                <div class="calc-item">
+                    <h4>X 的 Y% 是多少？</h4>
+                    <div class="input-group">
+                        <input type="number" id="p1-x" placeholder="数值">
+                        <span>的</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="p1-y" placeholder="百分比">
+                        <span>%</span>
+                    </div>
+                    <button class="calc-btn" onclick="calc1()">计算</button>
+                    <div class="result" id="r1-result"></div>
+                </div>
+
+                <div class="calc-item">
+                    <h4>X 是 Y 的百分之几？</h4>
+                    <div class="input-group">
+                        <input type="number" id="p2-x" placeholder="数值">
+                        <span>是</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="p2-y" placeholder="总数">
+                        <span>的</span>
+                    </div>
+                    <button class="calc-btn" onclick="calc2()">计算</button>
+                    <div class="result" id="r2-result"></div>
+                </div>
+
+                <div class="calc-item">
+                    <h4>X 增加/减少 Y%</h4>
+                    <div class="input-group">
+                        <input type="number" id="p3-x" placeholder="原始值">
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="p3-y" placeholder="百分比">
+                        <span>%</span>
+                    </div>
+                    <div class="input-group">
+                        <button class="calc-btn" style="width: auto; flex: 1;" onclick="calc3('increase')">增加</button>
+                        <button class="calc-btn" style="width: auto; flex: 1;" onclick="calc3('decrease')">减少</button>
+                    </div>
+                    <div class="result" id="r3-result"></div>
+                </div>
+
+                <div class="calc-item">
+                    <h4>百分比差异</h4>
+                    <div class="input-group">
+                        <input type="number" id="p4-from" placeholder="从">
+                        <span>到</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="p4-to" placeholder="到">
+                    </div>
+                    <button class="calc-btn" onclick="calc4()">计算</button>
+                    <div class="result" id="r4-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calc1() {
+            const x = parseFloat(document.getElementById('p1-x').value);
+            const y = parseFloat(document.getElementById('p1-y').value);
+
+            if (isNaN(x) || isNaN(y)) {
+                showResult('r1-result', '', '请输入有效数值');
+                return;
+            }
+
+            const result = (x * y) / 100;
+            showResult('r1-result', formatNumber(result), `${x} 的 ${y}% =`);
+        }
+
+        function calc2() {
+            const x = parseFloat(document.getElementById('p2-x').value);
+            const y = parseFloat(document.getElementById('p2-y').value);
+
+            if (isNaN(x) || isNaN(y) || y === 0) {
+                showResult('r2-result', '', '请输入有效数值');
+                return;
+            }
+
+            const result = (x / y) * 100;
+            showResult('r2-result', result.toFixed(2) + '%', `${x} 是 ${y} 的`);
+        }
+
+        function calc3(type) {
+            const x = parseFloat(document.getElementById('p3-x').value);
+            const y = parseFloat(document.getElementById('p3-y').value);
+
+            if (isNaN(x) || isNaN(y)) {
+                showResult('r3-result', '', '请输入有效数值');
+                return;
+            }
+
+            let result;
+            if (type === 'increase') {
+                result = x + (x * y) / 100;
+                showResult('r3-result', formatNumber(result), `${x} 增加 ${y}% 后 =`);
+            } else {
+                result = x - (x * y) / 100;
+                showResult('r3-result', formatNumber(result), `${x} 减少 ${y}% 后 =`);
+            }
+        }
+
+        function calc4() {
+            const from = parseFloat(document.getElementById('p4-from').value);
+            const to = parseFloat(document.getElementById('p4-to').value);
+
+            if (isNaN(from) || isNaN(to) || from === 0) {
+                showResult('r4-result', '', '请输入有效数值（起始值不能为 0）');
+                return;
+            }
+
+            const result = ((to - from) / from) * 100;
+            const status = result > 0 ? '增加' : (result < 0 ? '减少' : '不变');
+            showResult('r4-result', Math.abs(result).toFixed(2) + '%', `从 ${from} 到 ${to} ${status}`);
+        }
+
+        function showResult(id, value, label) {
+            const resultDiv = document.getElementById(id);
+            resultDiv.innerHTML = `
+                <div class="result-value">${value}</div>
+                <div class="result-label">${label}</div>
+            `;
+        }
+
+        function formatNumber(num) {
+            if (Number.isInteger(num)) {
+                return num.toLocaleString();
+            }
+            return parseFloat(num.toFixed(4)).toLocaleString();
+        }
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

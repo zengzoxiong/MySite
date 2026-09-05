@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本去重工具</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/text-deduplicator/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .controls label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 240px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #10b981;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+
+        .stats {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            color: #065f46;
+            font-weight: 600;
+        }
+
+        .stats span {
+            background: #ecfdf3;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>文本去重工具</h1>
+            <p>按行去重、保持顺序，适合清理名单和清单</p>
+        </div>
+
+        <div class="card">
+            <div class="controls">
+                <label><input type="checkbox" id="trim" checked> 去掉首尾空格</label>
+                <label><input type="checkbox" id="remove-empty" checked> 移除空行</label>
+                <label><input type="checkbox" id="case-insensitive"> 忽略大小写</label>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">原始文本</h3>
+                    <textarea id="input" placeholder="每行一个条目"></textarea>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 8px; color: #111827;">去重结果</h3>
+                    <textarea id="output" readonly placeholder="结果会显示在这里"></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="dedupe-btn">开始去重</button>
+                <button class="btn secondary" id="copy-btn">复制结果</button>
+                <button class="btn secondary" id="clear-btn">清空</button>
+            </div>
+
+            <div class="stats" id="stats">
+                <span>总行数：0</span>
+                <span>唯一行数：0</span>
+                <span>已移除：0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const trimToggle = document.getElementById('trim');
+        const removeEmptyToggle = document.getElementById('remove-empty');
+        const caseInsensitiveToggle = document.getElementById('case-insensitive');
+        const stats = document.getElementById('stats');
+
+        function dedupe() {
+            const text = input.value.replace(/\r\n/g, '\n');
+            const lines = text.split('\n');
+            const seen = new Set();
+            const result = [];
+
+            const prepared = lines
+                .map((line) => (trimToggle.checked ? line.trim() : line))
+                .filter((line) => !(removeEmptyToggle.checked && line === ''));
+
+            prepared.forEach((line) => {
+                const key = caseInsensitiveToggle.checked ? line.toLowerCase() : line;
+                if (seen.has(key)) {
+                    return;
+                }
+                seen.add(key);
+                result.push(line);
+            });
+
+            output.value = result.join('\n');
+            const removed = prepared.length - result.length;
+            stats.innerHTML = `
+                <span>总行数：${prepared.length}</span>
+                <span>唯一行数：${result.length}</span>
+                <span>已移除：${removed}</span>
+            `;
+        }
+
+        function copyResult() {
+            if (!output.value) {
+                return;
+            }
+            output.select();
+            output.setSelectionRange(0, output.value.length);
+            document.execCommand('copy');
+        }
+
+        function clearAll() {
+            input.value = '';
+            output.value = '';
+            stats.innerHTML = '<span>总行数：0</span><span>唯一行数：0</span><span>已移除：0</span>';
+        }
+
+        document.getElementById('dedupe-btn').addEventListener('click', dedupe);
+        document.getElementById('copy-btn').addEventListener('click', copyResult);
+        document.getElementById('clear-btn').addEventListener('click', clearAll);
+        [input, trimToggle, removeEmptyToggle, caseInsensitiveToggle].forEach((el) => {
+            el.addEventListener('input', dedupe);
+            el.addEventListener('change', dedupe);
+        });
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

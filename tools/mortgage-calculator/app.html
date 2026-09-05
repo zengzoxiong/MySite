@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房贷计算器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/mortgage-calculator/app.html">
+    <style>
+        :root {
+            --accent: #0ea5e9;
+            --accent-soft: #e0f2fe;
+            --bg: #0b1120;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --card: rgba(255, 255, 255, 0.96);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at 10% 10%, #bae6fd 0%, transparent 40%),
+                radial-gradient(circle at 90% 20%, #f0f9ff 0%, transparent 45%),
+                linear-gradient(130deg, #0ea5e9 0%, #0b1120 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .output-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .output-card h3 {
+            font-size: 13px;
+            color: #0f4c81;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0c4a6e;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .detail {
+            margin-top: 18px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px dashed var(--border);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #0369a1;
+            font-size: 12px;
+        }
+
+        .tip {
+            margin-top: 18px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>房贷计算器</h1>
+            <p>支持等额本息与等额本金，快速估算还款压力</p>
+        </div>
+
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>贷款金额 (万元)</label>
+                    <input type="number" id="principal" placeholder="例如 200" step="0.1">
+                </div>
+                <div>
+                    <label>贷款年限 (年)</label>
+                    <input type="number" id="years" value="30" step="1">
+                </div>
+                <div>
+                    <label>年利率 (%)</label>
+                    <input type="number" id="rate" value="4.3" step="0.01">
+                </div>
+                <div>
+                    <label>还款方式</label>
+                    <select id="method">
+                        <option value="equal-payment">等额本息</option>
+                        <option value="equal-principal">等额本金</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="calculate">开始计算</button>
+                <button class="btn btn-secondary" id="reset">清空</button>
+                <span class="badge" id="methodBadge">还款方式: 等额本息</span>
+            </div>
+
+            <div class="output-grid">
+                <div class="output-card">
+                    <h3>月供</h3>
+                    <div class="value" id="monthlyPayment">--</div>
+                    <p class="muted">首月或每月应还</p>
+                </div>
+                <div class="output-card">
+                    <h3>总利息</h3>
+                    <div class="value" id="totalInterest">--</div>
+                    <p class="muted">全部利息支出</p>
+                </div>
+                <div class="output-card">
+                    <h3>还款总额</h3>
+                    <div class="value" id="totalPayment">--</div>
+                    <p class="muted">本金 + 利息</p>
+                </div>
+                <div class="output-card">
+                    <h3>月供递减</h3>
+                    <div class="value" id="monthlyDecrease">--</div>
+                    <p class="muted">等额本金每月减少</p>
+                </div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-item"><span>贷款本金</span><strong id="principalDisplay">--</strong></div>
+                <div class="detail-item"><span>月利率</span><strong id="monthlyRate">--</strong></div>
+                <div class="detail-item"><span>还款期数</span><strong id="months">--</strong></div>
+                <div class="detail-item"><span>首月还款</span><strong id="firstMonth">--</strong></div>
+            </div>
+
+            <div class="tip">提示：等额本息月供固定，压力稳定；等额本金前期月供高，后期逐月递减。</div>
+        </div>
+    </div>
+
+    <script>
+        const principalInput = document.getElementById('principal');
+        const yearsInput = document.getElementById('years');
+        const rateInput = document.getElementById('rate');
+        const methodInput = document.getElementById('method');
+        const calculateBtn = document.getElementById('calculate');
+        const resetBtn = document.getElementById('reset');
+
+        const monthlyPaymentEl = document.getElementById('monthlyPayment');
+        const totalInterestEl = document.getElementById('totalInterest');
+        const totalPaymentEl = document.getElementById('totalPayment');
+        const monthlyDecreaseEl = document.getElementById('monthlyDecrease');
+        const principalDisplayEl = document.getElementById('principalDisplay');
+        const monthlyRateEl = document.getElementById('monthlyRate');
+        const monthsEl = document.getElementById('months');
+        const firstMonthEl = document.getElementById('firstMonth');
+        const methodBadgeEl = document.getElementById('methodBadge');
+
+        function formatMoney(value) {
+            if (Number.isNaN(value)) return '--';
+            return value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function updateResult() {
+            const principalWan = parseFloat(principalInput.value);
+            const years = parseFloat(yearsInput.value);
+            const annualRate = parseFloat(rateInput.value);
+            const method = methodInput.value;
+
+            if (!principalWan || !years || !annualRate) {
+                monthlyPaymentEl.textContent = '--';
+                totalInterestEl.textContent = '--';
+                totalPaymentEl.textContent = '--';
+                monthlyDecreaseEl.textContent = '--';
+                principalDisplayEl.textContent = '--';
+                monthlyRateEl.textContent = '--';
+                monthsEl.textContent = '--';
+                firstMonthEl.textContent = '--';
+                return;
+            }
+
+            const principal = principalWan * 10000;
+            const months = Math.round(years * 12);
+            const monthlyRate = annualRate / 12 / 100;
+
+            let monthlyPayment = 0;
+            let totalPayment = 0;
+            let totalInterest = 0;
+            let firstMonthPayment = 0;
+            let monthlyDecrease = 0;
+
+            if (method === 'equal-payment') {
+                const factor = Math.pow(1 + monthlyRate, months);
+                monthlyPayment = principal * monthlyRate * factor / (factor - 1);
+                totalPayment = monthlyPayment * months;
+                totalInterest = totalPayment - principal;
+                firstMonthPayment = monthlyPayment;
+                monthlyDecrease = 0;
+                methodBadgeEl.textContent = '还款方式: 等额本息';
+            } else {
+                const monthlyPrincipal = principal / months;
+                firstMonthPayment = monthlyPrincipal + principal * monthlyRate;
+                monthlyDecrease = monthlyPrincipal * monthlyRate;
+                totalInterest = principal * monthlyRate * (months + 1) / 2;
+                totalPayment = principal + totalInterest;
+                monthlyPayment = firstMonthPayment;
+                methodBadgeEl.textContent = '还款方式: 等额本金';
+            }
+
+            monthlyPaymentEl.textContent = `${formatMoney(monthlyPayment)} 元`;
+            totalInterestEl.textContent = `${formatMoney(totalInterest)} 元`;
+            totalPaymentEl.textContent = `${formatMoney(totalPayment)} 元`;
+            monthlyDecreaseEl.textContent = monthlyDecrease ? `${formatMoney(monthlyDecrease)} 元` : '固定';
+            principalDisplayEl.textContent = `${formatMoney(principal)} 元`;
+            monthlyRateEl.textContent = `${(monthlyRate * 100).toFixed(3)}%`;
+            monthsEl.textContent = `${months} 期`;
+            firstMonthEl.textContent = `${formatMoney(firstMonthPayment)} 元`;
+        }
+
+        function resetForm() {
+            principalInput.value = '';
+            yearsInput.value = '30';
+            rateInput.value = '4.3';
+            methodInput.value = 'equal-payment';
+            methodBadgeEl.textContent = '还款方式: 等额本息';
+            updateResult();
+        }
+
+        calculateBtn.addEventListener('click', updateResult);
+        resetBtn.addEventListener('click', resetForm);
+
+        [principalInput, yearsInput, rateInput, methodInput].forEach((input) => {
+            input.addEventListener('input', updateResult);
+            input.addEventListener('change', updateResult);
+        });
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

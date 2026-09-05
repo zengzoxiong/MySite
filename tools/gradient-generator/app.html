@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渐变色生成器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/gradient-generator/app.html">
+    <style>
+        :root {
+            --accent: #f43f5e;
+            --accent-soft: #f43f5e33;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f43f5e 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .output-box {
+            background: #f8fafc;
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .preview {
+            width: 100%;
+            min-height: 180px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .result {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>渐变色生成器</h1>
+            <p>生成 CSS 线性渐变并实时预览</p>
+        </div>
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>起始颜色</label>
+                    <input type="color" id="colorStart" value="#f43f5e">
+                </div>
+                <div>
+                    <label>结束颜色</label>
+                    <input type="color" id="colorEnd" value="#3b82f6">
+                </div>
+            </div>
+            <div style="margin-top: 12px;">
+                <label>方向</label>
+                <select id="direction">
+                    <option value="to right">从左到右</option>
+                    <option value="to bottom">从上到下</option>
+                    <option value="45deg">45°</option>
+                    <option value="135deg">135°</option>
+                </select>
+            </div>
+            <div class="preview" id="preview" style="margin-top: 16px; min-height: 160px;"></div>
+            <div class="output-box" style="margin-top: 16px;">
+                <label>CSS 代码</label>
+                <textarea id="cssOutput" class="code" readonly></textarea>
+                <div class="actions">
+                    <button class="btn" id="copy">复制 CSS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colorStart = document.getElementById('colorStart');
+        const colorEnd = document.getElementById('colorEnd');
+        const direction = document.getElementById('direction');
+        const preview = document.getElementById('preview');
+        const cssOutput = document.getElementById('cssOutput');
+        const copyBtn = document.getElementById('copy');
+
+        function updateGradient() {
+            const value = `linear-gradient(${direction.value}, ${colorStart.value}, ${colorEnd.value})`;
+            preview.style.background = value;
+            cssOutput.value = `background: ${value};`;
+        }
+
+        [colorStart, colorEnd, direction].forEach(el => {
+            el.addEventListener('input', updateGradient);
+        });
+
+        copyBtn.addEventListener('click', () => {
+            cssOutput.select();
+            document.execCommand('copy');
+        });
+
+        updateGradient();
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>
+

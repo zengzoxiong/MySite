@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP 状态码查询</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/http-status/app.html">
+    <style>
+        :root {
+            --accent: #0ea5e9;
+            --accent-soft: #0ea5e933;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .output-box {
+            background: #f8fafc;
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .preview {
+            width: 100%;
+            min-height: 180px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .result {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>HTTP 状态码查询</h1>
+            <p>快速查询常见 HTTP 状态码含义</p>
+        </div>
+        <div class="card">
+            <div class="row" style="margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label>搜索状态码或关键词</label>
+                    <input type="text" id="search" placeholder="例如 404 / unauthorized / server">
+                </div>
+            </div>
+            <div id="list" class="output-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('search');
+        const list = document.getElementById('list');
+        const statuses = [
+            { code: 200, title: 'OK', desc: '请求成功' },
+            { code: 201, title: 'Created', desc: '资源创建成功' },
+            { code: 202, title: 'Accepted', desc: '请求已接收，处理中' },
+            { code: 204, title: 'No Content', desc: '请求成功但无返回内容' },
+            { code: 301, title: 'Moved Permanently', desc: '永久重定向' },
+            { code: 302, title: 'Found', desc: '临时重定向' },
+            { code: 304, title: 'Not Modified', desc: '资源未修改，使用缓存' },
+            { code: 400, title: 'Bad Request', desc: '请求参数错误' },
+            { code: 401, title: 'Unauthorized', desc: '未授权或身份验证失败' },
+            { code: 403, title: 'Forbidden', desc: '服务器拒绝访问' },
+            { code: 404, title: 'Not Found', desc: '资源不存在' },
+            { code: 409, title: 'Conflict', desc: '请求冲突' },
+            { code: 413, title: 'Payload Too Large', desc: '请求体过大' },
+            { code: 415, title: 'Unsupported Media Type', desc: '不支持的媒体类型' },
+            { code: 429, title: 'Too Many Requests', desc: '请求过多被限流' },
+            { code: 500, title: 'Internal Server Error', desc: '服务器内部错误' },
+            { code: 502, title: 'Bad Gateway', desc: '网关错误' },
+            { code: 503, title: 'Service Unavailable', desc: '服务不可用' },
+            { code: 504, title: 'Gateway Timeout', desc: '网关超时' },
+        ];
+
+        function render(filter = '') {
+            const keyword = filter.trim().toLowerCase();
+            const filtered = statuses.filter(item => {
+                return (
+                    item.code.toString().includes(keyword) ||
+                    item.title.toLowerCase().includes(keyword) ||
+                    item.desc.toLowerCase().includes(keyword)
+                );
+            });
+            if (!filtered.length) {
+                list.innerHTML = '<p class="muted">没有匹配的状态码</p>';
+                return;
+            }
+            list.innerHTML = filtered.map(item => `
+                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div class="row" style="justify-content: space-between;">
+                        <strong>${item.code} ${item.title}</strong>
+                        <span class="chip">HTTP</span>
+                    </div>
+                    <p class="muted" style="margin-top: 6px;">${item.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        render();
+        searchInput.addEventListener('input', (event) => render(event.target.value));
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>
+

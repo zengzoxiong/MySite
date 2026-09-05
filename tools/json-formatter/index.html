@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 格式化工具 - JustHTMLs</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/json-formatter/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .features li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 10px 10px 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .preview iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>JSON 格式化工具</h1>
+            <p>格式化、压缩和验证 JSON 数据</p>
+        </div>
+
+        <div class="card">
+            <h2>关于这个工具</h2>
+            <p>JSON 格式化工具可以帮助你美化、压缩和验证 JSON 数据。支持多种缩进样式、键名排序等功能，是处理 JSON 数据的必备工具。</p>
+
+            <h2>功能特点</h2>
+            <ul class="features">
+                <li>JSON 格式化/美化</li>
+                <li>JSON 压缩/最小化</li>
+                <li>JSON 语法验证</li>
+                <li>支持 2 空格、4 空格、Tab 缩进</li>
+                <li>支持键名排序</li>
+                <li>显示字符数、行数、文件大小</li>
+                <li>一键复制或下载结果</li>
+                <li>完全在浏览器本地运行</li>
+            </ul>
+
+            <h2>使用场景</h2>
+            <ul class="features">
+                <li>格式化 API 返回的 JSON 数据</li>
+                <li>压缩 JSON 减少文件大小</li>
+                <li>验证 JSON 语法正确性</li>
+                <li>调试和阅读 JSON 配置文件</li>
+                <li>JSON 数据预处理</li>
+            </ul>
+
+            <div style="margin-top: 30px;">
+                <a href="app.html" class="btn">开始使用</a>
+                <a href="https://github.com/justhtmls/html-tools/tree/main/tools/json-formatter" target="_blank" class="btn btn-secondary">查看源码</a>
+                <a href="../../index.html" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>快速预览</h2>
+            <div class="preview">
+                <iframe src="app.html" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

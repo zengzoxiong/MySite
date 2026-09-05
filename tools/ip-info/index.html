@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP 地址信息查询 - JustHTMLs</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/ip-info/">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css">
+    <style>
+        :root {
+            --primary: #06b6d4;
+            --secondary: #3b82f6;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        main {
+            padding: 40px 0 80px;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tool-icon-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .tool-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .tool-description {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tool-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .tool-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .info-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .info-section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .info-section ul {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: var(--text-muted);
+        }
+
+        .info-section li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: var(--primary);
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            background: var(--bg-hover);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="../../" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回首页
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tool-header">
+            <div class="tool-icon-large">🌐</div>
+            <h1 class="tool-title">IP 地址信息查询</h1>
+            <p class="tool-description">快速查询 IP 地址的地理位置、ISP 等信息</p>
+            <div class="tool-meta">
+                <div class="tool-meta-item">
+                    <i class="fas fa-user"></i>
+                    <span>JustHTMLs</span>
+                </div>
+                <div class="tool-meta-item">
+                    <i class="fas fa-code-branch"></i>
+                    <span>v1.0.0</span>
+                </div>
+                <div class="tool-meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>2026-01-02</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-actions">
+            <a href="app.html" target="_blank" class="btn btn-primary">
+                <i class="fas fa-external-link-alt"></i>
+                打开工具
+            </a>
+            <a href="https://github.com/justhtmls/html-tools/tree/main/tools/ip-info" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-github"></i>
+                查看源码
+            </a>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-info-circle" style="color: var(--primary);"></i> 工具介绍</h2>
+            <p>IP 地址信息查询工具可以快速查询 IP 地址的详细信息，包括地理位置、时区、ISP、货币等信息。支持查询本机 IP 和指定 IP 地址。</p>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-star" style="color: var(--primary);"></i> 主要功能</h2>
+            <ul>
+                <li>自动查询本机 IP 地址信息</li>
+                <li>查询指定 IP 地址的详细信息</li>
+                <li>显示地理位置（国家、城市、地区）</li>
+                <li>显示时区、货币、邮政编码</li>
+                <li>显示 ISP 和经纬度信息</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-keyboard" style="color: var(--primary);"></i> 使用场景</h2>
+            <ul>
+                <li>查看本机 IP 地址和位置信息</li>
+                <li>验证 IP 地址的地理位置</li>
+                <li>网络安全和调试</li>
+                <li>了解访问来源地理位置</li>
+                <li>网络故障排查</li>
+            </ul>
+        </div>
+
+        <div class="tags">
+            <span class="tag">ip</span>
+            <span class="tag">network</span>
+            <span class="tag">geolocation</span>
+            <span class="tag">utility</span>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 JustHTMLs</p>
+    </footer>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

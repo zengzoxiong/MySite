@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/countdown-timer/app.html">
+    <style>
+        :root {
+            --accent: #06b6d4;
+            --accent-soft: #06b6d433;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .timer-display {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #ecfeff, #dbeafe);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .time {
+            font-size: 64px;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            color: var(--accent);
+            letter-spacing: 4px;
+        }
+
+        .time.finished {
+            color: #dc2626;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .label {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-item label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-item input {
+            width: 80px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .input-item input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .presets {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .progress-ring .bg {
+            stroke: #e2e8f0;
+        }
+
+        .progress-ring .progress {
+            stroke: var(--accent);
+            stroke-dasharray: 565;
+            stroke-dashoffset: 0;
+        }
+
+        .progress-ring .time-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .sound-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .sound-toggle label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>⏱️ 倒计时器</h1>
+            <p>设置时间，专注当下</p>
+        </div>
+        <div class="card">
+            <div class="input-group" id="inputGroup">
+                <div class="input-item">
+                    <label>小时</label>
+                    <input type="number" id="hours" min="0" max="23" value="0">
+                </div>
+                <div class="input-item">
+                    <label>分钟</label>
+                    <input type="number" id="minutes" min="0" max="59" value="5">
+                </div>
+                <div class="input-item">
+                    <label>秒</label>
+                    <input type="number" id="seconds" min="0" max="59" value="0">
+                </div>
+            </div>
+
+            <div class="presets" id="presets">
+                <button class="preset-btn" data-time="60">1分钟</button>
+                <button class="preset-btn" data-time="300">5分钟</button>
+                <button class="preset-btn" data-time="600">10分钟</button>
+                <button class="preset-btn" data-time="1800">30分钟</button>
+                <button class="preset-btn" data-time="3600">1小时</button>
+            </div>
+
+            <div class="timer-display hidden" id="timerDisplay">
+                <svg class="progress-ring" id="progressRing">
+                    <circle class="bg" cx="100" cy="100" r="90"></circle>
+                    <circle class="progress" cx="100" cy="100" r="90"></circle>
+                </svg>
+                <div class="time" id="timeDisplay">00:00:00</div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="startBtn">开始</button>
+                <button class="btn btn-secondary" id="resetBtn">重置</button>
+            </div>
+
+            <div class="sound-toggle">
+                <label>
+                    <input type="checkbox" id="soundEnabled" checked>
+                    结束时播放提示音
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let interval = null;
+        let isRunning = false;
+
+        const inputGroup = document.getElementById('inputGroup');
+        const presets = document.getElementById('presets');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+        const progressCircle = document.querySelector('.progress-ring .progress');
+        const soundEnabled = document.getElementById('soundEnabled');
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updateProgress() {
+            const circumference = 2 * Math.PI * 90;
+            const offset = circumference * (1 - remainingSeconds / totalSeconds);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function getInputSeconds() {
+            const h = parseInt(hoursInput.value) || 0;
+            const m = parseInt(minutesInput.value) || 0;
+            const s = parseInt(secondsInput.value) || 0;
+            return h * 3600 + m * 60 + s;
+        }
+
+        function setInputSeconds(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            hoursInput.value = h;
+            minutesInput.value = m;
+            secondsInput.value = s;
+        }
+
+        function playSound() {
+            if (soundEnabled.checked) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }
+        }
+
+        function start() {
+            if (!isRunning) {
+                if (remainingSeconds === 0) {
+                    totalSeconds = getInputSeconds();
+                    remainingSeconds = totalSeconds;
+                }
+
+                if (totalSeconds === 0) {
+                    alert('请设置倒计时时间');
+                    return;
+                }
+
+                isRunning = true;
+                startBtn.textContent = '暂停';
+                inputGroup.classList.add('hidden');
+                presets.classList.add('hidden');
+                timerDisplay.classList.remove('hidden');
+                timeDisplay.classList.remove('finished');
+
+                interval = setInterval(() => {
+                    remainingSeconds--;
+                    timeDisplay.textContent = formatTime(remainingSeconds);
+                    updateProgress();
+
+                    if (remainingSeconds <= 0) {
+                        clearInterval(interval);
+                        isRunning = false;
+                        startBtn.textContent = '开始';
+                        timeDisplay.classList.add('finished');
+                        playSound();
+
+                        // 通知
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('倒计时结束', {
+                                body: '您设置的倒计时已完成！',
+                                icon: '/favicon.svg'
+                            });
+                        }
+                    }
+                }, 1000);
+            } else {
+                clearInterval(interval);
+                isRunning = false;
+                startBtn.textContent = '继续';
+            }
+        }
+
+        function reset() {
+            clearInterval(interval);
+            isRunning = false;
+            remainingSeconds = 0;
+            totalSeconds = 0;
+
+            startBtn.textContent = '开始';
+            inputGroup.classList.remove('hidden');
+            presets.classList.remove('hidden');
+            timerDisplay.classList.add('hidden');
+            timeDisplay.classList.remove('finished');
+
+            progressCircle.style.strokeDashoffset = 0;
+        }
+
+        startBtn.addEventListener('click', start);
+        resetBtn.addEventListener('click', reset);
+
+        // 预设按钮
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const seconds = parseInt(btn.dataset.time);
+                setInputSeconds(seconds);
+            });
+        });
+
+        // 请求通知权限
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

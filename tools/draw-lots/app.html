@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽签工具</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/draw-lots/app.html">
+    <style>
+        :root {
+            --accent: #ef4444;
+            --accent-soft: #ef444433;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .lot-box {
+            margin: 30px 0;
+        }
+
+        .lot-container {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fef2f2;
+            border: 3px dashed var(--accent);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lot-result {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--accent);
+            animation: appear 0.5s ease-out;
+        }
+
+        .lot-result .level {
+            font-size: 72px;
+        }
+
+        .lot-result .text {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+
+        @keyframes appear {
+            from {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .shaking {
+            animation: shake 0.1s ease-in-out infinite;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .lot-type {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .lot-type-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--accent);
+            background: white;
+            color: var(--accent);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .lot-type-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .lot-type-btn:hover {
+            background: var(--accent-soft);
+        }
+
+        .lot-type-btn.active:hover {
+            background: var(--accent);
+        }
+
+        .history {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .history h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .history-item {
+            padding: 6px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>🎋 抽签工具</h1>
+            <p>诚心祈祷，求得一个好签</p>
+        </div>
+        <div class="card">
+            <div class="lot-type">
+                <button class="lot-type-btn active" data-type="fortune">求运势</button>
+                <button class="lot-type-btn" data-type="decision">做决定</button>
+                <button class="lot-type-btn" data-type="luck">测吉凶</button>
+            </div>
+
+            <div class="lot-box">
+                <div class="lot-container" id="lotContainer">
+                    <p class="muted">点击下方按钮抽签</p>
+                </div>
+            </div>
+
+            <button class="btn" id="drawBtn">🙏 开始抽签</button>
+
+            <div class="history" id="history" style="display: none;">
+                <h3>抽签记录</h3>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fortuneLots = [
+            { level: '上上签', text: '大吉大利，万事如意', color: '#dc2626' },
+            { level: '上签', text: '吉星高照，前程似锦', color: '#ea580c' },
+            { level: '中上签', text: '顺顺利利，心想事成', color: '#f59e0b' },
+            { level: '中签', text: '平平稳稳，安康顺遂', color: '#84cc16' },
+            { level: '中下签', text: '需多努力，终有回报', color: '#22c55e' },
+            { level: '下签', text: '暂遇困境，切勿灰心', color: '#14b8a6' },
+            { level: '下下签', text: '祸福相依，转机将至', color: '#0ea5e9' }
+        ];
+
+        const decisionLots = [
+            { level: '去做吧', text: '机不可失，时不再来', color: '#22c55e' },
+            { level: '再想想', text: '三思而后行', color: '#f59e0b' },
+            { level: '算了吧', text: '天涯何处无芳草', color: '#ef4444' },
+            { level: '问别人', text: '三个臭皮匠，顶个诸葛亮', color: '#8b5cf6' }
+        ];
+
+        const luckLots = [
+            { level: '大吉', text: '紫气东来，鸿运当头', color: '#dc2626' },
+            { level: '中吉', text: '运势平稳，渐入佳境', color: '#f59e0b' },
+            { level: '小吉', text: '小有收获，继续努力', color: '#84cc16' },
+            { level: '平', text: '不好不坏，平平淡淡', color: '#6b7280' },
+            { level: '小凶', text: '稍有不顺，小心行事', color: '#0ea5e9' },
+            { level: '大凶', text: '需谨慎行事，避其锋芒', color: '#7c3aed' }
+        ];
+
+        let currentType = 'fortune';
+        let history = [];
+
+        const lotContainer = document.getElementById('lotContainer');
+        const drawBtn = document.getElementById('drawBtn');
+        const historyEl = document.getElementById('history');
+        const historyList = document.getElementById('historyList');
+        const typeBtns = document.querySelectorAll('.lot-type-btn');
+
+        typeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                typeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentType = btn.dataset.type;
+            });
+        });
+
+        function getLots() {
+            switch (currentType) {
+                case 'fortune': return fortuneLots;
+                case 'decision': return decisionLots;
+                case 'luck': return luckLots;
+                default: return fortuneLots;
+            }
+        }
+
+        function drawLot() {
+            drawBtn.disabled = true;
+            lotContainer.innerHTML = '<div class="lot-result shaking">🎋</div>';
+
+            // 模拟抽签动画
+            let count = 0;
+            const interval = setInterval(() => {
+                const lots = getLots();
+                const randomLot = lots[Math.floor(Math.random() * lots.length)];
+                lotContainer.innerHTML = `<div class="lot-result" style="color: ${randomLot.color}">${randomLot.level}</div>`;
+                count++;
+                if (count > 10) {
+                    clearInterval(interval);
+                    showResult();
+                }
+            }, 100);
+        }
+
+        function showResult() {
+            const lots = getLots();
+            const result = lots[Math.floor(Math.random() * lots.length)];
+
+            lotContainer.innerHTML = `
+                <div class="lot-result" style="color: ${result.color}">
+                    <div class="level">${result.level}</div>
+                    <div class="text">${result.text}</div>
+                </div>
+            `;
+
+            // 添加到历史记录
+            history.unshift(result);
+            if (history.length > 10) history.pop();
+            updateHistory();
+
+            drawBtn.disabled = false;
+        }
+
+        function updateHistory() {
+            if (history.length === 0) {
+                historyEl.style.display = 'none';
+                return;
+            }
+
+            historyEl.style.display = 'block';
+            historyList.innerHTML = history.map(item =>
+                `<span class="history-item" style="color: ${item.color}; border: 1px solid ${item.color}20;">${item.level}</span>`
+            ).join('');
+        }
+
+        drawBtn.addEventListener('click', drawLot);
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

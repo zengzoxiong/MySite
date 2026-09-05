@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/qr-generator/app.html">
+    <script src="../../assets/vendor/qrcodejs/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .input-section {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .preview-section {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            margin-bottom: 20px;
+        }
+
+        #qrcode img, #qrcode canvas {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10b981;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .color-input {
+            flex: 1;
+        }
+
+        .color-input input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: #10b981;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <a href="../.." class="back-link">
+            <span>←</span> 返回 JustHTMLs
+        </a>
+
+        <div class="header">
+            <h1>二维码生成器</h1>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>内容</label>
+                    <textarea id="text" placeholder="输入文本或网址...">https://htmls.dev</textarea>
+                </div>
+
+                <div class="options-grid">
+                    <div class="input-group">
+                        <label>尺寸</label>
+                        <select id="size">
+                            <option value="128">128 x 128</option>
+                            <option value="256" selected>256 x 256</option>
+                            <option value="384">384 x 384</option>
+                            <option value="512">512 x 512</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>容错级别</label>
+                        <select id="level">
+                            <option value="L">低 (7%)</option>
+                            <option value="M" selected>中 (15%)</option>
+                            <option value="Q">较高 (25%)</option>
+                            <option value="H">高 (30%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>颜色</label>
+                    <div class="color-inputs">
+                        <div class="color-input">
+                            <label style="font-size: 12px;">前景色</label>
+                            <input type="color" id="color-dark" value="#000000">
+                        </div>
+                        <div class="color-input">
+                            <label style="font-size: 12px;">背景色</label>
+                            <input type="color" id="color-light" value="#ffffff">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div id="qrcode"></div>
+                <div class="actions">
+                    <button class="btn" onclick="downloadQR()">
+                        <i class="fas fa-download"></i> 下载 PNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text');
+        const sizeSelect = document.getElementById('size');
+        const levelSelect = document.getElementById('level');
+        const colorDarkInput = document.getElementById('color-dark');
+        const colorLightInput = document.getElementById('color-light');
+        const qrContainer = document.getElementById('qrcode');
+
+        let qrCode = null;
+
+        function generateQR() {
+            const text = textInput.value;
+            const size = parseInt(sizeSelect.value);
+            const level = levelSelect.value;
+            const colorDark = colorDarkInput.value;
+            const colorLight = colorLightInput.value;
+
+            qrContainer.innerHTML = '';
+
+            if (!text) {
+                qrContainer.innerHTML = '<p style="color: #888;">请输入内容</p>';
+                return;
+            }
+
+            try {
+                qrCode = new QRCode(qrContainer, {
+                    text: text,
+                    width: size,
+                    height: size,
+                    colorDark: colorDark,
+                    colorLight: colorLight,
+                    correctLevel: QRCode.CorrectLevel[level]
+                });
+            } catch (e) {
+                qrContainer.innerHTML = '<p style="color: #f87171;">生成失败: ' + e.message + '</p>';
+            }
+        }
+
+        function downloadQR() {
+            const img = qrContainer.querySelector('img');
+            if (img && img.src) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = 'qrcode.png';
+                link.click();
+            } else {
+                // Try canvas
+                const canvas = qrContainer.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'qrcode.png';
+                    link.click();
+                }
+            }
+        }
+
+        textInput.addEventListener('input', generateQR);
+        sizeSelect.addEventListener('change', generateQR);
+        levelSelect.addEventListener('change', generateQR);
+        colorDarkInput.addEventListener('input', generateQR);
+        colorLightInput.addEventListener('input', generateQR);
+
+        // Initial generation
+        generateQR();
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

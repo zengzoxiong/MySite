@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片旋转翻转</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/image-rotate/app.html">
+    <style>
+        :root {
+            --accent: #f97316;
+            --accent-soft: #f9731633;
+            --bg: #0f172a;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f97316 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        input[type="file"],
+        input[type="color"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .preview {
+            width: 100%;
+            min-height: 200px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview canvas {
+            max-width: 100%;
+            max-height: 380px;
+            display: block;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--text);
+            font-size: 12px;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>图片旋转翻转</h1>
+            <p>快速旋转角度并镜像翻转图片</p>
+        </div>
+        <div class="card">
+            <div class="grid">
+                <div>
+                    <label>选择图片</label>
+                    <input type="file" id="file" accept="image/*">
+                    <div style="margin-top: 12px;">
+                        <label>旋转角度：<span class="chip" id="angle-value">0°</span></label>
+                        <input type="range" id="angle" min="-180" max="180" value="0">
+                    </div>
+                    <div class="row" style="margin-top: 10px;">
+                        <label><input type="checkbox" id="flip-x"> 水平翻转</label>
+                        <label><input type="checkbox" id="flip-y"> 垂直翻转</label>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label>输出格式</label>
+                        <select id="format">
+                            <option value="image/png">PNG</option>
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/webp">WebP</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button class="btn" id="render">生成新图片</button>
+                        <a class="btn btn-secondary" id="download" download>下载图片</a>
+                    </div>
+                </div>
+                <div>
+                    <label>预览</label>
+                    <div class="preview">
+                        <canvas id="canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const angleInput = document.getElementById('angle');
+        const angleValue = document.getElementById('angle-value');
+        const flipXInput = document.getElementById('flip-x');
+        const flipYInput = document.getElementById('flip-y');
+        const formatSelect = document.getElementById('format');
+        const renderBtn = document.getElementById('render');
+        const downloadLink = document.getElementById('download');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let sourceImage = new Image();
+        let downloadUrl = '';
+
+        function updateAngleLabel() {
+            angleValue.textContent = `${angleInput.value}°`;
+        }
+
+        function revokeDownload() {
+            if (downloadUrl) {
+                URL.revokeObjectURL(downloadUrl);
+                downloadUrl = '';
+            }
+        }
+
+        function renderImage() {
+            if (!sourceImage.src) return;
+            const angleDeg = Number(angleInput.value) || 0;
+            const angle = angleDeg * Math.PI / 180;
+            const width = sourceImage.naturalWidth;
+            const height = sourceImage.naturalHeight;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            const newWidth = Math.max(1, Math.round(Math.abs(width * cos) + Math.abs(height * sin)));
+            const newHeight = Math.max(1, Math.round(Math.abs(width * sin) + Math.abs(height * cos)));
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            ctx.clearRect(0, 0, newWidth, newHeight);
+            ctx.save();
+            ctx.translate(newWidth / 2, newHeight / 2);
+            ctx.rotate(angle);
+            ctx.scale(flipXInput.checked ? -1 : 1, flipYInput.checked ? -1 : 1);
+            ctx.drawImage(sourceImage, -width / 2, -height / 2);
+            ctx.restore();
+            const format = formatSelect.value;
+            revokeDownload();
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                downloadUrl = URL.createObjectURL(blob);
+                downloadLink.href = downloadUrl;
+                downloadLink.download = `rotated.${format.split('/')[1]}`;
+            }, format, 0.92);
+        }
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                sourceImage = new Image();
+                sourceImage.onload = () => {
+                    renderImage();
+                };
+                sourceImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        angleInput.addEventListener('input', () => {
+            updateAngleLabel();
+            renderImage();
+        });
+
+        [flipXInput, flipYInput, formatSelect].forEach((el) => {
+            el.addEventListener('change', renderImage);
+        });
+
+        renderBtn.addEventListener('click', renderImage);
+
+        updateAngleLabel();
+    </script>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

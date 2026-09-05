@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期差值计算器</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/date-diff/app.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .inputs label {
+            font-size: 14px;
+            color: #14532d;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .inputs input {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #86efac;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #22c55e;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+        }
+
+        .result {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .result div {
+            background: #f0fdf4;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #14532d;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #14532d;
+        }
+
+        .status.error {
+            color: #b91c1c;
+        }
+    
+        .tool-doc-link,
+        .tool-home-link {
+            position: fixed;
+            top: 16px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            z-index: 9999;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-doc-link {
+            right: 16px;
+        }
+
+        .tool-home-link {
+            right: 74px;
+        }
+
+        .tool-doc-link:hover,
+        .tool-home-link:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <a class="tool-home-link" href="../../index.html">首页</a>
+    <a class="tool-doc-link" href="index.html">说明</a>
+    <div class="container">
+        <div class="header">
+            <h1>日期差值计算器</h1>
+            <p>计算两个日期之间的天数、小时数和总秒数</p>
+        </div>
+
+        <div class="card">
+            <div class="inputs">
+                <label>开始时间
+                    <input type="datetime-local" id="start">
+                </label>
+                <label>结束时间
+                    <input type="datetime-local" id="end">
+                </label>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="calc-btn">计算差值</button>
+                <button class="btn secondary" id="swap-btn">交换时间</button>
+                <button class="btn secondary" id="clear-btn">清空</button>
+            </div>
+
+            <div class="result" id="result"></div>
+            <div class="status" id="status">请选择开始和结束时间。</div>
+        </div>
+    </div>
+
+    <script>
+        const startInput = document.getElementById('start');
+        const endInput = document.getElementById('end');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+
+        function formatNumber(value) {
+            return value.toLocaleString('zh-CN');
+        }
+
+        function calculate() {
+            const startValue = startInput.value;
+            const endValue = endInput.value;
+            if (!startValue || !endValue) {
+                result.innerHTML = '';
+                status.textContent = '请选择开始和结束时间。';
+                status.classList.remove('error');
+                return;
+            }
+
+            const startDate = new Date(startValue);
+            const endDate = new Date(endValue);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                result.innerHTML = '';
+                status.textContent = '时间格式无效。';
+                status.classList.add('error');
+                return;
+            }
+
+            let diffMs = endDate - startDate;
+            const direction = diffMs >= 0 ? '结束时间在之后' : '结束时间在之前';
+            diffMs = Math.abs(diffMs);
+
+            const seconds = Math.floor(diffMs / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            const weeks = (days / 7).toFixed(2);
+
+            result.innerHTML = `
+                <div>总天数：${formatNumber(days)} 天</div>
+                <div>总小时：${formatNumber(hours)} 小时</div>
+                <div>总分钟：${formatNumber(minutes)} 分钟</div>
+                <div>总秒数：${formatNumber(seconds)} 秒</div>
+                <div>总周数：${weeks} 周</div>
+            `;
+
+            status.textContent = `${direction}（差值已取绝对值）`;
+            status.classList.remove('error');
+        }
+
+        function swapDates() {
+            const temp = startInput.value;
+            startInput.value = endInput.value;
+            endInput.value = temp;
+            calculate();
+        }
+
+        function clearAll() {
+            startInput.value = '';
+            endInput.value = '';
+            result.innerHTML = '';
+            status.textContent = '请选择开始和结束时间。';
+            status.classList.remove('error');
+        }
+
+        document.getElementById('calc-btn').addEventListener('click', calculate);
+        document.getElementById('swap-btn').addEventListener('click', swapDates);
+        document.getElementById('clear-btn').addEventListener('click', clearAll);
+        [startInput, endInput].forEach((el) => {
+            el.addEventListener('change', calculate);
+        });
+    </script>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>
