@@ -66,6 +66,15 @@ function renderSidebarCategories(categories) {
     sidebarCategories.innerHTML = html;
 }
 
+// 从 URL 提取域名
+function getDomain(url) {
+    try {
+        return new URL(url).hostname;
+    } catch {
+        return '';
+    }
+}
+
 // 渲染链接卡片
 function renderLinks() {
     const searchTerm = searchInput.value.toLowerCase().trim();
@@ -91,16 +100,23 @@ function renderLinks() {
         emptyState.style.display = 'none';
     }
 
-    linksGrid.innerHTML = filteredLinks.map(link => `
+    linksGrid.innerHTML = filteredLinks.map(link => {
+        const domain = getDomain(link.url);
+        const faviconUrl = domain
+            ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+            : '';
+        return `
         <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
-            <div class="icon">${link.icon}</div>
+            <div class="icon">
+                ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.parentElement.innerHTML='&#128279;'">` : '&#128279;'}
+            </div>
             <div class="info">
                 <div class="title">${link.title}</div>
                 <div class="description">${link.description}</div>
                 <span class="category">${link.category}</span>
             </div>
-        </a>
-    `).join('');
+        </a>`;
+    }).join('');
 }
 
 // 主题

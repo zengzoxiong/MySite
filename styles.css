@@ -317,7 +317,6 @@ body.sidebar-collapsed .main-content {
 }
 
 .link-card .icon {
-    font-size: 1.2rem;
     flex-shrink: 0;
     width: 32px;
     height: 32px;
@@ -325,7 +324,14 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     justify-content: center;
     background-color: var(--hover-bg);
-    border-radius: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.link-card .icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 .link-card .info {
