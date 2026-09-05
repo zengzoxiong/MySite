@@ -1,70 +1,88 @@
 {
+  "categories": [
+    "开发工具",
+    "编码转换",
+    "文本处理",
+    "图像工具",
+    "实用工具"
+  ],
   "tools": [
     {
       "name": "SVG 编辑器",
       "path": "svg-editor.html",
       "description": "在线绘制架构图 / 流程图，支持保存与导出",
-      "icon": "✏️"
+      "icon": "✏️",
+      "category": "图像工具"
     },
     {
       "name": "Base64 编解码",
       "path": "base64-encode/index.html",
       "description": "Base64 编码和解码工具",
-      "icon": ""
+      "icon": "",
+      "category": "编码转换"
     },
     {
       "name": "JSON 格式化",
       "path": "json-formatter/index.html",
       "description": "JSON 数据格式化、验证和美化",
-      "icon": ""
+      "icon": "📋",
+      "category": "开发工具"
     },
     {
       "name": "二维码生成器",
       "path": "qr-generator/index.html",
       "description": "生成 QR Code 二维码图片",
-      "icon": ""
+      "icon": "📱",
+      "category": "图像工具"
     },
     {
       "name": "正则表达式测试",
       "path": "regex-tester/index.html",
       "description": "测试和调试正则表达式",
-      "icon": ""
+      "icon": "🔍",
+      "category": "开发工具"
     },
     {
       "name": "密码生成器",
       "path": "password-generator/index.html",
       "description": "生成随机安全密码",
-      "icon": ""
+      "icon": "🔑",
+      "category": "实用工具"
     },
     {
       "name": "UUID 生成器",
       "path": "uuid-generator/index.html",
       "description": "生成 UUID v4 唯一标识符",
-      "icon": ""
+      "icon": "🆔",
+      "category": "开发工具"
     },
     {
       "name": "URL 编解码",
       "path": "url-encode/index.html",
       "description": "URL 编码和解码工具",
-      "icon": ""
+      "icon": "🔗",
+      "category": "编码转换"
     },
     {
       "name": "文本对比",
       "path": "text-diff/index.html",
       "description": "比较两段文本的差异",
-      "icon": ""
+      "icon": "📊",
+      "category": "文本处理"
     },
     {
       "name": "时间戳转换",
       "path": "timestamp-converter/index.html",
       "description": "Unix 时间戳与日期互转",
-      "icon": ""
+      "icon": "⏰",
+      "category": "实用工具"
     },
     {
       "name": "颜色选择器",
       "path": "color-picker/index.html",
       "description": "选取和转换颜色值",
-      "icon": ""
+      "icon": "🎨",
+      "category": "图像工具"
     }
   ]
 }

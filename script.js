@@ -2,6 +2,8 @@
 let allLinks = [];
 let allTools = [];
 let currentCategory = 'all';
+let currentToolCategory = 'all';
+let isToolsView = false; // 是否显示工具视图
 
 // DOM 元素
 const sidebar = document.getElementById('sidebar');
@@ -15,6 +17,7 @@ const themeIcon = themeToggle.querySelector('.theme-icon');
 const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
+const mainContent = document.getElementById('mainContent');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,14 +47,28 @@ async function loadLinks() {
     }
 }
 
-// 渲染侧栏工具区
+// 渲染侧栏工具区（改为分类导航）
 function renderSidebarTools() {
-    sidebarTools.innerHTML = allTools.map(tool => `
-        <a class="sidebar-item" href="tools/${tool.path}" target="_blank" rel="noopener noreferrer">
-            <span class="item-icon">${tool.icon}</span>
-            <span class="item-text">${tool.name}</span>
-        </a>
+    const categories = ['全部', ...new Set(allTools.map(t => t.category))];
+    sidebarTools.innerHTML = categories.map(cat => `
+        <div class="sidebar-item ${cat === '全部' ? 'active' : ''}" data-tool-category="${cat}">
+            <span class="item-text">${cat}</span>
+        </div>
     `).join('');
+
+    // 绑定工具分类点击事件
+    sidebarTools.addEventListener('click', (e) => {
+        const item = e.target.closest('.sidebar-item');
+        if (!item) return;
+        sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentToolCategory = item.dataset.toolCategory === '全部' ? 'all' : item.dataset.toolCategory;
+        isToolsView = true;
+        renderTools();
+        if (window.innerWidth <= 768) {
+            closeMobileMenu();
+        }
+    });
 }
 
 // 渲染侧栏分类区
@@ -125,6 +142,47 @@ function renderLinks() {
     }).join('');
 }
 
+// 渲染工具卡片
+function renderTools() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+
+    let filteredTools = allTools;
+
+    if (currentToolCategory !== 'all') {
+        filteredTools = filteredTools.filter(tool => tool.category === currentToolCategory);
+    }
+
+    if (searchTerm) {
+        filteredTools = filteredTools.filter(tool =>
+            tool.name.toLowerCase().includes(searchTerm) ||
+            tool.description.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    if (filteredTools.length === 0) {
+        linksGrid.style.display = 'none';
+        emptyState.style.display = 'block';
+    } else {
+        linksGrid.style.display = 'grid';
+        emptyState.style.display = 'none';
+    }
+
+    linksGrid.innerHTML = filteredTools.map(tool => {
+        const faviconUrl = tool.icon || '';
+        return `
+        <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card">
+            <div class="icon">
+                ${faviconUrl ? `<span style="font-size:1.2rem">${faviconUrl}</span>` : '🔧'}
+            </div>
+            <div class="info">
+                <div class="title">${tool.name}</div>
+                <div class="description">${tool.description}</div>
+                <span class="category">${tool.category}</span>
+            </div>
+        </a>`;
+    }).join('');
+}
+
 // 主题
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
@@ -180,8 +238,14 @@ function closeMobileMenu() {
 
 // 事件监听
 function initEventListeners() {
-    // 搜索
-    searchInput.addEventListener('input', renderLinks);
+    // 搜索（根据当前视图决定渲染哪个）
+    searchInput.addEventListener('input', () => {
+        if (isToolsView) {
+            renderTools();
+        } else {
+            renderLinks();
+        }
+    });
 
     // 主题切换
     themeToggle.addEventListener('click', toggleTheme);
@@ -193,13 +257,14 @@ function initEventListeners() {
     mobileMenuBtn.addEventListener('click', openMobileMenu);
     sidebarOverlay.addEventListener('click', closeMobileMenu);
 
-    // 分类点击（事件委托）
+    // 分类点击（事件委托）- 收藏分类
     sidebarCategories.addEventListener('click', (e) => {
         const item = e.target.closest('.sidebar-item');
         if (!item) return;
         sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         currentCategory = item.dataset.category;
+        isToolsView = false; // 切换到链接视图
         renderLinks();
         // 移动端自动关闭菜单
         if (window.innerWidth <= 768) {
@@ -214,9 +279,13 @@ function initEventListeners() {
             e.preventDefault();
             searchInput.focus();
         }
-        // ESC 清空搜索
+        // ESC 清空搜索并重置视图
         if (e.key === 'Escape') {
             searchInput.value = '';
+            isToolsView = false;
+            // 重置收藏分类选中状态
+            sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            sidebarCategories.querySelector('[data-category="all"]').classList.add('active');
             renderLinks();
             searchInput.blur();
         }
