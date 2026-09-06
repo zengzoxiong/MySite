@@ -4,7 +4,9 @@
     "视频音频",
     "图片处理",
     "文档工具",
-    "教程网站"
+    "教程网站",
+    "工具合集",
+    "常用软件下载"
   ],
   "links": [
     {
@@ -74,8 +76,141 @@
       "title": "ToolHub",
       "url": "https://toolhub.changhui.org.cn/tools.html",
       "description": "免费在线工具平台，提供二维码生成与解码、IP查询、正则表达式测试、随机密码生成、Base64编解码等多种实用功能。",
-      "category": "代码工具",
+      "category": "工具合集",
       "icon": "️"
+    },
+    {
+      "title": "QQ",
+      "url": "https://im.qq.com/download",
+      "description": "腾讯QQ官方下载页面，支持Windows、Mac、Linux、Android、iOS等全平台。",
+      "category": "常用软件下载",
+      "icon": "💬"
+    },
+    {
+      "title": "微信",
+      "url": "https://weixin.qq.com/",
+      "description": "微信官方下载页面，支持Windows、Mac、Linux等桌面平台。",
+      "category": "常用软件下载",
+      "icon": "💚"
+    },
+    {
+      "title": "腾讯会议",
+      "url": "https://meeting.tencent.com/download-center.html",
+      "description": "腾讯会议官方下载中心，支持Windows、Mac、Linux、iOS、Android等平台。",
+      "category": "常用软件下载",
+      "icon": "📹"
+    },
+    {
+      "title": "WPS Office",
+      "url": "https://platform.wps.cn/",
+      "description": "WPS Office官方网站，全平台免费下载，支持多人在线协作编辑文档。",
+      "category": "常用软件下载",
+      "icon": "📝"
+    },
+    {
+      "title": "7-Zip",
+      "url": "https://www.7-zip.org/",
+      "description": "开源免费的高压缩比文件压缩工具，支持7z、ZIP、RAR等多种格式。",
+      "category": "常用软件下载",
+      "icon": "📦"
+    },
+    {
+      "title": "PotPlayer",
+      "url": "https://potplayer.daum.net/",
+      "description": "功能强大的多媒体播放器，支持几乎所有视频格式，硬件加速，界面简洁。",
+      "category": "常用软件下载",
+      "icon": "▶️"
+    },
+    {
+      "title": "Visual Studio Code",
+      "url": "https://code.visualstudio.com/",
+      "description": "微软出品的免费开源代码编辑器，支持丰富的扩展生态系统。",
+      "category": "常用软件下载",
+      "icon": "💻"
+    },
+    {
+      "title": "Clash Verge Rev",
+      "url": "https://github.com/clash-verge-rev/clash-verge-rev/releases",
+      "description": "基于 Tauri 的 Clash GUI 客户端，支持 Windows、Mac、Linux，开源免费。",
+      "category": "常用软件下载",
+      "icon": "🌐"
+    },
+    {
+      "title": "CCSwitch",
+      "url": "https://github.com/farion1231/cc-switch/releases",
+      "description": "Claude Code 和 Codex 供应商配置管理工具，开源免费。",
+      "category": "常用软件下载",
+      "icon": "⚙️"
+    },
+    {
+      "title": "Node.js",
+      "url": "https://nodejs.org/zh-cn/download/",
+      "description": "Node.js 官方下载页面，JavaScript 运行时环境，支持多平台。",
+      "category": "常用软件下载",
+      "icon": "💚"
+    },
+    {
+      "title": "Watt Toolkit",
+      "url": "https://steampp.net/",
+      "description": "Steam++ 瓦特工具箱，Steam 辅助工具，支持网络加速、账号切换、库存管理等。",
+      "category": "常用软件下载",
+      "icon": "🎮"
+    },
+    {
+      "title": "Obsidian",
+      "url": "https://obsidian.md/",
+      "description": "强大的知识管理和笔记应用，支持双向链接、本地存储、插件扩展。",
+      "category": "常用软件下载",
+      "icon": "💎"
+    },
+    {
+      "title": "UU远程",
+      "url": "https://uu.163.com/",
+      "description": "网易UU远程控制软件，支持高清流畅远程桌面、文件传输、远程游戏。",
+      "category": "常用软件下载",
+      "icon": "🖥️"
+    },
+    {
+      "title": "向日葵远程控制",
+      "url": "https://sunlogin.oray.com/download/",
+      "description": "贝锐向日葵远程控制软件，支持远程办公、远程游戏、远程协助。",
+      "category": "常用软件下载",
+      "icon": "🌻"
+    },
+    {
+      "title": "Zotero",
+      "url": "https://www.zotero.org/download/",
+      "description": "免费开源的文献管理工具，支持浏览器插件、多端同步、论文引用管理。",
+      "category": "常用软件下载",
+      "icon": "📚"
+    },
+    {
+      "title": "火绒安全",
+      "url": "https://huorong.cn/",
+      "description": "火绒安全软件，纯净无广告的杀毒防护软件，精准查杀病毒木马。",
+      "category": "常用软件下载",
+      "icon": "🛡️"
+    },
+    {
+      "title": "网易云音乐",
+      "url": "https://music.163.com/st/download",
+      "description": "网易云音乐官方下载页面，支持 PC、Mac、Android、iOS 等全平台。",
+      "category": "常用软件下载",
+      "icon": "🎵"
+    },
+    {
+      "title": "小米互联服务",
+      "url": "https://hyperos.mi.com/continuity/abilities/ab0016",
+      "description": "小米跨端智联服务，实现小米手机与 iPhone、iPad、Mac、Windows 互联互通。",
+      "category": "常用软件下载",
+      "icon": "📱"
+    },
+    {
+      "title": "Qoder",
+      "url": "https://www.aliyun.com/product/qoder",
+      "description": "阿里巴巴智能编程平台，AI 驱动的 Agentic 编程工具，支持 IDE、插件、CLI。",
+      "category": "常用软件下载",
+      "icon": "🤖"
     }
   ]
 }
