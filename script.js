@@ -125,13 +125,15 @@ function renderLinks() {
 
     linksGrid.innerHTML = filteredLinks.map(link => {
         const domain = getDomain(link.url);
+        // 使用 DuckDuckGo 的 favicon 服务（国内可访问）
         const faviconUrl = domain
-            ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+            ? `https://icons.duckduckgo.com/ip3/${domain}.ico`
             : '';
+        const emojiIcon = link.icon || '🔗';
         return `
         <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
             <div class="icon">
-                ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.parentElement.innerHTML='&#128279;'">` : '&#128279;'}
+                ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.onerror=null;this.parentElement.innerHTML='${emojiIcon}'" width="32" height="32">` : emojiIcon}
             </div>
             <div class="info">
                 <div class="title">${link.title}</div>

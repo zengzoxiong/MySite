@@ -1,0 +1,1 @@
+Get-ChildItem tools -Directory | Select-Object Name | ConvertTo-Json
