@@ -81,8 +81,8 @@
     },
     {
       "title": "QQ",
-      "url": "https://im.qq.com/download",
-      "description": "腾讯QQ官方下载页面，支持Windows、Mac、Linux、Android、iOS等全平台。",
+      "url": "https://im.qq.com",
+      "description": "腾讯QQ NT官方下载页面，全新NT架构，支持Windows、Mac、Linux、Android、iOS等全平台。",
       "category": "常用软件下载",
       "icon": "💬"
     },
@@ -158,15 +158,15 @@
     },
     {
       "title": "Obsidian",
-      "url": "https://obsidian.md/",
+      "url": "https://obsidian.md/download",
       "description": "强大的知识管理和笔记应用，支持双向链接、本地存储、插件扩展。",
       "category": "常用软件下载",
       "icon": "💎"
     },
     {
       "title": "UU远程",
-      "url": "https://uu.163.com/",
-      "description": "网易UU远程控制软件，支持高清流畅远程桌面、文件传输、远程游戏。",
+      "url": "https://yc.uu.163.com/",
+      "description": "网易UU远程控制软件，真4K真免费，支持远程桌面、文件传输、远程游戏。",
       "category": "常用软件下载",
       "icon": "🖥️"
     },
@@ -200,14 +200,14 @@
     },
     {
       "title": "小米互联服务",
-      "url": "https://hyperos.mi.com/continuity/abilities/ab0016",
-      "description": "小米跨端智联服务，实现小米手机与 iPhone、iPad、Mac、Windows 互联互通。",
+      "url": "https://hyperos.mi.com/continuity",
+      "description": "小米跨端智联服务，实现小米手机与 Windows、Mac、iPhone 互联互通。",
       "category": "常用软件下载",
       "icon": "📱"
     },
     {
       "title": "Qoder",
-      "url": "https://www.aliyun.com/product/qoder",
+      "url": "https://qoder.com.cn/download",
       "description": "阿里巴巴智能编程平台，AI 驱动的 Agentic 编程工具，支持 IDE、插件、CLI。",
       "category": "常用软件下载",
       "icon": "🤖"
