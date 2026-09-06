@@ -117,7 +117,7 @@ body {
 }
 
 .sidebar.collapsed .sidebar-collapse-btn {
-    display: none;
+    transform: rotate(180deg);
 }
 
 /* 搜索框 */
