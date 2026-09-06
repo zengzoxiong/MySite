@@ -6,7 +6,8 @@
     "文档工具",
     "教程网站",
     "工具合集",
-    "常用软件下载"
+    "常用软件下载",
+    "资源"
   ],
   "links": [
     {
@@ -81,7 +82,7 @@
     },
     {
       "title": "软仓",
-      "url": "https://ruancang.net/",
+      "url": "https://www.ruancang.net/",
       "description": "专业软件导航网站，收录385+专业生产力软件免费下载，包括Adobe全家桶、CAD、达芬奇等，纯净无广告。",
       "category": "常用软件下载",
       "icon": "📦"
@@ -218,6 +219,13 @@
       "description": "阿里巴巴智能编程平台，AI 驱动的 Agentic 编程工具，支持 IDE、插件、CLI。",
       "category": "常用软件下载",
       "icon": "🤖"
+    },
+    {
+      "title": "KissSub",
+      "url": "https://www.kisssub.org/",
+      "description": "动漫字幕分享平台，提供最新番剧字幕下载。",
+      "category": "资源",
+      "icon": "🎬"
     }
   ]
 }
