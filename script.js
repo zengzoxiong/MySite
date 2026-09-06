@@ -1,8 +1,8 @@
 // 全局状态
 let allLinks = [];
 let allTools = [];
-let currentCategory = 'all';
-let currentToolCategory = 'all';
+let currentCategory = '';
+let currentToolCategory = '';
 let isToolsView = false; // 是否显示工具视图
 
 // DOM 元素
@@ -49,9 +49,9 @@ async function loadLinks() {
 
 // 渲染侧栏工具区（改为分类导航）
 function renderSidebarTools() {
-    const categories = ['全部', ...new Set(allTools.map(t => t.category))];
+    const categories = [...new Set(allTools.map(t => t.category))];
     sidebarTools.innerHTML = categories.map(cat => `
-        <div class="sidebar-item ${cat === '全部' ? 'active' : ''}" data-tool-category="${cat}">
+        <div class="sidebar-item" data-tool-category="${cat}">
             <span class="item-text">${cat}</span>
         </div>
     `).join('');
@@ -62,7 +62,7 @@ function renderSidebarTools() {
         if (!item) return;
         sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        currentToolCategory = item.dataset.toolCategory === '全部' ? 'all' : item.dataset.toolCategory;
+        currentToolCategory = item.dataset.toolCategory;
         isToolsView = true;
         renderTools();
         if (window.innerWidth <= 768) {
@@ -73,12 +73,7 @@ function renderSidebarTools() {
 
 // 渲染侧栏分类区
 function renderSidebarCategories(categories) {
-    let html = `
-        <div class="sidebar-item active" data-category="all">
-            <span class="item-icon">📋</span>
-            <span class="item-text">全部</span>
-        </div>
-    `;
+    let html = '';
     categories.forEach(cat => {
         html += `
             <div class="sidebar-item" data-category="${cat}">
@@ -104,11 +99,10 @@ function renderLinks() {
 
     let filteredLinks = allLinks;
 
-    if (currentCategory !== 'all') {
+    // 搜索时搜索所有，不按分类筛选
+    if (!searchTerm && currentCategory) {
         filteredLinks = filteredLinks.filter(link => link.category === currentCategory);
-    }
-
-    if (searchTerm) {
+    } else if (searchTerm) {
         filteredLinks = filteredLinks.filter(link =>
             link.title.toLowerCase().includes(searchTerm) ||
             link.description.toLowerCase().includes(searchTerm)
@@ -150,11 +144,10 @@ function renderTools() {
 
     let filteredTools = allTools;
 
-    if (currentToolCategory !== 'all') {
+    // 搜索时搜索所有，不按分类筛选
+    if (!searchTerm && currentToolCategory) {
         filteredTools = filteredTools.filter(tool => tool.category === currentToolCategory);
-    }
-
-    if (searchTerm) {
+    } else if (searchTerm) {
         filteredTools = filteredTools.filter(tool =>
             tool.name.toLowerCase().includes(searchTerm) ||
             tool.description.toLowerCase().includes(searchTerm)
@@ -285,9 +278,11 @@ function initEventListeners() {
         if (e.key === 'Escape') {
             searchInput.value = '';
             isToolsView = false;
-            // 重置收藏分类选中状态
+            currentCategory = '';
+            currentToolCategory = '';
+            // 重置分类选中状态
             sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            sidebarCategories.querySelector('[data-category="all"]').classList.add('active');
+            sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
             renderLinks();
             searchInput.blur();
         }
