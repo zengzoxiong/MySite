@@ -7,7 +7,8 @@
     "教程网站",
     "工具合集",
     "常用软件下载",
-    "资源"
+    "资源",
+    "学习"
   ],
   "links": [
     {
@@ -226,6 +227,13 @@
       "description": "动漫字幕分享平台，提供最新番剧字幕下载。",
       "category": "资源",
       "icon": "🎬"
+    },
+    {
+      "title": "Hello 算法",
+      "url": "https://www.hello-algo.com/chapter_hello_algo/",
+      "description": "动画图解、一键运行的数据结构与算法教程，支持 Java、C++、Python、Go、JS、TS、C#、Swift、Rust、Dart、Zig 等语言。",
+      "category": "学习",
+      "icon": "📖"
     }
   ]
 }
