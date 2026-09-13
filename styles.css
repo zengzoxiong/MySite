@@ -195,7 +195,7 @@ body {
     text-decoration: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.15s, color 0.15s;
+    transition: background-color 0.15s, color 0.15s, padding-left 0.2s ease;
     white-space: nowrap;
     overflow: hidden;
 }
@@ -203,6 +203,10 @@ body {
 .sidebar-item:hover {
     background-color: var(--hover-bg);
     color: var(--text-primary);
+}
+
+.sidebar:not(.collapsed) .sidebar-item:hover {
+    padding-left: 13px;
 }
 
 .sidebar-item.active {
@@ -264,6 +268,12 @@ body {
 .theme-icon {
     font-size: 0.9rem;
     flex-shrink: 0;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-icon {
+    transform: rotate(-20deg) scale(1.15);
 }
 
 .sidebar.collapsed .theme-label {
@@ -288,120 +298,467 @@ body.sidebar-collapsed .main-content {
     margin-left: var(--sidebar-collapsed-width);
 }
 
-/* ===== 首页仪表盘 ===== */
+/* ===== 首页仪表盘（全屏沉浸式，无卡片） ===== */
 .dashboard {
-    display: grid;
-    grid-template-columns: 1.1fr 1.5fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
+    position: relative;
+    height: calc(100vh - 48px);
+    min-height: 620px;
 }
 
-.dash-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px 24px;
-    box-shadow: var(--shadow-card);
-    min-width: 0;
+.dashboard.hidden {
+    display: none;
 }
 
-.clock-time {
-    font-size: 2.4rem;
+/* --- 中央主视觉：时钟 + 天气 --- */
+.hero {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-bottom: 30px;
+    animation: fadeUp 0.6s ease backwards;
+}
+
+.hero-clock {
+    font-size: clamp(4rem, 10vw, 7rem);
     font-weight: 700;
-    letter-spacing: 1px;
-    line-height: 1.2;
+    letter-spacing: 2px;
+    line-height: 1.05;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
 }
 
-.clock-date {
-    font-size: 0.85rem;
+.hero-date {
+    font-size: 1.05rem;
     color: var(--text-secondary);
-    margin-top: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-top: 8px;
 }
 
-.weather-top {
+.hero-weather {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: fadeUp 0.6s ease 0.15s backwards;
+}
+
+.weather-main {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
 .weather-icon {
-    font-size: 2rem;
+    font-size: 2.2rem;
     line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.hero-weather:hover .weather-icon {
+    transform: scale(1.15) rotate(8deg);
 }
 
 .weather-temp {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
 }
 
 .weather-desc {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     color: var(--text-secondary);
-    margin-top: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .weather-extra {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-tertiary);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-height: 1.2em;
 }
 
-.github-card {
+/* --- 四角组件（HUD 风格，无卡片底色） --- */
+.corner {
+    position: absolute;
+    z-index: 2;
+}
+
+.section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 1.5px;
     display: flex;
     align-items: center;
-    gap: 14px;
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
 
-.github-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-card-hover);
-    border-color: var(--accent-color);
+/* 右上：GitHub 传送门 */
+.github-corner {
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    animation: fadeDown 0.5s ease 0.2s backwards;
 }
 
 .github-icon {
-    width: 36px;
-    height: 36px;
+    width: 26px;
+    height: 26px;
     fill: var(--text-primary);
-    flex-shrink: 0;
+    transition: transform 0.25s ease, fill 0.25s;
 }
 
-.github-title {
-    font-size: 0.95rem;
+.github-corner:hover .github-icon {
+    transform: scale(1.12) rotate(-4deg);
+    fill: var(--accent-color);
+}
+
+.gh-name {
+    font-size: 0.92rem;
     font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.2s;
 }
 
-.github-sub {
-    font-size: 0.78rem;
+.github-corner:hover .gh-name {
+    color: var(--accent-color);
+}
+
+.github-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 0.74rem;
     color: var(--text-secondary);
-    margin-top: 2px;
-    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.github-corner:hover .github-stats {
+    color: var(--text-tertiary);
+}
+
+.github-stats b {
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    margin-right: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* 底部中央：今日一言 */
+.quote-corner {
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    animation: fadeUp 0.5s ease 0.4s backwards;
+}
+
+.quote-text {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    transition: opacity 0.25s;
+}
+
+.quote-foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quote-meta {
+    font-size: 0.76rem;
+    color: var(--text-tertiary);
+    transition: opacity 0.25s;
+}
+
+.quote-corner.switching .quote-text,
+.quote-corner.switching .quote-meta {
+    opacity: 0;
+}
+
+.quote-refresh {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.quote-refresh:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: rotate(90deg) scale(1.05);
+}
+
+.quote-refresh.spinning {
+    animation: spin 0.6s linear;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 左下：时光进度 */
+.progress-corner {
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: fadeUp 0.5s ease 0.3s backwards;
+}
+
+.progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.progress-head span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-bar {
+    height: 6px;
+    background-color: var(--hover-bg);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-color), #8b5cf6);
+    transition: width 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 右下：待办清单 */
+.todo-corner {
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: fadeUp 0.5s ease 0.5s backwards;
+}
+
+.todo-count {
+    margin-left: auto;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.todo-form {
+    margin: 0;
+}
+
+.todo-form input {
+    width: 100%;
+    padding: 6px 2px;
+    font-size: 0.82rem;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.todo-form input:focus {
+    border-bottom-color: var(--accent-color);
+}
+
+.todo-form input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.todo-list {
+    list-style: none;
+    max-height: 170px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    animation: todoIn 0.28s ease backwards;
+    transition: background-color 0.2s, opacity 0.22s, transform 0.22s;
+}
+
+.todo-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.todo-item.leaving {
+    opacity: 0;
+    transform: translateX(14px);
+}
+
+@keyframes todoIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.todo-check {
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid var(--text-tertiary);
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.todo-check:hover {
+    border-color: var(--accent-color);
+}
+
+.todo-check:active {
+    transform: scale(0.88);
+}
+
+.todo-check:checked {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.todo-check:checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    animation: checkPop 0.2s ease;
+}
+
+@keyframes checkPop {
+    from { transform: scale(0.4); }
+    to { transform: scale(1); }
+}
+
+.todo-text {
+    font-size: 0.84rem;
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.25s;
 }
 
-@media (max-width: 900px) {
+.todo-item.done .todo-text {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+}
+
+.todo-del {
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s, transform 0.15s;
+}
+
+.todo-item:hover .todo-del {
+    opacity: 1;
+}
+
+.todo-del:hover {
+    color: #ef4444;
+    transform: scale(1.15);
+}
+
+/* 窄屏：四角组件改为纵向流式排布 */
+@media (max-width: 1150px) {
     .dashboard {
-        grid-template-columns: 1fr 1fr;
+        height: auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
     }
 
-    .github-card {
-        grid-column: 1 / -1;
+    .hero {
+        position: static;
+        padding: 48px 0 8px;
+    }
+
+    .corner {
+        position: static;
+    }
+
+    .progress-corner,
+    .todo-corner {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
     }
 }
 
@@ -425,6 +782,11 @@ body.sidebar-collapsed .main-content {
     display: flex;
     gap: 12px;
     align-items: flex-start;
+}
+
+/* 分类切换时的入场动画 */
+.link-card.anim {
+    animation: fadeUp 0.4s ease backwards;
 }
 
 .link-card:hover {
@@ -585,8 +947,8 @@ body.sidebar-collapsed .main-content {
         grid-template-columns: 1fr;
     }
 
-    .dashboard {
-        grid-template-columns: 1fr;
+    .hero-clock {
+        font-size: 3.2rem;
     }
 }
 
@@ -600,6 +962,19 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.todo-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 2px;
 }

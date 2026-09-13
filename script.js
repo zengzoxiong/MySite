@@ -3,7 +3,8 @@ let allLinks = [];
 let allTools = [];
 let currentCategory = '';
 let currentToolCategory = '';
-let isToolsView = false; // 是否显示工具视图
+let currentView = 'home'; // 'home' | 'links' | 'tools'
+let viewBeforeSearch = null; // 从首页进入搜索态时记住来源
 
 // DOM 元素
 const sidebar = document.getElementById('sidebar');
@@ -18,6 +19,8 @@ const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 const mainContent = document.getElementById('mainContent');
+const dashboard = document.getElementById('dashboard');
+const homeNav = document.getElementById('homeNav');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,11 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initSidebar();
     initEventListeners();
-    initClock();
-    initWeather();
+    initDashboard();
 });
 
-// ===== 首页时钟 =====
+// ===== 首页仪表盘 =====
+function initDashboard() {
+    homeNav.classList.add('active');
+    initClock();
+    initWeather();
+    initQuote();
+    initProgress();
+    initGitHubStats();
+    initTodo();
+}
+
+// --- 时钟 ---
 function initClock() {
     const clockTime = document.getElementById('clockTime');
     const clockDate = document.getElementById('clockDate');
@@ -45,7 +58,7 @@ function initClock() {
     setInterval(tick, 1000);
 }
 
-// ===== 首页天气（西安，Open-Meteo 免费接口，无需密钥） =====
+// --- 天气（西安，Open-Meteo 免费接口，无需密钥） ---
 const WMO_CODES = {
     0: ['晴', '☀️'], 1: ['多云转晴', '🌤️'], 2: ['多云', '⛅'], 3: ['阴', '☁️'],
     45: ['雾', '🌫️'], 48: ['雾凇', '🌫️'],
@@ -79,11 +92,211 @@ async function initWeather() {
 
         weatherIcon.textContent = icon;
         weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
-        weatherDesc.textContent = `西安 · ${text}`;
+        weatherDesc.textContent = text;
         weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
     } catch (e) {
-        weatherDesc.textContent = '西安 · 天气获取失败';
+        weatherDesc.textContent = '天气获取失败';
         console.error('天气加载失败:', e);
+    }
+}
+
+// --- 今日一言（Hitokoto 免费接口） ---
+async function loadQuote() {
+    const quoteText = document.getElementById('quoteText');
+    const quoteMeta = document.getElementById('quoteMeta');
+    try {
+        const res = await fetch('https://v1.hitokoto.cn/?c=i&c=k&c=d&max_length=42');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        quoteText.textContent = data.hitokoto;
+        quoteMeta.textContent = data.from ? `—— ${data.from}` : '';
+    } catch (e) {
+        quoteText.textContent = '生活明朗，万物可爱。';
+        quoteMeta.textContent = '—— 每日一句';
+        console.error('一言加载失败:', e);
+    }
+}
+
+function initQuote() {
+    loadQuote();
+    const btn = document.getElementById('quoteRefresh');
+    const corner = document.querySelector('.quote-corner');
+    btn.addEventListener('click', () => {
+        if (corner.classList.contains('switching')) return;
+        btn.classList.remove('spinning');
+        void btn.offsetWidth; // 重置旋转动画
+        btn.classList.add('spinning');
+        corner.classList.add('switching');
+        setTimeout(async () => {
+            await loadQuote();
+            corner.classList.remove('switching');
+        }, 250);
+    });
+}
+
+// --- 时光进度（年 / 月 / 周） ---
+function animateValue(el, target, duration, fmt) {
+    const start = performance.now();
+    function frame(t) {
+        const p = Math.min(1, (t - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+        el.textContent = fmt(target * eased);
+        if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+function initProgress() {
+    const now = new Date();
+
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+    const yearPct = (now - startOfYear) / (endOfYear - startOfYear) * 100;
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthPct = (now - startOfMonth) / (endOfMonth - startOfMonth) * 100;
+
+    const dayIdx = (now.getDay() + 6) % 7; // 周一为 0
+    const weekPct = ((dayIdx + now.getHours() / 24 + now.getMinutes() / 1440) / 7) * 100;
+
+    [
+        ['fillYear', 'pctYear', yearPct],
+        ['fillMonth', 'pctMonth', monthPct],
+        ['fillWeek', 'pctWeek', weekPct]
+    ].forEach(([fillId, pctId, pct]) => {
+        const v = Math.min(100, Math.max(0, pct));
+        const fill = document.getElementById(fillId);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            fill.style.width = v + '%';
+        }));
+        animateValue(document.getElementById(pctId), v, 1100, x => x.toFixed(1) + '%');
+    });
+}
+
+// --- GitHub 传送门 + 实时数据 ---
+async function initGitHubStats() {
+    try {
+        const res = await fetch('https://api.github.com/users/zengzoxiong');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        animateValue(document.getElementById('ghRepos'), data.public_repos || 0, 900, v => String(Math.round(v)));
+        animateValue(document.getElementById('ghFollowers'), data.followers || 0, 900, v => String(Math.round(v)));
+    } catch (e) {
+        document.getElementById('githubStats').style.display = 'none';
+        console.error('GitHub 数据加载失败:', e);
+    }
+}
+
+// --- 待办清单（localStorage 持久化） ---
+const TODO_KEY = 'dashboardTodos';
+
+function getTodos() {
+    try {
+        return JSON.parse(localStorage.getItem(TODO_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+function saveTodos(todos) {
+    localStorage.setItem(TODO_KEY, JSON.stringify(todos));
+}
+
+function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function todoItemHtml(t) {
+    return `<li class="todo-item ${t.done ? 'done' : ''}" data-id="${t.id}">
+        <input type="checkbox" class="todo-check" ${t.done ? 'checked' : ''} title="完成">
+        <span class="todo-text">${escapeHtml(t.text)}</span>
+        <button class="todo-del" title="删除">✕</button>
+    </li>`;
+}
+
+function updateTodoCount() {
+    const todos = getTodos();
+    const left = todos.filter(t => !t.done).length;
+    document.getElementById('todoCount').textContent = todos.length ? `${left}/${todos.length} 待完成` : '';
+}
+
+function initTodo() {
+    const list = document.getElementById('todoList');
+    const form = document.getElementById('todoForm');
+    const input = document.getElementById('todoInput');
+
+    list.innerHTML = getTodos().map(todoItemHtml).join('');
+    updateTodoCount();
+
+    function addTodo() {
+        const text = input.value.trim();
+        if (!text) return;
+        const todo = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text, done: false };
+        const todos = getTodos();
+        todos.unshift(todo);
+        saveTodos(todos);
+        const tmp = document.createElement('template');
+        tmp.innerHTML = todoItemHtml(todo).trim();
+        list.prepend(tmp.content.firstElementChild);
+        input.value = '';
+        updateTodoCount();
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addTodo();
+    });
+
+    // 显式监听回车，避免个别环境不触发表单隐式提交
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTodo();
+        }
+    });
+
+    list.addEventListener('change', (e) => {
+        const check = e.target.closest('.todo-check');
+        if (!check) return;
+        const item = check.closest('.todo-item');
+        const todos = getTodos();
+        const todo = todos.find(t => t.id === item.dataset.id);
+        if (todo) {
+            todo.done = check.checked;
+            saveTodos(todos);
+            item.classList.toggle('done', todo.done);
+            updateTodoCount();
+        }
+    });
+
+    list.addEventListener('click', (e) => {
+        const btn = e.target.closest('.todo-del');
+        if (!btn) return;
+        const item = btn.closest('.todo-item');
+        item.classList.add('leaving');
+        setTimeout(() => {
+            saveTodos(getTodos().filter(t => t.id !== item.dataset.id));
+            item.remove();
+            updateTodoCount();
+        }, 220);
+    });
+}
+
+// ===== 视图控制 =====
+function goHome() {
+    currentView = 'home';
+    viewBeforeSearch = null;
+    searchInput.value = '';
+    currentCategory = '';
+    currentToolCategory = '';
+    sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    homeNav.classList.add('active');
+    renderLinks();
+    searchInput.blur();
+    if (window.innerWidth <= 768) {
+        closeMobileMenu();
     }
 }
 
@@ -107,7 +320,7 @@ async function loadLinks() {
     }
 }
 
-// 渲染侧栏工具区（改为分类导航）
+// 渲染侧栏工具区（分类导航）
 function renderSidebarTools() {
     const categories = [...new Set(allTools.map(t => t.category))];
     sidebarTools.innerHTML = categories.map(cat => `
@@ -122,9 +335,10 @@ function renderSidebarTools() {
         if (!item) return;
         sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
+        homeNav.classList.remove('active');
         currentToolCategory = item.dataset.toolCategory;
-        isToolsView = true;
-        renderTools();
+        currentView = 'tools';
+        renderTools(true);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
         }
@@ -154,8 +368,18 @@ function getDomain(url) {
 }
 
 // 渲染链接卡片
-function renderLinks() {
+function renderLinks(animate = false) {
     const searchTerm = searchInput.value.toLowerCase().trim();
+
+    // 首页视图：仅显示仪表盘，不显示收藏卡片
+    if (currentView === 'home' && !searchTerm) {
+        dashboard.classList.remove('hidden');
+        linksGrid.style.display = 'none';
+        emptyState.style.display = 'none';
+        return;
+    }
+
+    dashboard.classList.add('hidden');
 
     let filteredLinks = allLinks;
 
@@ -177,15 +401,17 @@ function renderLinks() {
         emptyState.style.display = 'none';
     }
 
-    linksGrid.innerHTML = filteredLinks.map(link => {
+    linksGrid.innerHTML = filteredLinks.map((link, i) => {
         const domain = getDomain(link.url);
         const emojiIcon = link.icon || '🔗';
         // 尝试加载 favicon，失败则显示 emoji
         const faviconHtml = domain
             ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${emojiIcon}'};" width="32" height="32">`
             : emojiIcon;
+        const animClass = animate ? ' anim' : '';
+        const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
         return `
-        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
+        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card${animClass}"${animDelay}>
             <div class="icon">
                 ${faviconHtml}
             </div>
@@ -199,7 +425,9 @@ function renderLinks() {
 }
 
 // 渲染工具卡片
-function renderTools() {
+function renderTools(animate = false) {
+    dashboard.classList.add('hidden');
+
     const searchTerm = searchInput.value.toLowerCase().trim();
 
     let filteredTools = allTools;
@@ -222,10 +450,12 @@ function renderTools() {
         emptyState.style.display = 'none';
     }
 
-    linksGrid.innerHTML = filteredTools.map(tool => {
+    linksGrid.innerHTML = filteredTools.map((tool, i) => {
         const faviconUrl = tool.icon || '';
+        const animClass = animate ? ' anim' : '';
+        const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
         return `
-        <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card">
+        <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card${animClass}"${animDelay}>
             <div class="icon">
                 ${faviconUrl ? `<span style="font-size:1.2rem">${faviconUrl}</span>` : '🔧'}
             </div>
@@ -293,12 +523,25 @@ function closeMobileMenu() {
 
 // 事件监听
 function initEventListeners() {
-    // 搜索（根据当前视图决定渲染哪个）
+    // 搜索：从首页输入时自动切换到收藏搜索，清空后回到首页
     searchInput.addEventListener('input', () => {
-        if (isToolsView) {
-            renderTools();
-        } else {
+        const term = searchInput.value.toLowerCase().trim();
+        if (term && currentView === 'home') {
+            viewBeforeSearch = 'home';
+            currentView = 'links';
+            renderLinks(false);
+            return;
+        }
+        if (!term && viewBeforeSearch === 'home') {
+            viewBeforeSearch = null;
+            currentView = 'home';
             renderLinks();
+            return;
+        }
+        if (currentView === 'tools') {
+            renderTools(false);
+        } else {
+            renderLinks(false);
         }
     });
 
@@ -312,15 +555,20 @@ function initEventListeners() {
     mobileMenuBtn.addEventListener('click', openMobileMenu);
     sidebarOverlay.addEventListener('click', closeMobileMenu);
 
+    // 回到首页
+    homeNav.addEventListener('click', goHome);
+
     // 分类点击（事件委托）- 收藏分类
     sidebarCategories.addEventListener('click', (e) => {
         const item = e.target.closest('.sidebar-item');
         if (!item) return;
         sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
+        homeNav.classList.remove('active');
         currentCategory = item.dataset.category;
-        isToolsView = false; // 切换到链接视图
-        renderLinks();
+        currentView = 'links';
+        viewBeforeSearch = null;
+        renderLinks(true);
         // 移动端自动关闭菜单
         if (window.innerWidth <= 768) {
             closeMobileMenu();
@@ -334,17 +582,9 @@ function initEventListeners() {
             e.preventDefault();
             searchInput.focus();
         }
-        // ESC 清空搜索并重置视图
+        // ESC 返回首页并清空搜索
         if (e.key === 'Escape') {
-            searchInput.value = '';
-            isToolsView = false;
-            currentCategory = '';
-            currentToolCategory = '';
-            // 重置分类选中状态
-            sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            renderLinks();
-            searchInput.blur();
+            goHome();
         }
     });
 }

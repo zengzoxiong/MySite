@@ -24,6 +24,15 @@
 
         <nav class="sidebar-nav">
             <div class="sidebar-section">
+                <div class="sidebar-item" id="homeNav" title="回到首页">
+                    <span class="item-icon">🏠</span>
+                    <span class="item-text">首页</span>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
                 <div class="sidebar-section-title">收藏</div>
                 <div class="sidebar-categories" id="sidebarCategories">
                     <!-- JS 动态渲染 -->
@@ -53,27 +62,66 @@
 
     <!-- 右侧内容区 -->
     <main class="main-content" id="mainContent">
-        <!-- 首页仪表盘：时钟 / 天气 / GitHub 传送门 -->
+        <!-- 首页仪表盘：全屏沉浸式，无卡片 -->
         <section class="dashboard" id="dashboard">
-            <div class="dash-card clock-card">
-                <div class="clock-time" id="clockTime">--:--:--</div>
-                <div class="clock-date" id="clockDate">&nbsp;</div>
-            </div>
-            <div class="dash-card weather-card">
-                <div class="weather-top">
-                    <span class="weather-icon" id="weatherIcon">🌤️</span>
-                    <span class="weather-temp" id="weatherTemp">--°C</span>
+            <!-- 中央主视觉：时钟 + 天气 -->
+            <div class="hero">
+                <div class="hero-clock" id="clockTime">--:--:--</div>
+                <div class="hero-date" id="clockDate">&nbsp;</div>
+                <div class="hero-weather">
+                    <div class="weather-main">
+                        <span class="weather-icon" id="weatherIcon">🌤️</span>
+                        <span class="weather-temp" id="weatherTemp">--°C</span>
+                        <span class="weather-desc" id="weatherDesc">天气获取中...</span>
+                    </div>
+                    <div class="weather-extra" id="weatherExtra"></div>
                 </div>
-                <div class="weather-desc" id="weatherDesc">西安 · 天气获取中...</div>
-                <div class="weather-extra" id="weatherExtra"></div>
             </div>
-            <a class="dash-card github-card" href="https://github.com/zengzoxiong" target="_blank" rel="noopener noreferrer" title="前往我的 GitHub 主页">
+
+            <!-- 右上：GitHub 传送门 -->
+            <a class="corner github-corner" href="https://github.com/zengzoxiong" target="_blank" rel="noopener noreferrer" title="前往我的 GitHub 主页">
                 <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-                <div class="github-info">
-                    <div class="github-title">我的 GitHub</div>
-                    <div class="github-sub">github.com/zengzoxiong ↗</div>
-                </div>
+                <span class="gh-name">zengzoxiong ↗</span>
+                <span class="github-stats" id="githubStats">
+                    <span><b id="ghRepos">–</b> 仓库</span>
+                    <span><b id="ghFollowers">–</b> 粉丝</span>
+                </span>
             </a>
+
+            <!-- 左下：时光进度 -->
+            <div class="corner progress-corner">
+                <div class="section-label">时光进度</div>
+                <div class="progress-item">
+                    <div class="progress-head"><span>今年</span><span id="pctYear">0%</span></div>
+                    <div class="progress-bar"><div class="progress-fill" id="fillYear"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-head"><span>本月</span><span id="pctMonth">0%</span></div>
+                    <div class="progress-bar"><div class="progress-fill" id="fillMonth"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-head"><span>本周</span><span id="pctWeek">0%</span></div>
+                    <div class="progress-bar"><div class="progress-fill" id="fillWeek"></div></div>
+                </div>
+            </div>
+
+            <!-- 底部中央：今日一言 -->
+            <div class="corner quote-corner">
+                <div class="quote-text" id="quoteText">获取中...</div>
+                <div class="quote-foot">
+                    <span class="quote-meta" id="quoteMeta"></span>
+                    <button class="quote-refresh" id="quoteRefresh" title="换一句">↻</button>
+                </div>
+            </div>
+
+            <!-- 右下：待办清单 -->
+            <div class="corner todo-corner">
+                <div class="section-label">待办清单<span class="todo-count" id="todoCount"></span></div>
+                <form class="todo-form" id="todoForm">
+                    <input type="text" id="todoInput" placeholder="添加待办，回车保存..." maxlength="60" autocomplete="off">
+                </form>
+                <ul class="todo-list" id="todoList"></ul>
+            </div>
         </section>
 
         <div class="links-grid" id="linksGrid"></div>
