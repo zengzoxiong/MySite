@@ -288,6 +288,123 @@ body.sidebar-collapsed .main-content {
     margin-left: var(--sidebar-collapsed-width);
 }
 
+/* ===== 首页仪表盘 ===== */
+.dashboard {
+    display: grid;
+    grid-template-columns: 1.1fr 1.5fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dash-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow-card);
+    min-width: 0;
+}
+
+.clock-time {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.clock-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.weather-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.weather-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.weather-temp {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.weather-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.weather-extra {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.github-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.github-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--accent-color);
+}
+
+.github-icon {
+    width: 36px;
+    height: 36px;
+    fill: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.github-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.github-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+    .dashboard {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .github-card {
+        grid-column: 1 / -1;
+    }
+}
+
 /* 链接卡片网格 */
 .links-grid {
     display: grid;
@@ -465,6 +582,10 @@ body.sidebar-collapsed .main-content {
     }
 
     .links-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard {
         grid-template-columns: 1fr;
     }
 }

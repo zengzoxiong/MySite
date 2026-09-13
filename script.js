@@ -25,7 +25,67 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initSidebar();
     initEventListeners();
+    initClock();
+    initWeather();
 });
+
+// ===== 首页时钟 =====
+function initClock() {
+    const clockTime = document.getElementById('clockTime');
+    const clockDate = document.getElementById('clockDate');
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+
+    function tick() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        clockTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        clockDate.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 星期${weekdays[now.getDay()]}`;
+    }
+    tick();
+    setInterval(tick, 1000);
+}
+
+// ===== 首页天气（西安，Open-Meteo 免费接口，无需密钥） =====
+const WMO_CODES = {
+    0: ['晴', '☀️'], 1: ['多云转晴', '🌤️'], 2: ['多云', '⛅'], 3: ['阴', '☁️'],
+    45: ['雾', '🌫️'], 48: ['雾凇', '🌫️'],
+    51: ['小毛毛雨', '🌦️'], 53: ['毛毛雨', '🌦️'], 55: ['大毛毛雨', '🌧️'],
+    56: ['冻毛毛雨', '🌧️'], 57: ['冻毛毛雨', '🌧️'],
+    61: ['小雨', '🌧️'], 63: ['中雨', '🌧️'], 65: ['大雨', '🌧️'],
+    66: ['冻雨', '🌧️'], 67: ['冻雨', '🌧️'],
+    71: ['小雪', '🌨️'], 73: ['中雪', '🌨️'], 75: ['大雪', '❄️'], 77: ['雪粒', '🌨️'],
+    80: ['小阵雨', '🌦️'], 81: ['阵雨', '🌦️'], 82: ['强阵雨', '⛈️'],
+    85: ['小阵雪', '🌨️'], 86: ['阵雪', '🌨️'],
+    95: ['雷阵雨', '⛈️'], 96: ['雷阵雨伴冰雹', '⛈️'], 99: ['雷阵雨伴冰雹', '⛈️']
+};
+
+async function initWeather() {
+    const weatherIcon = document.getElementById('weatherIcon');
+    const weatherTemp = document.getElementById('weatherTemp');
+    const weatherDesc = document.getElementById('weatherDesc');
+    const weatherExtra = document.getElementById('weatherExtra');
+
+    try {
+        // 西安坐标 34.34°N, 108.94°E
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=34.34&longitude=108.94' +
+            '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m' +
+            '&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FShanghai&forecast_days=1';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const cur = data.current;
+        const [text, icon] = WMO_CODES[cur.weather_code] || ['未知', '🌡️'];
+        const daily = data.daily;
+
+        weatherIcon.textContent = icon;
+        weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
+        weatherDesc.textContent = `西安 · ${text}`;
+        weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
+    } catch (e) {
+        weatherDesc.textContent = '西安 · 天气获取失败';
+        console.error('天气加载失败:', e);
+    }
+}
 
 // 加载链接数据
 async function loadLinks() {

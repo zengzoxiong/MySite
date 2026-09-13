@@ -8,7 +8,8 @@
     "工具合集",
     "常用软件下载",
     "资源",
-    "学习"
+    "学习",
+    "开源工具"
   ],
   "links": [
     {
@@ -222,6 +223,62 @@
       "icon": "🤖"
     },
     {
+      "title": "一方工具箱",
+      "url": "https://tool.fologde.com/",
+      "description": "简洁好用的在线工具箱，集成图片处理、文本处理、开发辅助等多种日常小工具，即开即用。",
+      "category": "工具合集",
+      "icon": "🧰"
+    },
+    {
+      "title": "IT Tools",
+      "url": "https://it-tools.tech",
+      "description": "GitHub 40k+ Star 的开源在线工具箱，覆盖编解码、加密哈希、格式转换等开发者高频工具，支持自部署。",
+      "category": "工具合集",
+      "icon": "🛠️"
+    },
+    {
+      "title": "CyberChef",
+      "url": "https://gchq.github.io/CyberChef/",
+      "description": "GCHQ 开源的「网络瑞士军刀」，加密、编码、压缩、数据分析一站式搞定，纯静态可离线部署。",
+      "category": "工具合集",
+      "icon": "🔐"
+    },
+    {
+      "title": "Omni Tools",
+      "url": "https://omnitools.app",
+      "description": "自托管友好的开源工具集，覆盖图片、文本、数据转换等日常任务，无广告无追踪，Docker 一键部署。",
+      "category": "工具合集",
+      "icon": "🧯"
+    },
+    {
+      "title": "IT Toolbox",
+      "url": "https://ittool.wort.uk",
+      "description": "基于 Cloudflare Pages Functions 全栈部署的开发者在线工具箱，集成 146 个高频开发工具。",
+      "category": "工具合集",
+      "icon": "🧱"
+    },
+    {
+      "title": "傲星工具箱",
+      "url": "https://tool.aoaostar.com",
+      "description": "GitHub 1.5k+ Star 的在线工具箱程序，支持插件扩展，PHP 环境即可自建。",
+      "category": "工具合集",
+      "icon": "⭐"
+    },
+    {
+      "title": "彩虹工具箱",
+      "url": "https://tool.cccyun.cc",
+      "description": "支持插件增强的在线工具箱程序，也能当网址导航用，PHP + MySQL 自建部署。",
+      "category": "工具合集",
+      "icon": "🌈"
+    },
+    {
+      "title": "FreeTool",
+      "url": "https://xdxsb.top/FreeTool",
+      "description": "开源多功能在线工具箱，覆盖文本、图片、开发者常用小工具，可自行搭建。",
+      "category": "工具合集",
+      "icon": "🆓"
+    },
+    {
       "title": "KissSub",
       "url": "https://www.kisssub.org/",
       "description": "动漫字幕分享平台，提供最新番剧字幕下载。",
@@ -234,6 +291,48 @@
       "description": "动画图解、一键运行的数据结构与算法教程，支持 Java、C++、Python、Go、JS、TS、C#、Swift、Rust、Dart、Zig 等语言。",
       "category": "学习",
       "icon": "📖"
+    },
+    {
+      "title": "Excalidraw",
+      "url": "https://excalidraw.com",
+      "description": "GitHub 130k+ Star 的手绘风虚拟白板，画架构图 / 流程图神器，支持协作，可自部署。",
+      "category": "开源工具",
+      "icon": "🎨"
+    },
+    {
+      "title": "tldraw",
+      "url": "https://www.tldraw.com",
+      "description": "GitHub 50k+ Star 的无限画布白板，随手绘图、草图原型都很顺手，可嵌入自己的网页。",
+      "category": "开源工具",
+      "icon": "✏️"
+    },
+    {
+      "title": "drawDB",
+      "url": "https://drawdb.app",
+      "description": "GitHub 39k+ Star 的在线数据库 ER 图编辑器，可视化建表并一键生成 SQL，纯前端可自部署。",
+      "category": "开源工具",
+      "icon": "🗄️"
+    },
+    {
+      "title": "Squoosh",
+      "url": "https://squoosh.app",
+      "description": "Google 开源的浏览器端图片压缩工具，多编码器对比调参，图片不出本地，隐私友好。",
+      "category": "开源工具",
+      "icon": "🗜️"
+    },
+    {
+      "title": "LibreSpeed",
+      "url": "https://librespeed.org",
+      "description": "GitHub 15k+ Star 的开源 HTML5 网速测试，无 Flash 无依赖，轻量易自部署。",
+      "category": "开源工具",
+      "icon": "📶"
+    },
+    {
+      "title": "WebStack 导航",
+      "url": "http://webstack.cc",
+      "description": "GitHub 7k+ Star 的静态响应式网址导航模板，纯静态无后端，适合当作个人主页起点。",
+      "category": "开源工具",
+      "icon": "🧭"
     }
   ]
 }
