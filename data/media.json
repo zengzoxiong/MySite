@@ -17,6 +17,26 @@
       "cover": "assets/media/attack-on-titan.jpg"
     },
     {
+      "title": "Re:从零开始的异世界生活（全季）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 9.0,
+      "date": "2024-09-20",
+      "comment": "死亡回归的绝望与温柔，菜月昴的救赎之旅。",
+      "cover": "assets/media/re-zero.jpg",
+      "url": "https://anilist.co/anime/21355"
+    },
+    {
+      "title": "无职转生（全季）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 9.1,
+      "date": "2024-08-15",
+      "comment": "异世界穿越的天花板，作画与叙事都是顶级。",
+      "cover": "assets/media/mushoku-tensei.jpg",
+      "url": "https://anilist.co/anime/108465"
+    },
+    {
       "title": "间谍过家家",
       "type": "番剧",
       "status": "看过",
@@ -25,6 +45,26 @@
       "comment": "阿尼亚太可爱了，一家三口的温馨喜剧。",
       "url": "https://movie.douban.com/subject/35465232/",
       "cover": "assets/media/spy-x-family.jpg"
+    },
+    {
+      "title": "间谍过家家 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "date": "2024-01-10",
+      "comment": "克洛妮大作战+豪华客轮篇，约尔太太帅炸。",
+      "cover": "assets/media/spy-x-family-s2.jpg",
+      "url": "https://anilist.co/anime/158927"
+    },
+    {
+      "title": "间谍过家家剧场版：Code: White",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.3,
+      "date": "2024-05-01",
+      "comment": "一家人的甜点大作战，阿尼亚影史最佳表情包。",
+      "cover": "assets/media/spy-x-family-code-white.jpg",
+      "url": "https://anilist.co/anime/158928"
     },
     {
       "title": "星际穿越",
@@ -45,6 +85,16 @@
       "comment": "中国科幻电影的里程碑，人类可以仰望星空。",
       "url": "https://movie.douban.com/subject/35267208/",
       "cover": "assets/media/wandering-earth-2.jpg"
+    },
+    {
+      "title": "让子弹飞",
+      "type": "电影",
+      "status": "看过",
+      "rating": 9.0,
+      "date": "2023-10-01",
+      "comment": "站着，还把钱挣了。姜文的表达艺术。",
+      "cover": "assets/media/let-the-bullets-fly.jpg",
+      "url": "https://www.themoviedb.org/movie/51533"
     },
     {
       "title": "长安十二时辰",
@@ -85,6 +135,46 @@
       "comment": "摇滚永不死，夏天就该听现场。",
       "url": "https://movie.douban.com/subject/30414504/",
       "cover": "assets/media/the-big-band.jpg"
+    },
+    {
+      "title": "极限挑战 第一季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 9.2,
+      "date": "2024-06-15",
+      "comment": "男人帮原点，无剧本的无限反转。",
+      "cover": "assets/media/go-fighting-s1.jpg",
+      "url": "https://www.themoviedb.org/tv/89620/season/1"
+    },
+    {
+      "title": "极限挑战 第二季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 9.3,
+      "date": "2024-07-02",
+      "comment": "神综艺巅峰，金条之战至今是名场面。",
+      "cover": "assets/media/go-fighting-s2.jpg",
+      "url": "https://www.themoviedb.org/tv/89620/season/2"
+    },
+    {
+      "title": "极限挑战 第三季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 9.1,
+      "date": "2024-07-20",
+      "comment": "三傻三精阵容稳固，反转依旧精彩。",
+      "cover": "assets/media/go-fighting-s3.jpg",
+      "url": "https://www.themoviedb.org/tv/89620/season/3"
+    },
+    {
+      "title": "极限挑战 第四季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 8.8,
+      "date": "2024-08-10",
+      "comment": "开始有剧本痕迹，但智囊团留下不少好梗。",
+      "cover": "assets/media/go-fighting-s4.jpg",
+      "url": "https://www.themoviedb.org/tv/89620/season/4"
     }
   ]
 }
