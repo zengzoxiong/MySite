@@ -39,7 +39,19 @@
 2. **前端组件类**（tldraw、Excalidraw）：通过 npm 引入官方 SDK/组件，嵌入自建工具页面。
 3. **需要轻后端**（LibreSpeed、傲星/彩虹工具箱、Omni Tools）：部署到 Vercel / Cloudflare / 自己的 VPS（分别对应 Serverless Functions、PHP、Docker），本站只保留入口链接。
 
-## 四、搜索方法备忘
+## 四、影视记录类开源项目（2026-09-14 补充调研）
+
+为本站「影视」栏做的调研。以下项目均可自部署追踪观影记录，但因需要服务器/数据库，不适合 GitHub Pages 静态站点直接使用；本站参考它们的数据模型（标题、类型、状态、评分、评论、海报、外链）做了纯静态实现，数据存 `data/media.json`。
+
+| 名称 | 在线地址 | GitHub 仓库 | Star | 技术栈 / 部署 |
+|---|---|---|---|---|
+| RYOT | <https://ryot.io> | [IgnisDa/ryot](https://github.com/IgnisDa/ryot) | 3.6k | Rust + React，Docker 自部署，支持电影/剧集/番剧/游戏/书籍 |
+| Yamtrack | - | [FuzzyGrim/Yamtrack](https://github.com/FuzzyGrim/Yamtrack) | 3.5k | Django，Docker 自部署，对接 TMDB/AniList/MAL |
+| Watcharr | <https://watcharr.app> | [sbondCo/Watcharr](https://github.com/sbondCo/Watcharr) | 1.5k | Go + Svelte，Docker 自部署，看过清单 + 评分 + 吐槽 |
+| Flox | <https://flox-demo.pyxl.dev/> | [devfake/flox](https://github.com/devfake/flox) | 1.35k | PHP Laravel，电影/剧集/番剧 watched list |
+| Movary | <https://movary.org> | [leepeuker/movary](https://github.com/leepeuker/movary) | 776 | PHP，专注电影追踪与评分 |
+
+## 五、搜索方法备忘
 
 - GitHub Search API：`https://api.github.com/search/repositories?q=在线工具+工具箱&sort=stars`
 - 关键词组合：`工具箱`、`在线工具`、`self-hosted online tools`、`toolbox`

@@ -1,10 +1,21 @@
 // 全局状态
 let allLinks = [];
 let allTools = [];
+let mediaData = { types: [], items: [] };
 let currentCategory = '';
 let currentToolCategory = '';
-let currentView = 'home'; // 'home' | 'links' | 'tools'
+let currentMediaType = '';
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media'
 let viewBeforeSearch = null; // 从首页进入搜索态时记住来源
+
+// 影视类型对应的渐变占位海报
+const TYPE_GRADIENTS = {
+    '番剧': 'linear-gradient(160deg, #a855f7, #6366f1)',
+    '电影': 'linear-gradient(160deg, #f59e0b, #ef4444)',
+    '综艺': 'linear-gradient(160deg, #10b981, #0ea5e9)',
+    '电视剧': 'linear-gradient(160deg, #3b82f6, #8b5cf6)',
+    '默认': 'linear-gradient(160deg, #64748b, #334155)'
+};
 
 // DOM 元素
 const sidebar = document.getElementById('sidebar');
@@ -21,6 +32,8 @@ const sidebarOverlay = document.getElementById('sidebarOverlay');
 const mainContent = document.getElementById('mainContent');
 const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
+const mediaGrid = document.getElementById('mediaGrid');
+const sidebarMedia = document.getElementById('sidebarMedia');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -295,7 +308,8 @@ function initSectionToggles() {
     document.querySelectorAll('.sidebar-section-title[data-section]').forEach(btn => {
         const section = btn.closest('.sidebar-section');
         const key = 'sidebarSection_' + btn.dataset.section;
-        if (localStorage.getItem(key) === 'collapsed') {
+        if (localStorage.getItem(key) !== 'expanded') {
+            // 默认收起，只有显式保存过 expanded 才展开
             section.classList.add('section-collapsed');
         }
         btn.addEventListener('click', () => {
@@ -327,14 +341,26 @@ function goHome() {
     searchInput.value = '';
     currentCategory = '';
     currentToolCategory = '';
+    currentMediaType = '';
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     homeNav.classList.add('active');
     renderLinks();
     searchInput.blur();
     if (window.innerWidth <= 768) {
         closeMobileMenu();
     }
+}
+
+// 渲染侧栏影视区（类型导航）
+function renderSidebarMedia() {
+    const types = mediaData.types || [];
+    sidebarMedia.innerHTML = ['全部', ...types].map(t => `
+        <div class="sidebar-item" data-media-type="${t}">
+            <span class="item-text">${t}</span>
+        </div>
+    `).join('');
 }
 
 // 加载链接数据
@@ -354,6 +380,15 @@ async function loadLinks() {
     } catch (error) {
         console.error('加载数据失败:', error);
         linksGrid.innerHTML = '<p class="empty-state">加载数据失败</p>';
+    }
+
+    // 影视记录独立加载，失败不影响收藏/工具
+    try {
+        const mediaRes = await fetch('data/media.json');
+        mediaData = await mediaRes.json();
+        renderSidebarMedia();
+    } catch (error) {
+        console.error('影视数据加载失败:', error);
     }
 }
 
@@ -412,11 +447,13 @@ function renderLinks(animate = false) {
     if (currentView === 'home' && !searchTerm) {
         dashboard.classList.remove('hidden');
         linksGrid.style.display = 'none';
+        mediaGrid.style.display = 'none';
         emptyState.style.display = 'none';
         return;
     }
 
     dashboard.classList.add('hidden');
+    mediaGrid.style.display = 'none';
 
     let filteredLinks = allLinks;
 
@@ -464,6 +501,7 @@ function renderLinks(animate = false) {
 // 渲染工具卡片
 function renderTools(animate = false) {
     dashboard.classList.add('hidden');
+    mediaGrid.style.display = 'none';
 
     const searchTerm = searchInput.value.toLowerCase().trim();
 
@@ -503,6 +541,56 @@ function renderTools(animate = false) {
             </div>
         </a>`;
     }).join('');
+}
+
+// 渲染影视记录（海报卡片墙）
+function renderMedia(animate = false) {
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    let items = mediaData.items || [];
+    if (currentMediaType) items = items.filter(i => i.type === currentMediaType);
+    if (searchTerm) items = items.filter(i =>
+        i.title.toLowerCase().includes(searchTerm) ||
+        (i.comment || '').toLowerCase().includes(searchTerm)
+    );
+
+    const chips = ['全部', ...(mediaData.types || [])].map(t => {
+        const active = (t === '全部' && !currentMediaType) || t === currentMediaType;
+        return `<button class="media-chip${active ? ' active' : ''}" data-media-chip="${t}">${t}</button>`;
+    }).join('');
+
+    const cards = items.map((item, i) => {
+        const title = escapeHtml(item.title || '');
+        const statusClass = item.status === '在看' ? ' watching' : (item.status === '想看' ? ' wish' : '');
+        const gradient = TYPE_GRADIENTS[item.type] || TYPE_GRADIENTS['默认'];
+        const animClass = animate ? ' anim' : '';
+        const animDelay = animate ? ` style="animation-delay:${Math.min(i * 40, 450)}ms"` : '';
+        const coverInner = `
+            <div class="media-ph" style="background:${gradient}"><span class="ph-char">${title.charAt(0)}</span><span class="ph-title">${title}</span></div>
+            ${item.cover ? `<img src="${item.cover}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
+            ${item.status ? `<span class="badge-status${statusClass}">${item.status}</span>` : ''}
+            ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
+            ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}`;
+        const infoInner = `
+            <div class="media-title">${title}</div>
+            <div class="media-meta">${item.type || ''}${item.date ? ' · ' + item.date : ''}</div>`;
+        const tag = item.url ? 'a' : 'div';
+        const urlAttrs = item.url ? ` href="${item.url}" target="_blank" rel="noopener noreferrer"` : '';
+        return `<${tag} class="media-card${animClass}"${urlAttrs}${animDelay}>
+            <div class="media-cover">${coverInner}</div>
+            <div class="media-info">${infoInner}</div>
+        </${tag}>`;
+    }).join('');
+
+    mediaGrid.innerHTML = `
+        <div class="media-filters">${chips}</div>
+        <div class="media-count">共 ${items.length} 部</div>
+        <div class="media-cards">${cards || '<p class="empty-state">没有找到匹配的作品</p>'}</div>
+    `;
 }
 
 // 主题
@@ -580,6 +668,8 @@ function initEventListeners() {
         }
         if (currentView === 'tools') {
             renderTools(false);
+        } else if (currentView === 'media') {
+            renderMedia(false);
         } else {
             renderLinks(false);
         }
@@ -619,6 +709,30 @@ function initEventListeners() {
     sidebar.addEventListener('click', (e) => {
         const host = e.target.closest('.sidebar-item, .sidebar-section-title, .theme-toggle, .home-btn, .sidebar-collapse-btn');
         if (host) spawnRipple(host, e);
+    });
+
+    // 影视类型点击（侧栏）
+    sidebarMedia.addEventListener('click', (e) => {
+        const item = e.target.closest('.sidebar-item');
+        if (!item) return;
+        sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        homeNav.classList.remove('active');
+        currentMediaType = item.dataset.mediaType === '全部' ? '' : item.dataset.mediaType;
+        currentView = 'media';
+        viewBeforeSearch = null;
+        renderMedia(true);
+        if (window.innerWidth <= 768) {
+            closeMobileMenu();
+        }
+    });
+
+    // 影视筛选芯片点击（内容区）
+    mediaGrid.addEventListener('click', (e) => {
+        const chip = e.target.closest('.media-chip');
+        if (!chip) return;
+        currentMediaType = chip.dataset.mediaChip === '全部' ? '' : chip.dataset.mediaChip;
+        renderMedia(false);
     });
 
     // 键盘快捷键

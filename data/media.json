@@ -1,0 +1,77 @@
+{
+  "types": ["番剧", "电影", "综艺", "电视剧"],
+  "items": [
+    {
+      "title": "进击的巨人",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 9.1,
+      "date": "2023-11-05",
+      "comment": "自由与牢笼的终极追问，神作不解释。",
+      "url": "https://movie.douban.com/subject/25792624/"
+    },
+    {
+      "title": "间谍过家家",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "date": "2024-06-18",
+      "comment": "阿尼亚太可爱了，一家三口的温馨喜剧。",
+      "url": "https://movie.douban.com/subject/35465232/"
+    },
+    {
+      "title": "星际穿越",
+      "type": "电影",
+      "status": "看过",
+      "rating": 9.8,
+      "date": "2024-03-15",
+      "comment": "爱是唯一可以穿越时间维度的东西。",
+      "url": "https://movie.douban.com/subject/1889243/"
+    },
+    {
+      "title": "流浪地球2",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.3,
+      "date": "2023-02-01",
+      "comment": "中国科幻电影的里程碑，人类可以仰望星空。",
+      "url": "https://movie.douban.com/subject/35267208/"
+    },
+    {
+      "title": "长安十二时辰",
+      "type": "电视剧",
+      "status": "看过",
+      "rating": 8.4,
+      "date": "2024-01-20",
+      "comment": "大唐反恐二十四小时，服化道顶级。",
+      "url": "https://movie.douban.com/subject/26770780/"
+    },
+    {
+      "title": "琅琊榜",
+      "type": "电视剧",
+      "status": "看过",
+      "rating": 9.4,
+      "date": "2023-10-02",
+      "comment": "麒麟才子梅长苏，权谋剧天花板。",
+      "url": "https://movie.douban.com/subject/25754848/"
+    },
+    {
+      "title": "明星大侦探",
+      "type": "综艺",
+      "status": "在看",
+      "rating": 9.2,
+      "date": "2025-03-11",
+      "comment": "剧本杀综艺鼻祖，每季都有封神案件。",
+      "url": "https://movie.douban.com/subject/26680066/"
+    },
+    {
+      "title": "乐队的夏天",
+      "type": "综艺",
+      "status": "想看",
+      "rating": 8.6,
+      "date": "",
+      "comment": "摇滚永不死，夏天就该听现场。",
+      "url": "https://movie.douban.com/subject/30414504/"
+    }
+  ]
+}
