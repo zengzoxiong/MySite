@@ -61,10 +61,12 @@ MySite/
   "rating": 9.1,           // 0-10，可省略
   "date": "2024-06-18",    // 观看日期，可省略
   "comment": "一句话短评，悬停海报显示",  // 可省略
-  "cover": "海报图URL",     // 可省略；省略时用类型渐变占位图
+  "cover": "assets/media/xxx.jpg",  // 海报图，可省略；省略时用类型渐变占位图
   "url": "https://movie.douban.com/subject/xxx/"  // 可省略；省略时卡片不可点击
 }
 ```
+
+海报图片建议存放在 `assets/media/` 目录（随项目一起存储，无外链依赖），也支持完整外链 URL。
 
 ### 添加自建工具
 
