@@ -40,6 +40,10 @@ function initDashboard() {
     initProgress();
     initGitHubStats();
     initTodo();
+    initSectionToggles();
+
+    // 点击天气区域手动刷新
+    document.getElementById('heroWeather').addEventListener('click', () => initWeather(true));
 }
 
 // --- 时钟 ---
@@ -72,13 +76,14 @@ const WMO_CODES = {
     95: ['雷阵雨', '⛈️'], 96: ['雷阵雨伴冰雹', '⛈️'], 99: ['雷阵雨伴冰雹', '⛈️']
 };
 
-async function initWeather() {
+async function initWeather(manual = false) {
     const weatherIcon = document.getElementById('weatherIcon');
     const weatherTemp = document.getElementById('weatherTemp');
     const weatherDesc = document.getElementById('weatherDesc');
     const weatherExtra = document.getElementById('weatherExtra');
 
     try {
+        if (manual) weatherIcon.classList.add('refreshing');
         // 西安坐标 34.34°N, 108.94°E
         const url = 'https://api.open-meteo.com/v1/forecast?latitude=34.34&longitude=108.94' +
             '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m' +
@@ -92,11 +97,13 @@ async function initWeather() {
 
         weatherIcon.textContent = icon;
         weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
-        weatherDesc.textContent = text;
+        weatherDesc.textContent = `西安 · ${text}`;
         weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
     } catch (e) {
-        weatherDesc.textContent = '天气获取失败';
+        if (!manual) weatherDesc.textContent = '西安 · 天气获取失败';
         console.error('天气加载失败:', e);
+    } finally {
+        weatherIcon.classList.remove('refreshing');
     }
 }
 
@@ -281,6 +288,36 @@ function initTodo() {
             updateTodoCount();
         }, 220);
     });
+}
+
+// ===== 一级菜单折叠（收藏 / 工具，状态持久化） =====
+function initSectionToggles() {
+    document.querySelectorAll('.sidebar-section-title[data-section]').forEach(btn => {
+        const section = btn.closest('.sidebar-section');
+        const key = 'sidebarSection_' + btn.dataset.section;
+        if (localStorage.getItem(key) === 'collapsed') {
+            section.classList.add('section-collapsed');
+        }
+        btn.addEventListener('click', () => {
+            section.classList.toggle('section-collapsed');
+            localStorage.setItem(key, section.classList.contains('section-collapsed') ? 'collapsed' : 'expanded');
+        });
+    });
+}
+
+// ===== 点击涟漪效果 =====
+function spawnRipple(host, e) {
+    const rect = host.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2.2;
+    const x = (e.clientX || rect.left + rect.width / 2) - rect.left - size / 2;
+    const y = (e.clientY || rect.top + rect.height / 2) - rect.top - size / 2;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    host.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
 }
 
 // ===== 视图控制 =====
@@ -492,6 +529,9 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
     updateThemeIcon(next);
+    themeIcon.classList.remove('spin-once');
+    void themeIcon.offsetWidth; // 重置旋转动画
+    themeIcon.classList.add('spin-once');
 }
 
 // 侧栏
@@ -573,6 +613,12 @@ function initEventListeners() {
         if (window.innerWidth <= 768) {
             closeMobileMenu();
         }
+    });
+
+    // 侧栏内所有可点元素统一加涟漪反馈
+    sidebar.addEventListener('click', (e) => {
+        const host = e.target.closest('.sidebar-item, .sidebar-section-title, .theme-toggle, .home-btn, .sidebar-collapse-btn');
+        if (host) spawnRipple(host, e);
     });
 
     // 键盘快捷键

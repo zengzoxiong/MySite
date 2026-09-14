@@ -89,10 +89,67 @@ body {
     overflow: hidden;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* 首页小屋按钮 */
+.home-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.home-btn svg {
+    fill: currentColor;
+    transition: transform 0.2s ease;
+}
+
+.home-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.home-btn:hover svg {
+    transform: scale(1.15);
+}
+
+.home-btn:active svg {
+    transform: scale(0.85);
+}
+
+.home-btn.active {
+    color: var(--accent-color);
+    background-color: var(--hover-bg);
+}
+
 .sidebar.collapsed .sidebar-logo {
-    font-size: 0.85rem;
-    text-align: center;
-    width: 100%;
+    display: none;
+}
+
+/* 收起时头部改为纵向排列两个图标 */
+.sidebar.collapsed .sidebar-header {
+    height: auto;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 0;
+}
+
+.sidebar.collapsed .header-actions {
+    flex-direction: column;
 }
 
 .sidebar-collapse-btn {
@@ -108,7 +165,9 @@ body {
     justify-content: center;
     border-radius: 4px;
     flex-shrink: 0;
-    transition: background-color 0.15s, color 0.15s;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.15s, color 0.15s, transform 0.15s;
 }
 
 .sidebar-collapse-btn:hover {
@@ -116,8 +175,16 @@ body {
     color: var(--text-primary);
 }
 
+.sidebar-collapse-btn:active {
+    transform: scale(0.85);
+}
+
 .sidebar.collapsed .sidebar-collapse-btn {
     transform: rotate(180deg);
+}
+
+.sidebar.collapsed .sidebar-collapse-btn:active {
+    transform: rotate(180deg) scale(0.85);
 }
 
 /* 搜索框 */
@@ -140,6 +207,7 @@ body {
 
 .sidebar-search input:focus {
     border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .sidebar-search input::placeholder {
@@ -163,6 +231,13 @@ body {
 }
 
 .sidebar-section-title {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-family: inherit;
     font-size: 0.68rem;
     font-weight: 600;
     color: var(--text-tertiary);
@@ -170,7 +245,36 @@ body {
     letter-spacing: 0.8px;
     padding: 8px 8px 4px;
     white-space: nowrap;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s;
+}
+
+.sidebar-section-title:hover {
+    color: var(--text-primary);
+}
+
+.section-chevron {
+    font-size: 0.78rem;
+    line-height: 1;
+    transform: rotate(90deg);
+    transition: transform 0.25s ease;
+}
+
+.sidebar-section.section-collapsed .section-chevron {
+    transform: rotate(0deg);
+}
+
+.section-body {
+    max-height: 600px;
     overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar-section.section-collapsed .section-body {
+    max-height: 0;
 }
 
 .sidebar.collapsed .sidebar-section-title {
@@ -276,6 +380,32 @@ body {
     transform: rotate(-20deg) scale(1.15);
 }
 
+.theme-icon.spin-once {
+    animation: spin360 0.45s ease;
+}
+
+@keyframes spin360 {
+    to { transform: rotate(360deg); }
+}
+
+/* 点击涟漪 */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: currentColor;
+    opacity: 0.15;
+    transform: scale(0);
+    animation: rippleAnim 0.55s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes rippleAnim {
+    to {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
 .sidebar.collapsed .theme-label {
     display: none;
 }
@@ -343,7 +473,13 @@ body.sidebar-collapsed .main-content {
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
+    user-select: none;
     animation: fadeUp 0.6s ease 0.15s backwards;
+}
+
+.weather-icon.refreshing {
+    animation: spin 1s linear infinite;
 }
 
 .weather-main {
@@ -443,6 +579,10 @@ body.sidebar-collapsed .main-content {
     color: var(--text-tertiary);
 }
 
+.github-corner:active {
+    transform: scale(0.97);
+}
+
 .github-stats b {
     color: var(--text-primary);
     font-size: 0.88rem;
@@ -528,6 +668,10 @@ body.sidebar-collapsed .main-content {
     color: var(--accent-color);
     border-color: var(--accent-color);
     transform: rotate(90deg) scale(1.05);
+}
+
+.quote-refresh:active {
+    transform: scale(0.85);
 }
 
 .quote-refresh.spinning {
@@ -823,6 +967,26 @@ body.sidebar-collapsed .main-content {
     font-weight: 600;
     margin-bottom: 4px;
     color: var(--text-primary);
+    transition: color 0.2s;
+}
+
+.link-card:hover .title {
+    color: var(--accent-color);
+}
+
+.link-card .icon img,
+.link-card .icon span {
+    transition: transform 0.25s ease;
+}
+
+.link-card:hover .icon img,
+.link-card:hover .icon span {
+    transform: scale(1.18) rotate(-8deg);
+}
+
+.link-card:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--shadow-card);
 }
 
 .link-card .description {
@@ -871,6 +1035,15 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-card);
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.mobile-menu-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.mobile-menu-btn:active {
+    transform: scale(0.9);
 }
 
 /* 遮罩 */
@@ -892,6 +1065,25 @@ body.sidebar-collapsed .main-content {
         transform: translateX(-100%);
         width: var(--sidebar-width);
         box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 移动端收起状态恢复常规头部布局 */
+    .sidebar.collapsed .sidebar-header {
+        flex-direction: row;
+        height: 52px;
+        gap: 0;
+        padding: 16px;
+    }
+
+    .sidebar.collapsed .sidebar-logo {
+        display: block;
+        font-size: 1rem;
+        width: 100%;
+        text-align: left;
+    }
+
+    .sidebar.collapsed .header-actions {
+        flex-direction: row;
     }
 
     .sidebar.mobile-open {

@@ -15,7 +15,12 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span class="sidebar-logo">工具箱</span>
-            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收缩侧栏">‹</button>
+            <div class="header-actions">
+                <button class="home-btn" id="homeNav" title="回到首页">
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                </button>
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收缩侧栏">‹</button>
+            </div>
         </div>
 
         <div class="sidebar-search">
@@ -24,17 +29,8 @@
 
         <nav class="sidebar-nav">
             <div class="sidebar-section">
-                <div class="sidebar-item" id="homeNav" title="回到首页">
-                    <span class="item-icon">🏠</span>
-                    <span class="item-text">首页</span>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">收藏</div>
-                <div class="sidebar-categories" id="sidebarCategories">
+                <button class="sidebar-section-title" data-section="favorites" title="展开/收起收藏分类">收藏<span class="section-chevron">›</span></button>
+                <div class="section-body sidebar-categories" id="sidebarCategories">
                     <!-- JS 动态渲染 -->
                 </div>
             </div>
@@ -42,8 +38,8 @@
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
-                <div class="sidebar-section-title">工具</div>
-                <div class="sidebar-tools" id="sidebarTools">
+                <button class="sidebar-section-title" data-section="tools" title="展开/收起工具分类">工具<span class="section-chevron">›</span></button>
+                <div class="section-body sidebar-tools" id="sidebarTools">
                     <!-- JS 动态渲染 -->
                 </div>
             </div>
@@ -68,7 +64,7 @@
             <div class="hero">
                 <div class="hero-clock" id="clockTime">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
-                <div class="hero-weather">
+                <div class="hero-weather" id="heroWeather" title="点击刷新天气">
                     <div class="weather-main">
                         <span class="weather-icon" id="weatherIcon">🌤️</span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>
