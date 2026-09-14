@@ -175,6 +175,366 @@
       "comment": "开始有剧本痕迹，但智囊团留下不少好梗。",
       "cover": "assets/media/go-fighting-s4.jpg",
       "url": "https://www.themoviedb.org/tv/89620/season/4"
+    },
+    {
+      "title": "魔法禁书目录",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "comment": "学园都市的超能力与魔法交织的宏大开端。",
+      "cover": "assets/media/magic-index-1.jpg",
+      "url": "https://anilist.co/anime/4654"
+    },
+    {
+      "title": "魔法禁书目录 II",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.8,
+      "comment": "罗马正教篇，禁书目录世界观进一步展开。",
+      "cover": "assets/media/magic-index-2.jpg",
+      "url": "https://anilist.co/anime/8937"
+    },
+    {
+      "title": "魔法禁书目录 III",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.3,
+      "comment": "世界观收束的最终章，节奏快到飞起。",
+      "cover": "assets/media/magic-index-3.jpg",
+      "url": "https://anilist.co/anime/100185"
+    },
+    {
+      "title": "干物妹！小埋R",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "comment": "在外面是女神，在家里是干物妹。",
+      "cover": "assets/media/umaru-r.jpg",
+      "url": "https://anilist.co/anime/98572"
+    },
+    {
+      "title": "埃罗芒阿老师",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.5,
+      "comment": "不普通的兄妹日常，纱雾太戳人。",
+      "cover": "assets/media/eromanga-sensei.jpg",
+      "url": "https://anilist.co/anime/21685"
+    },
+    {
+      "title": "白圣女与黑牧师",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.9,
+      "comment": "圣女与牧师的温馨日常，狗粮管饱。",
+      "cover": "assets/media/saint-cecilia.png",
+      "url": "https://anilist.co/anime/150972"
+    },
+    {
+      "title": "莉可丽丝",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.4,
+      "comment": "泷奈与千束的咖啡店日常与枪战美学。",
+      "cover": "assets/media/lycoris-recoil.jpg",
+      "url": "https://anilist.co/anime/143270"
+    },
+    {
+      "title": "真理面具（动态漫）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.5,
+      "comment": "国产动态漫，悬疑烧脑设定。",
+      "cover": "assets/media/zhenli-mianju.jpg",
+      "url": "https://www.themoviedb.org/tv/290762"
+    },
+    {
+      "title": "青春猪头少年不会梦到兔女郎学姐",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "comment": "青春症候群的温柔物语，咲太嘴炮封神。",
+      "cover": "assets/media/aobuta-s1.jpg",
+      "url": "https://anilist.co/anime/101291"
+    },
+    {
+      "title": "青春猪头少年不会梦到怀梦美少女",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.3,
+      "comment": "和花妹妹线，泪腺警告。",
+      "cover": "assets/media/aobuta-movie.jpg",
+      "url": "https://anilist.co/anime/154967"
+    },
+    {
+      "title": "刀剑神域 Alicization篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "comment": "Underworld篇开端，世界观彻底放大。",
+      "cover": "assets/media/sao-alicization.jpg",
+      "url": "https://anilist.co/anime/100182"
+    },
+    {
+      "title": "刀剑神域 异界战争篇（上）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.4,
+      "comment": "爱丽丝篇后半，A神G座战斗燃爆。",
+      "cover": "assets/media/sao-wou-1.jpg",
+      "url": "https://anilist.co/anime/108759"
+    },
+    {
+      "title": "刀剑神域 异界战争篇（下）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "comment": "最终决战，桐人觉醒名场面。",
+      "cover": "assets/media/sao-wou-2.jpg",
+      "url": "https://anilist.co/anime/114308"
+    },
+    {
+      "title": "我的妹妹哪有这么可爱",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.8,
+      "comment": "俺妹经典，兄妹党的启蒙之作。",
+      "cover": "assets/media/oreimo.jpg",
+      "url": "https://anilist.co/anime/10108"
+    },
+    {
+      "title": "鬼灭之刃",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "comment": "飞碟社作画天花板，炭治郎的斩鬼之旅。",
+      "cover": "assets/media/kimetsu-1.jpg",
+      "url": "https://anilist.co/anime/101922"
+    },
+    {
+      "title": "鬼灭之刃 无限列车篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.8,
+      "comment": "炎柱炼狱杏寿郎的最后一课。",
+      "cover": "assets/media/kimetsu-mugen.png",
+      "url": "https://anilist.co/anime/112151"
+    },
+    {
+      "title": "鬼灭之刃 游郭篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.7,
+      "comment": "音柱宇髄天元，花花夜战天花板。",
+      "cover": "assets/media/kimetsu-yukaku.jpg",
+      "url": "https://anilist.co/anime/142329"
+    },
+    {
+      "title": "鬼灭之刃 刀匠村篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.5,
+      "comment": "霞柱时透无一郎，双子鬼的羁绊。",
+      "cover": "assets/media/kimetsu-katana.png",
+      "url": "https://anilist.co/anime/145139"
+    },
+    {
+      "title": "鬼灭之刃 柱训练篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.3,
+      "comment": "决战前的修行，无限城篇的序章。",
+      "cover": "assets/media/kimetsu-hashira.png",
+      "url": "https://anilist.co/anime/166240"
+    },
+    {
+      "title": "暴太郎战队咚兄弟",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.5,
+      "comment": "暴太郎银河学园，无厘头特摄神作。",
+      "cover": "assets/media/donbrothers.jpg",
+      "url": "https://www.themoviedb.org/tv/153918"
+    },
+    {
+      "title": "路人超能100（灵能百分百）",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "comment": "ONE老师的超能力成长物语，作画鬼才。",
+      "cover": "assets/media/mob-psycho-1.jpg",
+      "url": "https://anilist.co/anime/21507"
+    },
+    {
+      "title": "总之就是非常可爱",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.8,
+      "comment": "从第一天就结婚的甜到齁恋爱喜剧。",
+      "cover": "assets/media/tonikawa.jpg",
+      "url": "https://anilist.co/anime/116267"
+    },
+    {
+      "title": "奇幻世界舅舅",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "comment": "舅舅的异世界回忆录，吐槽与温情齐飞。",
+      "cover": "assets/media/isekai-ojisan.jpg",
+      "url": "https://anilist.co/anime/135806"
+    },
+    {
+      "title": "伍六七",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.8,
+      "comment": "小鸡岛理发师，国产原创动画之光。",
+      "cover": "assets/media/scissor-seven-1.jpg",
+      "url": "https://anilist.co/anime/107912"
+    },
+    {
+      "title": "伍六七之最强发型师",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.9,
+      "comment": "梅花十三登场，笑点与刀子齐飞。",
+      "cover": "assets/media/scissor-seven-2.jpg",
+      "url": "https://anilist.co/anime/113290"
+    },
+    {
+      "title": "伍六七之玄武国篇",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 9.0,
+      "comment": "玄武国冒险，国产动画电影级演出。",
+      "cover": "assets/media/scissor-seven-3.png",
+      "url": "https://anilist.co/anime/127595"
+    },
+    {
+      "title": "伍六七之暗影宿命",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.7,
+      "comment": "暗影刺客的宿命逐渐揭开。",
+      "cover": "assets/media/scissor-seven-4.png",
+      "url": "https://anilist.co/anime/159490"
+    },
+    {
+      "title": "伍六七之记忆碎片",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.6,
+      "comment": "记忆碎片拼回真相，期待下一季。",
+      "cover": "assets/media/scissor-seven-5.png",
+      "url": "https://anilist.co/anime/182445"
+    },
+    {
+      "title": "异度侵入 ID:INVADED",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.8,
+      "comment": "杀意世界的推理神作，结构精妙。",
+      "cover": "assets/media/id-invaded.png",
+      "url": "https://anilist.co/anime/110350"
+    },
+    {
+      "title": "请问您今天要来点兔子吗？",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "comment": "Rabbit House的软萌日常。",
+      "cover": "assets/media/gochiusa-1.jpg",
+      "url": "https://anilist.co/anime/20517"
+    },
+    {
+      "title": "请问您今天要来点兔子吗？？",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.1,
+      "comment": "还是那个可爱的咖啡屋，智乃长大了。",
+      "cover": "assets/media/gochiusa-2.jpg",
+      "url": "https://anilist.co/anime/21034"
+    },
+    {
+      "title": "请问您今天要来点兔子吗？～Song for You～",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "comment": "点兔剧场版OVA，心爱与智乃的羁绊。",
+      "cover": "assets/media/gochiusa-ova.jpg",
+      "url": "https://anilist.co/anime/104199"
+    },
+    {
+      "title": "魔女之旅",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "comment": "灰之魔女伊蕾娜的旅途见闻录。",
+      "cover": "assets/media/elaina.jpg",
+      "url": "https://anilist.co/anime/112609"
+    },
+    {
+      "title": "世界顶尖的暗杀者转生异世界贵族",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.3,
+      "comment": "暗杀者转生，卢各的任务是弑神。",
+      "cover": "assets/media/assassin-isekai.jpg",
+      "url": "https://anilist.co/anime/129898"
+    },
+    {
+      "title": "不时用俄语小声说真心话的邻桌艾莉同学",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.8,
+      "comment": "俄语真心话，艾莉同学又傲又甜。",
+      "cover": "assets/media/alya.jpg",
+      "url": "https://anilist.co/anime/162804"
+    },
+    {
+      "title": "堀与宫村 piece",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.4,
+      "comment": "原作全收录的补完篇，青春气息满溢。",
+      "cover": "assets/media/horimiya-piece.jpg",
+      "url": "https://anilist.co/anime/163132"
+    },
+    {
+      "title": "葬送的芙莉莲",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 9.2,
+      "comment": "勇者死后才开始了解人类，时间的抒情诗。",
+      "cover": "assets/media/frieren.jpg",
+      "url": "https://anilist.co/anime/154587"
+    },
+    {
+      "title": "路人女主的养成方法",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.9,
+      "comment": "同人游戏制作群像，加藤惠的降临。",
+      "cover": "assets/media/saekano.jpg",
+      "url": "https://anilist.co/anime/20657"
+    },
+    {
+      "title": "侦探已死",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 6.8,
+      "comment": "谢丝塔的余音，设定有趣展开一般。",
+      "cover": "assets/media/detective-dead.jpg",
+      "url": "https://anilist.co/anime/128712"
+    },
+    {
+      "title": "某科学的一方通行",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.4,
+      "comment": "学园都市最强者的另一面。",
+      "cover": "assets/media/accelerator.jpg",
+      "url": "https://anilist.co/anime/104463"
     }
   ]
 }
