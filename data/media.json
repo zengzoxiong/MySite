@@ -7,300 +7,275 @@
   ],
   "items": [
     {
-      "title": "进击的巨人",
-      "type": "番剧",
-      "status": "看过",
-      "rating": 9.1,
-      "date": "2023-11-05",
-      "comment": "自由与牢笼的终极追问，神作不解释。",
-      "url": "https://movie.douban.com/subject/25792624/",
-      "cover": "assets/media/attack-on-titan.jpg"
-    },
-    {
       "title": "Re:从零开始的异世界生活（全季）",
       "type": "番剧",
       "status": "看过",
-      "rating": 9.0,
+      "rating": 8.1,
       "date": "2024-09-20",
       "comment": "死亡回归的绝望与温柔，菜月昴的救赎之旅。",
       "cover": "assets/media/re-zero.jpg",
-      "url": "https://anilist.co/anime/21355"
+      "url": "https://anilist.co/anime/21355",
+      "release": "2016-04-04"
     },
     {
       "title": "无职转生（全季）",
       "type": "番剧",
       "status": "看过",
-      "rating": 9.1,
+      "rating": 8.4,
       "date": "2024-08-15",
       "comment": "异世界穿越的天花板，作画与叙事都是顶级。",
       "cover": "assets/media/mushoku-tensei.jpg",
-      "url": "https://anilist.co/anime/108465"
+      "url": "https://anilist.co/anime/108465",
+      "release": "2021-01-11"
     },
     {
       "title": "间谍过家家",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 8.5,
       "date": "2024-06-18",
       "comment": "阿尼亚太可爱了，一家三口的温馨喜剧。",
       "url": "https://movie.douban.com/subject/35465232/",
-      "cover": "assets/media/spy-x-family.jpg"
+      "cover": "assets/media/spy-x-family.jpg",
+      "release": "2022-04-09"
     },
     {
       "title": "间谍过家家 第二季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.5,
       "date": "2024-01-10",
       "comment": "克洛妮大作战+豪华客轮篇，约尔太太帅炸。",
       "cover": "assets/media/spy-x-family-s2.jpg",
-      "url": "https://anilist.co/anime/158927"
+      "url": "https://www.themoviedb.org/tv/120089/season/2",
+      "release": "2023-10-07"
     },
     {
       "title": "间谍过家家剧场版：Code: White",
       "type": "电影",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 7.2,
       "date": "2024-05-01",
       "comment": "一家人的甜点大作战，阿尼亚影史最佳表情包。",
       "cover": "assets/media/spy-x-family-code-white.jpg",
-      "url": "https://anilist.co/anime/158928"
+      "url": "https://anilist.co/anime/158928",
+      "release": "2023-12-22"
     },
     {
       "title": "星际穿越",
       "type": "电影",
       "status": "看过",
-      "rating": 9.8,
+      "rating": 8.5,
       "date": "2024-03-15",
       "comment": "爱是唯一可以穿越时间维度的东西。",
       "url": "https://movie.douban.com/subject/1889243/",
-      "cover": "assets/media/interstellar.jpg"
+      "cover": "assets/media/interstellar.jpg",
+      "release": "2014-10-26"
     },
     {
       "title": "流浪地球2",
       "type": "电影",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 7.3,
       "date": "2023-02-01",
       "comment": "中国科幻电影的里程碑，人类可以仰望星空。",
       "url": "https://movie.douban.com/subject/35267208/",
-      "cover": "assets/media/wandering-earth-2.jpg"
+      "cover": "assets/media/wandering-earth-2.jpg",
+      "release": "2023-01-20"
     },
     {
       "title": "让子弹飞",
       "type": "电影",
       "status": "看过",
-      "rating": 9.0,
+      "rating": 7.8,
       "date": "2023-10-01",
       "comment": "站着，还把钱挣了。姜文的表达艺术。",
       "cover": "assets/media/let-the-bullets-fly.jpg",
-      "url": "https://www.themoviedb.org/movie/51533"
-    },
-    {
-      "title": "长安十二时辰",
-      "type": "电视剧",
-      "status": "看过",
-      "rating": 8.4,
-      "date": "2024-01-20",
-      "comment": "大唐反恐二十四小时，服化道顶级。",
-      "url": "https://movie.douban.com/subject/26770780/",
-      "cover": "assets/media/longest-day-in-changan.jpg"
-    },
-    {
-      "title": "琅琊榜",
-      "type": "电视剧",
-      "status": "看过",
-      "rating": 9.4,
-      "date": "2023-10-02",
-      "comment": "麒麟才子梅长苏，权谋剧天花板。",
-      "url": "https://movie.douban.com/subject/25754848/",
-      "cover": "assets/media/nirvana-in-fire.jpg"
-    },
-    {
-      "title": "明星大侦探",
-      "type": "综艺",
-      "status": "在看",
-      "rating": 9.2,
-      "date": "2025-03-11",
-      "comment": "剧本杀综艺鼻祖，每季都有封神案件。",
-      "url": "https://movie.douban.com/subject/26680066/",
-      "cover": "assets/media/who-is-the-murderer.jpg"
-    },
-    {
-      "title": "乐队的夏天",
-      "type": "综艺",
-      "status": "想看",
-      "rating": 8.6,
-      "date": "",
-      "comment": "摇滚永不死，夏天就该听现场。",
-      "url": "https://movie.douban.com/subject/30414504/",
-      "cover": "assets/media/the-big-band.jpg"
+      "url": "https://www.themoviedb.org/movie/51533",
+      "release": "2010-12-20"
     },
     {
       "title": "极限挑战 第一季",
       "type": "综艺",
       "status": "看过",
-      "rating": 9.2,
+      "rating": 8.6,
       "date": "2024-06-15",
       "comment": "男人帮原点，无剧本的无限反转。",
       "cover": "assets/media/go-fighting-s1.jpg",
-      "url": "https://www.themoviedb.org/tv/89620/season/1"
+      "url": "https://www.themoviedb.org/tv/89620/season/1",
+      "release": "2015-06-14"
     },
     {
       "title": "极限挑战 第二季",
       "type": "综艺",
       "status": "看过",
-      "rating": 9.3,
+      "rating": 8.6,
       "date": "2024-07-02",
       "comment": "神综艺巅峰，金条之战至今是名场面。",
       "cover": "assets/media/go-fighting-s2.jpg",
-      "url": "https://www.themoviedb.org/tv/89620/season/2"
+      "url": "https://www.themoviedb.org/tv/89620/season/2",
+      "release": "2016"
     },
     {
       "title": "极限挑战 第三季",
       "type": "综艺",
       "status": "看过",
-      "rating": 9.1,
+      "rating": 8.6,
       "date": "2024-07-20",
       "comment": "三傻三精阵容稳固，反转依旧精彩。",
       "cover": "assets/media/go-fighting-s3.jpg",
-      "url": "https://www.themoviedb.org/tv/89620/season/3"
+      "url": "https://www.themoviedb.org/tv/89620/season/3",
+      "release": "2017-07-09"
     },
     {
       "title": "极限挑战 第四季",
       "type": "综艺",
       "status": "看过",
-      "rating": 8.8,
+      "rating": 8.6,
       "date": "2024-08-10",
       "comment": "开始有剧本痕迹，但智囊团留下不少好梗。",
       "cover": "assets/media/go-fighting-s4.jpg",
-      "url": "https://www.themoviedb.org/tv/89620/season/4"
+      "url": "https://www.themoviedb.org/tv/89620/season/4",
+      "release": "2018"
     },
     {
       "title": "魔法禁书目录",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 7.5,
       "comment": "学园都市的超能力与魔法交织的宏大开端。",
       "cover": "assets/media/magic-index-1.jpg",
-      "url": "https://anilist.co/anime/4654"
+      "url": "https://anilist.co/anime/4654",
+      "release": "2008-10-05"
     },
     {
       "title": "魔法禁书目录 II",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.8,
+      "rating": 7.5,
       "comment": "罗马正教篇，禁书目录世界观进一步展开。",
       "cover": "assets/media/magic-index-2.jpg",
-      "url": "https://anilist.co/anime/8937"
+      "url": "https://www.themoviedb.org/tv/30980/season/2",
+      "release": "2010-10-08"
     },
     {
       "title": "魔法禁书目录 III",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.3,
+      "rating": 7.5,
       "comment": "世界观收束的最终章，节奏快到飞起。",
       "cover": "assets/media/magic-index-3.jpg",
-      "url": "https://anilist.co/anime/100185"
+      "url": "https://www.themoviedb.org/tv/30980/season/3",
+      "release": "2018-10-05"
     },
     {
       "title": "干物妹！小埋R",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 8.2,
       "comment": "在外面是女神，在家里是干物妹。",
       "cover": "assets/media/umaru-r.jpg",
-      "url": "https://anilist.co/anime/98572"
+      "url": "https://www.themoviedb.org/tv/67126/season/2",
+      "release": "2017-10-09"
     },
     {
       "title": "埃罗芒阿老师",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 5.9,
       "comment": "不普通的兄妹日常，纱雾太戳人。",
       "cover": "assets/media/eromanga-sensei.jpg",
-      "url": "https://anilist.co/anime/21685"
+      "url": "https://anilist.co/anime/21685",
+      "release": "2017-04-09"
     },
     {
       "title": "白圣女与黑牧师",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.9,
+      "rating": 7.5,
       "comment": "圣女与牧师的温馨日常，狗粮管饱。",
       "cover": "assets/media/saint-cecilia.png",
-      "url": "https://anilist.co/anime/150972"
+      "url": "https://anilist.co/anime/150972",
+      "release": "2023-07-13"
     },
     {
       "title": "莉可丽丝",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.4,
+      "rating": 8.1,
       "comment": "泷奈与千束的咖啡店日常与枪战美学。",
       "cover": "assets/media/lycoris-recoil.jpg",
-      "url": "https://anilist.co/anime/143270"
+      "url": "https://anilist.co/anime/143270",
+      "release": "2022-07-02"
     },
     {
       "title": "真理面具（动态漫）",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
       "comment": "国产动态漫，悬疑烧脑设定。",
       "cover": "assets/media/zhenli-mianju.jpg",
-      "url": "https://www.themoviedb.org/tv/290762"
+      "url": "https://www.themoviedb.org/tv/290762",
+      "release": "2020-11-28"
     },
     {
       "title": "青春猪头少年不会梦到兔女郎学姐",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.5,
       "comment": "青春症候群的温柔物语，咲太嘴炮封神。",
       "cover": "assets/media/aobuta-s1.jpg",
-      "url": "https://anilist.co/anime/101291"
+      "url": "https://anilist.co/anime/101291",
+      "release": "2018-10-04"
     },
     {
       "title": "青春猪头少年不会梦到怀梦美少女",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 8.2,
       "comment": "和花妹妹线，泪腺警告。",
       "cover": "assets/media/aobuta-movie.jpg",
-      "url": "https://anilist.co/anime/154967"
+      "url": "https://anilist.co/anime/154967",
+      "release": "2019-06-15"
     },
     {
       "title": "刀剑神域 Alicization篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 8.1,
       "comment": "Underworld篇开端，世界观彻底放大。",
       "cover": "assets/media/sao-alicization.jpg",
-      "url": "https://anilist.co/anime/100182"
+      "url": "https://www.themoviedb.org/tv/45782/season/3",
+      "release": "2018-10-07"
     },
     {
       "title": "刀剑神域 异界战争篇（上）",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.4,
+      "rating": 8.1,
       "comment": "爱丽丝篇后半，A神G座战斗燃爆。",
       "cover": "assets/media/sao-wou-1.jpg",
-      "url": "https://anilist.co/anime/108759"
+      "url": "https://www.themoviedb.org/tv/45782/season/4",
+      "release": "2019-10-13"
     },
     {
       "title": "刀剑神域 异界战争篇（下）",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.1,
       "comment": "最终决战，桐人觉醒名场面。",
       "cover": "assets/media/sao-wou-2.jpg",
-      "url": "https://anilist.co/anime/114308"
+      "url": "https://www.themoviedb.org/tv/45782/season/4",
+      "release": "2020-07-12"
     },
     {
       "title": "我的妹妹哪有这么可爱",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.8,
+      "rating": 6.9,
       "comment": "俺妹经典，兄妹党的启蒙之作。",
       "cover": "assets/media/oreimo.jpg",
-      "url": "https://anilist.co/anime/10108"
+      "url": "https://anilist.co/anime/10108",
+      "release": "2010-10-03"
     },
     {
       "title": "鬼灭之刃",
@@ -309,115 +284,128 @@
       "rating": 8.6,
       "comment": "飞碟社作画天花板，炭治郎的斩鬼之旅。",
       "cover": "assets/media/kimetsu-1.jpg",
-      "url": "https://anilist.co/anime/101922"
+      "url": "https://anilist.co/anime/101922",
+      "release": "2019-04-06"
     },
     {
       "title": "鬼灭之刃 无限列车篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.8,
+      "rating": 8.2,
       "comment": "炎柱炼狱杏寿郎的最后一课。",
       "cover": "assets/media/kimetsu-mugen.png",
-      "url": "https://anilist.co/anime/112151"
+      "url": "https://anilist.co/anime/112151",
+      "release": "2020-10-16"
     },
     {
       "title": "鬼灭之刃 游郭篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.7,
+      "rating": 8.4,
       "comment": "音柱宇髄天元，花花夜战天花板。",
       "cover": "assets/media/kimetsu-yukaku.jpg",
-      "url": "https://anilist.co/anime/142329"
+      "url": "https://anilist.co/anime/142329",
+      "release": "2023-02-03"
     },
     {
       "title": "鬼灭之刃 刀匠村篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.5,
+      "rating": 7.2,
       "comment": "霞柱时透无一郎，双子鬼的羁绊。",
       "cover": "assets/media/kimetsu-katana.png",
-      "url": "https://anilist.co/anime/145139"
+      "url": "https://anilist.co/anime/145139",
+      "release": "2024-05-05"
     },
     {
       "title": "鬼灭之刃 柱训练篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 7.2,
       "comment": "决战前的修行，无限城篇的序章。",
       "cover": "assets/media/kimetsu-hashira.png",
-      "url": "https://anilist.co/anime/166240"
+      "url": "https://anilist.co/anime/166240",
+      "release": "2025-06-20"
     },
     {
       "title": "暴太郎战队咚兄弟",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.5,
+      "rating": 8.8,
       "comment": "暴太郎银河学园，无厘头特摄神作。",
       "cover": "assets/media/donbrothers.jpg",
-      "url": "https://www.themoviedb.org/tv/153918"
+      "url": "https://www.themoviedb.org/tv/153918",
+      "release": "2022-03-06"
     },
     {
       "title": "路人超能100（灵能百分百）",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.5,
       "comment": "ONE老师的超能力成长物语，作画鬼才。",
       "cover": "assets/media/mob-psycho-1.jpg",
-      "url": "https://anilist.co/anime/21507"
+      "url": "https://www.themoviedb.org/tv/67075",
+      "release": "2016-07-12"
     },
     {
       "title": "总之就是非常可爱",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.8,
+      "rating": 8.5,
       "comment": "从第一天就结婚的甜到齁恋爱喜剧。",
       "cover": "assets/media/tonikawa.jpg",
-      "url": "https://anilist.co/anime/116267"
+      "url": "https://anilist.co/anime/116267",
+      "release": "2020-10-03"
     },
     {
       "title": "奇幻世界舅舅",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 7.5,
       "comment": "舅舅的异世界回忆录，吐槽与温情齐飞。",
       "cover": "assets/media/isekai-ojisan.jpg",
-      "url": "https://anilist.co/anime/135806"
+      "url": "https://anilist.co/anime/135806",
+      "release": "2022-07-06"
     },
     {
       "title": "伍六七",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.8,
+      "rating": 8.6,
       "comment": "小鸡岛理发师，国产原创动画之光。",
       "cover": "assets/media/scissor-seven-1.jpg",
-      "url": "https://anilist.co/anime/107912"
+      "url": "https://anilist.co/anime/107912",
+      "release": "2018-04-25"
     },
     {
       "title": "伍六七之最强发型师",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.9,
+      "rating": 8.6,
       "comment": "梅花十三登场，笑点与刀子齐飞。",
       "cover": "assets/media/scissor-seven-2.jpg",
-      "url": "https://anilist.co/anime/113290"
+      "url": "https://www.themoviedb.org/tv/79141/season/2",
+      "release": "2019-10-23"
     },
     {
       "title": "伍六七之玄武国篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 9.0,
+      "rating": 8.6,
       "comment": "玄武国冒险，国产动画电影级演出。",
       "cover": "assets/media/scissor-seven-3.png",
-      "url": "https://anilist.co/anime/127595"
+      "url": "https://www.themoviedb.org/tv/79141/season/3",
+      "release": "2021-01-27"
     },
     {
       "title": "伍六七之暗影宿命",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.7,
+      "rating": 8.6,
       "comment": "暗影刺客的宿命逐渐揭开。",
       "cover": "assets/media/scissor-seven-4.png",
-      "url": "https://anilist.co/anime/159490"
+      "url": "https://www.themoviedb.org/tv/79141/season/4",
+      "release": "2023-01-18"
     },
     {
       "title": "伍六七之记忆碎片",
@@ -426,115 +414,168 @@
       "rating": 8.6,
       "comment": "记忆碎片拼回真相，期待下一季。",
       "cover": "assets/media/scissor-seven-5.png",
-      "url": "https://anilist.co/anime/182445"
+      "url": "https://www.themoviedb.org/tv/79141/season/5",
+      "release": "2024-10-02"
     },
     {
       "title": "异度侵入 ID:INVADED",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.8,
+      "rating": 7.3,
       "comment": "杀意世界的推理神作，结构精妙。",
       "cover": "assets/media/id-invaded.png",
-      "url": "https://anilist.co/anime/110350"
+      "url": "https://anilist.co/anime/110350",
+      "release": "2020-01-06"
     },
     {
       "title": "请问您今天要来点兔子吗？",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 7.3,
       "comment": "Rabbit House的软萌日常。",
       "cover": "assets/media/gochiusa-1.jpg",
-      "url": "https://anilist.co/anime/20517"
+      "url": "https://anilist.co/anime/20517",
+      "release": "2014-04-10"
     },
     {
       "title": "请问您今天要来点兔子吗？？",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 7.3,
       "comment": "还是那个可爱的咖啡屋，智乃长大了。",
       "cover": "assets/media/gochiusa-2.jpg",
-      "url": "https://anilist.co/anime/21034"
+      "url": "https://www.themoviedb.org/tv/60843/season/2",
+      "release": "2015-10-10"
     },
     {
       "title": "请问您今天要来点兔子吗？～Song for You～",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
       "comment": "点兔剧场版OVA，心爱与智乃的羁绊。",
       "cover": "assets/media/gochiusa-ova.jpg",
-      "url": "https://anilist.co/anime/104199"
+      "url": "https://anilist.co/anime/104199",
+      "release": "2019-09-26",
+      "rating": 7.3
     },
     {
       "title": "魔女之旅",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 7.6,
       "comment": "灰之魔女伊蕾娜的旅途见闻录。",
       "cover": "assets/media/elaina.jpg",
-      "url": "https://anilist.co/anime/112609"
+      "url": "https://anilist.co/anime/112609",
+      "release": "2020-10-02"
     },
     {
       "title": "世界顶尖的暗杀者转生异世界贵族",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 8.1,
       "comment": "暗杀者转生，卢各的任务是弑神。",
       "cover": "assets/media/assassin-isekai.jpg",
-      "url": "https://anilist.co/anime/129898"
+      "url": "https://anilist.co/anime/129898",
+      "release": "2021-10-06"
     },
     {
       "title": "不时用俄语小声说真心话的邻桌艾莉同学",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.8,
+      "rating": 8.0,
       "comment": "俄语真心话，艾莉同学又傲又甜。",
       "cover": "assets/media/alya.jpg",
-      "url": "https://anilist.co/anime/162804"
+      "url": "https://anilist.co/anime/162804",
+      "release": "2024-07-03"
     },
     {
       "title": "堀与宫村 piece",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.4,
+      "rating": 7.7,
       "comment": "原作全收录的补完篇，青春气息满溢。",
       "cover": "assets/media/horimiya-piece.jpg",
-      "url": "https://anilist.co/anime/163132"
+      "url": "https://anilist.co/anime/163132",
+      "release": "2023-07-01"
     },
     {
       "title": "葬送的芙莉莲",
       "type": "番剧",
       "status": "看过",
-      "rating": 9.2,
+      "rating": 8.8,
       "comment": "勇者死后才开始了解人类，时间的抒情诗。",
       "cover": "assets/media/frieren.jpg",
-      "url": "https://anilist.co/anime/154587"
+      "url": "https://anilist.co/anime/154587",
+      "release": "2023-09-29"
     },
     {
       "title": "路人女主的养成方法",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.9,
+      "rating": 6.8,
       "comment": "同人游戏制作群像，加藤惠的降临。",
       "cover": "assets/media/saekano.jpg",
-      "url": "https://anilist.co/anime/20657"
+      "url": "https://anilist.co/anime/20657",
+      "release": "2015-01-16"
     },
     {
       "title": "侦探已死",
       "type": "番剧",
       "status": "看过",
-      "rating": 6.8,
+      "rating": 5.6,
       "comment": "谢丝塔的余音，设定有趣展开一般。",
       "cover": "assets/media/detective-dead.jpg",
-      "url": "https://anilist.co/anime/128712"
+      "url": "https://anilist.co/anime/128712",
+      "release": "2021-07-04"
     },
     {
       "title": "某科学的一方通行",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.4,
+      "rating": 7.5,
       "comment": "学园都市最强者的另一面。",
       "cover": "assets/media/accelerator.jpg",
-      "url": "https://anilist.co/anime/104463"
+      "url": "https://anilist.co/anime/104463",
+      "release": "2019-07-12"
+    },
+    {
+      "title": "战狼",
+      "type": "电影",
+      "status": "看过",
+      "comment": "犯我中华者，虽远必诛。",
+      "url": "https://www.themoviedb.org/movie/335462",
+      "rating": 6.2,
+      "release": "2015-04-02",
+      "cover": "assets/media/wolf-warrior.jpg"
+    },
+    {
+      "title": "战狼2",
+      "type": "电影",
+      "status": "看过",
+      "comment": "铁血硬汉撤侨，水下长镜头开场封神。",
+      "url": "https://www.themoviedb.org/movie/452557",
+      "rating": 6.5,
+      "release": "2017-07-27",
+      "cover": "assets/media/wolf-warrior-2.jpg"
+    },
+    {
+      "title": "流浪地球",
+      "type": "电影",
+      "status": "看过",
+      "comment": "带着地球去流浪，中国科幻的启程之作。",
+      "url": "https://www.themoviedb.org/movie/535167",
+      "rating": 6.6,
+      "release": "2019-02-05",
+      "cover": "assets/media/wandering-earth-1.jpg"
+    },
+    {
+      "title": "小林家的龙女仆大电影",
+      "type": "电影",
+      "status": "看过",
+      "comment": "京阿尼龙女佣的剧场版，孤独的龙想要被投喂。",
+      "url": "https://www.themoviedb.org/movie/1359607",
+      "rating": 8.8,
+      "release": "2025-06-14",
+      "cover": "assets/media/dragon-maid-movie.jpg"
     }
   ]
 }

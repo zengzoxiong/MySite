@@ -1174,9 +1174,48 @@ body.sidebar-collapsed .main-content {
 /* ===== 影视记录 ===== */
 .media-filters {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 10px;
+}
+
+.media-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.media-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.media-sort select {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.media-sort select:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.media-sort select:focus {
+    border-color: var(--accent-color);
 }
 
 .media-chip {
@@ -1349,6 +1388,24 @@ body.sidebar-collapsed .main-content {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: color 0.2s;
+}
+
+.media-title .t {
+    display: inline-block;
+}
+
+/* 悬停时横向滚动展示完整标题（仅溢出的标题生效） */
+.media-title.overflowing:hover {
+    text-overflow: clip;
+}
+
+.media-title.overflowing:hover .t {
+    animation: marquee var(--marquee-dur, 5s) ease-in-out infinite alternate;
+}
+
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-1 * var(--shift, 0px))); }
 }
 
 .media-card:hover .media-title {

@@ -4,7 +4,8 @@ let allTools = [];
 let mediaData = { types: [], items: [] };
 let currentCategory = '';
 let currentToolCategory = '';
-let currentMediaType = '';
+let currentMediaType = '番剧';
+let currentSort = 'rating'; // 'rating' | 'title' | 'release'
 let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media'
 let viewBeforeSearch = null; // 从首页进入搜索态时记住来源
 
@@ -353,10 +354,10 @@ function goHome() {
     }
 }
 
-// 渲染侧栏影视区（类型导航）
+// 渲染侧栏影视区（类型导航，无"全部"）
 function renderSidebarMedia() {
     const types = mediaData.types || [];
-    sidebarMedia.innerHTML = ['全部', ...types].map(t => `
+    sidebarMedia.innerHTML = types.map(t => `
         <div class="sidebar-item" data-media-type="${t}">
             <span class="item-text">${t}</span>
         </div>
@@ -551,19 +552,34 @@ function renderMedia(animate = false) {
     mediaGrid.style.display = 'block';
 
     const searchTerm = searchInput.value.toLowerCase().trim();
-    let items = mediaData.items || [];
-    if (currentMediaType) items = items.filter(i => i.type === currentMediaType);
+    let items = (mediaData.items || []).filter(i => i.type === currentMediaType);
     if (searchTerm) items = items.filter(i =>
         i.title.toLowerCase().includes(searchTerm) ||
         (i.comment || '').toLowerCase().includes(searchTerm)
     );
 
-    const chips = ['全部', ...(mediaData.types || [])].map(t => {
-        const active = (t === '全部' && !currentMediaType) || t === currentMediaType;
-        return `<button class="media-chip${active ? ' active' : ''}" data-media-chip="${t}">${t}</button>`;
-    }).join('');
+    // 排序：评分降序 / 名称 A-Z / 上映时间（新→旧）
+    const sorted = [...items];
+    if (currentSort === 'title') {
+        sorted.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'zh-Hans-CN'));
+    } else if (currentSort === 'release') {
+        sorted.sort((a, b) => (b.release || '').localeCompare(a.release || ''));
+    } else {
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
 
-    const cards = items.map((item, i) => {
+    const chips = (mediaData.types || []).map(t =>
+        `<button class="media-chip${t === currentMediaType ? ' active' : ''}" data-media-chip="${t}">${t}</button>`
+    ).join('');
+    const sortOptions = [
+        ['rating', '按评分'],
+        ['title', '按名称 A-Z'],
+        ['release', '按上映时间']
+    ].map(([v, label]) =>
+        `<option value="${v}"${v === currentSort ? ' selected' : ''}>${label}</option>`
+    ).join('');
+
+    const cards = sorted.map((item, i) => {
         const title = escapeHtml(item.title || '');
         const statusClass = item.status === '在看' ? ' watching' : (item.status === '想看' ? ' wish' : '');
         const gradient = TYPE_GRADIENTS[item.type] || TYPE_GRADIENTS['默认'];
@@ -576,8 +592,8 @@ function renderMedia(animate = false) {
             ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
             ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}`;
         const infoInner = `
-            <div class="media-title">${title}</div>
-            <div class="media-meta">${item.type || ''}${item.date ? ' · ' + item.date : ''}</div>`;
+            <div class="media-title"><span class="t">${title}</span></div>
+            <div class="media-meta">${item.type || ''}${item.release ? ' · ' + item.release : ''}</div>`;
         const tag = item.url ? 'a' : 'div';
         const urlAttrs = item.url ? ` href="${item.url}" target="_blank" rel="noopener noreferrer"` : '';
         return `<${tag} class="media-card${animClass}"${urlAttrs}${animDelay}>
@@ -587,10 +603,26 @@ function renderMedia(animate = false) {
     }).join('');
 
     mediaGrid.innerHTML = `
-        <div class="media-filters">${chips}</div>
-        <div class="media-count">共 ${items.length} 部</div>
+        <div class="media-filters">
+            <div class="media-chips">${chips}</div>
+            <label class="media-sort">排序
+                <select id="mediaSort">${sortOptions}</select>
+            </label>
+        </div>
+        <div class="media-count">共 ${sorted.length} 部</div>
         <div class="media-cards">${cards || '<p class="empty-state">没有找到匹配的作品</p>'}</div>
     `;
+
+    // 检测溢出的标题，悬停时横向滚动展示全名
+    mediaGrid.querySelectorAll('.media-title').forEach(el => {
+        const span = el.querySelector('.t');
+        if (span && span.scrollWidth > el.clientWidth + 1) {
+            const shift = span.scrollWidth - el.clientWidth;
+            el.classList.add('overflowing');
+            span.style.setProperty('--shift', shift + 'px');
+            span.style.setProperty('--marquee-dur', (3.5 + shift / 22).toFixed(1) + 's');
+        }
+    });
 }
 
 // 主题
@@ -718,7 +750,7 @@ function initEventListeners() {
         sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
-        currentMediaType = item.dataset.mediaType === '全部' ? '' : item.dataset.mediaType;
+        currentMediaType = item.dataset.mediaType;
         currentView = 'media';
         viewBeforeSearch = null;
         renderMedia(true);
@@ -727,12 +759,19 @@ function initEventListeners() {
         }
     });
 
-    // 影视筛选芯片点击（内容区）
+    // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
-        currentMediaType = chip.dataset.mediaChip === '全部' ? '' : chip.dataset.mediaChip;
+        currentMediaType = chip.dataset.mediaChip;
         renderMedia(false);
+    });
+
+    mediaGrid.addEventListener('change', (e) => {
+        if (e.target.id === 'mediaSort') {
+            currentSort = e.target.value;
+            renderMedia(false);
+        }
     });
 
     // 键盘快捷键
