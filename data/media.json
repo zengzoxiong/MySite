@@ -141,6 +141,56 @@
       "release": "2018"
     },
     {
+      "title": "奔跑吧兄弟 第一季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 5.7,
+      "release": "2014",
+      "comment": "跑男元年，邓超领衔的撕名牌狂欢。",
+      "url": "https://www.themoviedb.org/tv/98031/season/1",
+      "cover": "assets/media/running-man-s1.jpg"
+    },
+    {
+      "title": "奔跑吧兄弟 第二季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 5.7,
+      "release": "2015",
+      "comment": "阵容磨合成熟，名场面井喷的一季。",
+      "url": "https://www.themoviedb.org/tv/98031/season/2",
+      "cover": "assets/media/running-man-s2.jpg"
+    },
+    {
+      "title": "奔跑吧兄弟 第三季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 5.7,
+      "release": "2015",
+      "comment": "黄金阵容的收官季，综艺感拉满。",
+      "url": "https://www.themoviedb.org/tv/98031/season/3",
+      "cover": "assets/media/running-man-s3.jpg"
+    },
+    {
+      "title": "爸爸去哪儿 第一季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 7.3,
+      "release": "2013",
+      "comment": "萌娃初代目，Kimi、Angela、石头的村居日常。",
+      "url": "https://www.themoviedb.org/tv/67559/season/1",
+      "cover": "assets/media/dad-s1.jpg"
+    },
+    {
+      "title": "爸爸去哪儿 第二季",
+      "type": "综艺",
+      "status": "看过",
+      "rating": 7.3,
+      "release": "2014",
+      "comment": "姐姐Grace与哥哥Joe加盟，萌力升级。",
+      "url": "https://www.themoviedb.org/tv/67559/season/2",
+      "cover": "assets/media/dad-s2.jpg"
+    },
+    {
       "title": "魔法禁书目录",
       "type": "番剧",
       "status": "看过",
@@ -718,6 +768,26 @@
       "rating": 10.0,
       "url": "https://www.themoviedb.org/movie/1731413",
       "release": "2026-07-12"
+    },
+    {
+      "title": "奔跑吧兄弟大电影",
+      "type": "电影",
+      "status": "看过",
+      "comment": "跑男团的大银幕首秀，合家欢冒险喜剧。",
+      "url": "https://www.themoviedb.org/movie/321815",
+      "rating": 4.1,
+      "release": "2015-01-29",
+      "cover": "assets/media/running-man-movie.jpg"
+    },
+    {
+      "title": "爸爸去哪儿大电影",
+      "type": "电影",
+      "status": "看过",
+      "comment": "萌娃们的长隆野生动物园大冒险。",
+      "url": "https://www.themoviedb.org/movie/423626",
+      "rating": 3.8,
+      "release": "2014-01-31",
+      "cover": "assets/media/dad-movie.jpg"
     },
     {
       "title": "假面骑士极狐",
