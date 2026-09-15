@@ -340,52 +340,170 @@ body {
     padding: 6px;
 }
 
-/* 侧栏底部 */
-.sidebar-footer {
-    padding: 12px;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.theme-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    width: 100%;
+/* 齿轮设置按钮 */
+.settings-btn {
+    width: 22px;
+    height: 22px;
     border: none;
     background: none;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
+    color: var(--text-tertiary);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 6px;
-    transition: background-color 0.15s, color 0.15s;
-    white-space: nowrap;
+    position: relative;
     overflow: hidden;
+    transition: background-color 0.15s, color 0.15s;
 }
 
-.theme-toggle:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-.theme-icon {
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    display: inline-block;
+.settings-btn svg {
+    fill: currentColor;
     transition: transform 0.3s ease;
 }
 
-.theme-toggle:hover .theme-icon {
-    transform: rotate(-20deg) scale(1.15);
+.settings-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent-color);
 }
 
-.theme-icon.spin-once {
-    animation: spin360 0.45s ease;
+.settings-btn:hover svg {
+    transform: rotate(60deg);
 }
 
-@keyframes spin360 {
-    to { transform: rotate(360deg); }
+.settings-btn:active svg {
+    transform: rotate(60deg) scale(0.85);
+}
+
+.settings-btn.active {
+    color: var(--accent-color);
+    background-color: var(--hover-bg);
+}
+
+.settings-btn.active svg {
+    transform: rotate(180deg);
+}
+
+/* ===== 设置面板 ===== */
+.settings-panel {
+    position: absolute;
+    top: 46px;
+    right: 10px;
+    width: 230px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card-hover);
+    padding: 12px 14px;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.settings-panel.open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+.settings-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+}
+
+.settings-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.settings-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 19px;
+    flex-shrink: 0;
+}
+
+.settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-switch .slider {
+    position: absolute;
+    inset: 0;
+    background-color: var(--border-color);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.settings-switch .slider::before {
+    content: '';
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    left: 3px;
+    top: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.settings-switch input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+.settings-switch input:checked + .slider::before {
+    transform: translateX(15px);
+}
+
+.settings-action {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.settings-action:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.sidebar.collapsed .settings-panel {
+    left: calc(var(--sidebar-collapsed-width) + 8px);
+    right: auto;
+}
+
+/* 动画关闭：全局禁用过渡与关键帧动画 */
+body.no-anim *,
+body.no-anim *::before,
+body.no-anim *::after {
+    transition: none !important;
+    animation: none !important;
 }
 
 /* 点击涟漪 */
@@ -404,15 +522,6 @@ body {
         transform: scale(1);
         opacity: 0;
     }
-}
-
-.sidebar.collapsed .theme-label {
-    display: none;
-}
-
-.sidebar.collapsed .theme-toggle {
-    justify-content: center;
-    padding: 6px;
 }
 
 /* ===== 主内容区 ===== */
@@ -1096,8 +1205,7 @@ body.sidebar-collapsed .main-content {
 
     .sidebar.collapsed .sidebar-search,
     .sidebar.collapsed .sidebar-item .item-text,
-    .sidebar.collapsed .sidebar-section-title,
-    .sidebar.collapsed .theme-label {
+    .sidebar.collapsed .sidebar-section-title {
         visibility: visible;
         display: flex;
         height: auto;
@@ -1112,9 +1220,9 @@ body.sidebar-collapsed .main-content {
         padding: 6px 8px;
     }
 
-    .sidebar.collapsed .theme-toggle {
-        justify-content: flex-start;
-        padding: 6px 8px;
+    .settings-panel {
+        right: 8px;
+        top: 52px;
     }
 
     .sidebar.collapsed .sidebar-collapse-btn {
@@ -1141,6 +1249,83 @@ body.sidebar-collapsed .main-content {
 
     .hero-clock {
         font-size: 3.2rem;
+    }
+
+    .hero-weather {
+        margin-top: 24px;
+    }
+
+    .weather-temp {
+        font-size: 1.5rem;
+    }
+
+    .weather-icon {
+        font-size: 1.8rem;
+    }
+
+    .weather-desc {
+        font-size: 0.92rem;
+    }
+
+    .dashboard {
+        min-height: 0;
+        padding-bottom: 8px;
+    }
+
+    .media-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .media-chips {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .media-sort {
+        justify-content: flex-end;
+    }
+}
+
+/* ===== 触屏设备（无悬停）适配 ===== */
+@media (hover: none) {
+    /* 待办删除按钮常显 */
+    .todo-del {
+        opacity: 1;
+    }
+
+    /* 影视短评按压海报显示 */
+    .media-card:active .media-overlay {
+        opacity: 1;
+    }
+
+    /* 触屏下去掉标题滚动（悬停不可用），改为换行完整展示 */
+    .media-title.overflowing {
+        white-space: normal;
+        text-overflow: clip;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.4;
+    }
+
+    .media-title.overflowing .t {
+        animation: none !important;
+        display: inline;
+    }
+
+    /* 首页角落组件在触屏上保持可读字号 */
+    .github-corner {
+        padding: 10px 8px;
+    }
+
+    .gh-name {
+        font-size: 0.85rem;
+    }
+
+    .github-stats {
+        display: none;
     }
 }
 

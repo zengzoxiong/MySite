@@ -2,8 +2,10 @@
   "types": [
     "番剧",
     "电影",
+    "特摄",
     "综艺",
-    "电视剧"
+    "电视剧",
+    "纪录片"
   ],
   "items": [
     {
@@ -338,14 +340,14 @@
       "release": "2022-03-06"
     },
     {
-      "title": "路人超能100（灵能百分百）",
+      "title": "灵能百分百 第一季",
       "type": "番剧",
       "status": "看过",
       "rating": 8.5,
       "comment": "ONE老师的超能力成长物语，作画鬼才。",
       "cover": "assets/media/mob-psycho-1.jpg",
       "url": "https://www.themoviedb.org/tv/67075",
-      "release": "2016-07-12"
+      "release": "2016-07-11"
     },
     {
       "title": "总之就是非常可爱",
@@ -538,6 +540,116 @@
       "release": "2019-07-12"
     },
     {
+      "title": "玉子市场",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.3,
+      "release": "2013-01-10",
+      "comment": "饼店少女与商店街的四季，京阿尼日常巅峰。",
+      "cover": "assets/media/tamako-market.jpg",
+      "url": "https://www.themoviedb.org/tv/48561"
+    },
+    {
+      "title": "徒然喜欢你",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.9,
+      "release": "2017-07-04",
+      "comment": "多线青春恋爱碎片，狗粮又甜又戳。",
+      "cover": "assets/media/tsuredure-children.jpg",
+      "url": "https://www.themoviedb.org/tv/72509"
+    },
+    {
+      "title": "薰香花朵凛然绽放",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.7,
+      "release": "2024-04-04",
+      "comment": "花野井王子的直球攻势，治愈系纯爱。",
+      "cover": "assets/media/hananoi-kun.jpg",
+      "url": "https://www.themoviedb.org/tv/271607"
+    },
+    {
+      "title": "恋爱要在世界征服后",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.4,
+      "release": "2022-04-08",
+      "comment": "邪恶组织战斗员与正义魔法少女的秘密恋爱。",
+      "cover": "assets/media/love-after-domination.jpg",
+      "url": "https://www.themoviedb.org/tv/122287"
+    },
+    {
+      "title": "凸变英雄BABA",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 6.1,
+      "release": "2016-10-05",
+      "comment": "废柴老爸被吸进马桶变身英雄的荒诞喜剧。",
+      "cover": "assets/media/to-be-hero-baba.jpg",
+      "url": "https://www.themoviedb.org/tv/68135"
+    },
+    {
+      "title": "凸变英雄LEAF",
+      "type": "番剧",
+      "status": "看过",
+      "comment": "无声世界的少女物语，实验性叙事封神。",
+      "rating": 6.1,
+      "release": "2018",
+      "url": "https://www.themoviedb.org/tv/68135/season/2",
+      "cover": "assets/media/to-be-hero-leaf.jpg"
+    },
+    {
+      "title": "凸变英雄X",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.7,
+      "release": "2025-04-06",
+      "comment": "人气值即力量的英雄社会，三雄争霸。",
+      "cover": "assets/media/to-be-hero-x.jpg",
+      "url": "https://www.themoviedb.org/tv/272059"
+    },
+    {
+      "title": "虚构推理 第一季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.8,
+      "release": "2020-01-12",
+      "comment": "小小的怪异，用谎言编织的真相。",
+      "cover": "assets/media/kyokousuiri-s1.jpg",
+      "url": "https://www.themoviedb.org/tv/93653"
+    },
+    {
+      "title": "虚构推理 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2023-01-09",
+      "comment": "琴子与六月的新案子，舌切雀的怨念。",
+      "cover": "assets/media/kyokousuiri-s2.png",
+      "rating": 7.8,
+      "url": "https://www.themoviedb.org/tv/93653/season/2"
+    },
+    {
+      "title": "灵能百分百 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.5,
+      "release": "2019-01-07",
+      "comment": "爪篇全面开战，???%爆发名场面。",
+      "cover": "assets/media/mob-s2.jpg",
+      "url": "https://www.themoviedb.org/tv/67075/season/2"
+    },
+    {
+      "title": "灵能百分百 第三季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.5,
+      "release": "2022-10-06",
+      "comment": "毕业与告别，最温柔的最终季。",
+      "cover": "assets/media/mob-s3.jpg",
+      "url": "https://www.themoviedb.org/tv/67075/season/3"
+    },
+    {
       "title": "战狼",
       "type": "电影",
       "status": "看过",
@@ -576,6 +688,85 @@
       "rating": 8.8,
       "release": "2025-06-14",
       "cover": "assets/media/dragon-maid-movie.jpg"
+    },
+    {
+      "title": "玉子爱情故事",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.2,
+      "release": "2014-04-26",
+      "comment": "饼藏终于说出口的告白，青春的定音锤。",
+      "cover": "assets/media/tamako-love-story.jpg",
+      "url": "https://www.themoviedb.org/movie/257475"
+    },
+    {
+      "title": "言叶之庭",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.6,
+      "release": "2013-04-28",
+      "comment": "雨天庭园里交错的孤独，新海诚美学。",
+      "cover": "assets/media/garden-of-words.jpg",
+      "url": "https://www.themoviedb.org/movie/198375"
+    },
+    {
+      "title": "灵能百分百剧场版",
+      "type": "电影",
+      "status": "看过",
+      "comment": "重逢的都市传说，再会的奇迹。",
+      "cover": "assets/media/mob-movie.jpg",
+      "rating": 10.0,
+      "url": "https://www.themoviedb.org/movie/1731413",
+      "release": "2026-07-12"
+    },
+    {
+      "title": "假面骑士极狐",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 9.5,
+      "release": "2022-09-04",
+      "comment": "欲望大奖赛的生存游戏，狐狸马甲藏不住的野心。",
+      "cover": "assets/media/kamen-rider-geats.jpg",
+      "url": "https://www.themoviedb.org/tv/261939"
+    },
+    {
+      "title": "假面骑士Zeztz",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 8.2,
+      "release": "2025-09-07",
+      "comment": "潜入梦境的令和新骑士，紫色黎明。",
+      "cover": "assets/media/kamen-rider-zeztz.jpg",
+      "url": "https://www.themoviedb.org/tv/295434"
+    },
+    {
+      "title": "超辉夜姬",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2026-01-21",
+      "cover": "assets/media/kaguya-hime.jpg",
+      "url": "https://www.themoviedb.org/movie/1575337"
+    },
+    {
+      "title": "兽电战队强龙者",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 6.9,
+      "release": "2013-02-17",
+      "comment": "恐龙电池咔嚓装填，Brave in！",
+      "cover": "assets/media/kyoryuger.jpg",
+      "url": "https://www.themoviedb.org/tv/95503"
+    },
+    {
+      "title": "海贼战队豪快者",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 7.5,
+      "release": "2011-02-13",
+      "comment": "全豪快！35大战队的传说钥匙。",
+      "cover": "assets/media/gokaiger.jpg",
+      "url": "https://www.themoviedb.org/tv/95707"
     }
   ]
 }

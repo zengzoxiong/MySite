@@ -26,7 +26,7 @@ const sidebarCategories = document.getElementById('sidebarCategories');
 const linksGrid = document.getElementById('linksGrid');
 const emptyState = document.getElementById('emptyState');
 const themeToggle = document.getElementById('themeToggle');
-const themeIcon = themeToggle.querySelector('.theme-icon');
+const themeIcon = (themeToggle && themeToggle.querySelector('.theme-icon')) || null;
 const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -35,11 +35,16 @@ const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadLinks();
     initTheme();
+    initAnimSetting();
+    initFocusFirstSetting();
+    initSettingsPanel();
     initSidebar();
     initEventListeners();
     initDashboard();
@@ -625,33 +630,87 @@ function renderMedia(animate = false) {
     });
 }
 
-// 主题
+// 主题与设置
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
-    } else if (prefersDark) {
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        updateThemeIcon('dark');
+    }
+    const settingTheme = document.getElementById('settingTheme');
+    if (settingTheme) {
+        settingTheme.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+        settingTheme.addEventListener('change', () => {
+            const next = settingTheme.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
     }
 }
 
-function updateThemeIcon(theme) {
-    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+// 动画开关：关闭时为 body 加 no-anim，全局禁用过渡与关键帧
+function initAnimSetting() {
+    const settingAnim = document.getElementById('settingAnim');
+    if (!settingAnim) return;
+    const saved = localStorage.getItem('animEnabled');
+    const enabled = saved !== 'off';
+    document.body.classList.toggle('no-anim', !enabled);
+    settingAnim.checked = enabled;
+    settingAnim.addEventListener('change', () => {
+        document.body.classList.toggle('no-anim', !settingAnim.checked);
+        localStorage.setItem('animEnabled', settingAnim.checked ? 'on' : 'off');
+    });
 }
 
-function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    updateThemeIcon(next);
-    themeIcon.classList.remove('spin-once');
-    void themeIcon.offsetWidth; // 重置旋转动画
-    themeIcon.classList.add('spin-once');
+// 搜索回车聚焦首条结果
+function initFocusFirstSetting() {
+    const settingFocusFirst = document.getElementById('settingFocusFirst');
+    if (!settingFocusFirst) return;
+    settingFocusFirst.checked = localStorage.getItem('focusFirst') !== 'off';
+    settingFocusFirst.addEventListener('change', () => {
+        localStorage.setItem('focusFirst', settingFocusFirst.checked ? 'on' : 'off');
+    });
+}
+
+function focusFirstResult() {
+    if (localStorage.getItem('focusFirst') === 'off') return;
+    const first = linksGrid.querySelector('.link-card') || mediaGrid.querySelector('.media-card');
+    if (first) first.focus();
+}
+
+function initSettingsPanel() {
+    if (!settingsBtn || !settingsPanel) return;
+    settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsPanel.classList.toggle('open');
+        settingsBtn.classList.toggle('active');
+    });
+    // 点击面板外关闭
+    document.addEventListener('click', (e) => {
+        if (settingsPanel.classList.contains('open') &&
+            !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+            settingsPanel.classList.remove('open');
+            settingsBtn.classList.remove('active');
+        }
+    });
+    // ESC 在搜索框未聚焦时也关闭面板
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && settingsPanel.classList.contains('open')) {
+            settingsPanel.classList.remove('open');
+            settingsBtn.classList.remove('active');
+        }
+    });
+    const clearBtn = document.getElementById('settingClearCache');
+    clearBtn.addEventListener('click', () => {
+        ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
+            .forEach(k => localStorage.removeItem(k));
+        document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
+        document.getElementById('todoList').innerHTML = '';
+        updateTodoCount();
+        clearBtn.textContent = '已清除 ✓';
+        setTimeout(() => { clearBtn.textContent = '清除本地数据（待办/折叠状态）'; }, 1600);
+    });
 }
 
 // 侧栏
@@ -707,8 +766,12 @@ function initEventListeners() {
         }
     });
 
-    // 主题切换
-    themeToggle.addEventListener('click', toggleTheme);
+    // 搜索框回车聚焦首条结果（可设置关闭）
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            focusFirstResult();
+        }
+    });
 
     // 侧栏收缩
     sidebarCollapseBtn.addEventListener('click', toggleSidebar);
@@ -739,7 +802,7 @@ function initEventListeners() {
 
     // 侧栏内所有可点元素统一加涟漪反馈
     sidebar.addEventListener('click', (e) => {
-        const host = e.target.closest('.sidebar-item, .sidebar-section-title, .theme-toggle, .home-btn, .sidebar-collapse-btn');
+        const host = e.target.closest('.sidebar-item, .sidebar-section-title, .home-btn, .settings-btn, .sidebar-collapse-btn');
         if (host) spawnRipple(host, e);
     });
 
