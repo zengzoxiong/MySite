@@ -700,6 +700,104 @@
       "url": "https://www.themoviedb.org/tv/67075/season/3"
     },
     {
+      "title": "魔法禁书目录剧场版",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.0,
+      "release": "2013-02-23",
+      "url": "https://www.themoviedb.org/movie/219250",
+      "cover": "assets/media/index-movie.jpg"
+    },
+    {
+      "title": "罗小黑战记",
+      "type": "番剧",
+      "status": "看过",
+      "comment": "国二维力的温柔巅峰，一人一猫。",
+      "rating": 8.4,
+      "release": "2019-08-27",
+      "url": "https://www.themoviedb.org/movie/620249",
+      "cover": "assets/media/luo-xiaohei.jpg"
+    },
+    {
+      "title": "天使降临到我身边",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "release": "2019-01-08",
+      "url": "https://www.themoviedb.org/tv/84666",
+      "cover": "assets/media/wataten.jpg"
+    },
+    {
+      "title": "孤独摇滚！",
+      "type": "番剧",
+      "status": "看过",
+      "comment": "社恐吉他手的爆燃乐队物语。",
+      "rating": 8.4,
+      "release": "2022-10-09",
+      "url": "https://www.themoviedb.org/tv/119100",
+      "cover": "assets/media/bocchi.jpg"
+    },
+    {
+      "title": "小林家的龙女仆",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.3,
+      "release": "2017-01-12",
+      "url": "https://www.themoviedb.org/tv/69291",
+      "cover": "assets/media/dragon-maid-s1.jpg"
+    },
+    {
+      "title": "总之就是非常可爱 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/tv/100049/season/2",
+      "release": "2023-04-08",
+      "cover": "assets/media/tonikawa-s2.png",
+      "rating": 8.5
+    },
+    {
+      "title": "堀与宫村",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.5,
+      "release": "2021-01-10",
+      "url": "https://www.themoviedb.org/tv/110070",
+      "cover": "assets/media/horimiya-s1.jpg"
+    },
+    {
+      "title": "路人超能100 REIGEN ～不为人知的奇迹发动者～",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2018-03-18",
+      "cover": "assets/media/mob-reigen.png"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 Memory Snow",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2018-10-06",
+      "cover": "assets/media/rezero-memory-snow.jpg",
+      "url": "https://anilist.co/anime/100049"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 冰结之绊",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.4,
+      "release": "2019-11-08",
+      "cover": "assets/media/rezero-hyoketsu.jpg",
+      "url": "https://www.themoviedb.org/movie/566451"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 新编集版",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2020",
+      "url": "https://www.themoviedb.org/tv/65942"
+    },
+    {
       "title": "战狼",
       "type": "电影",
       "status": "看过",
@@ -790,6 +888,229 @@
       "cover": "assets/media/dad-movie.jpg"
     },
     {
+      "title": "哪吒之魔童闹海",
+      "type": "电影",
+      "status": "看过",
+      "comment": "国漫影史票房新王，我命由我不由天。",
+      "rating": 8.2,
+      "release": "2025-01-29",
+      "url": "https://www.themoviedb.org/movie/980477",
+      "cover": "assets/media/nezha-2.jpg"
+    },
+    {
+      "title": "飞驰人生3",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.0,
+      "release": "2026-02-17",
+      "url": "https://www.themoviedb.org/movie/1462229",
+      "cover": "assets/media/pegasus-3.jpg"
+    },
+    {
+      "title": "飞驰人生2",
+      "type": "电影",
+      "status": "看过",
+      "comment": "热爱不灭，巴音布鲁克永远的王。",
+      "rating": 7.2,
+      "release": "2024-02-10",
+      "url": "https://www.themoviedb.org/movie/1228891",
+      "cover": "assets/media/pegasus-2.jpg"
+    },
+    {
+      "title": "捕风追影",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.3,
+      "release": "2025-08-02",
+      "url": "https://www.themoviedb.org/movie/1419406",
+      "cover": "assets/media/chasing-wind.jpg"
+    },
+    {
+      "title": "分手清单",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.0,
+      "release": "2025-06-14",
+      "url": "https://www.themoviedb.org/movie/1359994",
+      "cover": "assets/media/breakup-list.jpg"
+    },
+    {
+      "title": "红毯先生",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.1,
+      "release": "2023-09-15",
+      "url": "https://www.themoviedb.org/movie/1022659",
+      "cover": "assets/media/the-movie-emperor.jpg"
+    },
+    {
+      "title": "人在囧途",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.1,
+      "release": "2010-06-04",
+      "url": "https://www.themoviedb.org/movie/51306",
+      "cover": "assets/media/lost-on-journey.jpg"
+    },
+    {
+      "title": "长江七号",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.3,
+      "release": "2008-01-30",
+      "url": "https://www.themoviedb.org/movie/13688",
+      "cover": "assets/media/cj7.jpg"
+    },
+    {
+      "title": "神偷奶爸",
+      "type": "电影",
+      "status": "看过",
+      "comment": "小黄人来袭，反派奶爸的爆笑日常。",
+      "rating": 7.3,
+      "release": "2010-06-07",
+      "url": "https://www.themoviedb.org/movie/20352",
+      "cover": "assets/media/despicable-me-1.jpg"
+    },
+    {
+      "title": "神偷奶爸2",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.9,
+      "release": "2013-06-16",
+      "url": "https://www.themoviedb.org/movie/93456",
+      "cover": "assets/media/despicable-me-2.jpg"
+    },
+    {
+      "title": "神偷奶爸3",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.5,
+      "release": "2017-06-14",
+      "url": "https://www.themoviedb.org/movie/324852",
+      "cover": "assets/media/despicable-me-3.jpg"
+    },
+    {
+      "title": "玩具总动员",
+      "type": "电影",
+      "status": "看过",
+      "comment": "皮克斯开山之作，玩具们的友情史诗。",
+      "rating": 8.0,
+      "release": "1995-11-19",
+      "url": "https://www.themoviedb.org/movie/862",
+      "cover": "assets/media/toy-story-1.jpg"
+    },
+    {
+      "title": "玩具总动员2",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.6,
+      "release": "1999-10-30",
+      "url": "https://www.themoviedb.org/movie/863",
+      "cover": "assets/media/toy-story-2.jpg"
+    },
+    {
+      "title": "赛车总动员",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.1,
+      "release": "2006-03-14",
+      "url": "https://www.themoviedb.org/movie/920",
+      "cover": "assets/media/cars-1.jpg"
+    },
+    {
+      "title": "赛车总动员2",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.2,
+      "release": "2011-06-11",
+      "url": "https://www.themoviedb.org/movie/49013",
+      "cover": "assets/media/cars-2.jpg"
+    },
+    {
+      "title": "天气之子",
+      "type": "电影",
+      "status": "看过",
+      "comment": "世界与爱人之间，我选你。",
+      "rating": 8.0,
+      "release": "2019-07-19",
+      "url": "https://www.themoviedb.org/movie/568160",
+      "cover": "assets/media/weathering-with-you.jpg"
+    },
+    {
+      "title": "铃芽之旅",
+      "type": "电影",
+      "status": "看过",
+      "comment": "关门之旅，跨越灾难的救赎。",
+      "rating": 7.9,
+      "release": "2022-11-11",
+      "url": "https://www.themoviedb.org/movie/916224",
+      "cover": "assets/media/suzume.jpg"
+    },
+    {
+      "title": "疯狂动物城",
+      "type": "电影",
+      "status": "看过",
+      "comment": "乌托邦里的偏见寓言，闪电树懒封神。",
+      "rating": 7.8,
+      "release": "2016-02-07",
+      "url": "https://www.themoviedb.org/movie/269149",
+      "cover": "assets/media/zootopia-1.jpg"
+    },
+    {
+      "title": "疯狂动物城2",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.7,
+      "release": "2025-11-13",
+      "url": "https://www.themoviedb.org/movie/1084242",
+      "cover": "assets/media/zootopia-2.jpg"
+    },
+    {
+      "title": "刀剑神域进击篇：无星之夜",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.8,
+      "release": "2021-09-15",
+      "url": "https://www.themoviedb.org/movie/761898",
+      "cover": "assets/media/sao-progressive-1.jpg"
+    },
+    {
+      "title": "刀剑神域进击篇：暮色黄昏",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.7,
+      "release": "2022-10-22",
+      "url": "https://www.themoviedb.org/movie/893712",
+      "cover": "assets/media/sao-progressive-2.jpg"
+    },
+    {
+      "title": "刀剑神域：序列之争",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.7,
+      "release": "2017-02-18",
+      "url": "https://www.themoviedb.org/movie/413594",
+      "cover": "assets/media/sao-ordinal-scale.jpg"
+    },
+    {
+      "title": "全职高手之巅峰荣耀",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.4,
+      "release": "2019-08-16",
+      "url": "https://www.themoviedb.org/movie/613200",
+      "cover": "assets/media/kings-avatar-movie.jpg"
+    },
+    {
+      "title": "好东西",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.6,
+      "release": "2024-11-09",
+      "url": "https://www.themoviedb.org/movie/1260951",
+      "cover": "assets/media/her-story.jpg"
+    },
+    {
       "title": "假面骑士极狐",
       "type": "特摄",
       "status": "看过",
@@ -837,6 +1158,29 @@
       "comment": "全豪快！35大战队的传说钥匙。",
       "cover": "assets/media/gokaiger.jpg",
       "url": "https://www.themoviedb.org/tv/95707"
+    },
+    {
+      "title": "暴太郎战队咚兄弟vs全开者",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 4.7,
+      "release": "2023-05-03",
+      "url": "https://www.themoviedb.org/movie/1092060",
+      "cover": "assets/media/donbrothers-vs-zenkaiger.jpg"
+    },
+    {
+      "title": "暴太郎战队咚兄弟 电影：新·初恋英雄",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 6.3,
+      "release": "2022-07-22",
+      "url": "https://www.themoviedb.org/movie/937315",
+      "cover": "assets/media/donbrothers-movie.jpg"
+    },
+    {
+      "title": "国宝谜踪",
+      "type": "纪录片",
+      "status": "看过"
     }
   ]
 }
