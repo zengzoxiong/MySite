@@ -22,13 +22,16 @@
 
 ```
 MySite/
-├── index.html          # 主页面
-├── styles.css          # 样式文件
-├── script.js           # 交互逻辑
-├── svg-editor.html     # 自建工具：SVG 可视化编辑器（独立页面）
+├── index.html          # 主页面（首页仪表盘 + 三视图容器）
+├── styles.css          # 样式（含深色模式/动画/响应式）
+├── script.js           # 交互逻辑（视图管理/仪表盘/影视/设置）
 ├── data/
-│   └── links.json      # 链接配置文件
-└── README.md           # 项目说明
+│   ├── links.json      # 网站收藏配置（分类 + 链接）
+│   ├── tools.json      # 在线工具配置（驱动 tools/ 目录的 127 个自建工具页）
+│   └── media.json      # 影视收藏配置（番剧/电影/特摄/综艺/电视剧/纪录片）
+├── assets/media/       # 影视海报图（本地存储）
+├── tools/              # 自建网页工具（每个工具一个目录，含 app.html）
+└── README.md
 ```
 
 ## 🔧 使用方法
@@ -77,12 +80,16 @@ MySite/
 
 ### 添加自建工具
 
-自建工具为本站同源托管的网页（如 `svg-editor.html`），展示在首页置顶的「我的工具」区。
+自建工具为本站同源托管的网页（如 `tools/svg-editor/app.html`），展示在侧栏「在线工具」区，由 `data/tools.json` 驱动。
 
-1. 将工具页面放入仓库根目录（随站点一同部署）；
-2. 在 `index.html` 的 `.tools-grid` 中追加一个 `tool-card` 链接指向该页面。
+1. 新建 `tools/工具名/app.html`（页面随站点一同部署）；
+2. 在 `data/tools.json` 的 `tools` 数组中登记：
 
-> 说明：SVG 编辑器内置 6 张参考架构图，可通过工具栏「图集」按钮按需加载；打开即空白画布，编辑会自动保存到当前浏览器（刷新可续编）。
+```json
+{"name": "工具名", "path": "工具名/app.html", "description": "一句话描述", "icon": "🔧", "category": "所属分类"}
+```
+
+分类会自动出现在侧栏「在线工具」下。
 
 ## 🚀 部署
 

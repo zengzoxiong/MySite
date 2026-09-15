@@ -327,6 +327,7 @@ function initSectionToggles() {
 
 // ===== 点击涟漪效果 =====
 function spawnRipple(host, e) {
+    if (document.body.classList.contains('no-anim')) return; // 动画关闭时跳过，避免节点永不回收
     const rect = host.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height) * 2.2;
     const x = (e.clientX || rect.left + rect.width / 2) - rect.left - size / 2;
@@ -694,11 +695,12 @@ function initSettingsPanel() {
             settingsBtn.classList.remove('active');
         }
     });
-    // ESC 在搜索框未聚焦时也关闭面板
+    // ESC 在面板打开时只关面板，不触发全局“回首页”
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && settingsPanel.classList.contains('open')) {
             settingsPanel.classList.remove('open');
             settingsBtn.classList.remove('active');
+            e.stopImmediatePropagation();
         }
     });
     const clearBtn = document.getElementById('settingClearCache');
@@ -827,6 +829,10 @@ function initEventListeners() {
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
         currentMediaType = chip.dataset.mediaChip;
+        // 同步侧栏高亮
+        sidebarMedia.querySelectorAll('.sidebar-item').forEach(i =>
+            i.classList.toggle('active', i.dataset.mediaType === currentMediaType));
+        homeNav.classList.remove('active');
         renderMedia(false);
     });
 

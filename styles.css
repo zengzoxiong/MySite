@@ -1445,6 +1445,10 @@ body.sidebar-collapsed .main-content {
 .media-card {
     text-decoration: none;
     color: var(--text-primary);
+}
+
+/* 仅分类切换/进入视图时播放入场动画，搜索重渲染不重播 */
+.media-card.anim {
     animation: fadeUp 0.4s ease backwards;
 }
 
