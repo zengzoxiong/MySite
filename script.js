@@ -25,12 +25,9 @@ const sidebarTools = document.getElementById('sidebarTools');
 const sidebarCategories = document.getElementById('sidebarCategories');
 const linksGrid = document.getElementById('linksGrid');
 const emptyState = document.getElementById('emptyState');
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = (themeToggle && themeToggle.querySelector('.theme-icon')) || null;
 const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
-const mainContent = document.getElementById('mainContent');
 const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
@@ -62,7 +59,14 @@ function initDashboard() {
     initSectionToggles();
 
     // 点击天气区域手动刷新
-    document.getElementById('heroWeather').addEventListener('click', () => initWeather(true));
+    const heroWeather = document.getElementById('heroWeather');
+    heroWeather.addEventListener('click', () => initWeather(true));
+    heroWeather.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            initWeather(true);
+        }
+    });
 }
 
 // --- 时钟 ---
@@ -364,7 +368,7 @@ function goHome() {
 function renderSidebarMedia() {
     const types = mediaData.types || [];
     sidebarMedia.innerHTML = types.map(t => `
-        <div class="sidebar-item" data-media-type="${t}">
+        <div class="sidebar-item" role="button" tabindex="0" data-media-type="${t}">
             <span class="item-text">${t}</span>
         </div>
     `).join('');
@@ -403,7 +407,7 @@ async function loadLinks() {
 function renderSidebarTools() {
     const categories = [...new Set(allTools.map(t => t.category))];
     sidebarTools.innerHTML = categories.map(cat => `
-        <div class="sidebar-item" data-tool-category="${cat}">
+        <div class="sidebar-item" role="button" tabindex="0" data-tool-category="${cat}">
             <span class="item-text">${cat}</span>
         </div>
     `).join('');
@@ -426,15 +430,11 @@ function renderSidebarTools() {
 
 // 渲染侧栏分类区
 function renderSidebarCategories(categories) {
-    let html = '';
-    categories.forEach(cat => {
-        html += `
-            <div class="sidebar-item" data-category="${cat}">
-                <span class="item-text">${cat}</span>
-            </div>
-        `;
-    });
-    sidebarCategories.innerHTML = html;
+    sidebarCategories.innerHTML = categories.map(cat => `
+        <div class="sidebar-item" role="button" tabindex="0" data-category="${cat}">
+            <span class="item-text">${cat}</span>
+        </div>
+    `).join('');
 }
 
 // 从 URL 提取域名
@@ -620,13 +620,23 @@ function renderMedia(animate = false) {
     `;
 
     // 检测溢出的标题，悬停时横向滚动展示全名
+    recalcMarquee();
+}
+
+// 重算溢出标题的滚动参数（渲染后与窗口 resize 时调用）
+function recalcMarquee() {
     mediaGrid.querySelectorAll('.media-title').forEach(el => {
         const span = el.querySelector('.t');
-        if (span && span.scrollWidth > el.clientWidth + 1) {
+        if (!span) return;
+        const overflow = span.scrollWidth > el.clientWidth + 1;
+        el.classList.toggle('overflowing', overflow);
+        if (overflow) {
             const shift = span.scrollWidth - el.clientWidth;
-            el.classList.add('overflowing');
             span.style.setProperty('--shift', shift + 'px');
             span.style.setProperty('--marquee-dur', (3.5 + shift / 22).toFixed(1) + 's');
+        } else {
+            span.style.removeProperty('--shift');
+            span.style.removeProperty('--marquee-dur');
         }
     });
 }
@@ -802,6 +812,16 @@ function initEventListeners() {
         }
     });
 
+    // 侧栏内可点元素键盘支持（Enter/Space 触发点击）
+    sidebar.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const item = e.target.closest('.sidebar-item');
+        if (item) {
+            e.preventDefault();
+            item.click();
+        }
+    });
+
     // 侧栏内所有可点元素统一加涟漪反馈
     sidebar.addEventListener('click', (e) => {
         const host = e.target.closest('.sidebar-item, .sidebar-section-title, .home-btn, .settings-btn, .sidebar-collapse-btn');
@@ -855,4 +875,24 @@ function initEventListeners() {
             goHome();
         }
     });
+
+    // 窗口 resize：跨移动端断点时收起抽屉，并重算标题滚动参数
+    let resizeTimer = null;
+    let lastIsMobile = window.innerWidth <= 768;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const isMobile = window.innerWidth <= 768;
+            if (lastIsMobile !== isMobile) {
+                lastIsMobile = isMobile;
+                closeMobileMenu();
+            }
+            recalcMarquee();
+        }, 200);
+    });
+
+    // Service Worker（PWA 离线缓存，静默失败）
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
 }

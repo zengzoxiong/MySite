@@ -1,5 +1,6 @@
 /* ===== CSS 变量 - 亮色主题 ===== */
 :root {
+    color-scheme: light;
     --bg-color: #fafafa;
     --sidebar-bg: #ffffff;
     --card-bg: #ffffff;
@@ -19,6 +20,7 @@
 
 /* ===== 暗色主题 ===== */
 [data-theme="dark"] {
+    color-scheme: dark;
     --bg-color: #0a0a0a;
     --sidebar-bg: #111111;
     --card-bg: #161616;
@@ -319,13 +321,6 @@ body {
     font-weight: 500;
 }
 
-.sidebar-item .item-icon {
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    width: 20px;
-    text-align: center;
-}
-
 .sidebar-item .item-text {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -504,6 +499,17 @@ body.no-anim *::before,
 body.no-anim *::after {
     transition: none !important;
     animation: none !important;
+}
+
+/* 尊重系统级"减少动态效果"设置 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* 点击涟漪 */
@@ -690,6 +696,16 @@ body.sidebar-collapsed .main-content {
 
 .github-corner:active {
     transform: scale(0.97);
+}
+
+/* 右上：站点访问统计（不蒜子） */
+.site-stat {
+    top: 52px;
+    right: 0;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    animation: fadeDown 0.5s ease 0.35s backwards;
 }
 
 .github-stats b {
