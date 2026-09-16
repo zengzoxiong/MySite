@@ -34,33 +34,6 @@
             </div>
         </div>
 
-        <!-- 设置面板 -->
-        <div class="settings-panel" id="settingsPanel">
-            <div class="settings-title">设置</div>
-            <div class="settings-item">
-                <span class="settings-label">🌙 深色模式</span>
-                <label class="settings-switch">
-                    <input type="checkbox" id="settingTheme">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-item">
-                <span class="settings-label">✨ 动画效果</span>
-                <label class="settings-switch">
-                    <input type="checkbox" id="settingAnim" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="settings-item">
-                <span class="settings-label">🔍 搜索回车后聚焦首条</span>
-                <label class="settings-switch">
-                    <input type="checkbox" id="settingFocusFirst" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <button class="settings-action" id="settingClearCache">清除本地数据（待办/折叠状态）</button>
-        </div>
-
         <div class="sidebar-search">
             <input type="text" id="searchInput" placeholder="搜索..." autocomplete="off" aria-label="搜索网站收藏、工具与影视">
         </div>
@@ -89,6 +62,14 @@
                 <div class="section-body sidebar-media" id="sidebarMedia">
                     <!-- JS 动态渲染 -->
                 </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <a class="sidebar-item" href="guestbook.html">
+                    <span class="item-text">💬 留言板</span>
+                </a>
             </div>
         </nav>
 
@@ -170,6 +151,15 @@
 
         <div class="links-grid" id="linksGrid"></div>
         <div class="media-grid" id="mediaGrid" style="display: none;"></div>
+
+        <!-- 设置弹层：iframe 独立页（挂在 body 下，避免被侧栏 transform/overflow 影响） -->
+        <div class="settings-modal" id="settingsModal" hidden>
+            <div class="settings-backdrop" id="settingsBackdrop"></div>
+            <div class="settings-modal-box" role="dialog" aria-modal="true" aria-label="设置">
+                <button class="settings-modal-close" id="settingsClose" title="关闭设置">✕</button>
+                <iframe src="settings.html" title="设置"></iframe>
+            </div>
+        </div>
         <div class="empty-state" id="emptyState" style="display: none;">
             <p>没有找到匹配的内容</p>
         </div>

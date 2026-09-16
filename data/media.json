@@ -9,14 +9,40 @@
   ],
   "items": [
     {
-      "title": "Re:从零开始的异世界生活",
+      "title": "Re:从零开始的异世界生活 第一季",
       "type": "番剧",
       "status": "看过",
+      "release": "2016-04-04",
       "rating": 8.1,
-      "comment": "死亡回归的绝望与温柔，菜月昴的救赎之旅。",
-      "cover": "assets/media/re-zero.jpg",
       "url": "https://anilist.co/anime/21355",
-      "release": "2016-04-04"
+      "cover": "assets/media/re-zero-s1.jpg"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 第二季 前半",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2020-07-08",
+      "rating": 8.1,
+      "url": "https://anilist.co/anime/108632",
+      "cover": "assets/media/re-zero-s2a.jpg"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 第二季 后半",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2021-01-06",
+      "rating": 8.1,
+      "url": "https://anilist.co/anime/119661",
+      "cover": "assets/media/re-zero-s2b.jpg"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 第三季",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2024-10-02",
+      "rating": 8.1,
+      "url": "https://anilist.co/anime/163134",
+      "cover": "assets/media/re-zero-s3.jpg"
     },
     {
       "title": "无职转生",
@@ -787,6 +813,87 @@
       "cover": "assets/media/rezero-shinhen.jpg"
     },
     {
+      "title": "无职转生 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/tv/94664/season/2",
+      "release": "2023-07-03",
+      "cover": "assets/media/mushoku-s2.png",
+      "rating": 8.4
+    },
+    {
+      "title": "刀剑神域 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/tv/45782/season/2",
+      "release": "2014-07-05",
+      "cover": "assets/media/sao-s2.jpg",
+      "rating": 8.1
+    },
+    {
+      "title": "红战士转职冒险者",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2025-01-12",
+      "cover": "assets/media/sentai-red.jpg",
+      "url": "https://anilist.co/anime/180052"
+    },
+    {
+      "title": "龙王的工作",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 6.5,
+      "release": "2018-01-08",
+      "url": "https://www.themoviedb.org/tv/76141",
+      "cover": "assets/media/ryuo.jpg"
+    },
+    {
+      "title": "工作细胞",
+      "type": "番剧",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/tv/80671",
+      "rating": 8.0,
+      "release": "2018-07-08",
+      "cover": "assets/media/cells-at-work.jpg",
+      "comment": "你身体里的37万亿打工人。"
+    },
+    {
+      "title": "请问您今天要来点兔子吗？？～Dear My Sister～",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2017-11-11",
+      "cover": "assets/media/gochiusa-dms.jpg",
+      "url": "https://anilist.co/anime/21813",
+      "rating": 7.3
+    },
+    {
+      "title": "Charlotte",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "release": "2015-07-05",
+      "url": "https://www.themoviedb.org/tv/63145",
+      "cover": "assets/media/charlotte.jpg"
+    },
+    {
+      "title": "想要成为影之实力者 第一季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2022-10-05",
+      "url": "https://www.themoviedb.org/tv/119495",
+      "cover": "assets/media/eminence-s1.jpg"
+    },
+    {
+      "title": "想要成为影之实力者 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2022-10-05",
+      "url": "https://www.themoviedb.org/tv/119495",
+      "cover": "assets/media/eminence-s2.jpg"
+    },
+    {
       "title": "战狼",
       "type": "电影",
       "status": "看过",
@@ -1098,6 +1205,62 @@
       "release": "2024-11-09",
       "url": "https://www.themoviedb.org/movie/1260951",
       "cover": "assets/media/her-story.jpg"
+    },
+    {
+      "title": "年会不能停！",
+      "type": "电影",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/movie/1173076",
+      "rating": 7.5,
+      "release": "2023-12-14",
+      "cover": "assets/media/nhbn.jpg",
+      "comment": "大厂裁员潮里的爆笑错位喜剧。"
+    },
+    {
+      "title": "哪吒之魔童降世",
+      "type": "电影",
+      "status": "看过",
+      "url": "https://www.themoviedb.org/movie/615453",
+      "rating": 7.9,
+      "release": "2019-07-26",
+      "cover": "assets/media/nezha-1.jpg",
+      "comment": "我命由我不由天的起点。"
+    },
+    {
+      "title": "人在囧途之港囧",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.7,
+      "release": "2015-09-25",
+      "url": "https://www.themoviedb.org/movie/361613",
+      "cover": "assets/media/gangjiong.jpg"
+    },
+    {
+      "title": "人在囧途之泰囧",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.4,
+      "release": "2012-12-12",
+      "url": "https://www.themoviedb.org/movie/151743",
+      "cover": "assets/media/taijiong.jpg"
+    },
+    {
+      "title": "南京照相馆",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.9,
+      "release": "2025-07-19",
+      "url": "https://www.themoviedb.org/movie/1500536",
+      "cover": "assets/media/nanjing-photo.jpg"
+    },
+    {
+      "title": "盒中之海",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.5,
+      "release": "2024-10-03",
+      "url": "https://www.themoviedb.org/movie/1360489",
+      "cover": "assets/media/sea-in-box.jpg"
     },
     {
       "title": "假面骑士极狐",

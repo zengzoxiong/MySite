@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 设置页自身布局（复用全站变量与开关组件样式） */
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .settings-page {
+            width: 100%;
+            max-width: 380px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px 26px;
+            box-shadow: var(--shadow-card-hover);
+        }
+
+        .settings-page .settings-title {
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .settings-page .settings-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-page .settings-label {
+            font-size: 0.86rem;
+        }
+
+        .settings-page .settings-action {
+            margin-top: 16px;
+        }
+
+        .settings-hint {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-page">
+        <div class="settings-title">⚙️ 设置</div>
+        <div class="settings-item">
+            <span class="settings-label">🌙 深色模式</span>
+            <label class="settings-switch">
+                <input type="checkbox" id="settingTheme">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="settings-item">
+            <span class="settings-label">✨ 动画效果</span>
+            <label class="settings-switch">
+                <input type="checkbox" id="settingAnim" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="settings-item">
+            <span class="settings-label">🔍 搜索回车后聚焦首条</span>
+            <label class="settings-switch">
+                <input type="checkbox" id="settingFocusFirst" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <button class="settings-action" id="settingClearCache">清除本地数据（待办/折叠状态）</button>
+        <div class="settings-hint">更改即时生效并自动保存</div>
+    </div>
+
+    <script>
+        const KEY_THEME = 'theme', KEY_ANIM = 'animEnabled', KEY_FOCUS = 'focusFirst';
+        const notify = (type) => {
+            try { parent.postMessage({ type }, '*'); } catch (e) { /* 独立打开时无父页 */ }
+        };
+
+        // 深色模式
+        const themeBox = document.getElementById('settingTheme');
+        const applyTheme = () => {
+            const saved = localStorage.getItem(KEY_THEME);
+            const dark = saved ? saved === 'dark'
+                : window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            themeBox.checked = dark;
+        };
+        applyTheme();
+        themeBox.addEventListener('change', () => {
+            localStorage.setItem(KEY_THEME, themeBox.checked ? 'dark' : 'light');
+            applyTheme();
+            notify('settings-changed');
+        });
+
+        // 动画效果
+        const animBox = document.getElementById('settingAnim');
+        const applyAnim = () => {
+            const on = localStorage.getItem(KEY_ANIM) !== 'off';
+            document.body.classList.toggle('no-anim', !on);
+            animBox.checked = on;
+        };
+        applyAnim();
+        animBox.addEventListener('change', () => {
+            localStorage.setItem(KEY_ANIM, animBox.checked ? 'on' : 'off');
+            document.body.classList.toggle('no-anim', !animBox.checked);
+            notify('settings-changed');
+        });
+
+        // 搜索聚焦首条
+        const focusBox = document.getElementById('settingFocusFirst');
+        focusBox.checked = localStorage.getItem(KEY_FOCUS) !== 'off';
+        focusBox.addEventListener('change', () => {
+            localStorage.setItem(KEY_FOCUS, focusBox.checked ? 'on' : 'off');
+        });
+
+        // 清除本地数据
+        const clearBtn = document.getElementById('settingClearCache');
+        clearBtn.addEventListener('click', () => {
+            ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
+                .forEach(k => localStorage.removeItem(k));
+            notify('clear-cache');
+            clearBtn.textContent = '已清除 ✓';
+            setTimeout(() => { clearBtn.textContent = '清除本地数据（待办/折叠状态）'; }, 1600);
+        });
+
+        // 其他窗口修改主题时同步本页
+        window.addEventListener('storage', (e) => {
+            if (e.key === KEY_THEME) applyTheme();
+            if (e.key === KEY_ANIM) applyAnim();
+        });
+
+        // ESC 通知父页关闭弹层（焦点在本页时键盘事件不会传给父页）
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') notify('close-settings');
+        });
+    </script>
+</body>
+</html>

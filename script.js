@@ -5,9 +5,17 @@ let mediaData = { types: [], items: [] };
 let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
-let currentSort = 'rating'; // 'rating' | 'title' | 'release'
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media'
-let viewBeforeSearch = null; // 从首页进入搜索态时记住来源
+let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'search'
+let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
+const SORT_OPTIONS = [
+    ['rating-desc', '按评分（高 → 低）'],
+    ['rating-asc', '按评分（低 → 高）'],
+    ['release-desc', '按上映时间（新 → 旧）'],
+    ['release-asc', '按上映时间（旧 → 新）'],
+    ['title-asc', '按名称 A-Z'],
+    ['title-desc', '按名称 Z-A']
+];
 
 // 影视类型对应的渐变占位海报
 const TYPE_GRADIENTS = {
@@ -33,15 +41,16 @@ const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
 const settingsBtn = document.getElementById('settingsBtn');
-const settingsPanel = document.getElementById('settingsPanel');
+const settingsModal = document.getElementById('settingsModal');
+const settingsBackdrop = document.getElementById('settingsBackdrop');
+const settingsClose = document.getElementById('settingsClose');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadLinks();
     initTheme();
     initAnimSetting();
-    initFocusFirstSetting();
-    initSettingsPanel();
+    initSettingsModal();
     initSidebar();
     initEventListeners();
     initDashboard();
@@ -233,10 +242,6 @@ function saveTodos(todos) {
     localStorage.setItem(TODO_KEY, JSON.stringify(todos));
 }
 
-function escapeHtml(s) {
-    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
 function todoItemHtml(t) {
     return `<li class="todo-item ${t.done ? 'done' : ''}" data-id="${t.id}">
         <input type="checkbox" class="todo-check" ${t.done ? 'checked' : ''} title="完成">
@@ -348,7 +353,7 @@ function spawnRipple(host, e) {
 // ===== 视图控制 =====
 function goHome() {
     currentView = 'home';
-    viewBeforeSearch = null;
+    searchFrom = 'home';
     searchInput.value = '';
     currentCategory = '';
     currentToolCategory = '';
@@ -362,6 +367,73 @@ function goHome() {
     if (window.innerWidth <= 768) {
         closeMobileMenu();
     }
+}
+
+// 按视图渲染对应内容
+function renderCurrentView(animate = false) {
+    if (currentView === 'tools') renderTools(animate);
+    else if (currentView === 'media') renderMedia(animate);
+    else renderLinks(animate);
+}
+
+// ===== 全域搜索（收藏 + 工具 + 影视） =====
+let searchSeq = 0;
+
+function renderSearchWithLoading(term) {
+    dashboard.classList.add('hidden');
+    mediaGrid.style.display = 'none';
+    linksGrid.style.display = 'grid';
+    emptyState.style.display = 'none';
+    // 过渡加载态：短暂显示骨架，随后渲染分组结果
+    const seq = ++searchSeq;
+    if (document.hidden) { renderSearchResults(term); return; } // 后台标签跳过等待
+    linksGrid.innerHTML = `
+        <div class="search-group" style="grid-column:1/-1">
+            <div class="search-loading">
+                <span class="spinner"></span>
+                <span>正在全站搜索「${escapeHtml(term)}」...</span>
+            </div>
+        </div>`;
+    setTimeout(() => {
+        if (seq === searchSeq && currentView === 'search') renderSearchResults(term);
+    }, 300);
+}
+
+function renderSearchResults(term) {
+    const t = term.toLowerCase();
+    const match = (s) => (s || '').toLowerCase().includes(t);
+
+    const links = allLinks.filter(i => match(i.title) || match(i.description) || match(i.category));
+    const tools = allTools.filter(i => match(i.name) || match(i.description) || match(i.category));
+    const media = (mediaData.items || []).filter(i => match(i.title) || match(i.comment) || match(i.type));
+
+    const total = links.length + tools.length + media.length;
+    if (total === 0) {
+        linksGrid.innerHTML = `
+            <div class="search-group" style="grid-column:1/-1">
+                <p class="empty-state">没有找到与「${escapeHtml(term)}」匹配的内容</p>
+            </div>`;
+        return;
+    }
+
+    const group = (label, count, inner) => `
+        <div class="search-group" style="grid-column:1/-1">
+            <div class="search-group-head">${label}<span class="search-group-count">${count} 条</span></div>
+            <div class="links-grid search-group-body">${inner}</div>
+        </div>`;
+
+    let html = '';
+    if (links.length) {
+        html += group('🌐 网站收藏', links.length, links.map(buildLinkCard).join(''));
+    }
+    if (tools.length) {
+        html += group('🔧 在线工具', tools.length, tools.map(buildToolCard).join(''));
+    }
+    if (media.length) {
+        html += group('🎬 影视收藏', media.length, `<div class="media-cards">${media.map(buildMediaCard).join('')}</div>`);
+    }
+    linksGrid.innerHTML = html;
+    recalcMarquee();
 }
 
 // 渲染侧栏影视区（类型导航，无"全部"）
@@ -421,6 +493,8 @@ function renderSidebarTools() {
         homeNav.classList.remove('active');
         currentToolCategory = item.dataset.toolCategory;
         currentView = 'tools';
+        searchFrom = 'tools';
+        searchInput.value = '';
         renderTools(true);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
@@ -446,12 +520,71 @@ function getDomain(url) {
     }
 }
 
+// 卡片构建器（收藏/工具/影视共用，供各视图与全域搜索复用）
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// 供内联 onerror 字符串安全拼接
+function escapeJs(s) {
+    return String(s).replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
+}
+
+function buildLinkCard(link, i) {
+    const domain = getDomain(link.url);
+    const emojiIcon = link.icon || '🔗';
+    // 尝试加载 favicon，两级失败后回退到 emoji
+    const faviconHtml = domain
+        ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${escapeJs(emojiIcon)}'};" width="32" height="32" loading="lazy">`
+        : emojiIcon;
+    return `
+    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="icon">${faviconHtml}</div>
+        <div class="info">
+            <div class="title">${escapeHtml(link.title)}</div>
+            <div class="description">${escapeHtml(link.description)}</div>
+            <span class="category">${escapeHtml(link.category)}</span>
+        </div>
+    </a>`;
+}
+
+function buildToolCard(tool, i) {
+    const faviconUrl = tool.icon || '';
+    return `
+    <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="icon">${faviconUrl ? `<span style="font-size:1.2rem">${escapeHtml(faviconUrl)}</span>` : '🔧'}</div>
+        <div class="info">
+            <div class="title">${escapeHtml(tool.name)}</div>
+            <div class="description">${escapeHtml(tool.description)}</div>
+            <span class="category">${escapeHtml(tool.category)}</span>
+        </div>
+    </a>`;
+}
+
+function buildMediaCard(item, i) {
+    const title = escapeHtml(item.title || '');
+    const statusClass = item.status === '在看' ? ' watching' : (item.status === '想看' ? ' wish' : '');
+    const gradient = TYPE_GRADIENTS[item.type] || TYPE_GRADIENTS['默认'];
+    return `
+    <${item.url ? 'a' : 'div'} class="media-card"${item.url ? ` href="${item.url}" target="_blank" rel="noopener noreferrer"` : ''}>
+        <div class="media-cover">
+            <div class="media-ph" style="background:${gradient}"><span class="ph-char">${title.charAt(0)}</span><span class="ph-title">${title}</span></div>
+            ${item.cover ? `<img src="${item.cover}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
+            ${item.status ? `<span class="badge-status${statusClass}">${escapeHtml(item.status)}</span>` : ''}
+            ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
+            ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}
+        </div>
+        <div class="media-info">
+            <div class="media-title"><span class="t">${title}</span></div>
+            <div class="media-meta">${escapeHtml(item.type || '')}${item.release ? ' · ' + escapeHtml(item.release) : ''}</div>
+        </div>
+    </${item.url ? 'a' : 'div'}>`;
+}
+
 // 渲染链接卡片
 function renderLinks(animate = false) {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-
     // 首页视图：仅显示仪表盘，不显示收藏卡片
-    if (currentView === 'home' && !searchTerm) {
+    if (currentView === 'home') {
         dashboard.classList.remove('hidden');
         linksGrid.style.display = 'none';
         mediaGrid.style.display = 'none';
@@ -462,17 +595,9 @@ function renderLinks(animate = false) {
     dashboard.classList.add('hidden');
     mediaGrid.style.display = 'none';
 
-    let filteredLinks = allLinks;
-
-    // 搜索时搜索所有，不按分类筛选
-    if (!searchTerm && currentCategory) {
-        filteredLinks = filteredLinks.filter(link => link.category === currentCategory);
-    } else if (searchTerm) {
-        filteredLinks = filteredLinks.filter(link =>
-            link.title.toLowerCase().includes(searchTerm) ||
-            link.description.toLowerCase().includes(searchTerm)
-        );
-    }
+    const filteredLinks = currentCategory
+        ? allLinks.filter(link => link.category === currentCategory)
+        : allLinks;
 
     if (filteredLinks.length === 0) {
         linksGrid.style.display = 'none';
@@ -483,25 +608,9 @@ function renderLinks(animate = false) {
     }
 
     linksGrid.innerHTML = filteredLinks.map((link, i) => {
-        const domain = getDomain(link.url);
-        const emojiIcon = link.icon || '🔗';
-        // 尝试加载 favicon，失败则显示 emoji
-        const faviconHtml = domain
-            ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${emojiIcon}'};" width="32" height="32">`
-            : emojiIcon;
         const animClass = animate ? ' anim' : '';
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
-        return `
-        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card${animClass}"${animDelay}>
-            <div class="icon">
-                ${faviconHtml}
-            </div>
-            <div class="info">
-                <div class="title">${link.title}</div>
-                <div class="description">${link.description}</div>
-                <span class="category">${link.category}</span>
-            </div>
-        </a>`;
+        return buildLinkCard(link, i).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
     }).join('');
 }
 
@@ -509,44 +618,17 @@ function renderLinks(animate = false) {
 function renderTools(animate = false) {
     dashboard.classList.add('hidden');
     mediaGrid.style.display = 'none';
+    emptyState.style.display = 'none';
 
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    const filteredTools = currentToolCategory
+        ? allTools.filter(tool => tool.category === currentToolCategory)
+        : allTools;
 
-    let filteredTools = allTools;
-
-    // 搜索时搜索所有，不按分类筛选
-    if (!searchTerm && currentToolCategory) {
-        filteredTools = filteredTools.filter(tool => tool.category === currentToolCategory);
-    } else if (searchTerm) {
-        filteredTools = filteredTools.filter(tool =>
-            tool.name.toLowerCase().includes(searchTerm) ||
-            tool.description.toLowerCase().includes(searchTerm)
-        );
-    }
-
-    if (filteredTools.length === 0) {
-        linksGrid.style.display = 'none';
-        emptyState.style.display = 'block';
-    } else {
-        linksGrid.style.display = 'grid';
-        emptyState.style.display = 'none';
-    }
-
+    linksGrid.style.display = 'grid';
     linksGrid.innerHTML = filteredTools.map((tool, i) => {
-        const faviconUrl = tool.icon || '';
         const animClass = animate ? ' anim' : '';
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
-        return `
-        <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card${animClass}"${animDelay}>
-            <div class="icon">
-                ${faviconUrl ? `<span style="font-size:1.2rem">${faviconUrl}</span>` : '🔧'}
-            </div>
-            <div class="info">
-                <div class="title">${tool.name}</div>
-                <div class="description">${tool.description}</div>
-                <span class="category">${tool.category}</span>
-            </div>
-        </a>`;
+        return buildToolCard(tool, i).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
     }).join('');
 }
 
@@ -557,55 +639,30 @@ function renderMedia(animate = false) {
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
 
-    const searchTerm = searchInput.value.toLowerCase().trim();
     let items = (mediaData.items || []).filter(i => i.type === currentMediaType);
-    if (searchTerm) items = items.filter(i =>
-        i.title.toLowerCase().includes(searchTerm) ||
-        (i.comment || '').toLowerCase().includes(searchTerm)
-    );
 
-    // 排序：评分降序 / 名称 A-Z / 上映时间（新→旧）
+    // 排序
     const sorted = [...items];
-    if (currentSort === 'title') {
-        sorted.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'zh-Hans-CN'));
-    } else if (currentSort === 'release') {
-        sorted.sort((a, b) => (b.release || '').localeCompare(a.release || ''));
-    } else {
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    }
+    const byTitle = (a, b) => (a.title || '').localeCompare(b.title || '', 'zh-Hans-CN');
+    if (currentSort === 'rating-asc') sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+    else if (currentSort === 'rating-desc') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    else if (currentSort === 'release-asc') sorted.sort((a, b) => (a.release || '').localeCompare(b.release || ''));
+    else if (currentSort === 'release-desc') sorted.sort((a, b) => (b.release || '').localeCompare(a.release || ''));
+    else if (currentSort === 'title-desc') sorted.sort((a, b) => byTitle(b, a));
+    else sorted.sort(byTitle);
 
     const chips = (mediaData.types || []).map(t =>
         `<button class="media-chip${t === currentMediaType ? ' active' : ''}" data-media-chip="${t}">${t}</button>`
     ).join('');
-    const sortOptions = [
-        ['rating', '按评分'],
-        ['title', '按名称 A-Z'],
-        ['release', '按上映时间']
-    ].map(([v, label]) =>
+    const sortOptions = SORT_OPTIONS.map(([v, label]) =>
         `<option value="${v}"${v === currentSort ? ' selected' : ''}>${label}</option>`
     ).join('');
 
     const cards = sorted.map((item, i) => {
-        const title = escapeHtml(item.title || '');
-        const statusClass = item.status === '在看' ? ' watching' : (item.status === '想看' ? ' wish' : '');
-        const gradient = TYPE_GRADIENTS[item.type] || TYPE_GRADIENTS['默认'];
-        const animClass = animate ? ' anim' : '';
-        const animDelay = animate ? ` style="animation-delay:${Math.min(i * 40, 450)}ms"` : '';
-        const coverInner = `
-            <div class="media-ph" style="background:${gradient}"><span class="ph-char">${title.charAt(0)}</span><span class="ph-title">${title}</span></div>
-            ${item.cover ? `<img src="${item.cover}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
-            ${item.status ? `<span class="badge-status${statusClass}">${item.status}</span>` : ''}
-            ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
-            ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}`;
-        const infoInner = `
-            <div class="media-title"><span class="t">${title}</span></div>
-            <div class="media-meta">${item.type || ''}${item.release ? ' · ' + item.release : ''}</div>`;
-        const tag = item.url ? 'a' : 'div';
-        const urlAttrs = item.url ? ` href="${item.url}" target="_blank" rel="noopener noreferrer"` : '';
-        return `<${tag} class="media-card${animClass}"${urlAttrs}${animDelay}>
-            <div class="media-cover">${coverInner}</div>
-            <div class="media-info">${infoInner}</div>
-        </${tag}>`;
+        const html = buildMediaCard(item, i);
+        if (!animate) return html;
+        const animDelay = ` style="animation-delay:${Math.min(i * 40, 450)}ms"`;
+        return html.replace('class="media-card"', `class="media-card anim"${animDelay}`);
     }).join('');
 
     mediaGrid.innerHTML = `
@@ -642,88 +699,75 @@ function recalcMarquee() {
 }
 
 // 主题与设置
+// 主题：从 localStorage 应用（设置页 settings.html 负责修改）
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    }
-    const settingTheme = document.getElementById('settingTheme');
-    if (settingTheme) {
-        settingTheme.checked = document.documentElement.getAttribute('data-theme') === 'dark';
-        settingTheme.addEventListener('change', () => {
-            const next = settingTheme.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-        });
-    }
+    applyThemeFromStorage();
 }
 
-// 动画开关：关闭时为 body 加 no-anim，全局禁用过渡与关键帧
+function applyThemeFromStorage() {
+    const savedTheme = localStorage.getItem('theme');
+    const dark = savedTheme ? savedTheme === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+}
+
+// 动画开关：从 localStorage 应用（body.no-anim 全局禁用过渡与关键帧）
 function initAnimSetting() {
-    const settingAnim = document.getElementById('settingAnim');
-    if (!settingAnim) return;
-    const saved = localStorage.getItem('animEnabled');
-    const enabled = saved !== 'off';
-    document.body.classList.toggle('no-anim', !enabled);
-    settingAnim.checked = enabled;
-    settingAnim.addEventListener('change', () => {
-        document.body.classList.toggle('no-anim', !settingAnim.checked);
-        localStorage.setItem('animEnabled', settingAnim.checked ? 'on' : 'off');
-    });
+    applyAnimFromStorage();
+}
+
+function applyAnimFromStorage() {
+    document.body.classList.toggle('no-anim', localStorage.getItem('animEnabled') === 'off');
 }
 
 // 搜索回车聚焦首条结果
-function initFocusFirstSetting() {
-    const settingFocusFirst = document.getElementById('settingFocusFirst');
-    if (!settingFocusFirst) return;
-    settingFocusFirst.checked = localStorage.getItem('focusFirst') !== 'off';
-    settingFocusFirst.addEventListener('change', () => {
-        localStorage.setItem('focusFirst', settingFocusFirst.checked ? 'on' : 'off');
-    });
-}
-
 function focusFirstResult() {
     if (localStorage.getItem('focusFirst') === 'off') return;
     const first = linksGrid.querySelector('.link-card') || mediaGrid.querySelector('.media-card');
     if (first) first.focus();
 }
 
-function initSettingsPanel() {
-    if (!settingsBtn || !settingsPanel) return;
-    settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsPanel.classList.toggle('open');
-        settingsBtn.classList.toggle('active');
-    });
-    // 点击面板外关闭
-    document.addEventListener('click', (e) => {
-        if (settingsPanel.classList.contains('open') &&
-            !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
-            settingsPanel.classList.remove('open');
-            settingsBtn.classList.remove('active');
-        }
-    });
-    // ESC 在面板打开时只关面板，不触发全局“回首页”
+// 设置弹层：iframe 加载 settings.html，更改通过 postMessage 同步
+function initSettingsModal() {
+    if (!settingsBtn || !settingsModal) return;
+    const open = () => {
+        settingsModal.hidden = false;
+        void settingsModal.offsetHeight; // 同步回流，保证过渡生效（不依赖被节流的 rAF）
+        settingsModal.classList.add('open');
+        document.body.classList.add('modal-open'); // 锁定背景滚动
+        document.getElementById('settingsClose').focus();
+    };
+    const close = () => {
+        settingsModal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+        setTimeout(() => { settingsModal.hidden = true; }, 200);
+        settingsBtn.focus(); // 焦点还原
+    };
+    settingsBtn.addEventListener('click', open);
+    document.getElementById('settingsClose').addEventListener('click', close);
+    document.getElementById('settingsBackdrop').addEventListener('click', close);
+    // ESC 在弹层打开时只关弹层，不触发全局"回首页"
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && settingsPanel.classList.contains('open')) {
-            settingsPanel.classList.remove('open');
-            settingsBtn.classList.remove('active');
+        if (e.key === 'Escape' && !settingsModal.hidden) {
+            close();
             e.stopImmediatePropagation();
         }
     });
-    const clearBtn = document.getElementById('settingClearCache');
-    clearBtn.addEventListener('click', () => {
-        ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
-            .forEach(k => localStorage.removeItem(k));
-        document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
-        document.getElementById('todoList').innerHTML = '';
-        updateTodoCount();
-        clearBtn.textContent = '已清除 ✓';
-        setTimeout(() => { clearBtn.textContent = '清除本地数据（待办/折叠状态）'; }, 1600);
+    window.addEventListener('message', (e) => {
+        if (e.origin !== location.origin) return;
+        if (e.data && e.data.type === 'settings-changed') {
+            applyThemeFromStorage();
+            applyAnimFromStorage();
+        } else if (e.data && e.data.type === 'clear-cache') {
+            document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
+            document.getElementById('todoList').innerHTML = '';
+            updateTodoCount();
+        } else if (e.data && e.data.type === 'close-settings') {
+            close();
+        }
     });
 }
+
 
 // 侧栏
 function initSidebar() {
@@ -754,27 +798,24 @@ function closeMobileMenu() {
 
 // 事件监听
 function initEventListeners() {
-    // 搜索：从首页输入时自动切换到收藏搜索，清空后回到首页
+    // 搜索：全域搜索（收藏 + 工具 + 影视），清空后恢复原视图
     searchInput.addEventListener('input', () => {
         const term = searchInput.value.toLowerCase().trim();
-        if (term && currentView === 'home') {
-            viewBeforeSearch = 'home';
-            currentView = 'links';
-            renderLinks(false);
+        if (term) {
+            if (currentView !== 'search') {
+                searchFrom = currentView;
+                currentView = 'search';
+                sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                homeNav.classList.remove('active');
+            }
+            renderSearchWithLoading(term);
             return;
         }
-        if (!term && viewBeforeSearch === 'home') {
-            viewBeforeSearch = null;
-            currentView = 'home';
-            renderLinks();
-            return;
-        }
-        if (currentView === 'tools') {
-            renderTools(false);
-        } else if (currentView === 'media') {
-            renderMedia(false);
-        } else {
-            renderLinks(false);
+        if (currentView === 'search') {
+            currentView = searchFrom;
+            renderCurrentView();
         }
     });
 
@@ -804,7 +845,8 @@ function initEventListeners() {
         homeNav.classList.remove('active');
         currentCategory = item.dataset.category;
         currentView = 'links';
-        viewBeforeSearch = null;
+        searchFrom = 'links';
+        searchInput.value = ''; // 切视图清空搜索，避免残留
         renderLinks(true);
         // 移动端自动关闭菜单
         if (window.innerWidth <= 768) {
@@ -837,7 +879,8 @@ function initEventListeners() {
         homeNav.classList.remove('active');
         currentMediaType = item.dataset.mediaType;
         currentView = 'media';
-        viewBeforeSearch = null;
+        searchFrom = 'media';
+        searchInput.value = '';
         renderMedia(true);
         if (window.innerWidth <= 768) {
             closeMobileMenu();

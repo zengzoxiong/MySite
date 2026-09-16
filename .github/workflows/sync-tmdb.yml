@@ -1,0 +1,34 @@
+name: 同步 TMDB 评分
+
+on:
+  schedule:
+    - cron: '0 21 * * *' # 每日 UTC 21:00（北京时间凌晨 5 点）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 拉取 TMDB 评分并更新 media.json
+        run: python scripts/sync_tmdb.py
+
+      - name: 有变化时提交
+        run: |
+          if [[ -n $(git status --porcelain data/media.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/media.json
+            git commit -m "chore: 定时同步 TMDB 评分"
+            git push
+          else
+            echo "评分无变化，跳过提交"
+          fi

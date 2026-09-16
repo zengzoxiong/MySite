@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片格式转换</title>
+    <style>
+        :root {
+            --accent: #f59e0b;
+            --bg: #1f2937;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --ok: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #1f2937 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container { max-width: 860px; margin: 0 auto; }
+
+        .header { text-align: center; color: #fff; margin-bottom: 26px; }
+        .header h1 { font-size: 2.1rem; margin-bottom: 6px; }
+        .header p { opacity: 0.9; font-size: 0.92rem; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 18px;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 42px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .dropzone:hover, .dropzone.drag {
+            border-color: var(--accent);
+            background: #fffbeb;
+        }
+
+        .dropzone .icon { font-size: 2.4rem; }
+        .dropzone p { margin-top: 8px; color: var(--text-muted); font-size: 0.9rem; }
+        .dropzone strong { color: var(--accent); }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .controls label { font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+
+        select, input[type="range"] { accent-color: var(--accent); }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        button.btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        button.btn:hover { opacity: 0.9; }
+        button.btn:active { transform: scale(0.97); }
+        button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .file-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .file-item img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f3f4f6;
+            flex-shrink: 0;
+        }
+
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-size: 0.9rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+        .file-meta .save { color: var(--ok); font-weight: 600; }
+        .file-meta .grow { color: #ef4444; }
+
+        .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        .file-actions button {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .file-actions button:hover, .file-actions a:hover { border-color: var(--accent); color: var(--accent); }
+        .file-actions a { display: none; padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .file-item.done .file-actions button.convert { display: none; }
+        .file-item.done .file-actions a { display: inline-block; }
+
+        .hint { margin-top: 14px; font-size: 0.78rem; color: var(--text-muted); text-align: center; }
+
+        .empty-tip { text-align: center; color: var(--text-muted); padding: 10px 0 4px; font-size: 0.88rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>图片格式转换</h1>
+            <p>PNG / JPEG / WebP 互转 · 纯浏览器本地处理，图片不上传</p>
+        </div>
+
+        <div class="card">
+            <div class="dropzone" id="dropzone">
+                <div class="icon">🖼️</div>
+                <p>拖拽图片到此处，或 <strong>点击选择文件</strong></p>
+                <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
+            </div>
+
+            <div class="controls">
+                <label>目标格式
+                    <select id="targetFormat">
+                        <option value="image/png">PNG</option>
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/webp">WebP</option>
+                    </select>
+                </label>
+                <label>画质
+                    <input type="range" id="quality" min="10" max="100" value="90">
+                    <span id="qualityValue">90%</span>
+                </label>
+                <button class="btn" id="convertAll" disabled>全部转换</button>
+            </div>
+        </div>
+
+        <div class="card" id="listCard" style="display:none">
+            <div class="file-list" id="fileList"></div>
+            <p class="hint">转换在本地完成 · JPEG 输出会以白色填充透明区域 · 有损格式画质越高体积越大</p>
+        </div>
+    </div>
+
+    <script>
+        const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+        const files = []; // { file, img, converted, blob, outName }
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const listCard = document.getElementById('listCard');
+        const fileList = document.getElementById('fileList');
+        const targetFormat = document.getElementById('targetFormat');
+        const quality = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const convertAllBtn = document.getElementById('convertAll');
+
+        const fmtSize = (b) => b > 1048576 ? (b / 1048576).toFixed(2) + ' MB' : (b / 1024).toFixed(1) + ' KB';
+        const qualityOn = () => targetFormat.value !== 'image/png';
+        quality.disabled = !qualityOn();
+        targetFormat.addEventListener('change', () => {
+            quality.disabled = !qualityOn();
+            files.forEach(f => { f.converted = false; });
+            render();
+        });
+        quality.addEventListener('input', () => {
+            qualityValue.textContent = quality.value + '%';
+            files.forEach(f => { f.converted = false; });
+            render();
+        });
+
+        function addFiles(list) {
+            let pending = list.length;
+            for (const file of list) {
+                if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { if (--pending === 0) render(); continue; }
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    files.push({ file, img, converted: false, blob: null, outName: '' });
+                    if (--pending === 0) render();
+                };
+                img.onerror = () => { if (--pending === 0) render(); };
+                img.src = url;
+            }
+        }
+
+        function render() {
+            convertAllBtn.disabled = files.length === 0;
+            if (!files.length) { listCard.style.display = 'none'; fileList.innerHTML = ''; return; }
+            listCard.style.display = 'block';
+            fileList.innerHTML = '';
+            files.forEach((f, idx) => {
+                const item = document.createElement('div');
+                item.className = 'file-item' + (f.converted ? ' done' : '');
+                const meta = f.converted
+                    ? `${f.img.naturalWidth}×${f.img.naturalHeight} · ${fmtSize(f.file.size)} → ${fmtSize(f.blob.size)}
+                       <span class="${f.blob.size <= f.file.size ? 'save' : 'grow'}">（${f.blob.size <= f.file.size ? '-' : '+'}${Math.abs(100 - Math.round(f.blob.size / f.file.size * 100))}%）</span>`
+                    : `${f.img.naturalWidth}×${f.img.naturalHeight} · ${fmtSize(f.file.size)}`;
+                item.innerHTML = `
+                    <img src="${f.img.src}" alt="">
+                    <div class="file-info">
+                        <div class="file-name">${f.file.name.replace(/[<>&"]/g, '')}</div>
+                        <div class="file-meta">${meta}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="convert" data-idx="${idx}">转换</button>
+                        <a download="${f.outName}" href="${f.outUrl || ''}">下载</a>
+                    </div>`;
+                fileList.appendChild(item);
+            });
+        }
+
+        function convert(f) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = f.img.naturalWidth;
+                canvas.height = f.img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                if (targetFormat.value === 'image/jpeg') {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                ctx.drawImage(f.img, 0, 0);
+                canvas.toBlob((blob) => {
+                    f.blob = blob;
+                    const base = f.file.name.replace(/\.[^.]+$/, '');
+                    f.outName = `${base}.${EXT[targetFormat.value]}`;
+                    f.outUrl = URL.createObjectURL(blob);
+                    f.converted = true;
+                    resolve();
+                }, targetFormat.value, qualityOn() ? quality.value / 100 : undefined);
+            });
+        }
+
+        fileList.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button.convert');
+            if (!btn) return;
+            const f = files[+btn.dataset.idx];
+            btn.disabled = true;
+            btn.textContent = '转换中...';
+            await convert(f);
+            render();
+        });
+
+        convertAllBtn.addEventListener('click', async () => {
+            convertAllBtn.disabled = true;
+            convertAllBtn.textContent = '转换中...';
+            for (const f of files) { if (!f.converted) await convert(f); }
+            convertAllBtn.textContent = '全部转换';
+            convertAllBtn.disabled = false;
+            render();
+        });
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag');
+            addFiles(e.dataTransfer.files);
+        });
+    </script>
+</body>
+</html>

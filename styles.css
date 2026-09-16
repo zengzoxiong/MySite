@@ -379,32 +379,84 @@ body {
     transform: rotate(180deg);
 }
 
-/* ===== 设置面板 ===== */
-.settings-panel {
-    position: absolute;
-    top: 46px;
-    right: 10px;
-    width: 230px;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: var(--shadow-card-hover);
-    padding: 12px 14px;
-    z-index: 200;
+/* ===== 设置弹层（iframe 加载 settings.html） ===== */
+.settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
-    transform: translateY(-6px) scale(0.97);
-    pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    transition: opacity 0.2s ease;
 }
 
-.settings-panel.open {
+.settings-modal.open {
     opacity: 1;
-    transform: none;
-    pointer-events: auto;
 }
 
+.settings-modal[hidden] {
+    display: none;
+}
+
+/* 弹层打开时锁定背景滚动 */
+body.modal-open {
+    overflow: hidden;
+}
+
+.settings-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.settings-modal-box {
+    position: relative;
+    width: min(440px, calc(100vw - 32px));
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.settings-modal.open .settings-modal-box {
+    transform: none;
+}
+
+.settings-modal-box iframe {
+    display: block;
+    width: 100%;
+    height: min(480px, calc(100dvh - 32px)); /* 横屏手机防溢出 */
+    border: none;
+    background: var(--bg-color);
+}
+
+.settings-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.settings-modal-close:hover {
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+/* 设置页组件（供 settings.html 使用） */
 .settings-title {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 10px;
@@ -486,11 +538,6 @@ body {
     color: #ef4444;
     border-color: #ef4444;
     background-color: rgba(239, 68, 68, 0.05);
-}
-
-.sidebar.collapsed .settings-panel {
-    left: calc(var(--sidebar-collapsed-width) + 8px);
-    right: auto;
 }
 
 /* 动画关闭：全局禁用过渡与关键帧动画 */
@@ -1004,6 +1051,66 @@ body.sidebar-collapsed .main-content {
     transform: scale(1.15);
 }
 
+/* ===== 全域搜索 ===== */
+.search-group {
+    margin-bottom: 28px;
+}
+
+.search-group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-group-count {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-tertiary);
+}
+
+.search-group-body.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* 搜索结果里的影视组占满整行，避免被压成分组栅格的单列 */
+.search-group-body > .media-cards {
+    grid-column: 1 / -1;
+}
+
+.search-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 20px;
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* 中屏：收窄一言宽度，避免与左下/右下组件重叠 */
+@media (max-width: 1300px) and (min-width: 1151px) {
+    .quote-corner {
+        max-width: 400px;
+    }
+}
+
 /* 窄屏：四角组件改为纵向流式排布 */
 @media (max-width: 1150px) {
     .dashboard {
@@ -1234,11 +1341,6 @@ body.sidebar-collapsed .main-content {
     .sidebar.collapsed .sidebar-item {
         justify-content: flex-start;
         padding: 6px 8px;
-    }
-
-    .settings-panel {
-        right: 8px;
-        top: 52px;
     }
 
     .sidebar.collapsed .sidebar-collapse-btn {
