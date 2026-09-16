@@ -9,7 +9,7 @@
     "常用软件下载",
     "资源",
     "学习",
-    "开源工具"
+    "绘图工具"
   ],
   "links": [
     {
@@ -53,6 +53,13 @@
       "description": "在线长图片分割，支持平均分割，固定高度分割，还有比例分割。支持智能分割，自动寻找最优路径分割，自动避开文字分割。",
       "category": "图片处理",
       "icon": "🖼️"
+    },
+    {
+      "title": "Squoosh",
+      "url": "https://squoosh.app",
+      "description": "Google 开源的浏览器端图片压缩工具，多编码器对比调参，图片不出本地，隐私友好。",
+      "category": "图片处理",
+      "icon": "🗜️"
     },
     {
       "title": "西风阁",
@@ -296,43 +303,22 @@
       "title": "Excalidraw",
       "url": "https://excalidraw.com",
       "description": "GitHub 130k+ Star 的手绘风虚拟白板，画架构图 / 流程图神器，支持协作，可自部署。",
-      "category": "开源工具",
+      "category": "绘图工具",
       "icon": "🎨"
     },
     {
       "title": "tldraw",
       "url": "https://www.tldraw.com",
       "description": "GitHub 50k+ Star 的无限画布白板，随手绘图、草图原型都很顺手，可嵌入自己的网页。",
-      "category": "开源工具",
+      "category": "绘图工具",
       "icon": "✏️"
     },
     {
       "title": "drawDB",
       "url": "https://drawdb.app",
       "description": "GitHub 39k+ Star 的在线数据库 ER 图编辑器，可视化建表并一键生成 SQL，纯前端可自部署。",
-      "category": "开源工具",
+      "category": "绘图工具",
       "icon": "🗄️"
-    },
-    {
-      "title": "Squoosh",
-      "url": "https://squoosh.app",
-      "description": "Google 开源的浏览器端图片压缩工具，多编码器对比调参，图片不出本地，隐私友好。",
-      "category": "开源工具",
-      "icon": "🗜️"
-    },
-    {
-      "title": "LibreSpeed",
-      "url": "https://librespeed.org",
-      "description": "GitHub 15k+ Star 的开源 HTML5 网速测试，无 Flash 无依赖，轻量易自部署。",
-      "category": "开源工具",
-      "icon": "📶"
-    },
-    {
-      "title": "WebStack 导航",
-      "url": "http://webstack.cc",
-      "description": "GitHub 7k+ Star 的静态响应式网址导航模板，纯静态无后端，适合当作个人主页起点。",
-      "category": "开源工具",
-      "icon": "🧭"
     }
   ]
 }

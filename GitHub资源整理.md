@@ -2,6 +2,7 @@
 
 > 2026-09-13 通过 GitHub Search API 搜索整理，所有在线地址均已验证可访问。Star 数为整理时的数据。
 > 已收录部分同步维护在 `data/links.json` 中（「工具合集」与「开源工具」两个分类）。
+> 注：后续调整中 WebStack 导航、LibreSpeed 已从站内移除，Squoosh 移入「图片处理」，Excalidraw/tldraw/drawDB 归入「绘图工具」。
 
 ## 一、在线工具箱（已收录到「工具合集」分类）
 

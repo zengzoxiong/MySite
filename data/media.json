@@ -9,7 +9,7 @@
   ],
   "items": [
     {
-      "title": "Re:从零开始的异世界生活（全季）",
+      "title": "Re:从零开始的异世界生活",
       "type": "番剧",
       "status": "看过",
       "rating": 8.1,
@@ -19,7 +19,7 @@
       "release": "2016-04-04"
     },
     {
-      "title": "无职转生（全季）",
+      "title": "无职转生",
       "type": "番剧",
       "status": "看过",
       "rating": 8.4,
@@ -49,7 +49,7 @@
       "release": "2023-10-07"
     },
     {
-      "title": "间谍过家家剧场版：Code: White",
+      "title": "间谍过家家剧场版：代号白",
       "type": "电影",
       "status": "看过",
       "rating": 7.2,
@@ -398,7 +398,7 @@
       "release": "2020-10-03"
     },
     {
-      "title": "奇幻世界舅舅",
+      "title": "异世界舅舅",
       "type": "番剧",
       "status": "看过",
       "rating": 7.5,
@@ -408,7 +408,7 @@
       "release": "2022-07-06"
     },
     {
-      "title": "伍六七",
+      "title": "刺客伍六七",
       "type": "番剧",
       "status": "看过",
       "rating": 8.6,
@@ -488,7 +488,7 @@
       "release": "2015-10-10"
     },
     {
-      "title": "请问您今天要来点兔子吗？～Song for You～",
+      "title": "请问您今天要来点兔子吗？？～Sing for You～",
       "type": "番剧",
       "status": "看过",
       "comment": "点兔剧场版OVA，心爱与智乃的羁绊。",
@@ -520,7 +520,7 @@
     {
       "title": "不时用俄语小声说真心话的邻桌艾莉同学",
       "type": "番剧",
-      "status": "看过",
+      "status": "在看",
       "rating": 8.0,
       "comment": "俄语真心话，艾莉同学又傲又甜。",
       "cover": "assets/media/alya.jpg",
@@ -550,7 +550,7 @@
     {
       "title": "路人女主的养成方法",
       "type": "番剧",
-      "status": "看过",
+      "status": "想看",
       "rating": 6.8,
       "comment": "同人游戏制作群像，加藤惠的降临。",
       "cover": "assets/media/saekano.jpg",
@@ -699,7 +699,7 @@
     {
       "title": "罗小黑战记",
       "type": "番剧",
-      "status": "看过",
+      "status": "想看",
       "comment": "国二维力的温柔巅峰，一人一猫。",
       "rating": 8.4,
       "release": "2019-08-27",
@@ -760,7 +760,7 @@
       "cover": "assets/media/mob-reigen.png"
     },
     {
-      "title": "Re:从零开始的异世界生活 Memory Snow",
+      "title": "Re:从零开始的异世界生活 Memory Snow(雪之回忆)",
       "type": "番剧",
       "status": "看过",
       "rating": 8.1,
@@ -783,7 +783,8 @@
       "status": "看过",
       "rating": 8.1,
       "release": "2020",
-      "url": "https://www.themoviedb.org/tv/65942"
+      "url": "https://www.themoviedb.org/tv/65942",
+      "cover": "assets/media/rezero-shinhen.jpg"
     },
     {
       "title": "战狼",
@@ -816,7 +817,7 @@
       "cover": "assets/media/wandering-earth-1.jpg"
     },
     {
-      "title": "小林家的龙女仆大电影",
+      "title": "小林家的龙女仆：怕寂寞的龙",
       "type": "电影",
       "status": "看过",
       "comment": "京阿尼龙女佣的剧场版，孤独的龙想要被投喂。",
@@ -1168,7 +1169,8 @@
     {
       "title": "国宝谜踪",
       "type": "纪录片",
-      "status": "看过"
+      "status": "看过",
+      "cover": "assets/media/guobao-mizong.jpg"
     }
   ]
 }
