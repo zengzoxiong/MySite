@@ -22,3 +22,6 @@ logs/
 
 # ---- Claude 中间文件 ----
 .claude/.claude_temp/
+
+__pycache__/
+*.pyc
