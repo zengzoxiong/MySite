@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Skills</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 16px;
+        }
+
+        .skills-page {
+            width: 100%;
+            max-width: 860px;
+        }
+
+        .skills-page h1 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .skills-page .sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .install-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+        }
+
+        .install-all code {
+            flex: 1;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.84rem;
+            color: var(--text-primary);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            background: none;
+            color: var(--accent-color);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .skill-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .skill-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .skill-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .skill-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .skill-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .skill-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 99px;
+            background: var(--hover-bg);
+            color: var(--text-tertiary);
+        }
+
+        .skill-install {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: var(--hover-bg);
+            border-radius: 8px;
+        }
+
+        .skill-install code {
+            flex: 1;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .skill-install .copy-btn { padding: 4px 10px; font-size: 0.72rem; }
+
+        .back { margin-top: 28px; font-size: 0.85rem; color: var(--accent-color); text-decoration: none; }
+        .back:hover { text-decoration: underline; }
+
+        .repo-link { color: var(--accent-color); text-decoration: none; }
+        .repo-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="skills-page">
+        <h1>🧩 Agent Skills</h1>
+        <p class="sub">
+            供 Claude Code / Cursor 等 Agent 使用的个人技能包，沉淀自本站维护经验。
+            仓库：<a class="repo-link" href="https://github.com/zengzoxiong/skills" target="_blank" rel="noopener noreferrer">zengzoxiong/skills</a>
+        </p>
+
+        <div class="install-all">
+            <code id="installAllCmd"></code>
+            <button class="copy-btn" data-copy-target="installAllCmd">复制</button>
+        </div>
+
+        <div id="skillList"><p class="sub">加载中...</p></div>
+
+        <a class="back" href="./">← 返回工具箱</a>
+    </div>
+
+    <script>
+        const REPO = 'zengzoxiong/skills';
+        const dark = localStorage.getItem('theme')
+            ? localStorage.getItem('theme') === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+
+        function bindCopy(btn, getText) {
+            btn.addEventListener('click', async () => {
+                const text = getText();
+                try {
+                    await navigator.clipboard.writeText(text);
+                } catch {
+                    const ta = document.createElement('textarea');
+                    ta.value = text; document.body.appendChild(ta);
+                    ta.select(); document.execCommand('copy'); ta.remove();
+                }
+                const old = btn.textContent;
+                btn.textContent = '已复制 ✓';
+                setTimeout(() => { btn.textContent = old; }, 1200);
+            });
+        }
+
+        fetch('data/skills.json')
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('installAllCmd').textContent = d.installAll;
+                bindCopy(document.querySelector('.install-all .copy-btn'), () => d.installAll);
+
+                const list = document.getElementById('skillList');
+                list.innerHTML = d.skills.map(s => `
+                    <div class="skill-card">
+                        <div class="skill-head">
+                            <span class="skill-name">${s.name}</span>
+                            <button class="copy-btn" data-dir="${s.dir}">复制安装命令</button>
+                        </div>
+                        <div class="skill-desc">${s.description}</div>
+                        <div class="skill-tags">${s.tags.map(t => `<span class="skill-tag">${t}</span>`).join('')}</div>
+                        <div class="skill-install">
+                            <code>npx skills add ${REPO}/${s.dir}</code>
+                        </div>
+                        <div class="skill-tags">
+                            <a class="repo-link" style="font-size:0.75rem" href="https://github.com/${REPO}/tree/main/skills/${s.dir}" target="_blank" rel="noopener noreferrer">查看 SKILL.md →</a>
+                        </div>
+                    </div>`).join('');
+
+                list.querySelectorAll('.copy-btn[data-dir]').forEach(btn => {
+                    bindCopy(btn, () => `npx skills add ${REPO}/${btn.dataset.dir}`);
+                });
+            })
+            .catch(() => {
+                document.getElementById('skillList').innerHTML = '<p class="sub">技能数据加载失败，请刷新重试。</p>';
+            });
+    </script>
+</body>
+</html>

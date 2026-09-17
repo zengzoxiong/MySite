@@ -67,6 +67,9 @@
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
+                <a class="sidebar-item" href="skills.html">
+                    <span class="item-text">🧩 Agent Skills</span>
+                </a>
                 <a class="sidebar-item" href="guestbook.html">
                     <span class="item-text">💬 留言板</span>
                 </a>
@@ -158,6 +161,15 @@
             <div class="settings-modal-box" role="dialog" aria-modal="true" aria-label="设置">
                 <button class="settings-modal-close" id="settingsClose" title="关闭设置">✕</button>
                 <iframe src="settings.html" title="设置"></iframe>
+            </div>
+        </div>
+
+        <!-- 命令面板 Ctrl/Cmd+K -->
+        <div class="cmdk" id="cmdk" hidden>
+            <div class="cmdk-backdrop" id="cmdkBackdrop"></div>
+            <div class="cmdk-box" role="dialog" aria-modal="true" aria-label="命令面板">
+                <input type="text" id="cmdkInput" placeholder="输入命令或搜索内容，↑↓ 选择，Enter 执行，Esc 关闭..." autocomplete="off">
+                <ul id="cmdkList" role="listbox"></ul>
             </div>
         </div>
         <div class="empty-state" id="emptyState" style="display: none;">

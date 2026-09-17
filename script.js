@@ -44,6 +44,9 @@ const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const settingsBackdrop = document.getElementById('settingsBackdrop');
 const settingsClose = document.getElementById('settingsClose');
+const cmdk = document.getElementById('cmdk');
+const cmdkInput = document.getElementById('cmdkInput');
+const cmdkList = document.getElementById('cmdkList');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initAnimSetting();
     initSettingsModal();
+    initPalette();
     initSidebar();
     initEventListeners();
     initDashboard();
@@ -769,6 +773,134 @@ function initSettingsModal() {
 }
 
 
+
+// ===== 命令面板（Ctrl/Cmd+K） =====
+let cmdkActive = 0;
+let cmdkCommands = [];
+
+function buildCmdkCommands() {
+    const cmds = [
+        { icon: '🏠', label: '回到首页', run: goHome },
+        { icon: '⚙️', label: '打开设置', run: () => document.getElementById('settingsBtn').click() },
+        { icon: '🧩', label: 'Agent Skills', run: () => { location.href = 'skills.html'; } },
+        { icon: '💬', label: '留言板', run: () => { location.href = 'guestbook.html'; } },
+        { icon: '🔄', label: '切换深色模式', run: () => {
+            localStorage.setItem('theme',
+                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            applyThemeFromStorage();
+        } },
+        { icon: '✨', label: '切换动画效果', run: () => {
+            localStorage.setItem('animEnabled',
+                document.body.classList.contains('no-anim') ? 'on' : 'off');
+            applyAnimFromStorage();
+        } },
+        { icon: '🖼️', label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
+    ];
+    document.querySelectorAll('#sidebarCategories .sidebar-item').forEach(item => {
+        cmds.push({ icon: '⭐', label: '收藏分类：' + item.dataset.category,
+            run: () => item.click() });
+    });
+    document.querySelectorAll('#sidebarTools .sidebar-item').forEach(item => {
+        cmds.push({ icon: '🔧', label: '工具分类：' + item.dataset.toolCategory,
+            run: () => item.click() });
+    });
+    document.querySelectorAll('#sidebarMedia .sidebar-item').forEach(item => {
+        cmds.push({ icon: '🎬', label: '影视类型：' + item.dataset.mediaType,
+            run: () => item.click() });
+    });
+    return cmds;
+}
+
+function toggleCmdk() {
+    cmdk.hidden ? openCmdk() : closeCmdk();
+}
+
+function openCmdk() {
+    cmdkCommands = buildCmdkCommands();
+    cmdk.hidden = false;
+    void cmdk.offsetHeight;
+    cmdk.classList.add('open');
+    cmdkInput.value = '';
+    cmdkActive = 0;
+    renderCmdkList('');
+    setTimeout(() => cmdkInput.focus(), 30);
+}
+
+function closeCmdk() {
+    cmdk.classList.remove('open');
+    setTimeout(() => { cmdk.hidden = true; }, 150);
+    cmdkInput.blur();
+}
+
+function renderCmdkList(query) {
+    const q = query.toLowerCase().trim();
+    let list = cmdkCommands.filter(c => c.label.toLowerCase().includes(q));
+    if (q) {
+        list = [{ icon: '🔍', label: '全域搜索：' + query, search: query }, ...list];
+    }
+    cmdkList.innerHTML = list.map((c, i) => `
+        <li class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
+    `).join('');
+    cmdkList.__items = list;
+    const active = cmdkList.querySelector('.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+function runCmdkItem(idx) {
+    const item = cmdkList.__items && cmdkList.__items[idx];
+    if (!item) return;
+    closeCmdk();
+    if (item.search !== undefined) {
+        if (currentView !== 'home') goHome();
+        searchInput.value = item.search;
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        searchInput.focus();
+        return;
+    }
+    setTimeout(() => item.run(), 60);
+}
+
+function initPalette() {
+    if (!cmdk || !cmdkInput) return;
+    cmdkInput.addEventListener('input', () => {
+        cmdkActive = 0;
+        renderCmdkList(cmdkInput.value);
+    });
+    cmdkInput.addEventListener('keydown', (e) => {
+        const items = cmdkList.__items || [];
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            cmdkActive = (cmdkActive + 1) % Math.max(items.length, 1);
+            renderCmdkList(cmdkInput.value);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            cmdkActive = (cmdkActive - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1);
+            renderCmdkList(cmdkInput.value);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            runCmdkItem(cmdkActive);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            closeCmdk();
+        }
+    });
+    cmdkList.addEventListener('click', (e) => {
+        const li = e.target.closest('li[data-idx]');
+        if (li) runCmdkItem(+li.dataset.idx);
+    });
+    cmdkList.addEventListener('mousemove', (e) => {
+        const li = e.target.closest('li[data-idx]');
+        if (li && !li.classList.contains('active')) {
+            cmdkActive = +li.dataset.idx;
+            cmdkList.querySelectorAll('li').forEach(x => x.classList.remove('active'));
+            li.classList.add('active');
+        }
+    });
+    document.getElementById('cmdkBackdrop').addEventListener('click', closeCmdk);
+}
+
 // 侧栏
 function initSidebar() {
     const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -908,10 +1040,10 @@ function initEventListeners() {
 
     // 键盘快捷键
     document.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + K 聚焦搜索
+        // Ctrl/Cmd + K 打开/关闭命令面板
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
-            searchInput.focus();
+            toggleCmdk();
         }
         // ESC 返回首页并清空搜索
         if (e.key === 'Escape') {
