@@ -1141,6 +1141,78 @@ body.sidebar-collapsed .main-content {
     gap: 14px;
 }
 
+.skill-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.skill-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.skill-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.skill-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.skill-install {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 7px 12px;
+    background: var(--hover-bg);
+    border-radius: 8px;
+}
+
+.skill-install code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.skill-tag {
+    font-size: 0.7rem;
+    padding: 2px 10px;
+    border-radius: 99px;
+    background: var(--hover-bg);
+    color: var(--text-tertiary);
+}
+
+.copy-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--accent-color);
+    border-radius: 8px;
+    background: none;
+    color: var(--accent-color);
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
 /* ===== 全域搜索 ===== */
 .search-group {
     margin-bottom: 28px;

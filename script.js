@@ -1040,6 +1040,7 @@ function initEventListeners() {
                 sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 homeNav.classList.remove('active');
             }
             renderSearchWithLoading(term);
@@ -1148,6 +1149,7 @@ function initEventListeners() {
 
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
+        if (e.target.closest('[data-skill-chip]')) return; // 技能分组芯片由专属处理器处理
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
         currentMediaType = chip.dataset.mediaChip;
