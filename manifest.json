@@ -1,7 +1,7 @@
 {
-  "name": "工具箱",
-  "short_name": "工具箱",
-  "description": "个人工具箱：在线工具导航、网站收藏、影视观看记录与实时仪表盘。",
+  "name": "拾光集",
+  "short_name": "拾光集",
+  "description": "拾光集：个人数字花园——工具导航、网站收藏、影视记录与实时仪表盘。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

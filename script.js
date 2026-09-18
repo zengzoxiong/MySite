@@ -2,11 +2,13 @@
 let allLinks = [];
 let allTools = [];
 let mediaData = { types: [], items: [] };
+let skillsRegistry = { groups: [] };
 let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'skills' | 'search'
+let currentSkillGroup = '';
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
 const SORT_OPTIONS = [
     ['rating-desc', '按评分（高 → 低）'],
@@ -40,6 +42,7 @@ const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
+const sidebarAgentSkills = document.getElementById('sidebarAgentSkills');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const settingsBackdrop = document.getElementById('settingsBackdrop');
@@ -362,9 +365,11 @@ function goHome() {
     currentCategory = '';
     currentToolCategory = '';
     currentMediaType = '';
+    currentSkillGroup = '';
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     homeNav.classList.add('active');
     renderLinks();
     searchInput.blur();
@@ -377,6 +382,7 @@ function goHome() {
 function renderCurrentView(animate = false) {
     if (currentView === 'tools') renderTools(animate);
     else if (currentView === 'media') renderMedia(animate);
+    else if (currentView === 'skills') renderAgentSkills(currentSkillGroup);
     else renderLinks(animate);
 }
 
@@ -395,7 +401,7 @@ function renderSearchWithLoading(term) {
         <div class="search-group" style="grid-column:1/-1">
             <div class="search-loading">
                 <span class="spinner"></span>
-                <span>正在全站搜索「${escapeHtml(term)}」...</span>
+                <span>正在搜索「${escapeHtml(term)}」...</span>
             </div>
         </div>`;
     setTimeout(() => {
@@ -410,8 +416,10 @@ function renderSearchResults(term) {
     const links = allLinks.filter(i => match(i.title) || match(i.description) || match(i.category));
     const tools = allTools.filter(i => match(i.name) || match(i.description) || match(i.category));
     const media = (mediaData.items || []).filter(i => match(i.title) || match(i.comment) || match(i.type));
+    const skills = (skillsRegistry.groups || []).flatMap(g => g.items)
+        .filter(s => match(s.name) || match(s.description || ''));
 
-    const total = links.length + tools.length + media.length;
+    const total = links.length + tools.length + media.length + skills.length;
     if (total === 0) {
         linksGrid.innerHTML = `
             <div class="search-group" style="grid-column:1/-1">
@@ -436,8 +444,12 @@ function renderSearchResults(term) {
     if (media.length) {
         html += group('🎬 影视收藏', media.length, `<div class="media-cards">${media.map(buildMediaCard).join('')}</div>`);
     }
+    if (skills.length) {
+        html += group('🧩 Agent Skills', skills.length, `<div class="skills-cards">${skills.map(skillCardHtml).join('')}</div>`);
+    }
     linksGrid.innerHTML = html;
     recalcMarquee();
+    bindCopyButtons();
 }
 
 // 渲染侧栏影视区（类型导航，无"全部"）
@@ -477,6 +489,83 @@ async function loadLinks() {
     } catch (error) {
         console.error('影视数据加载失败:', error);
     }
+
+    // Agent Skills 注册表独立加载
+    try {
+        const skillsRes = await fetch('data/skills-registry.json');
+        skillsRegistry = await skillsRes.json();
+        renderSidebarAgentSkills();
+    } catch (error) {
+        console.error('Skills 注册表加载失败:', error);
+    }
+}
+
+// 渲染侧栏 Agent Skills 区（分组导航，点击进入 Skills 视图）
+function renderSidebarAgentSkills() {
+    const groups = skillsRegistry.groups || [];
+    sidebarAgentSkills.innerHTML = groups.map(g => `
+        <div class="sidebar-item" role="button" tabindex="0" data-skill-group="${g.group}">
+            <span class="item-text">${g.group}</span>
+        </div>
+    `).join('');
+}
+
+// 技能卡片构建（视图与搜索复用）
+function skillCardHtml(s) {
+    const install = s.upstream === 'local-only'
+        ? `<div class="skill-install"><code>（本地技能，无公开上游仓库）</code></div>`
+        : `<div class="skill-install"><code>npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}</code></div>`;
+    const link = s.upstream === 'local-only' ? ''
+        : `<a class="repo-link" style="font-size:0.75rem" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 →</a>`;
+    return `
+    <div class="skill-card">
+        <div class="skill-head">
+            <span class="skill-name">${escapeHtml(s.name)}${s.local ? ' <span class="skill-tag">本地镜像</span>' : ''}</span>
+            <button class="copy-btn" data-cmd="npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}">复制安装命令</button>
+        </div>
+        ${install}
+        <div class="skill-tags">${link}</div>
+    </div>`;
+}
+
+// 渲染 Agent Skills 视图（该分组的技能卡片）
+function renderAgentSkills(groupName) {
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+
+    const group = (skillsRegistry.groups || []).find(g => g.group === groupName);
+    const items = group ? group.items : [];
+    const card = skillCardHtml;
+    mediaGrid.innerHTML = `
+        <div class="media-filters">
+            <div class="media-chips">${(skillsRegistry.groups || []).map(g =>
+                `<button class="media-chip${g.group === groupName ? ' active' : ''}" data-skill-chip="${g.group}">${g.group}</button>`).join('')}
+            </div>
+            <span class="media-count" style="margin:0">共 ${items.length} 个技能</span>
+        </div>
+        <div class="skills-cards">${items.map(card).join('')}</div>
+    `;
+    bindCopyButtons();
+}
+
+// 复制按钮统一绑定（事件委托）
+function bindCopyButtons() {
+    mediaGrid.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const text = btn.dataset.cmd;
+            try { await navigator.clipboard.writeText(text); }
+            catch {
+                const ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta);
+                ta.select(); document.execCommand('copy'); ta.remove();
+            }
+            const old = btn.textContent;
+            btn.textContent = '已复制 ✓';
+            setTimeout(() => { btn.textContent = old; }, 1200);
+        });
+    });
 }
 
 // 渲染侧栏工具区（分类导航）
@@ -782,31 +871,42 @@ function buildCmdkCommands() {
     const cmds = [
         { icon: '🏠', label: '回到首页', run: goHome },
         { icon: '⚙️', label: '打开设置', run: () => document.getElementById('settingsBtn').click() },
-        { icon: '🧩', label: 'Agent Skills', run: () => { location.href = 'skills.html'; } },
-        { icon: '💬', label: '留言板', run: () => { location.href = 'guestbook.html'; } },
-        { icon: '🔄', label: '切换深色模式', run: () => {
-            localStorage.setItem('theme',
-                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-            applyThemeFromStorage();
+        { icon: '🧩', label: 'Agent Skills：工作流与规划', run: () => {
+            document.querySelector('[data-skill-group="工作流与规划"]')?.click();
         } },
-        { icon: '✨', label: '切换动画效果', run: () => {
-            localStorage.setItem('animEnabled',
-                document.body.classList.contains('no-anim') ? 'on' : 'off');
-            applyAnimFromStorage();
-        } },
+        {
+            icon: '🔄', label: '切换深色模式', run: () => {
+                localStorage.setItem('theme',
+                    document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+                applyThemeFromStorage();
+            }
+        },
+        {
+            icon: '✨', label: '切换动画效果', run: () => {
+                localStorage.setItem('animEnabled',
+                    document.body.classList.contains('no-anim') ? 'on' : 'off');
+                applyAnimFromStorage();
+            }
+        },
         { icon: '🖼️', label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
     ];
     document.querySelectorAll('#sidebarCategories .sidebar-item').forEach(item => {
-        cmds.push({ icon: '⭐', label: '收藏分类：' + item.dataset.category,
-            run: () => item.click() });
+        cmds.push({
+            icon: '⭐', label: '收藏分类：' + item.dataset.category,
+            run: () => item.click()
+        });
     });
     document.querySelectorAll('#sidebarTools .sidebar-item').forEach(item => {
-        cmds.push({ icon: '🔧', label: '工具分类：' + item.dataset.toolCategory,
-            run: () => item.click() });
+        cmds.push({
+            icon: '🔧', label: '工具分类：' + item.dataset.toolCategory,
+            run: () => item.click()
+        });
     });
     document.querySelectorAll('#sidebarMedia .sidebar-item').forEach(item => {
-        cmds.push({ icon: '🎬', label: '影视类型：' + item.dataset.mediaType,
-            run: () => item.click() });
+        cmds.push({
+            icon: '🎬', label: '影视类型：' + item.dataset.mediaType,
+            run: () => item.click()
+        });
     });
     return cmds;
 }
@@ -836,7 +936,7 @@ function renderCmdkList(query) {
     const q = query.toLowerCase().trim();
     let list = cmdkCommands.filter(c => c.label.toLowerCase().includes(q));
     if (q) {
-        list = [{ icon: '🔍', label: '全域搜索：' + query, search: query }, ...list];
+        list = [{ icon: '🔍', label: '搜索：' + query, search: query }, ...list];
     }
     cmdkList.innerHTML = list.map((c, i) => `
         <li class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
@@ -1019,6 +1119,33 @@ function initEventListeners() {
         }
     });
 
+    // Agent Skills 分组点击（侧栏）
+    sidebarAgentSkills.addEventListener('click', (e) => {
+        const item = e.target.closest('.sidebar-item');
+        if (!item) return;
+        sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        homeNav.classList.remove('active');
+        currentSkillGroup = item.dataset.skillGroup;
+        currentView = 'skills';
+        searchFrom = 'skills';
+        searchInput.value = '';
+        renderAgentSkills(currentSkillGroup);
+        if (window.innerWidth <= 768) {
+            closeMobileMenu();
+        }
+    });
+
+    // Skills 分组芯片切换（内容区）
+    mediaGrid.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-skill-chip]');
+        if (!chip) return;
+        currentSkillGroup = chip.dataset.skillChip;
+        sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i =>
+            i.classList.toggle('active', i.dataset.skillGroup === currentSkillGroup));
+        renderAgentSkills(currentSkillGroup);
+    });
+
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
         const chip = e.target.closest('.media-chip');
@@ -1068,6 +1195,6 @@ function initEventListeners() {
 
     // Service Worker（PWA 离线缓存，静默失败）
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        navigator.serviceWorker.register('sw.js').catch(() => { });
     }
 }

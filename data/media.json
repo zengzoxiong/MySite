@@ -1334,6 +1334,24 @@
       "type": "纪录片",
       "status": "看过",
       "cover": "assets/media/guobao-mizong.jpg"
+    },
+    {
+      "title": "邻家的天使大人",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2023-01-07",
+      "cover": "assets/media/oto-ninja-tenshi-s1.png",
+      "url": "https://www.themoviedb.org/tv/154743/season/1",
+      "rating": 7.7
+    },
+    {
+      "title": "邻家的天使大人 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "release": "2026-04-03",
+      "cover": "assets/media/oto-ninja-tenshi-s2.jpg",
+      "url": "https://www.themoviedb.org/tv/154743/season/2",
+      "comment": "藤宫周与椎名真昼的续篇，2026 年新番。"
     }
   ]
 }

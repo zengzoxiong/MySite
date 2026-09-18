@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工具箱</title>
-    <meta name="description" content="个人工具箱：在线工具导航、网站收藏、影视观看记录与实时仪表盘（时钟/西安天气/GitHub 数据/今日一言/待办清单）。">
+    <title>拾光集</title>
+    <meta name="description" content="拾光集：个人数字花园——在线工具导航、网站收藏、影视观看记录与实时仪表盘（时钟/天气/GitHub 数据/今日一言/待办清单）。">
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-    <meta property="og:title" content="工具箱">
-    <meta property="og:description" content="个人工具箱：在线工具导航、网站收藏、影视观看记录与实时仪表盘。">
+    <meta property="og:title" content="拾光集">
+    <meta property="og:description" content="拾光集：个人数字花园——工具导航、网站收藏、影视记录与实时仪表盘。">
     <meta property="og:type" content="website">
     <link rel="manifest" href="manifest.json">
     <script async src="https://busuanzi.cc/js/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -22,7 +22,7 @@
     <!-- 左侧侧栏 -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <span class="sidebar-logo">工具箱</span>
+            <span class="sidebar-logo">拾光集</span>
             <div class="header-actions">
                 <button class="home-btn" id="homeNav" title="回到首页">
                     <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -67,12 +67,19 @@
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
-                <a class="sidebar-item" href="skills.html">
-                    <span class="item-text">🧩 Agent Skills</span>
-                </a>
-                <a class="sidebar-item" href="guestbook.html">
-                    <span class="item-text">💬 留言板</span>
-                </a>
+                <button class="sidebar-section-title" data-section="agentSkills" title="展开/收起 Agent Skills">Agent Skills<span class="section-chevron">›</span></button>
+                <div class="section-body" id="sidebarAgentSkills">
+                    <!-- JS 动态渲染 -->
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <button class="sidebar-section-title" data-section="media" title="展开/收起影视记录">影视收藏<span class="section-chevron">›</span></button>
+                <div class="section-body sidebar-media" id="sidebarMedia">
+                    <!-- JS 动态渲染 -->
+                </div>
             </div>
         </nav>
 

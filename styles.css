@@ -1134,6 +1134,13 @@ body.sidebar-collapsed .main-content {
     box-shadow: inset 3px 0 0 var(--accent-color);
 }
 
+/* ===== Agent Skills ===== */
+.skills-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+}
+
 /* ===== 全域搜索 ===== */
 .search-group {
     margin-bottom: 28px;
