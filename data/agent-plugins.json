@@ -1,5 +1,5 @@
 {
-  "note": "Agent Plugin 数据：skills 为技能注册表（安装命令指向上游作者仓库）；mcps 为本站主人的 MCP 服务器配置（stdio 命令为本地路径，仅展示用途）。",
+  "note": "Agent Plugin 数据：skills 为技能注册表（安装命令指向上游作者仓库）；mcps 为站点主人正在使用的 MCP 服务器，config 为脱敏后的接入配置示例（密钥用占位符）。",
   "skills": {
     "groups": [
       {
@@ -195,72 +195,211 @@
     {
       "name": "Baidu Search",
       "type": "http",
-      "desc": "百度网页搜索，中文信息检索首选。"
+      "desc": "百度网页搜索，中文信息检索首选。",
+      "homepage": "https://cloud.baidu.com/product/qianfan_mcp",
+      "config": {
+        "type": "http",
+        "url": "https://qianfan.baidubce.com/v2/tools/web-search/mcp",
+        "headers": {
+          "Authorization": "Bearer <你的千帆 API Key>"
+        }
+      }
     },
     {
       "name": "Github",
       "type": "stdio",
-      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。"
+      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
+      "homepage": "https://github.com/modelcontextprotocol/server-github",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的 GitHub PAT>"
+        }
+      }
     },
     {
       "name": "filesystem",
       "type": "stdio",
-      "desc": "本地文件系统读写与目录管理。"
+      "desc": "本地文件系统读写与目录管理。",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "<允许访问的目录1>",
+          "<允许访问的目录2>"
+        ]
+      }
     },
     {
       "name": "git",
       "type": "stdio",
-      "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。"
+      "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。",
+      "homepage": "https://www.npmjs.com/package/mcp-git",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "mcp-git"
+        ]
+      }
     },
     {
       "name": "context7",
       "type": "stdio",
-      "desc": "第三方编程库的最新官方文档实时查询。"
+      "desc": "第三方编程库的最新官方文档实时查询。",
+      "homepage": "https://github.com/upstash/context7-mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@upstash/context7-mcp"
+        ]
+      }
     },
     {
       "name": "codebase-memory",
       "type": "stdio",
-      "desc": "代码库索引与知识图谱，架构/调用链分析。"
+      "desc": "代码库索引与知识图谱，架构/调用链分析（本地自部署）。",
+      "homepage": null,
+      "config": {
+        "command": "<本地 codebase-memory-mcp 可执行文件路径>"
+      }
     },
     {
       "name": "memory",
       "type": "stdio",
-      "desc": "持久化知识图谱记忆，跨会话保存实体与关系。"
+      "desc": "持久化知识图谱记忆，跨会话保存实体与关系。",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      }
     },
     {
       "name": "sequential-thinking",
       "type": "stdio",
-      "desc": "动态分步推理与复杂问题分解。"
+      "desc": "动态分步推理与复杂问题分解。",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ]
+      }
     },
     {
       "name": "time",
       "type": "stdio",
-      "desc": "时间查询、时区换算、Unix 时间戳。"
+      "desc": "时间查询、时区换算、Unix 时间戳。",
+      "homepage": "https://www.npmjs.com/package/@mcpcentral/mcp-time",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@mcpcentral/mcp-time"
+        ]
+      }
     },
     {
       "name": "drawio",
       "type": "stdio",
-      "desc": "生成与编辑 draw.io 图表文件。"
+      "desc": "生成与编辑 draw.io 图表文件。",
+      "homepage": "https://www.npmjs.com/package/@drawio/mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@drawio/mcp"
+        ]
+      }
     },
     {
       "name": "Markitdown",
       "type": "stdio",
-      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。"
+      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。",
+      "homepage": "https://github.com/microsoft/markitdown",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "markitdown-mcp-npx"
+        ]
+      }
     },
     {
       "name": "playwright",
       "type": "stdio",
-      "desc": "Playwright 浏览器自动化与页面测试。"
+      "desc": "Playwright 浏览器自动化与页面测试。",
+      "homepage": "https://github.com/microsoft/playwright-mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@playwright/mcp"
+        ]
+      }
     },
     {
       "name": "chrome-devtools",
       "type": "stdio",
-      "desc": "Chrome DevTools 协议控制浏览器与性能分析。"
+      "desc": "Chrome DevTools 协议控制浏览器与性能分析。",
+      "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "chrome-devtools-mcp"
+        ]
+      }
     },
     {
       "name": "google-search",
       "type": "stdio",
-      "desc": "Google 网页搜索备用通道。"
+      "desc": "Google 网页搜索（需 Google API Key 与搜索引擎 ID）。",
+      "homepage": "https://github.com/adenot/mcp-google-search",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@adenot/mcp-google-search"
+        ],
+        "env": {
+          "GOOGLE_API_KEY": "<你的 Google API Key>",
+          "GOOGLE_SEARCH_ENGINE_ID": "<你的搜索引擎 ID>"
+        }
+      }
     }
   ]
 }

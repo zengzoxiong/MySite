@@ -499,59 +499,84 @@ async function loadLinks() {
     }
 }
 
-// 技能卡片构建（视图与搜索复用）
+// 技能卡片构建（视图与搜索复用）：渐变头像 + 分组徽标 + 安装命令行
+const SKILL_GRADIENTS = [
+    'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    'linear-gradient(135deg, #0ea5e9, #6366f1)',
+    'linear-gradient(135deg, #10b981, #0ea5e9)',
+    'linear-gradient(135deg, #f59e0b, #ef4444)',
+    'linear-gradient(135deg, #ec4899, #8b5cf6)',
+    'linear-gradient(135deg, #14b8a6, #22c55e)'
+];
+
+function groupBadgeHtml(group) {
+    return group ? `<span class="skill-tag">${escapeHtml(group)}</span>` : '';
+}
+
 function skillCardHtml(s) {
+    const initial = escapeHtml((s.name || '?').charAt(0).toUpperCase());
+    const grad = SKILL_GRADIENTS[(s.name || '').length % SKILL_GRADIENTS.length];
     const install = s.upstream === 'local-only'
         ? `<div class="skill-install"><code>（本地技能，无公开上游仓库）</code></div>`
-        : `<div class="skill-install"><code>npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}</code></div>`;
+        : `<div class="skill-install"><code>npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}</code><button class="copy-btn" data-cmd="npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}">复制</button></div>`;
     const link = s.upstream === 'local-only' ? ''
-        : `<a class="repo-link" style="font-size:0.75rem" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 →</a>`;
+        : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
     return `
     <div class="skill-card">
-        <div class="skill-head">
-            <span class="skill-name">${escapeHtml(s.name)}${s.local ? ' <span class="skill-tag">本地镜像</span>' : ''}</span>
-            <button class="copy-btn" data-cmd="npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}">复制安装命令</button>
+        <div class="skill-top">
+            <div class="skill-avatar" style="background:${grad}">${initial}</div>
+            <div class="skill-title-wrap">
+                <div class="skill-name">${escapeHtml(s.name)}</div>
+                <div class="skill-sub">${groupBadgeHtml(s.group)}${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}</div>
+            </div>
         </div>
         ${install}
-        <div class="skill-tags">${link}</div>
+        <div class="skill-foot">${link}</div>
     </div>`;
 }
 
-// 渲染 Agent Plugin 视图（skills 技能卡片 / mcps 服务器卡片）
+// MCP 卡片构建：头像 + 类型徽标 + 说明 + 配置方法 + 上游链接
+function mcpCardHtml(m) {
+    const initial = escapeHtml((m.name || '?').charAt(0).toUpperCase());
+    const grad = SKILL_GRADIENTS[(m.name || '').length % SKILL_GRADIENTS.length];
+    const configText = escapeHtml(JSON.stringify(m.config, null, 2));
+    const home = m.homepage
+        ? `<a class="skill-link" href="${m.homepage}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
+        : '<span class="skill-link" style="color:var(--text-tertiary)">本地自部署</span>';
+    return `
+    <div class="skill-card">
+        <div class="skill-top">
+            <div class="skill-avatar" style="background:${grad}">${initial}</div>
+            <div class="skill-title-wrap">
+                <div class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></div>
+                <div class="skill-sub">${escapeHtml(m.desc)}</div>
+            </div>
+        </div>
+        <div class="config-block"><div class="config-label">配置方法 · 密钥用占位符，替换为自己的</div><pre>${configText}</pre></div>
+        <div class="skill-foot">${home}</div>
+    </div>`;
+}
+
+// 渲染 Agent Plugin 视图（skills 全量平铺 / mcps 配置卡片）
 function renderPluginCat(cat) {
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
 
-    const groups = (pluginsData.skills || {}).groups || [];
-    let items, countLabel;
+    let cards;
+    let countLabel;
     if (cat === 'mcps') {
-        items = (pluginsData.mcps || []).map(m => `
-            <div class="skill-card">
-                <div class="skill-head">
-                    <span class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></span>
-                </div>
-                <div class="skill-desc">${escapeHtml(m.desc)}</div>
-            </div>`);
-        countLabel = `共 ${items.length} 个 MCP 服务器`;
+        cards = (pluginsData.mcps || []).map(mcpCardHtml);
+        countLabel = `共 ${(pluginsData.mcps || []).length} 个 MCP 服务器`;
     } else {
-        // 'skills' 显示全部技能平铺，分组名则显示该组
-        const group = groups.find(g => g.group === cat);
-        items = (group ? group.items : groups.flatMap(g => g.items)).map(skillCardHtml);
-        countLabel = `共 ${items.length} 个技能`;
+        cards = ((pluginsData.skills || {}).groups || []).flatMap(g =>
+            g.items.map(s => skillCardHtml({ ...s, group: g.group })));
+        countLabel = `共 ${cards.length} 个技能`;
     }
     mediaGrid.innerHTML = `
-        <div class="media-filters">
-            <div class="media-chips">
-                <button class="media-chip${cat !== 'mcps' ? ' active' : ''}" data-plugin-cat="skills">Agent Skills</button>
-                <button class="media-chip${cat === 'mcps' ? ' active' : ''}" data-plugin-cat="mcps">Agent MCP</button>
-                ${cat !== 'mcps' ? groups.map(g =>
-                    `<button class="media-chip${g.group === cat ? ' active' : ''}" data-skill-chip="${g.group}">${g.group}</button>`).join('') : ''}
-            </div>
-            <span class="media-count" style="margin:0">${countLabel}</span>
-        </div>
-        <div class="skills-cards">${items.join('')}</div>
+        <div class="media-count" style="margin-bottom:14px">${countLabel}</div>
+        <div class="skills-cards">${cards.join('')}</div>
     `;
     bindCopyButtons();
 }
@@ -1146,27 +1171,8 @@ function initEventListeners() {
         }
     });
 
-    // Plugin 分类芯片 / 技能分组芯片切换（内容区）
-    mediaGrid.addEventListener('click', (e) => {
-        const catChip = e.target.closest('[data-plugin-cat]');
-        if (catChip) {
-            currentPluginCat = catChip.dataset.pluginCat;
-            sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i =>
-                i.classList.toggle('active', i.dataset.pluginCat === currentPluginCat));
-            renderPluginCat(currentPluginCat);
-            return;
-        }
-        if (currentView !== 'plugin') return;
-        const chip = e.target.closest('[data-skill-chip]');
-        if (!chip) return;
-        currentPluginCat = chip.dataset.skillChip;
-        renderPluginCat(currentPluginCat);
-    });
-
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
-        if (e.target.closest('[data-skill-chip]')) return; // 技能分组芯片由专属处理器处理
-        if (e.target.closest('[data-plugin-cat]')) return; // Plugin 分类芯片由专属处理器处理
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
         currentMediaType = chip.dataset.mediaChip;

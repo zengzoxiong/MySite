@@ -1134,65 +1134,147 @@ body.sidebar-collapsed .main-content {
     box-shadow: inset 3px 0 0 var(--accent-color);
 }
 
-/* ===== Agent Skills ===== */
+/* ===== Agent Skills / MCP 卡片 ===== */
 .skills-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
 }
 
 .skill-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 14px;
+    padding: 16px 18px;
     box-shadow: var(--shadow-card);
-    transition: border-color 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .skill-card:hover {
     border-color: var(--accent-color);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
 }
 
-.skill-head {
+.skill-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.skill-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.skill-title-wrap {
+    min-width: 0;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .skill-name {
-    font-size: 0.92rem;
-    font-weight: 600;
+    font-size: 0.95rem;
+    font-weight: 700;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.skill-sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.skill-desc {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
 }
 
 .skill-install {
     display: flex;
     align-items: center;
-    margin-top: 10px;
-    padding: 7px 12px;
+    gap: 8px;
+    padding: 8px 12px;
     background: var(--hover-bg);
-    border-radius: 8px;
+    border-radius: 9px;
 }
 
 .skill-install code {
+    flex: 1;
     font-family: Consolas, Monaco, monospace;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--text-secondary);
     overflow-x: auto;
     white-space: nowrap;
-    width: 100%;
 }
 
+.skill-foot {
+    display: flex;
+    align-items: center;
+    min-height: 1.2em;
+}
+
+.skill-link {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.skill-link:hover { text-decoration: underline; }
+
 .skill-tag {
-    font-size: 0.7rem;
-    padding: 2px 10px;
+    font-size: 0.68rem;
+    padding: 2px 9px;
     border-radius: 99px;
     background: var(--hover-bg);
     color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.config-block {
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.config-label {
+    padding: 6px 12px;
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    background-color: var(--hover-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.config-block pre {
+    margin: 0;
+    padding: 10px 12px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 0.73rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    max-height: 180px;
 }
 
 .copy-btn {
@@ -1205,12 +1287,16 @@ body.sidebar-collapsed .main-content {
     font-family: inherit;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, transform 0.15s;
 }
 
 .copy-btn:hover {
     background-color: var(--accent-color);
     color: #fff;
+}
+
+.copy-btn:active {
+    transform: scale(0.94);
 }
 
 /* ===== 全域搜索 ===== */
