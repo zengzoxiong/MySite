@@ -871,9 +871,7 @@ function renderMedia(animate = false) {
     else if (currentSort === 'title-desc') sorted.sort((a, b) => byTitle(b, a));
     else sorted.sort(byTitle);
 
-    const chips = (mediaData.types || []).map(t =>
-        `<button class="media-chip${t === currentMediaType ? ' active' : ''}" data-media-chip="${t}">${t}</button>`
-    ).join('') + ['全部', '想看', '在看', '看过'].map(s =>
+    const chips = ['全部', '想看', '在看', '看过'].map(s =>
         `<button class="media-chip media-chip-status${(currentStatusFilter || '全部') === s ? ' active' : ''}" data-status-chip="${s}">${s}</button>`
     ).join('');
     const sortOptions = SORT_OPTIONS.map(([v, label]) =>
@@ -1293,19 +1291,8 @@ function initEventListeners() {
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
         const statusChip = e.target.closest('[data-status-chip]');
-        if (statusChip) {
-            currentStatusFilter = statusChip.dataset.statusChip === '全部' ? '' : statusChip.dataset.statusChip;
-            renderMedia(false);
-            return;
-        }
-        const chip = e.target.closest('.media-chip');
-        if (!chip) return;
-        currentMediaType = chip.dataset.mediaChip;
-        currentStatusFilter = ''; // 切类型时状态重置为全部
-        // 同步侧栏高亮
-        sidebarMedia.querySelectorAll('.sidebar-item').forEach(i =>
-            i.classList.toggle('active', i.dataset.mediaType === currentMediaType));
-        homeNav.classList.remove('active');
+        if (!statusChip) return;
+        currentStatusFilter = statusChip.dataset.statusChip === '全部' ? '' : statusChip.dataset.statusChip;
         renderMedia(false);
     });
 
