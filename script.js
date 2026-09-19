@@ -10,6 +10,7 @@ let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
 let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'skills' | 'search'
 let currentPluginCat = '';
+let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
 const SORT_OPTIONS = [
     ['rating-desc', '按评分（高 → 低）'],
@@ -17,9 +18,7 @@ const SORT_OPTIONS = [
     ['release-desc', '按上映时间（新 → 旧）'],
     ['release-asc', '按上映时间（旧 → 新）'],
     ['title-asc', '按名称 A-Z'],
-    ['title-desc', '按名称 Z-A'],
-    ['status-watched', '仅显示看过'],
-    ['status-watching', '仅显示在看']
+    ['title-desc', '按名称 Z-A']
 ];
 
 // 影视类型对应的渐变占位海报
@@ -368,6 +367,7 @@ function goHome() {
     currentCategory = '';
     currentToolCategory = '';
     currentMediaType = '';
+    currentStatusFilter = '';
     currentPluginCat = '';
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -858,9 +858,8 @@ function renderMedia(animate = false) {
 
     let items = (mediaData.items || []).filter(i => i.type === currentMediaType);
 
-    // 状态过滤（仅显示看过 / 仅显示在看）
-    if (currentSort === 'status-watched') items = items.filter(i => i.status === '看过');
-    else if (currentSort === 'status-watching') items = items.filter(i => i.status === '在看');
+    // 状态过滤（全部 / 想看 / 在看 / 看过）
+    if (currentStatusFilter) items = items.filter(i => i.status === currentStatusFilter);
 
     // 排序
     const sorted = [...items];
@@ -874,6 +873,8 @@ function renderMedia(animate = false) {
 
     const chips = (mediaData.types || []).map(t =>
         `<button class="media-chip${t === currentMediaType ? ' active' : ''}" data-media-chip="${t}">${t}</button>`
+    ).join('') + ['全部', '想看', '在看', '看过'].map(s =>
+        `<button class="media-chip media-chip-status${(currentStatusFilter || '全部') === s ? ' active' : ''}" data-status-chip="${s}">${s}</button>`
     ).join('');
     const sortOptions = SORT_OPTIONS.map(([v, label]) =>
         `<option value="${v}"${v === currentSort ? ' selected' : ''}>${label}</option>`
@@ -1262,6 +1263,7 @@ function initEventListeners() {
         item.classList.add('active');
         homeNav.classList.remove('active');
         currentMediaType = item.dataset.mediaType;
+        currentStatusFilter = '';
         currentView = 'media';
         searchFrom = 'media';
         searchInput.value = '';
@@ -1290,9 +1292,16 @@ function initEventListeners() {
 
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
+        const statusChip = e.target.closest('[data-status-chip]');
+        if (statusChip) {
+            currentStatusFilter = statusChip.dataset.statusChip === '全部' ? '' : statusChip.dataset.statusChip;
+            renderMedia(false);
+            return;
+        }
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
         currentMediaType = chip.dataset.mediaChip;
+        currentStatusFilter = ''; // 切类型时状态重置为全部
         // 同步侧栏高亮
         sidebarMedia.querySelectorAll('.sidebar-item').forEach(i =>
             i.classList.toggle('active', i.dataset.mediaType === currentMediaType));

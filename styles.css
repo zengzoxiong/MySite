@@ -1876,6 +1876,26 @@ body.sidebar-collapsed .main-content {
     color: #fff;
 }
 
+/* 状态芯片：描边幽灵样式，与类型芯片区分 */
+.media-chip-status {
+    background-color: transparent;
+}
+
+.media-chip-status.active {
+    background-color: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-color);
+}
+
+/* 芯片组之间的分隔 */
+.media-chip[data-media-chip]:last-of-type {
+    margin-right: 10px;
+}
+
+.media-chip-status:first-of-type {
+    margin-left: 2px;
+}
+
 .media-count {
     font-size: 0.75rem;
     color: var(--text-tertiary);
