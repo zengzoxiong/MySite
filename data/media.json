@@ -1393,6 +1393,44 @@
       "comment": "藤宫周与椎名真昼的续篇，2026 年新番。"
     },
     {
+      "title": "赛博朋克：边缘行者",
+      "type": "番剧",
+      "status": "想看",
+      "release": "2022-09-13",
+      "comment": "夜之城市的燃烧十月，义体与爱情的十年经典。",
+      "cover": "assets/media/cyberpunk-s1.jpg",
+      "url": "https://anilist.co/anime/120377"
+    },
+    {
+      "title": "赛博朋克：边缘行者 第二季",
+      "type": "番剧",
+      "status": "想看",
+      "release": "2026-10-20",
+      "comment": "Trigger 续作定档 2026 年 10 月。",
+      "cover": "assets/media/cyberpunk-s2.jpg",
+      "url": "https://anilist.co/anime/195539"
+    },
+    {
+      "title": "双城之战 第一季",
+      "type": "番剧",
+      "status": "想看",
+      "url": "https://www.themoviedb.org/tv/94605/season/1",
+      "rating": 8.7,
+      "release": "2021",
+      "comment": "蔚与爆爆，皮尔特沃夫与祖安的姐妹宿命。",
+      "cover": "assets/media/arcane-s1.jpg"
+    },
+    {
+      "title": "双城之战 第二季",
+      "type": "番剧",
+      "status": "想看",
+      "url": "https://www.themoviedb.org/tv/94605/season/2",
+      "rating": 8.7,
+      "release": "2024",
+      "comment": "终章落幕，两姐妹的故事画上句点。",
+      "cover": "assets/media/arcane-s2.jpg"
+    },
+    {
       "title": "开端",
       "type": "电视剧",
       "status": "看过",
