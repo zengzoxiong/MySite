@@ -396,25 +396,7 @@ function renderGhStars(animate = false) {
     mediaGrid.style.display = 'block';
 
     const repos = starsData.repos || [];
-    const cards = repos.map((r, i) => {
-        const initial = escapeHtml((r.name || '?').charAt(0).toUpperCase());
-        const grad = SKILL_GRADIENTS[i % SKILL_GRADIENTS.length];
-        return `
-        <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="skill-card">
-            <div class="skill-top">
-                <div class="skill-avatar" style="background:${grad}">${initial}</div>
-                <div class="skill-title-wrap">
-                    <div class="skill-name">${escapeHtml(r.full_name)}</div>
-                    <span class="skill-tag">★ ${r.stars}</span>
-                </div>
-            </div>
-            ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
-            <div class="skill-foot">
-                ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
-                <span class="skill-link">星标于 ${r.starred_at}</span>
-            </div>
-        </a>`;
-    }).join('');
+    const cards = repos.map(starCardHtml).join('');
 
     mediaGrid.innerHTML = `
         <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''}</div>
@@ -495,31 +477,10 @@ function renderSearchResults(term) {
         html += group('🧩 Agent Skills', skills.length, `<div class="skills-cards">${skills.map(skillCardHtml).join('')}</div>`);
     }
     if (mcps.length) {
-        const mcpCard = (m) => `
-            <div class="skill-card">
-                <div class="skill-top">
-                    <div class="skill-avatar">${escapeHtml((m.name || '?').charAt(0).toUpperCase())}</div>
-                    <div class="skill-title-wrap">
-                        <div class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></div>
-                        <div class="skill-sub">${escapeHtml(m.desc)}</div>
-                    </div>
-                </div>
-            </div>`;
-        html += group('🔌 Agent MCP', mcps.length, `<div class="skills-cards">${mcps.map(mcpCard).join('')}</div>`);
+        html += group('🔌 Agent MCP', mcps.length, `<div class="skills-cards">${mcps.map(mcpCardHtml).join('')}</div>`);
     }
     if (stars.length) {
-        const starCard = (r) => `
-            <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="skill-card">
-                <div class="skill-top">
-                    <div class="skill-title-wrap" style="min-width:0">
-                        <div class="skill-name">${escapeHtml(r.full_name)}</div>
-                        <span class="skill-tag">★ ${r.stars}</span>
-                    </div>
-                </div>
-                ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
-                <div class="skill-foot">${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}</div>
-            </a>`;
-        html += group('⭐ GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCard).join('')}</div>`);
+        html += group('⭐ GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCardHtml).join('')}</div>`);
     }
     linksGrid.innerHTML = html;
     recalcMarquee();
@@ -581,63 +542,78 @@ async function loadLinks() {
     }
 }
 
-// 技能卡片构建（视图与搜索复用）：渐变头像 + 分组徽标 + 安装命令行
-const SKILL_GRADIENTS = [
-    'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    'linear-gradient(135deg, #0ea5e9, #6366f1)',
-    'linear-gradient(135deg, #10b981, #0ea5e9)',
-    'linear-gradient(135deg, #f59e0b, #ef4444)',
-    'linear-gradient(135deg, #ec4899, #8b5cf6)',
-    'linear-gradient(135deg, #14b8a6, #22c55e)'
-];
-
-function groupBadgeHtml(group) {
-    return group ? `<span class="skill-tag">${escapeHtml(group)}</span>` : '';
-}
-
+// 技能卡片构建（视图与搜索复用）：与收藏卡片同一极简语言
 function skillCardHtml(s) {
-    const initial = escapeHtml((s.name || '?').charAt(0).toUpperCase());
-    const grad = SKILL_GRADIENTS[(s.name || '').length % SKILL_GRADIENTS.length];
     const install = s.upstream === 'local-only'
-        ? `<div class="skill-install"><code>（本地技能，无公开上游仓库）</code></div>`
-        : `<div class="skill-install"><code>npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}</code><button class="copy-btn" data-cmd="npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}">复制</button></div>`;
+        ? ''
+        : `npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}`;
     const link = s.upstream === 'local-only' ? ''
         : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
     return `
     <div class="skill-card">
-        <div class="skill-top">
-            <div class="skill-avatar" style="background:${grad}">${initial}</div>
-            <div class="skill-title-wrap">
-                <div class="skill-name">${escapeHtml(s.name)}</div>
-                <div class="skill-sub">${groupBadgeHtml(s.group)}${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}</div>
+        <div class="skill-row">
+            <div class="skill-icon">${escapeHtml((s.name || '?').charAt(0).toUpperCase())}</div>
+            <div class="skill-main">
+                <div class="skill-title-row">
+                    <span class="skill-name">${escapeHtml(s.name)}</span>
+                    ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
+                    ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
+                </div>
+                ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
             </div>
+            ${install ? `<button class="copy-btn" data-cmd="${install}">复制</button>` : ''}
         </div>
-        ${install}
-        <div class="skill-foot">${link}</div>
+        <div class="skill-meta">${link}</div>
     </div>`;
 }
 
-// MCP 卡片构建：头像 + 类型徽标 + 说明 + 配置方法 + 上游链接
+// MCP 卡片构建：说明 + 可展开配置 + 官方页面
 function mcpCardHtml(m) {
-    const initial = escapeHtml((m.name || '?').charAt(0).toUpperCase());
-    const grad = SKILL_GRADIENTS[(m.name || '').length % SKILL_GRADIENTS.length];
     const configText = escapeHtml(JSON.stringify(m.config, null, 2));
     const home = m.homepage
         ? `<a class="skill-link" href="${m.homepage}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
-        : '<span class="skill-link" style="color:var(--text-tertiary)">本地自部署</span>';
+        : '<span class="skill-link">本地自部署</span>';
     return `
     <div class="skill-card">
-        <div class="skill-top">
-            <div class="skill-avatar" style="background:${grad}">${initial}</div>
-            <div class="skill-title-wrap">
-                <div class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></div>
-                <div class="skill-sub">${escapeHtml(m.desc)}</div>
+        <div class="skill-row">
+            <div class="skill-icon">${escapeHtml((m.name || '?').charAt(0).toUpperCase())}</div>
+            <div class="skill-main">
+                <div class="skill-title-row">
+                    <span class="skill-name">${escapeHtml(m.name)}</span>
+                    <span class="skill-tag">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span>
+                </div>
+                <div class="skill-desc">${escapeHtml(m.desc)}</div>
             </div>
         </div>
-        <div class="config-block"><div class="config-label">配置方法 · 密钥用占位符，替换为自己的</div><pre>${configText}</pre></div>
-        <div class="skill-foot">${home}</div>
+        <details class="config-block">
+            <summary>配置方法<span class="config-hint">密钥请替换为自己的</span></summary>
+            <pre>${configText}</pre>
+        </details>
+        <div class="skill-meta">${home}</div>
     </div>`;
 }
+
+// GitHub Stars 卡片构建
+function starCardHtml(r) {
+    return `
+    <a class="skill-card" href="${r.url}" target="_blank" rel="noopener noreferrer">
+        <div class="skill-row">
+            <div class="skill-icon">${escapeHtml((r.name || '?').charAt(0).toUpperCase())}</div>
+            <div class="skill-main">
+                <div class="skill-title-row">
+                    <span class="skill-name">${escapeHtml(r.full_name)}</span>
+                    <span class="skill-tag">★ ${r.stars}</span>
+                </div>
+                ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
+            </div>
+        </div>
+        <div class="skill-meta">
+            ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
+            <span class="skill-tag">星标于 ${r.starred_at}</span>
+        </div>
+    </a>`;
+}
+
 
 // 渲染 Agent Plugin 视图（skills 全量平铺 / mcps 配置卡片）
 function renderPluginCat(cat) {
