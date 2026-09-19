@@ -475,6 +475,18 @@ function initMusicPlayer() {
     mp.el.next = document.getElementById('mpNext');
     mp.el.play = document.getElementById('mpPlay');
     mp.el.progress = document.getElementById('mpProgress');
+    mp.el.wrap = document.getElementById('musicWrap');
+
+    // 拉绳收起/展开（状态记忆）
+    if (localStorage.getItem('mpStashed') === '1') {
+        mp.el.wrap.classList.add('stashed');
+    }
+    const toggleStash = () => {
+        const stashed = mp.el.wrap.classList.toggle('stashed');
+        localStorage.setItem('mpStashed', stashed ? '1' : '0');
+    };
+    mp.el.cord = document.getElementById('mpCord');
+    mp.el.cord.addEventListener('click', toggleStash);
 
     fetch('data/playlist.json')
         .then(r => r.json())
@@ -485,6 +497,10 @@ function initMusicPlayer() {
     mp.el.prev.addEventListener('click', () => mpLoad(mp.idx - 1, mp.playing));
     mp.el.next.addEventListener('click', () => mpLoad(mp.idx + 1, mp.playing));
 
+    mp.audio.addEventListener('error', () => {
+        mp.el.title.textContent = '音频加载失败，请检查文件';
+        mpSyncUI();
+    });
     mp.audio.addEventListener('play', mpSyncUI);
     mp.audio.addEventListener('pause', mpSyncUI);
     mp.audio.addEventListener('ended', () => mpLoad(mp.idx + 1, true));

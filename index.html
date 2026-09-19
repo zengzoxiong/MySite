@@ -119,8 +119,12 @@
                 </span>
             </div>
 
-            <!-- 左上：迷你音乐播放器 -->
-            <div class="corner music-player" id="musicPlayer">
+            <!-- 左上：迷你音乐播放器（拉绳收起/展开） -->
+            <div class="music-wrap" id="musicWrap">
+                <button class="mp-cord" id="mpCord" title="拉一下收起/展开" aria-label="收起或展开音乐播放器">
+                    <span class="mp-knob"></span>
+                </button>
+                <div class="corner music-player" id="musicPlayer">
                 <div class="mp-row">
                     <button class="mp-btn" id="mpPrev" title="上一首" aria-label="上一首">
                         <svg viewBox="0 0 24 24" width="13" height="13"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
@@ -141,6 +145,7 @@
                     <div class="mp-fill" id="mpFill"></div>
                 </div>
             </div>
+            </div><!-- /music-wrap -->
 
             <!-- 左下：时光进度 -->
             <div class="corner progress-corner">
