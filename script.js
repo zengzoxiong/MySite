@@ -902,9 +902,9 @@ function renderMedia(animate = false) {
     recalcMarquee();
 }
 
-// 重算溢出标题的滚动参数（渲染后与窗口 resize 时调用）
+// 重算溢出标题的滚动参数（渲染后与窗口 resize 时调用；扫描全文档，覆盖搜索结果）
 function recalcMarquee() {
-    mediaGrid.querySelectorAll('.media-title').forEach(el => {
+    document.querySelectorAll('.media-title').forEach(el => {
         const span = el.querySelector('.t');
         if (!span) return;
         const overflow = span.scrollWidth > el.clientWidth + 1;

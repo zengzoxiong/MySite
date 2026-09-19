@@ -394,16 +394,6 @@
       "release": "2025-06-20"
     },
     {
-      "title": "暴太郎战队咚兄弟",
-      "type": "番剧",
-      "status": "看过",
-      "rating": 8.8,
-      "comment": "暴太郎银河学园，无厘头特摄神作。",
-      "cover": "assets/media/donbrothers.jpg",
-      "url": "https://www.themoviedb.org/tv/153918",
-      "release": "2022-03-06"
-    },
-    {
       "title": "灵能百分百 第一季",
       "type": "番剧",
       "status": "看过",
@@ -1281,6 +1271,24 @@
       "url": "https://www.themoviedb.org/movie/1575337"
     },
     {
+      "title": "暴太郎战队咚兄弟vs全开者",
+      "type": "电影",
+      "status": "看过",
+      "rating": 4.7,
+      "release": "2023-05-03",
+      "url": "https://www.themoviedb.org/movie/1092060",
+      "cover": "assets/media/donbrothers-vs-zenkaiger.jpg"
+    },
+    {
+      "title": "暴太郎战队咚兄弟 电影：新·初恋英雄",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.3,
+      "release": "2022-07-22",
+      "url": "https://www.themoviedb.org/movie/937315",
+      "cover": "assets/media/donbrothers-movie.jpg"
+    },
+    {
       "title": "假面骑士极狐",
       "type": "特摄",
       "status": "看过",
@@ -1321,24 +1329,6 @@
       "url": "https://www.themoviedb.org/tv/95707"
     },
     {
-      "title": "暴太郎战队咚兄弟vs全开者",
-      "type": "特摄",
-      "status": "看过",
-      "rating": 4.7,
-      "release": "2023-05-03",
-      "url": "https://www.themoviedb.org/movie/1092060",
-      "cover": "assets/media/donbrothers-vs-zenkaiger.jpg"
-    },
-    {
-      "title": "暴太郎战队咚兄弟 电影：新·初恋英雄",
-      "type": "特摄",
-      "status": "看过",
-      "rating": 6.3,
-      "release": "2022-07-22",
-      "url": "https://www.themoviedb.org/movie/937315",
-      "cover": "assets/media/donbrothers-movie.jpg"
-    },
-    {
       "title": "烈车战队特急者",
       "type": "特摄",
       "status": "看过",
@@ -1347,6 +1337,16 @@
       "release": "2014-02-16",
       "url": "https://www.themoviedb.org/tv/68696",
       "cover": "assets/media/toqger.jpg"
+    },
+    {
+      "title": "暴太郎战队咚兄弟",
+      "type": "特摄",
+      "status": "看过",
+      "rating": 8.8,
+      "comment": "暴太郎银河学园，无厘头特摄神作。",
+      "cover": "assets/media/donbrothers.jpg",
+      "url": "https://www.themoviedb.org/tv/153918",
+      "release": "2022-03-06"
     },
     {
       "title": "国宝谜踪",
