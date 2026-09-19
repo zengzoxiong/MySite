@@ -38,11 +38,21 @@
     {
       "title": "Re:从零开始的异世界生活 第三季",
       "type": "番剧",
-      "status": "在看",
+      "status": "看过",
       "release": "2024-10-02",
       "rating": 8.1,
       "url": "https://anilist.co/anime/163134",
       "cover": "assets/media/re-zero-s3.jpg"
+    },
+    {
+      "title": "Re:从零开始的异世界生活 第四季",
+      "type": "番剧",
+      "status": "想看",
+      "rating": 8.1,
+      "release": "2026-04-08",
+      "comment": "第四季开播，追番中之前的等待。",
+      "cover": "assets/media/re-zero-s4.jpg",
+      "url": "https://anilist.co/anime/189046"
     },
     {
       "title": "无职转生",
