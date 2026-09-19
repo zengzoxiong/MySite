@@ -1272,6 +1272,15 @@
       "cover": "assets/media/sea-in-box.jpg"
     },
     {
+      "title": "超辉夜姬",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.1,
+      "release": "2026-01-21",
+      "cover": "assets/media/kaguya-hime.jpg",
+      "url": "https://www.themoviedb.org/movie/1575337"
+    },
+    {
       "title": "假面骑士极狐",
       "type": "特摄",
       "status": "看过",
@@ -1290,15 +1299,6 @@
       "comment": "潜入梦境的令和新骑士，紫色黎明。",
       "cover": "assets/media/kamen-rider-zeztz.jpg",
       "url": "https://www.themoviedb.org/tv/295434"
-    },
-    {
-      "title": "超辉夜姬",
-      "type": "特摄",
-      "status": "看过",
-      "rating": 8.1,
-      "release": "2026-01-21",
-      "cover": "assets/media/kaguya-hime.jpg",
-      "url": "https://www.themoviedb.org/movie/1575337"
     },
     {
       "title": "兽电战队强龙者",
@@ -1337,6 +1337,16 @@
       "release": "2022-07-22",
       "url": "https://www.themoviedb.org/movie/937315",
       "cover": "assets/media/donbrothers-movie.jpg"
+    },
+    {
+      "title": "烈车战队特急者",
+      "type": "特摄",
+      "status": "看过",
+      "comment": "彩虹线的想象力冒险，车站永远的家。",
+      "rating": 7.4,
+      "release": "2014-02-16",
+      "url": "https://www.themoviedb.org/tv/68696",
+      "cover": "assets/media/toqger.jpg"
     },
     {
       "title": "国宝谜踪",
