@@ -17,7 +17,9 @@ const SORT_OPTIONS = [
     ['release-desc', '按上映时间（新 → 旧）'],
     ['release-asc', '按上映时间（旧 → 新）'],
     ['title-asc', '按名称 A-Z'],
-    ['title-desc', '按名称 Z-A']
+    ['title-desc', '按名称 Z-A'],
+    ['status-watched', '仅显示看过'],
+    ['status-watching', '仅显示在看']
 ];
 
 // 影视类型对应的渐变占位海报
@@ -576,7 +578,7 @@ function mcpCardHtml(m) {
         </div>
         <div class="skill-desc">${escapeHtml(m.desc)}</div>
         <details class="config-block">
-            <summary>配置方法<span class="config-hint">密钥请替换为自己的</span></summary>
+            <summary>配置方法</summary>
             <pre>${configText}</pre>
         </details>
         <div class="skill-meta">${home}</div>
@@ -597,7 +599,6 @@ function starCardHtml(r) {
         </div>
         ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
         <div class="skill-meta">
-            ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
             <span class="skill-tag">星标于 ${r.starred_at}</span>
         </div>
     </a>`;
@@ -637,7 +638,7 @@ function mcpCardHtml(m) {
         </div>
         <div class="skill-desc">${escapeHtml(m.desc)}</div>
         <details class="config-block">
-            <summary>配置方法<span class="config-hint">密钥请替换为自己的</span></summary>
+            <summary>配置方法</summary>
             <pre>${configText}</pre>
         </details>
         <div class="skill-meta">${home}</div>
@@ -856,6 +857,10 @@ function renderMedia(animate = false) {
     mediaGrid.style.display = 'block';
 
     let items = (mediaData.items || []).filter(i => i.type === currentMediaType);
+
+    // 状态过滤（仅显示看过 / 仅显示在看）
+    if (currentSort === 'status-watched') items = items.filter(i => i.status === '看过');
+    else if (currentSort === 'status-watching') items = items.filter(i => i.status === '在看');
 
     // 排序
     const sorted = [...items];

@@ -487,10 +487,10 @@ body.modal-open {
 
 /* 设置页组件（供 settings.html 使用） */
 .settings-title {
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .settings-item {
@@ -498,12 +498,13 @@ body.modal-open {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 7px 0;
+    padding: 10px 0;
 }
 
 .settings-label {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .settings-switch {
@@ -550,25 +551,26 @@ body.modal-open {
     transform: translateX(15px);
 }
 
-.settings-action {
-    width: 100%;
-    margin-top: 8px;
-    padding: 7px 10px;
+.settings-clear {
+    padding: 6px 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: none;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-family: inherit;
     cursor: pointer;
-    text-align: center;
-    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+    flex-shrink: 0;
+    transition: color 0.2s, border-color 0.2s, transform 0.15s;
 }
 
-.settings-action:hover {
+.settings-clear:hover {
     color: #ef4444;
     border-color: #ef4444;
-    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.settings-clear:active {
+    transform: scale(0.94);
 }
 
 /* 动画关闭：全局禁用过渡与关键帧动画 */
@@ -1240,9 +1242,9 @@ body.sidebar-collapsed .main-content {
 
 .skill-stars {
     margin-left: auto;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f59e0b;
     font-variant-numeric: tabular-nums;
 }
 
