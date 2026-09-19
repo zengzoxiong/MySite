@@ -1,0 +1,266 @@
+{
+  "note": "Agent Plugin 数据：skills 为技能注册表（安装命令指向上游作者仓库）；mcps 为本站主人的 MCP 服务器配置（stdio 命令为本地路径，仅展示用途）。",
+  "skills": {
+    "groups": [
+      {
+        "group": "工作流与规划",
+        "items": [
+          {
+            "name": "using-superpowers",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "brainstorming",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "writing-plans",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "executing-plans",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "subagent-driven-development",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "dispatching-parallel-agents",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "requesting-code-review",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "receiving-code-review",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "verification-before-completion",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "test-driven-development",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "systematic-debugging",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "using-git-worktrees",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "finishing-a-development-branch",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "writing-skills",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "grilling",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "grill-me",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "to-spec",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "to-tickets",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "codebase-design",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "find-skills",
+            "upstream": "obra/superpowers"
+          }
+        ]
+      },
+      {
+        "group": "文档处理",
+        "items": [
+          {
+            "name": "docx",
+            "upstream": "anthropics/skills"
+          },
+          {
+            "name": "pdf",
+            "upstream": "anthropics/skills"
+          },
+          {
+            "name": "pptx",
+            "upstream": "anthropics/skills"
+          },
+          {
+            "name": "xlsx",
+            "upstream": "anthropics/skills"
+          },
+          {
+            "name": "skill-creator",
+            "upstream": "anthropics/skills"
+          },
+          {
+            "name": "ppt-master",
+            "upstream": "macrochen/ppt-master-skill"
+          },
+          {
+            "name": "humanizer-zh",
+            "upstream": "op7418/Humanizer-zh"
+          },
+          {
+            "name": "planning-with-files-zh",
+            "upstream": "OthmanAdi/planning-with-files"
+          }
+        ]
+      },
+      {
+        "group": "代码与设计",
+        "items": [
+          {
+            "name": "ui-ux-pro-max",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
+            "name": "ponytail",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "svg-architecture-diagram",
+            "upstream": "zengzoxiong/skills",
+            "local": true
+          },
+          {
+            "name": "tmdb-media-catalog",
+            "upstream": "zengzoxiong/skills",
+            "local": true
+          },
+          {
+            "name": "static-site-launch-checklist",
+            "upstream": "zengzoxiong/skills",
+            "local": true
+          }
+        ]
+      },
+      {
+        "group": "研究与分析",
+        "items": [
+          {
+            "name": "academic-search",
+            "upstream": "local-only"
+          },
+          {
+            "name": "research",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "code-graph",
+            "upstream": "local-only"
+          },
+          {
+            "name": "drawio",
+            "upstream": "local-only"
+          },
+          {
+            "name": "api-documentation-generator",
+            "upstream": "local-only"
+          },
+          {
+            "name": "understand",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-dashboard",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-domain",
+            "upstream": "Egonex-AI/Understand-Anything"
+          }
+        ]
+      }
+    ]
+  },
+  "mcps": [
+    {
+      "name": "Baidu Search",
+      "type": "http",
+      "desc": "百度网页搜索，中文信息检索首选。"
+    },
+    {
+      "name": "Github",
+      "type": "stdio",
+      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。"
+    },
+    {
+      "name": "filesystem",
+      "type": "stdio",
+      "desc": "本地文件系统读写与目录管理。"
+    },
+    {
+      "name": "git",
+      "type": "stdio",
+      "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。"
+    },
+    {
+      "name": "context7",
+      "type": "stdio",
+      "desc": "第三方编程库的最新官方文档实时查询。"
+    },
+    {
+      "name": "codebase-memory",
+      "type": "stdio",
+      "desc": "代码库索引与知识图谱，架构/调用链分析。"
+    },
+    {
+      "name": "memory",
+      "type": "stdio",
+      "desc": "持久化知识图谱记忆，跨会话保存实体与关系。"
+    },
+    {
+      "name": "sequential-thinking",
+      "type": "stdio",
+      "desc": "动态分步推理与复杂问题分解。"
+    },
+    {
+      "name": "time",
+      "type": "stdio",
+      "desc": "时间查询、时区换算、Unix 时间戳。"
+    },
+    {
+      "name": "drawio",
+      "type": "stdio",
+      "desc": "生成与编辑 draw.io 图表文件。"
+    },
+    {
+      "name": "Markitdown",
+      "type": "stdio",
+      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。"
+    },
+    {
+      "name": "playwright",
+      "type": "stdio",
+      "desc": "Playwright 浏览器自动化与页面测试。"
+    },
+    {
+      "name": "chrome-devtools",
+      "type": "stdio",
+      "desc": "Chrome DevTools 协议控制浏览器与性能分析。"
+    },
+    {
+      "name": "google-search",
+      "type": "stdio",
+      "desc": "Google 网页搜索备用通道。"
+    }
+  ]
+}

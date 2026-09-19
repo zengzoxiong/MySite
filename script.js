@@ -2,13 +2,13 @@
 let allLinks = [];
 let allTools = [];
 let mediaData = { types: [], items: [] };
-let skillsRegistry = { groups: [] };
+let pluginsData = { skills: { groups: [] }, mcps: [] };
 let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
 let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'skills' | 'search'
-let currentSkillGroup = '';
+let currentPluginCat = '';
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
 const SORT_OPTIONS = [
     ['rating-desc', '按评分（高 → 低）'],
@@ -42,7 +42,7 @@ const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
-const sidebarAgentSkills = document.getElementById('sidebarAgentSkills');
+const sidebarPlugin = document.getElementById('sidebarPlugin');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const settingsBackdrop = document.getElementById('settingsBackdrop');
@@ -365,11 +365,11 @@ function goHome() {
     currentCategory = '';
     currentToolCategory = '';
     currentMediaType = '';
-    currentSkillGroup = '';
+    currentPluginCat = '';
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     homeNav.classList.add('active');
     renderLinks();
     searchInput.blur();
@@ -382,7 +382,7 @@ function goHome() {
 function renderCurrentView(animate = false) {
     if (currentView === 'tools') renderTools(animate);
     else if (currentView === 'media') renderMedia(animate);
-    else if (currentView === 'skills') renderAgentSkills(currentSkillGroup);
+    else if (currentView === 'plugin') renderPluginCat(currentPluginCat);
     else renderLinks(animate);
 }
 
@@ -490,24 +490,13 @@ async function loadLinks() {
         console.error('影视数据加载失败:', error);
     }
 
-    // Agent Skills 注册表独立加载
+    // Agent Plugin 数据独立加载（skills + mcps）
     try {
-        const skillsRes = await fetch('data/skills-registry.json');
-        skillsRegistry = await skillsRes.json();
-        renderSidebarAgentSkills();
+        const pluginRes = await fetch('data/agent-plugins.json');
+        pluginsData = await pluginRes.json();
     } catch (error) {
-        console.error('Skills 注册表加载失败:', error);
+        console.error('Agent Plugin 数据加载失败:', error);
     }
-}
-
-// 渲染侧栏 Agent Skills 区（分组导航，点击进入 Skills 视图）
-function renderSidebarAgentSkills() {
-    const groups = skillsRegistry.groups || [];
-    sidebarAgentSkills.innerHTML = groups.map(g => `
-        <div class="sidebar-item" role="button" tabindex="0" data-skill-group="${g.group}">
-            <span class="item-text">${g.group}</span>
-        </div>
-    `).join('');
 }
 
 // 技能卡片构建（视图与搜索复用）
@@ -528,24 +517,41 @@ function skillCardHtml(s) {
     </div>`;
 }
 
-// 渲染 Agent Skills 视图（该分组的技能卡片）
-function renderAgentSkills(groupName) {
+// 渲染 Agent Plugin 视图（skills 技能卡片 / mcps 服务器卡片）
+function renderPluginCat(cat) {
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
 
-    const group = (skillsRegistry.groups || []).find(g => g.group === groupName);
-    const items = group ? group.items : [];
-    const card = skillCardHtml;
+    const groups = (pluginsData.skills || {}).groups || [];
+    let items, countLabel;
+    if (cat === 'mcps') {
+        items = (pluginsData.mcps || []).map(m => `
+            <div class="skill-card">
+                <div class="skill-head">
+                    <span class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></span>
+                </div>
+                <div class="skill-desc">${escapeHtml(m.desc)}</div>
+            </div>`);
+        countLabel = `共 ${items.length} 个 MCP 服务器`;
+    } else {
+        // 'skills' 显示全部技能平铺，分组名则显示该组
+        const group = groups.find(g => g.group === cat);
+        items = (group ? group.items : groups.flatMap(g => g.items)).map(skillCardHtml);
+        countLabel = `共 ${items.length} 个技能`;
+    }
     mediaGrid.innerHTML = `
         <div class="media-filters">
-            <div class="media-chips">${(skillsRegistry.groups || []).map(g =>
-                `<button class="media-chip${g.group === groupName ? ' active' : ''}" data-skill-chip="${g.group}">${g.group}</button>`).join('')}
+            <div class="media-chips">
+                <button class="media-chip${cat !== 'mcps' ? ' active' : ''}" data-plugin-cat="skills">Agent Skills</button>
+                <button class="media-chip${cat === 'mcps' ? ' active' : ''}" data-plugin-cat="mcps">Agent MCP</button>
+                ${cat !== 'mcps' ? groups.map(g =>
+                    `<button class="media-chip${g.group === cat ? ' active' : ''}" data-skill-chip="${g.group}">${g.group}</button>`).join('') : ''}
             </div>
-            <span class="media-count" style="margin:0">共 ${items.length} 个技能</span>
+            <span class="media-count" style="margin:0">${countLabel}</span>
         </div>
-        <div class="skills-cards">${items.map(card).join('')}</div>
+        <div class="skills-cards">${items.join('')}</div>
     `;
     bindCopyButtons();
 }
@@ -871,8 +877,11 @@ function buildCmdkCommands() {
     const cmds = [
         { icon: '🏠', label: '回到首页', run: goHome },
         { icon: '⚙️', label: '打开设置', run: () => document.getElementById('settingsBtn').click() },
-        { icon: '🧩', label: 'Agent Skills：工作流与规划', run: () => {
-            document.querySelector('[data-skill-group="工作流与规划"]')?.click();
+        { icon: '🧩', label: 'Agent Plugin：Agent Skills', run: () => {
+            document.querySelector('#sidebarPlugin [data-plugin-cat="skills"]')?.click();
+        } },
+        { icon: '🔌', label: 'Agent Plugin：Agent MCP', run: () => {
+            document.querySelector('#sidebarPlugin [data-plugin-cat="mcps"]')?.click();
         } },
         {
             icon: '🔄', label: '切换深色模式', run: () => {
@@ -1040,7 +1049,7 @@ function initEventListeners() {
                 sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 homeNav.classList.remove('active');
             }
             renderSearchWithLoading(term);
@@ -1120,36 +1129,44 @@ function initEventListeners() {
         }
     });
 
-    // Agent Skills 分组点击（侧栏）
-    sidebarAgentSkills.addEventListener('click', (e) => {
+    // Agent Plugin 分类点击（侧栏：Agent Skills / Agent MCP）
+    sidebarPlugin.addEventListener('click', (e) => {
         const item = e.target.closest('.sidebar-item');
         if (!item) return;
-        sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
-        currentSkillGroup = item.dataset.skillGroup;
-        currentView = 'skills';
-        searchFrom = 'skills';
+        currentPluginCat = item.dataset.pluginCat;
+        currentView = 'plugin';
+        searchFrom = 'plugin';
         searchInput.value = '';
-        renderAgentSkills(currentSkillGroup);
+        renderPluginCat(currentPluginCat);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
         }
     });
 
-    // Skills 分组芯片切换（内容区）
+    // Plugin 分类芯片 / 技能分组芯片切换（内容区）
     mediaGrid.addEventListener('click', (e) => {
+        const catChip = e.target.closest('[data-plugin-cat]');
+        if (catChip) {
+            currentPluginCat = catChip.dataset.pluginCat;
+            sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i =>
+                i.classList.toggle('active', i.dataset.pluginCat === currentPluginCat));
+            renderPluginCat(currentPluginCat);
+            return;
+        }
+        if (currentView !== 'plugin') return;
         const chip = e.target.closest('[data-skill-chip]');
         if (!chip) return;
-        currentSkillGroup = chip.dataset.skillChip;
-        sidebarAgentSkills.querySelectorAll('.sidebar-item').forEach(i =>
-            i.classList.toggle('active', i.dataset.skillGroup === currentSkillGroup));
-        renderAgentSkills(currentSkillGroup);
+        currentPluginCat = chip.dataset.skillChip;
+        renderPluginCat(currentPluginCat);
     });
 
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
         if (e.target.closest('[data-skill-chip]')) return; // 技能分组芯片由专属处理器处理
+        if (e.target.closest('[data-plugin-cat]')) return; // Plugin 分类芯片由专属处理器处理
         const chip = e.target.closest('.media-chip');
         if (!chip) return;
         currentMediaType = chip.dataset.mediaChip;

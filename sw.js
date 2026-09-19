@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（stale-while-revalidate） */
-const CACHE = 'mysite-v2';
+const CACHE = 'mysite-v3';
 const PRECACHE = [
     './',
     './index.html',
@@ -9,7 +9,7 @@ const PRECACHE = [
     './data/links.json',
     './data/tools.json',
     './data/media.json',
-    './data/skills-registry.json',
+    './data/agent-plugins.json',
     './manifest.json',
     './assets/icon.svg'
 ];
