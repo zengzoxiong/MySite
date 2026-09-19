@@ -119,6 +119,29 @@
                 </span>
             </div>
 
+            <!-- 左上：迷你音乐播放器 -->
+            <div class="corner music-player" id="musicPlayer">
+                <div class="mp-row">
+                    <button class="mp-btn" id="mpPrev" title="上一首" aria-label="上一首">
+                        <svg viewBox="0 0 24 24" width="13" height="13"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button class="mp-btn mp-play" id="mpPlay" title="播放/暂停" aria-label="播放或暂停">
+                        <svg class="mp-ic-play" viewBox="0 0 24 24" width="15" height="15"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="mp-ic-pause" viewBox="0 0 24 24" width="15" height="15" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+                    </button>
+                    <button class="mp-btn" id="mpNext" title="下一首" aria-label="下一首">
+                        <svg viewBox="0 0 24 24" width="13" height="13"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
+                    </button>
+                    <div class="mp-info">
+                        <div class="mp-title" id="mpTitle">歌单待补充</div>
+                        <div class="mp-time" id="mpTime">0:00 / 0:00</div>
+                    </div>
+                </div>
+                <div class="mp-progress" id="mpProgress" title="点击跳转进度">
+                    <div class="mp-fill" id="mpFill"></div>
+                </div>
+            </div>
+
             <!-- 左下：时光进度 -->
             <div class="corner progress-corner">
                 <div class="section-label">时光进度</div>

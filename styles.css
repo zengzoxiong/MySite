@@ -790,6 +790,91 @@ body.sidebar-collapsed .main-content {
     transform: scale(0.97);
 }
 
+/* 左上：迷你音乐播放器 */
+.music-player {
+    top: 0;
+    left: 0;
+    width: 250px;
+    animation: fadeUp 0.5s ease 0.1s backwards;
+}
+
+.mp-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mp-btn {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s, background-color 0.2s, transform 0.15s;
+}
+
+.mp-btn svg { fill: currentColor; }
+
+.mp-btn:hover {
+    color: var(--accent-color);
+    background-color: rgba(99, 102, 241, 0.12);
+}
+
+.mp-btn:active { transform: scale(0.9); }
+
+.mp-play {
+    width: 32px;
+    height: 32px;
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.mp-play:hover {
+    color: #fff;
+    background-color: var(--accent-color);
+    opacity: 0.9;
+}
+
+.mp-info { flex: 1; min-width: 0; }
+
+.mp-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-time {
+    font-size: 0.66rem;
+    color: var(--text-tertiary);
+    margin-top: 1px;
+    font-variant-numeric: tabular-nums;
+}
+
+.mp-progress {
+    height: 4px;
+    background-color: var(--hover-bg);
+    border-radius: 99px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.mp-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-color), #8b5cf6);
+    transition: width 0.2s linear;
+}
+
 /* 右上：站点访问统计（不蒜子） */
 .site-stat {
     top: 52px;

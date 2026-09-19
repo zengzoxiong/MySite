@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAnimSetting();
     initSettingsModal();
     initPalette();
+    initMusicPlayer();
     initSidebar();
     initEventListeners();
     initDashboard();
@@ -425,6 +426,79 @@ function renderGhStars(animate = false) {
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
     recalcMarquee();
+}
+
+// ===== 首页迷你音乐播放器 =====
+const mp = {
+    tracks: [], idx: 0, playing: false,
+    audio: new Audio(),
+    el: {}
+};
+
+function fmtTime(sec) {
+    if (!isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function mpLoad(idx, autoplay) {
+    if (!mp.tracks.length) return;
+    mp.idx = (idx + mp.tracks.length) % mp.tracks.length;
+    const t = mp.tracks[mp.idx];
+    mp.audio.src = t.src;
+    mp.el.title.textContent = t.artist ? `${t.title} - ${t.artist}` : t.title;
+    mp.el.time.textContent = '0:00 / 0:00';
+    mp.el.fill.style.width = '0%';
+    if (autoplay) mpPlayToggle(true);
+}
+
+function mpPlayToggle(force) {
+    if (!mp.tracks.length) return;
+    const want = force !== undefined ? force : !mp.playing;
+    if (want) { mp.audio.play().catch(() => {}); }
+    else { mp.audio.pause(); }
+}
+
+function mpSyncUI() {
+    mp.playing = !mp.audio.paused;
+    mp.el.playIcon.style.display = mp.playing ? 'none' : '';
+    mp.el.pauseIcon.style.display = mp.playing ? '' : 'none';
+}
+
+function initMusicPlayer() {
+    mp.el.title = document.getElementById('mpTitle');
+    mp.el.time = document.getElementById('mpTime');
+    mp.el.fill = document.getElementById('mpFill');
+    mp.el.playIcon = document.querySelector('.mp-ic-play');
+    mp.el.pauseIcon = document.querySelector('.mp-ic-pause');
+    mp.el.prev = document.getElementById('mpPrev');
+    mp.el.next = document.getElementById('mpNext');
+    mp.el.play = document.getElementById('mpPlay');
+    mp.el.progress = document.getElementById('mpProgress');
+
+    fetch('data/playlist.json')
+        .then(r => r.json())
+        .then(d => { mp.tracks = d.tracks || []; mpLoad(0, false); })
+        .catch(() => {});
+
+    mp.el.play.addEventListener('click', () => mpPlayToggle());
+    mp.el.prev.addEventListener('click', () => mpLoad(mp.idx - 1, mp.playing));
+    mp.el.next.addEventListener('click', () => mpLoad(mp.idx + 1, mp.playing));
+
+    mp.audio.addEventListener('play', mpSyncUI);
+    mp.audio.addEventListener('pause', mpSyncUI);
+    mp.audio.addEventListener('ended', () => mpLoad(mp.idx + 1, true));
+    mp.audio.addEventListener('timeupdate', () => {
+        const d = mp.audio.duration || 0;
+        mp.el.time.textContent = `${fmtTime(mp.audio.currentTime)} / ${fmtTime(d)}`;
+        mp.el.fill.style.width = (d ? (mp.audio.currentTime / d) * 100 : 0) + '%';
+    });
+
+    mp.el.progress.addEventListener('click', (e) => {
+        if (!mp.audio.duration) return;
+        const r = mp.el.progress.getBoundingClientRect();
+        mp.audio.currentTime = ((e.clientX - r.left) / r.width) * mp.audio.duration;
+    });
 }
 
 // ===== 全域搜索（收藏 + 工具 + 影视） =====
