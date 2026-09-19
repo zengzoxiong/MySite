@@ -7,7 +7,7 @@
       "url": "https://github.com/mattpocock/skills",
       "desc": "Skills for Real Engineers. Straight from my .agents directory.",
       "language": "Shell",
-      "stars": 265322,
+      "stars": 265797,
       "starred_at": "2026-09-18"
     },
     {
@@ -34,7 +34,7 @@
       "url": "https://github.com/luolangaga/tubatools",
       "desc": "图吧工具箱 CE",
       "language": "C#",
-      "stars": 4079,
+      "stars": 4116,
       "starred_at": "2026-09-05"
     },
     {
@@ -43,7 +43,7 @@
       "url": "https://github.com/firecrawl/anydoc",
       "desc": "Convert Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF to clean Markdown. Built in Rust, with Node.js and Python bindings.",
       "language": "Rust",
-      "stars": 21758,
+      "stars": 21807,
       "starred_at": "2026-08-23"
     },
     {
@@ -52,7 +52,7 @@
       "url": "https://github.com/DietrichGebert/ponytail",
       "desc": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
       "language": "JavaScript",
-      "stars": 142081,
+      "stars": 142503,
       "starred_at": "2026-08-23"
     },
     {
@@ -70,7 +70,7 @@
       "url": "https://github.com/clash-verge-rev/clash-verge-rev",
       "desc": "A modern GUI client based on Tauri, designed to run in Windows, macOS and Linux for tailored proxy experience",
       "language": "Rust",
-      "stars": 145346,
+      "stars": 145487,
       "starred_at": "2026-08-06"
     },
     {
@@ -79,7 +79,7 @@
       "url": "https://github.com/NickeManarin/ScreenToGif",
       "desc": "🎬 ScreenToGif allows you to record a selected area of your screen, edit and save it as a gif or video.",
       "language": "C#",
-      "stars": 27665,
+      "stars": 27668,
       "starred_at": "2026-08-06"
     },
     {
@@ -88,7 +88,7 @@
       "url": "https://github.com/op7418/Humanizer-zh",
       "desc": "Humanizer 的汉化版本，Claude Code Skills，旨在消除文本中 AI 生成的痕迹。",
       "language": "",
-      "stars": 17518,
+      "stars": 17560,
       "starred_at": "2026-07-25"
     },
     {
@@ -124,7 +124,7 @@
       "url": "https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning",
       "desc": "This is the homepage of a new book entitled \"Mathematical Foundations of Reinforcement Learning.\"",
       "language": "MATLAB",
-      "stars": 17836,
+      "stars": 17838,
       "starred_at": "2026-07-14"
     },
     {
@@ -133,7 +133,7 @@
       "url": "https://github.com/jgm/pandoc",
       "desc": "Universal markup converter",
       "language": "Haskell",
-      "stars": 46333,
+      "stars": 46339,
       "starred_at": "2026-07-13"
     },
     {
@@ -142,7 +142,7 @@
       "url": "https://github.com/alibaba/page-agent",
       "desc": "JavaScript in-page GUI agent. Control web interfaces with natural language.",
       "language": "TypeScript",
-      "stars": 29117,
+      "stars": 29125,
       "starred_at": "2026-07-12"
     },
     {
@@ -151,7 +151,7 @@
       "url": "https://github.com/DeusData/codebase-memory-mcp",
       "desc": "High-performance code intelligence MCP server. Indexes codebases into a persistent knowledge graph — average repo in milliseconds. 158 languages, sub-ms queries",
       "language": "C",
-      "stars": 43775,
+      "stars": 43824,
       "starred_at": "2026-07-12"
     },
     {
@@ -160,7 +160,7 @@
       "url": "https://github.com/Panniantong/Agent-Reach",
       "desc": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
       "language": "Python",
-      "stars": 83159,
+      "stars": 83445,
       "starred_at": "2026-07-12"
     },
     {
@@ -169,7 +169,7 @@
       "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
       "desc": "Chrome DevTools for coding agents",
       "language": "TypeScript",
-      "stars": 52288,
+      "stars": 52312,
       "starred_at": "2026-07-11"
     },
     {
@@ -178,7 +178,7 @@
       "url": "https://github.com/jlevy/the-art-of-command-line",
       "desc": "Master the command line, in one page",
       "language": "",
-      "stars": 162442,
+      "stars": 162459,
       "starred_at": "2026-07-08"
     },
     {
@@ -196,7 +196,7 @@
       "url": "https://github.com/ruanyf/weekly",
       "desc": "科技爱好者周刊，每周五发布",
       "language": "",
-      "stars": 102918,
+      "stars": 103106,
       "starred_at": "2026-07-08"
     },
     {
@@ -214,7 +214,7 @@
       "url": "https://github.com/jgraph/drawio-mcp",
       "desc": "",
       "language": "JavaScript",
-      "stars": 5466,
+      "stars": 5468,
       "starred_at": "2026-07-03"
     },
     {
@@ -223,7 +223,7 @@
       "url": "https://github.com/github/awesome-copilot",
       "desc": "Community-contributed instructions, agents, skills, and configurations to help you make the most of GitHub Copilot.",
       "language": "JavaScript",
-      "stars": 39151,
+      "stars": 39162,
       "starred_at": "2026-07-03"
     },
     {
@@ -259,7 +259,7 @@
       "url": "https://github.com/ChenChenyaqi/learn-anything",
       "desc": "Learn Anything is an AI-powered recursive learning system — Socratic deep-dives and TDD-style exercises integrated directly into your coding assistant.",
       "language": "TypeScript",
-      "stars": 453,
+      "stars": 454,
       "starred_at": "2026-06-26"
     },
     {
@@ -268,7 +268,7 @@
       "url": "https://github.com/farion1231/cc-switch",
       "desc": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode, OpenClaw, Grok Build & Hermes Agent. Only official website: ccswitch.io",
       "language": "Rust",
-      "stars": 133583,
+      "stars": 133678,
       "starred_at": "2026-06-22"
     },
     {
@@ -277,7 +277,7 @@
       "url": "https://github.com/github/github-mcp-server",
       "desc": "GitHub's official MCP Server",
       "language": "Go",
-      "stars": 33043,
+      "stars": 33068,
       "starred_at": "2026-06-22"
     },
     {
@@ -286,7 +286,7 @@
       "url": "https://github.com/pytorch/pytorch",
       "desc": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
       "language": "Python",
-      "stars": 103094,
+      "stars": 103107,
       "starred_at": "2026-06-21"
     },
     {
@@ -295,7 +295,7 @@
       "url": "https://github.com/multica-ai/andrej-karpathy-skills",
       "desc": "A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.",
       "language": "",
-      "stars": 213996,
+      "stars": 214139,
       "starred_at": "2026-06-18"
     },
     {
@@ -304,7 +304,7 @@
       "url": "https://github.com/OthmanAdi/planning-with-files",
       "desc": "Persistent file-based planning for AI coding agents and long-running tasks. Crash-proof markdown plans, session recovery after /clear and compaction, per-turn r",
       "language": "Shell",
-      "stars": 26986,
+      "stars": 26994,
       "starred_at": "2026-06-16"
     },
     {
@@ -322,7 +322,7 @@
       "url": "https://github.com/sickn33/agentic-awesome-skills",
       "desc": "AAS Core is the local, agent-first control plane for complete catalog discovery, agent-owned selection, stack validation, and planning, backed by 2,115+ agentic",
       "language": "Python",
-      "stars": 46573,
+      "stars": 46602,
       "starred_at": "2026-06-16"
     },
     {
@@ -331,7 +331,7 @@
       "url": "https://github.com/Egonex-AI/Understand-Anything",
       "desc": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude C",
       "language": "TypeScript",
-      "stars": 83256,
+      "stars": 83315,
       "starred_at": "2026-06-16"
     },
     {
@@ -340,7 +340,7 @@
       "url": "https://github.com/datawhalechina/hello-agents",
       "desc": "📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程",
       "language": "Python",
-      "stars": 79805,
+      "stars": 79907,
       "starred_at": "2026-04-11"
     },
     {
@@ -349,7 +349,7 @@
       "url": "https://github.com/521xueweihan/HelloGitHub",
       "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
       "language": "Python",
-      "stars": 177389,
+      "stars": 177551,
       "starred_at": "2026-04-11"
     },
     {
@@ -358,7 +358,7 @@
       "url": "https://github.com/krahets/hello-algo",
       "desc": "《Hello 算法》：动画图解、一键运行的数据结构与算法教程。支持简中、繁中、English、日本語，提供 Python, Java, C++, C, C#, JS, Go, Swift, Rust, Ruby, Kotlin, TS, Dart 等代码实现",
       "language": "Java",
-      "stars": 130271,
+      "stars": 130288,
       "starred_at": "2026-04-11"
     }
   ]
