@@ -1212,32 +1212,6 @@ body.sidebar-collapsed .main-content {
     transform: translateY(0) scale(0.99);
 }
 
-.skill-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.skill-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    background-color: var(--hover-bg);
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    transition: color 0.2s, background-color 0.2s;
-}
-
-.skill-card:hover .skill-icon {
-    color: var(--accent-color);
-    background-color: rgba(99, 102, 241, 0.1);
-}
-
 .skill-main {
     flex: 1;
     min-width: 0;
@@ -1262,6 +1236,14 @@ body.sidebar-collapsed .main-content {
 
 .skill-card:hover .skill-name {
     color: var(--accent-color);
+}
+
+.skill-stars {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
 }
 
 .skill-desc {

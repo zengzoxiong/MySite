@@ -465,22 +465,22 @@ function renderSearchResults(term) {
 
     let html = '';
     if (links.length) {
-        html += group('🌐 网站收藏', links.length, links.map(buildLinkCard).join(''));
+        html += group('网站收藏', links.length, links.map(buildLinkCard).join(''));
     }
     if (tools.length) {
-        html += group('🔧 在线工具', tools.length, tools.map(buildToolCard).join(''));
+        html += group('在线工具', tools.length, tools.map(buildToolCard).join(''));
     }
     if (media.length) {
-        html += group('🎬 影视收藏', media.length, `<div class="media-cards">${media.map(buildMediaCard).join('')}</div>`);
+        html += group('影视收藏', media.length, `<div class="media-cards">${media.map(buildMediaCard).join('')}</div>`);
     }
     if (skills.length) {
-        html += group('🧩 Agent Skills', skills.length, `<div class="skills-cards">${skills.map(skillCardHtml).join('')}</div>`);
+        html += group('Agent Skills', skills.length, `<div class="skills-cards">${skills.map(skillCardHtml).join('')}</div>`);
     }
     if (mcps.length) {
-        html += group('🔌 Agent MCP', mcps.length, `<div class="skills-cards">${mcps.map(mcpCardHtml).join('')}</div>`);
+        html += group('Agent MCP', mcps.length, `<div class="skills-cards">${mcps.map(mcpCardHtml).join('')}</div>`);
     }
     if (stars.length) {
-        html += group('⭐ GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCardHtml).join('')}</div>`);
+        html += group('GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCardHtml).join('')}</div>`);
     }
     linksGrid.innerHTML = html;
     recalcMarquee();
@@ -542,7 +542,7 @@ async function loadLinks() {
     }
 }
 
-// 技能卡片构建（视图与搜索复用）：与收藏卡片同一极简语言
+// 技能卡片构建（视图与搜索复用）：无图标，标题行 + 命令行 + 来源
 function skillCardHtml(s) {
     const install = s.upstream === 'local-only'
         ? ''
@@ -551,18 +551,13 @@ function skillCardHtml(s) {
         : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
     return `
     <div class="skill-card">
-        <div class="skill-row">
-            <div class="skill-icon">${escapeHtml((s.name || '?').charAt(0).toUpperCase())}</div>
-            <div class="skill-main">
-                <div class="skill-title-row">
-                    <span class="skill-name">${escapeHtml(s.name)}</span>
-                    ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
-                    ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
-                </div>
-                ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
-            </div>
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(s.name)}</span>
+            ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
+            ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
             ${install ? `<button class="copy-btn" data-cmd="${install}">复制</button>` : ''}
         </div>
+        ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
         <div class="skill-meta">${link}</div>
     </div>`;
 }
@@ -575,16 +570,11 @@ function mcpCardHtml(m) {
         : '<span class="skill-link">本地自部署</span>';
     return `
     <div class="skill-card">
-        <div class="skill-row">
-            <div class="skill-icon">${escapeHtml((m.name || '?').charAt(0).toUpperCase())}</div>
-            <div class="skill-main">
-                <div class="skill-title-row">
-                    <span class="skill-name">${escapeHtml(m.name)}</span>
-                    <span class="skill-tag">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span>
-                </div>
-                <div class="skill-desc">${escapeHtml(m.desc)}</div>
-            </div>
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(m.name)}</span>
+            <span class="skill-tag">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span>
         </div>
+        <div class="skill-desc">${escapeHtml(m.desc)}</div>
         <details class="config-block">
             <summary>配置方法<span class="config-hint">密钥请替换为自己的</span></summary>
             <pre>${configText}</pre>
@@ -593,25 +583,65 @@ function mcpCardHtml(m) {
     </div>`;
 }
 
-// GitHub Stars 卡片构建
+// GitHub Stars 卡片构建：≥1000 显示 x.xk（一位小数）
+function fmtStars(n) {
+    return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+}
+
 function starCardHtml(r) {
     return `
     <a class="skill-card" href="${r.url}" target="_blank" rel="noopener noreferrer">
-        <div class="skill-row">
-            <div class="skill-icon">${escapeHtml((r.name || '?').charAt(0).toUpperCase())}</div>
-            <div class="skill-main">
-                <div class="skill-title-row">
-                    <span class="skill-name">${escapeHtml(r.full_name)}</span>
-                    <span class="skill-tag">★ ${r.stars}</span>
-                </div>
-                ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
-            </div>
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(r.full_name)}</span>
+            <span class="skill-stars">★ ${fmtStars(r.stars)}</span>
         </div>
+        ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
         <div class="skill-meta">
             ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
             <span class="skill-tag">星标于 ${r.starred_at}</span>
         </div>
     </a>`;
+}
+
+// 技能卡片构建（视图与搜索复用）：与收藏卡片同一极简语言
+function skillCardHtml(s) {
+    const install = s.upstream === 'local-only'
+        ? ''
+        : `npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}`;
+    const link = s.upstream === 'local-only' ? ''
+        : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
+    return `
+    <div class="skill-card">
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(s.name)}</span>
+            ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
+            ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
+            ${install ? `<button class="copy-btn" data-cmd="${install}">复制</button>` : ''}
+        </div>
+        ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
+        <div class="skill-meta">${link}</div>
+    </div>`;
+}
+
+// MCP 卡片构建：说明 + 可展开配置 + 官方页面
+function mcpCardHtml(m) {
+    const configText = escapeHtml(JSON.stringify(m.config, null, 2));
+    const home = m.homepage
+        ? `<a class="skill-link" href="${m.homepage}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
+        : '<span class="skill-link">本地自部署</span>';
+    return `
+    <div class="skill-card">
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(m.name)}</span>
+            <span class="skill-tag">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span>
+        </div>
+        <div class="skill-desc">${escapeHtml(m.desc)}</div>
+        <details class="config-block">
+            <summary>配置方法<span class="config-hint">密钥请替换为自己的</span></summary>
+            <pre>${configText}</pre>
+        </details>
+        <div class="skill-meta">${home}</div>
+    </div>`;
 }
 
 
@@ -688,7 +718,7 @@ function renderSidebarTools() {
 function renderSidebarCategories(categories) {
     sidebarCategories.innerHTML = `
         <div class="sidebar-item" role="button" tabindex="0" data-ghstars="1">
-            <span class="item-text">⭐ 我的 Stars</span>
+            <span class="item-text">我的 Stars</span>
         </div>
     ` + categories.map(cat => `
         <div class="sidebar-item" role="button" tabindex="0" data-category="${cat}">
@@ -962,12 +992,12 @@ let cmdkCommands = [];
 
 function buildCmdkCommands() {
     const cmds = [
-        { icon: '🏠', label: '回到首页', run: goHome },
-        { icon: '⚙️', label: '打开设置', run: () => document.getElementById('settingsBtn').click() },
-        { icon: '🧩', label: 'Agent Plugin：Agent Skills', run: () => {
+        { icon: '', label: '回到首页', run: goHome },
+        { icon: '', label: '打开设置', run: () => document.getElementById('settingsBtn').click() },
+        { icon: '', label: 'Agent Plugin：Agent Skills', run: () => {
             document.querySelector('#sidebarPlugin [data-plugin-cat="skills"]')?.click();
         } },
-        { icon: '🔌', label: 'Agent Plugin：Agent MCP', run: () => {
+        { icon: '', label: 'Agent Plugin：Agent MCP', run: () => {
             document.querySelector('#sidebarPlugin [data-plugin-cat="mcps"]')?.click();
         } },
         {
@@ -984,7 +1014,7 @@ function buildCmdkCommands() {
                 applyAnimFromStorage();
             }
         },
-        { icon: '🖼️', label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
+        { icon: '', label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
     ];
     document.querySelectorAll('#sidebarCategories .sidebar-item').forEach(item => {
         cmds.push({
