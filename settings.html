@@ -75,7 +75,10 @@
             <span class="settings-label">清除本地数据</span>
             <button class="settings-clear" id="settingClearCache">清除</button>
         </div>
-        <div class="settings-hint">更改即时生效并自动保存</div>
+        <div class="settings-item">
+            <span class="settings-label">请求最新页面</span>
+            <button class="settings-clear" id="settingForceRefresh">刷新</button>
+        </div>
     </div>
 
     <script>
@@ -135,6 +138,11 @@
         window.addEventListener('storage', (e) => {
             if (e.key === KEY_THEME) applyTheme();
             if (e.key === KEY_ANIM) applyAnim();
+        });
+
+        // 强制刷新：通知父页清除缓存后整页重载
+        document.getElementById('settingForceRefresh').addEventListener('click', () => {
+            notify('force-refresh');
         });
 
         // ESC 通知父页关闭弹层（焦点在本页时键盘事件不会传给父页）

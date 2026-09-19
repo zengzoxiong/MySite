@@ -985,6 +985,16 @@ function initSettingsModal() {
             updateTodoCount();
         } else if (e.data && e.data.type === 'close-settings') {
             close();
+        } else if (e.data && e.data.type === 'force-refresh') {
+            (async () => {
+                try {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (const r of regs) await r.unregister();
+                    const keys = await caches.keys();
+                    for (const k of keys) await caches.delete(k);
+                } catch (err) { /* 忽略 */ }
+                location.reload();
+            })();
         }
     });
 }

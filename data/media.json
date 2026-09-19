@@ -38,7 +38,7 @@
     {
       "title": "Re:从零开始的异世界生活 第三季",
       "type": "番剧",
-      "status": "看过",
+      "status": "在看",
       "release": "2024-10-02",
       "rating": 8.1,
       "url": "https://anilist.co/anime/163134",
@@ -822,6 +822,15 @@
       "rating": 8.4
     },
     {
+      "title": "无职转生 第三季",
+      "type": "番剧",
+      "status": "在看",
+      "rating": 8.4,
+      "release": "2026-07-04",
+      "cover": "assets/media/mushoku-s3.jpg",
+      "url": "https://anilist.co/anime/178789"
+    },
+    {
       "title": "刀剑神域 第二季",
       "type": "番剧",
       "status": "看过",
@@ -1347,7 +1356,7 @@
     {
       "title": "邻家的天使大人 第二季",
       "type": "番剧",
-      "status": "看过",
+      "status": "在看",
       "release": "2026-04-03",
       "cover": "assets/media/oto-ninja-tenshi-s2.jpg",
       "url": "https://www.themoviedb.org/tv/154743/season/2",

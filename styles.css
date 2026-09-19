@@ -1888,6 +1888,12 @@ body.sidebar-collapsed .main-content {
     gap: 18px;
 }
 
+/* 空状态占满整行并居中 */
+.media-cards .empty-state {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+}
+
 .media-card {
     text-decoration: none;
     color: var(--text-primary);
