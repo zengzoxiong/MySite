@@ -130,7 +130,7 @@
             ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
                 .forEach(k => localStorage.removeItem(k));
             notify('clear-cache');
-            clearBtn.textContent = '已清除 ✓';
+            clearBtn.textContent = '✓';
             setTimeout(() => { clearBtn.textContent = '清除'; }, 1600);
         });
 

@@ -498,6 +498,8 @@ body.modal-open {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
     padding: 10px 0;
 }
 
@@ -552,15 +554,17 @@ body.modal-open {
 }
 
 .settings-clear {
-    padding: 6px 14px;
+    width: 34px;
+    padding: 5px 0;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: none;
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-family: inherit;
     cursor: pointer;
     flex-shrink: 0;
+    text-align: center;
     transition: color 0.2s, border-color 0.2s, transform 0.15s;
 }
 
