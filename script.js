@@ -4,6 +4,7 @@ let allTools = [];
 let mediaData = { types: [], items: [] };
 let pluginsData = { skills: { groups: [] }, mcps: [] };
 let starsData = { updated: '', repos: [] };
+let starsSort = 'date-desc'; // 星标仓库排序
 let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
@@ -397,10 +398,29 @@ function renderGhStars(animate = false) {
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
 
-    const repos = starsData.repos || [];
+    const repos = [...(starsData.repos || [])];
+    const byDate = (a, b) => (a.starred_at || '').localeCompare(b.starred_at || '');
+    if (starsSort === 'date-asc') repos.sort(byDate);
+    else if (starsSort === 'date-desc') repos.sort((a, b) => byDate(b, a));
+    else if (starsSort === 'stars-asc') repos.sort((a, b) => (a.stars || 0) - (b.stars || 0));
+    else repos.sort((a, b) => (b.stars || 0) - (a.stars || 0));
     const cards = repos.map(starCardHtml).join('');
 
+    const sortOptions = [
+        ['date-desc', '按星标时间（新 → 旧）'],
+        ['date-asc', '按星标时间（旧 → 新）'],
+        ['stars-desc', '按星数（多 → 少）'],
+        ['stars-asc', '按星数（少 → 多）']
+    ].map(([v, label]) =>
+        `<option value="${v}"${v === starsSort ? ' selected' : ''}>${label}</option>`
+    ).join('');
+
     mediaGrid.innerHTML = `
+        <div class="media-filters" style="justify-content:flex-end;margin-bottom:8px">
+            <label class="media-sort">排序
+                <select id="starsSort">${sortOptions}</select>
+            </label>
+        </div>
         <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''}</div>
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
@@ -1300,6 +1320,9 @@ function initEventListeners() {
         if (e.target.id === 'mediaSort') {
             currentSort = e.target.value;
             renderMedia(false);
+        } else if (e.target.id === 'starsSort') {
+            starsSort = e.target.value;
+            renderGhStars(false);
         }
     });
 

@@ -237,6 +237,13 @@
       "icon": "🤖"
     },
     {
+      "title": "ChatGPT",
+      "url": "https://openai.com/chatgpt/download/",
+      "description": "OpenAI 官方 ChatGPT 桌面客户端，支持 Windows 与 macOS。",
+      "category": "常用软件下载",
+      "icon": "💬"
+    },
+    {
       "title": "一方工具箱",
       "url": "https://tool.fologde.com/",
       "description": "简洁好用的在线工具箱，集成图片处理、文本处理、开发辅助等多种日常小工具，即开即用。",

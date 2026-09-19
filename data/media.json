@@ -1299,6 +1299,16 @@
       "cover": "assets/media/donbrothers-movie.jpg"
     },
     {
+      "title": "西游记之大圣归来",
+      "type": "电影",
+      "status": "看过",
+      "comment": "国产动画的破圈之作，大圣归来燃到起鸡皮疙瘩。",
+      "rating": 6.9,
+      "release": "2015-07-10",
+      "url": "https://www.themoviedb.org/movie/351694",
+      "cover": "assets/media/monkey-king.jpg"
+    },
+    {
       "title": "假面骑士极狐",
       "type": "特摄",
       "status": "看过",
