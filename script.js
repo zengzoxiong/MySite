@@ -3,6 +3,7 @@ let allLinks = [];
 let allTools = [];
 let mediaData = { types: [], items: [] };
 let pluginsData = { skills: { groups: [] }, mcps: [] };
+let starsData = { updated: '', repos: [] };
 let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
@@ -383,7 +384,43 @@ function renderCurrentView(animate = false) {
     if (currentView === 'tools') renderTools(animate);
     else if (currentView === 'media') renderMedia(animate);
     else if (currentView === 'plugin') renderPluginCat(currentPluginCat);
+    else if (currentView === 'ghstars') renderGhStars(animate);
     else renderLinks(animate);
+}
+
+// 渲染 GitHub Stars（工作流每日同步的星标仓库）
+function renderGhStars(animate = false) {
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+
+    const repos = starsData.repos || [];
+    const cards = repos.map((r, i) => {
+        const initial = escapeHtml((r.name || '?').charAt(0).toUpperCase());
+        const grad = SKILL_GRADIENTS[i % SKILL_GRADIENTS.length];
+        return `
+        <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="skill-card">
+            <div class="skill-top">
+                <div class="skill-avatar" style="background:${grad}">${initial}</div>
+                <div class="skill-title-wrap">
+                    <div class="skill-name">${escapeHtml(r.full_name)}</div>
+                    <span class="skill-tag">★ ${r.stars}</span>
+                </div>
+            </div>
+            ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
+            <div class="skill-foot">
+                ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
+                <span class="skill-link">星标于 ${r.starred_at}</span>
+            </div>
+        </a>`;
+    }).join('');
+
+    mediaGrid.innerHTML = `
+        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''} · 每日自动更新</div>
+        <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
+    `;
+    recalcMarquee();
 }
 
 // ===== 全域搜索（收藏 + 工具 + 影视） =====
@@ -409,6 +446,14 @@ function renderSearchWithLoading(term) {
     }, 300);
 }
 
+// 后台标签定时器被节流时，骨架会停留；聚焦/切回可见的瞬间立即渲染
+function flushPendingSearch() {
+    if (currentView === 'search' && document.querySelector('.search-loading')) {
+        const term = searchInput.value.trim();
+        if (term) renderSearchResults(term);
+    }
+}
+
 function renderSearchResults(term) {
     const t = term.toLowerCase();
     const match = (s) => (s || '').toLowerCase().includes(t);
@@ -416,10 +461,12 @@ function renderSearchResults(term) {
     const links = allLinks.filter(i => match(i.title) || match(i.description) || match(i.category));
     const tools = allTools.filter(i => match(i.name) || match(i.description) || match(i.category));
     const media = (mediaData.items || []).filter(i => match(i.title) || match(i.comment) || match(i.type));
-    const skills = (skillsRegistry.groups || []).flatMap(g => g.items)
+    const skills = ((pluginsData.skills || {}).groups || []).flatMap(g => g.items)
         .filter(s => match(s.name) || match(s.description || ''));
+    const mcps = (pluginsData.mcps || []).filter(m => match(m.name) || match(m.desc || ''));
+    const stars = (starsData.repos || []).filter(r => match(r.full_name) || match(r.desc) || match(r.language));
 
-    const total = links.length + tools.length + media.length + skills.length;
+    const total = links.length + tools.length + media.length + skills.length + mcps.length + stars.length;
     if (total === 0) {
         linksGrid.innerHTML = `
             <div class="search-group" style="grid-column:1/-1">
@@ -446,6 +493,33 @@ function renderSearchResults(term) {
     }
     if (skills.length) {
         html += group('🧩 Agent Skills', skills.length, `<div class="skills-cards">${skills.map(skillCardHtml).join('')}</div>`);
+    }
+    if (mcps.length) {
+        const mcpCard = (m) => `
+            <div class="skill-card">
+                <div class="skill-top">
+                    <div class="skill-avatar">${escapeHtml((m.name || '?').charAt(0).toUpperCase())}</div>
+                    <div class="skill-title-wrap">
+                        <div class="skill-name">${escapeHtml(m.name)}<span class="skill-tag" style="margin-left:8px">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span></div>
+                        <div class="skill-sub">${escapeHtml(m.desc)}</div>
+                    </div>
+                </div>
+            </div>`;
+        html += group('🔌 Agent MCP', mcps.length, `<div class="skills-cards">${mcps.map(mcpCard).join('')}</div>`);
+    }
+    if (stars.length) {
+        const starCard = (r) => `
+            <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="skill-card">
+                <div class="skill-top">
+                    <div class="skill-title-wrap" style="min-width:0">
+                        <div class="skill-name">${escapeHtml(r.full_name)}</div>
+                        <span class="skill-tag">★ ${r.stars}</span>
+                    </div>
+                </div>
+                ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
+                <div class="skill-foot">${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}</div>
+            </a>`;
+        html += group('⭐ GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCard).join('')}</div>`);
     }
     linksGrid.innerHTML = html;
     recalcMarquee();
@@ -496,6 +570,14 @@ async function loadLinks() {
         pluginsData = await pluginRes.json();
     } catch (error) {
         console.error('Agent Plugin 数据加载失败:', error);
+    }
+
+    // GitHub Stars 独立加载（工作流每日同步）
+    try {
+        const starsRes = await fetch('data/stars.json');
+        starsData = await starsRes.json();
+    } catch (error) {
+        console.error('Stars 数据加载失败:', error);
     }
 }
 
@@ -628,7 +710,11 @@ function renderSidebarTools() {
 
 // 渲染侧栏分类区
 function renderSidebarCategories(categories) {
-    sidebarCategories.innerHTML = categories.map(cat => `
+    sidebarCategories.innerHTML = `
+        <div class="sidebar-item" role="button" tabindex="0" data-ghstars="1">
+            <span class="item-text">⭐ 我的 Stars</span>
+        </div>
+    ` + categories.map(cat => `
         <div class="sidebar-item" role="button" tabindex="0" data-category="${cat}">
             <span class="item-text">${cat}</span>
         </div>
@@ -1110,10 +1196,20 @@ function initEventListeners() {
         sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
+        searchInput.value = ''; // 切视图清空搜索，避免残留
+        if (item.dataset.ghstars) {
+            currentCategory = '';
+            currentView = 'ghstars';
+            searchFrom = 'ghstars';
+            renderGhStars(true);
+            if (window.innerWidth <= 768) {
+                closeMobileMenu();
+            }
+            return;
+        }
         currentCategory = item.dataset.category;
         currentView = 'links';
         searchFrom = 'links';
-        searchInput.value = ''; // 切视图清空搜索，避免残留
         renderLinks(true);
         // 移动端自动关闭菜单
         if (window.innerWidth <= 768) {
@@ -1203,6 +1299,12 @@ function initEventListeners() {
         }
     });
 
+    // 后台节流兜底：切回页面/聚焦时立即渲染待定搜索结果
+    window.addEventListener('focus', flushPendingSearch);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) flushPendingSearch();
+    });
+
     // 窗口 resize：跨移动端断点时收起抽屉，并重算标题滚动参数
     let resizeTimer = null;
     let lastIsMobile = window.innerWidth <= 768;
@@ -1216,6 +1318,16 @@ function initEventListeners() {
             }
             recalcMarquee();
         }, 200);
+    });
+
+    // 访客统计：不蒜子成功取到数值后才显示胶囊，失败保持隐藏
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const pv = document.getElementById('busuanzi_value_site_pv');
+            if (pv && pv.textContent.trim()) {
+                document.getElementById('siteStat').style.display = '';
+            }
+        }, 3000);
     });
 
     // Service Worker（PWA 离线缓存，静默失败）

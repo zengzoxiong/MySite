@@ -1,0 +1,365 @@
+{
+  "updated": "2026-09-18",
+  "repos": [
+    {
+      "name": "skills",
+      "full_name": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills",
+      "desc": "Skills for Real Engineers. Straight from my .agents directory.",
+      "language": "Shell",
+      "stars": 265322,
+      "starred_at": "2026-09-18"
+    },
+    {
+      "name": "html-tools",
+      "full_name": "justhtmls/html-tools",
+      "url": "https://github.com/justhtmls/html-tools",
+      "desc": "开源 HTML 工具集 - 轻量、整洁、免费、隐私、无需安装",
+      "language": "HTML",
+      "stars": 266,
+      "starred_at": "2026-09-05"
+    },
+    {
+      "name": "kkFileView",
+      "full_name": "kekingcn/kkFileView",
+      "url": "https://github.com/kekingcn/kkFileView",
+      "desc": "Universal File Online Preview Project based on Spring-Boot",
+      "language": "Java",
+      "stars": 14709,
+      "starred_at": "2026-09-05"
+    },
+    {
+      "name": "tubatools",
+      "full_name": "luolangaga/tubatools",
+      "url": "https://github.com/luolangaga/tubatools",
+      "desc": "图吧工具箱 CE",
+      "language": "C#",
+      "stars": 4079,
+      "starred_at": "2026-09-05"
+    },
+    {
+      "name": "anydoc",
+      "full_name": "firecrawl/anydoc",
+      "url": "https://github.com/firecrawl/anydoc",
+      "desc": "Convert Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF to clean Markdown. Built in Rust, with Node.js and Python bindings.",
+      "language": "Rust",
+      "stars": 21758,
+      "starred_at": "2026-08-23"
+    },
+    {
+      "name": "ponytail",
+      "full_name": "DietrichGebert/ponytail",
+      "url": "https://github.com/DietrichGebert/ponytail",
+      "desc": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
+      "language": "JavaScript",
+      "stars": 142081,
+      "starred_at": "2026-08-23"
+    },
+    {
+      "name": "aoxiang-assistant",
+      "full_name": "Lorcas-Zephyr/aoxiang-assistant",
+      "url": "https://github.com/Lorcas-Zephyr/aoxiang-assistant",
+      "desc": "翱翔助手，适配西北工业大学教务系统，自动同步成绩、课表、电费",
+      "language": "Java",
+      "stars": 66,
+      "starred_at": "2026-08-19"
+    },
+    {
+      "name": "clash-verge-rev",
+      "full_name": "clash-verge-rev/clash-verge-rev",
+      "url": "https://github.com/clash-verge-rev/clash-verge-rev",
+      "desc": "A modern GUI client based on Tauri, designed to run in Windows, macOS and Linux for tailored proxy experience",
+      "language": "Rust",
+      "stars": 145346,
+      "starred_at": "2026-08-06"
+    },
+    {
+      "name": "ScreenToGif",
+      "full_name": "NickeManarin/ScreenToGif",
+      "url": "https://github.com/NickeManarin/ScreenToGif",
+      "desc": "🎬 ScreenToGif allows you to record a selected area of your screen, edit and save it as a gif or video.",
+      "language": "C#",
+      "stars": 27665,
+      "starred_at": "2026-08-06"
+    },
+    {
+      "name": "Humanizer-zh",
+      "full_name": "op7418/Humanizer-zh",
+      "url": "https://github.com/op7418/Humanizer-zh",
+      "desc": "Humanizer 的汉化版本，Claude Code Skills，旨在消除文本中 AI 生成的痕迹。",
+      "language": "",
+      "stars": 17518,
+      "starred_at": "2026-07-25"
+    },
+    {
+      "name": "HedgeMemo",
+      "full_name": "Again0521/HedgeMemo",
+      "url": "https://github.com/Again0521/HedgeMemo",
+      "desc": "可以是你记录复制过的文字/图片的剪切板、可以是表情管理器、也可以是便捷的截屏工具",
+      "language": "Swift",
+      "stars": 42,
+      "starred_at": "2026-07-25"
+    },
+    {
+      "name": "PaperLens",
+      "full_name": "vanthree31/PaperLens",
+      "url": "https://github.com/vanthree31/PaperLens",
+      "desc": "AI-Powered Research Assistant for Academic Paper Discovery, Analysis, and Citation Intelligence",
+      "language": "Python",
+      "stars": 183,
+      "starred_at": "2026-07-25"
+    },
+    {
+      "name": "panopticon",
+      "full_name": "Panopticon-AI-team/panopticon",
+      "url": "https://github.com/Panopticon-AI-team/panopticon",
+      "desc": "A wargaming platform compatible with reinforcement learning agents ",
+      "language": "TypeScript",
+      "stars": 123,
+      "starred_at": "2026-07-18"
+    },
+    {
+      "name": "Book-Mathematical-Foundation-of-Reinforcement-Learning",
+      "full_name": "MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning",
+      "url": "https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning",
+      "desc": "This is the homepage of a new book entitled \"Mathematical Foundations of Reinforcement Learning.\"",
+      "language": "MATLAB",
+      "stars": 17836,
+      "starred_at": "2026-07-14"
+    },
+    {
+      "name": "pandoc",
+      "full_name": "jgm/pandoc",
+      "url": "https://github.com/jgm/pandoc",
+      "desc": "Universal markup converter",
+      "language": "Haskell",
+      "stars": 46333,
+      "starred_at": "2026-07-13"
+    },
+    {
+      "name": "page-agent",
+      "full_name": "alibaba/page-agent",
+      "url": "https://github.com/alibaba/page-agent",
+      "desc": "JavaScript in-page GUI agent. Control web interfaces with natural language.",
+      "language": "TypeScript",
+      "stars": 29117,
+      "starred_at": "2026-07-12"
+    },
+    {
+      "name": "codebase-memory-mcp",
+      "full_name": "DeusData/codebase-memory-mcp",
+      "url": "https://github.com/DeusData/codebase-memory-mcp",
+      "desc": "High-performance code intelligence MCP server. Indexes codebases into a persistent knowledge graph — average repo in milliseconds. 158 languages, sub-ms queries",
+      "language": "C",
+      "stars": 43775,
+      "starred_at": "2026-07-12"
+    },
+    {
+      "name": "Agent-Reach",
+      "full_name": "Panniantong/Agent-Reach",
+      "url": "https://github.com/Panniantong/Agent-Reach",
+      "desc": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+      "language": "Python",
+      "stars": 83159,
+      "starred_at": "2026-07-12"
+    },
+    {
+      "name": "chrome-devtools-mcp",
+      "full_name": "ChromeDevTools/chrome-devtools-mcp",
+      "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "desc": "Chrome DevTools for coding agents",
+      "language": "TypeScript",
+      "stars": 52288,
+      "starred_at": "2026-07-11"
+    },
+    {
+      "name": "the-art-of-command-line",
+      "full_name": "jlevy/the-art-of-command-line",
+      "url": "https://github.com/jlevy/the-art-of-command-line",
+      "desc": "Master the command line, in one page",
+      "language": "",
+      "stars": 162442,
+      "starred_at": "2026-07-08"
+    },
+    {
+      "name": "git-flight-rules",
+      "full_name": "k88hudson/git-flight-rules",
+      "url": "https://github.com/k88hudson/git-flight-rules",
+      "desc": "Flight rules for git",
+      "language": "",
+      "stars": 42593,
+      "starred_at": "2026-07-08"
+    },
+    {
+      "name": "weekly",
+      "full_name": "ruanyf/weekly",
+      "url": "https://github.com/ruanyf/weekly",
+      "desc": "科技爱好者周刊，每周五发布",
+      "language": "",
+      "stars": 102918,
+      "starred_at": "2026-07-08"
+    },
+    {
+      "name": "miniforge",
+      "full_name": "conda-forge/miniforge",
+      "url": "https://github.com/conda-forge/miniforge",
+      "desc": "A conda-forge distribution.",
+      "language": "Shell",
+      "stars": 10204,
+      "starred_at": "2026-07-06"
+    },
+    {
+      "name": "drawio-mcp",
+      "full_name": "jgraph/drawio-mcp",
+      "url": "https://github.com/jgraph/drawio-mcp",
+      "desc": "",
+      "language": "JavaScript",
+      "stars": 5466,
+      "starred_at": "2026-07-03"
+    },
+    {
+      "name": "awesome-copilot",
+      "full_name": "github/awesome-copilot",
+      "url": "https://github.com/github/awesome-copilot",
+      "desc": "Community-contributed instructions, agents, skills, and configurations to help you make the most of GitHub Copilot.",
+      "language": "JavaScript",
+      "stars": 39151,
+      "starred_at": "2026-07-03"
+    },
+    {
+      "name": "drawio-mcp-server",
+      "full_name": "lgazo/drawio-mcp-server",
+      "url": "https://github.com/lgazo/drawio-mcp-server",
+      "desc": "Draw.io Model Context Protocol (MCP) Server",
+      "language": "TypeScript",
+      "stars": 1467,
+      "starred_at": "2026-07-03"
+    },
+    {
+      "name": "nwpu-manual",
+      "full_name": "angine04/nwpu-manual",
+      "url": "https://github.com/angine04/nwpu-manual",
+      "desc": "",
+      "language": "JavaScript",
+      "stars": 12,
+      "starred_at": "2026-07-03"
+    },
+    {
+      "name": "MiMonitorLightTray",
+      "full_name": "awakaze/MiMonitorLightTray",
+      "url": "https://github.com/awakaze/MiMonitorLightTray",
+      "desc": "Twinkle Tray-style Windows tray app to adjust Xiaomi/Mi monitor light bar brightness & color temperature via python-miio.",
+      "language": "Python",
+      "stars": 32,
+      "starred_at": "2026-06-29"
+    },
+    {
+      "name": "learn-anything",
+      "full_name": "ChenChenyaqi/learn-anything",
+      "url": "https://github.com/ChenChenyaqi/learn-anything",
+      "desc": "Learn Anything is an AI-powered recursive learning system — Socratic deep-dives and TDD-style exercises integrated directly into your coding assistant.",
+      "language": "TypeScript",
+      "stars": 453,
+      "starred_at": "2026-06-26"
+    },
+    {
+      "name": "cc-switch",
+      "full_name": "farion1231/cc-switch",
+      "url": "https://github.com/farion1231/cc-switch",
+      "desc": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode, OpenClaw, Grok Build & Hermes Agent. Only official website: ccswitch.io",
+      "language": "Rust",
+      "stars": 133583,
+      "starred_at": "2026-06-22"
+    },
+    {
+      "name": "github-mcp-server",
+      "full_name": "github/github-mcp-server",
+      "url": "https://github.com/github/github-mcp-server",
+      "desc": "GitHub's official MCP Server",
+      "language": "Go",
+      "stars": 33043,
+      "starred_at": "2026-06-22"
+    },
+    {
+      "name": "pytorch",
+      "full_name": "pytorch/pytorch",
+      "url": "https://github.com/pytorch/pytorch",
+      "desc": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
+      "language": "Python",
+      "stars": 103094,
+      "starred_at": "2026-06-21"
+    },
+    {
+      "name": "andrej-karpathy-skills",
+      "full_name": "multica-ai/andrej-karpathy-skills",
+      "url": "https://github.com/multica-ai/andrej-karpathy-skills",
+      "desc": "A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.",
+      "language": "",
+      "stars": 213996,
+      "starred_at": "2026-06-18"
+    },
+    {
+      "name": "planning-with-files",
+      "full_name": "OthmanAdi/planning-with-files",
+      "url": "https://github.com/OthmanAdi/planning-with-files",
+      "desc": "Persistent file-based planning for AI coding agents and long-running tasks. Crash-proof markdown plans, session recovery after /clear and compaction, per-turn r",
+      "language": "Shell",
+      "stars": 26986,
+      "starred_at": "2026-06-16"
+    },
+    {
+      "name": "WarMatrix",
+      "full_name": "WarMatrixAI/WarMatrix",
+      "url": "https://github.com/WarMatrixAI/WarMatrix",
+      "desc": "WarMatrix is a tactical simulation and command console application featuring a 3D tactical map interface, a scalable backend simulation engine, and an AI integr",
+      "language": "TypeScript",
+      "stars": 15,
+      "starred_at": "2026-06-16"
+    },
+    {
+      "name": "agentic-awesome-skills",
+      "full_name": "sickn33/agentic-awesome-skills",
+      "url": "https://github.com/sickn33/agentic-awesome-skills",
+      "desc": "AAS Core is the local, agent-first control plane for complete catalog discovery, agent-owned selection, stack validation, and planning, backed by 2,115+ agentic",
+      "language": "Python",
+      "stars": 46573,
+      "starred_at": "2026-06-16"
+    },
+    {
+      "name": "Understand-Anything",
+      "full_name": "Egonex-AI/Understand-Anything",
+      "url": "https://github.com/Egonex-AI/Understand-Anything",
+      "desc": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude C",
+      "language": "TypeScript",
+      "stars": 83256,
+      "starred_at": "2026-06-16"
+    },
+    {
+      "name": "hello-agents",
+      "full_name": "datawhalechina/hello-agents",
+      "url": "https://github.com/datawhalechina/hello-agents",
+      "desc": "📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程",
+      "language": "Python",
+      "stars": 79805,
+      "starred_at": "2026-04-11"
+    },
+    {
+      "name": "HelloGitHub",
+      "full_name": "521xueweihan/HelloGitHub",
+      "url": "https://github.com/521xueweihan/HelloGitHub",
+      "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
+      "language": "Python",
+      "stars": 177389,
+      "starred_at": "2026-04-11"
+    },
+    {
+      "name": "hello-algo",
+      "full_name": "krahets/hello-algo",
+      "url": "https://github.com/krahets/hello-algo",
+      "desc": "《Hello 算法》：动画图解、一键运行的数据结构与算法教程。支持简中、繁中、English、日本語，提供 Python, Java, C++, C, C#, JS, Go, Swift, Rust, Ruby, Kotlin, TS, Dart 等代码实现",
+      "language": "Java",
+      "stars": 130271,
+      "starred_at": "2026-04-11"
+    }
+  ]
+}

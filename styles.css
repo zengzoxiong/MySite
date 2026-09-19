@@ -1,9 +1,11 @@
-/* ===== CSS 变量 - 亮色主题 ===== */
+/* ===== CSS 变量 - 亮色主题（液态玻璃） ===== */
 :root {
     color-scheme: light;
-    --bg-color: #fafafa;
-    --sidebar-bg: #ffffff;
-    --card-bg: #ffffff;
+    --bg-color: #eef2f9;
+    --sidebar-bg: rgba(255, 255, 255, 0.55);
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-blur: blur(18px) saturate(170%);
     --text-primary: #1a1a1a;
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
@@ -18,12 +20,13 @@
     --sidebar-collapsed-width: 50px;
 }
 
-/* ===== 暗色主题 ===== */
+/* ===== 暗色主题（液态玻璃） ===== */
 [data-theme="dark"] {
     color-scheme: dark;
-    --bg-color: #0a0a0a;
-    --sidebar-bg: #111111;
-    --card-bg: #161616;
+    --bg-color: #07090f;
+    --sidebar-bg: rgba(16, 18, 24, 0.55);
+    --card-bg: rgba(20, 22, 30, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.09);
     --text-primary: #f0f0f0;
     --text-secondary: #888888;
     --text-tertiary: #555555;
@@ -51,6 +54,29 @@ body {
     display: flex;
     min-height: 100vh;
     transition: background-color 0.2s, color 0.2s;
+    position: relative;
+}
+
+/* 环境光斑：液态玻璃背后的色彩源 */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(42rem 42rem at 12% 8%, rgba(99, 102, 241, 0.22), transparent 65%),
+        radial-gradient(38rem 38rem at 88% 18%, rgba(14, 165, 233, 0.20), transparent 65%),
+        radial-gradient(40rem 40rem at 78% 88%, rgba(236, 72, 153, 0.14), transparent 65%),
+        radial-gradient(30rem 30rem at 22% 92%, rgba(16, 185, 129, 0.14), transparent 65%);
+    pointer-events: none;
+}
+
+[data-theme="dark"] body::before {
+    background:
+        radial-gradient(42rem 42rem at 12% 8%, rgba(99, 102, 241, 0.16), transparent 65%),
+        radial-gradient(38rem 38rem at 88% 18%, rgba(14, 165, 233, 0.13), transparent 65%),
+        radial-gradient(40rem 40rem at 78% 88%, rgba(236, 72, 153, 0.10), transparent 65%),
+        radial-gradient(30rem 30rem at 22% 92%, rgba(16, 185, 129, 0.10), transparent 65%);
 }
 
 /* ===== 侧栏 ===== */
@@ -61,7 +87,9 @@ body {
     top: 0;
     left: 0;
     background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     display: flex;
     flex-direction: column;
     transition: width 0.2s ease;
@@ -416,6 +444,9 @@ body.modal-open {
     width: min(440px, calc(100vw - 32px));
     border-radius: 16px;
     overflow: hidden;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
     transform: translateY(10px) scale(0.98);
     transition: transform 0.2s ease;
@@ -430,7 +461,7 @@ body.modal-open {
     width: 100%;
     height: min(480px, calc(100dvh - 32px)); /* 横屏手机防溢出 */
     border: none;
-    background: var(--bg-color);
+    color-scheme: inherit;
 }
 
 .settings-modal-close {
@@ -678,10 +709,22 @@ body.sidebar-collapsed .main-content {
     min-height: 1.2em;
 }
 
-/* --- 四角组件（HUD 风格，无卡片底色） --- */
+/* --- 四角组件（液态玻璃薄板） --- */
 .corner {
     position: absolute;
     z-index: 2;
+    background-color: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    padding: 14px 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+/* 一言底板放宽以容纳文字 */
+.quote-corner {
+    padding: 14px 26px;
 }
 
 .section-label {
@@ -1083,8 +1126,10 @@ body.sidebar-collapsed .main-content {
     position: relative;
     width: min(560px, calc(100vw - 32px));
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--glass-border);
     border-radius: 14px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     transform: translateY(8px) scale(0.98);
@@ -1143,8 +1188,14 @@ body.sidebar-collapsed .main-content {
 
 .skill-card {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--glass-border);
     border-radius: 14px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
     padding: 16px 18px;
     box-shadow: var(--shadow-card);
     display: flex;
@@ -1396,7 +1447,9 @@ body.sidebar-collapsed .main-content {
 /* 卡片样式 */
 .link-card {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border-radius: 10px;
     padding: 16px 18px;
     text-decoration: none;
@@ -1977,5 +2030,18 @@ body.sidebar-collapsed .main-content {
     .media-cards {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 12px;
+    }
+}
+
+
+/* 液态玻璃降级：不支持 backdrop-filter 时用不透明底色 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sidebar,
+    .link-card,
+    .skill-card,
+    .corner,
+    .settings-modal-box,
+    .cmdk-box {
+        background-color: var(--bg-color);
     }
 }

@@ -13,16 +13,19 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
+            background: transparent; /* 在父页玻璃弹层内保持透明 */
         }
 
         .settings-page {
             width: 100%;
             max-width: 380px;
             background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 24px 26px;
             box-shadow: var(--shadow-card-hover);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
         }
 
         .settings-page .settings-title {
