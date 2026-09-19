@@ -417,7 +417,7 @@ function renderGhStars(animate = false) {
     }).join('');
 
     mediaGrid.innerHTML = `
-        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''} · 每日自动更新</div>
+        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''}</div>
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
     recalcMarquee();

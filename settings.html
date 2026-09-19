@@ -10,20 +10,15 @@
         body {
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            align-items: stretch;
+            padding: 0;
             background: transparent; /* 在父页玻璃弹层内保持透明 */
         }
 
         .settings-page {
             width: 100%;
-            max-width: 380px;
             background-color: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px 26px;
-            box-shadow: var(--shadow-card-hover);
+            padding: 26px 28px;
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
         }
