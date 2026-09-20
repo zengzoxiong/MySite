@@ -15,7 +15,8 @@
       "release": "2016-04-04",
       "rating": 8.1,
       "url": "https://anilist.co/anime/21355",
-      "cover": "assets/media/re-zero-s1.jpg"
+      "cover": "assets/media/re-zero-s1.jpg",
+      "comment": "死亡回归的代价一次次压在少年身上，最难受的不是怪物，是无能为力。"
     },
     {
       "title": "Re:从零开始的异世界生活 第二季 前半",
@@ -24,7 +25,8 @@
       "release": "2020-07-08",
       "rating": 8.1,
       "url": "https://anilist.co/anime/108632",
-      "cover": "assets/media/re-zero-s2a.jpg"
+      "cover": "assets/media/re-zero-s2a.jpg",
+      "comment": "圣域那几年梦，让他第一次学会相信自己能救人。"
     },
     {
       "title": "Re:从零开始的异世界生活 第二季 后半",
@@ -33,7 +35,8 @@
       "release": "2021-01-06",
       "rating": 8.1,
       "url": "https://anilist.co/anime/119661",
-      "cover": "assets/media/re-zero-s2b.jpg"
+      "cover": "assets/media/re-zero-s2b.jpg",
+      "comment": "白鲸那一战攒了一整季的气，终于痛快一回。"
     },
     {
       "title": "Re:从零开始的异世界生活 第三季",
@@ -42,7 +45,8 @@
       "release": "2024-10-02",
       "rating": 8.1,
       "url": "https://anilist.co/anime/163134",
-      "cover": "assets/media/re-zero-s3.jpg"
+      "cover": "assets/media/re-zero-s3.jpg",
+      "comment": "王选摊牌，昴把私欲第一次说出口，看得人胸口发烫。"
     },
     {
       "title": "Re:从零开始的异世界生活 第四季",
@@ -720,7 +724,8 @@
       "rating": 7.0,
       "release": "2013-02-23",
       "url": "https://www.themoviedb.org/movie/219250",
-      "cover": "assets/media/index-movie.jpg"
+      "cover": "assets/media/index-movie.jpg",
+      "comment": "一首歌救一座城的老套路，但上条当麻那一拳永远好使。"
     },
     {
       "title": "罗小黑战记",
@@ -739,7 +744,8 @@
       "rating": 8.2,
       "release": "2019-01-08",
       "url": "https://www.themoviedb.org/tv/84666",
-      "cover": "assets/media/wataten.jpg"
+      "cover": "assets/media/wataten.jpg",
+      "comment": "软到骨子里的日常，小花的面无表情才是全片最大杀器。"
     },
     {
       "title": "孤独摇滚！",
@@ -758,7 +764,8 @@
       "rating": 8.3,
       "release": "2017-01-12",
       "url": "https://www.themoviedb.org/tv/69291",
-      "cover": "assets/media/dragon-maid-s1.jpg"
+      "cover": "assets/media/dragon-maid-s1.jpg",
+      "comment": "托尔系上围裙那一刻，日常番的天花板就有了名字。"
     },
     {
       "title": "总之就是非常可爱 第二季",
@@ -767,7 +774,8 @@
       "url": "https://www.themoviedb.org/tv/100049/season/2",
       "release": "2023-04-08",
       "cover": "assets/media/tonikawa-s2.png",
-      "rating": 8.5
+      "rating": 8.5,
+      "comment": "把婚后日常拍得不腻，靠的全是细节里的温柔。"
     },
     {
       "title": "堀与宫村",
@@ -776,14 +784,16 @@
       "rating": 8.5,
       "release": "2021-01-10",
       "url": "https://www.themoviedb.org/tv/110070",
-      "cover": "assets/media/horimiya-s1.jpg"
+      "cover": "assets/media/horimiya-s1.jpg",
+      "comment": "两个人的分寸感都很成熟，不拖沓，看完心情很好。"
     },
     {
       "title": "路人超能100 REIGEN ～不为人知的奇迹发动者～",
       "type": "番剧",
       "status": "看过",
       "release": "2018-03-18",
-      "cover": "assets/media/mob-reigen.png"
+      "cover": "assets/media/mob-reigen.png",
+      "comment": "灵幻新隆才是真正的大人，这部外传把他写透了。"
     },
     {
       "title": "Re:从零开始的异世界生活 Memory Snow(雪之回忆)",
@@ -792,7 +802,8 @@
       "rating": 8.1,
       "release": "2018-10-06",
       "cover": "assets/media/rezero-memory-snow.jpg",
-      "url": "https://anilist.co/anime/100049"
+      "url": "https://anilist.co/anime/100049",
+      "comment": "主线攒够疲惫之后的一口暖气，雪原很冷，人很暖。"
     },
     {
       "title": "Re:从零开始的异世界生活 冰结之绊",
@@ -801,7 +812,8 @@
       "rating": 7.4,
       "release": "2019-11-08",
       "cover": "assets/media/rezero-hyoketsu.jpg",
-      "url": "https://www.themoviedb.org/movie/566451"
+      "url": "https://www.themoviedb.org/movie/566451",
+      "comment": "库珥修走过的雪原，也是她成为她的理由。"
     },
     {
       "title": "Re:从零开始的异世界生活 新编集版",
@@ -810,7 +822,8 @@
       "rating": 8.1,
       "release": "2016-04-04",
       "url": "https://www.themoviedb.org/tv/65942",
-      "cover": "assets/media/rezero-shinhen.jpg"
+      "cover": "assets/media/rezero-shinhen.jpg",
+      "comment": "重剪之后节奏更紧，第一次补设定看这版最舒服。"
     },
     {
       "title": "无职转生 第二季",
@@ -819,7 +832,8 @@
       "url": "https://www.themoviedb.org/tv/94664/season/2",
       "release": "2023-07-03",
       "cover": "assets/media/mushoku-s2.png",
-      "rating": 8.4
+      "rating": 8.4,
+      "comment": "鲁迪的成长在异世界番里少见的诚实，镜头语言依旧是天花板。"
     },
     {
       "title": "无职转生 第三季",
@@ -828,7 +842,8 @@
       "rating": 8.4,
       "release": "2026-07-04",
       "cover": "assets/media/mushoku-s3.jpg",
-      "url": "https://anilist.co/anime/178789"
+      "url": "https://anilist.co/anime/178789",
+      "comment": "还在追，目前制作水准一点没掉。"
     },
     {
       "title": "刀剑神域 第二季",
@@ -837,7 +852,8 @@
       "url": "https://www.themoviedb.org/tv/45782/season/2",
       "release": "2014-07-05",
       "cover": "assets/media/sao-s2.jpg",
-      "rating": 8.1
+      "rating": 8.1,
+      "comment": "妖精之翼展开的时候，还是得承认这段最好看。"
     },
     {
       "title": "红战士转职冒险者",
@@ -845,7 +861,8 @@
       "status": "看过",
       "release": "2025-01-12",
       "cover": "assets/media/sentai-red.jpg",
-      "url": "https://anilist.co/anime/180052"
+      "url": "https://anilist.co/anime/180052",
+      "comment": "战队老大哥转生异世界，动作戏的爽感一点没打折。"
     },
     {
       "title": "龙王的工作",
@@ -854,7 +871,8 @@
       "rating": 6.5,
       "release": "2018-01-08",
       "url": "https://www.themoviedb.org/tv/76141",
-      "cover": "assets/media/ryuo.jpg"
+      "cover": "assets/media/ryuo.jpg",
+      "comment": "将棋是壳，师徒和家人之间的分寸才是内核。"
     },
     {
       "title": "工作细胞",
@@ -873,7 +891,8 @@
       "release": "2017-11-11",
       "cover": "assets/media/gochiusa-dms.jpg",
       "url": "https://anilist.co/anime/21813",
-      "rating": 7.3
+      "rating": 7.3,
+      "comment": "甜点、少女和慢镜头，看完整个人被熨平了。"
     },
     {
       "title": "Charlotte",
@@ -882,7 +901,8 @@
       "rating": 8.2,
       "release": "2015-07-05",
       "url": "https://www.themoviedb.org/tv/63145",
-      "cover": "assets/media/charlotte.jpg"
+      "cover": "assets/media/charlotte.jpg",
+      "comment": "前八集的天马行空换最后几集的收束，值不值看人，但结尾确实疼。"
     },
     {
       "title": "想要成为影之实力者 第一季",
@@ -891,7 +911,8 @@
       "rating": 8.1,
       "release": "2022-10-05",
       "url": "https://www.themoviedb.org/tv/119495",
-      "cover": "assets/media/eminence-s1.jpg"
+      "cover": "assets/media/eminence-s1.jpg",
+      "comment": "中二到极致就成了一套方法论，装得理直气壮。"
     },
     {
       "title": "想要成为影之实力者 第二季",
@@ -900,7 +921,8 @@
       "rating": 8.1,
       "release": "2023-10",
       "url": "https://www.themoviedb.org/tv/119495/season/2",
-      "cover": "assets/media/eminence-s2.jpg"
+      "cover": "assets/media/eminence-s2.jpg",
+      "comment": "外壳一直在玩梗，中段突然给了一段认真的过去，反差措手不及。"
     },
     {
       "title": "战狼",
@@ -1009,7 +1031,8 @@
       "rating": 7.0,
       "release": "2026-02-17",
       "url": "https://www.themoviedb.org/movie/1462229",
-      "cover": "assets/media/pegasus-3.jpg"
+      "cover": "assets/media/pegasus-3.jpg",
+      "comment": "跑完最后一届巴音布鲁克，韩寒把中年人的不服塞进了引擎声里。"
     },
     {
       "title": "飞驰人生2",
@@ -1028,7 +1051,8 @@
       "rating": 8.3,
       "release": "2025-08-02",
       "url": "https://www.themoviedb.org/movie/1419406",
-      "cover": "assets/media/chasing-wind.jpg"
+      "cover": "assets/media/chasing-wind.jpg",
+      "comment": "成龙配梁家辉，老派追踪对上天眼，动作戏是真打出来的。"
     },
     {
       "title": "分手清单",
@@ -1037,7 +1061,8 @@
       "rating": 8.0,
       "release": "2025-06-14",
       "url": "https://www.themoviedb.org/movie/1359994",
-      "cover": "assets/media/breakup-list.jpg"
+      "cover": "assets/media/breakup-list.jpg",
+      "comment": "把分手当成待办逐项走完，前任系列那股痛感还在。"
     },
     {
       "title": "红毯先生",
@@ -1046,7 +1071,8 @@
       "rating": 6.1,
       "release": "2023-09-15",
       "url": "https://www.themoviedb.org/movie/1022659",
-      "cover": "assets/media/the-movie-emperor.jpg"
+      "cover": "assets/media/the-movie-emperor.jpg",
+      "comment": "刘德华演一个演员，宁浩把娱乐圈的体面一层层撕给你看。"
     },
     {
       "title": "人在囧途",
@@ -1055,7 +1081,8 @@
       "rating": 7.1,
       "release": "2010-06-04",
       "url": "https://www.themoviedb.org/movie/51306",
-      "cover": "assets/media/lost-on-journey.jpg"
+      "cover": "assets/media/lost-on-journey.jpg",
+      "comment": "绿皮火车那一段，是国产公路喜剧里最难忘的画面之一。"
     },
     {
       "title": "长江七号",
@@ -1064,7 +1091,8 @@
       "rating": 7.3,
       "release": "2008-01-30",
       "url": "https://www.themoviedb.org/movie/13688",
-      "cover": "assets/media/cj7.jpg"
+      "cover": "assets/media/cj7.jpg",
+      "comment": "星爷拿外星小孩当镜子，照出一个穷父亲想守的体面。"
     },
     {
       "title": "神偷奶爸",
@@ -1083,7 +1111,8 @@
       "rating": 6.9,
       "release": "2013-06-16",
       "url": "https://www.themoviedb.org/movie/93456",
-      "cover": "assets/media/despicable-me-2.jpg"
+      "cover": "assets/media/despicable-me-2.jpg",
+      "comment": "露西一出场，格鲁那点坏就再也撑不住了。"
     },
     {
       "title": "神偷奶爸3",
@@ -1092,7 +1121,8 @@
       "rating": 6.5,
       "release": "2017-06-14",
       "url": "https://www.themoviedb.org/movie/324852",
-      "cover": "assets/media/despicable-me-3.jpg"
+      "cover": "assets/media/despicable-me-3.jpg",
+      "comment": "巴尔撒泽尔这个中二反派，比主线好笑十倍。"
     },
     {
       "title": "玩具总动员",
@@ -1111,7 +1141,8 @@
       "rating": 7.6,
       "release": "1999-10-30",
       "url": "https://www.themoviedb.org/movie/863",
-      "cover": "assets/media/toy-story-2.jpg"
+      "cover": "assets/media/toy-story-2.jpg",
+      "comment": "皮克斯第一次让玩具面对“被丢掉”，笑着笑着就安静了。"
     },
     {
       "title": "赛车总动员",
@@ -1120,7 +1151,8 @@
       "rating": 7.1,
       "release": "2006-03-14",
       "url": "https://www.themoviedb.org/movie/920",
-      "cover": "assets/media/cars-1.jpg"
+      "cover": "assets/media/cars-1.jpg",
+      "comment": "水箱温泉镇的慢节奏，其实是拍给大人看的。"
     },
     {
       "title": "赛车总动员2",
@@ -1129,7 +1161,8 @@
       "rating": 6.2,
       "release": "2011-06-11",
       "url": "https://www.themoviedb.org/movie/49013",
-      "cover": "assets/media/cars-2.jpg"
+      "cover": "assets/media/cars-2.jpg",
+      "comment": "套了层间谍片外衣，最好看的还是回到小镇那几段。"
     },
     {
       "title": "天气之子",
@@ -1168,7 +1201,8 @@
       "rating": 7.7,
       "release": "2025-11-13",
       "url": "https://www.themoviedb.org/movie/1084242",
-      "cover": "assets/media/zootopia-2.jpg"
+      "cover": "assets/media/zootopia-2.jpg",
+      "comment": "朱迪和尼克的搭档还是那味儿，新角色热闹没抢戏。"
     },
     {
       "title": "刀剑神域进击篇：无星之夜",
@@ -1177,7 +1211,8 @@
       "rating": 7.8,
       "release": "2021-09-15",
       "url": "https://www.themoviedb.org/movie/761898",
-      "cover": "assets/media/sao-progressive-1.jpg"
+      "cover": "assets/media/sao-progressive-1.jpg",
+      "comment": "从亚丝娜视角重看艾恩格朗特的开局，那晚的残酷被讲清楚了。"
     },
     {
       "title": "刀剑神域进击篇：暮色黄昏",
@@ -1186,7 +1221,8 @@
       "rating": 7.7,
       "release": "2022-10-22",
       "url": "https://www.themoviedb.org/movie/893712",
-      "cover": "assets/media/sao-progressive-2.jpg"
+      "cover": "assets/media/sao-progressive-2.jpg",
+      "comment": "攻略组的推进和桐人那把太刀，比 TV 版更舍得给镜头。"
     },
     {
       "title": "刀剑神域：序列之争",
@@ -1195,7 +1231,8 @@
       "rating": 7.7,
       "release": "2017-02-18",
       "url": "https://www.themoviedb.org/movie/413594",
-      "cover": "assets/media/sao-ordinal-scale.jpg"
+      "cover": "assets/media/sao-ordinal-scale.jpg",
+      "comment": "AR 把旧日的遗憾变成敌人，演唱会那段比打斗更打动人。"
     },
     {
       "title": "全职高手之巅峰荣耀",
@@ -1204,7 +1241,8 @@
       "rating": 6.4,
       "release": "2019-08-16",
       "url": "https://www.themoviedb.org/movie/613200",
-      "cover": "assets/media/kings-avatar-movie.jpg"
+      "cover": "assets/media/kings-avatar-movie.jpg",
+      "comment": "十八岁的叶修与苏沐秋组建嘉世，前传把传说的起点补上了。"
     },
     {
       "title": "好东西",
@@ -1213,7 +1251,8 @@
       "rating": 7.6,
       "release": "2024-11-09",
       "url": "https://www.themoviedb.org/movie/1260951",
-      "cover": "assets/media/her-story.jpg"
+      "cover": "assets/media/her-story.jpg",
+      "comment": "邵艺辉把三个人的边界拍得很软，台词一句句都记得住。"
     },
     {
       "title": "年会不能停！",
@@ -1242,7 +1281,8 @@
       "rating": 5.7,
       "release": "2015-09-25",
       "url": "https://www.themoviedb.org/movie/361613",
-      "cover": "assets/media/gangjiong.jpg"
+      "cover": "assets/media/gangjiong.jpg",
+      "comment": "回到香港的那场追逐，徐峥把中年悔意塞进了喜剧里。"
     },
     {
       "title": "人在囧途之泰囧",
@@ -1251,7 +1291,8 @@
       "rating": 6.4,
       "release": "2012-12-12",
       "url": "https://www.themoviedb.org/movie/151743",
-      "cover": "assets/media/taijiong.jpg"
+      "cover": "assets/media/taijiong.jpg",
+      "comment": "国产公路喜剧的起点，笑点朴素，但真的有效。"
     },
     {
       "title": "南京照相馆",
@@ -1260,7 +1301,8 @@
       "rating": 7.9,
       "release": "2025-07-19",
       "url": "https://www.themoviedb.org/movie/1500536",
-      "cover": "assets/media/nanjing-photo.jpg"
+      "cover": "assets/media/nanjing-photo.jpg",
+      "comment": "暗房里冲出的不只是照片，还有一座城被屠戮的证据。"
     },
     {
       "title": "盒中之海",
@@ -1269,7 +1311,8 @@
       "rating": 5.5,
       "release": "2024-10-03",
       "url": "https://www.themoviedb.org/movie/1360489",
-      "cover": "assets/media/sea-in-box.jpg"
+      "cover": "assets/media/sea-in-box.jpg",
+      "comment": "B 站这部 VR 游戏题材网络电影，悬疑铺得比预期扎实。"
     },
     {
       "title": "超辉夜姬",
@@ -1278,7 +1321,8 @@
       "rating": 8.1,
       "release": "2026-01-21",
       "cover": "assets/media/kaguya-hime.jpg",
-      "url": "https://www.themoviedb.org/movie/1575337"
+      "url": "https://www.themoviedb.org/movie/1575337",
+      "comment": "辉夜姬传说被搬进虚拟空间，一群音乐制作人把少女的歌声连在一起。"
     },
     {
       "title": "暴太郎战队咚兄弟vs全开者",
@@ -1287,7 +1331,8 @@
       "rating": 4.7,
       "release": "2023-05-03",
       "url": "https://www.themoviedb.org/movie/1092060",
-      "cover": "assets/media/donbrothers-vs-zenkaiger.jpg"
+      "cover": "assets/media/donbrothers-vs-zenkaiger.jpg",
+      "comment": "联动篇的老规矩，两队先打一架再联手，看的就是那份默契。"
     },
     {
       "title": "暴太郎战队咚兄弟 电影：新·初恋英雄",
@@ -1296,7 +1341,8 @@
       "rating": 6.3,
       "release": "2022-07-22",
       "url": "https://www.themoviedb.org/movie/937315",
-      "cover": "assets/media/donbrothers-movie.jpg"
+      "cover": "assets/media/donbrothers-movie.jpg",
+      "comment": "把“初恋”做成怪人设定，暴太郎这股荒诞味正对胃口。"
     },
     {
       "title": "西游记之大圣归来",
@@ -1369,10 +1415,11 @@
       "release": "2022-03-06"
     },
     {
-      "title": "国宝谜踪",
+      "title": "国宝迷踪",
       "type": "纪录片",
       "status": "看过",
-      "cover": "assets/media/guobao-mizong.jpg"
+      "cover": "assets/media/guobao-mizong.jpg",
+      "comment": "四起一级文物被盗案，剧情复现比纯访谈更抓人。"
     },
     {
       "title": "邻家的天使大人",
@@ -1381,12 +1428,13 @@
       "release": "2023-01-07",
       "cover": "assets/media/oto-ninja-tenshi-s1.png",
       "url": "https://www.themoviedb.org/tv/154743/season/1",
-      "rating": 7.7
+      "rating": 7.7,
+      "comment": "椎名真昼的温柔带着点入侵性，看两人把距离一寸寸挪近。"
     },
     {
       "title": "邻家的天使大人 第二季",
       "type": "番剧",
-      "status": "在看",
+      "status": "看过",
       "release": "2026-04-03",
       "cover": "assets/media/oto-ninja-tenshi-s2.jpg",
       "url": "https://www.themoviedb.org/tv/154743/season/2",
@@ -1437,7 +1485,8 @@
       "release": "2015-06-26",
       "url": "https://anilist.co/anime/102598",
       "rating": 6.6,
-      "cover": "assets/media/fox-102598.jpg"
+      "cover": "assets/media/fox-102598.jpg",
+      "comment": "转世续缘第一单，梵云飞等了一千年，把“认人”这件事讲得很重。"
     },
     {
       "title": "狐妖小红娘 王权篇",
@@ -1446,7 +1495,8 @@
       "release": "2016-01-08",
       "url": "https://anilist.co/anime/102599",
       "rating": 6.6,
-      "cover": "assets/media/fox-102599.jpg"
+      "cover": "assets/media/fox-102599.jpg",
+      "comment": "王权富贵与清瞳那一段，是全剧最狠的一次“为自由死一回”。"
     },
     {
       "title": "狐妖小红娘 月红篇",
@@ -1455,7 +1505,8 @@
       "release": "2016-06-24",
       "url": "https://anilist.co/anime/102600",
       "rating": 6.6,
-      "cover": "assets/media/fox-102600.jpg"
+      "cover": "assets/media/fox-102600.jpg",
+      "comment": "主线之锚，涂山红红和东方月初欠下的债，要用转世来还。"
     },
     {
       "title": "狐妖小红娘 千颜篇",
@@ -1464,7 +1515,8 @@
       "release": "2017-02-24",
       "url": "https://anilist.co/anime/102602",
       "rating": 6.6,
-      "cover": "assets/media/fox-102602.jpg"
+      "cover": "assets/media/fox-102602.jpg",
+      "comment": "颜如玉换了一千张脸，还是没学会怎么好好开口。"
     },
     {
       "title": "狐妖小红娘 南国篇",
@@ -1473,7 +1525,8 @@
       "release": "2017-11-24",
       "url": "https://anilist.co/anime/102603",
       "rating": 6.6,
-      "cover": "assets/media/fox-102603.jpg"
+      "cover": "assets/media/fox-102603.jpg",
+      "comment": "蛊毒搅进另一世的前缘，这次白月初成了别人故事里的第三者。"
     },
     {
       "title": "狐妖小红娘 竹业篇",
@@ -1482,7 +1535,8 @@
       "release": "2019-03-01",
       "url": "https://anilist.co/anime/104748",
       "rating": 6.6,
-      "cover": "assets/media/fox-104748.jpg"
+      "cover": "assets/media/fox-104748.jpg",
+      "comment": "上一代的乱世恋，看完再回头补月红篇，全是伏笔。"
     },
     {
       "title": "狐妖小红娘 尾生篇",
@@ -1491,7 +1545,8 @@
       "release": "2019-11-22",
       "url": "https://anilist.co/anime/113722",
       "rating": 6.6,
-      "cover": "assets/media/fox-113722.jpg"
+      "cover": "assets/media/fox-113722.jpg",
+      "comment": "一纸婚约续千年，这条线笑点比刀多。"
     },
     {
       "title": "狐妖小红娘 金晨曦篇",
@@ -1500,7 +1555,8 @@
       "release": "2020-06-19",
       "url": "https://anilist.co/anime/117572",
       "rating": 6.6,
-      "cover": "assets/media/fox-117572.jpg"
+      "cover": "assets/media/fox-117572.jpg",
+      "comment": "圈外生物登场，双人格的鸣鸾把“我到底是谁”问得很直白。"
     },
     {
       "title": "狐妖小红娘 沐天城篇",
@@ -1509,7 +1565,8 @@
       "release": "2020-12-11",
       "url": "https://anilist.co/anime/122672",
       "rating": 6.6,
-      "cover": "assets/media/fox-122672.jpg"
+      "cover": "assets/media/fox-122672.jpg",
+      "comment": "沐天城的秘密揭开，木蔑与鸣鸾的前世今生终于接上。"
     },
     {
       "title": "狐妖小红娘 两生花篇",
@@ -1518,7 +1575,8 @@
       "release": "2021-03-26",
       "url": "https://anilist.co/anime/130323",
       "rating": 6.6,
-      "cover": "assets/media/fox-130323.jpg"
+      "cover": "assets/media/fox-130323.jpg",
+      "comment": "圈外线收尾，“续缘”这件事第一次有了代价的形状。"
     },
     {
       "title": "狐妖小红娘 无暮篇",
@@ -1527,7 +1585,8 @@
       "release": "2023-06-24",
       "url": "https://anilist.co/anime/137885",
       "rating": 6.6,
-      "cover": "assets/media/fox-137885.jpg"
+      "cover": "assets/media/fox-137885.jpg",
+      "comment": "千年前王权家少主化名游历的旧案，把王权家的往事补齐了。"
     },
     {
       "title": "开端",
@@ -1538,6 +1597,16 @@
       "comment": "循环困境里的救赎，每一步都牵动人心。",
       "url": "https://www.themoviedb.org/tv/155441",
       "cover": "assets/media/kaiduan.jpg"
+    },
+    {
+      "title": "你的名字。",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.5,
+      "release": "2016-07-01",
+      "url": "https://www.themoviedb.org/movie/372058",
+      "cover": "assets/media/your-name.jpg",
+      "comment": "彗星落下的那晚，两个人隔着时间喊出的那个名字。"
     }
   ]
 }
