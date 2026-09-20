@@ -1,0 +1,34 @@
+name: 同步探索歌单
+
+on:
+  schedule:
+    - cron: '20 21 * * *' # 每日 UTC 21:20（北京时间凌晨 5:20）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 拉取网易云飙升榜并更新 explore.json
+        run: python scripts/sync_explore.py
+
+      - name: 有变化时提交
+        run: |
+          if [[ -n $(git status --porcelain data/explore.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/explore.json
+            git commit -m "chore: 定时同步探索歌单"
+            git push
+          else
+            echo "榜单无变化，跳过提交"
+          fi

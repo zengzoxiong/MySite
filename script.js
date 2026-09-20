@@ -430,7 +430,8 @@ function renderGhStars(animate = false) {
 
 // ===== 首页迷你音乐播放器 =====
 const mp = {
-    tracks: [], idx: 0, playing: false,
+    tracks: [], playlist: [], explore: null, idx: 0, playing: false, busy: false, loaded: false, open: false,
+    mode: 'loop', fails: 0,
     audio: new Audio(),
     el: {}
 };
@@ -441,72 +442,240 @@ function fmtTime(sec) {
     return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+function mpTimeText() {
+    const t = mp.tracks[mp.idx] || {};
+    mp.el.time.textContent = mp.busy ? '缓冲中…'
+        : `${fmtTime(mp.audio.currentTime)} / ${fmtTime(mp.audio.duration || t.dur)}`;
+}
+
+// 只更新界面，不碰 audio —— 真正拉流推迟到点播放
+function mpRenderNow() {
+    const t = mp.tracks[mp.idx];
+    if (!t) return;
+    const name = escapeHtml(t.artist ? `${t.title} - ${t.artist}` : t.title);
+    mp.el.title.innerHTML = `<span class="t"><span class="r">${name}</span><span class="r dup" aria-hidden="true">${name}</span></span>`;
+    recalcMarquee(mp.el.wrap);
+    mp.el.song.textContent = t.title;
+    mp.el.artist.textContent = t.artist || '';
+    if (t.cover) mp.el.cover.src = t.cover;
+    mp.el.time.textContent = `0:00 / ${fmtTime(t.dur)}`;
+    mp.el.fill.style.width = '0%';
+    mp.el.list.querySelectorAll('.on').forEach(n => n.classList.remove('on'));
+    const row = mp.el.list.children[mp.idx];
+    if (row) {
+        row.classList.add('on');
+        if (mp.open) row.scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function mpListHtml() {
+    return mp.tracks.map((t, i) => `
+        <button class="mp-item" data-idx="${i}">
+            <span class="mp-item-no">${String(i + 1).padStart(2, '0')}</span>
+            <span class="mp-item-name">${escapeHtml(t.title)}</span>
+            <span class="mp-item-artist">${escapeHtml(t.artist || '')}</span>
+            <span class="mp-item-dur">${fmtTime(t.dur)}</span>
+        </button>`).join('');
+}
+
 function mpLoad(idx, autoplay) {
     if (!mp.tracks.length) return;
     mp.idx = (idx + mp.tracks.length) % mp.tracks.length;
-    const t = mp.tracks[mp.idx];
-    mp.audio.src = t.src;
-    mp.el.title.textContent = t.artist ? `${t.title} - ${t.artist}` : t.title;
-    mp.el.time.textContent = '0:00 / 0:00';
-    mp.el.fill.style.width = '0%';
+    mp.loaded = false;
+    mp.busy = false;
+    mpRenderNow();
     if (autoplay) mpPlayToggle(true);
 }
 
 function mpPlayToggle(force) {
     if (!mp.tracks.length) return;
     const want = force !== undefined ? force : !mp.playing;
-    if (want) { mp.audio.play().catch(() => {}); }
-    else { mp.audio.pause(); }
+    if (!want) { mp.audio.pause(); return; }
+    if (!mp.loaded) {
+        mp.audio.src = mp.tracks[mp.idx].src;
+        mp.loaded = true;
+    }
+    mp.audio.play().catch(() => {});
 }
 
 function mpSyncUI() {
     mp.playing = !mp.audio.paused;
-    mp.el.playIcon.style.display = mp.playing ? 'none' : '';
-    mp.el.pauseIcon.style.display = mp.playing ? '' : 'none';
+    // 迷你条与控制区各有一套播放/暂停图标，一起同步
+    document.querySelectorAll('.mp-ic-play').forEach(n => { n.style.display = mp.playing ? 'none' : ''; });
+    document.querySelectorAll('.mp-ic-pause').forEach(n => { n.style.display = mp.playing ? '' : 'none'; });
+}
+
+function mpSetBusy(on) {
+    mp.busy = on;
+    mpTimeText();
+}
+
+function mpTogglePanel(open) {
+    mp.open = open === undefined ? !mp.open : open;
+    mp.el.wrap.classList.toggle('mp-open', mp.open);
+    mp.el.toggle.setAttribute('aria-expanded', String(mp.open));
+    mp.el.toggle.title = mp.open ? '收起歌单' : '展开歌单';
+    mp.el.openIcon.style.display = mp.open ? 'none' : '';
+    mp.el.closeIcon.style.display = mp.open ? '' : 'none';
+    if (mp.open) {
+        const row = mp.el.list.children[mp.idx];
+        if (row) row.scrollIntoView({ block: 'nearest' });
+    }
+    recalcMarquee(mp.el.wrap);
+}
+
+// 播放模式：列表循环 / 单曲循环 / 列表随机 / 探索（随机 + 每日榜单）
+const MP_MODES = ['loop', 'one', 'shuffle', 'explore'];
+const MP_MODE_NAME = { loop: '列表循环', one: '单曲循环', shuffle: '列表随机', explore: '每日探索' };
+
+function mpStep(dir) {
+    const n = mp.tracks.length;
+    if (n < 2) return 0;
+    if (mp.mode === 'shuffle' || mp.mode === 'explore') {
+        let r = mp.idx;
+        while (r === mp.idx) r = Math.floor(Math.random() * n);
+        return r;
+    }
+    return (mp.idx + dir + n) % n;
+}
+
+function mpShowMode() {
+    // SVG 元素没有反射的 hidden 属性，必须用 toggleAttribute 改 DOM 属性，否则图标不会切换
+    MP_MODES.forEach((m) => { mp.el.modeIcons[m].toggleAttribute('hidden', m !== mp.mode); });
+    mp.el.mode.title = MP_MODE_NAME[mp.mode];
+    mp.audio.loop = mp.mode === 'one';
+}
+
+function mpUseList(list, autoplay) {
+    mp.tracks = list;
+    mp.el.list.innerHTML = mpListHtml();
+    mpLoad(autoplay === undefined ? 0 : autoplay, mp.playing);
+}
+
+function mpSetMode(mode) {
+    mp.mode = mode;
+    mp.fails = 0;
+    localStorage.setItem('mpMode', mode);
+    mpShowMode();
+    if (mode === 'explore') mpLoadExplore();
+    else mpUseList(mp.playlist);
+}
+
+function mpLoadExplore() {
+    if (mp.explore) {
+        mp.tracks = mp.explore;
+        mp.el.list.innerHTML = mpListHtml();
+        mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
+        return;
+    }
+    fetch('data/explore.json')
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => {
+            mp.explore = (d.tracks || []).filter(t => t && t.src);
+            if (!mp.explore.length) throw new Error('empty');
+            if (mp.mode !== 'explore') return;
+            mp.tracks = mp.explore;
+            mp.el.list.innerHTML = mpListHtml();
+            mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
+        })
+        .catch(() => {
+            mp.explore = [];
+            if (mp.mode === 'explore') mpSetMode('loop');
+        });
 }
 
 function initMusicPlayer() {
     mp.el.title = document.getElementById('mpTitle');
     mp.el.time = document.getElementById('mpTime');
     mp.el.fill = document.getElementById('mpFill');
-    mp.el.playIcon = document.querySelector('.mp-ic-play');
-    mp.el.pauseIcon = document.querySelector('.mp-ic-pause');
-    mp.el.prev = document.getElementById('mpPrev');
-    mp.el.next = document.getElementById('mpNext');
-    mp.el.play = document.getElementById('mpPlay');
     mp.el.progress = document.getElementById('mpProgress');
     mp.el.wrap = document.getElementById('musicWrap');
-
-    // 拉绳收起/展开（状态记忆）
-    if (localStorage.getItem('mpStashed') === '1') {
-        mp.el.wrap.classList.add('stashed');
-    }
-    const toggleStash = () => {
-        const stashed = mp.el.wrap.classList.toggle('stashed');
-        localStorage.setItem('mpStashed', stashed ? '1' : '0');
+    mp.el.toggle = document.getElementById('mpToggle');
+    mp.el.openIcon = document.querySelector('.mp-ic-open');
+    mp.el.closeIcon = document.querySelector('.mp-ic-close');
+    mp.el.song = document.getElementById('mpSong');
+    mp.el.artist = document.getElementById('mpArtist');
+    mp.el.cover = document.getElementById('mpCover');
+    mp.el.list = document.getElementById('mpList');
+    mp.el.listToggle = document.getElementById('mpListToggle');
+    mp.el.vol = document.getElementById('mpVol');
+    mp.el.volWrap = document.getElementById('mpVolWrap');
+    mp.el.mode = document.getElementById('mpMode');
+    mp.el.modeIcons = {
+        loop: document.querySelector('.mi-loop'),
+        one: document.querySelector('.mi-one'),
+        shuffle: document.querySelector('.mi-shuffle'),
+        explore: document.querySelector('.mi-explore')
     };
-    mp.el.cord = document.getElementById('mpCord');
-    mp.el.cord.addEventListener('click', toggleStash);
+
+    mp.audio.preload = 'none';
+
+    // 音量：无滑块圆点，靠填充深浅 + 喇叭音波道数（0/1/2/3）表达大小
+    const syncVol = () => {
+        const v = Number(mp.el.vol.value);
+        mp.el.vol.style.setProperty('--v', v);
+        mp.el.volWrap.dataset.lv = v <= 0 ? 0 : v < 0.34 ? 1 : v < 0.67 ? 2 : 3;
+    };
+    const savedVol = localStorage.getItem('mpVolume');
+    mp.audio.volume = savedVol === null ? 1 : Number(savedVol);
+    mp.el.vol.value = mp.audio.volume;
+    syncVol();
+    mp.el.vol.addEventListener('input', () => {
+        mp.audio.volume = Number(mp.el.vol.value);
+        localStorage.setItem('mpVolume', mp.el.vol.value);
+        syncVol();
+    });
+
+    const savedMode = localStorage.getItem('mpMode');
+    if (MP_MODES.includes(savedMode)) mp.mode = savedMode;
+    mpShowMode();
+    mp.el.mode.addEventListener('click', () => mpSetMode(MP_MODES[(MP_MODES.indexOf(mp.mode) + 1) % MP_MODES.length]));
+
+    // 迷你条与展开控制区各有一组按钮，按类名一起绑定
+    const bindAll = (sel, fn) => document.querySelectorAll(sel).forEach(b => b.addEventListener('click', fn));
+    bindAll('.mp-playbtn', () => mpPlayToggle());
+    bindAll('.mp-prev', () => mpLoad(mpStep(-1), mp.playing));
+    bindAll('.mp-next', () => mpLoad(mpStep(1), mp.playing));
+
+    mp.el.toggle.addEventListener('click', () => mpTogglePanel());
+    mp.el.listToggle.addEventListener('click', () => {
+        const closed = mp.el.wrap.classList.toggle('list-closed');
+        mp.el.listToggle.setAttribute('aria-expanded', String(!closed));
+    });
+    mp.el.list.addEventListener('click', (e) => {
+        const row = e.target.closest('.mp-item');
+        if (row) mpLoad(Number(row.dataset.idx), true);
+    });
 
     fetch('data/playlist.json')
         .then(r => r.json())
-        .then(d => { mp.tracks = d.tracks || []; mpLoad(0, false); })
-        .catch(() => {});
-
-    mp.el.play.addEventListener('click', () => mpPlayToggle());
-    mp.el.prev.addEventListener('click', () => mpLoad(mp.idx - 1, mp.playing));
-    mp.el.next.addEventListener('click', () => mpLoad(mp.idx + 1, mp.playing));
+        .then(d => {
+            mp.playlist = d.tracks || [];
+            if (mp.mode === 'explore') { mpShowMode(); mpLoadExplore(); }
+            else mpUseList(mp.playlist);
+        })
+        .catch(() => { mp.el.title.textContent = '歌单加载失败'; });
 
     mp.audio.addEventListener('error', () => {
-        mp.el.title.textContent = '音频加载失败，请检查文件';
+        const t = mp.tracks[mp.idx];
+        if (!t || mp.audio.src !== t.src) return; // 换曲打断的旧请求
+        mpSetBusy(false);
         mpSyncUI();
+        // 探索榜单可能混入已变灰的版权曲，连续跳过几首仍失败才提示
+        mp.fails++;
+        if (mp.fails <= 8 && mp.tracks.length > 1) { mpLoad(mpStep(1), true); return; }
+        mp.el.title.textContent = '音频加载失败，换一首试试';
     });
+    mp.audio.addEventListener('loadstart', () => mpSetBusy(true));
+    mp.audio.addEventListener('waiting', () => mpSetBusy(true));
+    mp.audio.addEventListener('canplay', () => mpSetBusy(false));
+    mp.audio.addEventListener('playing', () => { mp.fails = 0; mpSetBusy(false); mpSyncUI(); });
     mp.audio.addEventListener('play', mpSyncUI);
-    mp.audio.addEventListener('pause', mpSyncUI);
-    mp.audio.addEventListener('ended', () => mpLoad(mp.idx + 1, true));
+    mp.audio.addEventListener('pause', () => { mpSetBusy(false); mpSyncUI(); });
+    mp.audio.addEventListener('ended', () => mpLoad(mpStep(1), true));
     mp.audio.addEventListener('timeupdate', () => {
         const d = mp.audio.duration || 0;
-        mp.el.time.textContent = `${fmtTime(mp.audio.currentTime)} / ${fmtTime(d)}`;
+        mpTimeText();
         mp.el.fill.style.width = (d ? (mp.audio.currentTime / d) * 100 : 0) + '%';
     });
 
@@ -514,6 +683,14 @@ function initMusicPlayer() {
         if (!mp.audio.duration) return;
         const r = mp.el.progress.getBoundingClientRect();
         mp.audio.currentTime = ((e.clientX - r.left) / r.width) * mp.audio.duration;
+    });
+
+    // 面板展开时：点面板外或按 Esc 收起（有其他弹层打开时让给它）
+    document.addEventListener('click', (e) => {
+        if (mp.open && !mp.el.wrap.contains(e.target)) mpTogglePanel(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mp.open && !document.body.classList.contains('modal-open')) mpTogglePanel(false);
     });
 }
 
@@ -902,7 +1079,7 @@ function buildMediaCard(item, i) {
             ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}
         </div>
         <div class="media-info">
-            <div class="media-title"><span class="t">${title}</span></div>
+            <div class="media-title marquee"><span class="t"><span class="r">${title}</span><span class="r dup" aria-hidden="true">${title}</span></span></div>
             <div class="media-meta">${escapeHtml(item.type || '')}${item.release ? ' · ' + escapeHtml(item.release) : ''}</div>
         </div>
     </${item.url ? 'a' : 'div'}>`;
@@ -916,6 +1093,7 @@ function renderLinks(animate = false) {
         linksGrid.style.display = 'none';
         mediaGrid.style.display = 'none';
         emptyState.style.display = 'none';
+        recalcMarquee(); // 仪表盘刚显示，重新量一次歌名是否溢出
         return;
     }
 
@@ -1010,20 +1188,24 @@ function renderMedia(animate = false) {
     recalcMarquee();
 }
 
-// 重算溢出标题的滚动参数（渲染后与窗口 resize 时调用；扫描全文档，覆盖搜索结果）
-function recalcMarquee() {
-    document.querySelectorAll('.media-title').forEach(el => {
-        const span = el.querySelector('.t');
-        if (!span) return;
-        const overflow = span.scrollWidth > el.clientWidth + 1;
-        el.classList.toggle('overflowing', overflow);
-        if (overflow) {
-            const shift = span.scrollWidth - el.clientWidth;
-            span.style.setProperty('--shift', shift + 'px');
-            span.style.setProperty('--marquee-dur', (3.5 + shift / 22).toFixed(1) + 's');
-        } else {
-            span.style.removeProperty('--shift');
-            span.style.removeProperty('--marquee-dur');
+// 重算长标题的循环滚动参数（渲染后与窗口 resize 时调用；root 可限定范围，默认全文档）
+// 先摘掉 overflowing 量单份文案的真实宽度，再统一写回，避免逐个强制回流
+function recalcMarquee(root) {
+    const els = [...(root || document).querySelectorAll('.marquee')];
+    if (!els.length) return;
+    els.forEach(el => {
+        el.classList.remove('overflowing');
+        el.style.removeProperty('--marquee-dur');
+    });
+    const runs = els.map(el => el.querySelector('.r'));
+    void document.body.offsetWidth;
+    els.forEach((el, i) => {
+        const run = runs[i];
+        if (!run) return;
+        const w = run.getBoundingClientRect().width;
+        if (w > el.clientWidth + 1) {
+            el.classList.add('overflowing');
+            el.style.setProperty('--marquee-dur', Math.max(4, w / 40).toFixed(1) + 's'); // 约 40px/s
         }
     });
 }

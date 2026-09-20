@@ -794,75 +794,338 @@ body.sidebar-collapsed .main-content {
     transform: scale(0.97);
 }
 
-/* 左上：迷你音乐播放器（拉绳收起/展开） */
+/* 左上：迷你音乐播放器（点击展开歌单面板） */
 .music-wrap {
     position: absolute;
     top: 0;
     left: 0;
     width: 250px;
     animation: fadeUp 0.5s ease 0.1s backwards;
+    transition: width 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
 }
 
-.mp-cord {
-    display: block;
-    width: 2px;
-    height: 16px;
-    margin-left: 24px;
-    border: none;
-    padding: 0;
-    background: linear-gradient(to bottom, transparent, var(--glass-border));
-    cursor: grab;
+.music-wrap.mp-open {
+    width: min(400px, calc(100vw - 32px));
+}
+
+/* .music-player 继承 .corner 的绝对定位，会盖住同级元素，这里覆写回文档流 */
+.music-player {
     position: relative;
-    transition: height 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
-.mp-cord::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--card-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-    transition: transform 0.2s;
-}
-
-.mp-cord:hover::after {
-    transform: translateX(-50%) scale(1.25);
-}
-
-.mp-cord:active {
-    cursor: grabbing;
-}
-
-.music-wrap.stashed .mp-cord {
-    height: 96px;
-}
-
-.music-player {
-    transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.3s ease;
-}
-
-.music-wrap.stashed .music-player {
-    transform: translateY(calc(-100% - 12px));
+/* 展开面板：grid-template-rows 0fr→1fr 做高度过渡，内层 overflow 裁掉溢出 */
+.mp-panel {
+    display: grid;
+    grid-template-rows: 0fr;
     opacity: 0;
-    pointer-events: none;
+    transition: grid-template-rows 0.35s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.25s ease;
 }
 
-.music-player {
-    top: 0;
+.music-wrap.mp-open .mp-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.mp-panel-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.mp-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 0 10px;
+}
+
+.mp-cover {
+    width: min(148px, 26vh);
+    height: min(148px, 26vh);
+    border-radius: 14px;
+    object-fit: cover;
+    background-color: var(--hover-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.mp-song {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-artist {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-ctrl {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 8px 0 10px;
+}
+
+.mp-lg {
+    width: 34px;
+    height: 34px;
+}
+
+.mp-lg.mp-play {
+    width: 40px;
+    height: 40px;
+}
+
+.mp-lg svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 音量放在控制行左端：细横条，填充段的颜色深浅随音量变化（拖满最深） */
+.mp-vol {
+    position: absolute;
     left: 0;
-    width: 250px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-tertiary);
+}
+
+.mp-vol svg {
+    fill: currentColor;
+}
+
+.mp-vol input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 72px;
+    height: 3px;
+    border-radius: 99px;
+    background: linear-gradient(to right,
+            color-mix(in srgb, var(--text-secondary) calc(20% + 80% * var(--v, 1)), transparent) 0 calc(var(--v, 1) * 100%),
+            var(--border-color) calc(var(--v, 1) * 100%) 100%);
+    cursor: pointer;
+}
+
+.mp-vol input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 0;
+    height: 0;
+    border: none;
+    background: transparent;
+}
+
+/* 音波按音量分级：静音只有喇叭体，音量越大波数越多 */
+.mp-vol .w {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    display: none;
+}
+
+.mp-vol[data-lv="1"] .w1,
+.mp-vol[data-lv="2"] .w1,
+.mp-vol[data-lv="2"] .w2,
+.mp-vol[data-lv="3"] .w {
+    display: block;
+}
+
+/* 控制行右端一组：模式切换 + 歌单显隐（纯图标，无文字） */
+.mp-side {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mp-modebtn {
+    color: var(--text-tertiary);
+}
+
+.mp-modebtn:hover {
+    color: var(--accent-color);
+}
+
+.mp-timerow {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 三条横杠：控制行右端，切换歌单显隐 */
+.mp-listbtn {
+    border-radius: 8px;
+    color: var(--text-tertiary);
+    transition: color 0.2s, opacity 0.2s;
+}
+
+/* 提高优先级：后面的 .mp-btn svg { fill: currentColor } 会把子元素重新填实 */
+.mp-btn.mp-modebtn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.mp-btn.mp-modebtn .needle {
+    fill: currentColor;
+    stroke: none;
+}
+
+.mp-modebtn svg[hidden] {
+    display: none;
+}
+
+.mp-listbtn:hover {
+    color: var(--text-secondary);
+}
+
+.music-wrap.list-closed .mp-listbtn {
+    opacity: 0.4;
+}
+
+.mp-list-wrap {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease;
+}
+
+.music-wrap.list-closed .mp-list-wrap {
+    grid-template-rows: 0fr;
+}
+
+.mp-list {
+    min-height: 0;
+    max-height: min(150px, 22vh);
+    overflow-y: auto;
+}
+
+.mp-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.mp-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mp-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.mp-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 6px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.mp-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.mp-item-no {
+    width: 18px;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
+}
+
+.mp-item-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-item-artist {
+    width: 84px;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-item-dur {
+    width: 32px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.mp-item.on .mp-item-no,
+.mp-item.on .mp-item-name,
+.mp-item.on .mp-item-artist,
+.mp-item.on .mp-item-dur {
+    color: var(--accent-color);
+}
+
+.mp-item.on .mp-item-name {
+    font-weight: 600;
 }
 
 .mp-row {
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.mp-transport {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 展开后控制按钮移到大封面下方，隐藏迷你条里的那一组 */
+.music-wrap.mp-open .mp-transport {
+    display: none;
+}
+
+/* 展开后歌名移到封面下方，隐藏迷你条里的标题行，只留收起箭头 */
+.music-wrap.mp-open .mp-info {
+    display: none;
+}
+
+/* 箭头始终贴在迷你条右端（展开后该组只剩它一个） */
+.mp-arrow {
+    margin-left: auto;
 }
 
 .mp-btn {
@@ -2201,18 +2464,46 @@ body.sidebar-collapsed .main-content {
     display: inline-block;
 }
 
-/* 悬停时横向滚动展示完整标题（仅溢出的标题生效） */
-.media-title.overflowing:hover {
+/* 长标题向左循环滚动：文案排两份首尾相接，位移 -50% 即无缝衔接（影视卡片与音乐迷你条共用） */
+.marquee .r {
+    white-space: nowrap;
+}
+
+.marquee .r.dup {
+    display: none;
+}
+
+/* 触发滚动的三种情形：音乐迷你条常开；影视卡片需鼠标悬停或键盘聚焦 */
+.mp-title.overflowing,
+.media-card:hover .media-title.overflowing,
+.media-card:focus .media-title.overflowing {
     text-overflow: clip;
 }
 
-.media-title.overflowing:hover .t {
-    animation: marquee var(--marquee-dur, 5s) ease-in-out infinite alternate;
+.mp-title.overflowing .r,
+.media-card:hover .media-title.overflowing .r,
+.media-card:focus .media-title.overflowing .r {
+    padding-right: 3em;
+}
+
+.mp-title.overflowing .r.dup,
+.media-card:hover .media-title.overflowing .r.dup,
+.media-card:focus .media-title.overflowing .r.dup {
+    display: block;
+}
+
+.mp-title.overflowing .t,
+.media-card:hover .media-title.overflowing .t,
+.media-card:focus .media-title.overflowing .t {
+    display: flex;
+    width: max-content;
+    animation: marquee var(--marquee-dur, 8s) linear infinite;
 }
 
 @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(calc(-1 * var(--shift, 0px))); }
+    to {
+        transform: translateX(-50%);
+    }
 }
 
 .media-card:hover .media-title {

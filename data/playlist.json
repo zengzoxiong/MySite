@@ -1,10 +1,440 @@
 {
-  "note": "首页迷你播放器歌单：src 支持本地文件（如 assets/music/xxx.mp3）或外链 URL。",
+  "note": "首页播放器歌单。src 用网易云外链接口 song/media/outer/url?id=<id>.mp3（302 到其 CDN，实测 https 页面首声约 0.1s）；cover 用 ?param=400y400 缩图。",
+  "source": {
+    "provider": "网易云音乐",
+    "playlist": "一只灰鹦鹉喜欢的音乐",
+    "url": "https://music.163.com/playlist?id=330395646",
+    "playlistTotal": 183,
+    "included": 61,
+    "skipped": "其余 122 首为 VIP/版权锁定，outer 直链会 302 到 music.163.com/404，浏览器报 Format error"
+  },
   "tracks": [
+    {
+      "title": "彩虹",
+      "artist": "TimeZ",
+      "src": "https://music.163.com/song/media/outer/url?id=412902095.mp3",
+      "cover": "https://p1.music.126.net/5Y5SUlFF2Rl2GLhQiKObCQ==/2896113629435583.jpg?param=400y400",
+      "dur": 240
+    },
+    {
+      "title": "My jealousy (Original ver.)",
+      "artist": "DJMAX",
+      "src": "https://music.163.com/song/media/outer/url?id=22831636.mp3",
+      "cover": "https://p2.music.126.net/9gkE-74Bemt9zyQyx9V4hA==/632219185993597.jpg?param=400y400",
+      "dur": 153
+    },
+    {
+      "title": "海屿你",
+      "artist": "马也_Crabbit",
+      "src": "https://music.163.com/song/media/outer/url?id=1973665667.mp3",
+      "cover": "https://p2.music.126.net/Enhy6dPn4gpyqrKhVEQvgA==/109951170483249998.jpg?param=400y400",
+      "dur": 296
+    },
+    {
+      "title": "Gee",
+      "artist": "少女时代",
+      "src": "https://music.163.com/song/media/outer/url?id=29535435.mp3",
+      "cover": "https://p2.music.126.net/yPpy4WcbVcyb70rmRnUCqg==/2529976256578329.jpg?param=400y400",
+      "dur": 203
+    },
     {
       "title": "答案",
       "artist": "杨坤 / 郭采洁",
-      "src": "assets/music/daan-yangkun.mp3"
+      "src": "https://music.163.com/song/media/outer/url?id=28232019.mp3",
+      "cover": "https://p2.music.126.net/yRb0ZHDWRMb5yWMTAy6YPw==/6016527627196727.jpg?param=400y400",
+      "dur": 232
+    },
+    {
+      "title": "与风告别",
+      "artist": "拂言",
+      "src": "https://music.163.com/song/media/outer/url?id=2668035349.mp3",
+      "cover": "https://p2.music.126.net/sTJqKkPy7Dt29VMN7mcoNQ==/109951170409795793.jpg?param=400y400",
+      "dur": 168
+    },
+    {
+      "title": "王妃",
+      "artist": "萧敬腾",
+      "src": "https://music.163.com/song/media/outer/url?id=400161259.mp3",
+      "cover": "https://p2.music.126.net/durZOgsdkTn7tRjDP12vNg==/109951167114826061.jpg?param=400y400",
+      "dur": 224
+    },
+    {
+      "title": "世界上的另一个我",
+      "artist": "阿肆 / 郭采洁",
+      "src": "https://music.163.com/song/media/outer/url?id=514765154.mp3",
+      "cover": "https://p2.music.126.net/cLOkkudmpzMqeS6NBoqC0g==/109951172945938773.jpg?param=400y400",
+      "dur": 238
+    },
+    {
+      "title": "出山",
+      "artist": "花粥 / 王胜娚",
+      "src": "https://music.163.com/song/media/outer/url?id=1313354324.mp3",
+      "cover": "https://p2.music.126.net/xUAfdMHdXhu3BmO4g8nOYA==/109951163573311341.jpg?param=400y400",
+      "dur": 200
+    },
+    {
+      "title": "Take a While",
+      "artist": "Yellow Lockdown / Licellow",
+      "src": "https://music.163.com/song/media/outer/url?id=1470657694.mp3",
+      "cover": "https://p2.music.126.net/1fw5bZlQUsti1UYATJJvJw==/109951169286879708.jpg?param=400y400",
+      "dur": 240
+    },
+    {
+      "title": "打ち上げ花火",
+      "artist": "Daoko / 米津玄師",
+      "src": "https://music.163.com/song/media/outer/url?id=524149974.mp3",
+      "cover": "https://p2.music.126.net/foHq40_kQ0L_4ntegSLLFw==/109951163088455433.jpg?param=400y400",
+      "dur": 290
+    },
+    {
+      "title": "若把你",
+      "artist": "Kirsty刘瑾睿",
+      "src": "https://music.163.com/song/media/outer/url?id=865632948.mp3",
+      "cover": "https://p2.music.126.net/M877M2-VhWZiLPVFORf9iQ==/109951163401482434.jpg?param=400y400",
+      "dur": 189
+    },
+    {
+      "title": "诀别书",
+      "artist": "邓垚",
+      "src": "https://music.163.com/song/media/outer/url?id=2038191895.mp3",
+      "cover": "https://p2.music.126.net/wztA5smxFjIfv98u7-IrQQ==/109951168933355255.jpg?param=400y400",
+      "dur": 247
+    },
+    {
+      "title": "我只能离开",
+      "artist": "颜人中",
+      "src": "https://music.163.com/song/media/outer/url?id=1398283847.mp3",
+      "cover": "https://p2.music.126.net/5GPFbTQU-kW57PGv_7LeBw==/109951164440649436.jpg?param=400y400",
+      "dur": 230
+    },
+    {
+      "title": "我们的歌",
+      "artist": "刘大拿",
+      "src": "https://music.163.com/song/media/outer/url?id=2025533834.mp3",
+      "cover": "https://p2.music.126.net/Gm2v1KrDe2TwplzxcmTxYg==/109951168428025131.jpg?param=400y400",
+      "dur": 189
+    },
+    {
+      "title": "tutu",
+      "artist": "鎖那",
+      "src": "https://music.163.com/song/media/outer/url?id=1854628391.mp3",
+      "cover": "https://p2.music.126.net/vQQham0ok6MLeY2GRIQNLA==/109951166101594087.jpg?param=400y400",
+      "dur": 201
+    },
+    {
+      "title": "千里邀月",
+      "artist": "乐正绫 / 泠鸢yousa / 茶理理 / Hanser / 三无Marblue",
+      "src": "https://music.163.com/song/media/outer/url?id=1391419936.mp3",
+      "cover": "https://p2.music.126.net/4l_4NPFSbGDNSoQ5MZOC1w==/109951173325180926.jpg?param=400y400",
+      "dur": 242
+    },
+    {
+      "title": "Stronger",
+      "artist": "Kelly Clarkson",
+      "src": "https://music.163.com/song/media/outer/url?id=26569168.mp3",
+      "cover": "https://p2.music.126.net/NyN6he8m4t4F_yjOR_Tlww==/2495891395114271.jpg?param=400y400",
+      "dur": 221
+    },
+    {
+      "title": "Catch My Breath",
+      "artist": "Kelly Clarkson",
+      "src": "https://music.163.com/song/media/outer/url?id=26226510.mp3",
+      "cover": "https://p2.music.126.net/lqUJW4EkNk-ldB9Y5j0mHw==/2385940232315172.jpg?param=400y400",
+      "dur": 252
+    },
+    {
+      "title": "紫荆花盛开",
+      "artist": "李荣浩 / 梁咏琪",
+      "src": "https://music.163.com/song/media/outer/url?id=1959528822.mp3",
+      "cover": "https://p2.music.126.net/R7yzr15Ftp4Mf59kTvy_uA==/109951167605022957.jpg?param=400y400",
+      "dur": 211
+    },
+    {
+      "title": "Moshi Moshi (feat. 百足)",
+      "artist": "Nozomi Kitay / GAL D",
+      "src": "https://music.163.com/song/media/outer/url?id=2119517202.mp3",
+      "cover": "https://p2.music.126.net/7w44iHWN6s7Hh8KfaosU-Q==/109951169275983406.jpg?param=400y400",
+      "dur": 177
+    },
+    {
+      "title": "sweets parade",
+      "artist": "花澤香菜",
+      "src": "https://music.163.com/song/media/outer/url?id=809268.mp3",
+      "cover": "https://p2.music.126.net/soVzasgTYU36F1uAirKEhQ==/109951165628137310.jpg?param=400y400",
+      "dur": 239
+    },
+    {
+      "title": "XY&Z",
+      "artist": "松本梨香",
+      "src": "https://music.163.com/song/media/outer/url?id=521493119.mp3",
+      "cover": "https://p2.music.126.net/_sllrC16IS8z8txtBaA2dw==/109951163073303849.jpg?param=400y400",
+      "dur": 211
+    },
+    {
+      "title": "絆",
+      "artist": "NanNan--",
+      "src": "https://music.163.com/song/media/outer/url?id=1387385598.mp3",
+      "cover": "https://p2.music.126.net/z_H_Uzw0rhTOQzZfJw1m0g==/109951167861558324.jpg?param=400y400",
+      "dur": 271
+    },
+    {
+      "title": "ルル",
+      "artist": "Meandi鸦缺",
+      "src": "https://music.163.com/song/media/outer/url?id=36616084.mp3",
+      "cover": "https://p2.music.126.net/MFsRWtDiN4kZRhyt-9oKWg==/18345351509634583.jpg?param=400y400",
+      "dur": 212
+    },
+    {
+      "title": "My Sunset",
+      "artist": "Feint",
+      "src": "https://music.163.com/song/media/outer/url?id=27888356.mp3",
+      "cover": "https://p2.music.126.net/RAYYEsI3kEGmqIFgLZ5FYw==/1316115418505387.jpg?param=400y400",
+      "dur": 326
+    },
+    {
+      "title": "可愛くなりたい (feat. 鎖那)",
+      "artist": "HoneyWorks / 鎖那",
+      "src": "https://music.163.com/song/media/outer/url?id=427419509.mp3",
+      "cover": "https://p2.music.126.net/D_KEqB9Y9ONVLRMYqKuTAA==/109951169052284566.jpg?param=400y400",
+      "dur": 252
+    },
+    {
+      "title": "Way Back Home",
+      "artist": "SHAUN",
+      "src": "https://music.163.com/song/media/outer/url?id=863046037.mp3",
+      "cover": "https://p2.music.126.net/H6LhX24ts3Va26ojXGQ-jQ==/109951163827768430.jpg?param=400y400",
+      "dur": 214
+    },
+    {
+      "title": "Ignite",
+      "artist": "K-391 / Alan Walker / Julie Bergan / 胜利",
+      "src": "https://music.163.com/song/media/outer/url?id=559701010.mp3",
+      "cover": "https://p2.music.126.net/yX9Y_lbV2Shjzh60fycC7A==/109951173628287514.jpg?param=400y400",
+      "dur": 210
+    },
+    {
+      "title": "Take Me",
+      "artist": "STRlighT",
+      "src": "https://music.163.com/song/media/outer/url?id=1984067065.mp3",
+      "cover": "https://p2.music.126.net/3wUkLoGs7UJPWl4TlStj1Q==/109951167929634521.jpg?param=400y400",
+      "dur": 234
+    },
+    {
+      "title": "可愛くてごめん (feat. かぴ)",
+      "artist": "HoneyWorks / かぴ",
+      "src": "https://music.163.com/song/media/outer/url?id=1969519579.mp3",
+      "cover": "https://p2.music.126.net/ygvJefaxNtKGCeidHU0GpA==/109951167745817208.jpg?param=400y400",
+      "dur": 220
+    },
+    {
+      "title": "Higher",
+      "artist": "Tobu",
+      "src": "https://music.163.com/song/media/outer/url?id=28830412.mp3",
+      "cover": "https://p2.music.126.net/03qQTno02s0z3jcIadX01A==/109951167481007353.jpg?param=400y400",
+      "dur": 213
+    },
+    {
+      "title": "Visions",
+      "artist": "Acreix",
+      "src": "https://music.163.com/song/media/outer/url?id=34040716.mp3",
+      "cover": "https://p2.music.126.net/FkDHefqpHyhxUdxWFug7mg==/109951165732553232.jpg?param=400y400",
+      "dur": 199
+    },
+    {
+      "title": "Angel With A Shotgun",
+      "artist": "The Cab",
+      "src": "https://music.163.com/song/media/outer/url?id=19291941.mp3",
+      "cover": "https://p2.music.126.net/huz4NOD8whE5YKWYs78uuQ==/109951163509240188.jpg?param=400y400",
+      "dur": 223
+    },
+    {
+      "title": "Touch",
+      "artist": "3LAU / Carly Paige",
+      "src": "https://music.163.com/song/media/outer/url?id=534228257.mp3",
+      "cover": "https://p1.music.126.net/fhGTMfI8oAcApCp-MVmmaw==/109951168437709430.jpg?param=400y400",
+      "dur": 206
+    },
+    {
+      "title": "I Want My Tears Back",
+      "artist": "Nightwish",
+      "src": "https://music.163.com/song/media/outer/url?id=519909593.mp3",
+      "cover": "https://p1.music.126.net/zFIFto9wVy9w2PC1eYKXNA==/109951163067376126.jpg?param=400y400",
+      "dur": 319
+    },
+    {
+      "title": "リテラチュア",
+      "artist": "姊妹兄",
+      "src": "https://music.163.com/song/media/outer/url?id=1888983793.mp3",
+      "cover": "https://p1.music.126.net/-0WIpFhVw4T_lVx7n2Z0sg==/109951166545320434.jpg?param=400y400",
+      "dur": 238
+    },
+    {
+      "title": "ベイビーヘイロー",
+      "artist": "鎖那",
+      "src": "https://music.163.com/song/media/outer/url?id=1892257906.mp3",
+      "cover": "https://p1.music.126.net/iYA8E-3l_GImmDGfl6QnPw==/109951166585959619.jpg?param=400y400",
+      "dur": 166
+    },
+    {
+      "title": "Yellow",
+      "artist": "少女さん",
+      "src": "https://music.163.com/song/media/outer/url?id=1353709928.mp3",
+      "cover": "https://p1.music.126.net/5VEteBNxEMQaY2_wZd1dXw==/109951165160012897.jpg?param=400y400",
+      "dur": 176
+    },
+    {
+      "title": "Run Free (feat. IVIE)",
+      "artist": "Deep Chills / IVIE",
+      "src": "https://music.163.com/song/media/outer/url?id=500410102.mp3",
+      "cover": "https://p1.music.126.net/VmzUHugXZBOPR49GVth30Q==/109951173054098239.jpg?param=400y400",
+      "dur": 171
+    },
+    {
+      "title": "Crilwa",
+      "artist": "Saiakoup",
+      "src": "https://music.163.com/song/media/outer/url?id=528177111.mp3",
+      "cover": "https://p1.music.126.net/1u0c_8c7oHMTmUKDroQT8w==/109951168082098832.jpg?param=400y400",
+      "dur": 85
+    },
+    {
+      "title": "うみたがり",
+      "artist": "MARETU / 初音ミク",
+      "src": "https://music.163.com/song/media/outer/url?id=407485172.mp3",
+      "cover": "https://p1.music.126.net/4y9X6ni1AEHL3oWgmK-oog==/109951169805861043.jpg?param=400y400",
+      "dur": 225
+    },
+    {
+      "title": "彼女は旅に出る",
+      "artist": "鎖那",
+      "src": "https://music.163.com/song/media/outer/url?id=509106775.mp3",
+      "cover": "https://p1.music.126.net/McwYbq8c2e9uugG51Rm-Jg==/109951166222733663.jpg?param=400y400",
+      "dur": 221
+    },
+    {
+      "title": "only my railgun",
+      "artist": "花たん",
+      "src": "https://music.163.com/song/media/outer/url?id=27632615.mp3",
+      "cover": "https://p1.music.126.net/_JsX-AjXOFmPjDNe2MReJg==/5678977557538770.jpg?param=400y400",
+      "dur": 300
+    },
+    {
+      "title": "怪物",
+      "artist": "多多poi / Hanser",
+      "src": "https://music.163.com/song/media/outer/url?id=1854902495.mp3",
+      "cover": "https://p1.music.126.net/0tEtTaVnM33s64IRWC1epw==/109951167829177246.jpg?param=400y400",
+      "dur": 205
+    },
+    {
+      "title": "Mine (Illenium Remix)",
+      "artist": "ILLENIUM / Phoebe Ryan",
+      "src": "https://music.163.com/song/media/outer/url?id=30780496.mp3",
+      "cover": "https://p1.music.126.net/94Zjhb6ibXN9jpIjRQDbUw==/7762552092459017.jpg?param=400y400",
+      "dur": 250
+    },
+    {
+      "title": "だんだん早くなる",
+      "artist": "40mP / 初音ミク",
+      "src": "https://music.163.com/song/media/outer/url?id=34509838.mp3",
+      "cover": "https://p1.music.126.net/Sv0pcvDjQXcIacJh98oc7w==/109951166919086788.jpg?param=400y400",
+      "dur": 138
+    },
+    {
+      "title": "神的随波逐流",
+      "artist": "泠鸢yousa",
+      "src": "https://music.163.com/song/media/outer/url?id=33682739.mp3",
+      "cover": "https://p1.music.126.net/2Rcimduy6Oj5Xz6beJDSIg==/3364505581118558.jpg?param=400y400",
+      "dur": 256
+    },
+    {
+      "title": "神のまにまに",
+      "artist": "初音ミク / 鏡音リン / GUMI / れるりり",
+      "src": "https://music.163.com/song/media/outer/url?id=32431066.mp3",
+      "cover": "https://p1.music.126.net/ze4CaBh_BTQrtBzbhYTI3A==/7886796906969685.jpg?param=400y400",
+      "dur": 256
+    },
+    {
+      "title": "Revenge (Minecraft Song)",
+      "artist": "TryHardNinja",
+      "src": "https://music.163.com/song/media/outer/url?id=29819906.mp3",
+      "cover": "https://p1.music.126.net/FZX7XAjsmEPGyVOqm4H7aQ==/109951166361039007.jpg?param=400y400",
+      "dur": 222
+    },
+    {
+      "title": "Angels",
+      "artist": "Vicetone / Kat Nestel",
+      "src": "https://music.163.com/song/media/outer/url?id=31566626.mp3",
+      "cover": "https://p1.music.126.net/xvjR2C1GZDSCPf1pJ542TA==/3320525116191823.jpg?param=400y400",
+      "dur": 214
+    },
+    {
+      "title": "On My Way",
+      "artist": "Alan Walker / Sabrina Carpenter / Farruko",
+      "src": "https://music.163.com/song/media/outer/url?id=1353010122.mp3",
+      "cover": "https://p1.music.126.net/niwxwlQSDwGcXwGyWsdaxA==/109951163940430131.jpg?param=400y400",
+      "dur": 194
+    },
+    {
+      "title": "Edge of My Life",
+      "artist": "Manafest",
+      "src": "https://music.163.com/song/media/outer/url?id=1434984281.mp3",
+      "cover": "https://p1.music.126.net/5A1BepfYdiitO6BdF2Wtdw==/109951172266635132.jpg?param=400y400",
+      "dur": 213
+    },
+    {
+      "title": "Falling Again",
+      "artist": "NURKO / Roniit",
+      "src": "https://music.163.com/song/media/outer/url?id=565841089.mp3",
+      "cover": "https://p1.music.126.net/tDK6cERynU-bsf4oGlkOsQ==/109951170649353089.jpg?param=400y400",
+      "dur": 269
+    },
+    {
+      "title": "Legends Never Die",
+      "artist": "英雄联盟 / Against the Current",
+      "src": "https://music.163.com/song/media/outer/url?id=506196018.mp3",
+      "cover": "https://p1.music.126.net/XadmwVrMvDDdPr_Wve0dCw==/109951170930231334.jpg?param=400y400",
+      "dur": 235
+    },
+    {
+      "title": "那年·年少",
+      "artist": "宋瑀哲",
+      "src": "https://music.163.com/song/media/outer/url?id=1495131163.mp3",
+      "cover": "https://p1.music.126.net/VuoQgDoLXx4CJsSXHL0rTA==/109951165466450525.jpg?param=400y400",
+      "dur": 261
+    },
+    {
+      "title": "Something Just Like This (Don Diablo Remix)",
+      "artist": "The Chainsmokers & Coldplay",
+      "src": "https://music.163.com/song/media/outer/url?id=1998397881.mp3",
+      "cover": "https://p1.music.126.net/n3y_9ICypkhieORQbjY3eQ==/109951168060305884.jpg?param=400y400",
+      "dur": 231
+    },
+    {
+      "title": "终点起点",
+      "artist": "LOKEY低调组合",
+      "src": "https://music.163.com/song/media/outer/url?id=451768026.mp3",
+      "cover": "https://p1.music.126.net/f7V71zTcVWr3d8-5aJEp_g==/109951162838571683.jpg?param=400y400",
+      "dur": 311
+    },
+    {
+      "title": "千本桜",
+      "artist": "黒うさP / 初音ミク / 鏡音リン / 鏡音レン / 巡音ルカ / KAITO / MEIKO",
+      "src": "https://music.163.com/song/media/outer/url?id=26209798.mp3",
+      "cover": "https://p1.music.126.net/C0oHI_hWGow6yQYvFKxw0w==/2444214348571696.jpg?param=400y400",
+      "dur": 245
+    },
+    {
+      "title": "Take Me Home Tonight",
+      "artist": "Eddie Money",
+      "src": "https://music.163.com/song/media/outer/url?id=565929837.mp3",
+      "cover": "https://p1.music.126.net/MUIJaBWhm6zbaQpSh3tHvg==/109951163311516567.jpg?param=400y400",
+      "dur": 224
+    },
+    {
+      "title": "Luv Letter",
+      "artist": "DJ OKAWARI",
+      "src": "https://music.163.com/song/media/outer/url?id=406232.mp3",
+      "cover": "https://p1.music.126.net/5zQX8kyNR_lRkunFtnHXLg==/109951168761309686.jpg?param=400y400",
+      "dur": 269
     }
   ]
 }
