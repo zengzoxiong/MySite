@@ -538,7 +538,7 @@
     {
       "name": "二维码解码",
       "path": "qr-decoder/app.html",
-      "description": "识别二维码内容",
+      "description": "上传图片 / 粘贴截图 / 摄像头 / 屏幕捕获，识别二维码内容",
       "icon": "📱",
       "category": "图像工具"
     },

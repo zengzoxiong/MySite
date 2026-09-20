@@ -4,9 +4,10 @@
     <link rel="icon" href="../../favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二维码解码器</title>
+    <title>二维码解码器 - 上传/粘贴截图/摄像头/屏幕捕获多种识别</title>
+    <meta name="description" content="在线二维码解码：上传图片、拖拽、Ctrl+V 粘贴截图、摄像头实时扫码、屏幕捕获取帧、图片链接识别，支持一图多码，全部在本地浏览器完成，不上传服务器。">
     <link rel="canonical" href="https://www.htmls.dev/tools/qr-decoder/app.html">
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" onerror="this.onerror=null;this.src='../../assets/vendor/jsqr/jsQR.min.js';"></script>
+    <script src="../../assets/vendor/jsqr/jsQR.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -29,7 +30,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .header h1 {
@@ -40,130 +41,176 @@
             background-clip: text;
         }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: start;
+        .header p {
+            color: #8a8fa3;
+            font-size: 12px;
+            margin-top: 8px;
         }
 
-        .upload-section {
+        .panel {
             background: rgba(30, 30, 50, 0.8);
             border-radius: 12px;
-            padding: 24px;
+            padding: 22px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
         }
 
         .upload-area {
             border: 2px dashed rgba(139, 92, 246, 0.5);
             border-radius: 12px;
-            padding: 40px;
+            padding: 34px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 20px;
         }
 
-        .upload-area:hover, .upload-area.dragover {
+        .upload-area:hover, .upload-area.dragover, .upload-area:focus-visible {
             border-color: #8b5cf6;
             background: rgba(139, 92, 246, 0.1);
+            outline: none;
         }
 
-        .upload-area i {
-            font-size: 48px;
-            color: #8b5cf6;
-            margin-bottom: 16px;
+        .upload-area svg {
+            width: 44px;
+            height: 44px;
+            fill: #8b5cf6;
+            margin-bottom: 12px;
         }
 
         .upload-area p {
-            color: #888;
-            margin: 8px 0;
+            color: #c8cdda;
+            margin: 6px 0;
         }
 
-        .upload-area input {
-            display: none;
+        .upload-area small {
+            color: #767b8f;
+            font-size: 12px;
         }
 
-        .preview-section {
-            background: rgba(30, 30, 50, 0.8);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .preview-image {
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto 20px;
-            display: block;
-            border-radius: 8px;
-        }
-
-        .result-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .result-label {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .result-content {
-            word-break: break-all;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
-            max-height: 200px;
-            overflow-y: auto;
+        .modes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
         }
 
         .btn {
-            padding: 12px 24px;
-            border: none;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s, transform 0.1s, color 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 16px;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #dfe3ee;
         }
+
+        .btn:hover {
+            background: rgba(139, 92, 246, 0.24);
+            color: #fff;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn[hidden] { display: none; }
 
         .btn-primary {
             background: linear-gradient(135deg, #8b5cf6, #6366f1);
             color: white;
+            border-color: transparent;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .error-msg {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 12px;
-            border-radius: 6px;
+        .urlbar {
+            display: flex;
+            gap: 10px;
             margin-top: 16px;
-            display: none;
         }
 
-        .error-msg.active {
+        .urlbar input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.28);
+            color: #eee;
+            font-size: 13px;
+        }
+
+        .stage { display: none; margin-top: 16px; }
+        .stage.active { display: block; }
+
+        .stage video, .stage img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            background: #000;
+            border-radius: 10px;
             display: block;
+        }
+
+        .status {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #8a8fa3;
+            min-height: 18px;
+        }
+
+        .status.err { color: #fca5a5; }
+        .status.ok { color: #6ee7b7; }
+
+        .item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .item h3 {
+            font-size: 12px;
+            color: #8a8fa3;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .item .content {
+            word-break: break-all;
+            padding: 11px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .item a { color: #a78bfa; }
+
+        .item .ops {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .item .ops .btn { margin-top: 0; padding: 8px 12px; }
+
+        .tip {
+            color: #767b8f;
+            font-size: 12px;
+            line-height: 1.8;
         }
 
         .tool-doc-link,
@@ -184,13 +231,8 @@
             transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
 
-        .tool-doc-link {
-            right: 16px;
-        }
-
-        .tool-home-link {
-            right: 74px;
-        }
+        .tool-doc-link { right: 16px; }
+        .tool-home-link { right: 74px; }
 
         .tool-doc-link:hover,
         .tool-home-link:hover {
@@ -199,10 +241,10 @@
             transform: translateY(-1px);
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 640px) {
+            .panel { padding: 16px; }
+            .upload-area { padding: 26px 14px; }
+            .urlbar { flex-direction: column; }
         }
     </style>
 </head>
@@ -212,126 +254,327 @@
     <div class="container">
         <div class="header">
             <h1>二维码解码器</h1>
+            <p>上传图片 · 拖拽 · Ctrl+V 粘贴截图 · 摄像头扫码 · 屏幕捕获 · 图片链接，解码全在本地浏览器完成</p>
         </div>
 
-        <div class="main-content">
-            <div class="upload-section">
-                <div class="upload-area" id="upload-area">
-                    <input type="file" id="file-input" accept="image/*">
-                    <i class="fas fa-upload"></i>
-                    <p><strong>点击上传或拖拽图片</strong></p>
-                    <p style="font-size: 12px; color: #666;">支持 PNG、JPG、JPEG 格式</p>
-                </div>
-                <img id="preview-img" class="preview-image" style="display: none;" alt="预览">
+        <div class="panel">
+            <div class="upload-area" id="upload-area" tabindex="0" role="button" aria-label="选择或粘贴图片进行识别">
+                <svg viewBox="0 0 24 24"><path d="M12 3 7 8.2h3.2V15h3.6V8.2H17zM4 17v3.2h16V17h-2v1.2H6V17z"/></svg>
+                <p><strong>点击选择图片，或把图片拖到这里</strong></p>
+                <small>截图后直接按 Ctrl+V 粘贴识别；支持 PNG / JPG / WEBP / GIF</small>
+            </div>
+            <input type="file" id="file-input" accept="image/*" hidden>
+
+            <div class="modes">
+                <button class="btn" id="btn-cam">
+                    <svg viewBox="0 0 24 24"><path d="M9.2 4 7.4 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.4L14.8 4zm2.8 4.4a5.2 5.2 0 1 1 0 10.4 5.2 5.2 0 0 1 0-10.4zm0 2.2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+                    摄像头扫码
+                </button>
+                <button class="btn" id="btn-screen">
+                    <svg viewBox="0 0 24 24"><path d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h4v2H6v-2h4v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h16V6z"/></svg>
+                    屏幕捕获取帧
+                </button>
+                <button class="btn btn-danger" id="btn-stop" hidden>
+                    <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                    停止取景
+                </button>
+                <button class="btn" id="btn-clear">
+                    <svg viewBox="0 0 24 24"><path d="M8.4 3h7.2l1 2H21v2H3V5h4.4zM5.2 8h13.6l-1 13H6.2z"/></svg>
+                    清空
+                </button>
             </div>
 
-            <div class="preview-section">
-                <div class="result-section" id="result-section" style="display: none;">
-                    <div class="result-label">解码结果：</div>
-                    <div class="result-content" id="result-content"></div>
-                    <button class="btn btn-primary" onclick="copyResult()" id="copy-btn">
-                        <i class="fas fa-copy"></i> 复制结果
-                    </button>
-                </div>
-                <div class="error-msg" id="error-msg"></div>
+            <div class="urlbar">
+                <input type="text" id="url-input" placeholder="粘贴图片链接后回车，例如 https://example.com/qrcode.png">
+                <button class="btn btn-primary" id="btn-url">识别链接</button>
             </div>
+
+            <div class="stage" id="stage">
+                <video id="video" playsinline muted hidden></video>
+                <img id="preview" alt="待识别图片预览" hidden>
+            </div>
+            <div class="status" id="status"></div>
+        </div>
+
+        <div class="panel" id="results-panel" hidden>
+            <div id="results"></div>
+        </div>
+
+        <div class="panel tip">
+            识别建议：二维码尽量占满画面、避免反光与模糊；彩色或低对比度的码可先转成黑白再试。一张图里有多个码时会逐个识别出来。<br>
+            摄像头与屏幕捕获需要 HTTPS 或本地环境并授予权限；开启后会自动持续识别，识别成功即停止取景。<br>
+            图片链接识别受对方站点跨域策略限制，若提示失败，请先下载图片再上传。
         </div>
     </div>
 
     <script>
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
-        const previewImg = document.getElementById('preview-img');
-        const resultSection = document.getElementById('result-section');
-        const resultContent = document.getElementById('result-content');
-        const errorMsg = document.getElementById('error-msg');
-        let decodedText = '';
+        const stage = document.getElementById('stage');
+        const video = document.getElementById('video');
+        const preview = document.getElementById('preview');
+        const statusEl = document.getElementById('status');
+        const resultsBox = document.getElementById('results');
+        const resultsPanel = document.getElementById('results-panel');
+        const btnCam = document.getElementById('btn-cam');
+        const btnScreen = document.getElementById('btn-screen');
+        const btnStop = document.getElementById('btn-stop');
+        let stream = null, timer = 0, busy = false;
+        const seen = new Set();
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                handleFile(e.target.files[0]);
-            }
-        });
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files[0]) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showError('请上传图片文件');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-                decodeQRCode(e.target.result);
-            };
-            reader.readAsDataURL(file);
+        // 浏览器原生识别器可用时优先（更快、支持 QR 之外的码制），否则回退 jsQR
+        let detector = null;
+        if ('BarcodeDetector' in window) {
+            try { detector = new BarcodeDetector({ formats: ['qr_code', 'data_matrix', 'aztec_code', 'pdf417'] }); } catch (e) { detector = null; }
         }
 
-        function decodeQRCode(imageSrc) {
-            errorMsg.classList.remove('active');
-            resultSection.style.display = 'none';
+        function say(msg, cls) {
+            statusEl.textContent = msg || '';
+            statusEl.className = 'status' + (cls ? ' ' + cls : '');
+        }
 
+        function esc(s) {
+            return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // 只放行 http/https，避免二维码里的 javascript: 变成可点链接
+        function safeUrl(s) {
+            try {
+                const u = new URL(s);
+                return (u.protocol === 'http:' || u.protocol === 'https:') ? u : null;
+            } catch (e) { return null; }
+        }
+
+        function addResult(text, kind) {
+            if (seen.has(text)) return false;
+            seen.add(text);
+            const u = safeUrl(text);
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.innerHTML = '<h3></h3><div class="content"></div><div class="ops"><button class="btn btn-copy">复制</button></div>';
+            el.querySelector('h3').textContent = (kind || '文本') + (u ? ' · 链接' : ' · ' + text.length + ' 字符');
+            const box = el.querySelector('.content');
+            if (u) {
+                const a = document.createElement('a');
+                a.href = u.href;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.textContent = text;
+                box.appendChild(a);
+                const open = document.createElement('a');
+                open.className = 'btn';
+                open.href = u.href;
+                open.target = '_blank';
+                open.rel = 'noopener noreferrer';
+                open.textContent = '打开链接';
+                el.querySelector('.ops').appendChild(open);
+            } else {
+                box.textContent = text;
+            }
+            el.querySelector('.btn-copy').addEventListener('click', (ev) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    ev.target.textContent = '已复制';
+                    setTimeout(() => { ev.target.textContent = '复制'; }, 1500);
+                });
+            });
+            resultsBox.prepend(el);
+            resultsPanel.hidden = false;
+            return true;
+        }
+
+        let scratch = null;
+        function pixelsOf(src, w, h) {
+            const c = scratch || (scratch = document.createElement('canvas'));
+            const scale = Math.min(1, 1600 / Math.max(w, h));
+            c.width = Math.max(1, Math.round(w * scale));
+            c.height = Math.max(1, Math.round(h * scale));
+            const ctx = c.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(src, 0, 0, c.width, c.height);
+            return { img: ctx.getImageData(0, 0, c.width, c.height), ctx };
+        }
+
+        // 把已识别的码涂白，好在同一张图上继续找下一个
+        function maskRegion(pixels, loc) {
+            const xs = [loc.topLeftCorner.x, loc.topRightCorner.x, loc.bottomRightCorner.x, loc.bottomLeftCorner.x];
+            const ys = [loc.topLeftCorner.y, loc.topRightCorner.y, loc.bottomRightCorner.y, loc.bottomLeftCorner.y];
+            const x = Math.max(0, Math.min(...xs) - 8), y = Math.max(0, Math.min(...ys) - 8);
+            const r = Math.min(pixels.img.width, Math.max(...xs) + 8), b = Math.min(pixels.img.height, Math.max(...ys) + 8);
+            pixels.ctx.fillStyle = '#fff';
+            pixels.ctx.fillRect(x, y, r - x, b - y);
+        }
+
+        function jsqrScan(src, w, h) {
+            if (typeof jsQR !== 'function') { say('解码库未加载：请检查网络后重试', 'err'); return []; }
+            const pixels = pixelsOf(src, w, h);
+            const out = [];
+            for (let i = 0; i < 6; i++) {
+                const r = jsQR(pixels.img.data, pixels.img.width, pixels.img.height, { inversionAttempts: 'attemptBoth' });
+                if (!r) break;
+                out.push({ text: r.data, kind: 'QR 码' });
+                if (!r.location) break;
+                maskRegion(pixels, r.location);
+            }
+            if (!out.length && Math.max(w, h) < 600) { // 小图放大一档再试
+                const c = scratch, ctx = c.getContext('2d', { willReadFrequently: true });
+                c.width = w * 2; c.height = h * 2;
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(src, 0, 0, c.width, c.height);
+                const up = ctx.getImageData(0, 0, c.width, c.height);
+                const r = jsQR(up.data, up.width, up.height, { inversionAttempts: 'attemptBoth' });
+                if (r) out.push({ text: r.data, kind: 'QR 码' });
+            }
+            return out;
+        }
+
+        function detectFrom(src, w, h) {
+            if (detector) {
+                return detector.detect(src)
+                    .then((codes) => (codes && codes.length ? codes.map((c) => ({ text: c.rawValue, kind: c.format })) : jsqrScan(src, w, h)))
+                    .catch(() => jsqrScan(src, w, h));
+            }
+            return Promise.resolve(jsqrScan(src, w, h));
+        }
+
+        async function runOn(src, w, h, from) {
+            if (busy) return false;
+            busy = true;
+            say('正在识别' + (from ? '（' + from + '）' : '') + '…');
+            let found = [];
+            try { found = await detectFrom(src, w, h) || []; } catch (e) { found = []; }
+            let added = 0;
+            found.forEach((r) => { if (addResult(r.text, r.kind)) added++; });
+            if (added) say('识别成功，新增 ' + added + ' 条结果', 'ok');
+            else if (found.length) say('这些内容之前已识别过', 'ok');
+            else say('没有识别到二维码，试试裁剪、放大或提高对比度', 'err');
+            busy = false;
+            return added > 0;
+        }
+
+        function showStill(url) {
+            stopScan();
+            stage.classList.add('active');
+            video.hidden = true;
+            preview.hidden = false;
+            preview.src = url;
+        }
+
+        function decodeBlob(blob, from) {
+            if (!blob || !blob.type.startsWith('image/')) { say('请选择图片文件', 'err'); return; }
+            const url = URL.createObjectURL(blob);
             const img = new Image();
             img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                if (code) {
-                    decodedText = code.data;
-                    resultContent.textContent = decodedText;
-                    resultSection.style.display = 'block';
-                } else {
-                    showError('未能识别二维码，请确保图片清晰且包含完整的二维码');
-                }
+                showStill(url);
+                runOn(img, img.naturalWidth, img.naturalHeight, from);
             };
-            img.src = imageSrc;
+            img.onerror = () => { say('图片无法读取', 'err'); URL.revokeObjectURL(url); };
+            img.src = url;
         }
 
-        function copyResult() {
-            if (decodedText) {
-                navigator.clipboard.writeText(decodedText).then(() => {
-                    const btn = document.getElementById('copy-btn');
-                    const original = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
-                    setTimeout(() => {
-                        btn.innerHTML = original;
-                    }, 2000);
-                });
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+        });
+        fileInput.addEventListener('change', (e) => {
+            const f = e.target.files[0];
+            if (f) decodeBlob(f, '本地图片');
+            fileInput.value = '';
+        });
+
+        ['dragenter', 'dragover'].forEach((t) => uploadArea.addEventListener(t, (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }));
+        ['dragleave', 'drop'].forEach((t) => uploadArea.addEventListener(t, (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }));
+        uploadArea.addEventListener('drop', (e) => {
+            const f = [...(e.dataTransfer.files || [])].find((x) => x.type.startsWith('image/'));
+            if (f) { decodeBlob(f, '拖入图片'); return; }
+            const txt = e.dataTransfer.getData('text/plain');
+            if (/^https?:\/\//i.test(txt)) { document.getElementById('url-input').value = txt; tryUrl(txt); }
+        });
+
+        // 截图后 Ctrl+V 直接识别
+        document.addEventListener('paste', (e) => {
+            const items = [...(((e.clipboardData || window.clipboardData) || {}).items || [])];
+            const hit = items.find((i) => i.type && i.type.startsWith('image/'));
+            if (hit) { e.preventDefault(); decodeBlob(hit.getAsFile(), '剪贴板截图'); return; }
+            const txt = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^https?:\/\//i.test(txt) && /\.(png|jpe?g|webp|gif|bmp)/i.test(txt)) {
+                document.getElementById('url-input').value = txt;
+                tryUrl(txt);
             }
+        });
+
+        function tryUrl(txt) {
+            const u = safeUrl((txt || '').trim());
+            if (!u) { say('请输入 http/https 图片链接', 'err'); return; }
+            say('正在下载图片…');
+            fetch(u.href)
+                .then((r) => { if (!r.ok) throw new Error(r.status); return r.blob(); })
+                .then((b) => decodeBlob(b, '链接图片'))
+                .catch(() => say('链接读取失败（多为对方站点禁止跨域取图），请下载后再上传', 'err'));
+        }
+        document.getElementById('btn-url').addEventListener('click', () => tryUrl(document.getElementById('url-input').value));
+        document.getElementById('url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUrl(e.target.value); });
+
+        async function startCapture(kind) {
+            stopScan();
+            if (!navigator.mediaDevices) { say('当前环境不支持摄像头/屏幕捕获（需要 HTTPS 或本地地址）', 'err'); return; }
+            const opts = kind === 'cam'
+                ? { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false }
+                : { video: { frameRate: 15 }, audio: false };
+            try {
+                stream = kind === 'cam' ? await navigator.mediaDevices.getUserMedia(opts) : await navigator.mediaDevices.getDisplayMedia(opts);
+            } catch (e) {
+                say(kind === 'cam' ? '摄像头未授权或不可用' : '未选择捕获内容（或已取消）', 'err');
+                return;
+            }
+            video.srcObject = stream;
+            video.hidden = false;
+            preview.hidden = true;
+            stage.classList.add('active');
+            btnCam.hidden = true;
+            btnScreen.hidden = true;
+            btnStop.hidden = false;
+            await video.play().catch(() => {});
+            say(kind === 'cam' ? '把二维码对准画面，识别到会自动停止' : '画面已捕获，正在自动识别，命中即停…');
+            timer = setInterval(async () => {
+                if (!video.videoWidth) return;
+                if (await runOn(video, video.videoWidth, video.videoHeight, kind === 'cam' ? '摄像头' : '屏幕')) stopScan();
+            }, kind === 'cam' ? 350 : 600);
+            stream.getVideoTracks().forEach((t) => t.addEventListener('ended', stopScan));
         }
 
-        function showError(message) {
-            errorMsg.textContent = message;
-            errorMsg.classList.add('active');
+        function stopScan() {
+            if (timer) { clearInterval(timer); timer = 0; }
+            if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+            video.srcObject = null;
+            btnCam.hidden = false;
+            btnScreen.hidden = false;
+            btnStop.hidden = true;
         }
+
+        btnCam.addEventListener('click', () => startCapture('cam'));
+        btnScreen.addEventListener('click', () => startCapture('screen'));
+        btnStop.addEventListener('click', () => { stopScan(); say('已停止取景'); });
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            stopScan();
+            resultsBox.innerHTML = '';
+            seen.clear();
+            resultsPanel.hidden = true;
+            stage.classList.remove('active');
+            video.hidden = true;
+            preview.hidden = true;
+            if (preview.src) URL.revokeObjectURL(preview.src);
+            preview.removeAttribute('src');
+            say('');
+        });
+        window.addEventListener('pagehide', stopScan);
+
+        say(detector ? '就绪（浏览器原生识别器 + jsQR 兜底）' : '就绪（jsQR 识别引擎）');
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onerror="this.onerror=null;this.href='../../assets/vendor/fontawesome/css/all.min.css';">
     <script src="../../assets/clicks.js" defer></script>
 </body>
 </html>
