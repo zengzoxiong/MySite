@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掷骰子工具 - JustHTMLs</title>
+    <meta name="description" content="模拟掷骰子，支持多种骰子类型（D4/D6/D8/D10/D12/D20/D100），可同时掷多个骰子">
+    <link rel="canonical" href="https://www.htmls.dev/tools/dice-roller/app.html">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --text: #f1f5f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #f59e0b, #dc2626);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .feature {
+            background: #334155;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 掷骰子工具</h1>
+            <p>模拟掷骰子，支持多种骰子类型</p>
+        </div>
+        <div class="card">
+            <p style="margin-bottom: 20px; color: #94a3b8;">
+                这是一个简单好用的掷骰子工具，支持多种骰子类型，可以同时掷多个骰子。适合桌面游戏、角色扮演游戏（RPG）或任何需要随机数生成器的场景。
+            </p>
+            <a href="app.html" class="btn">🎮 开始使用</a>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎲</div>
+                    <h3>多种骰子</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">支持 D4/D6/D8/D10/D12/D20/D100</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>多骰子</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">可同时投掷 1-12 个骰子</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⌨️</div>
+                    <h3>快捷键</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">按空格键快速投掷</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

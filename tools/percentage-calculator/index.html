@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百分比计算器 - JustHTMLs</title>
+    <link rel="canonical" href="https://www.htmls.dev/tools/percentage-calculator/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .features li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #fcb69f;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 10px 10px 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(252, 182, 159, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .preview iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>百分比计算器</h1>
+            <p>快速计算百分比相关问题</p>
+        </div>
+
+        <div class="card">
+            <h2>关于这个工具</h2>
+            <p>百分比计算器可以帮助你快速解决各种百分比计算问题，包括求百分比值、计算占比、百分比增减等。</p>
+
+            <h2>功能特点</h2>
+            <ul class="features">
+                <li>计算 X 的 Y%</li>
+                <li>计算 X 是 Y 的百分之几</li>
+                <li>计算数值增加或减少 Y%</li>
+                <li>计算两个数值的百分比差异</li>
+                <li>实时计算，即时显示结果</li>
+            </ul>
+
+            <div style="margin-top: 30px;">
+                <a href="app.html" class="btn">开始使用</a>
+                <a href="https://github.com/justhtmls/html-tools/tree/main/tools/percentage-calculator" target="_blank" class="btn btn-secondary">查看源码</a>
+                <a href="../../index.html" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>快速预览</h2>
+            <div class="preview">
+                <iframe src="app.html" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石头剪刀布 - JustHTMLs</title>
+    <meta name="description" content="经典猜拳游戏，与电脑对战石头剪刀布，看看谁能获胜">
+    <link rel="canonical" href="https://www.htmls.dev/tools/rock-paper-scissors/app.html">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --text: #f1f5f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .feature {
+            background: #334155;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✌️ 石头剪刀布</h1>
+            <p>经典猜拳游戏，看看谁更厉害</p>
+        </div>
+        <div class="card">
+            <p style="margin-bottom: 20px; color: #94a3b8;">
+                这是一个经典的石头剪刀布游戏，与电脑对战，看看你的运气如何。游戏会记录你的战绩，看看你能否战胜电脑！
+            </p>
+            <a href="app.html" class="btn">🎮 开始游戏</a>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">✊</div>
+                    <h3>石头</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">胜剪刀，败布</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">✌️</div>
+                    <h3>剪刀</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">胜布，败石头</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">✋</div>
+                    <h3>布</h3>
+                    <p style="font-size: 14px; color: #94a3b8;">胜石头，败剪刀</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/clicks.js" defer></script>
+</body>
+</html>
