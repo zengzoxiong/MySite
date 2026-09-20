@@ -16,7 +16,6 @@ MySite/
 ├── script.js             # 全部交互逻辑（约 900 行，单文件无模块）
 ├── styles.css            # 全站样式（液态玻璃设计系统，含明暗主题）
 ├── settings.html         # 设置页（iframe 载入主站弹层，postMessage 通信）
-├── guestbook.html        # （已删除，勿重建）
 ├── sw.js                 # PWA Service Worker（SWR 缓存，改预缓存须升版本号）
 ├── manifest.json         # PWA 清单
 ├── favicon.svg           # 站点图标（星芒设计，128 个工具页引用 ../../favicon.svg）
@@ -69,7 +68,7 @@ MySite/
 
 1. 新建 `tools/工具名/app.html`（自包含单文件，参考 image-converter 的风格）；
 2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`。
-工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
+   工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
 
 ### 4. Agent Plugin（data/agent-plugins.json）
 
