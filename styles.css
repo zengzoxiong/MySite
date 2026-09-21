@@ -888,6 +888,14 @@ body.sidebar-collapsed .main-content {
     max-height: min(220px, 34vh);
     scrollbar-width: none;
     scroll-behavior: smooth; /* 跟行时翻滚过去，不是瞬跳到某一行 */
+    padding: 8px 0 10px;
+    /* 当前行居中时上下边缘必然各切出半行，用渐隐遮罩让它淡出而不是硬切在进度条上 */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, currentColor 24%, currentColor 76%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, currentColor 24%, currentColor 76%, transparent);
+}
+
+.music-wrap.lyric .mp-lyric {
+    margin-bottom: 6px;
 }
 
 /* 用户关掉动画或系统要求减少动效时，退回瞬时滚动 */
