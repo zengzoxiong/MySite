@@ -157,7 +157,8 @@
         <div class="card">
             <h2>关于这个工具</h2>
             <p>很多人收藏了 kkFileView 这类在线预览方案，但它要在服务器上装 Java、还要配 LibreOffice 才能把 Office 转成 PDF 来渲染。这个工具走的是另一条路：<b>全部在浏览器里解析</b>，文件不会上传到任何服务器，断网也能用。</p>
-            <p>能直接看的格式（PDF、图片、音视频、文本、JSON、CSV）走浏览器原生能力，零依赖；Office 与压缩包才会在你真正打开这类文件时，临时加载本站自带的解析组件（JSZip、docx-preview、SheetJS、marked），首屏不会多下一分钱流量。</p>
+            <p>能直接看的格式（PDF、图片、音视频、文本、JSON、CSV）走浏览器原生能力，零依赖；Office 与压缩包才会在你真正打开这类文件时，临时加载本站自带的解析组件（JSZip、docx-preview、ExcelJS、marked），首屏不会多下一分钱流量。</p>
+            <p>表格、文档、幻灯片这类内容右上角有「打印 / 存 PDF」按钮：走浏览器自己的打印，在打印对话框里选「另存为 PDF」就能拿到文件，中文可选中可搜索——不需要额外引一个 PDF 生成库。</p>
 
             <h2>支持范围</h2>
             <table class="fmt">
@@ -173,16 +174,16 @@
                     <tr><td class="ext">csv tsv</td><td>自制解析（含引号转义），表头吸顶、行号列号齐全，超 5000 行只渲染前 5000 行。</td></tr>
                     <tr><td class="ext">md</td><td>渲染成排版页面，放在禁脚本的隔离框架里，文中的脚本与远程图片不会被加载。</td></tr>
                     <tr><td class="ext">html htm</td><td>默认显示源码，可一键切到「渲染成页面」，同样禁用脚本。</td></tr>
-                    <tr><td class="ext">xlsx xlsm</td><td>多工作表切标签，数字与日期按单元格格式显示。</td></tr>
+                    <tr><td class="ext">xlsx xlsm</td><td>多工作表切标签，并还原单元格样式：底色、字体颜色、加粗斜体下划线、对齐与自动换行、列宽行高、合并单元格，数字按格式码显示（百分比、千分位、日期）。</td></tr>
                     <tr><td class="ext">docx</td><td>尽量还原分页、页边距、页眉页脚、表格与图片；文本框、域代码和内嵌字体可能走样。</td></tr>
-                    <tr><td class="ext">pptx</td><td>按占位符坐标还原版式：字号、加粗、颜色与图片都会显示，位置继承母版与版式；动画、母版配色与艺术字不在纯前端还原范围内。</td></tr>
+                    <tr><td class="ext">pptx</td><td>按占位符坐标还原版式：字号、加粗、颜色（含主题色引用）、形状底色与描边、页面背景、图片与 SmartArt 文字都会显示，位置继承母版与版式；动画、艺术字弯曲与 SmartArt 排布不还原。</td></tr>
                     <tr><td class="ext">zip</td><td>列出目录与大小，点任意一行即可预览里面的文本、图片、PDF 等成员。</td></tr>
                 </tbody>
             </table>
 
             <h2>看不了的格式，会告诉你为什么</h2>
             <ul class="features warn">
-                <li>doc / ppt 等 Office 97-2003 二进制格式：纯前端无解，需要服务端转换。工具会读出文件头确认类型，并提示你用 WPS / Office 另存为 docx / pptx 再拖进来（老 xls 可以读）。</li>
+                <li>doc / ppt / xls 等 Office 97-2003 二进制格式：纯前端无解，需要服务端转换。工具会读出文件头确认类型，并提示你用 WPS / Office 另存为 docx / pptx / xlsx 再拖进来。</li>
                 <li>HEIC 手机照片、PSD 图层、7z / rar 压缩包、CAD 与 3D 模型：分别需要 0.5～1.9 MB 的解码组件，为了首屏速度没有内置。</li>
                 <li>单文件超过 200 MB 直接拒绝；文本只渲染前 400 KB；压缩包成员超过 50 MB 不解压。</li>
             </ul>

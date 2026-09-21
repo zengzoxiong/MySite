@@ -909,7 +909,7 @@
     {
       "name": "文件在线预览",
       "path": "file-preview/app.html",
-      "description": "拖入即读：PDF / 图片 / 音视频 / 代码高亮 / Markdown / JSON / CSV / Excel / Word / PPT 版式 / ZIP，全在本地解析不上传",
+      "description": "拖入即读：PDF / 图片 / 音视频 / 代码高亮 / Markdown / JSON / CSV / Excel（含底色边框等样式）/ Word / PPT 版式 / ZIP，可打印存 PDF，全在本地解析不上传",
       "icon": "🗂️",
       "category": "实用工具"
     }

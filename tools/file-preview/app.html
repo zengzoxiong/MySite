@@ -202,6 +202,18 @@
         .spin i { width: 16px; height: 16px; border: 2px solid #cbd5e1; border-top-color: #2563eb; border-radius: 50%; animation: r 0.8s linear infinite; }
         @keyframes r { to { transform: rotate(360deg); } }
 
+        @media print {
+            body { background: #fff; padding: 0; }
+            .drop, .side, .notice, .bar, .tabs, .tool-doc-link, .tool-home-link, .header p { display: none !important; }
+            .container { max-width: none; }
+            .layout { grid-template-columns: 1fr; }
+            .stage { border: 0; box-shadow: none; }
+            .view { max-height: none; overflow: visible; padding: 0; }
+            .sheetwrap { max-height: none; overflow: visible; border: 0; }
+            table.grid thead th, table.grid tbody th { position: static; }
+            .slide { break-inside: avoid; box-shadow: none; }
+        }
+
         .tool-doc-link, .tool-home-link {
             position: fixed; top: 16px; padding: 6px 12px; border-radius: 999px;
             font-size: 12px; font-weight: 600; color: #0f172a; background: rgba(255, 255, 255, .9);
@@ -263,6 +275,7 @@
                     </label>
                     <span class="spacer"></span>
                     <button class="mini" id="backZip" type="button" hidden>返回压缩包</button>
+                    <button class="mini" id="printBtn" type="button" hidden>打印 / 存 PDF</button>
                     <a class="mini" id="openTab" hidden>新窗口打开</a>
                 </div>
                 <div class="notice" id="notice" hidden></div>
@@ -288,6 +301,7 @@
         var COL_CAP = 200;
         var ZIP_FILE_CAP = 50 * 1024 * 1024;
         var ZIP_ENTRY_CAP = 2000;
+        var BORDER_W = { hair: '1px', thin: '1px', medium: '2px', mediumThick: '3px', thick: '4px', dashed: '1px', dashDot: '1px', dotted: '1px', double: '3px' };
 
         var IMG = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'avif', 'svg'];
         var AUDIO = ['mp3', 'wav', 'flac', 'ogg', 'oga', 'm4a', 'aac', 'opus'];
@@ -311,6 +325,7 @@
         var encSel = document.getElementById('enc');
         var openTab = document.getElementById('openTab');
         var backZip = document.getElementById('backZip');
+        var printBtn = document.getElementById('printBtn');
         var notice = document.getElementById('notice');
 
         var files = [];
@@ -473,6 +488,7 @@
             var label = name || it.file.name;
             encWrap.hidden = true;
             openTab.hidden = true;
+            printBtn.hidden = ['img', 'pdf', 'audio', 'video', 'unknown'].indexOf(kind) >= 0;
 
             function alive() { return my === token; }
 
@@ -575,10 +591,9 @@
 
             if (kind === 'sheet') {
                 busy('加载表格组件…');
-                Promise.all([loadLib(VENDOR + 'xlsx/xlsx.core.min.js'), it.file.arrayBuffer()]).then(function (r) {
+                Promise.all([loadLib(VENDOR + 'exceljs/exceljs.bare.min.js'), it.file.arrayBuffer()]).then(function (r) {
                     if (!alive()) return null;
-                    renderWorkbook(window.XLSX.read(r[1], { type: 'array' }), done);
-                    return null;
+                    return renderWorkbook(r[1], done);
                 }).catch(function (e) {
                     if (alive()) say('Excel 解析失败：' + (e && e.message ? e.message : e));
                 });
@@ -869,36 +884,164 @@
             if (cut) say('共 ' + rows.length + ' 行，只渲染前 ' + ROW_CAP + ' 行（表格区可滚动查看）。', true);
         }
 
-        function renderWorkbook(wb, done) {
-            var box = el('div');
-            var tabs = el('div', 'tabs');
-            var body = el('div');
-            var sheets = wb.SheetNames;
-            function show(i) {
-                Array.prototype.forEach.call(tabs.children, function (b, j) {
-                    b.setAttribute('aria-selected', String(j === i));
-                });
-                body.textContent = '';
-                var rows = window.XLSX.utils.sheet_to_json(wb.Sheets[sheets[i]], { header: 1, raw: false, defval: '' });
-                var cut = rows.length > ROW_CAP;
-                body.appendChild(tableEl(rows.slice(0, ROW_CAP)));
-                if (cut) say('工作表「' + sheets[i] + '」共 ' + rows.length + ' 行，只渲染前 ' + ROW_CAP + ' 行。', true);
-                else hush();
+        /* exceljs 的 cell.text 不套数字格式，这里按 numFmt 补一层常见格式（百分比 / 小数位 / 千分位 / 日期） */
+        function fmtCell(cell) {
+            var v = cell.value, f = cell.numFmt;
+            if (v instanceof Date) {
+                return /[hH]:|:s/.test(String(f || '')) ? v.toLocaleString('zh-CN', { hour12: false }) : v.toLocaleDateString('zh-CN');
             }
-            sheets.forEach(function (n, i) {
-                var b = el('button', 'tab', n);
-                b.type = 'button';
-                b.addEventListener('click', function () { show(i); });
-                tabs.appendChild(b);
+            if (typeof v !== 'number' || !f || f === 'General') return null;
+            var clean = String(f).split(';')[0].replace(/\[\$[^\]]*\]/g, '').replace(/[\\_*]/g, '').trim();
+            var dm = /\.([0]+)/.exec(clean);
+            var dec = dm ? dm[1].length : 0;
+            var pct = clean.indexOf('%') >= 0;
+            var grouped = /,/.test(clean.split('.')[0]);
+            var s = (pct ? v * 100 : v).toFixed(dec);
+            if (grouped) {
+                var p = s.split('.');
+                p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                s = p.join('.');
+            }
+            return s + (pct ? '%' : '');
+        }
+
+        function argb(c) {
+            var v = c && c.argb;
+            if (!v || typeof v !== 'string' || v.length < 8) return '';
+            return '#' + v.slice(2);
+        }
+
+        function decodeRef(ref) {
+            var m = /^([A-Z]+)(\d+)$/.exec(String(ref).replace(/\$/g, ''));
+            if (!m) return null;
+            var col = 0;
+            for (var i = 0; i < m[1].length; i++) col = col * 26 + (m[1].charCodeAt(i) - 64);
+            return { r: parseInt(m[2], 10), c: col };
+        }
+
+        function cellCss(cell) {
+            var out = [], f = cell.font || {}, al = cell.alignment || {}, fl = cell.fill, bd = cell.border;
+            if (f.bold) out.push('font-weight:700');
+            if (f.italic) out.push('font-style:italic');
+            if (f.u || f.underline) out.push('text-decoration:underline');
+            var fc = f.color ? argb(f.color) : '';
+            if (fc) out.push('color:' + fc);
+            if (f.size) out.push('font-size:' + Math.round(f.size * 1.333) + 'px');
+            if (fl && fl.type === 'pattern' && fl.pattern && fl.pattern !== 'none') {
+                var bg = argb(fl.pattern === 'solid' ? fl.fgColor : (fl.bgColor || fl.fgColor));
+                if (bg) out.push('background:' + bg);
+            }
+            if (bd) {
+                ['top', 'left', 'right', 'bottom'].forEach(function (side) {
+                    var b = bd[side];
+                    if (!b || !b.style) return;
+                    var dash = /dash/.test(b.style) ? ' dashed ' : ' solid ';
+                    out.push('border-' + side + ':' + (BORDER_W[b.style] || '1px') + dash + ((b.color && argb(b.color)) || '#94a3b8'));
+                });
+            }
+            if (al.horizontal) out.push('text-align:' + (al.horizontal === 'centerContinuous' ? 'center' : al.horizontal));
+            if (al.vertical) out.push('vertical-align:' + (al.vertical === 'bottom' ? 'bottom' : 'middle'));
+            out.push('white-space:' + (al.wrapText ? 'normal' : 'pre-wrap'));
+            return out.join(';');
+        }
+
+        function sheetTable(ws) {
+            var span = {}, skip = {}, cells = {};
+            (ws.model.merges || []).forEach(function (m) {
+                var parts = String(m).split(':');
+                var a = decodeRef(parts[0]), b = decodeRef(parts[1] || parts[0]);
+                if (!a || !b) return;
+                span[a.r + ':' + a.c] = { rs: b.r - a.r + 1, cs: b.c - a.c + 1 };
+                for (var r = a.r; r <= b.r; r++) {
+                    for (var c = a.c; c <= b.c; c++) if (r !== a.r || c !== a.c) skip[r + ':' + c] = 1;
+                }
             });
-            if (sheets.length) {
+            ws.eachRow({ includeEmpty: true }, function (row, rn) {
+                row.eachCell({ includeEmpty: true }, function (cell, cn) { cells[rn + ':' + cn] = cell; });
+            });
+            var rows = Math.min(ws.rowCount || 0, ROW_CAP);
+            var cols = Math.min(ws.columnCount || 0, COL_CAP);
+            var tb = el('table', 'grid');
+            var cg = document.createElement('colgroup');
+            cg.appendChild(el('col'));
+            for (var c = 1; c <= cols; c++) {
+                var col = el('col');
+                var w = ws.getColumn ? ws.getColumn(c).width : 0;
+                if (w) col.style.width = Math.round(w * 7.05 + 5) + 'px';
+                cg.appendChild(col);
+            }
+            tb.appendChild(cg);
+            var head = document.createElement('thead');
+            var hr = document.createElement('tr');
+            hr.appendChild(el('th'));
+            for (c = 1; c <= cols; c++) hr.appendChild(el('th', null, colName(c - 1)));
+            head.appendChild(hr);
+            tb.appendChild(head);
+            var body = document.createElement('tbody');
+            for (var r = 1; r <= rows; r++) {
+                var tr = document.createElement('tr');
+                var h = ws.getRow ? ws.getRow(r).height : 0;
+                tr.appendChild(el('th', null, String(r)));
+                for (c = 1; c <= cols; c++) {
+                    var key = r + ':' + c;
+                    if (skip[key]) continue;
+                    var cell = cells[key];
+                    var td = el('td');
+                    var txt = '';
+                    if (cell) {
+                        var formatted = fmtCell(cell);
+                        txt = formatted !== null ? formatted : String(cell.text === undefined || cell.text === null ? '' : cell.text);
+                    }
+                    td.textContent = txt;
+                    if (cell) {
+                        td.style.cssText = cellCss(cell);
+                        if (cell.type === 2 && !/text-align/.test(td.style.cssText)) td.style.textAlign = 'right';
+                    }
+                    var sp = span[key];
+                    if (sp) {
+                        if (sp.rs > 1) td.rowSpan = sp.rs;
+                        if (sp.cs > 1) td.colSpan = sp.cs;
+                    }
+                    tr.appendChild(td);
+                }
+                if (h) tr.style.height = Math.round(h * 1.333) + 'px';
+                body.appendChild(tr);
+            }
+            tb.appendChild(body);
+            var wrap = el('div', 'sheetwrap');
+            wrap.appendChild(tb);
+            if ((ws.columnCount || 0) > cols) say('列数超过 ' + cols + '，只渲染前 ' + cols + ' 列。', true);
+            return wrap;
+        }
+
+        function renderWorkbook(buf, done) {
+            var wb = new window.ExcelJS.Workbook();
+            return wb.xlsx.load(buf).then(function () {
+                var sheets = wb.worksheets.filter(function (s) { return !s.hidden; });
+                if (!sheets.length) { say('这个工作簿里没有可见的工作表。'); return null; }
+                var box = el('div'), tabs = el('div', 'tabs'), body = el('div');
+                function show(i) {
+                    Array.prototype.forEach.call(tabs.children, function (b, j) {
+                        b.setAttribute('aria-selected', String(j === i));
+                    });
+                    body.textContent = '';
+                    var ws = sheets[i];
+                    if ((ws.rowCount || 0) > ROW_CAP) say('工作表「' + ws.name + '」共 ' + ws.rowCount + ' 行，只渲染前 ' + ROW_CAP + ' 行。', true);
+                    else hush();
+                    body.appendChild(sheetTable(ws));
+                }
+                sheets.forEach(function (ws, i) {
+                    var b = el('button', 'tab', ws.name);
+                    b.type = 'button';
+                    b.addEventListener('click', function () { show(i); });
+                    tabs.appendChild(b);
+                });
                 box.appendChild(tabs);
                 box.appendChild(body);
                 show(0);
                 done(box, false);
-            } else {
-                say('这个工作簿里没有工作表。');
-            }
+                return null;
+            });
         }
 
         function tableEl(rows) {
@@ -951,6 +1094,15 @@
 
         function nsOne(node, ns, local) { var l = nsAll(node, ns, local); return l.length ? l[0] : null; }
 
+        /* 只找直接子节点：颜色/填充这类节点用后代查找会误抓到嵌套在描边里的 */
+        function kid(node, ns, local) {
+            var list = node ? node.childNodes : [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].namespaceURI === ns && list[i].localName === local) return list[i];
+            }
+            return null;
+        }
+
         function num(node, name) {
             var v = node && node.getAttribute(name);
             var f = parseFloat(v);
@@ -983,7 +1135,93 @@
             return (ph.getAttribute('type') || 'obj') + '|' + (ph.getAttribute('idx') || '');
         }
 
-        function readTx(node) {
+        function hexAdjust(hex, mod, off) {
+            var v = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+            if (mod) v = v.map(function (x) { return x * mod; });
+            if (off) v = v.map(function (x) { return x + 255 * off; });
+            return '#' + v.map(function (x) {
+                return ('0' + Math.max(0, Math.min(255, Math.round(x))).toString(16)).slice(-2);
+            }).join('');
+        }
+
+        function colorOf(node, theme) {
+            if (!node || !theme) return '';
+            var s = kid(node, DML, 'srgbClr');
+            if (s) return '#' + String(s.getAttribute('val') || '000000').slice(-6);
+            var sc = kid(node, DML, 'schemeClr');
+            if (sc) {
+                var name = String(sc.getAttribute('val') || '').toLowerCase();
+                var alias = { bg1: 'lt1', tx1: 'dk1', bg2: 'lt2', tx2: 'dk2' };
+                var hex = theme[name] || theme[alias[name]] || '';
+                if (!hex) return '';
+                var lm = kid(sc, DML, 'lumMod'), lo = kid(sc, DML, 'lumOff');
+                var sh = kid(sc, DML, 'shade'), ti = kid(sc, DML, 'tint');
+                if (lm || lo) hex = hexAdjust(hex, lm ? num(lm, 'val') / 100000 : 0, lo ? num(lo, 'val') / 100000 : 0);
+                if (sh) hex = hexAdjust(hex, num(sh, 'val') / 100000, 0);
+                if (ti) hex = hexAdjust(hex, 1, num(ti, 'val') / 200000 - 0.5);
+                return hex;
+            }
+            var sy = kid(node, DML, 'sysClr');
+            if (sy) {
+                var v = String(sy.getAttribute('lastClr') || sy.getAttribute('val') || '');
+                if (/^[0-9a-fA-F]{6,8}$/.test(v)) return '#' + v.slice(-6);
+            }
+            return '';
+        }
+
+        function themeColors(zip) {
+            var names = Object.keys(zip.files).filter(function (n) {
+                return /^ppt\/theme\/theme\d+\.xml$/.test(n);
+            }).sort();
+            if (!names.length) return Promise.resolve({});
+            return zip.file(names[0]).async('string').then(function (s) {
+                var doc = parseXml(s), map = {};
+                if (badXml(doc)) return map;
+                var scheme = nsOne(doc, DML, 'clrScheme');
+                if (!scheme) return map;
+                Array.prototype.forEach.call(scheme.children, function (node) {
+                    var key = String(node.localName || '').toLowerCase();
+                    var hex = colorOf(node, map);
+                    if (key && hex) map[key] = hex;
+                });
+                return map;
+            }).catch(function () { return {}; });
+        }
+
+        function masterBg(zip, theme) {
+            var name = Object.keys(zip.files).filter(function (n) {
+                return /^ppt\/slideMasters\/slideMaster\d+\.xml$/.test(n);
+            }).sort()[0];
+            if (!name) return Promise.resolve('');
+            return zip.file(name).async('string').then(function (s) {
+                var doc = parseXml(s);
+                if (badXml(doc)) return '';
+                var bg = nsOne(doc, PML, 'bg');
+                return colorOf(nsOne(bg, DML, 'solidFill'), theme);
+            }).catch(function () { return ''; });
+        }
+
+        function diagramTexts(zip, rels, slideName) {
+            var ids = Object.keys(rels).filter(function (k) { return /\/diagramData$/.test(rels[k].type); });
+            return Promise.all(ids.map(function (id) {
+                var path = relPath(slideName, rels[id].target);
+                if (!zip.file(path)) return Promise.resolve('');
+                return zip.file(path).async('string').then(function (s) {
+                    var doc = parseXml(s);
+                    if (badXml(doc)) return '';
+                    var ts = nsAll(doc, DML, 't'), arr = [];
+                    for (var i = 0; i < ts.length; i++) {
+                        var t = String(ts[i].textContent || '').trim();
+                        if (t) arr.push(t);
+                    }
+                    return arr.join('\n');
+                }).catch(function () { return ''; });
+            })).then(function (list) {
+                return list.filter(function (x) { return x; }).join('\n');
+            });
+        }
+
+        function readTx(node, theme) {
             var ps = nsAll(node, DML, 'p'), out = [];
             for (var i = 0; i < ps.length; i++) {
                 var pPr = nsOne(ps[i], DML, 'pPr');
@@ -998,12 +1236,11 @@
                     var t = nsOne(rs[j], DML, 't');
                     if (!t || !t.textContent) continue;
                     var rPr = nsOne(rs[j], DML, 'rPr');
-                    var srgb = rPr ? nsOne(rPr, DML, 'srgbClr') : null;
                     para.runs.push({
                         text: t.textContent,
                         sz: rPr && rPr.getAttribute('sz') ? num(rPr, 'sz') : 0,
                         b: !!(rPr && rPr.getAttribute('b') === '1'),
-                        color: srgb ? '#' + srgb.getAttribute('val') : ''
+                        color: rPr ? colorOf(nsOne(rPr, DML, 'solidFill'), theme) : ''
                     });
                 }
                 out.push(para);
@@ -1011,13 +1248,23 @@
             return out;
         }
 
-        function shapeBox(sp, geo, size) {
+        function shapeBox(sp, geo, size, theme) {
             var d = el('div', 'sh');
             d.style.left = (geo.x / size.cx * 100) + '%';
             d.style.top = (geo.y / size.cy * 100) + '%';
             d.style.width = (geo.cx / size.cx * 100) + '%';
             d.style.height = (geo.cy / size.cy * 100) + '%';
-            readTx(sp).forEach(function (para) {
+            var spPr = nsOne(sp, PML, 'spPr');
+            if (spPr) {
+                var bg = colorOf(kid(spPr, DML, 'solidFill'), theme);
+                if (bg) d.style.background = bg;
+                var ln = kid(spPr, DML, 'ln');
+                if (ln && !kid(ln, DML, 'noFill')) {
+                    var lc = colorOf(kid(ln, DML, 'solidFill'), theme) || '#94a3b8';
+                    d.style.border = Math.max(1, Math.round(num(ln, 'w') / 12700)) + 'px solid ' + lc;
+                }
+            }
+            readTx(sp, theme).forEach(function (para) {
                 var p = el('p');
                 var base = para.runs.length && para.runs[0].sz ? para.runs[0].sz : 1800;
                 p.style.fontSize = 'calc(var(--s) * ' + (base / 75).toFixed(1) + 'px)';
@@ -1094,6 +1341,8 @@
             if (!names.length) { say('这个 pptx 里没有找到幻灯片。'); return; }
             revokeDeck();
             var box = el('div', 'deck');
+            var themeP = themeColors(zip);
+            var bgP = themeP.then(function (t) { return masterBg(zip, t); });
             slideSize(zip).then(function (size) {
                 return Promise.all(names.map(function (name, idx) {
                     return Promise.all([
@@ -1104,10 +1353,12 @@
                         var doc = parseXml(r[0]);
                         if (badXml(doc)) throw new Error('第 ' + (idx + 1) + ' 页的 XML 无法解析，文件可能已损坏');
                         var rels = r[1];
-                        return layoutGeo(zip, rels, name).then(function (lmap) {
+                        return Promise.all([layoutGeo(zip, rels, name), diagramTexts(zip, rels, name), themeP, bgP]).then(function (x) {
+                            var lmap = x[0], dia = x[1], theme = x[2], mbg = x[3];
                             var slide = el('div', 'slide');
                             slide.style.aspectRatio = size.cx + ' / ' + size.cy;
                             slide.dataset.w = String(size.cx / EMU_PER_PX);
+                            slide.style.background = colorOf(kid(nsOne(doc, PML, 'bg'), DML, 'solidFill'), theme) || mbg || '#fff';
                             var sps = nsAll(doc, PML, 'sp'), pics = nsAll(doc, PML, 'pic');
                             var jobs = [], i;
                             function placePic(pic) {
@@ -1133,14 +1384,27 @@
                             }
                             for (i = 0; i < sps.length; i++) {
                                 var g = geoOf(sps[i]) || lmap[phKey(sps[i])];
-                                if (g) slide.appendChild(shapeBox(sps[i], g, size));
+                                if (g) slide.appendChild(shapeBox(sps[i], g, size, theme));
                             }
                             for (i = 0; i < pics.length; i++) placePic(pics[i]);
+                            if (dia) {
+                                var gf = nsOne(doc, PML, 'graphicFrame');
+                                var dg = (gf && geoOf(gf)) || { x: size.cx * 0.08, y: size.cy * 0.22, cx: size.cx * 0.84, cy: size.cy * 0.6 };
+                                var dbox = el('div', 'sh');
+                                dbox.style.left = (dg.x / size.cx * 100) + '%';
+                                dbox.style.top = (dg.y / size.cy * 100) + '%';
+                                dbox.style.width = (dg.cx / size.cx * 100) + '%';
+                                dbox.style.height = (dg.cy / size.cy * 100) + '%';
+                                dia.split('\n').forEach(function (line) {
+                                    dbox.appendChild(el('p', null, line));
+                                });
+                                slide.appendChild(dbox);
+                            }
                             slide.appendChild(el('span', 'no', String(idx + 1)));
                             if (!slide.querySelectorAll('.sh, img').length) {
                                 var flat = el('div', 'sh');
                                 flat.style.cssText = 'left:0;top:0;width:100%;height:100%';
-                                readTx(doc).forEach(function (para) {
+                                readTx(doc, theme).forEach(function (para) {
                                     var p = el('p');
                                     p.style.fontSize = 'calc(var(--s) * 24px)';
                                     para.runs.forEach(function (r) {
@@ -1158,7 +1422,7 @@
                     slides.forEach(function (s) { box.appendChild(s); });
                     done(box, false);
                     fitDeck();
-                    say('已按占位符位置还原版式（含图片与字号）；动画、母版配色与艺术字不在纯前端还原范围内。', true);
+                    say('已按占位符位置、主题色与字体还原版式；SmartArt 只取出文字，动画与艺术字弯曲不还原。', true);
                 });
             }).catch(function (e) {
                 say('pptx 解析失败：' + (e && e.message ? e.message : e));
@@ -1365,6 +1629,8 @@
         backZip.addEventListener('click', function () {
             if (zipReplay) { hush(); zipReplay(); }
         });
+
+        printBtn.addEventListener('click', function () { window.print(); });
 
         encSel.addEventListener('change', function () {
             if (cur && ['text', 'json', 'csv', 'md', 'html'].indexOf(kindOf(cur.file.name)) >= 0) {
