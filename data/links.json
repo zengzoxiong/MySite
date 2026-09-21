@@ -314,6 +314,13 @@
       "icon": "📖"
     },
     {
+      "title": "修改代码的艺术 · 示例代码",
+      "url": "https://github.com/BillSchofield/WorkingEffectivelyWithLegacyCode",
+      "description": "Feathers《Working Effectively with Legacy Code》中译本《修改代码的艺术》的配套仓库：Java/Gradle 示例工程加一篇长文笔记，讲清理遗留代码的接缝与解锁手法，2026 年仍在更新（原书正文需另购）。",
+      "category": "学习",
+      "icon": "🧩"
+    },
+    {
       "title": "Excalidraw",
       "url": "https://excalidraw.com",
       "description": "GitHub 130k+ Star 的手绘风虚拟白板，画架构图 / 流程图神器，支持协作，可自部署。",
