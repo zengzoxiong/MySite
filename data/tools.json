@@ -909,8 +909,15 @@
     {
       "name": "文件在线预览",
       "path": "file-preview/app.html",
-      "description": "拖入即读：PDF / 图片 / 音视频 / 代码高亮 / Markdown / JSON / CSV / Excel（含底色边框等样式）/ Word / PPT 版式 / ZIP，可打印存 PDF，全在本地解析不上传",
+      "description": "拖入即读：PDF / 图片 / 音视频 / 代码高亮 / Markdown / JSON / CSV / Excel（含底色边框等样式）/ Word / ZIP，可打印存 PDF，全在本地解析不上传",
       "icon": "🗂️",
+      "category": "实用工具"
+    },
+    {
+      "name": "多格式转 PDF",
+      "path": "to-pdf/app.html",
+      "description": "把 docx / xlsx / Markdown / CSV / JSON / 代码文本 / 图片排成 A4 纸张导出 PDF，可选纸张、方向与边距，支持打印成矢量 PDF 或直接下载文件",
+      "icon": "🧾",
       "category": "实用工具"
     }
   ]

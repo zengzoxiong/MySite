@@ -4,7 +4,7 @@
     <link rel="icon" href="../../favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="在线文件预览工具说明：在浏览器里直接阅读 PDF、图片、音视频、文本、Markdown、JSON、CSV、Excel、Word、PPT 与 ZIP，文件不上传，全部本地解析。">
+    <meta name="description" content="在线文件预览工具说明：在浏览器里直接阅读 PDF、图片、音视频、文本、Markdown、JSON、CSV、Excel、Word 与 ZIP，文件不上传，全部本地解析。">
     <title>文件在线预览 - 拾光集</title>
     <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/file-preview/index.html">
     <style>
@@ -176,14 +176,13 @@
                     <tr><td class="ext">html htm</td><td>默认显示源码，可一键切到「渲染成页面」，同样禁用脚本。</td></tr>
                     <tr><td class="ext">xlsx xlsm</td><td>多工作表切标签，并还原单元格样式：底色、字体颜色、加粗斜体下划线、对齐与自动换行、列宽行高、合并单元格，数字按格式码显示（百分比、千分位、日期）。</td></tr>
                     <tr><td class="ext">docx</td><td>尽量还原分页、页边距、页眉页脚、表格与图片；文本框、域代码和内嵌字体可能走样。</td></tr>
-                    <tr><td class="ext">pptx</td><td>按占位符坐标还原版式：字号、加粗、颜色（含主题色引用）、形状底色与描边、页面背景、图片与 SmartArt 文字都会显示，位置继承母版与版式；动画、艺术字弯曲与 SmartArt 排布不还原。</td></tr>
                     <tr><td class="ext">zip</td><td>列出目录与大小，点任意一行即可预览里面的文本、图片、PDF 等成员。</td></tr>
                 </tbody>
             </table>
 
             <h2>看不了的格式，会告诉你为什么</h2>
             <ul class="features warn">
-                <li>doc / ppt / xls 等 Office 97-2003 二进制格式：纯前端无解，需要服务端转换。工具会读出文件头确认类型，并提示你用 WPS / Office 另存为 docx / pptx / xlsx 再拖进来。</li>
+                <li>doc / ppt / xls 等 Office 97-2003 二进制格式：纯前端无解，需要服务端转换。工具会读出文件头确认类型，并提示你用 WPS / Office 另存为 docx / xlsx 再拖进来。</li>
                 <li>HEIC 手机照片、PSD 图层、7z / rar 压缩包、CAD 与 3D 模型：分别需要 0.5～1.9 MB 的解码组件，为了首屏速度没有内置。</li>
                 <li>单文件超过 200 MB 直接拒绝；文本只渲染前 400 KB；压缩包成员超过 50 MB 不解压。</li>
             </ul>

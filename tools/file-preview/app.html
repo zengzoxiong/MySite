@@ -37,13 +37,12 @@
 
         .drop {
             border: 2px dashed #b6c2d4;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.72);
-            padding: 26px 18px;
+            border-radius: 12px;
+            background: #f8fafc;
+            padding: 22px 14px;
             text-align: center;
             cursor: pointer;
             transition: border-color .2s, background .2s;
-            margin-bottom: 16px;
         }
 
         .drop:hover, .drop.dragover, .drop:focus-visible {
@@ -56,7 +55,7 @@
         .drop strong { display: block; margin-top: 6px; font-size: 15px; }
         .drop small { color: #64748b; font-size: 12px; }
 
-        .layout { display: grid; grid-template-columns: 262px 1fr; gap: 16px; align-items: start; }
+        .top { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
 
         .card {
             background: #fff;
@@ -65,7 +64,9 @@
             box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
         }
 
-        .side { padding: 12px; position: sticky; top: 16px; }
+        .fmt-card, .up-card { padding: 14px; }
+
+        .cap { font-size: 12px; color: #64748b; font-weight: 700; margin: 2px 0 10px; }
 
         .side-head {
             display: flex; align-items: center; justify-content: space-between;
@@ -80,7 +81,7 @@
 
         .mini:hover { background: #eef2f7; color: #0f172a; }
 
-        .list { list-style: none; max-height: 46vh; overflow: auto; }
+        .list { list-style: none; max-height: 24vh; overflow: auto; margin-top: 12px; }
 
         .list li {
             display: flex; gap: 8px; align-items: center;
@@ -102,7 +103,7 @@
         .list .rm:hover { color: #ef4444; }
         .list:empty::after { content: '还没有文件'; color: #94a3b8; font-size: 12px; display: block; text-align: center; padding: 14px 0; }
 
-        .fmt { margin-top: 12px; border-top: 1px dashed #e2e8f0; padding-top: 10px; font-size: 11.5px; color: #64748b; line-height: 1.7; }
+        .fmt { font-size: 11.5px; color: #64748b; line-height: 1.7; }
         .fmt b { display: block; margin-top: 7px; color: #334155; font-size: 12px; }
         .fmt b:first-child { margin-top: 0; }
         .fmt .e { font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace; font-size: 11px; color: #64748b; }
@@ -166,24 +167,6 @@
 
         .docpage { background: #fff; }
 
-        .deck { display: flex; flex-direction: column; gap: 16px; }
-
-        .slide {
-            position: relative;
-            width: 100%;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, .07);
-            color: #1e293b;
-        }
-
-        .slide .sh { position: absolute; overflow: hidden; }
-        .slide .sh p { margin: 0; line-height: 1.3; word-break: break-word; }
-        .slide img { position: absolute; object-fit: fill; display: block; }
-        .slide .no { position: absolute; right: 8px; bottom: 5px; font-size: 11px; color: #cbd5e1; }
-
         .tree { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         .tree th, .tree td { padding: 6px 8px; border-bottom: 1px solid #eef2f7; text-align: left; }
         .tree th { color: #64748b; font-size: 11.5px; background: #fbfcfe; }
@@ -211,7 +194,6 @@
             .view { max-height: none; overflow: visible; padding: 0; }
             .sheetwrap { max-height: none; overflow: visible; border: 0; }
             table.grid thead th, table.grid tbody th { position: static; }
-            .slide { break-inside: avoid; box-shadow: none; }
         }
 
         .tool-doc-link, .tool-home-link {
@@ -226,8 +208,7 @@
         .tool-doc-link:hover, .tool-home-link:hover { background: #fff; border-color: rgba(15, 23, 42, .2); transform: translateY(-1px); }
 
         @media (max-width: 880px) {
-            .layout { grid-template-columns: 1fr; }
-            .side { position: static; }
+            .top { grid-template-columns: 1fr; }
             .list { max-height: 30vh; }
             .bar .name { max-width: 100%; }
             .view { max-height: none; }
@@ -243,21 +224,25 @@
             <p>拖入即读 · 不装软件 · 文件只在你本机解析，不会上传</p>
         </div>
 
-        <div class="drop" id="drop" tabindex="0" role="button" aria-label="选择或拖入文件">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 6.5 9.5h3.2V16h4.6V9.5h3.2L12 3Zm-7 15.5v2.5h14v-2.5H5Z"/></svg>
-            <strong>把文件拖到这里，或点击选择（可多选）</strong>
-            <small>也可以直接 Ctrl+V 粘贴截图与文件</small>
-            <input type="file" id="picker" multiple hidden>
-        </div>
+        <div class="top">
+            <section class="card fmt-card">
+                <h2 class="cap">支持格式</h2>
+                <div class="fmt" id="fmt"></div>
+            </section>
 
-        <div class="layout">
-            <aside class="side card">
+            <section class="card up-card">
+                <div class="drop" id="drop" tabindex="0" role="button" aria-label="选择或拖入文件">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 6.5 9.5h3.2V16h4.6V9.5h3.2L12 3Zm-7 15.5v2.5h14v-2.5H5Z"/></svg>
+                    <strong>把文件拖到这里，或点击选择（可多选）</strong>
+                    <small>也可以直接 Ctrl+V 粘贴截图与文件</small>
+                    <input type="file" id="picker" multiple hidden>
+                </div>
                 <div class="side-head"><span>文件列表</span><button class="mini" id="clearAll" type="button">清空</button></div>
                 <ul class="list" id="list"></ul>
-                <div class="fmt" id="fmt"></div>
-            </aside>
+            </section>
+        </div>
 
-            <main class="stage card">
+        <main class="stage card">
                 <div class="bar" id="bar" hidden>
                     <span class="name" id="mName"></span>
                     <span class="meta" id="mSize"></span>
@@ -282,12 +267,11 @@
                 <div class="view" id="view">
                     <div class="empty">
                         <h3>还没有选择文件</h3>
-                        支持一次拖入多个，点左侧列表切换。<br>
+                        支持一次拖入多个，点上方列表切换。<br>
                         解析在浏览器里完成，不会向服务器发送任何内容。
                     </div>
                 </div>
-            </main>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -311,7 +295,6 @@
             'cs', 'go', 'rs', 'rb', 'php', 'sh', 'bat', 'ps1', 'sql', 'lua', 'swift', 'vue', 'jsx', 'tsx', 'toml', 'properties'];
         var DOCX = ['docx'];
         var SHEET = ['xlsx', 'xlsm'];
-        var PPTX = ['pptx'];
         var ZIP = ['zip'];
 
         var drop = document.getElementById('drop');
@@ -358,7 +341,6 @@
             if (TEXT.indexOf(e) >= 0) return 'text';
             if (DOCX.indexOf(e) >= 0) return 'docx';
             if (SHEET.indexOf(e) >= 0) return 'sheet';
-            if (PPTX.indexOf(e) >= 0) return 'pptx';
             if (ZIP.indexOf(e) >= 0) return 'zip';
             return 'unknown';
         }
@@ -572,7 +554,10 @@
 
             if (kind === 'docx') {
                 busy('加载 Word 渲染组件…');
-                Promise.all([needJszip(), loadLib(VENDOR + 'docx-preview/docx-preview.min.js')]).then(function () {
+                /* docx-preview 的 UMD 在加载时就绑定 window.JSZip，必须先下完 jszip 再下它 */
+                Promise.all([needJszip().then(function () {
+                    return loadLib(VENDOR + 'docx-preview/docx-preview.min.js');
+                }), it.file.arrayBuffer()]).then(function () {
                     if (!alive()) return null;
                     busy('排版渲染中…');
                     return it.file.arrayBuffer();
@@ -596,20 +581,6 @@
                     return renderWorkbook(r[1], done);
                 }).catch(function (e) {
                     if (alive()) say('Excel 解析失败：' + (e && e.message ? e.message : e));
-                });
-                return;
-            }
-
-            if (kind === 'pptx') {
-                busy('加载压缩包组件…');
-                Promise.all([needJszip(), it.file.arrayBuffer()]).then(function (r) {
-                    if (!alive()) return null;
-                    return window.JSZip.loadAsync(r[1]);
-                }).then(function (zip) {
-                    if (!alive() || !zip) return null;
-                    return renderDeck(zip, done);
-                }).catch(function (e) {
-                    if (alive()) say('pptx 解析失败：' + (e && e.message ? e.message : e));
                 });
                 return;
             }
@@ -1084,366 +1055,6 @@
             return s;
         }
 
-        var PML = 'http://schemas.openxmlformats.org/presentationml/2006/main';
-        var DML = 'http://schemas.openxmlformats.org/drawingml/2006/main';
-        var RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
-        var EMU_PER_PX = 914400 / 96;
-        var deckUrls = [];
-
-        function nsAll(node, ns, local) { return node.getElementsByTagNameNS(ns, local); }
-
-        function nsOne(node, ns, local) { var l = nsAll(node, ns, local); return l.length ? l[0] : null; }
-
-        /* 只找直接子节点：颜色/填充这类节点用后代查找会误抓到嵌套在描边里的 */
-        function kid(node, ns, local) {
-            var list = node ? node.childNodes : [];
-            for (var i = 0; i < list.length; i++) {
-                if (list[i].namespaceURI === ns && list[i].localName === local) return list[i];
-            }
-            return null;
-        }
-
-        function num(node, name) {
-            var v = node && node.getAttribute(name);
-            var f = parseFloat(v);
-            return isNaN(f) ? 0 : f;
-        }
-
-        function relPath(base, target) {
-            var parts = base.split('/').slice(0, -1);
-            String(target).split('/').forEach(function (seg) {
-                if (!seg || seg === '.') return;
-                if (seg === '..') parts.pop();
-                else parts.push(seg);
-            });
-            return parts.join('/');
-        }
-
-        function parseXml(s) { return new DOMParser().parseFromString(s, 'application/xml'); }
-
-        function badXml(doc) { return !doc || doc.getElementsByTagName('parsererror').length > 0; }
-
-        function geoOf(sp) {
-            var off = nsOne(sp, DML, 'off'), ext = nsOne(sp, DML, 'ext');
-            if (!off || !ext) return null;
-            return { x: num(off, 'x'), y: num(off, 'y'), cx: num(ext, 'cx'), cy: num(ext, 'cy') };
-        }
-
-        function phKey(sp) {
-            var ph = nsOne(sp, PML, 'ph');
-            if (!ph) return null;
-            return (ph.getAttribute('type') || 'obj') + '|' + (ph.getAttribute('idx') || '');
-        }
-
-        function hexAdjust(hex, mod, off) {
-            var v = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
-            if (mod) v = v.map(function (x) { return x * mod; });
-            if (off) v = v.map(function (x) { return x + 255 * off; });
-            return '#' + v.map(function (x) {
-                return ('0' + Math.max(0, Math.min(255, Math.round(x))).toString(16)).slice(-2);
-            }).join('');
-        }
-
-        function colorOf(node, theme) {
-            if (!node || !theme) return '';
-            var s = kid(node, DML, 'srgbClr');
-            if (s) return '#' + String(s.getAttribute('val') || '000000').slice(-6);
-            var sc = kid(node, DML, 'schemeClr');
-            if (sc) {
-                var name = String(sc.getAttribute('val') || '').toLowerCase();
-                var alias = { bg1: 'lt1', tx1: 'dk1', bg2: 'lt2', tx2: 'dk2' };
-                var hex = theme[name] || theme[alias[name]] || '';
-                if (!hex) return '';
-                var lm = kid(sc, DML, 'lumMod'), lo = kid(sc, DML, 'lumOff');
-                var sh = kid(sc, DML, 'shade'), ti = kid(sc, DML, 'tint');
-                if (lm || lo) hex = hexAdjust(hex, lm ? num(lm, 'val') / 100000 : 0, lo ? num(lo, 'val') / 100000 : 0);
-                if (sh) hex = hexAdjust(hex, num(sh, 'val') / 100000, 0);
-                if (ti) hex = hexAdjust(hex, 1, num(ti, 'val') / 200000 - 0.5);
-                return hex;
-            }
-            var sy = kid(node, DML, 'sysClr');
-            if (sy) {
-                var v = String(sy.getAttribute('lastClr') || sy.getAttribute('val') || '');
-                if (/^[0-9a-fA-F]{6,8}$/.test(v)) return '#' + v.slice(-6);
-            }
-            return '';
-        }
-
-        function themeColors(zip) {
-            var names = Object.keys(zip.files).filter(function (n) {
-                return /^ppt\/theme\/theme\d+\.xml$/.test(n);
-            }).sort();
-            if (!names.length) return Promise.resolve({});
-            return zip.file(names[0]).async('string').then(function (s) {
-                var doc = parseXml(s), map = {};
-                if (badXml(doc)) return map;
-                var scheme = nsOne(doc, DML, 'clrScheme');
-                if (!scheme) return map;
-                Array.prototype.forEach.call(scheme.children, function (node) {
-                    var key = String(node.localName || '').toLowerCase();
-                    var hex = colorOf(node, map);
-                    if (key && hex) map[key] = hex;
-                });
-                return map;
-            }).catch(function () { return {}; });
-        }
-
-        function masterBg(zip, theme) {
-            var name = Object.keys(zip.files).filter(function (n) {
-                return /^ppt\/slideMasters\/slideMaster\d+\.xml$/.test(n);
-            }).sort()[0];
-            if (!name) return Promise.resolve('');
-            return zip.file(name).async('string').then(function (s) {
-                var doc = parseXml(s);
-                if (badXml(doc)) return '';
-                var bg = nsOne(doc, PML, 'bg');
-                return colorOf(nsOne(bg, DML, 'solidFill'), theme);
-            }).catch(function () { return ''; });
-        }
-
-        function diagramTexts(zip, rels, slideName) {
-            var ids = Object.keys(rels).filter(function (k) { return /\/diagramData$/.test(rels[k].type); });
-            return Promise.all(ids.map(function (id) {
-                var path = relPath(slideName, rels[id].target);
-                if (!zip.file(path)) return Promise.resolve('');
-                return zip.file(path).async('string').then(function (s) {
-                    var doc = parseXml(s);
-                    if (badXml(doc)) return '';
-                    var ts = nsAll(doc, DML, 't'), arr = [];
-                    for (var i = 0; i < ts.length; i++) {
-                        var t = String(ts[i].textContent || '').trim();
-                        if (t) arr.push(t);
-                    }
-                    return arr.join('\n');
-                }).catch(function () { return ''; });
-            })).then(function (list) {
-                return list.filter(function (x) { return x; }).join('\n');
-            });
-        }
-
-        function readTx(node, theme) {
-            var ps = nsAll(node, DML, 'p'), out = [];
-            for (var i = 0; i < ps.length; i++) {
-                var pPr = nsOne(ps[i], DML, 'pPr');
-                var para = {
-                    align: pPr ? (pPr.getAttribute('algn') || '') : '',
-                    lvl: pPr ? num(pPr, 'lvl') : 0,
-                    bullet: !!(pPr && (nsOne(pPr, DML, 'buChar') || nsOne(pPr, DML, 'buAutoNum'))),
-                    runs: []
-                };
-                var rs = nsAll(ps[i], DML, 'r');
-                for (var j = 0; j < rs.length; j++) {
-                    var t = nsOne(rs[j], DML, 't');
-                    if (!t || !t.textContent) continue;
-                    var rPr = nsOne(rs[j], DML, 'rPr');
-                    para.runs.push({
-                        text: t.textContent,
-                        sz: rPr && rPr.getAttribute('sz') ? num(rPr, 'sz') : 0,
-                        b: !!(rPr && rPr.getAttribute('b') === '1'),
-                        color: rPr ? colorOf(nsOne(rPr, DML, 'solidFill'), theme) : ''
-                    });
-                }
-                out.push(para);
-            }
-            return out;
-        }
-
-        function shapeBox(sp, geo, size, theme) {
-            var d = el('div', 'sh');
-            d.style.left = (geo.x / size.cx * 100) + '%';
-            d.style.top = (geo.y / size.cy * 100) + '%';
-            d.style.width = (geo.cx / size.cx * 100) + '%';
-            d.style.height = (geo.cy / size.cy * 100) + '%';
-            var spPr = nsOne(sp, PML, 'spPr');
-            if (spPr) {
-                var bg = colorOf(kid(spPr, DML, 'solidFill'), theme);
-                if (bg) d.style.background = bg;
-                var ln = kid(spPr, DML, 'ln');
-                if (ln && !kid(ln, DML, 'noFill')) {
-                    var lc = colorOf(kid(ln, DML, 'solidFill'), theme) || '#94a3b8';
-                    d.style.border = Math.max(1, Math.round(num(ln, 'w') / 12700)) + 'px solid ' + lc;
-                }
-            }
-            readTx(sp, theme).forEach(function (para) {
-                var p = el('p');
-                var base = para.runs.length && para.runs[0].sz ? para.runs[0].sz : 1800;
-                p.style.fontSize = 'calc(var(--s) * ' + (base / 75).toFixed(1) + 'px)';
-                if (para.align === 'ctr') p.style.textAlign = 'center';
-                else if (para.align === 'r') p.style.textAlign = 'right';
-                if (para.lvl) p.style.marginLeft = (para.lvl * 1.4) + 'em';
-                if (para.bullet) p.appendChild(el('span', null, '• '));
-                para.runs.forEach(function (r) {
-                    var s = el('span', null, r.text);
-                    if (r.sz) s.style.fontSize = 'calc(var(--s) * ' + (r.sz / 75).toFixed(1) + 'px)';
-                    if (r.b) s.style.fontWeight = '700';
-                    if (r.color) s.style.color = r.color;
-                    p.appendChild(s);
-                });
-                d.appendChild(p);
-            });
-            return d;
-        }
-
-        function relsPathFor(name) {
-            var i = name.lastIndexOf('/');
-            return name.slice(0, i) + '/_rels/' + name.slice(i + 1) + '.rels';
-        }
-
-        function relsOf(zip, slideName) {
-            var path = relsPathFor(slideName);
-            return zip.file(path) ? zip.file(path).async('string').then(function (s) {
-                var map = {}, list = parseXml(s).getElementsByTagName('Relationship');
-                for (var i = 0; i < list.length; i++) {
-                    map[list[i].getAttribute('Id')] = { target: list[i].getAttribute('Target'), type: list[i].getAttribute('Type') || '' };
-                }
-                return map;
-            }) : Promise.resolve({});
-        }
-
-        function layoutGeo(zip, rels, slideName) {
-            var id = '';
-            Object.keys(rels).forEach(function (k) { if (/\/slideLayout$/.test(rels[k].type)) id = k; });
-            if (!id) return Promise.resolve({});
-            var path = relPath(slideName, rels[id].target);
-            if (!zip.file(path)) return Promise.resolve({});
-            return zip.file(path).async('string').then(function (s) {
-                var doc = parseXml(s);
-                if (badXml(doc)) return {};
-                var map = {}, sps = nsAll(doc, PML, 'sp');
-                for (var i = 0; i < sps.length; i++) {
-                    var key = phKey(sps[i]), geo = geoOf(sps[i]);
-                    if (key && geo && !map[key]) map[key] = geo;
-                }
-                return map;
-            });
-        }
-
-        function slideSize(zip) {
-            if (!zip.file('ppt/presentation.xml')) return Promise.resolve({ cx: 9144000, cy: 6858000 });
-            return zip.file('ppt/presentation.xml').async('string').then(function (s) {
-                var doc = parseXml(s);
-                var sld = badXml(doc) ? null : nsOne(doc, PML, 'sldSz');
-                return sld ? { cx: num(sld, 'cx') || 9144000, cy: num(sld, 'cy') || 6858000 } : { cx: 9144000, cy: 6858000 };
-            });
-        }
-
-        function revokeDeck() {
-            deckUrls.forEach(function (u) { URL.revokeObjectURL(u); });
-            deckUrls = [];
-        }
-
-        function renderDeck(zip, done) {
-            var names = Object.keys(zip.files).filter(function (n) {
-                return /^ppt\/slides\/slide\d+\.xml$/.test(n);
-            }).sort(function (a, b) {
-                return (parseInt((a.match(/\d+/) || ['0'])[0], 10)) - (parseInt((b.match(/\d+/) || ['0'])[0], 10));
-            });
-            if (!names.length) { say('这个 pptx 里没有找到幻灯片。'); return; }
-            revokeDeck();
-            var box = el('div', 'deck');
-            var themeP = themeColors(zip);
-            var bgP = themeP.then(function (t) { return masterBg(zip, t); });
-            slideSize(zip).then(function (size) {
-                return Promise.all(names.map(function (name, idx) {
-                    return Promise.all([
-                        zip.file(name).async('string'),
-                        relsOf(zip, name),
-                        null
-                    ]).then(function (r) {
-                        var doc = parseXml(r[0]);
-                        if (badXml(doc)) throw new Error('第 ' + (idx + 1) + ' 页的 XML 无法解析，文件可能已损坏');
-                        var rels = r[1];
-                        return Promise.all([layoutGeo(zip, rels, name), diagramTexts(zip, rels, name), themeP, bgP]).then(function (x) {
-                            var lmap = x[0], dia = x[1], theme = x[2], mbg = x[3];
-                            var slide = el('div', 'slide');
-                            slide.style.aspectRatio = size.cx + ' / ' + size.cy;
-                            slide.dataset.w = String(size.cx / EMU_PER_PX);
-                            slide.style.background = colorOf(kid(nsOne(doc, PML, 'bg'), DML, 'solidFill'), theme) || mbg || '#fff';
-                            var sps = nsAll(doc, PML, 'sp'), pics = nsAll(doc, PML, 'pic');
-                            var jobs = [], i;
-                            function placePic(pic) {
-                                var geo = geoOf(pic);
-                                if (!geo) return;
-                                var blip = nsOne(pic, DML, 'blip');
-                                var rid = blip && (blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed'));
-                                var img = el('img');
-                                img.style.left = (geo.x / size.cx * 100) + '%';
-                                img.style.top = (geo.y / size.cy * 100) + '%';
-                                img.style.width = (geo.cx / size.cx * 100) + '%';
-                                img.style.height = (geo.cy / size.cy * 100) + '%';
-                                slide.appendChild(img);
-                                if (!rid || !rels[rid]) return;
-                                var path = relPath(name, rels[rid].target);
-                                if (!zip.file(path)) return;
-                                jobs.push(zip.file(path).async('uint8array').then(function (u8) {
-                                    var url = URL.createObjectURL(new Blob([u8], { type: 'image/' + (extOf(path) === 'jpg' ? 'jpeg' : extOf(path)) }));
-                                    deckUrls.push(url);
-                                    img.src = url;
-                                    img.alt = '';
-                                }));
-                            }
-                            for (i = 0; i < sps.length; i++) {
-                                var g = geoOf(sps[i]) || lmap[phKey(sps[i])];
-                                if (g) slide.appendChild(shapeBox(sps[i], g, size, theme));
-                            }
-                            for (i = 0; i < pics.length; i++) placePic(pics[i]);
-                            if (dia) {
-                                var gf = nsOne(doc, PML, 'graphicFrame');
-                                var dg = (gf && geoOf(gf)) || { x: size.cx * 0.08, y: size.cy * 0.22, cx: size.cx * 0.84, cy: size.cy * 0.6 };
-                                var dbox = el('div', 'sh');
-                                dbox.style.left = (dg.x / size.cx * 100) + '%';
-                                dbox.style.top = (dg.y / size.cy * 100) + '%';
-                                dbox.style.width = (dg.cx / size.cx * 100) + '%';
-                                dbox.style.height = (dg.cy / size.cy * 100) + '%';
-                                dia.split('\n').forEach(function (line) {
-                                    dbox.appendChild(el('p', null, line));
-                                });
-                                slide.appendChild(dbox);
-                            }
-                            slide.appendChild(el('span', 'no', String(idx + 1)));
-                            if (!slide.querySelectorAll('.sh, img').length) {
-                                var flat = el('div', 'sh');
-                                flat.style.cssText = 'left:0;top:0;width:100%;height:100%';
-                                readTx(doc, theme).forEach(function (para) {
-                                    var p = el('p');
-                                    p.style.fontSize = 'calc(var(--s) * 24px)';
-                                    para.runs.forEach(function (r) {
-                                        p.appendChild(shapeRun(r));
-                                    });
-                                    if (!para.runs.length) p.appendChild(el('span', null, ' '));
-                                    flat.appendChild(p);
-                                });
-                                slide.appendChild(flat);
-                            }
-                            return Promise.all(jobs).then(function () { return slide; });
-                        });
-                    });
-                })).then(function (slides) {
-                    slides.forEach(function (s) { box.appendChild(s); });
-                    done(box, false);
-                    fitDeck();
-                    say('已按占位符位置、主题色与字体还原版式；SmartArt 只取出文字，动画与艺术字弯曲不还原。', true);
-                });
-            }).catch(function (e) {
-                say('pptx 解析失败：' + (e && e.message ? e.message : e));
-            });
-        }
-
-        function shapeRun(r) {
-            var s = el('span', null, r.text);
-            s.style.fontSize = 'calc(var(--s) * ' + ((r.sz || 1800) / 75).toFixed(1) + 'px)';
-            if (r.b) s.style.fontWeight = '700';
-            if (r.color) s.style.color = r.color;
-            return s;
-        }
-
-        function fitDeck() {
-            Array.prototype.forEach.call(document.querySelectorAll('.slide'), function (s) {
-                var w = parseFloat(s.dataset.w) || 960;
-                s.style.setProperty('--s', String((s.clientWidth || w) / w));
-            });
-        }
-
         function renderZip(zip, onPick, done) {
             var entries = [];
             zip.forEach(function (path, entry) {
@@ -1529,7 +1140,7 @@
             if (h.indexOf('D0 CF 11 E0') === 0) {
                 return {
                     what: '这是 Office 97-2003 的复合文档（.doc / .xls / .ppt 老格式）。',
-                    how: '纯前端无法还原这种二进制排版。用 WPS / Office / LibreOffice 打开后另存为 docx / xlsx / pptx 再拖进来，就能直接预览。'
+                    how: '纯前端无法还原这种二进制排版。用 WPS / Office / LibreOffice 打开后另存为 docx / xlsx 再拖进来，就能直接预览。'
                 };
             }
             if (h.indexOf('52 61 72') === 0) {
@@ -1539,7 +1150,7 @@
                 return { what: '这是 7z 压缩包。', how: '本站只内置了 zip 解析。请解压后再拖入里面的文件。' };
             }
             if (h.indexOf('50 4B 03 04') === 0 || h.indexOf('50 4B 05 06') === 0) {
-                return { what: '这是 zip 容器（docx / xlsx / pptx 本质也是 zip）。', how: '把扩展名改成 .docx / .xlsx / .pptx 再拖进来，或直接把 .zip 拖进来浏览目录。' };
+                return { what: '这是 zip 容器（docx / xlsx 本质也是 zip）。', how: '把扩展名改成 .docx / .xlsx 再拖进来，或直接把 .zip 拖进来浏览目录。' };
             }
             if (h.indexOf('FF D8 FF') === 0) {
                 return { what: '这是 JPEG 图片，但扩展名是 .' + (e || '无') + '。', how: '把文件改名为 .jpg 再拖进来即可。' };
@@ -1552,13 +1163,13 @@
             }
             return {
                 what: '识别不出这个格式（扩展名 .' + (e || '无') + '）。',
-                how: '本站能看：PDF、常见图片、音频视频、文本与代码、Markdown、JSON、CSV、xlsx、docx、pptx 文字、zip。老式 doc / ppt、HEIC、7z / rar、CAD 与 3D 模型需要专业软件或在线转换。'
+                how: '本站能看：PDF、常见图片、音频视频、文本与代码、Markdown、JSON、CSV、xlsx、docx、zip。老式 doc / ppt、HEIC、7z / rar、CAD 与 3D 模型需要专业软件或在线转换。'
             };
         }
 
         function renderFmt() {
             var groups = [
-                ['文档', ['pdf'].concat(DOCX, PPTX)],
+                ['文档', ['pdf'].concat(DOCX)],
                 ['表格', SHEET.concat(['csv', 'tsv'])],
                 ['文本 / 代码', ['md', 'json'].concat(TEXT)],
                 ['图片', IMG],
@@ -1624,7 +1235,6 @@
             reset();
         });
 
-        window.addEventListener('resize', fitDeck);
 
         backZip.addEventListener('click', function () {
             if (zipReplay) { hush(); zipReplay(); }

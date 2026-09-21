@@ -30,9 +30,9 @@ MySite/
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
-│   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked）
+│   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked、jspdf、html2canvas）
 │   └── icon.svg          # PWA 图标（星芒）
-├── tools/                # 129 个自建网页工具（每工具一目录 + app.html）
+├── tools/                # 130 个自建网页工具（每工具一目录 + app.html）
 ├── scripts/              # 同步脚本（sync_tmdb.py / sync_stars.py / sync_explore.py）
 └── .github/workflows/    # 定时任务（TMDB 评分 / GitHub Stars / 探索歌单）
 ```
@@ -72,7 +72,8 @@ MySite/
    工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
 - **从上游搬来的页面必须去品牌**：`tools/*` 多数源自 `justhtmls/html-tools`，页面里的 `JustHTMLs`/`htmls.dev` 字样（返回链接文案、示例数据、`<title>` 后缀、页脚版权、作者徽标）和 `<link rel="canonical">` 都要改成本站（title/页脚用「拾光集」，canonical 指向 `https://zengzoxiong.github.io/MySite/tools/<工具>/index.html`——留着来源站 canonical 会把 SEO 权重白送出去）。署名只保留说明页的「查看源码」按钮（指向上游仓库）。
 - 说明页的图标样式表走 cdnjs，`onerror` 兜底到本地副本 `assets/vendor/fontawesome/css/all.min.css`（css + 4 个 woff2，字形路径写死 `../webfonts/`，别挪目录）——已断掉 cdnjs 实测过 solid/regular/brands 三套字形都能从本地渲染。
-- **`tools/file-preview`（文件在线预览）是纯前端解析**，对标 kkFileView 但不需要服务端：PDF / 图片 / 音视频 / 文本 / JSON / CSV 走浏览器原生（零依赖），只有 docx / xlsx / pptx / zip / md 才按类型 `loadLib()` 懒加载 `assets/vendor/{jszip,docx-preview,exceljs,marked}`（合计约 1.06 MB，其中 exceljs 842 KB，首屏不下）。表格用 **ExcelJS 而不是 SheetJS**：SheetJS 社区版不读 `styles.xml`，拿不到底色/字体/对齐；换 ExcelJS 后才能还原样式。两个坑记牢——`cell.text` **不套数字格式**，要过 `fmtCell()`（百分比 / 小数位 / 千分位 / 日期）；Excel 里 `sz` 是百分之一磅、`a:ln@w` 是 EMU（除 12700 得磅）。加格式只改 `kindOf` + `dispatch` 分派表，**别在首屏引 script**。安全底线：Markdown 与 HTML 的渲染结果只进 `<iframe sandbox>`（无 `allow-scripts`），`sanitize()` 会剥掉 script/iframe/object/embed/link 并清空 `img[src]`（否则文件内容能发起第三方请求当外带通道）；SVG 走 `<img>` 不内联；文本一律 `textContent`。**代码高亮与 pptx 版式都是自写的，不引第三方**：`tokenize()` 是按语言配置的词法器（关键字/字符串/注释/数字/标签），pptx 用 `p:sp` 的 `a:off`/`a:ext` 定位、自身无坐标时回查 `slideLayout` 的占位符、颜色要能解 `a:schemeClr`（先读 `ppt/theme/themeN.xml` 的 `clrScheme`）、图片走 slide rels → `ppt/media/*` → blob、SmartArt 只从 `ppt/diagrams/dataN.xml` 抽文字。表格与幻灯片右上角有「打印 / 存 PDF」按钮（`window.print()` + 一段 `@media print` 隐藏外壳），不引 PDF 生成库。已知限制：doc/ppt 等 OLE 复合文档、HEIC、7z/rar、PSD、CAD/3D 纯前端无解，靠魔数嗅探给可操作提示；文本只渲染前 400 KB、单文件上限 200 MB、压缩包成员上限 50 MB。
+- **`tools/file-preview`（文件在线预览）是纯前端解析**，对标 kkFileView 但不需要服务端：PDF / 图片 / 音视频 / 文本 / JSON / CSV 走浏览器原生（零依赖），只有 docx / xlsx / zip / md 才按类型 `loadLib()` 懒加载 `assets/vendor/{jszip,docx-preview,exceljs,marked}`（合计约 1.06 MB，其中 exceljs 842 KB，首屏不下）。表格用 **ExcelJS 而不是 SheetJS**：SheetJS 社区版不读 `styles.xml`，拿不到底色/字体/对齐；换 ExcelJS 后才能还原样式。两个坑记牢——`cell.text` **不套数字格式**，要过 `fmtCell()`（百分比 / 小数位 / 千分位 / 日期）；Excel 里 `sz` 是百分之一磅、`a:ln@w` 是 EMU（除 12700 得磅）。加格式只改 `kindOf` + `dispatch` 分派表，**别在首屏引 script**。安全底线：Markdown 与 HTML 的渲染结果只进 `<iframe sandbox>`（无 `allow-scripts`），`sanitize()` 会剥掉 script/iframe/object/embed/link 并清空 `img[src]`（否则文件内容能发起第三方请求当外带通道）；SVG 走 `<img>` 不内联；文本一律 `textContent`。**代码高亮是自写的词法器**：`tokenize()` 按语言配置分类关键字/字符串/注释/数字/标签，表格右上角有「打印 / 存 PDF」按钮（`window.print()` + 一段 `@media print` 隐藏外壳），不引 PDF 生成库。已知限制：pptx 与 doc/ppt/xls 等 OLE 复合文档、HEIC、7z/rar、PSD、CAD/3D 一律不做（pptx 曾做过版式还原，因转 PDF 仍需排版引擎、纯前端做不到而移除，改用「多格式转 PDF」）；遇到时靠魔数嗅探给可操作提示；文本只渲染前 400 KB、单文件上限 200 MB、压缩包成员上限 50 MB。
+- **`tools/to-pdf`（多格式转 PDF）**：docx / xlsx / md / csv / json / 文本 / 图片排成纸张（A4·A3·Letter、纵横、三档边距、三档字号），两条出口——`window.print()` 出矢量 PDF（中文可选中，`@page` 尺寸随设置注入 `<style>`），或懒加载 `html2canvas + jspdf`（约 600 KB）截图逐页切图 `doc.save()` 下载位图 PDF。截图路径有 30000 px 高度上限，超了提示改用打印。两个出口的差异必须在页面上写清楚，别让用户以为下载的是矢量。
 
 ### 4. Agent Plugin（data/agent-plugins.json）
 

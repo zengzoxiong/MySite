@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="多格式转 PDF 工具说明：Markdown、Word docx、Excel、CSV、JSON、代码文本、图片都能排成纸张导出 PDF，支持 A4/A3/Letter、纵横方向与页边距，可打印成矢量 PDF 或直接下载文件。">
+    <title>多格式转 PDF - 拾光集</title>
+    <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/to-pdf/index.html">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', Roboto, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .header { text-align: center; color: #fff; margin-bottom: 30px; }
+
+        .header h1 { font-size: 2.4rem; margin-bottom: 10px; }
+
+        .card {
+            background: rgba(255, 255, 255, .96);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+            margin-bottom: 20px;
+        }
+
+        .card h2 { color: #333; margin: 26px 0 14px; font-size: 1.35rem; }
+
+        .card h2:first-child { margin-top: 0; }
+
+        .card p { color: #666; line-height: 1.85; margin-bottom: 12px; }
+
+        ul.features { list-style: none; margin-top: 12px; }
+
+        ul.features li { padding: 9px 0; color: #555; border-bottom: 1px solid #eee; line-height: 1.7; }
+
+        ul.features li:before { content: "✓"; color: #11998e; font-weight: bold; margin-right: 10px; }
+
+        ul.warn li:before { content: "!"; color: #d97706; }
+
+        table.fmt { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
+
+        table.fmt th, table.fmt td { border: 1px solid #e8eaf0; padding: 9px 11px; text-align: left; vertical-align: top; line-height: 1.6; }
+
+        table.fmt thead th { background: #f5f6fa; color: #444; }
+
+        table.fmt td.ext { font-family: Consolas, 'Courier New', monospace; color: #11998e; white-space: nowrap; }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 28px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all .3s;
+            margin: 18px 10px 0 0;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(17, 153, 142, .4); }
+
+        .btn-secondary { background: #6c757d; }
+
+        .preview { background: #f8f9fa; border-radius: 12px; padding: 18px; }
+
+        .preview iframe { width: 100%; height: 460px; border: none; border-radius: 8px; background: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>多格式转 PDF</h1>
+            <p>把常见文件排成纸张，导出成 PDF 文件</p>
+        </div>
+
+        <div class="card">
+            <h2>两种导出方式，先选对再动手</h2>
+            <p><b>打印 / 矢量 PDF</b>（推荐）：走浏览器自己的打印，在打印对话框里目标选「另存为 PDF」。文字可选中、可搜索、可复制，中文不需要额外字体，文件也最小。</p>
+            <p><b>下载 PDF</b>：点一下直接拿到 .pdf 文件。实现是把排版结果截图后逐页塞进 PDF（html2canvas + jsPDF），所以是<b>位图版</b>——文字不能选中，文件更大，胜在免对话框、能批量走。</p>
+            <p>两条路都在本机完成，不会把文件传上任何服务器。</p>
+
+            <h2>能转什么</h2>
+            <table class="fmt">
+                <thead><tr><th>输入</th><th>导出效果</th></tr></thead>
+                <tbody>
+                    <tr><td class="ext">docx</td><td>连续排版（不强制 Word 分页），标题层级、表格、图片、字号与颜色尽量保留。</td></tr>
+                    <tr><td class="ext">xlsx xlsm</td><td>每个工作表一节，带底色、边框、合并单元格与数字格式（百分比、千分位、日期）。</td></tr>
+                    <tr><td class="ext">md</td><td>渲染成排版页面（标题、列表、表格、代码块、引用）；远程图片不会加载。</td></tr>
+                    <tr><td class="ext">csv tsv</td><td>转成表格，含引号转义解析。</td></tr>
+                    <tr><td class="ext">json</td><td>格式化缩进后按等宽字体输出；语法有错则按原文输出。</td></tr>
+                    <tr><td class="ext">txt log 代码 xml yml ini</td><td>等宽保留缩进与换行；UTF-8 解不动自动改用 GBK 并提示。</td></tr>
+                    <tr><td class="ext">png jpg gif webp bmp svg</td><td>按页面宽度缩放，单页输出。</td></tr>
+                </tbody>
+            </table>
+
+            <h2>设置项</h2>
+            <ul class="features">
+                <li>纸张 A4 / A3 / Letter，方向纵向 / 横向，页边距窄 12 mm / 标准 18 mm / 宽 25 mm，正文小 12px / 中 14px / 大 16px。</li>
+                <li>预览区就是实际纸张尺寸，右上角实时显示「约 N 页」，改设置立刻重排。</li>
+                <li>打印路径的 <code>@page</code> 尺寸与边距会跟着设置变，所以浏览器打印出来的分页和预览一致。</li>
+            </ul>
+
+            <h2>转不了的</h2>
+            <ul class="features warn">
+                <li>pptx：幻灯片转 PDF 需要先有一个排版引擎把版式画出来，纯前端做不到，本站已不再支持 pptx 预览，也不提供转换。</li>
+                <li>doc / xls / ppt 等 Office 97-2003 二进制格式：需要服务端 LibreOffice，请先另存为 docx / xlsx。</li>
+                <li>已经是 PDF 的文件：不做无意义的二次转换，直接用「文件在线预览」看。</li>
+                <li>内容超过约 30000 像素高（几百页）时，下载路径会拒绝并让你改用打印，避免截图吃满内存。</li>
+            </ul>
+
+            <div>
+                <a href="app.html" class="btn">开始使用</a>
+                <a href="../../index.html" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>快速预览</h2>
+            <div class="preview">
+                <iframe src="app.html" loading="lazy" title="多格式转 PDF 工具界面"></iframe>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
