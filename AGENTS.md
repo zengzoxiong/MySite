@@ -70,6 +70,7 @@ MySite/
 1. 新建 `tools/工具名/app.html`（自包含单文件，参考 image-converter 的风格）；
 2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`。
    工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
+- **从上游搬来的页面必须去品牌**：`tools/*` 多数源自 `justhtmls/html-tools`，页面里的 `JustHTMLs`/`htmls.dev` 字样（返回链接文案、示例数据、`<title>` 后缀、页脚版权、作者徽标）和 `<link rel="canonical">` 都要改成本站（title/页脚用「拾光集」，canonical 指向 `https://zengzoxiong.github.io/MySite/tools/<工具>/index.html`——留着来源站 canonical 会把 SEO 权重白送出去）。署名只保留说明页的「查看源码」按钮（指向上游仓库）。
 
 ### 4. Agent Plugin（data/agent-plugins.json）
 
