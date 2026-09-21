@@ -166,9 +166,23 @@
 
         .docpage { background: #fff; }
 
-        .slides section { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; background: #fff; }
-        .slides h4 { font-size: 12px; color: #94a3b8; font-weight: 700; margin-bottom: 8px; }
-        .slides p { font-size: 13.5px; line-height: 1.8; white-space: pre-wrap; }
+        .deck { display: flex; flex-direction: column; gap: 16px; }
+
+        .slide {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, .07);
+            color: #1e293b;
+        }
+
+        .slide .sh { position: absolute; overflow: hidden; }
+        .slide .sh p { margin: 0; line-height: 1.3; word-break: break-word; }
+        .slide img { position: absolute; object-fit: fill; display: block; }
+        .slide .no { position: absolute; right: 8px; bottom: 5px; font-size: 11px; color: #cbd5e1; }
 
         .tree { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         .tree th, .tree td { padding: 6px 8px; border-bottom: 1px solid #eef2f7; text-align: left; }
@@ -179,6 +193,12 @@
         .tree td.r { text-align: right; color: #64748b; font-variant-numeric: tabular-nums; }
 
         .spin { display: flex; align-items: center; gap: 10px; color: #64748b; font-size: 13px; padding: 30px 0; justify-content: center; }
+
+        pre.raw .k { color: #7c3aed; }
+        pre.raw .s { color: #15803d; }
+        pre.raw .c { color: #94a3b8; font-style: italic; }
+        pre.raw .n { color: #b45309; }
+        pre.raw .t { color: #0369a1; }
         .spin i { width: 16px; height: 16px; border: 2px solid #cbd5e1; border-top-color: #2563eb; border-radius: 50%; animation: r 0.8s linear infinite; }
         @keyframes r { to { transform: rotate(360deg); } }
 
@@ -526,7 +546,7 @@
                     else if (kind === 'csv') renderCsv(res.text, extOf(label) === 'tsv', done);
                     else if (kind === 'md') renderRich(res.text, done, 'Markdown');
                     else if (kind === 'html') renderHtmlSource(res.text, done);
-                    else renderRaw(res.text, done);
+                    else renderCode(res.text, extOf(label), done);
                     return null;
                 }).catch(function (e) {
                     if (alive()) say('读取失败：' + e.message);
@@ -572,7 +592,7 @@
                     return window.JSZip.loadAsync(r[1]);
                 }).then(function (zip) {
                     if (!alive() || !zip) return null;
-                    return renderSlides(zip, done);
+                    return renderDeck(zip, done);
                 }).catch(function (e) {
                     if (alive()) say('pptx 解析失败：' + (e && e.message ? e.message : e));
                 });
@@ -612,6 +632,108 @@
 
         function renderRaw(text, done) {
             var pre = el('pre', 'raw', text);
+            done(pre, false);
+        }
+
+        var LANG_BY_EXT = {
+            js: 'js', mjs: 'js', ts: 'js', tsx: 'js', jsx: 'js', vue: 'js', php: 'js',
+            java: 'java', kt: 'java', cs: 'java',
+            c: 'c', h: 'c', cpp: 'c', hpp: 'c', go: 'go', rs: 'rs',
+            py: 'py', rb: 'py', sh: 'sh', bat: 'sh', ps1: 'sh', sql: 'sql',
+            css: 'plain', scss: 'plain', less: 'plain',
+            html: 'html', htm: 'html', xml: 'xml'
+        };
+
+        var KW = {
+            c: 'auto bool break case char class const continue default delete do double else enum extern false float for friend goto if inline int long namespace new nullptr operator private protected public register return short signed sizeof static struct switch template this true typedef union unsigned using virtual void volatile while NULL',
+            java: 'abstract boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try var void while false true null',
+            js: 'async await break case catch class const continue debugger default delete do else export extends finally for from function get if import in instanceof let new of return set static super switch this throw try typeof undefined var void while yield null true false',
+            go: 'break case chan const continue default defer else fallthrough for func go goto if import interface map package range return select struct switch type var nil true false make new string int error',
+            rs: 'as async await box break const continue crate dyn else enum extern fn for if impl in let loop match mod move mut pub ref return self Self static struct trait type unsafe use where while Some None Ok Err true false',
+            py: 'and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield None True False self cls',
+            sh: 'if then else elif fi for while until do done case esac function in echo export local readonly return break continue source exit set unset shift exec eval alias trap',
+            sql: 'select from where group by order having insert into values update delete create table alter drop join left right full outer inner cross on as distinct union all limit offset set null not and or in like between exists case when then else end primary key foreign references index view transaction commit rollback grant revoke count sum avg min max'
+        };
+
+        var LANG_CFG = {
+            c: { line: ['//'], block: [['/*', '*/']], quote: ['"', "'"], kw: KW.c },
+            java: { line: ['//'], block: [['/*', '*/']], quote: ['"', "'"], kw: KW.java },
+            js: { line: ['//'], block: [['/*', '*/']], quote: ['"', "'", '`'], kw: KW.js },
+            go: { line: ['//'], block: [['/*', '*/']], quote: ['"', '`'], kw: KW.go },
+            rs: { line: ['//'], block: [['/*', '*/']], quote: ['"', "'"], kw: KW.rs },
+            py: { line: ['#'], block: [], quote: ['"', "'"], kw: KW.py },
+            sh: { line: ['#'], block: [], quote: ['"', "'"], kw: KW.sh },
+            sql: { line: ['--'], block: [], quote: ["'"], kw: KW.sql, ci: true },
+            html: { tag: true, quote: ['"', "'"], kw: '' },
+            xml: { tag: true, quote: ['"', "'"], kw: '' },
+            plain: { block: [['/*', '*/']], quote: ['"', "'"], kw: '' }
+        };
+
+        function tokenize(src, cfg) {
+            var out = [], plain = '', i = 0, n = src.length, k;
+            var kw = {};
+            (cfg.kw || '').split(' ').forEach(function (w) { if (w) kw[w] = 1; });
+            function flush() { if (plain) { out.push(['', plain]); plain = ''; } }
+            function at(s, pos) { return s && src.substr(pos, s.length) === s; }
+            while (i < n) {
+                var end = -1, cls = '', ch = src.charAt(i), p, m;
+                for (k = 0; cfg.line && k < cfg.line.length; k++) {
+                    if (at(cfg.line[k], i)) { p = src.indexOf('\n', i); end = p < 0 ? n : p; cls = 'c'; break; }
+                }
+                for (k = 0; end < 0 && cfg.block && k < cfg.block.length; k++) {
+                    if (at(cfg.block[k][0], i)) {
+                        p = src.indexOf(cfg.block[k][1], i + cfg.block[k][0].length);
+                        end = p < 0 ? n : p + cfg.block[k][1].length;
+                        cls = 'c';
+                        break;
+                    }
+                }
+                for (k = 0; end < 0 && cfg.quote && k < cfg.quote.length; k++) {
+                    if (ch === cfg.quote[k]) {
+                        p = i + 1;
+                        while (p < n) {
+                            if (src.charAt(p) === '\\') { p += 2; continue; }
+                            if (src.charAt(p) === ch) { p++; break; }
+                            if (src.charAt(p) === '\n' && ch !== '`') break;
+                            p++;
+                        }
+                        end = Math.min(p, n); cls = 's';
+                        break;
+                    }
+                }
+                if (end < 0 && cfg.tag && ch === '<') {
+                    p = src.indexOf('>', i);
+                    end = p < 0 ? n : p + 1;
+                    cls = 't';
+                }
+                if (end < 0 && ch >= '0' && ch <= '9' && !/[A-Za-z0-9_.]/.test(src.charAt(i - 1) || '')) {
+                    m = /^[0-9][0-9a-fA-FxX.eE]*/.exec(src.slice(i, i + 24));
+                    if (m) { end = i + m[0].length; cls = 'n'; }
+                }
+                if (end < 0 && /[A-Za-z_$\u00C0-\u024F]/.test(ch)) {
+                    m = /^[A-Za-z0-9_$\u00C0-\u024F]+/.exec(src.slice(i));
+                    var w = m[0];
+                    if (kw[cfg.ci ? w.toLowerCase() : w]) { flush(); out.push(['k', w]); i += w.length; continue; }
+                    plain += w; i += w.length; continue;
+                }
+                if (end >= 0) { flush(); out.push([cls, src.slice(i, end)]); i = end; continue; }
+                plain += ch; i++;
+            }
+            flush();
+            return out;
+        }
+
+        function renderCode(text, ext, done) {
+            var lang = LANG_BY_EXT[ext];
+            var pre = el('pre', 'raw');
+            if (!lang || text.length > 120000) {
+                pre.textContent = text;
+                done(pre, false);
+                return;
+            }
+            tokenize(text, LANG_CFG[lang]).forEach(function (t) {
+                pre.appendChild(t[0] ? el('span', t[0], t[1]) : document.createTextNode(t[1]));
+            });
             done(pre, false);
         }
 
@@ -819,38 +941,244 @@
             return s;
         }
 
-        function renderSlides(zip, done) {
+        var PML = 'http://schemas.openxmlformats.org/presentationml/2006/main';
+        var DML = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+        var RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+        var EMU_PER_PX = 914400 / 96;
+        var deckUrls = [];
+
+        function nsAll(node, ns, local) { return node.getElementsByTagNameNS(ns, local); }
+
+        function nsOne(node, ns, local) { var l = nsAll(node, ns, local); return l.length ? l[0] : null; }
+
+        function num(node, name) {
+            var v = node && node.getAttribute(name);
+            var f = parseFloat(v);
+            return isNaN(f) ? 0 : f;
+        }
+
+        function relPath(base, target) {
+            var parts = base.split('/').slice(0, -1);
+            String(target).split('/').forEach(function (seg) {
+                if (!seg || seg === '.') return;
+                if (seg === '..') parts.pop();
+                else parts.push(seg);
+            });
+            return parts.join('/');
+        }
+
+        function parseXml(s) { return new DOMParser().parseFromString(s, 'application/xml'); }
+
+        function badXml(doc) { return !doc || doc.getElementsByTagName('parsererror').length > 0; }
+
+        function geoOf(sp) {
+            var off = nsOne(sp, DML, 'off'), ext = nsOne(sp, DML, 'ext');
+            if (!off || !ext) return null;
+            return { x: num(off, 'x'), y: num(off, 'y'), cx: num(ext, 'cx'), cy: num(ext, 'cy') };
+        }
+
+        function phKey(sp) {
+            var ph = nsOne(sp, PML, 'ph');
+            if (!ph) return null;
+            return (ph.getAttribute('type') || 'obj') + '|' + (ph.getAttribute('idx') || '');
+        }
+
+        function readTx(node) {
+            var ps = nsAll(node, DML, 'p'), out = [];
+            for (var i = 0; i < ps.length; i++) {
+                var pPr = nsOne(ps[i], DML, 'pPr');
+                var para = {
+                    align: pPr ? (pPr.getAttribute('algn') || '') : '',
+                    lvl: pPr ? num(pPr, 'lvl') : 0,
+                    bullet: !!(pPr && (nsOne(pPr, DML, 'buChar') || nsOne(pPr, DML, 'buAutoNum'))),
+                    runs: []
+                };
+                var rs = nsAll(ps[i], DML, 'r');
+                for (var j = 0; j < rs.length; j++) {
+                    var t = nsOne(rs[j], DML, 't');
+                    if (!t || !t.textContent) continue;
+                    var rPr = nsOne(rs[j], DML, 'rPr');
+                    var srgb = rPr ? nsOne(rPr, DML, 'srgbClr') : null;
+                    para.runs.push({
+                        text: t.textContent,
+                        sz: rPr && rPr.getAttribute('sz') ? num(rPr, 'sz') : 0,
+                        b: !!(rPr && rPr.getAttribute('b') === '1'),
+                        color: srgb ? '#' + srgb.getAttribute('val') : ''
+                    });
+                }
+                out.push(para);
+            }
+            return out;
+        }
+
+        function shapeBox(sp, geo, size) {
+            var d = el('div', 'sh');
+            d.style.left = (geo.x / size.cx * 100) + '%';
+            d.style.top = (geo.y / size.cy * 100) + '%';
+            d.style.width = (geo.cx / size.cx * 100) + '%';
+            d.style.height = (geo.cy / size.cy * 100) + '%';
+            readTx(sp).forEach(function (para) {
+                var p = el('p');
+                var base = para.runs.length && para.runs[0].sz ? para.runs[0].sz : 1800;
+                p.style.fontSize = 'calc(var(--s) * ' + (base / 75).toFixed(1) + 'px)';
+                if (para.align === 'ctr') p.style.textAlign = 'center';
+                else if (para.align === 'r') p.style.textAlign = 'right';
+                if (para.lvl) p.style.marginLeft = (para.lvl * 1.4) + 'em';
+                if (para.bullet) p.appendChild(el('span', null, '• '));
+                para.runs.forEach(function (r) {
+                    var s = el('span', null, r.text);
+                    if (r.sz) s.style.fontSize = 'calc(var(--s) * ' + (r.sz / 75).toFixed(1) + 'px)';
+                    if (r.b) s.style.fontWeight = '700';
+                    if (r.color) s.style.color = r.color;
+                    p.appendChild(s);
+                });
+                d.appendChild(p);
+            });
+            return d;
+        }
+
+        function relsPathFor(name) {
+            var i = name.lastIndexOf('/');
+            return name.slice(0, i) + '/_rels/' + name.slice(i + 1) + '.rels';
+        }
+
+        function relsOf(zip, slideName) {
+            var path = relsPathFor(slideName);
+            return zip.file(path) ? zip.file(path).async('string').then(function (s) {
+                var map = {}, list = parseXml(s).getElementsByTagName('Relationship');
+                for (var i = 0; i < list.length; i++) {
+                    map[list[i].getAttribute('Id')] = { target: list[i].getAttribute('Target'), type: list[i].getAttribute('Type') || '' };
+                }
+                return map;
+            }) : Promise.resolve({});
+        }
+
+        function layoutGeo(zip, rels, slideName) {
+            var id = '';
+            Object.keys(rels).forEach(function (k) { if (/\/slideLayout$/.test(rels[k].type)) id = k; });
+            if (!id) return Promise.resolve({});
+            var path = relPath(slideName, rels[id].target);
+            if (!zip.file(path)) return Promise.resolve({});
+            return zip.file(path).async('string').then(function (s) {
+                var doc = parseXml(s);
+                if (badXml(doc)) return {};
+                var map = {}, sps = nsAll(doc, PML, 'sp');
+                for (var i = 0; i < sps.length; i++) {
+                    var key = phKey(sps[i]), geo = geoOf(sps[i]);
+                    if (key && geo && !map[key]) map[key] = geo;
+                }
+                return map;
+            });
+        }
+
+        function slideSize(zip) {
+            if (!zip.file('ppt/presentation.xml')) return Promise.resolve({ cx: 9144000, cy: 6858000 });
+            return zip.file('ppt/presentation.xml').async('string').then(function (s) {
+                var doc = parseXml(s);
+                var sld = badXml(doc) ? null : nsOne(doc, PML, 'sldSz');
+                return sld ? { cx: num(sld, 'cx') || 9144000, cy: num(sld, 'cy') || 6858000 } : { cx: 9144000, cy: 6858000 };
+            });
+        }
+
+        function revokeDeck() {
+            deckUrls.forEach(function (u) { URL.revokeObjectURL(u); });
+            deckUrls = [];
+        }
+
+        function renderDeck(zip, done) {
             var names = Object.keys(zip.files).filter(function (n) {
                 return /^ppt\/slides\/slide\d+\.xml$/.test(n);
             }).sort(function (a, b) {
-                return num(a) - num(b);
+                return (parseInt((a.match(/\d+/) || ['0'])[0], 10)) - (parseInt((b.match(/\d+/) || ['0'])[0], 10));
             });
-            var box = el('div', 'slides');
             if (!names.length) { say('这个 pptx 里没有找到幻灯片。'); return; }
-            var i = 0;
-            function next() {
-                if (i >= names.length) { done(box, false); say('仅提取了每页的文字内容，版式与图片无法还原（纯前端限制）。', true); return; }
-                var n = names[i];
-                zip.file(n).async('string').then(function (xml) {
-                    var doc = new DOMParser().parseFromString(xml, 'application/xml');
-                    var ts = doc.getElementsByTagNameNS('http://schemas.openxmlformats.org/drawingml/2006/main', 't');
-                    var sec = el('section');
-                    sec.appendChild(el('h4', null, '第 ' + (i + 1) + ' 页'));
-                    var parts = [];
-                    for (var k = 0; k < ts.length; k++) {
-                        var s = (ts[k].textContent || '').trim();
-                        if (s) parts.push(s);
-                    }
-                    sec.appendChild(el('p', null, parts.length ? parts.join('\n') : '（本页没有文字）'));
-                    box.appendChild(sec);
-                    i++;
-                    next();
-                }).catch(function () { i++; next(); });
-            }
-            next();
+            revokeDeck();
+            var box = el('div', 'deck');
+            slideSize(zip).then(function (size) {
+                return Promise.all(names.map(function (name, idx) {
+                    return Promise.all([
+                        zip.file(name).async('string'),
+                        relsOf(zip, name),
+                        null
+                    ]).then(function (r) {
+                        var doc = parseXml(r[0]);
+                        if (badXml(doc)) throw new Error('第 ' + (idx + 1) + ' 页的 XML 无法解析，文件可能已损坏');
+                        var rels = r[1];
+                        return layoutGeo(zip, rels, name).then(function (lmap) {
+                            var slide = el('div', 'slide');
+                            slide.style.aspectRatio = size.cx + ' / ' + size.cy;
+                            slide.dataset.w = String(size.cx / EMU_PER_PX);
+                            var sps = nsAll(doc, PML, 'sp'), pics = nsAll(doc, PML, 'pic');
+                            var jobs = [], i;
+                            function placePic(pic) {
+                                var geo = geoOf(pic);
+                                if (!geo) return;
+                                var blip = nsOne(pic, DML, 'blip');
+                                var rid = blip && (blip.getAttributeNS(RNS, 'embed') || blip.getAttribute('r:embed'));
+                                var img = el('img');
+                                img.style.left = (geo.x / size.cx * 100) + '%';
+                                img.style.top = (geo.y / size.cy * 100) + '%';
+                                img.style.width = (geo.cx / size.cx * 100) + '%';
+                                img.style.height = (geo.cy / size.cy * 100) + '%';
+                                slide.appendChild(img);
+                                if (!rid || !rels[rid]) return;
+                                var path = relPath(name, rels[rid].target);
+                                if (!zip.file(path)) return;
+                                jobs.push(zip.file(path).async('uint8array').then(function (u8) {
+                                    var url = URL.createObjectURL(new Blob([u8], { type: 'image/' + (extOf(path) === 'jpg' ? 'jpeg' : extOf(path)) }));
+                                    deckUrls.push(url);
+                                    img.src = url;
+                                    img.alt = '';
+                                }));
+                            }
+                            for (i = 0; i < sps.length; i++) {
+                                var g = geoOf(sps[i]) || lmap[phKey(sps[i])];
+                                if (g) slide.appendChild(shapeBox(sps[i], g, size));
+                            }
+                            for (i = 0; i < pics.length; i++) placePic(pics[i]);
+                            slide.appendChild(el('span', 'no', String(idx + 1)));
+                            if (!slide.querySelectorAll('.sh, img').length) {
+                                var flat = el('div', 'sh');
+                                flat.style.cssText = 'left:0;top:0;width:100%;height:100%';
+                                readTx(doc).forEach(function (para) {
+                                    var p = el('p');
+                                    p.style.fontSize = 'calc(var(--s) * 24px)';
+                                    para.runs.forEach(function (r) {
+                                        p.appendChild(shapeRun(r));
+                                    });
+                                    if (!para.runs.length) p.appendChild(el('span', null, ' '));
+                                    flat.appendChild(p);
+                                });
+                                slide.appendChild(flat);
+                            }
+                            return Promise.all(jobs).then(function () { return slide; });
+                        });
+                    });
+                })).then(function (slides) {
+                    slides.forEach(function (s) { box.appendChild(s); });
+                    done(box, false);
+                    fitDeck();
+                    say('已按占位符位置还原版式（含图片与字号）；动画、母版配色与艺术字不在纯前端还原范围内。', true);
+                });
+            }).catch(function (e) {
+                say('pptx 解析失败：' + (e && e.message ? e.message : e));
+            });
         }
 
-        function num(n) { var m = n.match(/(\d+)/); return m ? Number(m[1]) : 0; }
+        function shapeRun(r) {
+            var s = el('span', null, r.text);
+            s.style.fontSize = 'calc(var(--s) * ' + ((r.sz || 1800) / 75).toFixed(1) + 'px)';
+            if (r.b) s.style.fontWeight = '700';
+            if (r.color) s.style.color = r.color;
+            return s;
+        }
+
+        function fitDeck() {
+            Array.prototype.forEach.call(document.querySelectorAll('.slide'), function (s) {
+                var w = parseFloat(s.dataset.w) || 960;
+                s.style.setProperty('--s', String((s.clientWidth || w) / w));
+            });
+        }
 
         function renderZip(zip, onPick, done) {
             var entries = [];
@@ -1027,9 +1355,12 @@
             files = [];
             cur = null;
             token++;
+            revokeDeck();
             renderList();
             reset();
         });
+
+        window.addEventListener('resize', fitDeck);
 
         backZip.addEventListener('click', function () {
             if (zipReplay) { hush(); zipReplay(); }
