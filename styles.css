@@ -887,6 +887,18 @@ body.sidebar-collapsed .main-content {
     overflow: hidden auto;
     max-height: min(220px, 34vh);
     scrollbar-width: none;
+    scroll-behavior: smooth; /* 跟行时翻滚过去，不是瞬跳到某一行 */
+}
+
+/* 用户关掉动画或系统要求减少动效时，退回瞬时滚动 */
+body.no-anim .mp-lyric > div {
+    scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mp-lyric > div {
+        scroll-behavior: auto;
+    }
 }
 
 .mp-lyric > div::-webkit-scrollbar {

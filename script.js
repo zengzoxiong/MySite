@@ -720,9 +720,14 @@ function initMusicPlayer() {
     bindAll('.mp-next', () => mpLoad(mpStep(1), mp.playing));
 
     mp.el.toggle.addEventListener('click', () => mpTogglePanel());
-    mp.el.listToggle.addEventListener('click', () => {
-        const closed = mp.el.wrap.classList.toggle('list-closed');
+    const mpSetListClosed = (closed) => {
+        mp.el.wrap.classList.toggle('list-closed', closed);
         mp.el.listToggle.setAttribute('aria-expanded', String(!closed));
+    };
+    mp.el.listToggle.addEventListener('click', () => {
+        // 歌词态下列表被 .lyric 规则强制收起，此时点列表键要先退回封面态再展开
+        if (mp.lyricOn) { mpToggleLyric(false); mpSetListClosed(false); return; }
+        mpSetListClosed(!mp.el.wrap.classList.contains('list-closed'));
     });
     mp.el.list.addEventListener('click', (e) => {
         const row = e.target.closest('.mp-item');
