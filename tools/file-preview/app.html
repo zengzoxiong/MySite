@@ -103,7 +103,9 @@
         .list:empty::after { content: '还没有文件'; color: #94a3b8; font-size: 12px; display: block; text-align: center; padding: 14px 0; }
 
         .fmt { margin-top: 12px; border-top: 1px dashed #e2e8f0; padding-top: 10px; font-size: 11.5px; color: #64748b; line-height: 1.7; }
-        .fmt b { color: #334155; }
+        .fmt b { display: block; margin-top: 7px; color: #334155; font-size: 12px; }
+        .fmt b:first-child { margin-top: 0; }
+        .fmt .e { font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace; font-size: 11px; color: #64748b; }
 
         .stage { padding: 0; overflow: hidden; }
 
@@ -220,11 +222,7 @@
             <aside class="side card">
                 <div class="side-head"><span>文件列表</span><button class="mini" id="clearAll" type="button">清空</button></div>
                 <ul class="list" id="list"></ul>
-                <div class="fmt">
-                    <b>可直接看</b><br>PDF · 图片 · 音频 · 视频 · 文本/代码 · JSON · CSV<br>
-                    <b>需加载组件</b><br>Word docx · Excel xlsx · PPT 文字 · ZIP<br>
-                    <b>看不了</b><br>doc/xls 老格式仅能读 xls · ppt · HEIC · 7z/rar · CAD
-                </div>
+                <div class="fmt" id="fmt"></div>
             </aside>
 
             <main class="stage card">
@@ -965,6 +963,33 @@
                 how: '本站能看：PDF、常见图片、音频视频、文本与代码、Markdown、JSON、CSV、xlsx、docx、pptx 文字、zip。老式 doc / ppt、HEIC、7z / rar、CAD 与 3D 模型需要专业软件或在线转换。'
             };
         }
+
+        function renderFmt() {
+            var groups = [
+                ['文档', ['pdf'].concat(DOCX, PPTX)],
+                ['表格', SHEET.concat(['csv', 'tsv'])],
+                ['文本 / 代码', ['md', 'json'].concat(TEXT)],
+                ['图片', IMG],
+                ['音频 / 视频', AUDIO.concat(VIDEO)],
+                ['压缩包', ZIP]
+            ];
+            var seen = {};
+            var box = document.getElementById('fmt');
+            box.textContent = '';
+            groups.forEach(function (g) {
+                var list = g[1].filter(function (e) {
+                    if (e === 'markdown' || seen[e]) return false;
+                    seen[e] = 1;
+                    return true;
+                });
+                if (!list.length) return;
+                box.appendChild(el('b', null, g[0]));
+                box.appendChild(el('span', 'e', list.join(' · ')));
+                box.appendChild(document.createElement('br'));
+            });
+        }
+
+        renderFmt();
 
         drop.addEventListener('click', function () { picker.click(); });
         drop.addEventListener('keydown', function (e) {
