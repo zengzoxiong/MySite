@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="icon" href="../../favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="在线文件预览工具说明：在浏览器里直接阅读 PDF、图片、音视频、文本、Markdown、JSON、CSV、Excel、Word、PPT 与 ZIP，文件不上传，全部本地解析。">
+    <title>文件在线预览 - 拾光集</title>
+    <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/file-preview/index.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin: 26px 0 14px;
+            font-size: 1.35rem;
+        }
+
+        .card h2:first-child {
+            margin-top: 0;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.85;
+            margin-bottom: 12px;
+        }
+
+        ul.features {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        ul.features li {
+            padding: 9px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            line-height: 1.7;
+        }
+
+        ul.features li:before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        ul.warn li:before {
+            content: "!";
+            color: #d97706;
+        }
+
+        table.fmt {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 14px;
+        }
+
+        table.fmt th, table.fmt td {
+            border: 1px solid #e8eaf0;
+            padding: 9px 11px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        table.fmt thead th {
+            background: #f5f6fa;
+            color: #444;
+        }
+
+        table.fmt td.ext {
+            font-family: Consolas, 'Courier New', monospace;
+            color: #667eea;
+            white-space: nowrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 18px 10px 0 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .preview iframe {
+            width: 100%;
+            height: 460px;
+            border: none;
+            border-radius: 8px;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>文件在线预览</h1>
+            <p>把文件拖进浏览器就能看，不用装任何第三方软件</p>
+        </div>
+
+        <div class="card">
+            <h2>关于这个工具</h2>
+            <p>很多人收藏了 kkFileView 这类在线预览方案，但它要在服务器上装 Java、还要配 LibreOffice 才能把 Office 转成 PDF 来渲染。这个工具走的是另一条路：<b>全部在浏览器里解析</b>，文件不会上传到任何服务器，断网也能用。</p>
+            <p>能直接看的格式（PDF、图片、音视频、文本、JSON、CSV）走浏览器原生能力，零依赖；Office 与压缩包才会在你真正打开这类文件时，临时加载本站自带的解析组件（JSZip、docx-preview、SheetJS、marked），首屏不会多下一分钱流量。</p>
+
+            <h2>支持范围</h2>
+            <table class="fmt">
+                <thead>
+                    <tr><th>格式</th><th>能到什么程度</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="ext">pdf</td><td>调用浏览器内置查看器，翻页、缩放、搜索、打印都在里面；浏览器被设置成「PDF 一律下载」时用右上角「新窗口打开」。</td></tr>
+                    <tr><td class="ext">png jpg gif webp bmp ico avif svg</td><td>原尺寸显示，透明背景用棋盘格衬底。SVG 以图片方式加载，里面的脚本不会执行。</td></tr>
+                    <tr><td class="ext">mp3 wav flac ogg m4a / mp4 webm mov</td><td>原生播放器，能放取决于浏览器是否带这个编码（H.264 的 mp4 一般没问题，HEVC 多数不行）。</td></tr>
+                    <tr><td class="ext">txt log 代码文件</td><td>等宽保留排版；可切换 UTF-8 / GBK / Big5 / Shift-JIS / EUC-KR / UTF-16 等编码，UTF-8 解不动时会自动改用 GBK 并提示。</td></tr>
+                    <tr><td class="ext">json</td><td>解析成可折叠的层级树，标出键名、字符串、数字与布尔；语法有错就退回纯文本并告知报错位置。</td></tr>
+                    <tr><td class="ext">csv tsv</td><td>自制解析（含引号转义），表头吸顶、行号列号齐全，超 5000 行只渲染前 5000 行。</td></tr>
+                    <tr><td class="ext">md</td><td>渲染成排版页面，放在禁脚本的隔离框架里，文中的脚本与远程图片不会被加载。</td></tr>
+                    <tr><td class="ext">html htm</td><td>默认显示源码，可一键切到「渲染成页面」，同样禁用脚本。</td></tr>
+                    <tr><td class="ext">xlsx xlsm</td><td>多工作表切标签，数字与日期按单元格格式显示。</td></tr>
+                    <tr><td class="ext">docx</td><td>尽量还原分页、页边距、页眉页脚、表格与图片；文本框、域代码和内嵌字体可能走样。</td></tr>
+                    <tr><td class="ext">pptx</td><td>逐页提取文字（版式与图片无法还原，这是纯前端的硬限制）。</td></tr>
+                    <tr><td class="ext">zip</td><td>列出目录与大小，点任意一行即可预览里面的文本、图片、PDF 等成员。</td></tr>
+                </tbody>
+            </table>
+
+            <h2>看不了的格式，会告诉你为什么</h2>
+            <ul class="features warn">
+                <li>doc / ppt 等 Office 97-2003 二进制格式：纯前端无解，需要服务端转换。工具会读出文件头确认类型，并提示你用 WPS / Office 另存为 docx / pptx 再拖进来（老 xls 可以读）。</li>
+                <li>HEIC 手机照片、PSD 图层、7z / rar 压缩包、CAD 与 3D 模型：分别需要 0.5～1.9 MB 的解码组件，为了首屏速度没有内置。</li>
+                <li>单文件超过 200 MB 直接拒绝；文本只渲染前 400 KB；压缩包成员超过 50 MB 不解压。</li>
+            </ul>
+
+            <h2>隐私</h2>
+            <p>文件通过 <code>File</code> 对象在内存里读取，只走 <code>createObjectURL</code> 与本地解析，页面不会发出任何包含文件内容的请求。你可以在浏览器开发者网络的 Network 面板里验证：除了本站自己的脚本与样式，没有第三条连接。</p>
+
+            <div>
+                <a href="app.html" class="btn">开始使用</a>
+                <a href="../../index.html" class="btn btn-secondary">返回首页</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>快速预览</h2>
+            <div class="preview">
+                <iframe src="app.html" loading="lazy" title="文件在线预览工具界面"></iframe>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

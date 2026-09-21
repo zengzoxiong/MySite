@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（stale-while-revalidate） */
-const CACHE = 'mysite-v9';
+const CACHE = 'mysite-v10';
 const PRECACHE = [
     './',
     './index.html',

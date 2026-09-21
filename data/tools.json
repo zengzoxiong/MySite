@@ -905,6 +905,13 @@
       "description": "石头剪刀布游戏",
       "icon": "✊",
       "category": "实用工具"
+    },
+    {
+      "name": "文件在线预览",
+      "path": "file-preview/app.html",
+      "description": "拖入即读：PDF / 图片 / 音视频 / 文本（可切 GBK）/ Markdown / JSON / CSV / Excel / Word / PPT 文字 / ZIP，全在本地解析不上传",
+      "icon": "🗂️",
+      "category": "实用工具"
     }
   ]
 }
