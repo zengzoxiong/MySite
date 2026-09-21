@@ -799,7 +799,7 @@ body.sidebar-collapsed .main-content {
     position: absolute;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 300px;
     animation: fadeUp 0.5s ease 0.1s backwards;
     transition: width 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
 }
@@ -839,14 +839,93 @@ body.sidebar-collapsed .main-content {
     padding: 10px 0 10px;
 }
 
+/* 圆形唱片封面：点击切换歌词，悬停时像唱片一样自转 */
+.mp-disc {
+    border: none;
+    padding: 0;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+}
+
 .mp-cover {
     width: min(148px, 26vh);
     height: min(148px, 26vh);
-    border-radius: 14px;
+    border-radius: 50%;
     object-fit: cover;
     background-color: var(--hover-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-card-hover);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.mp-disc:hover .mp-cover,
+.mp-disc:focus-visible .mp-cover {
+    animation: mp-spin 9s linear infinite;
+}
+
+@keyframes mp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 歌词态：封面缩成小唱片，下方展开歌词、收起曲目列表 */
+.music-wrap.lyric .mp-cover {
+    width: 64px;
+    height: 64px;
+}
+
+.mp-lyric {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+}
+
+.mp-lyric > div {
+    min-height: 0;
+    overflow: hidden auto;
+    max-height: min(220px, 34vh);
+    scrollbar-width: none;
+}
+
+.mp-lyric > div::-webkit-scrollbar {
+    width: 0;
+}
+
+.music-wrap.lyric .mp-lyric {
+    grid-template-rows: 1fr;
+}
+
+.music-wrap.lyric .mp-list-wrap {
+    grid-template-rows: 0fr;
+}
+
+.mp-ly-line {
+    padding: 5px 6px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.mp-ly-line:hover {
+    background-color: var(--hover-bg);
+}
+
+.mp-ly-line.on {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.mp-ly-empty {
+    padding: 18px 0;
+    text-align: center;
+    font-size: 0.74rem;
+    color: var(--text-tertiary);
 }
 
 .mp-song {

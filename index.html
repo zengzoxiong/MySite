@@ -146,9 +146,14 @@
                     <div class="mp-panel" id="mpPanel">
                         <div class="mp-panel-inner">
                             <div class="mp-hero">
-                                <img class="mp-cover" id="mpCover" alt="专辑封面" referrerpolicy="no-referrer">
+                                <button class="mp-disc" id="mpDisc" title="查看歌词" aria-label="查看歌词" aria-pressed="false">
+                                    <img class="mp-cover" id="mpCover" alt="专辑封面" referrerpolicy="no-referrer">
+                                </button>
                                 <div class="mp-song" id="mpSong"></div>
                                 <div class="mp-artist" id="mpArtist"></div>
+                            </div>
+                            <div class="mp-lyric" id="mpLyric">
+                                <div id="mpLyricInner"></div>
                             </div>
                             <div class="mp-progress" id="mpProgress" title="点击跳转进度">
                                 <div class="mp-fill" id="mpFill"></div>

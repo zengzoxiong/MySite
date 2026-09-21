@@ -432,6 +432,7 @@ function renderGhStars(animate = false) {
 const mp = {
     tracks: [], playlist: [], explore: null, idx: 0, playing: false, busy: false, loaded: false, open: false,
     mode: 'loop', fails: 0,
+    lyricOn: false, lyricMap: null, lyricLines: null, lyricIdx: -1,
     audio: new Audio(),
     el: {}
 };
@@ -466,6 +467,7 @@ function mpRenderNow() {
         row.classList.add('on');
         if (mp.open) row.scrollIntoView({ block: 'nearest' });
     }
+    if (mp.lyricOn) mpRenderLyric();
 }
 
 function mpListHtml() {
@@ -584,6 +586,84 @@ function mpLoadExplore() {
         });
 }
 
+// ===== 歌词（点圆形封面切换；data/lyrics.json 由 scripts/sync_lyrics.py 每日生成）=====
+function mpSongId(t) {
+    const m = /id=(\d+)\./.exec((t && t.src) || '');
+    return m ? m[1] : null;
+}
+
+function mpParseLrc(text) {
+    const lines = [];
+    (text || '').split('\n').forEach((row) => {
+        const marks = [...row.matchAll(/\[(\d{1,2}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g)];
+        if (!marks.length) return;
+        const words = row.replace(/\[[^\]]*\]/g, '').trim();
+        if (!words) return;
+        marks.forEach((m) => {
+            const frac = m[3] ? Number(('' + m[3]).padEnd(3, '0')) : 0;
+            lines.push({ t: Number(m[1]) * 60 + Number(m[2]) + frac / 1000, s: words });
+        });
+    });
+    return lines.sort((a, b) => a.t - b.t);
+}
+
+function mpRenderLyric() {
+    const box = mp.el.lyricInner;
+    mp.lyricLines = null;
+    mp.lyricIdx = -1;
+    box.innerHTML = '';
+    if (!mp.lyricMap) { box.innerHTML = '<div class="mp-ly-empty">歌词加载中…</div>'; return; }
+    const parsed = mpParseLrc(mp.lyricMap[mpSongId(mp.tracks[mp.idx])] || '');
+    if (!parsed.length) { box.innerHTML = '<div class="mp-ly-empty">暂无歌词</div>'; return; }
+    mp.lyricLines = parsed;
+    const frag = document.createDocumentFragment();
+    parsed.forEach((l, i) => {
+        const d = document.createElement('div');
+        d.className = 'mp-ly-line';
+        d.dataset.i = i;
+        d.textContent = l.s;
+        frag.appendChild(d);
+    });
+    box.appendChild(frag);
+}
+
+// 高亮当前行并居中；用 rect 差值算滚动量，不依赖定位父级
+function mpSyncLyric() {
+    if (!mp.lyricOn || !mp.lyricLines) return;
+    const now = mp.audio.currentTime;
+    let idx = -1;
+    for (let i = 0; i < mp.lyricLines.length; i++) {
+        if (mp.lyricLines[i].t <= now + 0.2) idx = i; else break;
+    }
+    if (idx === mp.lyricIdx) return;
+    const box = mp.el.lyricInner;
+    const prev = box.children[mp.lyricIdx];
+    if (prev && prev.classList) prev.classList.remove('on');
+    const cur = box.children[idx];
+    if (cur) {
+        cur.classList.add('on');
+        box.scrollTop += cur.getBoundingClientRect().top - box.getBoundingClientRect().top
+            - box.clientHeight / 2 + cur.clientHeight / 2;
+    }
+    mp.lyricIdx = idx;
+}
+
+function mpFetchLyrics() {
+    if (mp.lyricMap) { mpRenderLyric(); return; }
+    fetch('data/lyrics.json')
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { mp.lyricMap = d || {}; mpRenderLyric(); })
+        .catch(() => { mp.lyricMap = {}; mpRenderLyric(); });
+}
+
+function mpToggleLyric(on) {
+    mp.lyricOn = on === undefined ? !mp.lyricOn : on;
+    mp.el.wrap.classList.toggle('lyric', mp.lyricOn);
+    mp.el.disc.title = mp.lyricOn ? '返回封面' : '查看歌词';
+    mp.el.disc.setAttribute('aria-pressed', String(mp.lyricOn));
+    if (mp.lyricOn) { mpFetchLyrics(); mpSyncLyric(); }
+}
+
 function initMusicPlayer() {
     mp.el.title = document.getElementById('mpTitle');
     mp.el.time = document.getElementById('mpTime');
@@ -596,6 +676,8 @@ function initMusicPlayer() {
     mp.el.song = document.getElementById('mpSong');
     mp.el.artist = document.getElementById('mpArtist');
     mp.el.cover = document.getElementById('mpCover');
+    mp.el.disc = document.getElementById('mpDisc');
+    mp.el.lyricInner = document.getElementById('mpLyricInner');
     mp.el.list = document.getElementById('mpList');
     mp.el.listToggle = document.getElementById('mpListToggle');
     mp.el.vol = document.getElementById('mpVol');
@@ -647,6 +729,19 @@ function initMusicPlayer() {
         if (row) mpLoad(Number(row.dataset.idx), true);
     });
 
+    // 点封面切歌词；点歌词行跳到该时间播放
+    mp.el.disc.addEventListener('click', () => mpToggleLyric());
+    mp.el.lyricInner.addEventListener('click', (e) => {
+        const line = e.target.closest('.mp-ly-line');
+        if (!line || !mp.lyricLines) return;
+        const l = mp.lyricLines[Number(line.dataset.i)];
+        if (!l) return;
+        mpPlayToggle(true);
+        const seek = () => { mp.audio.currentTime = l.t; };
+        if (mp.audio.readyState >= 1) seek();
+        else mp.audio.addEventListener('loadedmetadata', seek, { once: true });
+    });
+
     fetch('data/playlist.json')
         .then(r => r.json())
         .then(d => {
@@ -677,6 +772,7 @@ function initMusicPlayer() {
         const d = mp.audio.duration || 0;
         mpTimeText();
         mp.el.fill.style.width = (d ? (mp.audio.currentTime / d) * 100 : 0) + '%';
+        mpSyncLyric();
     });
 
     mp.el.progress.addEventListener('click', (e) => {

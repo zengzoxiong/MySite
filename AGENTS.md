@@ -81,7 +81,10 @@ MySite/
 
 ### 6. 音乐播放器（data/playlist.json）
 
-`tracks[]: {title, artist, src, cover, dur}`；`src` 为可播直链，`cover` 为专辑封面，`dur` 是秒数（用于未加载时就显示时长）。收起态是左上角迷你条（250×56：上一首/播放/下一首 + 歌名 + 右侧箭头），歌名过长时向左循环滚动；点箭头展开成 400 宽面板，纵向依次是**居中大封面（148px，下方歌名+歌手）→ 进度条 → 时间（右对齐）→ 控制行（左端音量细条、中间上一首/播放/下一首、右端三条横杠）→ 可滚动曲目列表**；展开高 503、收起列表后 353。点面板外或按 Esc 收起整个面板。
+`tracks[]: {title, artist, src, cover, dur}`；`src` 为可播直链，`cover` 为专辑封面，`dur` 是秒数（用于未加载时就显示时长）。收起态是左上角迷你条（300×56：上一首/播放/下一首 + 歌名 + 右侧箭头），歌名过长时向左循环滚动；点箭头展开成 400 宽面板，纵向依次是**居中的圆形唱片封面（148px，下方歌名+歌手）→ 进度条 → 时间（右对齐）→ 控制行（左端音量细条、中间上一首/播放/下一首、右端模式按钮 + 三条横杠）→ 可滚动曲目列表**；展开高约 503、收起列表后 353。点面板外或按 Esc 收起整个面板。
+
+- 圆形封面是**歌词页开关**：悬停时像唱片一样自转（`.mp-disc:hover .mp-cover` → `@keyframes mp-spin`），点击切到歌词态（`.music-wrap.lyric`）——封面缩到 64px、歌词区在下方展开（居中逐行、当前行高亮并自动滚到中线、点某行可跳转播放）、曲目列表用同一套 `grid-template-rows: 1fr → 0fr` 收起；再点封面切回
+- 歌词只在进入歌词态时才拉 `data/lyrics.json`（`{ "<歌曲id>": "<LRC 原文>" }`，歌曲 id 从 `src` 里 `id=(\d+)\.` 正则取出）；解析在 `mpParseLrc()`，同步在 `timeupdate` 里的 `mpSyncLyric()`。滚动量用 `getBoundingClientRect()` 差值算，别改成 `offsetTop`（滚动容器没有定位）
 
 - 箭头（`.mp-arrow`）靠 `margin-left:auto` 始终贴在迷你条右端：收起态图标朝左（`.mp-ic-open`），展开态朝下（`.mp-ic-close`）且此时 `.mp-info` 隐藏（歌名移到大封面下方）
 - 三条横杠 `#mpListToggle` 只切列表：在 `#musicWrap` 上加/去 `list-closed`，配合 `.mp-list-wrap` 的 `grid-template-rows: 1fr → 0fr`；按钮在列表隐藏时降到 `opacity:.4`
