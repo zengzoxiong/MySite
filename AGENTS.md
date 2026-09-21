@@ -30,7 +30,7 @@ MySite/
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
-│   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs）
+│   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1）
 │   └── icon.svg          # PWA 图标（星芒）
 ├── tools/                # 128 个自建网页工具（每工具一目录 + app.html）
 ├── scripts/              # 同步脚本（sync_tmdb.py / sync_stars.py / sync_explore.py）
@@ -71,6 +71,7 @@ MySite/
 2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`。
    工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
 - **从上游搬来的页面必须去品牌**：`tools/*` 多数源自 `justhtmls/html-tools`，页面里的 `JustHTMLs`/`htmls.dev` 字样（返回链接文案、示例数据、`<title>` 后缀、页脚版权、作者徽标）和 `<link rel="canonical">` 都要改成本站（title/页脚用「拾光集」，canonical 指向 `https://zengzoxiong.github.io/MySite/tools/<工具>/index.html`——留着来源站 canonical 会把 SEO 权重白送出去）。署名只保留说明页的「查看源码」按钮（指向上游仓库）。
+- 说明页的图标样式表走 cdnjs，`onerror` 兜底到本地副本 `assets/vendor/fontawesome/css/all.min.css`（css + 4 个 woff2，字形路径写死 `../webfonts/`，别挪目录）——已断掉 cdnjs 实测过 solid/regular/brands 三套字形都能从本地渲染。
 
 ### 4. Agent Plugin（data/agent-plugins.json）
 
