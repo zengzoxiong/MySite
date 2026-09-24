@@ -961,6 +961,23 @@ body.sidebar-collapsed .main-content {
     top: -100%;
 }
 
+/* 翻页必须整副不透明：半透明卡面会透出底下那层数字形成残影，
+   翻片不透明而静态卡半透明又会在环境光斑上显出色差。
+   用「页面底色 + 卡面」叠出不透明等效色，明暗主题都跟随 */
+.hero-clock[data-style="flip"] .ck-a,
+.hero-clock[data-style="flip"] .ck-b,
+.hero-clock[data-style="flip"] .ff-top > i,
+.hero-clock[data-style="flip"] .ff-bot > i {
+    background-color: var(--bg-color);
+    background-image: linear-gradient(var(--card-bg), var(--card-bg));
+}
+
+/* 翻页片不留投影：旋转时会甩到卡片外成灰边 */
+.hero-clock[data-style="flip"] .ff-top > i,
+.hero-clock[data-style="flip"] .ff-bot > i {
+    box-shadow: none;
+}
+
 .hero-clock[data-style="flip"] .ck-cell.anim .ff-top {
     animation: ck-ff-top 0.26s ease-in both;
 }
@@ -970,13 +987,13 @@ body.sidebar-collapsed .main-content {
 }
 
 @keyframes ck-ff-top {
-    from { transform: rotateX(0deg); filter: brightness(1); }
-    to { transform: rotateX(-90deg); filter: brightness(0.8); }
+    from { transform: rotateX(0deg); }
+    to { transform: rotateX(-90deg); }
 }
 
 @keyframes ck-ff-bot {
-    from { transform: rotateX(90deg); filter: brightness(0.8); }
-    to { transform: rotateX(0deg); filter: brightness(1); }
+    from { transform: rotateX(90deg); }
+    to { transform: rotateX(0deg); }
 }
 
 /* 2) 上滑：窗口内旧数字往上退出、新数字从下方推上来 */
