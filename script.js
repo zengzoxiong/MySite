@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLinks();
     initTheme();
     initAnimSetting();
+    applyFontFromStorage();
     initSettingsModal();
     initPalette();
     initMusicPlayer();
@@ -89,23 +90,167 @@ function initDashboard() {
     });
 }
 
-// --- 时钟 ---
-function initClock() {
-    const clockTime = document.getElementById('clockTime');
-    const clockDate = document.getElementById('clockDate');
-    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+// --- 时钟（6 种风格，清单在 assets/appearance.js 的 CLOCK_STYLES）---
+const CLOCK_WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+let clockEl = null;
+let clockDateEl = null;
+let clockStyle = '';
+let clockDigits = []; // 6 个数字单元，与 HHMMSS 一一对应
+let clockTimer = 0;
 
-    function tick() {
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        clockTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-        clockDate.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 星期${weekdays[now.getDay()]}`;
-    }
-    tick();
-    setInterval(tick, 1000);
+function initClock() {
+    clockEl = document.getElementById('clockTime');
+    clockDateEl = document.getElementById('clockDate');
+    applyClockStyle();
+    if (!clockTimer) clockTimer = setInterval(clockTick, 1000);
 }
 
-// --- 天气（西安，Open-Meteo 免费接口，无需密钥） ---
+// 按 localStorage.clockStyle 重建数字单元；风格没变时只刷一次时间
+function applyClockStyle() {
+    if (!clockEl) return;
+    const style = window.SiteAppearance ? SiteAppearance.clockStyleFromStorage() : 'plain';
+    if (style === clockStyle) { clockTick(); return; }
+    clockDigits.forEach(c => { clearTimeout(c._ckTimer); c._ckDone = null; }); // 拆掉旧单元上的兜底定时器
+    clockStyle = style;
+    clockEl.dataset.style = style;
+    clockDigits = [];
+    if (style === 'plain') {
+        clockEl.textContent = '--:--:--';
+    } else {
+        clockEl.textContent = '';
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < 6; i++) {
+            if (i === 2 || i === 4) frag.appendChild(buildClockSep());
+            const cell = buildClockCell(style);
+            frag.appendChild(cell);
+            clockDigits.push(cell);
+        }
+        clockEl.appendChild(frag);
+    }
+    clockTick();
+}
+
+function buildClockSep() {
+    const sep = document.createElement('span');
+    sep.className = 'ck-sep';
+    sep.textContent = ':';
+    return sep;
+}
+
+function buildClockCell(style) {
+    const cell = document.createElement('span');
+    cell.className = 'ck-cell';
+    if (style === 'roll') {
+        const reel = document.createElement('span');
+        reel.className = 'ck-reel';
+        for (let i = 0; i <= 10; i++) { // 0-9 之后多补一个 0，跨 9→0 才能继续往下滚
+            const item = document.createElement('i');
+            item.textContent = String(i % 10);
+            reel.appendChild(item);
+        }
+        cell.appendChild(reel);
+    } else {
+        const a = document.createElement('span');
+        a.className = 'ck-a';
+        const b = document.createElement('span');
+        b.className = 'ck-b';
+        cell.appendChild(a);
+        cell.appendChild(b);
+        if (style === 'flip') {
+            // 分页翻页钟的两片半页：上片翻走旧值上半、下片落下新值下半
+            const top = document.createElement('span');
+            top.className = 'ff-top';
+            top.appendChild(document.createElement('i'));
+            const bot = document.createElement('span');
+            bot.className = 'ff-bot';
+            bot.appendChild(document.createElement('i'));
+            cell.appendChild(top);
+            cell.appendChild(bot);
+        }
+    }
+    return cell;
+}
+
+function clockTick() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const t = pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+    const shown = `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4)}`;
+    if (clockStyle === 'plain') {
+        clockEl.textContent = shown;
+    } else {
+        for (let i = 0; i < clockDigits.length; i++) clockSetDigit(clockDigits[i], t[i]);
+    }
+    // 卡片风格下 textContent 是新旧两层叠出来的（复制会拿到重复数字），统一用 aria-label 报时
+    clockEl.setAttribute('aria-label', shown);
+    clockDateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 星期${CLOCK_WEEKDAYS[now.getDay()]}`;
+}
+
+// 关掉动画（或系统要求减少动效）时必须走瞬时替换：
+// 此时 animationend / transitionend 不会触发，单元会永远卡在动画中间态
+function clockAnimOff() {
+    return document.body.classList.contains('no-anim')
+        || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function clockSetDigit(cell, ch) {
+    if (!cell || cell.dataset.v === ch) return; // 没变的位不动，免得每秒六位一起闪
+    const prev = cell.dataset.v;
+    cell.dataset.v = ch;
+    const instant = prev === undefined || clockAnimOff();
+    if (clockStyle === 'roll') { clockRollTo(cell, ch, prev, instant); return; }
+
+    const a = cell.children[0], b = cell.children[1];
+    if (cell._ckDone) cell._ckDone(); // 上一次动画没落定就先落定，别让两层叠在一起
+    if (instant) { a.textContent = ch; b.textContent = ch; return; }
+    b.textContent = ch;
+    if (clockStyle === 'flip') {
+        cell.children[2].firstChild.textContent = a.textContent; // 上片=旧值上半
+        cell.children[3].firstChild.textContent = ch;            // 下片=新值下半
+    }
+    cell.classList.add('anim');
+    const done = () => {
+        clearTimeout(cell._ckTimer);
+        b.removeEventListener('animationend', done);
+        cell.classList.remove('anim');
+        a.textContent = ch;
+        cell._ckDone = null;
+    };
+    cell._ckDone = done;
+    b.addEventListener('animationend', done, { once: true });
+    cell._ckTimer = setTimeout(done, 1600); // 后台标签页动画被节流时的兜底
+}
+
+function clockRollTo(cell, ch, prev, instant) {
+    const reel = cell.children[0];
+    const n = reel.children.length; // 11
+    let idx = Number(ch);
+    if (!instant && prev === '9' && ch === '0') idx = n - 1; // 借末尾那份 0 继续向下滚
+    if (instant) {
+        reel.classList.add('snap');
+        reel.style.transform = `translateY(${-100 * idx / n}%)`;
+        void reel.offsetWidth;
+        reel.classList.remove('snap');
+        return;
+    }
+    reel.style.transform = `translateY(${-100 * idx / n}%)`;
+    if (idx !== n - 1) return;
+    // 滚完补位的那个 0 之后瞬移回第一个 0（无过渡），下一轮才能接着往下滚
+    const reset = () => {
+        clearTimeout(cell._ckTimer);
+        reel.removeEventListener('transitionend', reset);
+        reel.classList.add('snap');
+        reel.style.transform = 'translateY(0)';
+        void reel.offsetWidth;
+        reel.classList.remove('snap');
+        cell._ckDone = null;
+    };
+    cell._ckDone = reset;
+    reel.addEventListener('transitionend', reset, { once: true });
+    cell._ckTimer = setTimeout(reset, 1600);
+}
+
+// --- 天气（Open-Meteo 免费接口，无需密钥；城市在设置里选，默认西安，也可自动定位） ---
 const WMO_CODES = {
     0: ['晴', '☀️'], 1: ['多云转晴', '🌤️'], 2: ['多云', '⛅'], 3: ['阴', '☁️'],
     45: ['雾', '🌫️'], 48: ['雾凇', '🌫️'],
@@ -119,18 +264,58 @@ const WMO_CODES = {
     95: ['雷阵雨', '⛈️'], 96: ['雷阵雨伴冰雹', '⛈️'], 99: ['雷阵雨伴冰雹', '⛈️']
 };
 
+const FALLBACK_CITY = { name: '西安', lat: 34.34, lon: 108.94 }; // 自动定位拿不到坐标时的兜底
+let lastWeatherRaw = ''; // 最近一次发起查询的城市存储串，设置变更时据此判断要不要重拉
+
+// 自动定位：拿设备坐标；拒绝授权 / 不支持 / 超时都 reject，由调用方回退西安
+function locatePosition() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('浏览器不支持定位'));
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+            reject,
+            { timeout: 8000, maximumAge: 10 * 60 * 1000 } // 10 分钟内的定位缓存够用
+        );
+    });
+}
+
 async function initWeather(manual = false) {
+    const heroWeather = document.getElementById('heroWeather');
     const weatherIcon = document.getElementById('weatherIcon');
     const weatherTemp = document.getElementById('weatherTemp');
     const weatherDesc = document.getElementById('weatherDesc');
     const weatherExtra = document.getElementById('weatherExtra');
 
+    const city = window.SiteAppearance ? SiteAppearance.getWeatherCity() : { auto: true };
+    lastWeatherRaw = window.SiteAppearance ? SiteAppearance.weatherCityRaw() : 'auto';
+
+    let lat, lon, label;
+    if (city.auto) {
+        try {
+            const pos = await locatePosition();
+            lat = pos.lat;
+            lon = pos.lon;
+            label = '当前位置';
+        } catch (e) {
+            // 定位不可用（拒绝授权/不支持/超时）：静默回退西安
+            lat = FALLBACK_CITY.lat;
+            lon = FALLBACK_CITY.lon;
+            label = FALLBACK_CITY.name;
+        }
+    } else {
+        lat = city.lat;
+        lon = city.lon;
+        label = city.name;
+    }
+    heroWeather.title = `点击刷新${label}天气`;
+    heroWeather.setAttribute('aria-label', heroWeather.title);
+
     try {
         if (manual) weatherIcon.classList.add('refreshing');
-        // 西安坐标 34.34°N, 108.94°E
-        const url = 'https://api.open-meteo.com/v1/forecast?latitude=34.34&longitude=108.94' +
+        // timezone=auto 让 Open-Meteo 按坐标推当地时区，preset / 定位都适用
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
             '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m' +
-            '&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FShanghai&forecast_days=1';
+            '&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -140,10 +325,10 @@ async function initWeather(manual = false) {
 
         weatherIcon.textContent = icon;
         weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
-        weatherDesc.textContent = `西安 · ${text}`;
+        weatherDesc.textContent = `${label} · ${text}`;
         weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
     } catch (e) {
-        if (!manual) weatherDesc.textContent = '西安 · 天气获取失败';
+        if (!manual) weatherDesc.textContent = `${label} · 天气获取失败`;
         console.error('天气加载失败:', e);
     } finally {
         weatherIcon.classList.remove('refreshing');
@@ -1312,15 +1497,15 @@ function recalcMarquee(root) {
 }
 
 // 主题与设置
-// 主题：从 localStorage 应用（设置页 settings.html 负责修改）
+// 主题：从 localStorage 应用（设置页 settings.html 负责修改）；跟随系统时监听系统明暗变化
 function initTheme() {
     applyThemeFromStorage();
+    if (window.SiteAppearance) SiteAppearance.watchSystemTheme(applyThemeFromStorage);
 }
 
 function applyThemeFromStorage() {
-    const savedTheme = localStorage.getItem('theme');
-    const dark = savedTheme ? savedTheme === 'dark'
-        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (window.SiteAppearance) { SiteAppearance.applyThemeMode(); return; }
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
 }
 
@@ -1331,6 +1516,11 @@ function initAnimSetting() {
 
 function applyAnimFromStorage() {
     document.body.classList.toggle('no-anim', localStorage.getItem('animEnabled') === 'off');
+}
+
+// 界面字体：字体清单与按需加载都在 assets/appearance.js（settings.html 共用同一份）
+function applyFontFromStorage() {
+    if (window.SiteAppearance) SiteAppearance.applySiteFontFromStorage();
 }
 
 // 搜索回车聚焦首条结果
@@ -1371,6 +1561,11 @@ function initSettingsModal() {
         if (e.data && e.data.type === 'settings-changed') {
             applyThemeFromStorage();
             applyAnimFromStorage();
+            applyFontFromStorage();
+            applyClockStyle();
+            // 只有城市真的变了才重拉天气，避免改个深色模式也去敲天气接口
+            const raw = window.SiteAppearance ? SiteAppearance.weatherCityRaw() : 'auto';
+            if (raw !== lastWeatherRaw) initWeather(true);
         } else if (e.data && e.data.type === 'clear-cache') {
             document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
             document.getElementById('todoList').innerHTML = '';
@@ -1408,9 +1603,9 @@ function buildCmdkCommands() {
             document.querySelector('#sidebarPlugin [data-plugin-cat="mcps"]')?.click();
         } },
         {
-            icon: '🔄', label: '切换深色模式', run: () => {
-                localStorage.setItem('theme',
-                    document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            icon: '🔄', label: '切换浅色 / 深色', run: () => {
+                const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                localStorage.setItem('theme', dark ? 'light' : 'dark');
                 applyThemeFromStorage();
             }
         },

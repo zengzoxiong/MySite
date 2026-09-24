@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>设置</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- 外观偏好清单（与主站共用一份），必须先于下面内联脚本 -->
+    <script src="assets/appearance.js"></script>
     <style>
         /* 设置页自身布局（复用全站变量与开关组件样式） */
         body {
@@ -17,10 +19,25 @@
 
         .settings-page {
             width: 100%;
+            max-height: 100vh; /* 选项变多后靠本页自己滚，别撑破弹层 */
+            overflow-y: auto;
             background-color: var(--card-bg);
             padding: 26px 28px;
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .settings-page::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .settings-page::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .settings-page::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
         }
 
         .settings-page .settings-title {
@@ -51,11 +68,8 @@
     <div class="settings-page">
         <div class="settings-title">设置</div>
         <div class="settings-item">
-            <span class="settings-label">深色模式</span>
-            <label class="settings-switch">
-                <input type="checkbox" id="settingTheme">
-                <span class="slider"></span>
-            </label>
+            <span class="settings-label">外观模式</span>
+            <select class="settings-select" id="settingThemeMode" aria-label="外观模式"></select>
         </div>
         <div class="settings-item">
             <span class="settings-label">动画效果</span>
@@ -71,6 +85,29 @@
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="settings-item settings-col">
+            <div class="settings-line">
+                <span class="settings-label">界面字体</span>
+                <select class="settings-select" id="settingFont" aria-label="界面字体"></select>
+            </div>
+            <div class="settings-preview">拾光集 · <b>The quick brown fox</b> · 0123456789</div>
+        </div>
+        <div class="settings-item">
+            <span class="settings-label">首页时钟风格</span>
+            <select class="settings-select" id="settingClock" aria-label="首页时钟风格"></select>
+        </div>
+        <div class="settings-item settings-col">
+            <div class="settings-line">
+                <span class="settings-label">天气城市</span>
+                <span class="settings-city-current" id="settingCityCurrent">自动定位</span>
+            </div>
+            <div class="settings-city-picker">
+                <input type="text" class="settings-city-input" id="settingCitySearch"
+                       placeholder="搜索城市，如：杭州 / Tokyo" autocomplete="off" aria-label="搜索天气城市">
+                <div class="settings-city-list" id="settingCityList" hidden></div>
+            </div>
+            <button type="button" class="settings-clear settings-city-auto" id="settingCityAuto">恢复自动定位</button>
+        </div>
         <div class="settings-item">
             <span class="settings-label">清除本地数据</span>
             <button class="settings-clear" id="settingClearCache">清除</button>
@@ -82,26 +119,28 @@
     </div>
 
     <script>
-        const KEY_THEME = 'theme', KEY_ANIM = 'animEnabled', KEY_FOCUS = 'focusFirst';
+        const KEY_ANIM = 'animEnabled', KEY_FOCUS = 'focusFirst';
         const notify = (type) => {
             try { parent.postMessage({ type }, '*'); } catch (e) { /* 独立打开时无父页 */ }
         };
+        const AP = window.SiteAppearance;
 
-        // 深色模式
-        const themeBox = document.getElementById('settingTheme');
-        const applyTheme = () => {
-            const saved = localStorage.getItem(KEY_THEME);
-            const dark = saved ? saved === 'dark'
-                : window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-            themeBox.checked = dark;
-        };
+        // 外观模式：浅色 / 深色 / 跟随系统
+        const themeSelect = document.getElementById('settingThemeMode');
+        AP.THEME_MODES.forEach((m) => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name;
+            themeSelect.appendChild(opt);
+        });
+        const applyTheme = () => { themeSelect.value = AP.applyThemeMode(); };
         applyTheme();
-        themeBox.addEventListener('change', () => {
-            localStorage.setItem(KEY_THEME, themeBox.checked ? 'dark' : 'light');
+        themeSelect.addEventListener('change', () => {
+            localStorage.setItem(AP.KEY_THEME, themeSelect.value);
             applyTheme();
             notify('settings-changed');
         });
+        AP.watchSystemTheme(applyTheme); // 跟随系统时，系统明暗变化实时跟上
 
         // 动画效果
         const animBox = document.getElementById('settingAnim');
@@ -124,6 +163,154 @@
             localStorage.setItem(KEY_FOCUS, focusBox.checked ? 'on' : 'off');
         });
 
+        // ===== 外观：界面字体 + 首页时钟风格（清单来自 assets/appearance.js） =====
+        const fontSelect = document.getElementById('settingFont');
+        const clockSelect = document.getElementById('settingClock');
+
+        function fillSelect(sel, list) {
+            list.forEach((item) => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name;
+                sel.appendChild(opt);
+            });
+        }
+        fillSelect(fontSelect, AP.SITE_FONTS);
+        fillSelect(clockSelect, AP.CLOCK_STYLES);
+
+        fontSelect.addEventListener('change', () => {
+            localStorage.setItem(AP.KEY_FONT, fontSelect.value);
+            notify('settings-changed'); // 先让父页并行去加载，别等本页字体就绪
+            AP.applySiteFont(fontSelect.value); // 本页（iframe）也跟着换字体
+        });
+
+        clockSelect.addEventListener('change', () => {
+            localStorage.setItem(AP.KEY_CLOCK, clockSelect.value);
+            notify('settings-changed');
+        });
+
+        // ===== 天气城市：搜索 Open-Meteo 地理编码，可选任意城市；默认自动定位 =====
+        const cityCurrent = document.getElementById('settingCityCurrent');
+        const citySearch = document.getElementById('settingCitySearch');
+        const cityList = document.getElementById('settingCityList');
+        const cityAutoBtn = document.getElementById('settingCityAuto');
+        let citySearchTimer = 0;
+
+        const citySub = (it) => {
+            // 从细到粗拼行政区（市·省·国家），去掉空值/与城市名互为前缀的层级（杭州↔杭州市），
+            // 用来区分同名城市（如湖北两个「峰口」分属荆州/黄冈，只到省会看着完全一样）
+            const sameAsName = (v) => v === it.name || v.startsWith(it.name) || it.name.startsWith(v);
+            const parts = [];
+            [it.admin2, it.admin1, it.country].forEach((v) => {
+                if (v && !sameAsName(v) && !parts.includes(v)) parts.push(v);
+            });
+            return parts.join(' · ');
+        };
+
+        function hideCityList() {
+            cityList.hidden = true;
+            cityList.innerHTML = '';
+        }
+
+        function cityRow(item, plainText) {
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'settings-city-row' + (item ? '' : ' is-plain');
+            if (!item) {
+                row.textContent = plainText;
+                return row;
+            }
+            const n = document.createElement('span');
+            n.className = 'n';
+            n.textContent = item.name;
+            row.appendChild(n);
+            const sub = citySub(item);
+            if (sub) {
+                const s = document.createElement('span');
+                s.className = 's';
+                s.textContent = sub;
+                row.appendChild(s);
+            }
+            // mousedown 先于 input 的 blur 触发，保证点得中
+            row.addEventListener('mousedown', (e) => { e.preventDefault(); pickCity(item); });
+            return row;
+        }
+
+        function renderCityList(items, loading) {
+            cityList.innerHTML = '';
+            if (loading) {
+                cityList.appendChild(cityRow(null, '搜索中…'));
+                cityList.hidden = false;
+                return;
+            }
+            // 名称+副标题完全相同的行只留一条（接口偶会重复返回同一地方）
+            const seen = new Set();
+            const uniq = [];
+            (items || []).forEach((it) => {
+                const key = it.name + '|' + citySub(it);
+                if (!seen.has(key)) { seen.add(key); uniq.push(it); }
+            });
+            if (!uniq.length) cityList.appendChild(cityRow(null, '没有匹配的城市'));
+            else uniq.forEach((it) => cityList.appendChild(cityRow(it)));
+            cityList.hidden = false;
+        }
+
+        function searchCity(q) {
+            const url = 'https://geocoding-api.open-meteo.com/v1/search?count=8&language=zh&format=json&name=' + encodeURIComponent(q);
+            return fetch(url).then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            }).then((data) => data.results || []);
+        }
+
+        function pickCity(item) {
+            AP.setWeatherCity({ name: item.name, lat: item.latitude, lon: item.longitude, sub: citySub(item) });
+            hideCityList();
+            syncCityFromStorage();
+            notify('settings-changed'); // 父页检测到城市变了会重拉天气
+        }
+
+        function syncCityFromStorage() {
+            cityCurrent.textContent = AP.weatherCityLabel();
+            cityAutoBtn.hidden = AP.getWeatherCity().auto; // 已是自动定位就没必要再「恢复」
+            citySearch.value = '';
+            hideCityList();
+        }
+
+        citySearch.addEventListener('input', () => {
+            clearTimeout(citySearchTimer);
+            const q = citySearch.value.trim();
+            if (!q) { hideCityList(); return; }
+            renderCityList(null, true);
+            citySearchTimer = setTimeout(() => {
+                searchCity(q).then((items) => renderCityList(items)).catch(() => renderCityList([]));
+            }, 300);
+        });
+        citySearch.addEventListener('keydown', (e) => {
+            // 列表开着时 Esc 只关列表，别顺带把整个设置弹层关了
+            if (e.key === 'Escape' && !cityList.hidden) { e.stopPropagation(); hideCityList(); }
+        });
+        citySearch.addEventListener('blur', () => setTimeout(hideCityList, 120));
+        cityAutoBtn.addEventListener('click', () => {
+            AP.setWeatherCity('auto');
+            syncCityFromStorage();
+            notify('settings-changed');
+        });
+
+        function syncFontFromStorage() {
+            const id = AP.fontById(localStorage.getItem(AP.KEY_FONT)).id;
+            fontSelect.value = id;
+            return AP.applySiteFont(id); // 本页（iframe）也跟着换字体
+        }
+
+        function syncClockFromStorage() {
+            clockSelect.value = AP.clockStyleById(localStorage.getItem(AP.KEY_CLOCK)).id;
+        }
+
+        syncFontFromStorage();
+        syncClockFromStorage();
+        syncCityFromStorage();
+
         // 清除本地数据
         const clearBtn = document.getElementById('settingClearCache');
         clearBtn.addEventListener('click', () => {
@@ -136,8 +323,11 @@
 
         // 其他窗口修改主题时同步本页
         window.addEventListener('storage', (e) => {
-            if (e.key === KEY_THEME) applyTheme();
+            if (e.key === AP.KEY_THEME) applyTheme();
             if (e.key === KEY_ANIM) applyAnim();
+            if (e.key === AP.KEY_FONT) syncFontFromStorage();
+            if (e.key === AP.KEY_CLOCK) syncClockFromStorage();
+            if (e.key === AP.KEY_WEATHER) syncCityFromStorage();
         });
 
         // 强制刷新：通知父页清除缓存后整页重载

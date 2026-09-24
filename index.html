@@ -14,6 +14,8 @@
     <script async src="https://busuanzi.cc/js/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <!-- 外观偏好（界面字体 / 时钟风格清单），需在 script.js 之前加载 -->
+    <script src="assets/appearance.js"></script>
 </head>
 <body>
     <!-- 移动端遮罩 -->
@@ -90,9 +92,9 @@
         <section class="dashboard" id="dashboard">
             <!-- 中央主视觉：时钟 + 天气 -->
             <div class="hero">
-                <div class="hero-clock" id="clockTime">--:--:--</div>
+                <div class="hero-clock" id="clockTime" role="timer" aria-label="--:--:--">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
-                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新西安天气">
+                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气">
                     <div class="weather-main">
                         <span class="weather-icon" id="weatherIcon">🌤️</span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>

@@ -18,6 +18,10 @@
     --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
     --sidebar-width: 220px;
     --sidebar-collapsed-width: 50px;
+    /* 界面字体：--font-system 是系统字体兜底栈，--font-ui 由 assets/appearance.js
+       按 localStorage.fontFamily 覆写成「所选开源字体 + 兜底栈」 */
+    --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-ui: var(--font-system);
 }
 
 /* ===== 暗色主题（液态玻璃） ===== */
@@ -47,7 +51,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-ui);
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
@@ -459,7 +463,7 @@ body.modal-open {
 .settings-modal-box iframe {
     display: block;
     width: 100%;
-    height: min(480px, calc(100dvh - 32px)); /* 横屏手机防溢出 */
+    height: min(556px, calc(100dvh - 32px)); /* 横屏手机防溢出 */
     border: none;
     color-scheme: inherit;
 }
@@ -577,6 +581,163 @@ body.modal-open {
     transform: scale(0.94);
 }
 
+/* 多行设置项（界面字体：一行下拉 + 一行预览） */
+.settings-item.settings-col {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+}
+
+/* 设置项内部的「标签 + 控件」一行 */
+.settings-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 下拉选择（与影视排序下拉同一套观感） */
+.settings-select {
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    max-width: 62%;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.settings-select:hover,
+.settings-select:focus {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* 天气城市：当前值 + 搜索框 + 结果下拉 */
+.settings-city-current {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    max-width: 62%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-city-picker {
+    position: relative;
+}
+
+.settings-city-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--search-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.settings-city-input:focus {
+    border-color: var(--accent-color);
+}
+
+.settings-city-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 5;
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    /* 不透明底：半透明玻璃会透出下方设置项文字，下拉面板必须盖住 */
+    background-color: var(--search-bg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.settings-city-list[hidden] {
+    display: none;
+}
+
+.settings-city-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.settings-city-row:hover {
+    /* 面板是不透明底，hover 用主色淡染保证明暗主题都看得见 */
+    background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+    color: var(--text-primary);
+}
+
+.settings-city-row .n {
+    color: var(--text-primary);
+    flex: none;
+}
+
+.settings-city-row .s {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-tertiary);
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 「搜索中 / 无匹配」这类提示行不可点 */
+.settings-city-row.is-plain {
+    color: var(--text-tertiary);
+    cursor: default;
+}
+
+.settings-city-row.is-plain:hover {
+    background: none;
+}
+
+/* 「恢复自动定位」比通用清除按钮宽，靠左放 */
+.settings-city-auto {
+    width: auto;
+    padding: 5px 10px;
+    align-self: flex-start;
+}
+
+/* 字体预览行：跟随 --font-ui，选完直接看到效果 */
+.settings-preview {
+    padding: 9px 11px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    background-color: var(--search-bg);
+    color: var(--text-primary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.settings-preview b {
+    font-weight: 700;
+}
+
 /* 动画关闭：全局禁用过渡与关键帧动画 */
 body.no-anim *,
 body.no-anim *::before,
@@ -664,6 +825,277 @@ body.sidebar-collapsed .main-content {
     font-size: 1.05rem;
     color: var(--text-secondary);
     margin-top: 8px;
+}
+
+/* --- 首页时钟风格（data-style 由 script.js 根据 localStorage.clockStyle 写入）---
+   除 plain（直接写 textContent）外，其余五种都把 HH:MM:SS 拆成 6 个数字单元：
+   .ck-a = 当前层（参与文档流，撑起单元尺寸），.ck-b = 新值层（绝对定位叠在上面）。
+   只有值变了的单元才加 .anim，所以秒位每秒动、分位每分钟动。 */
+.hero-clock[data-style]:not([data-style="plain"]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0; /* 字间距改由 .ck-cell / .ck-sep 的 margin 控制 */
+}
+
+.ck-cell {
+    position: relative;
+    flex: none;
+}
+
+.ck-a {
+    position: relative;
+    display: block;
+}
+
+.ck-b {
+    position: absolute;
+    inset: 0;
+    visibility: hidden; /* 只在 .anim 期间现身，避免和 .ck-a 叠成双影 */
+}
+
+.ck-cell.anim .ck-b {
+    visibility: visible;
+}
+
+.ck-sep {
+    flex: none;
+    padding: 0 0.05em;
+    font-weight: 400;
+    opacity: 0.4;
+}
+
+/* 卡片外观（翻页 / 叠卡 / 立方共用）：两层必须完全一致，否则切换时会跳位；
+   翻页的两片半页（.ff-top/.ff-bot 里的 i）也是同样的卡面 */
+.hero-clock[data-style="flip"] .ck-a,
+.hero-clock[data-style="flip"] .ck-b,
+.hero-clock[data-style="flip"] .ff-top > i,
+.hero-clock[data-style="flip"] .ff-bot > i,
+.hero-clock[data-style="stack"] .ck-a,
+.hero-clock[data-style="stack"] .ck-b,
+.hero-clock[data-style="cube"] .ck-a,
+.hero-clock[data-style="cube"] .ck-b {
+    padding: 0.05em 0.11em;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.13em;
+    background-color: var(--card-bg);
+    box-shadow: 0 0.05em 0.22em rgba(0, 0, 0, 0.08);
+}
+
+.hero-clock[data-style="flip"] .ck-cell,
+.hero-clock[data-style="stack"] .ck-cell,
+.hero-clock[data-style="cube"] .ck-cell {
+    margin: 0 0.035em;
+}
+
+/* 1) 翻页：真·分页翻页钟。翻动时背景=「新值上半 + 旧值下半」，
+   上半页（旧值）绕中缝折下露出新值上半，接着下半页（新值）从中缝折下盖住旧值下半 */
+.hero-clock[data-style="flip"] .ck-cell {
+    perspective: 2.6em;
+}
+
+/* 中缝：固定在单元上的分页线，不跟着翻页片转 */
+.hero-clock[data-style="flip"] .ck-cell::after {
+    content: '';
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: 0.05em;
+    right: 0.05em;
+    height: 1px;
+    background-color: var(--glass-border);
+    pointer-events: none;
+}
+
+/* 翻动期间把两张静态卡各裁一半，拼成「上新下旧」的底 */
+.hero-clock[data-style="flip"] .ck-cell.anim .ck-a {
+    clip-path: inset(50% 0 0 0);
+}
+
+.hero-clock[data-style="flip"] .ck-cell.anim .ck-b {
+    clip-path: inset(0 0 50% 0);
+}
+
+/* 翻页片：上下两个半窗，各自只露出半个数字 */
+.hero-clock[data-style="flip"] .ff-top,
+.hero-clock[data-style="flip"] .ff-bot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    visibility: hidden;
+    z-index: 2;
+}
+
+.hero-clock[data-style="flip"] .ff-top {
+    top: 0;
+    transform-origin: 50% 100%;
+}
+
+.hero-clock[data-style="flip"] .ff-bot {
+    top: 50%;
+    transform-origin: 50% 0;
+}
+
+.hero-clock[data-style="flip"] .ck-cell.anim .ff-top,
+.hero-clock[data-style="flip"] .ck-cell.anim .ff-bot {
+    visibility: visible;
+}
+
+/* 半窗里的整卡数字：高度=单元两倍，靠 top 偏移决定露出上半还是下半 */
+.hero-clock[data-style="flip"] .ff-top > i,
+.hero-clock[data-style="flip"] .ff-bot > i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 200%;
+    font-style: normal;
+}
+
+.hero-clock[data-style="flip"] .ff-top > i {
+    top: 0;
+}
+
+.hero-clock[data-style="flip"] .ff-bot > i {
+    top: -100%;
+}
+
+.hero-clock[data-style="flip"] .ck-cell.anim .ff-top {
+    animation: ck-ff-top 0.26s ease-in both;
+}
+
+.hero-clock[data-style="flip"] .ck-cell.anim .ff-bot {
+    animation: ck-ff-bot 0.26s 0.26s ease-out both;
+}
+
+@keyframes ck-ff-top {
+    from { transform: rotateX(0deg); filter: brightness(1); }
+    to { transform: rotateX(-90deg); filter: brightness(0.8); }
+}
+
+@keyframes ck-ff-bot {
+    from { transform: rotateX(90deg); filter: brightness(0.8); }
+    to { transform: rotateX(0deg); filter: brightness(1); }
+}
+
+/* 2) 上滑：窗口内旧数字往上退出、新数字从下方推上来 */
+.hero-clock[data-style="slide"] .ck-cell {
+    height: 1.2em;
+    line-height: 1.2em;
+    overflow: hidden;
+    margin: 0 0.015em;
+}
+
+.hero-clock[data-style="slide"] .ck-cell.anim .ck-a {
+    animation: ck-slide-out 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.hero-clock[data-style="slide"] .ck-cell.anim .ck-b {
+    animation: ck-slide-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes ck-slide-out {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-100%); opacity: 0.15; }
+}
+
+@keyframes ck-slide-in {
+    from { transform: translateY(100%); opacity: 0.15; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* 3) 叠卡：新卡片从上方落下盖住旧卡片，旧卡片下沉淡出 */
+.hero-clock[data-style="stack"] .ck-b {
+    box-shadow: 0 0.1em 0.4em rgba(0, 0, 0, 0.16);
+}
+
+.hero-clock[data-style="stack"] .ck-cell.anim .ck-a {
+    animation: ck-stack-old 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.hero-clock[data-style="stack"] .ck-cell.anim .ck-b {
+    animation: ck-stack-new 0.5s cubic-bezier(0.34, 1.28, 0.64, 1) both;
+}
+
+@keyframes ck-stack-old {
+    from { transform: none; opacity: 1; }
+    to { transform: translateY(0.2em) scale(0.88); opacity: 0; }
+}
+
+@keyframes ck-stack-new {
+    from { transform: translateY(-0.5em) scale(1.08); opacity: 0; }
+    55% { opacity: 1; }
+    to { transform: none; opacity: 1; }
+}
+
+/* 4) 滚轮：0-9 再加一个 0 的长条上下滚，上下缘用 mask 淡出做出圆筒感 */
+.hero-clock[data-style="roll"] .ck-cell {
+    height: 1.2em;
+    line-height: 1.2em;
+    overflow: hidden;
+    margin: 0 0.02em;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 26%, #000 74%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 26%, #000 74%, transparent);
+}
+
+.ck-reel {
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25, 0.9, 0.28, 1);
+}
+
+/* 跨 9→0 后要把长条瞬移回真正的 0，这一步不能有过渡 */
+.ck-reel.snap {
+    transition: none !important;
+}
+
+.ck-reel i {
+    display: block;
+    height: 1.2em;
+    line-height: 1.2em;
+    font-style: normal;
+}
+
+/* 5) 立方：绕竖轴转面，带一点景深位移 */
+.hero-clock[data-style="cube"] .ck-cell {
+    perspective: 4em;
+}
+
+.hero-clock[data-style="cube"] .ck-a,
+.hero-clock[data-style="cube"] .ck-b {
+    backface-visibility: hidden;
+}
+
+.hero-clock[data-style="cube"] .ck-cell.anim .ck-a {
+    animation: ck-cube-out 0.28s ease-in both;
+}
+
+.hero-clock[data-style="cube"] .ck-cell.anim .ck-b {
+    animation: ck-cube-in 0.28s 0.28s ease-out both;
+}
+
+@keyframes ck-cube-out {
+    from { transform: rotateY(0deg) translateZ(0); opacity: 1; }
+    to { transform: rotateY(84deg) translateZ(0.14em); opacity: 0.1; }
+}
+
+@keyframes ck-cube-in {
+    from { transform: rotateY(-84deg) translateZ(0.14em); opacity: 0.1; }
+    to { transform: rotateY(0deg) translateZ(0); opacity: 1; }
+}
+
+/* 卡片样式占位更宽，小屏缩一号避免横向溢出 */
+@media (max-width: 560px) {
+    .hero-clock[data-style="flip"],
+    .hero-clock[data-style="stack"],
+    .hero-clock[data-style="cube"] {
+        font-size: clamp(2.3rem, 9.5vw, 4rem);
+    }
+
+    .hero-clock[data-style="slide"],
+    .hero-clock[data-style="roll"] {
+        font-size: clamp(3rem, 12.5vw, 5rem);
+    }
 }
 
 .hero-weather {

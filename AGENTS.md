@@ -31,6 +31,7 @@ MySite/
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
 │   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked、jspdf、html2canvas）
+│   ├── appearance.js     # 外观偏好清单（界面字体/时钟风格），index 与 settings 共用，须在 script.js 之前加载
 │   └── icon.svg          # PWA 图标（星芒）
 ├── tools/                # 130 个自建网页工具（每工具一目录 + app.html）
 ├── scripts/              # 同步脚本（sync_tmdb.py / sync_stars.py / sync_explore.py）
@@ -106,6 +107,14 @@ MySite/
 - 刷新歌单：`music.163.com/api/v3/playlist/detail?id=<pid>&n=1000&s=0` 取 `trackIds` → `api/v3/song/detail`（POST `c=[{"id":x},...]`）取 `privileges[].pl`，`pl>0` 才可播 → `api/song/detail?ids=[...]` 取 `album.picUrl`。接口需带浏览器 UA + `Referer: https://music.163.com/`
 - **这是非官方接口，随时可能失效**；失效时回退方案是自建音频（放 `assets/music/`，走 jsDelivr gcore 节点：`https://gcore.jsdelivr.net/gh/zengzoxiong/MySite@main/<路径>`；`cdn.jsdelivr.net`/`fastly.jsdelivr.net` 在国内会 301 到 `raw.githubusercontent.com`，比 GitHub Pages 还慢，别用）
 - **按需加载**：`mp.audio.preload = 'none'`，只有点播放/点曲目才挂 `src`（`mp.loaded` 标记），换曲时 `loaded=false`；缓冲中显示在时长位
+
+### 7. 站点偏好（界面字体 / 首页时钟风格 / 天气城市）
+
+清单与加载逻辑都在 `assets/appearance.js`（`window.SiteAppearance`），index.html 与 settings.html **共用这一份**，加/改选项只改这里。该文件在 `<head>` 同步加载（加载时就把已选字体的 CSS 挂上，让分片提前下载），必须排在 `script.js` 之前；改完记得把它加进 sw.js 的 PRECACHE 并升版本号。
+
+- **界面字体**：`localStorage.fontFamily`，6 选 1（系统默认 + 思源黑体/思源宋体/霞鹜文楷/得意黑/朱雀仿宋，均为 SIL OFL 开源字体）。字体 CSS 从 jsDelivr 按需拉取（gcore → fastly → cdn 三级回退），每套都做了 unicode-range 分片，浏览器只下载用到的分片；**不要改成整包下载**（整套中文字库十几 MB）。应用方式是写 `--font-ui`（`:root` 里默认 `var(--font-system)`，`body { font-family: var(--font-ui) }`），别在别处硬写 font-family 栈。切换前用 `document.fonts.load()` 等字体就绪再切，避免得意黑那套 CSS 没写 `font-display` 导致整页文字空白（FOIT）。
+- **首页时钟风格**：`localStorage.clockStyle`，6 选 1（简约/翻页/上滑/叠卡/滚轮/立方，见 `CLOCK_STYLES`）。除「简约」直接写 `textContent` 外，其余五种把 HH:MM:SS 拆成 6 个 `.ck-cell`（`.ck-a` 当前层撑尺寸、`.ck-b` 新值层绝对定位叠在上面），只有值变了的单元加 `.anim`；样式全在 styles.css 的 `.hero-clock[data-style=…]` 块。`no-anim`/`prefers-reduced-motion` 下走瞬时替换（否则 animationend/transitionend 不触发，单元会卡在动画中间态）；script.js 里 `clockSetDigit`/`clockRollTo` 的 1600ms 兜底定时器要大于 CSS 动画时长。滚轮是 0-9 再补一个 0 的长条，跨 9→0 借末尾那份 0 继续向下滚、滚完瞬移回第一个 0。卡片风格下 `textContent` 是新旧两层叠出来的（复制会拿到重复数字），读屏/报时靠 `role="timer"` + 每秒更新的 `aria-label`。
+- **天气城市**：`localStorage.weatherCity`，**默认自动定位**（存 `'auto'` 或空）；自定义城市存 JSON `{name,lat,lon,sub}`，由设置页搜 Open-Meteo 地理编码（`geocoding-api.open-meteo.com/v1/search`，`language=zh`）任选，**不维护固定城市清单**；结果副标题 `sub` 从细到粗拼 `admin2·admin1·country`（跳过与城市名互为前缀的层级），用来区分同名城市（湖北有两个「峰口」，分属荆州/黄冈），并对「名称+sub」完全相同的行去重。自动定位走 `navigator.geolocation.getCurrentPosition`（10 分钟缓存、8s 超时），成功显示「当前位置」；**拒绝授权/不支持/超时静默回退西安**（script.js 的 `FALLBACK_CITY`），不给额外提示。Open-Meteo 统一传 `timezone=auto` 让接口按坐标推时区，别为城市硬编时区。设置里改城市后父页只在存储串（`weatherCityRaw()`）真的变化时才重拉天气，避免改个深色模式也去敲天气接口。读写 helper 在 appearance.js：`getWeatherCity`/`setWeatherCity`/`weatherCityLabel`/`weatherCityRaw`。
 
 ## 前端架构与约定（script.js / styles.css）
 
