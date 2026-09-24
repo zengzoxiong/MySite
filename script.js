@@ -284,6 +284,29 @@ function locatePosition() {
     });
 }
 
+// 反向地理编码：把定位坐标换成真实地名。Open-Meteo 只有正向搜索，
+// 反向走 BigDataCloud 客户端接口（免费免密钥、支持 CORS，zh-Hans 出简体）；
+// locality 即最低一级的市/县（区），不拼省市全链。按坐标圆整缓存，手动刷新不重复敲接口
+const reverseGeoCache = new Map();
+async function reversePlaceName(lat, lon) {
+    const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+    if (reverseGeoCache.has(key)) return reverseGeoCache.get(key);
+    let name = '';
+    try {
+        const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-Hans`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const d = await res.json();
+        name = d.locality || d.city || d.principalSubdivision || '';
+        // 去掉市/县/区后缀，与城市搜索的无后缀风格对齐；自治县/自治旗与单字名保留
+        if (name.length >= 3 && /[市县区]$/.test(name) && !name.endsWith('自治县') && !name.endsWith('自治旗')) name = name.slice(0, -1);
+    } catch (e) {
+        console.error('反向地理编码失败:', e);
+    }
+    reverseGeoCache.set(key, name);
+    return name;
+}
+
 async function initWeather(manual = false) {
     const heroWeather = document.getElementById('heroWeather');
     const weatherIcon = document.getElementById('weatherIcon');
@@ -300,7 +323,7 @@ async function initWeather(manual = false) {
             const pos = await locatePosition();
             lat = pos.lat;
             lon = pos.lon;
-            label = '当前位置';
+            label = await reversePlaceName(lat, lon); // 定位到什么位置就写什么位置
         } catch (e) {
             // 定位不可用（拒绝授权/不支持/超时）：静默回退西安
             lat = FALLBACK_CITY.lat;
@@ -312,7 +335,7 @@ async function initWeather(manual = false) {
         lon = city.lon;
         label = city.name;
     }
-    heroWeather.title = `点击刷新${label}天气`;
+    heroWeather.title = label ? `点击刷新${label}天气` : '点击刷新天气';
     heroWeather.setAttribute('aria-label', heroWeather.title);
 
     try {
@@ -330,10 +353,10 @@ async function initWeather(manual = false) {
 
         weatherIcon.textContent = icon;
         weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
-        weatherDesc.textContent = `${label} · ${text}`;
+        weatherDesc.textContent = label ? `${label} · ${text}` : text;
         weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
     } catch (e) {
-        if (!manual) weatherDesc.textContent = `${label} · 天气获取失败`;
+        if (!manual) weatherDesc.textContent = label ? `${label} · 天气获取失败` : '天气获取失败';
         console.error('天气加载失败:', e);
     } finally {
         weatherIcon.classList.remove('refreshing');
