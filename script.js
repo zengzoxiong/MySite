@@ -208,16 +208,21 @@ function clockSetDigit(cell, ch) {
         cell.children[2].firstChild.textContent = a.textContent; // 上片=旧值上半
         cell.children[3].firstChild.textContent = ch;            // 下片=新值下半
     }
+    void cell.offsetWidth; // 与上面 _ckDone 移除 .anim 之间隔一次回流，同名动画否则不会重新起跑
     cell.classList.add('anim');
+    // animationend 必须挂在真正带动画的元素上：翻页的两段在翻片上，.ck-b 只有
+    // clip-path、永远等不到事件，只能靠 1600ms 兜底——.anim 会跨到下一秒，
+    // 移除再加回在同一帧内完成导致动画不重播、数字瞬变
+    const endEl = clockStyle === 'flip' ? cell.children[3] : b;
     const done = () => {
         clearTimeout(cell._ckTimer);
-        b.removeEventListener('animationend', done);
+        endEl.removeEventListener('animationend', done);
         cell.classList.remove('anim');
         a.textContent = ch;
         cell._ckDone = null;
     };
     cell._ckDone = done;
-    b.addEventListener('animationend', done, { once: true });
+    endEl.addEventListener('animationend', done, { once: true });
     cell._ckTimer = setTimeout(done, 1600); // 后台标签页动画被节流时的兜底
 }
 
