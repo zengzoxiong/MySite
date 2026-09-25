@@ -1,0 +1,25 @@
+name: 工具页体检
+
+on:
+  push:
+    paths:
+      - 'tools/**'
+      - 'data/tools.json'
+      - 'scripts/check_tools.py'
+  schedule:
+    - cron: '40 21 * * 1' # 每周一 UTC 21:40（北京时间周二凌晨 5:40）
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 纯 CI 守卫：违例退出码 1 亮红灯并写 step summary，不自动改文件
+      - name: 体检工具页（canonical/favicon/署名/去品牌/登记）
+        run: python scripts/check_tools.py
