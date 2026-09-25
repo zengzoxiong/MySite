@@ -665,92 +665,107 @@ function drawVertical(ctx, text, x, y, advance, maxChars) {
     return cy;
 }
 
-// 每日生成图：种子决定天色/日月/山脊层，同一天同一张图
-function drawTalismanScene(ctx, x, y, w, h, rnd, dark) {
+// 每日生成图（网易云日签海报式全幅背景）：种子决定天色/星点/日月/山脊，同一天同一张图；
+// 上下再压暗角渐变，保证海报白字可读
+function drawTalismanScene(ctx, W, H, rnd, dark) {
     const hue = Math.floor(rnd() * 360);
-    const sky = ctx.createLinearGradient(0, y, 0, y + h);
-    sky.addColorStop(0, dark ? `hsl(${hue} 42% 15%)` : `hsl(${hue} 68% 76%)`);
-    sky.addColorStop(1, dark ? `hsl(${(hue + 45) % 360} 46% 28%)` : `hsl(${(hue + 45) % 360} 72% 89%)`);
-    ctx.save();
-    roundRectPath(ctx, x, y, w, h, 10);
-    ctx.clip();
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    if (dark) {
+        sky.addColorStop(0, `hsl(${hue} 48% 13%)`);
+        sky.addColorStop(0.55, `hsl(${(hue + 35) % 360} 44% 22%)`);
+        sky.addColorStop(1, `hsl(${(hue + 70) % 360} 40% 9%)`);
+    } else {
+        sky.addColorStop(0, `hsl(${hue} 58% 46%)`);
+        sky.addColorStop(0.55, `hsl(${(hue + 35) % 360} 62% 58%)`);
+        sky.addColorStop(1, `hsl(${(hue + 70) % 360} 52% 34%)`);
+    }
     ctx.fillStyle = sky;
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = dark ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.6)';
-    const dots = 12 + Math.floor(rnd() * 10);
-    for (let i = 0; i < dots; i++) ctx.fillRect(x + rnd() * w, y + rnd() * h * 0.45, 1.6, 1.6);
-    const cx = x + w * (0.25 + rnd() * 0.5), cy = y + h * (0.2 + rnd() * 0.2), r = 13 + rnd() * 10;
-    ctx.fillStyle = dark ? '#f0e8d4' : `hsl(${(hue + 310) % 360} 88% 84%)`;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    const dots = 26 + Math.floor(rnd() * 18);
+    for (let i = 0; i < dots; i++) ctx.fillRect(rnd() * W, rnd() * H * 0.5, 1.6, 1.6);
+    // 日月放左半区：右半要留给竖排签句，压上了字会花
+    const cx = W * (0.12 + rnd() * 0.34), cy = H * (0.14 + rnd() * 0.14), r = 22 + rnd() * 14;
+    ctx.fillStyle = dark ? '#f0e8d4' : `hsl(${(hue + 310) % 360} 90% 86%)`;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
     for (let layer = 0; layer < 3; layer++) {
-        const base = y + h * (0.56 + layer * 0.14);
-        ctx.fillStyle = `hsl(${(hue + 205) % 360} ${dark ? 24 : 30}% ${dark ? 20 - layer * 5 : 50 - layer * 13}%)`;
+        const base = H * (0.6 + layer * 0.12);
+        ctx.fillStyle = `hsl(${(hue + 205) % 360} ${dark ? 26 : 34}% ${dark ? 16 - layer * 4 : 30 - layer * 8}%)`;
         ctx.beginPath();
-        ctx.moveTo(x, y + h);
-        ctx.lineTo(x, base + rnd() * 8);
-        let px = x;
-        while (px < x + w) {
-            px += w * (0.12 + rnd() * 0.16);
-            ctx.lineTo(Math.min(px, x + w), base - rnd() * h * (0.22 - layer * 0.05));
+        ctx.moveTo(0, H);
+        ctx.lineTo(0, base + rnd() * 12);
+        let px = 0;
+        while (px < W) {
+            px += W * (0.12 + rnd() * 0.16);
+            ctx.lineTo(Math.min(px, W), base - rnd() * H * (0.16 - layer * 0.04));
         }
-        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(W, H);
         ctx.closePath();
         ctx.fill();
     }
-    ctx.restore();
-    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.10)';
-    ctx.lineWidth = 1;
-    roundRectPath(ctx, x, y, w, h, 10);
-    ctx.stroke();
+    const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
+    top.addColorStop(0, 'rgba(0,0,0,0.38)');
+    top.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = top;
+    ctx.fillRect(0, 0, W, H * 0.34);
+    const bot = ctx.createLinearGradient(0, H * 0.58, 0, H);
+    bot.addColorStop(0, 'rgba(0,0,0,0)');
+    bot.addColorStop(1, 'rgba(0,0,0,0.46)');
+    ctx.fillStyle = bot;
+    ctx.fillRect(0, H * 0.58, W, H * 0.42);
 }
 
-// 签到符：竖排毛笔字版面。右起竖列：题头→日期→吉凶竖印→宜忌→签句→当日信息→落款，
-// 下方横置每日生成图，图右下角压朱印。统一用马善政毛笔楷书（加载失败回退站点字体）
+// 半透白胶囊标签（宜/忌），返回宽度方便排下一个
+function drawPill(ctx, x, y, text, family) {
+    ctx.font = `12px ${family}`;
+    const w = ctx.measureText(text).width + 22;
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    roundRectPath(ctx, x, y, w, 26, 13);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + 11, y + 14);
+    ctx.textBaseline = 'top';
+    return w;
+}
+
+// 签到符：网易云日签海报式——全幅生成图打底，左上大日期、右上吉凶竖印、
+// 右起竖排毛笔签句、左侧竖题头、宜忌胶囊与底部信息 caption、右下品牌朱印
 function drawTalisman(canvas, f, streak) {
     const W = 380, H = 680, S = 2;
-    const TEXT_BOTTOM = 372; // 竖列文字区下沿，再往下是生成图
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     canvas.width = W * S;
     canvas.height = H * S;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(S, 0, 0, S, 0, 0);
-    const family = `'Ma Shan Zheng', ${getComputedStyle(document.body).fontFamily || 'sans-serif'}`;
-    const paper = dark ? '#151821' : '#f7f2e7';
-    const ink = dark ? '#ece7db' : '#2c2620';
-    const sub = dark ? '#9b9689' : '#8b8371';
-    const line = dark ? '#3b3f4b' : '#d9cfb8';
-    const sealRed = dark ? '#c65540' : '#b8442c';
-    const sealInk = '#fdf6ec';
-    ctx.fillStyle = paper;
-    ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = line;
-    ctx.lineWidth = 2; ctx.strokeRect(10, 10, W - 20, H - 20);
-    ctx.lineWidth = 1; ctx.strokeRect(16, 16, W - 32, H - 32);
-    ctx.textAlign = 'center';
+    const site = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    const family = `'Ma Shan Zheng', ${site}`;
+    const main = 'rgba(255,255,255,0.96)';
+    const subc = 'rgba(255,255,255,0.74)';
+    const sealRed = dark ? '#d0503c' : '#c0392b';
+    drawTalismanScene(ctx, W, H, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
     ctx.textBaseline = 'top';
-    // 写一竖列：按字号算字距，列高超不过文字区就截断
-    const col = (text, x, y, size, advance, color) => {
-        ctx.font = `${size}px ${family}`;
-        ctx.fillStyle = color;
-        return drawVertical(ctx, text, x, y, advance, Math.floor((TEXT_BOTTOM - y) / advance));
-    };
-    // 题头（最右列）+ 日期列
-    col('拾光签', 340, 50, 29, 38, ink);
-    col(`${yearToCn(f.year)}年${numToCn(f.month)}月${numToCn(f.day)}日·${f.weekday}`, 308, 54, 12, 16, sub);
-    // 吉凶竖印：红底白字竖排
-    const luckAdv = 46;
-    const sealH = Array.from(f.luck).length * luckAdv + 26;
+    // 左上日期块：小年月 + 大日 + 星期/节日
+    ctx.textAlign = 'left';
+    ctx.font = `12px ${site}`; ctx.fillStyle = subc;
+    ctx.fillText(`${f.year}.${String(f.month).padStart(2, '0')}`, 36, 40);
+    ctx.font = `700 62px ${site}`; ctx.fillStyle = main;
+    ctx.fillText(String(f.day), 33, 58);
+    ctx.font = `12px ${site}`; ctx.fillStyle = subc;
+    ctx.fillText(`${f.weekday}${f.festival ? ' · ' + f.festival : ''}`, 36, 128);
+    // 右上吉凶竖印
+    const luckAdv = 42;
+    const sealH = Array.from(f.luck).length * luckAdv + 22;
     ctx.fillStyle = sealRed;
-    roundRectPath(ctx, 246, 62, 52, sealH, 8);
+    roundRectPath(ctx, W - 62, 36, 38, sealH, 8);
     ctx.fill();
-    ctx.font = `36px ${family}`; ctx.fillStyle = sealInk;
-    drawVertical(ctx, f.luck, 272, 75, luckAdv);
-    // 宜忌两列
-    col(`宜·${f.yi}`, 230, 64, 14, 19, ink);
-    col(`忌·${f.ji}`, 208, 64, 14, 19, ink);
-    // 签句：右起换列竖写，最多三列
-    const sentAdv = 24;
-    const cap = Math.floor((TEXT_BOTTOM - 64) / sentAdv);
+    ctx.font = `24px ${family}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    drawVertical(ctx, f.luck, W - 43, 47, luckAdv);
+    // 右起竖排毛笔签句（印下方起列，最多三列）
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 1;
+    const sentAdv = 30, sentY = 36 + sealH + 26;
+    const cap = Math.floor((H * 0.56 - sentY) / sentAdv);
     const chunks = [];
     let cur = '';
     for (const ch of f.sentence) {
@@ -758,23 +773,25 @@ function drawTalisman(canvas, f, streak) {
         else cur += ch;
     }
     if (cur) chunks.push(cur);
-    chunks.slice(0, 3).forEach((ck, i) => col(ck, 178 - i * 26, 64, 16, sentAdv, ink));
-    // 当日信息四列 + 落款（最左列）
-    const infos = [
-        `${f.yearGanzhi}年${f.lunarText}`,
-        `${f.dayGanzhi}日${f.festival ? '·' + f.festival : ''}`,
-        `年第${numToCn(f.dayOfYear)}天`,
-        `余${numToCn(f.yearDays - f.dayOfYear)}天·连签${numToCn(streak)}日`
-    ];
-    infos.forEach((t, i) => col(t, 106 - i * 17, 62, 11, 15, sub));
-    col('拾光集·每日签', 36, 62, 10, 14, sub);
-    // 每日生成图 + 图上压角印
-    drawTalismanScene(ctx, 36, 388, W - 72, 240, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
+    ctx.font = `22px ${family}`; ctx.fillStyle = main;
+    chunks.slice(0, 3).forEach((ck, i) => drawVertical(ctx, ck, W - 44 - i * 30, sentY, sentAdv));
+    // 左侧竖题头
+    ctx.font = `24px ${family}`;
+    drawVertical(ctx, '拾光签', 44, 176, 34);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    // 宜忌胶囊
+    const w1 = drawPill(ctx, 36, H - 122, `宜 ${f.yi}`, site);
+    drawPill(ctx, 36 + w1 + 10, H - 122, `忌 ${f.ji}`, site);
+    // 底部信息 caption
+    ctx.font = `11px ${site}`; ctx.fillStyle = subc; ctx.textAlign = 'left';
+    ctx.fillText(`${f.yearGanzhi}年${f.lunarText} · ${f.dayGanzhi}日`, 36, H - 76);
+    ctx.fillText(`年第${f.dayOfYear}天 · 余${f.yearDays - f.dayOfYear}天 · 连续签到${streak}天`, 36, H - 56);
+    // 右下品牌朱印
     ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W - 88, 580, 44, 44, 6);
+    roundRectPath(ctx, W - 60, H - 68, 32, 32, 6);
     ctx.fill();
-    ctx.font = `16px ${family}`; ctx.fillStyle = sealInk;
-    drawVertical(ctx, '拾光', W - 66, 588, 20);
+    ctx.font = `16px ${family}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.fillText('拾', W - 44, H - 60);
 }
 
 function saveTalismanPng(canvas, key) {

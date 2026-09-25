@@ -1952,17 +1952,18 @@ body.no-anim .mp-lyric > div {
 
 .talisman-box {
     position: relative;
-    border-radius: 16px;
-    border: 1px solid var(--glass-border);
-    background: var(--bg-color);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
-    padding: 18px 18px 14px;
+    border-radius: 18px;
+    padding: 10px 10px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
     max-height: calc(100dvh - 32px);
     overflow: auto;
+    /* 海报分享页：外壳透明，视觉主体是画布本身 */
+    background: transparent;
+    border: none;
+    box-shadow: none;
     transform: translateY(10px) scale(0.98);
     transition: transform 0.2s ease;
 }
@@ -1973,9 +1974,10 @@ body.no-anim .mp-lyric > div {
 
 .talisman-canvas {
     display: block;
-    width: min(300px, 76vw);
+    width: min(320px, 80vw);
     height: auto;
-    border-radius: 10px;
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
 }
 
 .talisman-close {
@@ -1987,8 +1989,8 @@ body.no-anim .mp-lyric > div {
     height: 30px;
     border: none;
     border-radius: 50%;
-    background: var(--hover-bg);
-    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
     font-size: 0.9rem;
     cursor: pointer;
     transition: color 0.2s, transform 0.2s;
@@ -2000,19 +2002,19 @@ body.no-anim .mp-lyric > div {
 }
 
 .talisman-btn {
-    border: 1px solid var(--border-color);
-    background: transparent;
-    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
     border-radius: 10px;
     padding: 6px 16px;
     font-size: 0.82rem;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .talisman-btn:hover {
-    color: var(--accent-color);
-    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .quote-refresh.spinning {
