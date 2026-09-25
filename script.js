@@ -74,6 +74,7 @@ function initDashboard() {
     initClock();
     initWeather();
     initQuote();
+    initCheckin();
     initProgress();
     initGitHubStats();
     initTodo();
@@ -434,7 +435,8 @@ async function loadQuote() {
 }
 
 function initQuote() {
-    loadQuote();
+    // 一言要签到后才解锁：未签到不敲 hitokoto，省一次外部请求
+    if (isCheckedInToday()) loadQuote();
     const btn = document.getElementById('quoteRefresh');
     const corner = document.querySelector('.quote-corner');
     btn.addEventListener('click', () => {
@@ -447,6 +449,391 @@ function initQuote() {
             await loadQuote();
             corner.classList.remove('switching');
         }, 250);
+    });
+}
+
+// ===== 首页签到（拾光签） =====
+// 一言卡片在未签到时是封签面板：签到才解锁今日一言，并弹出一张长方形签到符
+// （每日吉凶 + 当日信息 + 一句话 + 每日生成图），可保存/复制为 PNG。
+// 签面内容全部由日期种子决定：同一天任何时刻抽到同一支签。
+
+// 农历表 1900-2100：bit4-16 为十二个月大小、bit0-3 为闰月号、bit16 为闰月大小。
+// 锚点自检过：2026-09-25=八月十五、2026-02-17 与 2025-01-29=正月初一
+const LUNAR_INFO = [
+    0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
+    0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
+    0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
+    0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
+    0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
+    0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
+    0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
+    0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
+    0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
+    0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0,
+    0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
+    0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
+    0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
+    0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0, 0x0a4d0, 0x0d0b6, 0x0d250, 0x0d520, 0x0dd45,
+    0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,
+    0x14b63, 0x09370, 0x049f8, 0x04970, 0x064b0, 0x168a6, 0x0ea50, 0x06b20, 0x1a6c4, 0x0aae0,
+    0x0a2e0, 0x0d2e3, 0x0c960, 0x0d557, 0x0d4a0, 0x0da50, 0x05d55, 0x056a0, 0x0a6d0, 0x055d4,
+    0x052d0, 0x0a9b8, 0x0a950, 0x0b4a0, 0x0b6a6, 0x0ad50, 0x055a0, 0x0aba4, 0x0a5b0, 0x052b0,
+    0x0b273, 0x06930, 0x07337, 0x06aa0, 0x0ad50, 0x14b55, 0x04b60, 0x0a570, 0x054e4, 0x0d160,
+    0x0e968, 0x0d520, 0x0daa0, 0x16aa6, 0x056d0, 0x04ae0, 0x0a9d4, 0x0a2d0, 0x0d150, 0x0f252,
+    0x0d520
+];
+const LUNAR_MONTH_CN = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+const LUNAR_DAY_CN = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+const ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+function lunarLeapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+function lunarLeapDays(y) { return lunarLeapMonth(y) ? ((LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29) : 0; }
+function lunarMonthDays(y, m) { return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
+function lunarYearDays(y) {
+    let s = 348;
+    for (let i = 0x8000; i > 0x8; i >>= 1) s += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
+    return s + lunarLeapDays(y);
+}
+
+function solarToLunar(y, m, d) {
+    let offset = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1900, 0, 31)) / 86400000);
+    let ly = 1900;
+    for (; ly < 2101 && offset >= lunarYearDays(ly); ly++) offset -= lunarYearDays(ly);
+    const leap = lunarLeapMonth(ly);
+    let lm = 1, isLeap = false;
+    for (; lm <= 12; lm++) {
+        let days;
+        if (leap > 0 && lm === leap + 1 && !isLeap) { lm--; isLeap = true; days = lunarLeapDays(ly); }
+        else days = lunarMonthDays(ly, lm);
+        if (isLeap && lm === leap + 1) isLeap = false;
+        if (offset < days) break;
+        offset -= days;
+    }
+    return {
+        year: ly, month: lm, day: offset + 1, isLeap,
+        monthCn: (isLeap ? '闰' : '') + LUNAR_MONTH_CN[lm - 1] + '月',
+        dayCn: LUNAR_DAY_CN[offset]
+    };
+}
+
+function julianDayNumber(y, m, d) {
+    const a = Math.floor((14 - m) / 12), y2 = y + 4800 - a, m2 = m + 12 * a - 3;
+    return d + Math.floor((153 * m2 + 2) / 5) + 365 * y2 + Math.floor(y2 / 4)
+        - Math.floor(y2 / 100) + Math.floor(y2 / 400) - 32045;
+}
+
+// 干支日：以 2026-09-25=壬寅日（六十甲子第 38，0 基）为锚定偏移
+const DAY_GZ_OFFSET = ((38 - julianDayNumber(2026, 9, 25) % 60) % 60 + 60) % 60;
+function dayGanzhi(y, m, d) {
+    const i = (julianDayNumber(y, m, d) + DAY_GZ_OFFSET) % 60;
+    return GAN[i % 10] + ZHI[i % 12];
+}
+function yearGanzhi(ly) { return GAN[(ly - 4) % 10] + ZHI[(ly - 4) % 12]; }
+
+// 节日：农历优先，再补公历
+const LUNAR_FESTIVALS = { '1-1': '春节', '1-15': '元宵', '5-5': '端午', '7-7': '七夕', '8-15': '中秋', '9-9': '重阳', '12-8': '腊八', '12-30': '除夕' };
+const SOLAR_FESTIVALS = { '1-1': '元旦', '2-14': '情人节', '5-1': '劳动节', '6-1': '儿童节', '10-1': '国庆节', '12-25': '圣诞' };
+
+// 种子随机：FNV-1a 出种子，mulberry32 出序列，同一天全球同签
+function fnvSeed(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return h >>> 0;
+}
+function mulberry32(a) {
+    return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+// 吉凶权重合计 100：大吉 16 / 中吉 20 / 小吉 16 / 吉 16 / 末吉 12 / 凶 12 / 大凶 8
+const LUCK_POOL = [['大吉', 16], ['中吉', 20], ['小吉', 16], ['吉', 16], ['末吉', 12], ['凶', 12], ['大凶', 8]];
+const YI_POOL = ['早睡', '读十页书', '给植物浇水', '散步二十分钟', '写三行日记', '听一张专辑', '整理桌面', '给老朋友发消息', '喝够八杯水', '看一集老番', '清掉一件待办', '抬头看云'];
+const JI_POOL = ['熬夜', '拖延', '暴食', '纠结', '久坐', '刷手机到深夜', '冲动消费', '和自我较劲'];
+const SIGN_SENTENCES = [
+    '把今天过成值得回忆的一天。', '慢一点，比较快。', '心之所向，素履以往。', '日拱一卒，功不唐捐。',
+    '万物有灵，且美。', '留白处自有风景。', '把小事做稳，就是大事。', '风会记得每一朵花的香。',
+    '不急不躁，日子自有答案。', '今天也值得被认真对待。', '行到水穷处，坐看云起时。', '把期待降低，把依赖变少。',
+    '光落在你脸上，可爱一如往常。', '山高水长，怕什么来不及。', '一寸光阴一寸金。', '温柔是世间最强的力量。',
+    '别慌，月亮也正在大海某处迷茫。', '把每一天当作作品来打磨。', '静水流深，仓促的人看不见。', '好运藏在努力里。',
+    '今日事，今日毕。', '低头一步是人间，抬头三尺有神明。', '慢慢来，谁都有一个努力的过程。', '天高地迥，觉宇宙之无穷。'
+];
+
+function todayKey(d = new Date()) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function isCheckedInToday() {
+    try { return !!localStorage.getItem('checkin:' + todayKey()); } catch (e) { return false; }
+}
+
+function buildTodayFortune() {
+    const now = new Date();
+    const key = todayKey(now);
+    const rnd = mulberry32(fnvSeed('shiguang-sign-' + key));
+    let roll = rnd() * 100, luck = LUCK_POOL[LUCK_POOL.length - 1][0];
+    for (const [name, w] of LUCK_POOL) { if (roll < w) { luck = name; break; } roll -= w; }
+    const yi = YI_POOL[Math.floor(rnd() * YI_POOL.length)];
+    const ji = JI_POOL[Math.floor(rnd() * JI_POOL.length)];
+    const sentence = SIGN_SENTENCES[Math.floor(rnd() * SIGN_SENTENCES.length)];
+    const lunar = solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    const festival = LUNAR_FESTIVALS[`${lunar.month}-${lunar.day}`] || SOLAR_FESTIVALS[`${now.getMonth() + 1}-${now.getDate()}`] || '';
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const dayOfYear = Math.floor((now - yearStart) / 86400000) + 1;
+    const yearDays = Math.floor((new Date(now.getFullYear() + 1, 0, 1) - yearStart) / 86400000);
+    return {
+        key, luck, yi, ji, sentence, festival, dayOfYear, yearDays,
+        lunarText: `${lunar.monthCn}${lunar.dayCn}`,
+        yearGanzhi: yearGanzhi(lunar.year),
+        dayGanzhi: dayGanzhi(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+        weekday: `星期${CLOCK_WEEKDAYS[now.getDay()]}`,
+        dateText: `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日`
+    };
+}
+
+// 连续签到：昨天签过就 +1，断了重计
+function peekCheckinStreak() {
+    const today = todayKey();
+    const last = localStorage.getItem('checkinLast');
+    const stored = Number(localStorage.getItem('checkinStreak') || 0);
+    if (last === today) return stored || 1;
+    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+    return last === todayKey(yest) ? stored + 1 : 1;
+}
+function recordCheckin() {
+    const streak = peekCheckinStreak();
+    const today = todayKey();
+    try {
+        localStorage.setItem('checkin:' + today, String(Date.now()));
+        localStorage.setItem('checkinLast', today);
+        localStorage.setItem('checkinStreak', String(streak));
+    } catch (e) { /* 隐私模式下签不了也照样出签，只是不记 */ }
+    return streak;
+}
+
+// --- 签到符画布：380×680 竖长方形，导出按 2x 分辨率 ---
+// 画布是 artwork，配色自成一套（纸/墨/朱砂），不跟站点主题变量走，但明暗各一套
+function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+function wrapCjkText(ctx, text, cx, y, maxWidth, lineHeight, maxLines) {
+    const lines = [];
+    let cur = '';
+    for (const ch of text) {
+        if (ctx.measureText(cur + ch).width > maxWidth && cur) { lines.push(cur); cur = ch; }
+        else cur += ch;
+    }
+    if (cur) lines.push(cur);
+    const cut = lines.slice(0, maxLines);
+    if (lines.length > maxLines) cut[cut.length - 1] = cut[cut.length - 1].slice(0, -1) + '…';
+    cut.forEach((ln, i) => ctx.fillText(ln, cx, y + i * lineHeight));
+    return cut.length;
+}
+
+// 每日生成图：种子决定天色/日月/山脊层，同一天同一张图
+function drawTalismanScene(ctx, x, y, w, h, rnd, dark) {
+    const hue = Math.floor(rnd() * 360);
+    const sky = ctx.createLinearGradient(0, y, 0, y + h);
+    sky.addColorStop(0, dark ? `hsl(${hue} 42% 15%)` : `hsl(${hue} 68% 76%)`);
+    sky.addColorStop(1, dark ? `hsl(${(hue + 45) % 360} 46% 28%)` : `hsl(${(hue + 45) % 360} 72% 89%)`);
+    ctx.save();
+    roundRectPath(ctx, x, y, w, h, 10);
+    ctx.clip();
+    ctx.fillStyle = sky;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.6)';
+    const dots = 12 + Math.floor(rnd() * 10);
+    for (let i = 0; i < dots; i++) ctx.fillRect(x + rnd() * w, y + rnd() * h * 0.45, 1.6, 1.6);
+    const cx = x + w * (0.25 + rnd() * 0.5), cy = y + h * (0.2 + rnd() * 0.2), r = 13 + rnd() * 10;
+    ctx.fillStyle = dark ? '#f0e8d4' : `hsl(${(hue + 310) % 360} 88% 84%)`;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    for (let layer = 0; layer < 3; layer++) {
+        const base = y + h * (0.56 + layer * 0.14);
+        ctx.fillStyle = `hsl(${(hue + 205) % 360} ${dark ? 24 : 30}% ${dark ? 20 - layer * 5 : 50 - layer * 13}%)`;
+        ctx.beginPath();
+        ctx.moveTo(x, y + h);
+        ctx.lineTo(x, base + rnd() * 8);
+        let px = x;
+        while (px < x + w) {
+            px += w * (0.12 + rnd() * 0.16);
+            ctx.lineTo(Math.min(px, x + w), base - rnd() * h * (0.22 - layer * 0.05));
+        }
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fill();
+    }
+    ctx.restore();
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.10)';
+    ctx.lineWidth = 1;
+    roundRectPath(ctx, x, y, w, h, 10);
+    ctx.stroke();
+}
+
+function drawTalisman(canvas, f, streak) {
+    const W = 380, H = 680, S = 2;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    canvas.width = W * S;
+    canvas.height = H * S;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(S, 0, 0, S, 0, 0);
+    const family = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    const paper = dark ? '#151821' : '#f7f2e7';
+    const ink = dark ? '#ece7db' : '#2c2620';
+    const sub = dark ? '#9b9689' : '#8b8371';
+    const line = dark ? '#3b3f4b' : '#d9cfb8';
+    const sealRed = dark ? '#c65540' : '#b8442c';
+    const sealInk = '#fdf6ec';
+    ctx.fillStyle = paper;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 2; ctx.strokeRect(10, 10, W - 20, H - 20);
+    ctx.lineWidth = 1; ctx.strokeRect(16, 16, W - 32, H - 32);
+    const center = (text, y, font, color) => {
+        ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(text, W / 2, y);
+    };
+    center('拾 光 签', 54, `700 24px ${family}`, ink);
+    center(`${f.dateText} · ${f.weekday}`, 76, `400 12px ${family}`, sub);
+    // 吉凶朱印
+    ctx.fillStyle = sealRed;
+    roundRectPath(ctx, W / 2 - 62, 94, 124, 66, 8);
+    ctx.fill();
+    center(f.luck, 140, `700 36px ${family}`, sealInk);
+    // 宜忌
+    ctx.font = `400 13px ${family}`; ctx.fillStyle = ink;
+    ctx.textAlign = 'left'; ctx.fillText(`宜 · ${f.yi}`, 40, 190);
+    ctx.textAlign = 'right'; ctx.fillText(`忌 · ${f.ji}`, W - 40, 190);
+    // 每日生成图
+    drawTalismanScene(ctx, 40, 206, W - 80, 176, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
+    // 一句话
+    ctx.textAlign = 'center';
+    ctx.font = `500 14px ${family}`; ctx.fillStyle = ink;
+    wrapCjkText(ctx, f.sentence, W / 2, 414, W - 88, 22, 3);
+    // 分隔 + 当日信息
+    ctx.strokeStyle = line;
+    ctx.beginPath(); ctx.moveTo(40, 492); ctx.lineTo(W - 40, 492); ctx.stroke();
+    const info1 = `${f.yearGanzhi}年 ${f.lunarText} · ${f.dayGanzhi}日` + (f.festival ? ` · ${f.festival}` : '');
+    center(info1, 518, `400 13px ${family}`, ink);
+    center(`年第 ${f.dayOfYear} 天 · 余 ${f.yearDays - f.dayOfYear} 天`, 540, `400 12px ${family}`, sub);
+    center(`连续签到 ${streak} 天`, 562, `400 12px ${family}`, sub);
+    // 落款 + 角印
+    ctx.textAlign = 'left'; ctx.font = `400 11px ${family}`; ctx.fillStyle = sub;
+    ctx.fillText('拾光集 · 每日签', 40, 640);
+    ctx.fillStyle = sealRed;
+    roundRectPath(ctx, W - 84, 604, 44, 44, 6);
+    ctx.fill();
+    ctx.fillStyle = sealInk; ctx.textAlign = 'center'; ctx.font = `700 15px ${family}`;
+    ctx.fillText('拾', W - 62, 622);
+    ctx.fillText('光', W - 62, 640);
+}
+
+function saveTalismanPng(canvas, key) {
+    canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `拾光签-${key}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }, 'image/png');
+}
+
+function copyTalismanPng(canvas) {
+    return new Promise((resolve, reject) => {
+        if (!navigator.clipboard || !window.ClipboardItem) return reject(new Error('浏览器不支持复制图片'));
+        canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error('导出失败'));
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(resolve, reject);
+        }, 'image/png');
+    });
+}
+
+// --- 签到面板 / 签到符弹层 ---
+let talismanLastFocus = null;
+
+function openTalisman(streak) {
+    const modal = document.getElementById('talismanModal');
+    drawTalisman(document.getElementById('talismanCanvas'), buildTodayFortune(), streak);
+    talismanLastFocus = document.activeElement;
+    modal.hidden = false;
+    void modal.offsetHeight; // 同步回流后再加类，后台标签页也能播过渡
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    document.getElementById('talismanClose').focus();
+}
+
+function closeTalisman() {
+    const modal = document.getElementById('talismanModal');
+    if (modal.hidden) return;
+    modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => { modal.hidden = true; }, 200);
+    if (talismanLastFocus && talismanLastFocus.focus) talismanLastFocus.focus();
+}
+
+function initCheckin() {
+    const panel = document.getElementById('checkinPanel');
+    const body = document.getElementById('quoteBody');
+    const btn = document.getElementById('checkinBtn');
+    const tip = document.getElementById('checkinTip');
+    const modal = document.getElementById('talismanModal');
+
+    const revealQuote = () => {
+        panel.hidden = true;
+        body.hidden = false;
+        loadQuote();
+    };
+    if (isCheckedInToday()) {
+        revealQuote();
+        tip.textContent = '';
+    } else {
+        const streak = peekCheckinStreak();
+        tip.textContent = streak > 1 ? `今日尚未签到 · 已连续 ${streak - 1} 天` : '今日尚未签到 · 签后解锁今日一言';
+    }
+
+    btn.addEventListener('click', () => {
+        const streak = recordCheckin();
+        revealQuote();
+        openTalisman(streak);
+    });
+    // 已签到后一言卡片上的小按钮：重看今日签
+    document.getElementById('quoteTalisman').addEventListener('click', () => {
+        openTalisman(Number(localStorage.getItem('checkinStreak') || 1));
+    });
+
+    document.getElementById('talismanClose').addEventListener('click', closeTalisman);
+    document.getElementById('talismanBackdrop').addEventListener('click', closeTalisman);
+    document.getElementById('talismanSave').addEventListener('click', () => {
+        saveTalismanPng(document.getElementById('talismanCanvas'), todayKey());
+    });
+    const copyBtn = document.getElementById('talismanCopy');
+    copyBtn.addEventListener('click', () => {
+        const old = copyBtn.textContent;
+        copyTalismanPng(document.getElementById('talismanCanvas'))
+            .then(() => { copyBtn.textContent = '已复制'; })
+            .catch(() => { copyBtn.textContent = '不支持复制'; });
+        setTimeout(() => { copyBtn.textContent = old; }, 1600);
+    });
+    // ESC 只关签符弹层，不触发全局“回首页”
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.hidden) {
+            closeTalisman();
+            e.stopImmediatePropagation();
+        }
     });
 }
 

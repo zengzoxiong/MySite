@@ -7,6 +7,8 @@
     --glass-border: rgba(255, 255, 255, 0.65);
     --glass-blur: blur(18px) saturate(170%);
     --text-primary: #1a1a1a;
+    --seal-red: #b8442c; /* 签到符朱砂印色 */
+    --seal-ink: #fdf6ec;
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border-color: #eaeaea;
@@ -32,6 +34,8 @@
     --card-bg: rgba(20, 22, 30, 0.55);
     --glass-border: rgba(255, 255, 255, 0.09);
     --text-primary: #f0f0f0;
+    --seal-red: #c65540;
+    --seal-ink: #fdf6ec;
     --text-secondary: #888888;
     --text-tertiary: #555555;
     --border-color: #222222;
@@ -1848,6 +1852,153 @@ body.no-anim .mp-lyric > div {
 
 .quote-refresh:active {
     transform: scale(0.85);
+}
+
+/* --- 首页签到（拾光签）：未签到时一言卡片是封签面板，签到后解锁一言 --- */
+.checkin-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 这两个容器写了 display 规则，[hidden] 的 UA 样式会被盖掉（坑位 11） */
+.checkin-panel[hidden],
+.quote-body[hidden] {
+    display: none !important;
+}
+
+.quote-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.checkin-seal {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--seal-red);
+    color: var(--seal-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkin-tip {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+
+.checkin-btn {
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.checkin-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* 签到符弹层：长方形竖符画布 + 保存/复制 */
+.talisman-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 320;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.talisman-modal.open {
+    opacity: 1;
+}
+
+.talisman-modal[hidden] {
+    display: none;
+}
+
+.talisman-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.talisman-box {
+    position: relative;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-color);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+    padding: 18px 18px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.talisman-modal.open .talisman-box {
+    transform: none;
+}
+
+.talisman-canvas {
+    display: block;
+    width: min(300px, 76vw);
+    height: auto;
+    border-radius: 10px;
+}
+
+.talisman-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.talisman-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.talisman-btn {
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.talisman-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
 }
 
 .quote-refresh.spinning {

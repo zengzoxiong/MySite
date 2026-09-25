@@ -237,12 +237,25 @@
                 </div>
             </div>
 
-            <!-- 底部中央：今日一言 -->
+            <!-- 底部中央：签到 + 今日一言（签到后才解锁一言） -->
             <div class="corner quote-corner">
-                <div class="quote-text" id="quoteText">获取中...</div>
-                <div class="quote-foot">
-                    <span class="quote-meta" id="quoteMeta"></span>
-                    <button class="quote-refresh" id="quoteRefresh" title="换一句">↻</button>
+                <div class="checkin-panel" id="checkinPanel">
+                    <span class="checkin-seal" aria-hidden="true">签</span>
+                    <span class="checkin-tip" id="checkinTip">今日尚未签到</span>
+                    <button class="checkin-btn" id="checkinBtn">翻开今日签</button>
+                </div>
+                <div class="quote-body" id="quoteBody" hidden>
+                    <div class="quote-text" id="quoteText">获取中...</div>
+                    <div class="quote-foot">
+                        <span class="quote-meta" id="quoteMeta"></span>
+                        <button class="quote-refresh" id="quoteRefresh" title="换一句">↻</button>
+                        <button class="quote-refresh" id="quoteTalisman" title="再看今日签">
+                            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+                                <rect x="4" y="1.5" width="8" height="13" rx="1.5" fill="none" stroke="currentColor" />
+                                <path d="M6 5h4M6 8h4M6 11h2.5" fill="none" stroke="currentColor" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -265,6 +278,19 @@
             <div class="settings-modal-box" role="dialog" aria-modal="true" aria-label="设置">
                 <button class="settings-modal-close" id="settingsClose" title="关闭设置">✕</button>
                 <iframe src="settings.html" title="设置"></iframe>
+            </div>
+        </div>
+
+        <!-- 签到符弹层：长方形竖符画布 + 保存/复制 -->
+        <div class="talisman-modal" id="talismanModal" hidden>
+            <div class="talisman-backdrop" id="talismanBackdrop"></div>
+            <div class="talisman-box" role="dialog" aria-modal="true" aria-label="今日签到符">
+                <button class="talisman-close" id="talismanClose" title="关闭">✕</button>
+                <canvas id="talismanCanvas" class="talisman-canvas" role="img" aria-label="今日签到符图片"></canvas>
+                <div class="talisman-actions">
+                    <button class="talisman-btn" id="talismanSave">保存 PNG</button>
+                    <button class="talisman-btn" id="talismanCopy">复制图片</button>
+                </div>
             </div>
         </div>
 
