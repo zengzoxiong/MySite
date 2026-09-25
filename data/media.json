@@ -885,6 +885,16 @@
       "comment": "你身体里的37万亿打工人。"
     },
     {
+      "title": "工作细胞 第二季",
+      "type": "番剧",
+      "status": "在看",
+      "rating": 8.0,
+      "release": "2021-01-08",
+      "url": "https://www.themoviedb.org/tv/80671/season/2",
+      "cover": "assets/media/cells-at-work-s2.jpg",
+      "comment": "37万亿打工人返岗续更，身体的日常又热闹起来。"
+    },
+    {
       "title": "请问您今天要来点兔子吗？？～Dear My Sister～",
       "type": "番剧",
       "status": "看过",
@@ -1607,6 +1617,86 @@
       "url": "https://www.themoviedb.org/movie/372058",
       "cover": "assets/media/your-name.jpg",
       "comment": "彗星落下的那晚，两个人隔着时间喊出的那个名字。"
+    },
+    {
+      "title": "消失的她",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.5,
+      "release": "2022-12-25",
+      "url": "https://www.themoviedb.org/movie/1108211",
+      "cover": "assets/media/lost-in-the-stars.jpg",
+      "comment": "海底那座铁笼看得人脊背发凉，赌徒的誓言不值一枚筹码。"
+    },
+    {
+      "title": "恶棍天使",
+      "type": "电影",
+      "status": "看过",
+      "rating": 4.1,
+      "release": "2015-12-24",
+      "url": "https://www.themoviedb.org/movie/373196",
+      "cover": "assets/media/devil-and-angel.jpg",
+      "comment": "闹剧归闹剧，孙俪的查小刀憨得让人想笑。"
+    },
+    {
+      "title": "银河补习班",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.8,
+      "release": "2019-07-18",
+      "url": "https://www.themoviedb.org/movie/603765",
+      "cover": "assets/media/looking-up.jpg",
+      "comment": "理想主义的父亲，和一场关于教育的漫长较劲。"
+    },
+    {
+      "title": "百鸟朝凤",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.7,
+      "release": "2016-05-06",
+      "url": "https://www.themoviedb.org/movie/308924",
+      "cover": "assets/media/song-of-the-phoenix.jpg",
+      "comment": "唢呐声里的匠人风骨，焦三爷的转身是一个时代的落幕。"
+    },
+    {
+      "title": "宝可梦 超级愿望",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "release": "2010-09-23",
+      "url": "https://www.themoviedb.org/tv/60572/season/14",
+      "cover": "assets/media/pokemon-best-wishes.jpg",
+      "comment": "全新的合众地区，小智重新出发的一季。"
+    },
+    {
+      "title": "宝可梦 XY",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "release": "2013-10-17",
+      "url": "https://www.themoviedb.org/tv/60572/season/17",
+      "cover": "assets/media/pokemon-xy.png",
+      "comment": "从卡洛斯启程到联盟决赛，小智与瑟蕾娜的完整一程。"
+    },
+    {
+      "title": "宝可梦 太阳&月亮",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.0,
+      "release": "2016-11-17",
+      "url": "https://www.themoviedb.org/tv/60572/season/20",
+      "cover": "assets/media/pokemon-sun-moon.png",
+      "comment": "阿罗拉没有道馆，但小智第一次真的站上了冠军台。"
+    },
+    {
+      "title": "宝可梦：光环的超魔神 胡帕",
+      "type": "电影",
+      "status": "看过",
+      "rating": 6.8,
+      "release": "2015-07-18",
+      "url": "https://www.themoviedb.org/movie/350499",
+      "cover": "assets/media/pokemon-hoopa.jpg",
+      "comment": "历代神兽大乱斗，胡帕的顽皮撑起全片。"
     }
   ]
 }
