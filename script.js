@@ -423,7 +423,8 @@ async function loadQuote() {
     const quoteText = document.getElementById('quoteText');
     const quoteMeta = document.getElementById('quoteMeta');
     try {
-        const res = await fetch('https://v1.hitokoto.cn/?c=i&c=k&c=d&max_length=42');
+        // _t nonce 破缓存：hitokoto 对同 IP 短窗缓存，不加时「换一句」会拿回同一句
+        const res = await fetch(`https://v1.hitokoto.cn/?c=i&c=k&c=d&max_length=42&_t=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         quoteText.textContent = data.hitokoto;
