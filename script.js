@@ -584,6 +584,8 @@ function buildTodayFortune() {
     return {
         key, luck, sentence, festival,
         year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate(),
+        lunarText: `${lunar.monthCn}${lunar.dayCn}`,
+        dateText: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
         weekday: `星期${CLOCK_WEEKDAYS[now.getDay()]}`
     };
 }
@@ -781,45 +783,54 @@ function drawTalisman(canvas, f) {
     const family = `'Ma Shan Zheng', ${site}`;
     const main = 'rgba(255,255,255,0.96)';
     const subc = 'rgba(255,255,255,0.74)';
-    const sealRed = dark ? '#d0503c' : '#c0392b';
     drawTalismanScene(ctx, W, H, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
     ctx.textBaseline = 'top';
-    // 左上日期块：小年月 + 大日 + 星期/节日
+    // 左上日期块：小字公历+星期，大字农历（毛笔）
     ctx.textAlign = 'left';
     ctx.font = `12px ${site}`; ctx.fillStyle = subc;
-    ctx.fillText(`${f.year}.${String(f.month).padStart(2, '0')}`, 36, 40);
-    ctx.font = `700 62px ${site}`; ctx.fillStyle = main;
-    ctx.fillText(String(f.day), 33, 58);
-    ctx.font = `12px ${site}`; ctx.fillStyle = subc;
-    ctx.fillText(`${f.weekday}${f.festival ? ' · ' + f.festival : ''}`, 36, 128);
-    // 右起竖排毛笔签句（最多三列）
+    ctx.fillText(`${f.dateText} · ${f.weekday}`, 36, 40);
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 1;
-    const sentAdv = 30, sentY = 150;
-    const cap = Math.floor((H * 0.62 - sentY) / sentAdv);
-    const chunks = [];
-    let cur = '';
-    for (const ch of f.sentence) {
-        if (cur.length >= cap) { chunks.push(cur); cur = ch; }
-        else cur += ch;
+    ctx.font = `40px ${family}`; ctx.fillStyle = main;
+    ctx.fillText(f.lunarText, 34, 62);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    if (f.festival) {
+        ctx.font = `12px ${site}`; ctx.fillStyle = subc;
+        ctx.fillText(f.festival, 36, 116);
     }
-    if (cur) chunks.push(cur);
-    ctx.font = `22px ${family}`; ctx.fillStyle = main;
-    chunks.slice(0, 3).forEach((ck, i) => drawVertical(ctx, ck, W - 44 - i * 30, sentY, sentAdv));
+    // 右起竖排毛笔签句：均分列长（不留下孤字尾列），列首避开句读
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 1;
+    const sentAdv = 30, sentY = 168;
+    const maxPer = Math.floor((H * 0.62 - sentY) / sentAdv);
+    const chars = Array.from(f.sentence);
+    const colsN = Math.min(3, Math.max(1, Math.ceil(chars.length / maxPer)));
+    const per = Math.ceil(chars.length / colsN);
+    const chunks = [];
+    for (let i = 0; i < chars.length; i += per) chunks.push(chars.slice(i, i + per).join(''));
+    for (let i = 1; i < chunks.length; i++) {
+        if (/^[，。、！？；：）]/.test(chunks[i])) {
+            chunks[i] = chunks[i - 1].slice(-1) + chunks[i];
+            chunks[i - 1] = chunks[i - 1].slice(0, -1);
+        }
+    }
+    ctx.font = `20px ${family}`; ctx.fillStyle = main;
+    chunks.forEach((ck, i) => drawVertical(ctx, ck, W - 44 - i * 32, sentY, sentAdv));
     // 左侧竖题头
     ctx.font = `24px ${family}`;
     drawVertical(ctx, '拾光签', 44, 176, 34);
-    // 吉凶居中竖写：毛笔大字，列尾压一枚小朱印当落款
+    // 吉凶居中竖写：毛笔大字
     const luckChars = Array.from(f.luck).length;
     const luckAdv = 56;
     const luckY = H * 0.42 - luckChars * luckAdv / 2;
     ctx.font = `44px ${family}`; ctx.fillStyle = main; ctx.textAlign = 'center';
-    const luckEnd = drawVertical(ctx, f.luck, W / 2, luckY, luckAdv);
+    drawVertical(ctx, f.luck, W / 2, luckY, luckAdv);
+    // 左下角吉凶小字标注：标签+结果两截，压在底部暗角上
+    ctx.textAlign = 'left';
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;
+    ctx.font = `12px ${site}`; ctx.fillStyle = subc;
+    ctx.fillText('吉凶', 36, H - 50);
+    ctx.font = `15px ${site}`; ctx.fillStyle = main;
+    ctx.fillText(f.luck, 68, H - 52);
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W / 2 - 15, luckEnd + 10, 30, 30, 6);
-    ctx.fill();
-    ctx.font = `15px ${family}`; ctx.fillStyle = '#fff';
-    ctx.fillText('拾', W / 2, luckEnd + 17);
 }
 
 function saveTalismanPng(canvas, key) {
@@ -851,7 +862,7 @@ let talismanLastFocus = null;
 
 // 把签面会用到的字凑成样串喂给 fonts.load，触发毛笔字对应 unicode-range 分片下载
 function talismanFontSample(f) {
-    return ['拾光签', f.luck, f.sentence, f.weekday, f.festival, '拾'].join('');
+    return ['拾光签', f.luck, f.sentence, f.lunarText, f.weekday, f.festival].join('');
 }
 
 async function openTalisman() {
