@@ -823,13 +823,6 @@ function drawTalisman(canvas, f) {
     const luckY = H * 0.42 - luckChars * luckAdv / 2;
     ctx.font = `44px ${family}`; ctx.fillStyle = main; ctx.textAlign = 'center';
     drawVertical(ctx, f.luck, W / 2, luckY, luckAdv);
-    // 左下角吉凶小字标注：标签+结果两截，压在底部暗角上
-    ctx.textAlign = 'left';
-    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;
-    ctx.font = `12px ${site}`; ctx.fillStyle = subc;
-    ctx.fillText('吉凶', 36, H - 50);
-    ctx.font = `15px ${site}`; ctx.fillStyle = main;
-    ctx.fillText(f.luck, 68, H - 52);
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 }
 
