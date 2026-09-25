@@ -556,8 +556,6 @@ function mulberry32(a) {
 
 // 吉凶权重合计 100：大吉 16 / 中吉 20 / 小吉 16 / 吉 16 / 末吉 12 / 凶 12 / 大凶 8
 const LUCK_POOL = [['大吉', 16], ['中吉', 20], ['小吉', 16], ['吉', 16], ['末吉', 12], ['凶', 12], ['大凶', 8]];
-const YI_POOL = ['早睡', '读十页书', '给植物浇水', '散步二十分钟', '写三行日记', '听一张专辑', '整理桌面', '给老朋友发消息', '喝够八杯水', '看一集老番', '清掉一件待办', '抬头看云'];
-const JI_POOL = ['熬夜', '拖延', '暴食', '纠结', '久坐', '刷手机到深夜', '冲动消费', '和自我较劲'];
 const SIGN_SENTENCES = [
     '把今天过成值得回忆的一天。', '慢一点，比较快。', '心之所向，素履以往。', '日拱一卒，功不唐捐。',
     '万物有灵，且美。', '留白处自有风景。', '把小事做稳，就是大事。', '风会记得每一朵花的香。',
@@ -580,22 +578,13 @@ function buildTodayFortune() {
     const rnd = mulberry32(fnvSeed('shiguang-sign-' + key));
     let roll = rnd() * 100, luck = LUCK_POOL[LUCK_POOL.length - 1][0];
     for (const [name, w] of LUCK_POOL) { if (roll < w) { luck = name; break; } roll -= w; }
-    const yi = YI_POOL[Math.floor(rnd() * YI_POOL.length)];
-    const ji = JI_POOL[Math.floor(rnd() * JI_POOL.length)];
     const sentence = SIGN_SENTENCES[Math.floor(rnd() * SIGN_SENTENCES.length)];
     const lunar = solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const festival = LUNAR_FESTIVALS[`${lunar.month}-${lunar.day}`] || SOLAR_FESTIVALS[`${now.getMonth() + 1}-${now.getDate()}`] || '';
-    const yearStart = new Date(now.getFullYear(), 0, 1);
-    const dayOfYear = Math.floor((now - yearStart) / 86400000) + 1;
-    const yearDays = Math.floor((new Date(now.getFullYear() + 1, 0, 1) - yearStart) / 86400000);
     return {
-        key, luck, yi, ji, sentence, festival, dayOfYear, yearDays,
+        key, luck, sentence, festival,
         year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate(),
-        lunarText: `${lunar.monthCn}${lunar.dayCn}`,
-        yearGanzhi: yearGanzhi(lunar.year),
-        dayGanzhi: dayGanzhi(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-        weekday: `星期${CLOCK_WEEKDAYS[now.getDay()]}`,
-        dateText: `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日`
+        weekday: `星期${CLOCK_WEEKDAYS[now.getDay()]}`
     };
 }
 
@@ -633,24 +622,6 @@ function roundRectPath(ctx, x, y, w, h, r) {
 
 // 竖排标点：横排标点竖写时换竖式字形，免得歪在字面中间
 const VERTICAL_PUNCT = { '，': '︐', '。': '︒', '、': '︑', '！': '︕', '？': '︖', '：': '︓', '；': '︔', '（': '︵', '）': '︶' };
-const CN_DIGITS = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-const CN_UNITS = ['', '十', '百', '千'];
-// 年份逐位汉写（二〇二六），计数按位值汉写（二百六十八）——竖排里不摆阿拉伯数字
-function yearToCn(y) { return String(y).split('').map(d => CN_DIGITS[+d]).join(''); }
-function numToCn(n) {
-    if (n < 10) return CN_DIGITS[n];
-    const s = String(n);
-    let out = '';
-    for (let i = 0; i < s.length; i++) {
-        const d = +s[i];
-        const unit = CN_UNITS[s.length - 1 - i];
-        if (d === 0) { if (out && !out.endsWith('〇')) out += '〇'; continue; }
-        out += CN_DIGITS[d] + unit;
-    }
-    out = out.replace(/〇+$/, '');
-    if (out.startsWith('一十')) out = out.slice(1); // 10-19 习惯写「十X」
-    return out || '〇';
-}
 
 // 竖写一列：自上而下；调用前需设好 textAlign=center / textBaseline=top。返回末字底 y
 function drawVertical(ctx, text, x, y, advance, maxChars) {
@@ -718,9 +689,9 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
             ctx.fillRect(rnd() * W, rnd() * H * 0.52, sz, sz);
         }
     }
-    // 日月 + 光晕
+    // 日月 + 光晕：放在中左偏下，避开左上日期块与左侧题头
     const [sh, ss, sl] = p.sun;
-    const cx = W * (0.12 + rnd() * 0.34), cy = H * (0.13 + rnd() * 0.13), r = 20 + rnd() * 12;
+    const cx = W * (0.26 + rnd() * 0.12), cy = H * (0.34 + rnd() * 0.12), r = 20 + rnd() * 12;
     const halo = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 3.4);
     halo.addColorStop(0, hsl(sh, ss, sl, dark ? 0.5 : 0.4));
     halo.addColorStop(1, hsl(sh, ss, sl, 0));
@@ -760,53 +731,46 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
         ctx.fillStyle = fog;
         ctx.fillRect(0, base - amp, W, amp + 34);
     }
-    // 湖面：倒影光斑 + 地平线亮边
+    // 湖面：水色接天色不戛黑块，满幅细漱波光 + 日月倒影光斑
     if (lake) {
+        // 水色取中天色相压暗：用地平暖色相会在暗色下跳成一整块芥末黄
+        const wh = p.sky[1][0];
         const wg = ctx.createLinearGradient(0, horizon, 0, H);
-        wg.addColorStop(0, hsl(rh, rs, dark ? 12 : 30));
-        wg.addColorStop(1, hsl(p.sky[2][0], p.sky[2][1], dark ? 6 : 18));
+        wg.addColorStop(0, hsl(wh, 26, dark ? 14 : 30));
+        wg.addColorStop(1, hsl(wh, 30, dark ? 5 : 14));
         ctx.fillStyle = wg;
         ctx.fillRect(0, horizon, W, H - horizon);
-        ctx.fillStyle = hsl(sh, ss, sl, 0.32);
-        for (let i = 0; i < 7; i++) {
-            const yy = horizon + 6 + i * (H - horizon - 12) / 7;
-            const ww = r * (2.3 - i * 0.24) * (0.6 + rnd() * 0.8);
-            ctx.fillRect(cx - ww / 2, yy, ww, 2);
+        ctx.fillStyle = hsl(sh, ss, sl, 0.08);
+        for (let i = 0; i < 6; i++) {
+            const yy = horizon + 8 + i * (H - horizon - 16) / 6;
+            const ww = W * (0.45 + rnd() * 0.4);
+            ctx.fillRect(W / 2 - ww / 2, yy, ww, 1.4);
         }
-        ctx.fillStyle = hsl(sh, ss, sl, 0.5);
-        ctx.fillRect(0, horizon - 1, W, 1.5);
+        ctx.fillStyle = hsl(sh, ss, sl, 0.26);
+        for (let i = 0; i < 6; i++) {
+            const yy = horizon + 6 + i * (H - horizon - 12) / 6;
+            const ww = r * (2.2 - i * 0.26) * (0.6 + rnd() * 0.7);
+            ctx.fillRect(cx - ww / 2, yy, ww, 1.8);
+        }
+        ctx.fillStyle = hsl(sh, ss, sl, 0.4);
+        ctx.fillRect(0, horizon - 1, W, 1.2);
     }
-    // 上下暗角：海报白字的 readability
+    // 上暗角保日期白字；下暗角只留一点压住画面重心（底部已无文字）
     const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
     top.addColorStop(0, 'rgba(0,0,0,0.38)');
     top.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = top;
     ctx.fillRect(0, 0, W, H * 0.34);
-    const bot = ctx.createLinearGradient(0, H * 0.58, 0, H);
+    const bot = ctx.createLinearGradient(0, H * 0.8, 0, H);
     bot.addColorStop(0, 'rgba(0,0,0,0)');
-    bot.addColorStop(1, 'rgba(0,0,0,0.46)');
+    bot.addColorStop(1, 'rgba(0,0,0,0.3)');
     ctx.fillStyle = bot;
-    ctx.fillRect(0, H * 0.58, W, H * 0.42);
+    ctx.fillRect(0, H * 0.8, W, H * 0.2);
 }
 
-// 半透白胶囊标签（宜/忌），返回宽度方便排下一个
-function drawPill(ctx, x, y, text, family) {
-    ctx.font = `12px ${family}`;
-    const w = ctx.measureText(text).width + 22;
-    ctx.fillStyle = 'rgba(255,255,255,0.16)';
-    roundRectPath(ctx, x, y, w, 26, 13);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x + 11, y + 14);
-    ctx.textBaseline = 'top';
-    return w;
-}
-
-// 签到符：网易云日签海报式——全幅生成图打底，左上大日期、右上吉凶竖印、
-// 右起竖排毛笔签句、左侧竖题头、宜忌胶囊与底部信息 caption、右下品牌朱印
-function drawTalisman(canvas, f, streak) {
+// 签到符：网易云日签海报式——全幅生成图打底，左上大日期、吉凶居中竖写+列尾朱印、
+// 右起竖排毛笔签句、左侧竖题头；底部不再放字，留给画面本身
+function drawTalisman(canvas, f) {
     const W = 380, H = 680, S = 2;
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     canvas.width = W * S;
@@ -828,18 +792,10 @@ function drawTalisman(canvas, f, streak) {
     ctx.fillText(String(f.day), 33, 58);
     ctx.font = `12px ${site}`; ctx.fillStyle = subc;
     ctx.fillText(`${f.weekday}${f.festival ? ' · ' + f.festival : ''}`, 36, 128);
-    // 右上吉凶竖印
-    const luckAdv = 42;
-    const sealH = Array.from(f.luck).length * luckAdv + 22;
-    ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W - 62, 36, 38, sealH, 8);
-    ctx.fill();
-    ctx.font = `24px ${family}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-    drawVertical(ctx, f.luck, W - 43, 47, luckAdv);
-    // 右起竖排毛笔签句（印下方起列，最多三列）
+    // 右起竖排毛笔签句（最多三列）
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 1;
-    const sentAdv = 30, sentY = 36 + sealH + 26;
-    const cap = Math.floor((H * 0.56 - sentY) / sentAdv);
+    const sentAdv = 30, sentY = 150;
+    const cap = Math.floor((H * 0.62 - sentY) / sentAdv);
     const chunks = [];
     let cur = '';
     for (const ch of f.sentence) {
@@ -852,20 +808,18 @@ function drawTalisman(canvas, f, streak) {
     // 左侧竖题头
     ctx.font = `24px ${family}`;
     drawVertical(ctx, '拾光签', 44, 176, 34);
+    // 吉凶居中竖写：毛笔大字，列尾压一枚小朱印当落款
+    const luckChars = Array.from(f.luck).length;
+    const luckAdv = 56;
+    const luckY = H * 0.42 - luckChars * luckAdv / 2;
+    ctx.font = `44px ${family}`; ctx.fillStyle = main; ctx.textAlign = 'center';
+    const luckEnd = drawVertical(ctx, f.luck, W / 2, luckY, luckAdv);
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    // 宜忌胶囊
-    const w1 = drawPill(ctx, 36, H - 122, `宜 ${f.yi}`, site);
-    drawPill(ctx, 36 + w1 + 10, H - 122, `忌 ${f.ji}`, site);
-    // 底部信息 caption
-    ctx.font = `11px ${site}`; ctx.fillStyle = subc; ctx.textAlign = 'left';
-    ctx.fillText(`${f.yearGanzhi}年${f.lunarText} · ${f.dayGanzhi}日`, 36, H - 76);
-    ctx.fillText(`年第${f.dayOfYear}天 · 余${f.yearDays - f.dayOfYear}天 · 连续签到${streak}天`, 36, H - 56);
-    // 右下品牌朱印
     ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W - 60, H - 68, 32, 32, 6);
+    roundRectPath(ctx, W / 2 - 15, luckEnd + 10, 30, 30, 6);
     ctx.fill();
-    ctx.font = `16px ${family}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-    ctx.fillText('拾', W - 44, H - 60);
+    ctx.font = `15px ${family}`; ctx.fillStyle = '#fff';
+    ctx.fillText('拾', W / 2, luckEnd + 17);
 }
 
 function saveTalismanPng(canvas, key) {
@@ -896,22 +850,18 @@ function copyTalismanPng(canvas) {
 let talismanLastFocus = null;
 
 // 把签面会用到的字凑成样串喂给 fonts.load，触发毛笔字对应 unicode-range 分片下载
-function talismanFontSample(f, streak) {
-    return ['拾光签', f.luck, `宜·${f.yi}`, `忌·${f.ji}`, f.sentence,
-        `${f.yearGanzhi}年${f.lunarText}`, `${f.dayGanzhi}日·${f.festival}`,
-        `年第${numToCn(f.dayOfYear)}天`, `余${numToCn(f.yearDays - f.dayOfYear)}天·连签${numToCn(streak)}日`,
-        `${yearToCn(f.year)}年${numToCn(f.month)}月${numToCn(f.day)}日·${f.weekday}`,
-        '拾光集·每日签', '〇一二三四五六七八九十百千'].join('');
+function talismanFontSample(f) {
+    return ['拾光签', f.luck, f.sentence, f.weekday, f.festival, '拾'].join('');
 }
 
-async function openTalisman(streak) {
+async function openTalisman() {
     const modal = document.getElementById('talismanModal');
     const f = buildTodayFortune();
     // 毛笔字就绪再画，否则 canvas 会拿回退字体定型
     if (window.SiteAppearance && SiteAppearance.loadBrushFont) {
-        await SiteAppearance.loadBrushFont(talismanFontSample(f, streak));
+        await SiteAppearance.loadBrushFont(talismanFontSample(f));
     }
-    drawTalisman(document.getElementById('talismanCanvas'), f, streak);
+    drawTalisman(document.getElementById('talismanCanvas'), f);
     talismanLastFocus = document.activeElement;
     modal.hidden = false;
     void modal.offsetHeight; // 同步回流后再加类，后台标签页也能播过渡
@@ -950,13 +900,13 @@ function initCheckin() {
     }
 
     btn.addEventListener('click', () => {
-        const streak = recordCheckin();
+        recordCheckin();
         revealQuote();
-        openTalisman(streak);
+        openTalisman();
     });
     // 已签到后一言卡片上的小按钮：重看今日签
     document.getElementById('quoteTalisman').addEventListener('click', () => {
-        openTalisman(Number(localStorage.getItem('checkinStreak') || 1));
+        openTalisman();
     });
 
     document.getElementById('talismanClose').addEventListener('click', closeTalisman);
