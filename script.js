@@ -589,6 +589,7 @@ function buildTodayFortune() {
     const yearDays = Math.floor((new Date(now.getFullYear() + 1, 0, 1) - yearStart) / 86400000);
     return {
         key, luck, yi, ji, sentence, festival, dayOfYear, yearDays,
+        year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate(),
         lunarText: `${lunar.monthCn}${lunar.dayCn}`,
         yearGanzhi: yearGanzhi(lunar.year),
         dayGanzhi: dayGanzhi(now.getFullYear(), now.getMonth() + 1, now.getDate()),
@@ -629,18 +630,38 @@ function roundRectPath(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
-function wrapCjkText(ctx, text, cx, y, maxWidth, lineHeight, maxLines) {
-    const lines = [];
-    let cur = '';
-    for (const ch of text) {
-        if (ctx.measureText(cur + ch).width > maxWidth && cur) { lines.push(cur); cur = ch; }
-        else cur += ch;
+// 竖排标点：横排标点竖写时换竖式字形，免得歪在字面中间
+const VERTICAL_PUNCT = { '，': '︐', '。': '︒', '、': '︑', '！': '︕', '？': '︖', '：': '︓', '；': '︔', '（': '︵', '）': '︶' };
+const CN_DIGITS = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+const CN_UNITS = ['', '十', '百', '千'];
+// 年份逐位汉写（二〇二六），计数按位值汉写（二百六十八）——竖排里不摆阿拉伯数字
+function yearToCn(y) { return String(y).split('').map(d => CN_DIGITS[+d]).join(''); }
+function numToCn(n) {
+    if (n < 10) return CN_DIGITS[n];
+    const s = String(n);
+    let out = '';
+    for (let i = 0; i < s.length; i++) {
+        const d = +s[i];
+        const unit = CN_UNITS[s.length - 1 - i];
+        if (d === 0) { if (out && !out.endsWith('〇')) out += '〇'; continue; }
+        out += CN_DIGITS[d] + unit;
     }
-    if (cur) lines.push(cur);
-    const cut = lines.slice(0, maxLines);
-    if (lines.length > maxLines) cut[cut.length - 1] = cut[cut.length - 1].slice(0, -1) + '…';
-    cut.forEach((ln, i) => ctx.fillText(ln, cx, y + i * lineHeight));
-    return cut.length;
+    out = out.replace(/〇+$/, '');
+    if (out.startsWith('一十')) out = out.slice(1); // 10-19 习惯写「十X」
+    return out || '〇';
+}
+
+// 竖写一列：自上而下；调用前需设好 textAlign=center / textBaseline=top。返回末字底 y
+function drawVertical(ctx, text, x, y, advance, maxChars) {
+    let cy = y;
+    let n = 0;
+    for (const ch of text) {
+        if (maxChars && n >= maxChars) break;
+        ctx.fillText(VERTICAL_PUNCT[ch] || ch, x, cy);
+        cy += advance;
+        n++;
+    }
+    return cy;
 }
 
 // 每日生成图：种子决定天色/日月/山脊层，同一天同一张图
@@ -682,14 +703,17 @@ function drawTalismanScene(ctx, x, y, w, h, rnd, dark) {
     ctx.stroke();
 }
 
+// 签到符：竖排毛笔字版面。右起竖列：题头→日期→吉凶竖印→宜忌→签句→当日信息→落款，
+// 下方横置每日生成图，图右下角压朱印。统一用马善政毛笔楷书（加载失败回退站点字体）
 function drawTalisman(canvas, f, streak) {
     const W = 380, H = 680, S = 2;
+    const TEXT_BOTTOM = 372; // 竖列文字区下沿，再往下是生成图
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
     canvas.width = W * S;
     canvas.height = H * S;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(S, 0, 0, S, 0, 0);
-    const family = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    const family = `'Ma Shan Zheng', ${getComputedStyle(document.body).fontFamily || 'sans-serif'}`;
     const paper = dark ? '#151821' : '#f7f2e7';
     const ink = dark ? '#ece7db' : '#2c2620';
     const sub = dark ? '#9b9689' : '#8b8371';
@@ -701,42 +725,55 @@ function drawTalisman(canvas, f, streak) {
     ctx.strokeStyle = line;
     ctx.lineWidth = 2; ctx.strokeRect(10, 10, W - 20, H - 20);
     ctx.lineWidth = 1; ctx.strokeRect(16, 16, W - 32, H - 32);
-    const center = (text, y, font, color) => {
-        ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(text, W / 2, y);
-    };
-    center('拾 光 签', 54, `700 24px ${family}`, ink);
-    center(`${f.dateText} · ${f.weekday}`, 76, `400 12px ${family}`, sub);
-    // 吉凶朱印
-    ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W / 2 - 62, 94, 124, 66, 8);
-    ctx.fill();
-    center(f.luck, 140, `700 36px ${family}`, sealInk);
-    // 宜忌
-    ctx.font = `400 13px ${family}`; ctx.fillStyle = ink;
-    ctx.textAlign = 'left'; ctx.fillText(`宜 · ${f.yi}`, 40, 190);
-    ctx.textAlign = 'right'; ctx.fillText(`忌 · ${f.ji}`, W - 40, 190);
-    // 每日生成图
-    drawTalismanScene(ctx, 40, 206, W - 80, 176, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
-    // 一句话
     ctx.textAlign = 'center';
-    ctx.font = `500 14px ${family}`; ctx.fillStyle = ink;
-    wrapCjkText(ctx, f.sentence, W / 2, 414, W - 88, 22, 3);
-    // 分隔 + 当日信息
-    ctx.strokeStyle = line;
-    ctx.beginPath(); ctx.moveTo(40, 492); ctx.lineTo(W - 40, 492); ctx.stroke();
-    const info1 = `${f.yearGanzhi}年 ${f.lunarText} · ${f.dayGanzhi}日` + (f.festival ? ` · ${f.festival}` : '');
-    center(info1, 518, `400 13px ${family}`, ink);
-    center(`年第 ${f.dayOfYear} 天 · 余 ${f.yearDays - f.dayOfYear} 天`, 540, `400 12px ${family}`, sub);
-    center(`连续签到 ${streak} 天`, 562, `400 12px ${family}`, sub);
-    // 落款 + 角印
-    ctx.textAlign = 'left'; ctx.font = `400 11px ${family}`; ctx.fillStyle = sub;
-    ctx.fillText('拾光集 · 每日签', 40, 640);
+    ctx.textBaseline = 'top';
+    // 写一竖列：按字号算字距，列高超不过文字区就截断
+    const col = (text, x, y, size, advance, color) => {
+        ctx.font = `${size}px ${family}`;
+        ctx.fillStyle = color;
+        return drawVertical(ctx, text, x, y, advance, Math.floor((TEXT_BOTTOM - y) / advance));
+    };
+    // 题头（最右列）+ 日期列
+    col('拾光签', 340, 50, 29, 38, ink);
+    col(`${yearToCn(f.year)}年${numToCn(f.month)}月${numToCn(f.day)}日·${f.weekday}`, 308, 54, 12, 16, sub);
+    // 吉凶竖印：红底白字竖排
+    const luckAdv = 46;
+    const sealH = Array.from(f.luck).length * luckAdv + 26;
     ctx.fillStyle = sealRed;
-    roundRectPath(ctx, W - 84, 604, 44, 44, 6);
+    roundRectPath(ctx, 246, 62, 52, sealH, 8);
     ctx.fill();
-    ctx.fillStyle = sealInk; ctx.textAlign = 'center'; ctx.font = `700 15px ${family}`;
-    ctx.fillText('拾', W - 62, 622);
-    ctx.fillText('光', W - 62, 640);
+    ctx.font = `36px ${family}`; ctx.fillStyle = sealInk;
+    drawVertical(ctx, f.luck, 272, 75, luckAdv);
+    // 宜忌两列
+    col(`宜·${f.yi}`, 230, 64, 14, 19, ink);
+    col(`忌·${f.ji}`, 208, 64, 14, 19, ink);
+    // 签句：右起换列竖写，最多三列
+    const sentAdv = 24;
+    const cap = Math.floor((TEXT_BOTTOM - 64) / sentAdv);
+    const chunks = [];
+    let cur = '';
+    for (const ch of f.sentence) {
+        if (cur.length >= cap) { chunks.push(cur); cur = ch; }
+        else cur += ch;
+    }
+    if (cur) chunks.push(cur);
+    chunks.slice(0, 3).forEach((ck, i) => col(ck, 178 - i * 26, 64, 16, sentAdv, ink));
+    // 当日信息四列 + 落款（最左列）
+    const infos = [
+        `${f.yearGanzhi}年${f.lunarText}`,
+        `${f.dayGanzhi}日${f.festival ? '·' + f.festival : ''}`,
+        `年第${numToCn(f.dayOfYear)}天`,
+        `余${numToCn(f.yearDays - f.dayOfYear)}天·连签${numToCn(streak)}日`
+    ];
+    infos.forEach((t, i) => col(t, 106 - i * 17, 62, 11, 15, sub));
+    col('拾光集·每日签', 36, 62, 10, 14, sub);
+    // 每日生成图 + 图上压角印
+    drawTalismanScene(ctx, 36, 388, W - 72, 240, mulberry32(fnvSeed('shiguang-art-' + f.key)), dark);
+    ctx.fillStyle = sealRed;
+    roundRectPath(ctx, W - 88, 580, 44, 44, 6);
+    ctx.fill();
+    ctx.font = `16px ${family}`; ctx.fillStyle = sealInk;
+    drawVertical(ctx, '拾光', W - 66, 588, 20);
 }
 
 function saveTalismanPng(canvas, key) {
@@ -766,9 +803,23 @@ function copyTalismanPng(canvas) {
 // --- 签到面板 / 签到符弹层 ---
 let talismanLastFocus = null;
 
-function openTalisman(streak) {
+// 把签面会用到的字凑成样串喂给 fonts.load，触发毛笔字对应 unicode-range 分片下载
+function talismanFontSample(f, streak) {
+    return ['拾光签', f.luck, `宜·${f.yi}`, `忌·${f.ji}`, f.sentence,
+        `${f.yearGanzhi}年${f.lunarText}`, `${f.dayGanzhi}日·${f.festival}`,
+        `年第${numToCn(f.dayOfYear)}天`, `余${numToCn(f.yearDays - f.dayOfYear)}天·连签${numToCn(streak)}日`,
+        `${yearToCn(f.year)}年${numToCn(f.month)}月${numToCn(f.day)}日·${f.weekday}`,
+        '拾光集·每日签', '〇一二三四五六七八九十百千'].join('');
+}
+
+async function openTalisman(streak) {
     const modal = document.getElementById('talismanModal');
-    drawTalisman(document.getElementById('talismanCanvas'), buildTodayFortune(), streak);
+    const f = buildTodayFortune();
+    // 毛笔字就绪再画，否则 canvas 会拿回退字体定型
+    if (window.SiteAppearance && SiteAppearance.loadBrushFont) {
+        await SiteAppearance.loadBrushFont(talismanFontSample(f, streak));
+    }
+    drawTalisman(document.getElementById('talismanCanvas'), f, streak);
     talismanLastFocus = document.activeElement;
     modal.hidden = false;
     void modal.offsetHeight; // 同步回流后再加类，后台标签页也能播过渡

@@ -125,7 +125,7 @@ MySite/
 - **状态存储**：`localStorage` 的 `checkin:YYYY-MM-DD`（当日已签）、`checkinLast` + `checkinStreak`（连签：昨天签过 +1、断了重计）；隐私模式写失败不阻断出签。
 - **签面确定性**：日期字符串过 FNV-1a 出种子、mulberry32 出序列，**同一天任何时刻同一支签**；吉凶按 `LUCK_POOL` 权重抽（合计 100：大吉16/中吉20/小吉16/吉16/末吉12/凶12/大凶8），宜/忌/一句话各从池里抽。
 - **当日信息**：农历走内嵌 `LUNAR_INFO` 表（1900-2100，锚点自检过：2026-09-25=八月十五、2026-02-17 与 2025-01-29=正月初一）；干支日以 2026-09-25=壬寅日定偏移；节日先查农历表再补公历表；另有年第 N 天/余 M 天。**改农历表必须重跑锚点自检**（ cumulative 偏移，错一位全链偏）。
-- **签到符画布**：`drawTalisman` 画 380×680 逻辑像素、2x 导出；版面自上而下：签头+日期 → 吉凶朱印 → 宜忌 → 每日生成图（`drawTalismanScene` 种子画天色/星点/日月/三层山脊）→ 一句话（`wrapCjkText` 按字换行最多三行）→ 分隔+农历干支节日+年第N天+连签 → 落款+角印。明暗主题各一套纸/墨/印色（画布是 artwork，配色自成一套不跟主题变量）。
+- **签到符画布**：`drawTalisman` 画 380×680 逻辑像素、2x 导出；**竖排毛笔字**：统一马善政毛笔楷书（appearance.js 的 `loadBrushFont` 在画签前按需拉 `@fontsource/ma-shan-zheng@5`，并用签面文字样串触发 unicode-range 分片，拉不动回退站点字体）；右起竖列：题头→日期→吉凶竖印→宜忌→签句（换列最多三列）→当日信息四列→落款；标点走 `VERTICAL_PUNCT` 竖式字形、数字走 `yearToCn`/`numToCn` 汉写（竖排里不摆阿拉伯数字）；下方横置每日生成图（`drawTalismanScene` 种子画天色/星点/日月/三层山脊），图右下角压朱印。明暗主题各一套纸/墨/印色（画布是 artwork，配色自成一套不跟主题变量）。
 - **导出**：`saveTalismanPng` 走 `toBlob` → download `拾光签-YYYY-MM-DD.png`；`copyTalismanPng` 走 `ClipboardItem`，不支持时按钮文案临时提示（不用 alert）。
 - **弹层**：`#talismanModal` 与设置弹层同一套规矩（`hidden` + 同步回流再加 `.open`、`body.modal-open` 锁滚、Esc `stopImmediatePropagation`、焦点开时存/关时还）；`.checkin-panel`/`.quote-body`/`.talisman-modal` 都写了 display 规则，已补 `[hidden] { display:none !important }`（坑位 11）。
 - **零新依赖**：逻辑全在 script.js、样式在 styles.css（新增 `--seal-red`/`--seal-ink` 两个变量，明暗各一）；无新文件，不改 PRECACHE、不升 SW 版本。

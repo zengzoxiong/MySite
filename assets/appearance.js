@@ -139,6 +139,21 @@
         return Promise.race([loading, timeout]);
     }
 
+    // 签到符专用毛笔字（马善政毛笔楷书，SIL OFL）：不进界面字体清单，
+    // 画签时才按需拉 CSS + 对应分片，不用签的人一个字节都不付
+    const BRUSH_FONT = { family: "'Ma Shan Zheng'", css: ['@fontsource/ma-shan-zheng@5/index.css'] };
+    let brushCssTask = null;
+    function loadBrushFont(sample) {
+        if (!brushCssTask) brushCssTask = Promise.all(BRUSH_FONT.css.map(injectCss));
+        return brushCssTask.then(() => {
+            if (!document.fonts || !document.fonts.load) return;
+            return Promise.race([
+                document.fonts.load('16px ' + BRUSH_FONT.family, sample || '拾光签大吉宜忌'),
+                new Promise((r) => setTimeout(r, 2500)) // 拉不动就算了，canvas 回退站点字体
+            ]);
+        });
+    }
+
     // 应用界面字体：返回 Promise，调用方可据此显示「加载中」状态
     function applySiteFont(id) {
         const f = fontById(id);
@@ -211,6 +226,8 @@
         weatherCityRaw: weatherCityRaw,
         applySiteFont: applySiteFont,
         applySiteFontFromStorage: applySiteFontFromStorage,
+        loadBrushFont: loadBrushFont,
+        BRUSH_FONT: BRUSH_FONT,
         clockStyleFromStorage: clockStyleFromStorage
     };
 
