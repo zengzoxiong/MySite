@@ -665,44 +665,118 @@ function drawVertical(ctx, text, x, y, advance, maxChars) {
     return cy;
 }
 
-// 每日生成图（网易云日签海报式全幅背景）：种子决定天色/星点/日月/山脊，同一天同一张图；
-// 上下再压暗角渐变，保证海报白字可读
-function drawTalismanScene(ctx, W, H, rnd, dark) {
-    const hue = Math.floor(rnd() * 360);
-    const sky = ctx.createLinearGradient(0, 0, 0, H);
-    if (dark) {
-        sky.addColorStop(0, `hsl(${hue} 48% 13%)`);
-        sky.addColorStop(0.55, `hsl(${(hue + 35) % 360} 44% 22%)`);
-        sky.addColorStop(1, `hsl(${(hue + 70) % 360} 40% 9%)`);
-    } else {
-        sky.addColorStop(0, `hsl(${hue} 58% 46%)`);
-        sky.addColorStop(0.55, `hsl(${(hue + 35) % 360} 62% 58%)`);
-        sky.addColorStop(1, `hsl(${(hue + 70) % 360} 52% 34%)`);
+// 每日生成图配色盘：六套手工调的 HSL（暗色基调），亮色整体提亮降饱；种子选一套，
+// 保证任何一天抽到的都是协调色，而不是随机 hue 碰运气
+const SCENE_PALETTES = [
+    { sky: [[222, 45, 16], [268, 40, 34], [18, 72, 58]], ridge: [262, 30], sun: [38, 92, 74], stars: true },  // 暮紫
+    { sky: [[198, 58, 14], [186, 48, 34], [42, 82, 62]], ridge: [204, 32], sun: [48, 95, 78], stars: false }, // 海日
+    { sky: [[340, 44, 14], [352, 50, 34], [22, 74, 56]], ridge: [348, 30], sun: [32, 92, 72], stars: true },  // 绛霞
+    { sky: [[152, 34, 12], [162, 38, 30], [48, 62, 54]], ridge: [168, 26], sun: [52, 82, 74], stars: false }, // 松烟
+    { sky: [[215, 50, 10], [224, 44, 26], [206, 34, 46]], ridge: [214, 26], sun: [46, 60, 82], stars: true }, // 月夜
+    { sky: [[268, 40, 13], [288, 42, 30], [322, 52, 52]], ridge: [282, 28], sun: [40, 92, 78], stars: true }   // 紫夜
+];
+const hsl = (h, s, l, a) => (a === undefined ? `hsl(${h} ${s}% ${l}%)` : `hsl(${h} ${s}% ${l}% / ${a})`);
+
+// 平滑山脊：种子控制点 + 二次贝塞尔过中点，比硬折线柔和
+function ridgePath(ctx, W, baseY, amp, rnd, bottomY) {
+    const n = 4 + Math.floor(rnd() * 3);
+    const pts = [];
+    for (let i = 0; i <= n; i++) pts.push([W * i / n, baseY - rnd() * amp]);
+    ctx.beginPath();
+    ctx.moveTo(0, bottomY);
+    ctx.lineTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length - 1; i++) {
+        const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+        const my = (pts[i][1] + pts[i + 1][1]) / 2;
+        ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
     }
+    ctx.lineTo(W, pts[pts.length - 1][1]);
+    ctx.lineTo(W, bottomY);
+    ctx.closePath();
+}
+
+// 每日生成图（网易云日签海报式全幅背景）：种子选配色盘与构图（山/湖），
+// 同一天同一张图；上下再压暗角渐变保白字可读
+function drawTalismanScene(ctx, W, H, rnd, dark) {
+    const p = SCENE_PALETTES[Math.floor(rnd() * SCENE_PALETTES.length)];
+    const lift = dark ? 0 : 24; // 亮色提亮
+    const dsat = dark ? 0 : -8; // 亮色稍降饱
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    p.sky.forEach(([h, s, l], i) => {
+        const stop = i === 2 ? 1 : i * 0.5 + 0.05;
+        sky.addColorStop(stop, hsl(h, Math.max(s + dsat, 20), Math.min(l + lift, 90)));
+    });
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    const dots = 26 + Math.floor(rnd() * 18);
-    for (let i = 0; i < dots; i++) ctx.fillRect(rnd() * W, rnd() * H * 0.5, 1.6, 1.6);
-    // 日月放左半区：右半要留给竖排签句，压上了字会花
-    const cx = W * (0.12 + rnd() * 0.34), cy = H * (0.14 + rnd() * 0.14), r = 22 + rnd() * 14;
-    ctx.fillStyle = dark ? '#f0e8d4' : `hsl(${(hue + 310) % 360} 90% 86%)`;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    for (let layer = 0; layer < 3; layer++) {
-        const base = H * (0.6 + layer * 0.12);
-        ctx.fillStyle = `hsl(${(hue + 205) % 360} ${dark ? 26 : 34}% ${dark ? 16 - layer * 4 : 30 - layer * 8}%)`;
-        ctx.beginPath();
-        ctx.moveTo(0, H);
-        ctx.lineTo(0, base + rnd() * 12);
-        let px = 0;
-        while (px < W) {
-            px += W * (0.12 + rnd() * 0.16);
-            ctx.lineTo(Math.min(px, W), base - rnd() * H * (0.16 - layer * 0.04));
+    // 星点：大小/亮度不一，只在夜空或暗色主题出
+    if (p.stars || dark) {
+        const n = 30 + Math.floor(rnd() * 22);
+        for (let i = 0; i < n; i++) {
+            const big = rnd() > 0.86;
+            ctx.fillStyle = `rgba(255,255,255,${(0.3 + rnd() * 0.55).toFixed(2)})`;
+            const sz = big ? 2 : 1.2;
+            ctx.fillRect(rnd() * W, rnd() * H * 0.52, sz, sz);
         }
-        ctx.lineTo(W, H);
-        ctx.closePath();
-        ctx.fill();
     }
+    // 日月 + 光晕
+    const [sh, ss, sl] = p.sun;
+    const cx = W * (0.12 + rnd() * 0.34), cy = H * (0.13 + rnd() * 0.13), r = 20 + rnd() * 12;
+    const halo = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 3.4);
+    halo.addColorStop(0, hsl(sh, ss, sl, dark ? 0.5 : 0.4));
+    halo.addColorStop(1, hsl(sh, ss, sl, 0));
+    ctx.fillStyle = halo;
+    ctx.fillRect(cx - r * 3.4, cy - r * 3.4, r * 6.8, r * 6.8);
+    ctx.fillStyle = hsl(sh, ss, Math.min(sl + (dark ? 6 : 4), 92));
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    // 飞鸟：左半天空两三点，国画味
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(30,32,48,0.38)';
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    const birds = 2 + Math.floor(rnd() * 2);
+    for (let i = 0; i < birds; i++) {
+        const bx = W * (0.1 + rnd() * 0.34), by = H * (0.16 + rnd() * 0.2), bs = 5 + rnd() * 4;
+        ctx.beginPath();
+        ctx.moveTo(bx - bs, by);
+        ctx.quadraticCurveTo(bx - bs / 2, by - bs * 0.7, bx, by);
+        ctx.quadraticCurveTo(bx + bs / 2, by - bs * 0.7, bx + bs, by);
+        ctx.stroke();
+    }
+    // 山脊四层 + 层间雾；种子决定要不要把最下层换成湖面
+    const lake = rnd() < 0.45;
+    const horizon = lake ? H * 0.78 : H;
+    const [rh, rs] = p.ridge;
+    for (let layer = 0; layer < 4; layer++) {
+        const base = H * (0.5 + layer * 0.09) + (lake ? -H * 0.06 : 0);
+        const amp = H * (0.16 - layer * 0.028);
+        const l = dark ? 15 - layer * 3 : 34 - layer * 7;
+        ridgePath(ctx, W, base, amp, rnd, horizon);
+        ctx.fillStyle = hsl(rh, Math.max(rs + dsat, 16), Math.max(l + lift * 0.4, 6));
+        ctx.fill();
+        // 层间雾：山脊上方一条两端渐隐的亮带，拉出空气透视（顶端不渐隐会露硬边）
+        const fog = ctx.createLinearGradient(0, base - amp, 0, base + 34);
+        fog.addColorStop(0, hsl(rh, 24, dark ? 62 : 92, 0));
+        fog.addColorStop(0.35, hsl(rh, 24, dark ? 62 : 92, 0.12));
+        fog.addColorStop(1, hsl(rh, 24, dark ? 62 : 92, 0));
+        ctx.fillStyle = fog;
+        ctx.fillRect(0, base - amp, W, amp + 34);
+    }
+    // 湖面：倒影光斑 + 地平线亮边
+    if (lake) {
+        const wg = ctx.createLinearGradient(0, horizon, 0, H);
+        wg.addColorStop(0, hsl(rh, rs, dark ? 12 : 30));
+        wg.addColorStop(1, hsl(p.sky[2][0], p.sky[2][1], dark ? 6 : 18));
+        ctx.fillStyle = wg;
+        ctx.fillRect(0, horizon, W, H - horizon);
+        ctx.fillStyle = hsl(sh, ss, sl, 0.32);
+        for (let i = 0; i < 7; i++) {
+            const yy = horizon + 6 + i * (H - horizon - 12) / 7;
+            const ww = r * (2.3 - i * 0.24) * (0.6 + rnd() * 0.8);
+            ctx.fillRect(cx - ww / 2, yy, ww, 2);
+        }
+        ctx.fillStyle = hsl(sh, ss, sl, 0.5);
+        ctx.fillRect(0, horizon - 1, W, 1.5);
+    }
+    // 上下暗角：海报白字的 readability
     const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
     top.addColorStop(0, 'rgba(0,0,0,0.38)');
     top.addColorStop(1, 'rgba(0,0,0,0)');
