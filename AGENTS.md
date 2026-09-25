@@ -27,6 +27,7 @@ MySite/
 │   ├── agent-plugins.json# Agent Skills 注册表 + MCP 清单
 │   ├── stars.json        # GitHub Stars（工作流自动同步，勿手改）
 │   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
+│   ├── gh-activity.json  # GitHub 贡献热力图（工作流每周同步，勿手改）
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
@@ -137,6 +138,7 @@ MySite/
 
 - **新增视图必须同步改**：`renderCurrentView()` 分发、`goHome()` 复位、侧栏点击处理器（含 `searchFrom` 与搜索框清空）、全域搜索 `renderSearchResults`
 - 搜索框输入即进入 `search` 视图（分组结果 + 加载过渡 + `searchSeq` 防竞态），清空后恢复 `searchFrom` 视图
+- 右上角 GitHub 卡片带展开键（`#ghExpand`）：展开 `#ghPanel` 贡献热力图（懒加载 `data/gh-activity.json`，54 列×7 行 `.gh-cell` 五档色阶走 `color-mix(in srgb, var(--accent-color) …)`，格宽 9px+间距 2px 刚好不出横向滚动条，格子 title 报日期+次数）；Esc/点面板外关闭，Esc 用 `stopImmediatePropagation` 不触发全局回首页
 
 ### 卡片构建器（共用，勿在视图里内联写卡片）
 
@@ -188,6 +190,7 @@ MySite/
 - `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
 - `check-links.yml`：每周一 05:30 体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
 - `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
+- `sync-ghactivity.yml`：每周一 05:50 同步 GitHub 贡献到 data/gh-activity.json（主源 contributions 片段近一年，回退 events 近 90 天），有变化才提交
 - 三个工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线

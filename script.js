@@ -987,6 +987,80 @@ async function initGitHubStats() {
         document.getElementById('githubStats').style.display = 'none';
         console.error('GitHub 数据加载失败:', e);
     }
+
+    // 展开键：贡献热力图面板（数据懒加载，首次展开才敲 json）
+    const btn = document.getElementById('ghExpand');
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleGhPanel();
+    });
+    document.addEventListener('click', (e) => {
+        const panel = document.getElementById('ghPanel');
+        if (!panel.hidden && !document.querySelector('.github-corner').contains(e.target)) toggleGhPanel(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !document.getElementById('ghPanel').hidden) {
+            toggleGhPanel(false);
+            e.stopImmediatePropagation(); // 只关面板，不触发全局“回首页”
+        }
+    });
+}
+
+// --- GitHub 贡献热力图（右上角展开面板） ---
+// 数据由 .github/workflows/sync-ghactivity.yml 每周写 data/gh-activity.json：
+// { fetchedAt, days: { 'YYYY-MM-DD': 次数 } }
+let ghActivity = null;
+
+async function loadGhActivity() {
+    if (ghActivity) return ghActivity;
+    try {
+        const res = await fetch('data/gh-activity.json');
+        if (res.ok) ghActivity = await res.json();
+    } catch (e) {
+        console.error('贡献数据加载失败:', e);
+    }
+    return ghActivity;
+}
+
+function ghLevel(c) { return c === 0 ? 0 : c < 3 ? 1 : c < 5 ? 2 : c < 8 ? 3 : 4; }
+
+function renderGhHeat() {
+    const heat = document.getElementById('ghHeat');
+    const totalEl = document.getElementById('ghTotal');
+    const fetchedEl = document.getElementById('ghFetched');
+    const days = ghActivity && ghActivity.days;
+    if (!days) {
+        heat.innerHTML = '<span class="gh-empty">暂无贡献数据（工作流每周一同步）</span>';
+        totalEl.textContent = '';
+        fetchedEl.textContent = '';
+        return;
+    }
+    // 结束于今天、起点对齐周日，凑满 53 列×7 行
+    const end = new Date();
+    end.setUTCHours(0, 0, 0, 0);
+    let startMs = end.getTime() - 370 * 86400000;
+    startMs -= new Date(startMs).getUTCDay() * 86400000;
+    const cells = [];
+    let total = 0;
+    for (let t = startMs; t <= end.getTime(); t += 86400000) {
+        const key = new Date(t).toISOString().slice(0, 10);
+        const c = days[key] || 0;
+        total += c;
+        cells.push(`<i class="gh-cell lv${ghLevel(c)}" title="${key} · ${c} 次贡献"></i>`);
+    }
+    heat.innerHTML = cells.join('');
+    totalEl.textContent = `近一年 ${total} 次`;
+    fetchedEl.textContent = ghActivity.fetchedAt ? `同步于 ${ghActivity.fetchedAt}` : '';
+}
+
+function toggleGhPanel(show) {
+    const panel = document.getElementById('ghPanel');
+    const btn = document.getElementById('ghExpand');
+    const next = show === undefined ? panel.hidden : show;
+    if (next) loadGhActivity().then(renderGhHeat);
+    panel.hidden = !next;
+    btn.classList.toggle('open', next);
+    btn.setAttribute('aria-expanded', String(next));
 }
 
 // --- 待办清单（localStorage 持久化） ---
