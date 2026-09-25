@@ -190,7 +190,7 @@ MySite/
 - `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
 - `check-links.yml`：每周一 05:30 体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
 - `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
-- `sync-ghactivity.yml`：每周一 05:50 同步 GitHub 贡献到 data/gh-activity.json（主源 contributions 片段近一年，回退 events 近 90 天），有变化才提交
+- `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（主源 contributions 片段近一年，回退 events 近 90 天），有变化才提交
 - 三个工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线
