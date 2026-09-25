@@ -6,7 +6,7 @@
     "dead": 0
   },
   "results": {
-    "https://tools.video": {
+    "https://tools.video/zh-CN": {
       "status": 200,
       "reason": "http",
       "state": "ok",
