@@ -114,7 +114,7 @@ MySite/
 
 - **界面字体**：`localStorage.fontFamily`，6 选 1（系统默认 + 思源黑体/思源宋体/霞鹜文楷/得意黑/朱雀仿宋，均为 SIL OFL 开源字体）。字体 CSS 从 jsDelivr 按需拉取（gcore → fastly → cdn 三级回退），每套都做了 unicode-range 分片，浏览器只下载用到的分片；**不要改成整包下载**（整套中文字库十几 MB）。应用方式是写 `--font-ui`（`:root` 里默认 `var(--font-system)`，`body { font-family: var(--font-ui) }`），别在别处硬写 font-family 栈。切换前用 `document.fonts.load()` 等字体就绪再切，避免得意黑那套 CSS 没写 `font-display` 导致整页文字空白（FOIT）。
 - **首页时钟风格**：`localStorage.clockStyle`，6 选 1（简约/翻页/上滑/叠卡/滚轮/立方，见 `CLOCK_STYLES`）。除「简约」直接写 `textContent` 外，其余五种把 HH:MM:SS 拆成 6 个 `.ck-cell`（`.ck-a` 当前层撑尺寸、`.ck-b` 新值层绝对定位叠在上面），只有值变了的单元加 `.anim`；样式全在 styles.css 的 `.hero-clock[data-style=…]` 块。`no-anim`/`prefers-reduced-motion` 下走瞬时替换（否则 animationend/transitionend 不触发，单元会卡在动画中间态）；script.js 里 `clockSetDigit`/`clockRollTo` 的 1600ms 兜底定时器要大于 CSS 动画时长。滚轮是 0-9 再补一个 0 的长条，跨 9→0 借末尾那份 0 继续向下滚、滚完瞬移回第一个 0。卡片风格下 `textContent` 是新旧两层叠出来的（复制会拿到重复数字），读屏/报时靠 `role="timer"` + 每秒更新的 `aria-label`。
-- **天气城市**：`localStorage.weatherCity`，**默认自动定位**（存 `'auto'` 或空）；自定义城市存 JSON `{name,lat,lon,sub}`，由设置页搜 Open-Meteo 地理编码（`geocoding-api.open-meteo.com/v1/search`，`language=zh`）任选，**不维护固定城市清单**；结果副标题 `sub` 从细到粗拼 `admin2·admin1·country`（跳过与城市名互为前缀的层级），用来区分同名城市（湖北有两个「峰口」，分属荆州/黄冈），并对「名称+sub」完全相同的行去重。自动定位走 `navigator.geolocation.getCurrentPosition`（10 分钟缓存、8s 超时），成功显示「当前位置」；**拒绝授权/不支持/超时静默回退西安**（script.js 的 `FALLBACK_CITY`），不给额外提示。Open-Meteo 统一传 `timezone=auto` 让接口按坐标推时区，别为城市硬编时区。设置里改城市后父页只在存储串（`weatherCityRaw()`）真的变化时才重拉天气，避免改个深色模式也去敲天气接口。读写 helper 在 appearance.js：`getWeatherCity`/`setWeatherCity`/`weatherCityLabel`/`weatherCityRaw`。
+- **天气城市**：`localStorage.weatherCity`，**默认自动定位**（存 `'auto'` 或空）；自定义城市存 JSON `{name,lat,lon,sub}`，由设置页搜 Open-Meteo 地理编码（`geocoding-api.open-meteo.com/v1/search`，`language=zh`）任选，**不维护固定城市清单**；结果副标题 `sub` 从细到粗拼 `admin2·admin1·country`（跳过与城市名互为前缀的层级），用来区分同名城市（湖北有两个「峰口」，分属荆州/黄冈），并对「名称+sub」完全相同的行去重。自动定位走 `navigator.geolocation.getCurrentPosition`（10 分钟缓存、8s 超时）；**定位结果不写「当前位置」**，而是用 BigDataCloud 反向地理编码（`reverse-geocode-client`，`localityLanguage=zh-Hans` 出简体）取 `locality`（最低一级市/县/区，兜底 `city`→`principalSubdivision`）显示，去掉末尾市/县/区后缀；Nominatim 在国内不可达，别换回去。**拒绝授权/不支持/超时静默回退西安**（script.js 的 `FALLBACK_CITY`），不给额外提示。**天气快照**：坐标+地名+渲染结果存 `localStorage.weatherSnap`（10 分钟 TTL，`raw` 字段绑定城市），冷启动先铺快照再决定敲不敲接口；auto 且无快照时给定位 1.5s 预算、超了先用西安，定位晚到且坐标差超过 0.05° 再后台校正；天气与反向地名 `Promise.allSettled` 并行拉。Open-Meteo 统一传 `timezone=auto` 让接口按坐标推时区，别为城市硬编时区。设置里改城市后父页只在存储串（`weatherCityRaw()`）真的变化时才重拉天气，避免改个深色模式也去敲天气接口。读写 helper 在 appearance.js：`getWeatherCity`/`setWeatherCity`/`weatherCityLabel`/`weatherCityRaw`。
 
 ## 前端架构与约定（script.js / styles.css）
 
@@ -157,7 +157,8 @@ MySite/
 ### Service Worker（sw.js）
 
 - SWR 模式：同源资源缓存优先、后台更新；**跨域请求直连不缓存**
-- 改动 `PRECACHE` 清单或资源内容后**必须升 `CACHE` 版本号**（v1→v2→…），否则老访客拿旧缓存
+- **升 `CACHE` 版本的口径**：SWR 下普通资源内容改动靠后台 revalidate 自愈，**不需要**升版本；只有改 `PRECACHE` 清单、改缓存策略/语义（如修剪规则）、或要强制清掉老访客旧缓存时才升（v14→v15→…）。为改一行 CSS 去升版本会触发全量重下，别做
+- 运行时缓存（PRECACHE 之外的同源 GET，工具页/海报等）有 `RUNTIME_MAX` 上限，超出按写入顺序淘汰最旧的；PRECACHE 条目不修剪
 - 注册带特性检测 + 静默失败
 
 ## 本地测试方法

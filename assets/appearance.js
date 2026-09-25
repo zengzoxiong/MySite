@@ -52,6 +52,22 @@
     const KEY_FONT = 'fontFamily', KEY_CLOCK = 'clockStyle', KEY_WEATHER = 'weatherCity', KEY_THEME = 'theme';
     const root = document.documentElement;
     const cssCache = new Map(); // path -> Promise，同一份 CSS 只注入一次
+    const preconnected = new Set();
+
+    // 第一次向某 CDN 节点发请求前先握手，省掉 DNS+TLS 往返；
+    // 用系统字体的人根本不会走到这里，不白付连接成本
+    function ensurePreconnect(base) {
+        const origin = base.slice(0, base.indexOf('/npm/'));
+        if (preconnected.has(origin)) return;
+        preconnected.add(origin);
+        ['preconnect', 'dns-prefetch'].forEach((rel) => {
+            const link = document.createElement('link');
+            link.rel = rel;
+            link.href = origin;
+            if (rel === 'preconnect') link.crossOrigin = 'anonymous'; // 字体文件走 CORS，握手要带上
+            document.head.appendChild(link);
+        });
+    }
 
     // 外观模式：浅色 / 深色 / 跟随系统。默认跟随系统；旧版只存 'dark'/'light'，缺省或脏值当 system
     const THEME_MODES = [
@@ -96,9 +112,11 @@
             let base = 0;
             const attempt = () => {
                 if (base >= CDN_BASES.length) return resolve(); // 全部失败：交给 --font-system 兜底
+                const href = CDN_BASES[base++];
+                ensurePreconnect(href);
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = CDN_BASES[base++] + path;
+                link.href = href + path;
                 link.onload = () => resolve();
                 link.onerror = () => { link.remove(); attempt(); };
                 document.head.appendChild(link);

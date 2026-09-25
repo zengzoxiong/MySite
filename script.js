@@ -286,81 +286,134 @@ function locatePosition() {
 
 // 反向地理编码：把定位坐标换成真实地名。Open-Meteo 只有正向搜索，
 // 反向走 BigDataCloud 客户端接口（免费免密钥、支持 CORS，zh-Hans 出简体）；
-// locality 即最低一级的市/县（区），不拼省市全链。按坐标圆整缓存，手动刷新不重复敲接口
+// locality 即最低一级的市/县（区），不拼省市全链。按坐标圆整缓存并落 localStorage，
+// 冷启动同坐标不重复敲接口
 const reverseGeoCache = new Map();
 async function reversePlaceName(lat, lon) {
-    const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+    const key = `reverseGeo:${lat.toFixed(2)},${lon.toFixed(2)}`;
     if (reverseGeoCache.has(key)) return reverseGeoCache.get(key);
     let name = '';
-    try {
-        const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-Hans`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const d = await res.json();
-        name = d.locality || d.city || d.principalSubdivision || '';
-        // 去掉市/县/区后缀，与城市搜索的无后缀风格对齐；自治县/自治旗与单字名保留
-        if (name.length >= 3 && /[市县区]$/.test(name) && !name.endsWith('自治县') && !name.endsWith('自治旗')) name = name.slice(0, -1);
-    } catch (e) {
-        console.error('反向地理编码失败:', e);
+    try { name = localStorage.getItem(key) || ''; } catch (e) { /* 隐私模式忽略 */ }
+    if (!name) {
+        try {
+            const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-Hans`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const d = await res.json();
+            name = d.locality || d.city || d.principalSubdivision || '';
+            // 去掉市/县/区后缀，与城市搜索的无后缀风格对齐；自治县/自治旗与单字名保留
+            if (name.length >= 3 && /[市县区]$/.test(name) && !name.endsWith('自治县') && !name.endsWith('自治旗')) name = name.slice(0, -1);
+            try { localStorage.setItem(key, name); } catch (e) { /* 忽略 */ }
+        } catch (e) {
+            console.error('反向地理编码失败:', e);
+        }
     }
     reverseGeoCache.set(key, name);
     return name;
 }
 
-async function initWeather(manual = false) {
-    const heroWeather = document.getElementById('heroWeather');
-    const weatherIcon = document.getElementById('weatherIcon');
-    const weatherTemp = document.getElementById('weatherTemp');
-    const weatherDesc = document.getElementById('weatherDesc');
-    const weatherExtra = document.getElementById('weatherExtra');
+// 天气快照：坐标+地名+渲染结果落 localStorage（10 分钟 TTL）。冷启动先铺快照
+// 再决定是否敲接口，定位弹窗 / 接口慢都不再拖首屏，外部请求也减半
+const WEATHER_TTL = 10 * 60 * 1000;
+function readWeatherSnap() {
+    try { return JSON.parse(localStorage.weatherSnap || 'null'); } catch (e) { return null; }
+}
+function writeWeatherSnap(snap) {
+    try { localStorage.weatherSnap = JSON.stringify(snap); } catch (e) { /* 忽略 */ }
+}
 
+function paintWeather(w) {
+    const heroWeather = document.getElementById('heroWeather');
+    heroWeather.title = w.label ? `点击刷新${w.label}天气` : '点击刷新天气';
+    heroWeather.setAttribute('aria-label', heroWeather.title);
+    document.getElementById('weatherIcon').textContent = w.icon;
+    document.getElementById('weatherTemp').textContent = w.temp;
+    document.getElementById('weatherDesc').textContent = w.desc;
+    document.getElementById('weatherExtra').textContent = w.extra;
+}
+
+async function initWeather(manual = false) {
     const city = window.SiteAppearance ? SiteAppearance.getWeatherCity() : { auto: true };
     lastWeatherRaw = window.SiteAppearance ? SiteAppearance.weatherCityRaw() : 'auto';
 
-    let lat, lon, label;
-    if (city.auto) {
-        try {
-            const pos = await locatePosition();
-            lat = pos.lat;
-            lon = pos.lon;
-            label = await reversePlaceName(lat, lon); // 定位到什么位置就写什么位置
-        } catch (e) {
-            // 定位不可用（拒绝授权/不支持/超时）：静默回退西安
-            lat = FALLBACK_CITY.lat;
-            lon = FALLBACK_CITY.lon;
-            label = FALLBACK_CITY.name;
-        }
-    } else {
+    const snap = readWeatherSnap();
+    const snapMine = !!(snap && snap.raw === lastWeatherRaw);
+    const ctx = { manual, painted: snapMine };
+    // 新鲜快照直接用，一次外部请求都不发；过期快照先铺上当占位，下面继续拉新
+    if (snapMine) paintWeather(snap);
+    if (snapMine && !manual && Date.now() - snap.ts < WEATHER_TTL) return;
+
+    if (manual) document.getElementById('weatherIcon').classList.add('refreshing');
+    try {
+        await fetchWeather(city, ctx);
+    } finally {
+        document.getElementById('weatherIcon').classList.remove('refreshing');
+    }
+}
+
+// 拉一次天气并渲染+落快照。auto 时定位不阻塞首屏：有上次坐标就直接用，
+// 没有则给定位 1.5s 预算、超了先用西安；定位晚到且坐标确实变了再后台校正
+async function fetchWeather(city, ctx) {
+    let lat, lon, labelP;
+    if (!city.auto) {
         lat = city.lat;
         lon = city.lon;
-        label = city.name;
+        labelP = Promise.resolve(city.name);
+    } else {
+        const snap = readWeatherSnap();
+        const geo = locatePosition().catch(() => null);
+        if (snap && snap.auto) {
+            lat = snap.lat;
+            lon = snap.lon;
+        } else {
+            const pos = await Promise.race([geo, new Promise(r => setTimeout(r, 1500))]);
+            if (pos) { lat = pos.lat; lon = pos.lon; }
+            else { lat = FALLBACK_CITY.lat; lon = FALLBACK_CITY.lon; }
+        }
+        labelP = reversePlaceName(lat, lon);
+        // 定位比预算晚到、且和已用坐标不是一处时，后台补一次校正（不 await）
+        geo.then(pos => {
+            if (pos && (Math.abs(pos.lat - lat) > 0.05 || Math.abs(pos.lon - lon) > 0.05)) {
+                fetchWeatherAt(pos.lat, pos.lon, reversePlaceName(pos.lat, pos.lon), true, { manual: false, painted: true });
+            }
+        });
     }
-    heroWeather.title = label ? `点击刷新${label}天气` : '点击刷新天气';
-    heroWeather.setAttribute('aria-label', heroWeather.title);
+    await fetchWeatherAt(lat, lon, labelP, city.auto, ctx);
+}
 
-    try {
-        if (manual) weatherIcon.classList.add('refreshing');
-        // timezone=auto 让 Open-Meteo 按坐标推当地时区，preset / 定位都适用
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-            '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m' +
-            '&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const cur = data.current;
-        const [text, icon] = WMO_CODES[cur.weather_code] || ['未知', '🌡️'];
-        const daily = data.daily;
-
-        weatherIcon.textContent = icon;
-        weatherTemp.textContent = `${Math.round(cur.temperature_2m)}°C`;
-        weatherDesc.textContent = label ? `${label} · ${text}` : text;
-        weatherExtra.textContent = `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`;
-    } catch (e) {
-        if (!manual) weatherDesc.textContent = label ? `${label} · 天气获取失败` : '天气获取失败';
-        console.error('天气加载失败:', e);
-    } finally {
-        weatherIcon.classList.remove('refreshing');
+// 天气与反向地名并行：地名只影响标题文案，不该让天气等它
+async function fetchWeatherAt(lat, lon, labelP, fromAuto, ctx) {
+    const [w, l] = await Promise.allSettled([fetchWeatherData(lat, lon), labelP]);
+    const label = l.status === 'fulfilled' ? l.value : '';
+    if (w.status !== 'fulfilled') {
+        if (!ctx.painted && !ctx.manual) {
+            document.getElementById('weatherDesc').textContent = label ? `${label} · 天气获取失败` : '天气获取失败';
+        }
+        console.error('天气加载失败:', w.reason);
+        return;
     }
+    const { icon, temp, extra, text } = w.value;
+    const desc = label ? `${label} · ${text}` : text;
+    paintWeather({ icon, temp, desc, extra, label });
+    writeWeatherSnap({ raw: lastWeatherRaw, auto: fromAuto, lat, lon, label, icon, temp, desc, extra, ts: Date.now() });
+}
+
+async function fetchWeatherData(lat, lon) {
+    // timezone=auto 让 Open-Meteo 按坐标推当地时区，preset / 定位都适用
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m' +
+        '&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const cur = data.current;
+    const [text, icon] = WMO_CODES[cur.weather_code] || ['未知', '🌡️'];
+    const daily = data.daily;
+    return {
+        text, icon,
+        temp: `${Math.round(cur.temperature_2m)}°C`,
+        extra: `今日 ${Math.round(daily.temperature_2m_min[0])}° ~ ${Math.round(daily.temperature_2m_max[0])}° · 湿度 ${cur.relative_humidity_2m}% · 风速 ${Math.round(cur.wind_speed_10m)}km/h`
+    };
 }
 
 // --- 今日一言（Hitokoto 免费接口） ---
@@ -1956,15 +2009,22 @@ function initEventListeners() {
         }, 200);
     });
 
-    // 访客统计：不蒜子成功取到数值后才显示胶囊，失败保持隐藏
+    // 访客统计：不蒜子是纯装饰第三方脚本，等首屏加载完、浏览器空闲再注入，
+    // 不与关键资源抢带宽；成功取到数值后才显示胶囊，失败保持隐藏
     window.addEventListener('load', () => {
-        setTimeout(() => {
-            const pv = document.getElementById('busuanzi_value_site_pv');
-            if (pv && pv.textContent.trim()) {
-                document.getElementById('siteStat').style.display = '';
-            }
-        }, 3000);
-    });
+        const inject = () => {
+            const s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://busuanzi.cc/js/busuanzi/2.3/busuanzi.pure.mini.js';
+            s.onload = () => setTimeout(() => {
+                const pv = document.getElementById('busuanzi_value_site_pv');
+                if (pv && pv.textContent.trim()) document.getElementById('siteStat').style.display = '';
+            }, 800);
+            document.head.appendChild(s);
+        };
+        if ('requestIdleCallback' in window) requestIdleCallback(inject, { timeout: 4000 });
+        else setTimeout(inject, 1500);
+    }, { once: true });
 
     // Service Worker（PWA 离线缓存，静默失败）
     if ('serviceWorker' in navigator) {

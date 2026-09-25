@@ -11,7 +11,6 @@
     <meta property="og:description" content="拾光集：个人数字花园——工具导航、网站收藏、影视记录与实时仪表盘。">
     <meta property="og:type" content="website">
     <link rel="manifest" href="manifest.json">
-    <script async src="https://busuanzi.cc/js/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <!-- 外观偏好（界面字体 / 时钟风格清单），需在 script.js 之前加载 -->
@@ -94,7 +93,7 @@
             <div class="hero">
                 <div class="hero-clock" id="clockTime" role="timer" aria-label="--:--:--">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
-                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气">
+                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气" aria-live="polite">
                     <div class="weather-main">
                         <span class="weather-icon" id="weatherIcon">🌤️</span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>
