@@ -50,6 +50,7 @@ MySite/
 
 - `icon` 是 favicon 加载失败时的兜底 emoji（站点整体禁 emoji，但此字段为功能性兜底，保留）
 - 卡片构建在 `buildLinkCard()`，动态文本已过 `escapeHtml`
+- **死链体检**：`.github/workflows/check-links.yml` 每周一 05:30（北京）跑 `scripts/check_links.py`，结果写 `data/link-health.json`（**勿手改**），三档 `ok/suspect/dead`、宁漏报不误报（403/429/5xx/超时只记 suspect 不出标；404/410 或两次 DNS 失败才判 dead）；状态+状态码没变时整条沿用旧记录，文件字节不变则工作流跳过提交。`buildLinkCard` 读全局 `linkHealth` 给 dead 链接标题行加「失效」红丸（`--dead-color`），suspect 不出标
 
 ### 2. 影视收藏（data/media.json）——数据规范最严格的部分
 
@@ -184,6 +185,7 @@ MySite/
 - `sync-tmdb.yml`：每日 05:00（北京）刷新 media.json 的 TMDB 评分/上映时间，有变化才提交
 - `sync-stars.yml`：每日 05:10 同步 GitHub Stars 到 stars.json
 - `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
+- `check-links.yml`：每周一 05:30 体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
 - 三个工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线

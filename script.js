@@ -1,5 +1,6 @@
 // 全局状态
 let allLinks = [];
+let linkHealth = {}; // 死链体检结果（工作流每周写 data/link-health.json），失效链接出角标
 let allTools = [];
 let mediaData = { types: [], items: [] };
 let pluginsData = { skills: { groups: [] }, mcps: [] };
@@ -1551,6 +1552,13 @@ async function loadLinks() {
         const toolsData = await toolsRes.json();
         allLinks = linksData.links;
         allTools = toolsData.tools;
+        // 死链体检结果独立加载：缺失/失败都不影响收藏展示，只是不出角标
+        try {
+            const healthRes = await fetch('data/link-health.json');
+            if (healthRes.ok) linkHealth = (await healthRes.json()).results || {};
+        } catch (error) {
+            console.error('死链体检结果加载失败:', error);
+        }
         renderSidebarTools();
         renderSidebarCategories(linksData.categories);
         renderLinks();
@@ -1791,6 +1799,11 @@ function escapeJs(s) {
 function buildLinkCard(link, i) {
     const domain = getDomain(link.url);
     const emojiIcon = link.icon || '🔗';
+    // 死链体检判死的链接在标题行出红标（suspect 不出标，宁漏报不误报）
+    const health = linkHealth[link.url];
+    const deadBadge = health && health.state === 'dead'
+        ? ` <span class="link-dead" title="链接体检失效（${escapeHtml(health.checkedAt || '')}）">失效</span>`
+        : '';
     // 尝试加载 favicon，两级失败后回退到 emoji
     const faviconHtml = domain
         ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${escapeJs(emojiIcon)}'};" width="32" height="32" loading="lazy">`
@@ -1799,7 +1812,7 @@ function buildLinkCard(link, i) {
     <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
         <div class="icon">${faviconHtml}</div>
         <div class="info">
-            <div class="title">${escapeHtml(link.title)}</div>
+            <div class="title">${escapeHtml(link.title)}${deadBadge}</div>
             <div class="description">${escapeHtml(link.description)}</div>
             <span class="category">${escapeHtml(link.category)}</span>
         </div>

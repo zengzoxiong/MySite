@@ -9,6 +9,7 @@
     --text-primary: #1a1a1a;
     --seal-red: #b8442c; /* 签到符朱砂印色 */
     --seal-ink: #fdf6ec;
+    --dead-color: #c0392b; /* 死链体检失效角标 */
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border-color: #eaeaea;
@@ -36,6 +37,7 @@
     --text-primary: #f0f0f0;
     --seal-red: #c65540;
     --seal-ink: #fdf6ec;
+    --dead-color: #d95843;
     --text-secondary: #888888;
     --text-tertiary: #555555;
     --border-color: #222222;
@@ -1907,6 +1909,18 @@ body.no-anim .mp-lyric > div {
 
 .checkin-btn:hover {
     transform: translateY(-1px);
+}
+
+/* 死链体检角标：标题行内联红丸，hover 看体检日期 */
+.link-dead {
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 99px;
+    background: var(--dead-color);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 600;
+    vertical-align: 1px;
 }
 
 /* 签到符弹层：长方形竖符画布 + 保存/复制 */

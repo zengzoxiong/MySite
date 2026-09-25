@@ -1,0 +1,339 @@
+{
+  "counts": {
+    "total": 47,
+    "ok": 44,
+    "suspect": 3,
+    "dead": 0
+  },
+  "results": {
+    "https://tools.video": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.koukoutu.com/removebgtool/all?v=xhpt.AI": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://ttsmaker.cn": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://pdf.imagestool.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://highlightcode.parryqiu.com/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.wdku.net/image/imagesplit": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://squoosh.app": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.slzxf.cn/": {
+      "status": 0,
+      "reason": "net",
+      "state": "suspect",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://chinese-font.netlify.app/zh-cn/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.kkview.cn/zh-cn/index.html": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://toolhub.changhui.org.cn/tools.html": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.ruancang.net/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://im.qq.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://weixin.qq.com/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://meeting.tencent.com/download-center.html": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://platform.wps.cn/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.7-zip.org/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://potplayer.daum.net/": {
+      "status": 0,
+      "reason": "net",
+      "state": "suspect",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://code.visualstudio.com/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://github.com/clash-verge-rev/clash-verge-rev/releases": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://github.com/farion1231/cc-switch/releases": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://nodejs.org/zh-cn/download/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://steampp.net/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://obsidian.md/download": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://uuyc.163.com/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://sunlogin.oray.com/download/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.zotero.org/download/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://huorong.cn/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://music.163.com/st/download": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://hyperos.mi.com/continuity/abilities/ab0019": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://qoder.com.cn/download": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://zcode.z.ai/cn": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://openai.com/chatgpt/download/": {
+      "status": 403,
+      "reason": "http",
+      "state": "suspect",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://tool.fologde.com/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://it-tools.tech": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://gchq.github.io/CyberChef/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://omnitools.app": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://ittool.wort.uk": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://tool.aoaostar.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://tool.cccyun.cc": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://xdxsb.top/FreeTool": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "https://xdxsb.top/FreeTool/",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.kisssub.org/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "https://www.kisssub.org/public/html/start/",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.hello-algo.com/chapter_hello_algo/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://github.com/BillSchofield/WorkingEffectivelyWithLegacyCode": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://excalidraw.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://www.tldraw.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-09-25"
+    },
+    "https://drawdb.app": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "https://www.drawdb.app/",
+      "checkedAt": "2026-09-25"
+    }
+  }
+}
