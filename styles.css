@@ -883,6 +883,8 @@ body.sidebar-collapsed .main-content {
 .hero-clock[data-style="stack"] .ck-b,
 .hero-clock[data-style="cube"] .ck-a,
 .hero-clock[data-style="cube"] .ck-b {
+    width: 0.85em; /* 数字等宽：比例字体的界面字体（霞鹜文楷等）下 1 与 0 卡片也同宽，tabular-nums 救不了 */
+    text-align: center;
     padding: 0.05em 0.11em;
     border: 1px solid var(--glass-border);
     border-radius: 0.13em;
