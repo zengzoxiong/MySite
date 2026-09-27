@@ -48,7 +48,8 @@ body {
   display:flex; align-items:flex-end; justify-content:center;
   transform:translateY(103%); transition:transform .16s ease-out; pointer-events:none; }
 .hole.up .actor { transform:translateY(4%); }
-.actor svg { width:80%; display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+.actor svg { width:80%; display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));
+  pointer-events:auto; /* actor 穿透、图形可点：命中必须真的点在地鼠/炸弹身上 */ }
 /* 命中飘分 */
 .float-txt { position:absolute; left:50%; top:14%; font-weight:700; font-size:18px;
   pointer-events:none; z-index:5; animation:floatUp .7s ease-out forwards; }
@@ -70,6 +71,14 @@ body {
 .btn.primary { background:var(--primary); color:#fff; }
 .btn.primary:active { transform:scale(.97); }
 .tip { color:#9aa3af; font-size:12.5px; margin-top:12px; text-align:center; }
+/* 敲击锤子：pointerdown 处冒出，快速砸下并淡出 */
+.hammer { position:absolute; width:64px; height:64px; pointer-events:none; z-index:8;
+  transform-origin:46px 52px; animation:whack .24s ease-out forwards; }
+@keyframes whack {
+  0%   { transform:rotate(-52deg) scale(.8); opacity:1; }
+  45%  { transform:rotate(6deg) scale(1); opacity:1; }
+  100% { transform:rotate(6deg) scale(1); opacity:0; }
+}
 .foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
 @media (max-width:420px) {
   .head h1 { font-size:22px; }
@@ -255,6 +264,27 @@ function spawnLoop() {
   spawnTimer = setTimeout(spawnLoop, gapDuration());
 }
 
+/* ================= 敲击锤子：pointerdown 处砸一下（纯视觉，结算仍由 click 处理） ================= */
+const HAMMER_SVG =
+  '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">' +
+    '<line x1="14" y1="54" x2="44" y2="22" stroke="#a1887f" stroke-width="8" stroke-linecap="round"/>' +
+    '<g transform="rotate(45 48 16)">' +
+      '<rect x="34" y="4" width="28" height="22" rx="5" fill="#5d4037"/>' +
+      '<rect x="34" y="4" width="28" height="8" rx="4" fill="#795548"/>' +
+    '</g>' +
+  '</svg>';
+stage.addEventListener('pointerdown', (e) => {
+  if (!playing) return;
+  const rect = stage.getBoundingClientRect();
+  const h = document.createElement('div');
+  h.className = 'hammer';
+  h.innerHTML = HAMMER_SVG;
+  h.style.left = (e.clientX - rect.left - 46) + 'px';  // 让锤头（右上区域）对准落点
+  h.style.top = (e.clientY - rect.top - 14) + 'px';
+  stage.appendChild(h);
+  setTimeout(() => h.remove(), 280);
+});
+
 /* ================= 命中判定（事件委托，只有冒头状态可命中） ================= */
 holesEl.addEventListener('click', (e) => {
   if (!playing) return;
@@ -262,6 +292,7 @@ holesEl.addEventListener('click', (e) => {
   if (!holeEl) return;
   const h = holes[Number(holeEl.dataset.i)];
   if (!h.up || h.hit) return;
+  if (!e.target.closest('.actor svg')) return; // 洞口空白处不算命中，必须敲在地鼠/炸弹身上
   h.hit = true;
   if (h.actor.classList.contains('bomb')) {
     /* 点中炸弹：扣分并清空连击，舞台抖动 */
