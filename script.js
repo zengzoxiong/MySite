@@ -860,12 +860,18 @@ function talismanFontSample(f) {
 
 async function openTalisman() {
     const modal = document.getElementById('talismanModal');
+    const canvas = document.getElementById('talismanCanvas');
     const f = buildTodayFortune();
-    // 毛笔字就绪再画，否则 canvas 会拿回退字体定型
-    if (window.SiteAppearance && SiteAppearance.loadBrushFont) {
-        await SiteAppearance.loadBrushFont(talismanFontSample(f));
-    }
-    drawTalisman(document.getElementById('talismanCanvas'), f);
+    // 毛笔字就绪再画，否则 canvas 会拿回退字体定型；但最多等 2.5s——
+    // 字体 CDN 卡顿时不能挡住弹层弹出，先画一版，字体晚到后补画换上
+    const fontReady = (window.SiteAppearance && SiteAppearance.loadBrushFont)
+        ? SiteAppearance.loadBrushFont(talismanFontSample(f))
+        : Promise.resolve();
+    await Promise.race([fontReady, new Promise((r) => setTimeout(r, 2500))]);
+    drawTalisman(canvas, f);
+    const redrawIfOpen = () => { if (!modal.hidden) drawTalisman(canvas, f); };
+    fontReady.then(redrawIfOpen); // 注入/分片真正就绪（可能晚于 2.5s）后补画
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(redrawIfOpen);
     talismanLastFocus = document.activeElement;
     modal.hidden = false;
     void modal.offsetHeight; // 同步回流后再加类，后台标签页也能播过渡
@@ -1517,20 +1523,6 @@ function initMusicPlayer() {
 
     mp.audio.preload = 'none';
 
-    // 静音：点小喇叭切换，记忆状态；静音时波道变淡、音量条填充归零
-    mp.audio.muted = localStorage.getItem('mpMuted') === '1';
-    const syncMute = () => {
-        mp.el.volWrap.dataset.muted = mp.audio.muted ? '1' : '0';
-        const muteBtn = document.getElementById('mpMuteToggle');
-        if (muteBtn) muteBtn.classList.toggle('muted', mp.audio.muted);
-    };
-    syncMute();
-    document.getElementById('mpMuteToggle').addEventListener('click', () => {
-        mp.audio.muted = !mp.audio.muted;
-        localStorage.setItem('mpMuted', mp.audio.muted ? '1' : '0');
-        syncMute();
-    });
-
     // 音量：无滑块圆点，靠填充深浅 + 喇叭音波道数（0/1/2/3）表达大小
     const syncVol = () => {
         const v = Number(mp.el.vol.value);
@@ -1541,8 +1533,31 @@ function initMusicPlayer() {
     mp.audio.volume = savedVol === null ? 1 : Number(savedVol);
     mp.el.vol.value = mp.audio.volume;
     syncVol();
+
+    // 静音：点小喇叭切换，记忆状态；图标打叉变红，音量条填充归零展示
+    mp.audio.muted = localStorage.getItem('mpMuted') === '1';
+    const syncMute = () => {
+        mp.el.volWrap.dataset.muted = mp.audio.muted ? '1' : '0';
+        const muteBtn = document.getElementById('mpMuteToggle');
+        if (muteBtn) muteBtn.classList.toggle('muted', mp.audio.muted);
+        if (mp.audio.muted) {
+            mp.el.vol.style.setProperty('--v', 0); // 静音时音量条归零
+            mp.el.volWrap.dataset.lv = 0;
+        } else syncVol(); // 解除静音恢复滑块值
+    };
+    syncMute();
+    document.getElementById('mpMuteToggle').addEventListener('click', () => {
+        mp.audio.muted = !mp.audio.muted;
+        localStorage.setItem('mpMuted', mp.audio.muted ? '1' : '0');
+        syncMute();
+    });
     mp.el.vol.addEventListener('input', () => {
         mp.audio.volume = Number(mp.el.vol.value);
+        if (mp.audio.muted) { // 拖音量条 = 想要声音，顺手解除静音
+            mp.audio.muted = false;
+            localStorage.setItem('mpMuted', '0');
+            syncMute();
+        }
         localStorage.setItem('mpVolume', mp.el.vol.value);
         syncVol();
     });

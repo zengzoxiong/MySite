@@ -140,7 +140,8 @@
         return CLOCK_STYLES.find(s => s.id === id) || CLOCK_STYLES[0];
     }
 
-    // 注入一份 CDN 样式表；某个节点挂了（onerror）就换下一个节点重试
+    // 注入一份 CDN 样式表；节点 onerror 或 8 秒无响应（连接挂起时 onload/onerror
+    // 都可能不触发，promise 永不决议）就换下一个节点重试
     function injectCss(path) {
         if (cssCache.has(path)) return cssCache.get(path);
         const task = new Promise((resolve) => {
@@ -152,8 +153,20 @@
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.href = href + path;
-                link.onload = () => resolve();
-                link.onerror = () => { link.remove(); attempt(); };
+                const next = () => { link.remove(); attempt(); };
+                let settled = false;
+                const timer = setTimeout(() => {
+                    if (settled) return;
+                    settled = true; next();
+                }, 8000);
+                link.onload = () => {
+                    if (settled) return;
+                    settled = true; clearTimeout(timer); resolve();
+                };
+                link.onerror = () => {
+                    if (settled) return;
+                    settled = true; clearTimeout(timer); next();
+                };
                 document.head.appendChild(link);
             };
             attempt();

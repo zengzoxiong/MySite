@@ -25,3 +25,4 @@ logs/
 
 __pycache__/
 *.pyc
+.playwright-mcp/

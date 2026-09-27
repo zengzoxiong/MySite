@@ -1637,16 +1637,17 @@ body.no-anim .mp-lyric > div {
 
 .mp-mute:hover { color: var(--accent-color); }
 
-.mp-mute .mute-slash {
+.mp-mute .mute-x {
     display: none;
     stroke: currentColor;
-    stroke-width: 1.8;
+    stroke-width: 2;
     stroke-linecap: round;
 }
 
-.mp-mute.muted .mute-slash { display: block; }
+.mp-mute.muted .mute-x { display: block; }
 
-.mp-mute.muted { color: var(--text-tertiary); }
+/* 静音态：图标整体变红（高于 :hover 的主题色权重） */
+.mp-vol[data-muted="1"] .mp-mute { color: #ef4444; }
 
 /* 控制行右端一组：模式切换 + 歌单显隐（纯图标，无文字） */
 .mp-side {
