@@ -1517,6 +1517,20 @@ function initMusicPlayer() {
 
     mp.audio.preload = 'none';
 
+    // 静音：点小喇叭切换，记忆状态；静音时波道变淡、音量条填充归零
+    mp.audio.muted = localStorage.getItem('mpMuted') === '1';
+    const syncMute = () => {
+        mp.el.volWrap.dataset.muted = mp.audio.muted ? '1' : '0';
+        const muteBtn = document.getElementById('mpMuteToggle');
+        if (muteBtn) muteBtn.classList.toggle('muted', mp.audio.muted);
+    };
+    syncMute();
+    document.getElementById('mpMuteToggle').addEventListener('click', () => {
+        mp.audio.muted = !mp.audio.muted;
+        localStorage.setItem('mpMuted', mp.audio.muted ? '1' : '0');
+        syncMute();
+    });
+
     // 音量：无滑块圆点，靠填充深浅 + 喇叭音波道数（0/1/2/3）表达大小
     const syncVol = () => {
         const v = Number(mp.el.vol.value);
@@ -2210,7 +2224,11 @@ function initSettingsModal() {
     });
     window.addEventListener('message', (e) => {
         if (e.origin !== location.origin) return;
-        if (e.data && e.data.type === 'settings-changed') {
+        if (e.data && e.data.type === 'accent-changed') {
+            if (window.SiteAppearance) SiteAppearance.applyAccentFromStorage();
+        } else if (e.data && e.data.type === 'accent-changed') {
+            if (window.SiteAppearance) SiteAppearance.applyAccentFromStorage();
+        } else if (e.data && e.data.type === 'settings-changed') {
             applyThemeFromStorage();
             applyAnimFromStorage();
             applyFontFromStorage();

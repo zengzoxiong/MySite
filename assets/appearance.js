@@ -70,6 +70,41 @@
     }
 
     // 外观模式：浅色 / 深色 / 跟随系统。默认跟随系统；旧版只存 'dark'/'light'，缺省或脏值当 system
+    const KEY_ACCENT = 'accentColor';
+    // 主题色预设：p 为主色（链接/按钮/选中态），s 为渐变副色（进度条等）
+    const ACCENTS = [
+        { id: 'azure',   name: '星蓝', p: '#2563eb', s: '#60a5fa' },
+        { id: 'iris',    name: '靛紫', p: '#6366f1', s: '#a855f6' },
+        { id: 'sky',     name: '晴空', p: '#0ea5e9', s: '#22d3ee' },
+        { id: 'forest',  name: '森绿', p: '#10b981', s: '#34d399' },
+        { id: 'sunset',  name: '落日', p: '#f59e0b', s: '#fb923c' },
+        { id: 'rose',    name: '玫红', p: '#ec4899', s: '#f472b6' },
+        { id: 'crimson', name: '绯红', p: '#ef4444', s: '#f87171' }
+    ];
+
+    function accentById(id) {
+        return ACCENTS.find((a) => a.id === id) || null;
+    }
+
+    function accentFromStorage() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(KEY_ACCENT) || 'null');
+            return saved && accentById(saved.id) ? saved.id : '';
+        } catch (e) { return ''; }
+    }
+
+    function applyAccent(id) {
+        const a = accentById(id);
+        const root = document.documentElement;
+        if (a) {
+            root.style.setProperty('--accent-color', a.p);
+            root.style.setProperty('--accent-2', a.s);
+        } else {
+            root.style.removeProperty('--accent-color');
+            root.style.removeProperty('--accent-2');
+        }
+    }
+
     const THEME_MODES = [
         { id: 'light', name: '浅色' },
         { id: 'dark', name: '深色' },
@@ -224,6 +259,15 @@
         setWeatherCity: setWeatherCity,
         weatherCityLabel: weatherCityLabel,
         weatherCityRaw: weatherCityRaw,
+        KEY_ACCENT: KEY_ACCENT,
+        ACCENTS: ACCENTS,
+        accentById: accentById,
+        applyAccent: applyAccent,
+        applyAccentFromStorage: function () {
+            let id = '';
+            try { id = JSON.parse(localStorage.getItem(KEY_ACCENT) || 'null')?.id || ''; } catch (e) {}
+            applyAccent(id);
+        },
         applySiteFont: applySiteFont,
         applySiteFontFromStorage: applySiteFontFromStorage,
         loadBrushFont: loadBrushFont,
@@ -236,4 +280,13 @@
     try {
         fontById(localStorage.getItem(KEY_FONT)).css.forEach(injectCss);
     } catch (e) { /* 隐私模式下 localStorage 可能不可用 */ }
+
+    // 已选主题色立即应用（主站/设置页/iframe 同源共用）
+    try {
+        const savedAccent = JSON.parse(localStorage.getItem(KEY_ACCENT) || 'null');
+        if (savedAccent && accentById(savedAccent.id)) {
+            document.documentElement.style.setProperty('--accent-color', savedAccent.p || '');
+            document.documentElement.style.setProperty('--accent-2', savedAccent.s || '');
+        }
+    } catch (e) { /* 忽略 */ }
 })();

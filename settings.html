@@ -56,6 +56,54 @@
 
 
 
+        .accent-dots {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .accent-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            position: relative;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .accent-dot:hover { transform: scale(1.15); }
+
+        .accent-dot.active {
+            box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--text-primary);
+        }
+
+        .accent-dots {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .accent-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .accent-dot:hover { transform: scale(1.15); }
+
+        .accent-dot.active {
+            box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--text-primary);
+        }
+
         .settings-hint {
             margin-top: 12px;
             font-size: 0.7rem;
@@ -67,6 +115,10 @@
 <body>
     <div class="settings-page">
         <div class="settings-title">设置</div>
+        <div class="settings-item settings-col">
+            <span class="settings-label">主题色</span>
+            <div class="accent-dots" id="accentDots" role="radiogroup" aria-label="主题色"></div>
+        </div>
         <div class="settings-item">
             <span class="settings-label">外观模式</span>
             <select class="settings-select" id="settingThemeMode" aria-label="外观模式"></select>
@@ -161,6 +213,39 @@
         focusBox.checked = localStorage.getItem(KEY_FOCUS) !== 'off';
         focusBox.addEventListener('change', () => {
             localStorage.setItem(KEY_FOCUS, focusBox.checked ? 'on' : 'off');
+        });
+
+        // ===== 主题色（预设清单来自 assets/appearance.js） =====
+        const accentDots = document.getElementById('accentDots');
+        const KEY_ACCENT = AP.KEY_ACCENT;
+
+        function readAccentSaved() {
+            try { return JSON.parse(localStorage.getItem(KEY_ACCENT) || 'null'); }
+            catch (e) { return null; }
+        }
+
+        function renderAccentDots() {
+            const saved = readAccentSaved();
+            accentDots.innerHTML = '';
+            AP.ACCENTS.forEach((a) => {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'accent-dot' + ((saved ? saved.id : '') === a.id ? ' active' : '');
+                dot.style.background = 'linear-gradient(135deg, ' + a.p + ', ' + a.s + ')';
+                dot.title = a.name;
+                dot.setAttribute('aria-label', '主题色：' + a.name);
+                dot.addEventListener('click', () => {
+                    localStorage.setItem(KEY_ACCENT, JSON.stringify({ id: a.id, p: a.p, s: a.s }));
+                    AP.applyAccent(a.id);
+                    notify('accent-changed');
+                    renderAccentDots();
+                });
+                accentDots.appendChild(dot);
+            });
+        }
+        renderAccentDots();
+        window.addEventListener('storage', (e) => {
+            if (e.key === KEY_ACCENT) renderAccentDots();
         });
 
         // ===== 外观：界面字体 + 首页时钟风格（清单来自 assets/appearance.js） =====
@@ -328,6 +413,7 @@
             if (e.key === AP.KEY_FONT) syncFontFromStorage();
             if (e.key === AP.KEY_CLOCK) syncClockFromStorage();
             if (e.key === AP.KEY_WEATHER) syncCityFromStorage();
+            if (e.key === KEY_ACCENT) renderAccentDots();
         });
 
         // 强制刷新：通知父页清除缓存后整页重载
