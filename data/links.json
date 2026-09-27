@@ -15,28 +15,28 @@
     {
       "title": "tools.video",
       "url": "https://tools.video/zh-CN",
-      "description": "在线音视频处理合集，压缩、转格式、裁剪、合并、提取音频，22 个工具都在一个站里",
+      "description": "最快、最全能的在线音视频处理工具合集。内置 22 个视频、音频处理工具，一个网站搞定视频压缩、格式转换、裁剪、合并、提取音频！",
       "category": "视频音频",
       "icon": "🎬"
     },
     {
       "title": "抠抠图",
       "url": "https://www.koukoutu.com/removebgtool/all?v=xhpt.AI",
-      "description": "在线 AI 抠图，发丝这种细节也能抠干净，免费，批量一次最多传 100 张",
+      "description": "一个免费在线AI抠图神器。抠图功能永久免费，主打精准抠图，复杂的背景和发丝也能轻松识别。支持在线免费AI抠图和批量抠图，最多支持一次上传 100 张图片。",
       "category": "图片处理",
       "icon": "🖼️"
     },
     {
       "title": "马克配音",
       "url": "https://ttsmaker.cn",
-      "description": "文本转语音，50 多种语言、300 种音色，短视频配音、读书、播音都能用",
+      "description": "一款免费在线文本转语音工具。提供了 50 多种语言和 300 种语音风格，包含了男声、女声、爆款短视频、演讲、小说阅读、新闻播音等各种类型，风格多样。",
       "category": "视频音频",
       "icon": "🎙️"
     },
     {
       "title": "ImagesTool PDF TOOL",
       "url": "https://pdf.imagestool.com",
-      "description": "本地处理的 PDF 工具箱，文件不上传服务器，断网也能用。合并、拆分、压缩、水印、加密等几十个功能",
+      "description": "一款 100% 免费的本地处理 PDF 工具。无需长传文件到服务器，完全本地处理，网站加载完成后，断网也可以使用。支持 PDF 合并、拆分、提取、压缩、转换、水印、加密等几十个功能。",
       "category": "文档工具",
       "icon": "📄"
     },
@@ -78,21 +78,21 @@
     {
       "title": "kkFileView",
       "url": "https://www.kkview.cn/zh-cn/index.html",
-      "description": "文件在线预览服务，Office、PDF、图片、音视频、压缩包、CAD 都能预览，部署一次全站接入",
+      "description": "一个预览地址覆盖 Office、PDF、图片、音视频、压缩包、CAD、3D 模型等常见文件类型。独立部署，快速接入业务系统，提供统一的在线预览体验。",
       "category": "文档工具",
       "icon": "👁️"
     },
     {
       "title": "ToolHub",
       "url": "https://toolhub.changhui.org.cn/tools.html",
-      "description": "二维码、IP 查询、正则、随机密码、Base64 这类常用小工具的合集",
+      "description": "免费在线工具平台，提供二维码生成与解码、IP查询、正则表达式测试、随机密码生成、Base64编解码等多种实用功能。",
       "category": "工具合集",
       "icon": "🛠️"
     },
     {
       "title": "软仓",
       "url": "https://www.ruancang.net/",
-      "description": "385+ 个常用软件的下载站，Adobe 全家桶、CAD、达芬奇都有，无广告",
+      "description": "专业软件导航网站，收录385+专业生产力软件免费下载，包括Adobe全家桶、CAD、达芬奇等，纯净无广告。",
       "category": "常用软件下载",
       "icon": "📦"
     },
@@ -134,14 +134,14 @@
     {
       "title": "PotPlayer",
       "url": "https://potplayer.daum.net/",
-      "description": "老牌视频播放器，什么格式都能放，带硬件加速",
+      "description": "功能强大的多媒体播放器，支持几乎所有视频格式，硬件加速，界面简洁。",
       "category": "常用软件下载",
       "icon": "▶️"
     },
     {
       "title": "Visual Studio Code",
       "url": "https://code.visualstudio.com/",
-      "description": "微软的免费代码编辑器，插件生态大，什么语言都配得齐",
+      "description": "微软出品的免费开源代码编辑器，支持丰富的扩展生态系统。",
       "category": "常用软件下载",
       "icon": "💻"
     },
@@ -176,7 +176,7 @@
     {
       "title": "Obsidian",
       "url": "https://obsidian.md/download",
-      "description": "本地优先的笔记应用，双向链接加插件生态，适合搭个人知识库",
+      "description": "强大的知识管理和笔记应用，支持双向链接、本地存储、插件扩展。",
       "category": "常用软件下载",
       "icon": "💎"
     },
@@ -246,7 +246,7 @@
     {
       "title": "一方工具箱",
       "url": "https://tool.fologde.com/",
-      "description": "在线工具箱，图片、文本、开发辅助的小工具都有，打开就能用",
+      "description": "简洁好用的在线工具箱，集成图片处理、文本处理、开发辅助等多种日常小工具，即开即用。",
       "category": "工具合集",
       "icon": "🧰"
     },
@@ -260,14 +260,14 @@
     {
       "title": "CyberChef",
       "url": "https://gchq.github.io/CyberChef/",
-      "description": "GCHQ 开源的「网络瑞士军刀」，加密、编码、压缩这些数据操作在一个网页里串起来做，可离线部署",
+      "description": "GCHQ 开源的「网络瑞士军刀」，加密、编码、压缩、数据分析一站式搞定，纯静态可离线部署。",
       "category": "工具合集",
       "icon": "🔐"
     },
     {
       "title": "Omni Tools",
       "url": "https://omnitools.app",
-      "description": "开源的自托管小工具合集，图片、文本、数据转换都有，Docker 起一个就能用",
+      "description": "自托管友好的开源工具集，覆盖图片、文本、数据转换等日常任务，无广告无追踪，Docker 一键部署。",
       "category": "工具合集",
       "icon": "🧯"
     },
@@ -309,7 +309,7 @@
     {
       "title": "Hello 算法",
       "url": "https://www.hello-algo.com/chapter_hello_algo/",
-      "description": "动画演示加可运行代码的数据结构与算法教程，Java、Python、Go、Rust 等主流语言都有",
+      "description": "动画图解、一键运行的数据结构与算法教程，支持 Java、C++、Python、Go、JS、TS、C#、Swift、Rust、Dart、Zig 等语言。",
       "category": "学习",
       "icon": "📖"
     },
@@ -323,7 +323,7 @@
     {
       "title": "Excalidraw",
       "url": "https://excalidraw.com",
-      "description": "GitHub 130k+ Star 的手绘风白板，画架构图和流程图很好用，支持协作和自部署",
+      "description": "GitHub 130k+ Star 的手绘风虚拟白板，画架构图 / 流程图神器，支持协作，可自部署。",
       "category": "绘图工具",
       "icon": "🎨"
     },
@@ -337,7 +337,7 @@
     {
       "title": "drawDB",
       "url": "https://drawdb.app",
-      "description": "GitHub 39k+ Star 的在线数据库 ER 图编辑器，画完表直接导出 SQL，纯前端可自部署",
+      "description": "GitHub 39k+ Star 的在线数据库 ER 图编辑器，可视化建表并一键生成 SQL，纯前端可自部署。",
       "category": "绘图工具",
       "icon": "🗄️"
     }
