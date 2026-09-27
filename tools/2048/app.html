@@ -57,6 +57,7 @@
     }
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #e08a3c; }
+    .btn.auto-on { background: #2f9e44; box-shadow: 0 2px 10px rgba(47, 158, 68, .4); }
     .hud .btn { align-self: stretch; }
 
     /* 棋盘：16 个底格 + 绝对定位方块，坐标全部由 CSS 变量 --x/--y 经 calc 换算，天然响应式 */
@@ -154,6 +155,7 @@
       <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
       <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
       <button class="btn" id="newBtn" type="button">新游戏</button>
+      <button class="btn" id="autoBtn" type="button">自动模式</button>
     </section>
 
     <div class="board" id="board">
@@ -167,7 +169,7 @@
       </div>
     </div>
 
-    <p class="hint">方向键 / WASD / 触屏滑动 · 合并出 2048 即胜利，可继续冲击更高分</p>
+    <p class="hint">方向键 / WASD / 触屏滑动 · 合并出 2048 即胜利，可继续冲击更高分<br>自动模式：AI 托管走棋冲高分，结束自动开新局继续</p>
     <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
   </main>
 
@@ -421,6 +423,108 @@
   ovContinue.addEventListener('click', function () {
     paused = false;
     hideOverlay();
+  });
+
+  /* ---------- 自动模式：AI 托管 ----------
+     每步对 4 个方向做纯矩阵模拟，评估函数综合：合并得分、空格数、
+     行列单调性（log 域惩罚）、平滑度、最大数贴角，并对新块 2/4 的
+     随机落位取期望；结束自动开新局，挂机也能持续刷分 */
+  let autoOn = false;
+  const lg = function (v) { return v ? Math.log2(v) : 0; };
+
+  function gridValues() {
+    return grid.map(function (row) { return row.map(function (t) { return t ? t.v : 0; }); });
+  }
+  function simMove(mat, dir) {
+    const dr = VEC[dir][0], dc = VEC[dir][1];
+    const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
+    if (dr === 1) rows.reverse();
+    if (dc === 1) cols.reverse();
+    const m = mat.map(function (row) { return row.slice(); });
+    const merged = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    let moved = false, gained = 0;
+    for (const r of rows) {
+      for (const c of cols) {
+        const v = m[r][c];
+        if (!v) continue;
+        let nr = r, nc = c;
+        while (true) {
+          const ar = nr + dr, ac = nc + dc;
+          if (ar < 0 || ar > 3 || ac < 0 || ac > 3 || m[ar][ac]) break;
+          nr = ar; nc = ac;
+        }
+        const ar = nr + dr, ac = nc + dc;
+        const target = (ar >= 0 && ar < 4 && ac >= 0 && ac < 4) ? m[ar][ac] : 0;
+        if (target && target === v && !merged[ar][ac]) {
+          m[r][c] = 0; m[ar][ac] = v * 2; merged[ar][ac] = 1;
+          gained += v * 2; moved = true;
+        } else if (nr !== r || nc !== c) {
+          m[r][c] = 0; m[nr][nc] = v; moved = true;
+        }
+      }
+    }
+    return { mat: m, moved: moved, gained: gained };
+  }
+  function evaluate(mat) {
+    let empty = 0, smooth = 0, maxV = 0;
+    let monoLR = 0, monoRL = 0, monoUD = 0, monoDU = 0;
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        const v = mat[r][c];
+        if (!v) { empty++; continue; }
+        if (v > maxV) maxV = v;
+        if (c < 3) {
+          const w = lg(mat[r][c + 1]);
+          smooth += Math.abs(lg(v) - w);
+          if (lg(v) > w) monoLR += w - lg(v); else monoRL += lg(v) - w;
+        }
+        if (r < 3) {
+          const w = lg(mat[r + 1][c]);
+          if (lg(v) > w) monoUD += w - lg(v); else monoDU += lg(v) - w;
+        }
+      }
+    }
+    const mono = Math.max(monoLR, monoRL) + Math.max(monoUD, monoDU); // 越有序越接近 0
+    const corner = (mat[0][0] === maxV || mat[0][3] === maxV || mat[3][0] === maxV || mat[3][3] === maxV)
+      ? lg(maxV) * 2.7 : 0;
+    return empty * 270 + mono * 47 + corner * 100 - smooth * 3;
+  }
+  function bestDir() {
+    const mat = gridValues();
+    let best = null, bestScore = -Infinity;
+    for (const dir of ['up', 'left', 'down', 'right']) {
+      const sim = simMove(mat, dir);
+      if (!sim.moved) continue;
+      let sc = sim.gained + evaluate(sim.mat);
+      const empties = [];
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (!sim.mat[r][c]) empties.push([r, c]);
+      if (empties.length) {
+        let exp = 0;
+        for (const cell of empties) {
+          for (const v of [2, 4]) {
+            const m2 = sim.mat.map(function (row) { return row.slice(); });
+            m2[cell[0]][cell[1]] = v;
+            exp += (v === 2 ? 0.9 : 0.1) * evaluate(m2);
+          }
+        }
+        sc += exp / empties.length;
+      }
+      if (sc > bestScore) { bestScore = sc; best = dir; }
+    }
+    return best;
+  }
+  window.setInterval(function () {
+    if (!autoOn) return;
+    if (over) { newGame(); return; }            // 结束自动续局，挂机持续刷分
+    if (paused) { paused = false; hideOverlay(); } // 胜利弹层自动关闭继续
+    if (lock) return;
+    const dir = bestDir();
+    if (dir) move(dir);
+  }, 110);
+  document.getElementById('autoBtn').addEventListener('click', function () {
+    autoOn = !autoOn;
+    this.textContent = autoOn ? '停止自动' : '自动模式';
+    this.classList.toggle('auto-on', autoOn);
   });
 
   /* ---------- 初始化：先铺 16 个底格，再开局 ---------- */
