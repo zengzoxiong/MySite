@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陨石闪避 - 拾光集</title>
+<meta name="description" content="陨石闪避：操控小飞船躲开不断坠落的陨石，存活越久得分越高，护盾道具提供短暂无敌，纯本地运行的网页小游戏。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dodge/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368;flex-wrap:wrap}
+.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
+.hud .shield-tag{color:#0288d1;font-weight:600}
+.hud .shield-tag b{color:#0288d1}
+button{font:inherit;border:0;border-radius:10px;padding:9px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.stage{position:relative;max-width:480px;margin:0 auto;border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+canvas{display:block;width:100%;height:auto;aspect-ratio:420/640;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.86);text-align:center;cursor:pointer;padding:16px}
+[hidden]{display:none!important}
+.overlay h2{font-size:24px;margin-bottom:8px;color:#202124}
+.overlay .big{font-size:46px;font-weight:800;color:#1a73e8;line-height:1.25;font-variant-numeric:tabular-nums}
+.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:4px 0}
+.overlay button{margin-top:12px}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <header>
+    <h1>陨石闪避</h1>
+    <div class="hud">
+      <span>得分 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <span class="shield-tag" id="shieldBox" hidden>护盾 <b id="shieldT">0</b> 秒</span>
+    </div>
+  </header>
+  <div class="stage" id="stage">
+    <canvas id="cv" width="420" height="640"></canvas>
+    <div class="overlay" id="ov" hidden></div>
+  </div>
+  <p class="tips">移动鼠标 / 手指拖动 / 方向键（A、D 亦可）控制飞船；存活每秒得 10 分；陨石随时间越来越密、越来越快；碰到青色护盾道具可获得 10 秒无敌，无敌期间撞上陨石会将其撞碎</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</div>
+<script>
+(function () {
+'use strict';
+
+/* ================= 基本常量 ================= */
+var W = 420, H = 640;          // 逻辑分辨率
+var SHIP_Y = H - 84;           // 飞船固定纵坐标
+var SHIP_R = 13;               // 飞船碰撞半径
+var SHIELD_DUR = 10;           // 护盾持续秒数
+
+var cv = document.getElementById('cv');
+var ctx = cv.getContext('2d');
+var stage = document.getElementById('stage');
+var ov = document.getElementById('ov');
+var elScore = document.getElementById('score');
+var elBest = document.getElementById('best');
+var elShield = document.getElementById('shieldBox');
+var elShieldT = document.getElementById('shieldT');
+
+/* 高分屏适配 */
+(function fit() {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+})();
+
+/* ================= 最高分（带 slug 前缀，读写均包 try/catch） ================= */
+var BEST_KEY = 'dodge_best';
+var best = 0;
+try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
+
+/* ================= 游戏状态 ================= */
+var state = 'ready';   // ready | playing | dying | over | paused
+var t = 0;             // 本局存活时间（秒）
+var score = 0, shownScore = -1;
+var ship = { x: W / 2, tx: null };  // tx：指针目标横坐标
+var keys = { left: false, right: false };
+var meteors = [];      // 陨石
+var pickups = [];      // 护盾道具
+var parts = [];        // 粒子
+var stars = [];        // 背景星空
+var spawnT = 0;        // 陨石生成倒计时
+var nextPickup = 0;    // 下一次护盾道具出现时刻
+var shieldLeft = 0;    // 护盾剩余秒数
+var dieT = 0, overGuard = 0;
+
+/* 难度曲线：存活越久陨石越快越密 */
+function mul() { return Math.min(2.2, 1 + t / 70); }
+function interval() { return Math.max(0.34, 1.05 - t * 0.011); }
+
+function initStars() {
+  stars = [];
+  for (var i = 0; i < 70; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      s: Math.random() < 0.8 ? 1.5 : 2.5,
+      v: 14 + Math.random() * 34,
+      a: 0.25 + Math.random() * 0.6
+    });
+  }
+}
+
+function resetGame() {
+  t = 0; score = 0; shownScore = -1;
+  ship.x = W / 2; ship.tx = null;
+  keys.left = false; keys.right = false;
+  meteors = []; pickups = []; parts = [];
+  spawnT = 0.9;                       // 开局稍等再落第一颗
+  nextPickup = 8 + Math.random() * 5;
+  shieldLeft = 0;
+  dieT = 0;
+  syncHud();
+  syncShield();
+}
+
+/* ================= HUD 与覆盖层 ================= */
+function syncHud() { elScore.textContent = score; elBest.textContent = best; }
+function syncShield() {
+  if (shieldLeft > 0) {
+    elShield.hidden = false;
+    elShieldT.textContent = shieldLeft.toFixed(1);
+  } else {
+    elShield.hidden = true;
+  }
+}
+function showOverlay(html) { ov.innerHTML = html; ov.hidden = false; }
+function hideOverlay() { ov.hidden = true; }
+
+function showStart() {
+  showOverlay(
+    '<h2>陨石闪避</h2>' +
+    '<p>驾驶小飞船躲开不断坠落的陨石<br>存活越久得分越高（每秒 10 分）<br>护盾道具可提供 10 秒无敌，无敌期间可撞碎陨石</p>' +
+    '<button type="button">开始游戏</button>' +
+    '<p>移动鼠标 / 手指拖动 / 方向键 控制飞船</p>'
+  );
+}
+function showPause() {
+  showOverlay('<h2>已暂停</h2><p>点击画面或按空格继续</p>');
+}
+function showOver() {
+  state = 'over';
+  overGuard = 0.6;
+  var isNew = score > best;
+  if (isNew) {
+    best = score;
+    try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+  }
+  syncHud();
+  showOverlay(
+    '<h2>' + (isNew ? '新纪录！' : '游戏结束') + '</h2>' +
+    '<div class="big">' + score + '</div>' +
+    '<p>存活 ' + t.toFixed(1) + ' 秒 · 最高纪录 ' + best + '</p>' +
+    '<button type="button">再来一局</button>'
+  );
+}
+
+/* ================= 流程控制 ================= */
+function startGame() {
+  resetGame();
+  state = 'playing';
+  hideOverlay();
+}
+function resumeGame() {
+  state = 'playing';
+  hideOverlay();
+}
+function die() {
+  state = 'dying';
+  dieT = 0;
+  shieldLeft = 0;
+  syncShield();
+  burst(ship.x, SHIP_Y, 35, 26);    // 橙色火焰碎片
+  burst(ship.x, SHIP_Y, 205, 14);   // 蓝白火花
+  if (navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
+}
+function act() {
+  if (state === 'ready') startGame();
+  else if (state === 'paused') resumeGame();
+  else if (state === 'over' && overGuard <= 0) startGame();
+  /* playing 状态下点击不做动作，移动交给指针与键盘 */
+}
+
+/* ================= 生成 ================= */
+function spawnMeteor() {
+  var r = 13 + Math.random() * 27;
+  var n = 6 + (Math.random() * 4 | 0);
+  var verts = [];
+  for (var i = 0; i < n; i++) verts.push(0.72 + Math.random() * 0.42); // 顶点半径系数
+  var craters = [];
+  var cn = 2 + (Math.random() * 2 | 0);
+  for (var j = 0; j < cn; j++) {
+    var a = Math.random() * Math.PI * 2, d = Math.random() * r * 0.45;
+    craters.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, r: r * (0.12 + Math.random() * 0.16) });
+  }
+  meteors.push({
+    x: r + Math.random() * (W - 2 * r),
+    y: -r - 12,
+    vx: (Math.random() * 2 - 1) * 46 * mul(),
+    vy: (95 + Math.random() * 115) * mul(),
+    r: r,
+    rot: Math.random() * Math.PI * 2,
+    vr: (Math.random() * 2 - 1) * 2.6,   // 自转角速度各不相同
+    verts: verts,
+    craters: craters,
+    hue: 16 + Math.random() * 24          // 岩石棕灰色系
+  });
+}
+function spawnPickup() {
+  pickups.push({ x: 30 + Math.random() * (W - 60), y: -24, vy: 105, ph: Math.random() * Math.PI * 2 });
+}
+/* 爆裂粒子 */
+function burst(x, y, hue, n) {
+  for (var i = 0; i < n; i++) {
+    var a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 220;
+    var life = 0.5 + Math.random() * 0.45;
+    parts.push({
+      x: x, y: y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: life, max: life,
+      r: 2 + Math.random() * 3.5,
+      col: 'hsl(' + hue + ',65%,' + (45 + Math.random() * 25) + '%)'
+    });
+  }
+}
+
+/* ================= 更新 ================= */
+function moveShip(dt) {
+  var kb = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  if (kb !== 0) {
+    ship.x += kb * 430 * dt;   // 键盘：恒速移动
+    ship.tx = null;
+  } else if (ship.tx !== null) {
+    ship.x += (ship.tx - ship.x) * Math.min(1, dt * 14);   // 指针：平滑跟随
+  }
+  ship.x = Math.max(22, Math.min(W - 22, ship.x));
+}
+
+function update(dt) {
+  /* 星空缓慢下移，营造飞行感 */
+  for (var si = 0; si < stars.length; si++) {
+    var st = stars[si];
+    st.y += st.v * dt;
+    if (st.y > H + 2) { st.y = -2; st.x = Math.random() * W; }
+  }
+  /* 粒子 */
+  for (var pi = parts.length - 1; pi >= 0; pi--) {
+    var pt = parts[pi];
+    pt.life -= dt;
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.vy += 420 * dt;
+    if (pt.life <= 0) parts.splice(pi, 1);
+  }
+
+  if (state === 'playing') {
+    t += dt;
+    score = Math.floor(t * 10);   // 每秒 +10
+    if (score !== shownScore) { shownScore = score; elScore.textContent = score; }
+
+    if (shieldLeft > 0) {
+      shieldLeft = Math.max(0, shieldLeft - dt);
+    }
+    syncShield();
+
+    moveShip(dt);
+
+    /* 陨石生成 */
+    spawnT -= dt;
+    if (spawnT <= 0) { spawnMeteor(); spawnT = interval(); }
+
+    /* 护盾道具生成 */
+    if (t >= nextPickup) {
+      spawnPickup();
+      nextPickup = t + 11 + Math.random() * 8;
+    }
+
+    /* 陨石更新与碰撞 */
+    for (var mi = meteors.length - 1; mi >= 0; mi--) {
+      var m = meteors[mi];
+      m.x += m.vx * dt;
+      m.y += m.vy * dt;
+      m.rot += m.vr * dt;
+      if ((m.x < m.r && m.vx < 0) || (m.x > W - m.r && m.vx > 0)) m.vx = -m.vx;   // 左右反弹
+      if (m.y > H + m.r + 40) { meteors.splice(mi, 1); continue; }
+      var rr = m.r * 0.82 + SHIP_R;   // 判定圆略缩小，手感更宽容
+      var dx = m.x - ship.x, dy = m.y - SHIP_Y;
+      if (dx * dx + dy * dy < rr * rr) {
+        if (shieldLeft > 0) {
+          burst(m.x, m.y, m.hue, 12);   // 无敌期间撞碎陨石
+          meteors.splice(mi, 1);
+        } else {
+          die();
+          return;
+        }
+      }
+    }
+
+    /* 道具下落与拾取 */
+    for (var qi = pickups.length - 1; qi >= 0; qi--) {
+      var q = pickups[qi];
+      q.y += q.vy * dt;
+      var qy = q.y + Math.sin(t * 3 + q.ph) * 4;   // 上下浮动
+      var ddx = q.x - ship.x, ddy = qy - SHIP_Y;
+      if (ddx * ddx + ddy * ddy < 35 * 35) {
+        pickups.splice(qi, 1);
+        shieldLeft = SHIELD_DUR;
+        burst(q.x, qy, 200, 10);
+      } else if (q.y > H + 40) {
+        pickups.splice(qi, 1);
+      }
+    }
+  } else if (state === 'dying') {
+    /* 陨石继续飘落，短暂延迟后展示结算 */
+    for (var di = 0; di < meteors.length; di++) {
+      var md = meteors[di];
+      md.x += md.vx * dt;
+      md.y += md.vy * dt;
+      md.rot += md.vr * dt;
+    }
+    dieT += dt;
+    if (dieT > 0.7) showOver();
+  }
+}
+
+/* ================= 绘制 ================= */
+function draw() {
+  /* 深空背景 */
+  var bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#101c36');
+  bg.addColorStop(1, '#25406b');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* 星星 */
+  for (var i = 0; i < stars.length; i++) {
+    var s = stars[i];
+    ctx.fillStyle = 'rgba(255,255,255,' + s.a + ')';
+    ctx.fillRect(s.x, s.y, s.s, s.s);
+  }
+
+  drawPickups();
+  drawMeteors();
+  drawParts();
+  if (state === 'playing' || state === 'paused' || state === 'ready') drawShip();
+  drawShieldRing();
+}
+/* 多边形陨石：随机顶点半径 + 陨石坑 + 自转 */
+function drawMeteors() {
+  for (var i = 0; i < meteors.length; i++) {
+    var m = meteors[i];
+    ctx.save();
+    ctx.translate(m.x, m.y);
+    ctx.rotate(m.rot);
+    ctx.beginPath();
+    var n = m.verts.length;
+    for (var k = 0; k < n; k++) {
+      var a = k / n * Math.PI * 2, rr = m.r * m.verts[k];
+      var px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+      if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'hsl(' + m.hue + ',26%,44%)';
+    ctx.fill();
+    ctx.strokeStyle = 'hsl(' + m.hue + ',32%,28%)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'hsla(' + m.hue + ',30%,30%,.55)';
+    for (var c = 0; c < m.craters.length; c++) {
+      ctx.beginPath();
+      ctx.arc(m.craters[c].x, m.craters[c].y, m.craters[c].r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+/* 护盾道具：光晕 + 圆环 + 盾形徽记 */
+function drawPickups() {
+  for (var i = 0; i < pickups.length; i++) {
+    var q = pickups[i];
+    var y = q.y + Math.sin(t * 3 + q.ph) * 4;
+    ctx.fillStyle = 'rgba(41,182,246,.18)';
+    ctx.beginPath();
+    ctx.arc(q.x, y, 20 + Math.sin(t * 5 + q.ph) * 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#29b6f6';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(q.x, y, 14, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#29b6f6';
+    ctx.beginPath();
+    ctx.moveTo(q.x, y - 7.5);
+    ctx.lineTo(q.x + 5.5, y - 4.5);
+    ctx.lineTo(q.x + 5.5, y + 1);
+    ctx.quadraticCurveTo(q.x + 5.5, y + 5.5, q.x, y + 7.5);
+    ctx.quadraticCurveTo(q.x - 5.5, y + 5.5, q.x - 5.5, y + 1);
+    ctx.lineTo(q.x - 5.5, y - 4.5);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+/* 小飞船：几何拼装（机身 + 机翼 + 舷窗 + 尾焰） */
+function drawShip() {
+  ctx.save();
+  ctx.translate(ship.x, SHIP_Y);
+  /* 尾焰（随机抖动） */
+  var fl = 8 + Math.random() * 7;
+  var grd = ctx.createLinearGradient(0, 12, 0, 20 + fl);
+  grd.addColorStop(0, 'rgba(255,183,77,.95)');
+  grd.addColorStop(1, 'rgba(255,183,77,0)');
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.moveTo(-5, 12);
+  ctx.lineTo(5, 12);
+  ctx.lineTo(0, 12 + fl);
+  ctx.closePath();
+  ctx.fill();
+  /* 机翼 */
+  ctx.fillStyle = '#c3d0e4';
+  ctx.beginPath();
+  ctx.moveTo(-11, 2); ctx.lineTo(-22, 16); ctx.lineTo(-8, 13);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(11, 2); ctx.lineTo(22, 16); ctx.lineTo(8, 13);
+  ctx.closePath(); ctx.fill();
+  /* 机身 */
+  ctx.fillStyle = '#f2f6fc';
+  ctx.strokeStyle = '#8fa3bd';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, -20);
+  ctx.quadraticCurveTo(12, -6, 12, 6);
+  ctx.lineTo(7, 13);
+  ctx.lineTo(-7, 13);
+  ctx.lineTo(-12, 6);
+  ctx.quadraticCurveTo(-12, -6, 0, -20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  /* 舷窗 */
+  ctx.fillStyle = '#37c6ff';
+  ctx.beginPath();
+  ctx.arc(0, -4, 4.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  ctx.beginPath();
+  ctx.arc(-1.4, -5.4, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+/* 护盾光环（剩 3 秒内闪烁警示） */
+function drawShieldRing() {
+  if (shieldLeft <= 0 || state === 'dying' || state === 'over') return;
+  var pulse = 26 + Math.sin(t * 6) * 2;
+  var blink = shieldLeft < 3 ? (Math.sin(t * 16) > 0 ? 0.85 : 0.25) : 0.8;
+  ctx.strokeStyle = 'rgba(41,182,246,' + blink + ')';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(ship.x, SHIP_Y, pulse, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(41,182,246,' + (blink * 0.35) + ')';
+  ctx.beginPath();
+  ctx.arc(ship.x, SHIP_Y, pulse + 5, 0, Math.PI * 2);
+  ctx.stroke();
+}
+function drawParts() {
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i];
+    ctx.globalAlpha = Math.max(0, p.life / p.max);
+    ctx.fillStyle = p.col;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ================= 主循环 ================= */
+var lastFrame = performance.now();
+function loop(now) {
+  var dt = Math.min((now - lastFrame) / 1000, 0.05);
+  lastFrame = now;
+  if (overGuard > 0) overGuard -= dt;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ================= 输入（指针 + 键盘，兼容无 PointerEvent 的环境） ================= */
+function setPointer(e) {
+  var rect = cv.getBoundingClientRect();
+  ship.tx = (e.clientX - rect.left) / rect.width * W;
+}
+function onTap(el, fn) {
+  if (window.PointerEvent) el.addEventListener('pointerdown', fn);
+  else {
+    el.addEventListener('touchstart', function (e) { e.preventDefault(); fn(e.touches[0]); }, { passive: false });
+    el.addEventListener('mousedown', fn);
+  }
+}
+function onMove(el, fn) {
+  if (window.PointerEvent) el.addEventListener('pointermove', fn);
+  else {
+    el.addEventListener('touchmove', function (e) { e.preventDefault(); fn(e.touches[0]); }, { passive: false });
+    el.addEventListener('mousemove', fn);
+  }
+}
+onTap(stage, function (e) {
+  setPointer(e);
+  act();
+});
+onMove(stage, function (e) {
+  if (state === 'playing') setPointer(e);
+});
+window.addEventListener('keydown', function (e) {
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') { keys.left = true; e.preventDefault(); }
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') { keys.right = true; e.preventDefault(); }
+  else if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    if (!e.repeat) act();
+  }
+});
+window.addEventListener('keyup', function (e) {
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+});
+
+/* 切后台自动暂停；回到前台重置时间基准，避免 delta 时间跳变 */
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) {
+    if (state === 'playing') { state = 'paused'; showPause(); }
+  } else {
+    lastFrame = performance.now();
+  }
+});
+
+/* ================= 启动 ================= */
+initStars();
+resetGame();
+showStart();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

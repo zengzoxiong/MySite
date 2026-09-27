@@ -996,6 +996,34 @@
       "description": "波次推进太空射击，走位躲避弹幕，爆炸粒子",
       "icon": "🚀",
       "category": "小游戏"
+    },
+    {
+      "name": "跳跳鸟",
+      "path": "flappy-bird/app.html",
+      "description": "点击扇翅穿过管道缝隙，撞上就坠机，越飞越难",
+      "icon": "🐦",
+      "category": "小游戏"
+    },
+    {
+      "name": "陨石闪避",
+      "path": "dodge/app.html",
+      "description": "操控小飞船躲陨石，捡护盾开无敌，活得越久分越高",
+      "icon": "🛸",
+      "category": "小游戏"
+    },
+    {
+      "name": "叠叠高",
+      "path": "stack-tower/app.html",
+      "description": "方块来回移动看准时机放下，切得越准塔越稳",
+      "icon": "🧱",
+      "category": "小游戏"
+    },
+    {
+      "name": "打字练习",
+      "path": "typing-tutor/app.html",
+      "description": "键位、单词、文章三关课程，虚拟键盘指法提示，练 speed",
+      "icon": "⌨",
+      "category": "小游戏"
     }
   ]
 }

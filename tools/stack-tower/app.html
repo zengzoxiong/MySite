@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>叠叠高 - 拾光集</title>
+<meta name="description" content="叠叠高：方块左右往返移动，点击或按空格放下，对齐部分保留、悬空部分切掉，完全对齐回涨宽度，纯本地运行的网页小游戏。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/stack-tower/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368;flex-wrap:wrap}
+.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
+button{font:inherit;border:0;border-radius:10px;padding:9px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.stage{position:relative;max-width:480px;margin:0 auto;border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+canvas{display:block;width:100%;height:auto;aspect-ratio:420/640;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.84);text-align:center;cursor:pointer;padding:16px}
+[hidden]{display:none!important}
+.overlay h2{font-size:24px;margin-bottom:8px;color:#202124}
+.overlay .big{font-size:46px;font-weight:800;color:#1a73e8;line-height:1.25;font-variant-numeric:tabular-nums}
+.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:4px 0}
+.overlay button{margin-top:12px}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <header>
+    <h1>叠叠高</h1>
+    <div class="hud">
+      <span>分数 <b id="score">0</b></span>
+      <span>层数 <b id="layer">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+    </div>
+  </header>
+  <div class="stage" id="stage">
+    <canvas id="cv" width="420" height="640"></canvas>
+    <div class="overlay" id="ov" hidden></div>
+  </div>
+  <p class="tips">点击画面 / 空格键 放下方块；与下方对齐的部分保留、悬空部分切掉；完全对齐可回涨宽度并获得连击加分；塔越高方块移动越快，宽度归零即结束</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</div>
+<script>
+(function () {
+'use strict';
+
+/* ================= 基本常量 ================= */
+var W = 420, H = 640;        // 逻辑分辨率
+var BH = 26;                 // 单块高度
+var INIT_W = 150;            // 初始方块宽度
+var BASE_Y = 560;            // 基座顶面纵坐标
+var PERFECT_TOL = 6;         // 完全对齐的判定容差（像素）
+var REGROW = 12;             // 完全对齐时宽度回涨量
+
+var cv = document.getElementById('cv');
+var ctx = cv.getContext('2d');
+var stage = document.getElementById('stage');
+var ov = document.getElementById('ov');
+var elScore = document.getElementById('score');
+var elLayer = document.getElementById('layer');
+var elBest = document.getElementById('best');
+
+/* 高分屏适配 */
+(function fit() {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+})();
+
+/* ================= 最高纪录（带 slug 前缀，读写均包 try/catch） ================= */
+var BEST_KEY = 'stack-tower_best';
+var best = 0;
+try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
+
+/* ================= 游戏状态 ================= */
+var state = 'ready';   // ready | playing | dying | over | paused
+var stack = [];        // 塔身 { x, w, hue }（第 0 块为基块，不计玩家层数）
+var moving = null;     // 当前移动块 { x, w, dir, hue, y }
+var debris = [];       // 被切掉的坠落碎片
+var texts = [];        // 飘字提示
+var cam = 0;           // 相机下移量（塔高时视野跟随）
+var combo = 0;         // 完美连击数
+var bonus = 0;         // 完美奖励累计分
+var score = 0;
+var dieT = 0, overGuard = 0;
+
+function resetGame() {
+  stack = [{ x: (W - INIT_W) / 2, w: INIT_W, hue: 205 }];
+  debris = []; texts = [];
+  cam = 0; combo = 0; bonus = 0; score = 0;
+  dieT = 0;
+  spawnMoving();
+  syncHud();
+}
+
+function spawnMoving() {
+  var top = stack[stack.length - 1];
+  var li = stack.length;   // 本块作为第 li 个玩家层
+  var dir = Math.random() < 0.5 ? 1 : -1;
+  moving = {
+    x: dir === 1 ? -top.w - 10 : W + 10,   // 从屏幕一侧外进入
+    w: top.w,                              // 宽度继承塔顶
+    dir: dir,
+    hue: (205 + li * 14) % 360,            // 逐层轮换色相
+    y: BASE_Y - (stack.length + 1) * BH
+  };
+}
+
+/* ================= HUD 与覆盖层 ================= */
+function syncHud() {
+  elScore.textContent = score;
+  elLayer.textContent = stack.length - 1;
+  elBest.textContent = best;
+}
+function showOverlay(html) { ov.innerHTML = html; ov.hidden = false; }
+function hideOverlay() { ov.hidden = true; }
+
+function showStart() {
+  showOverlay(
+    '<h2>叠叠高</h2>' +
+    '<p>方块左右往返移动，点击或按空格放下<br>对齐部分保留、悬空部分切掉<br>完全对齐可回涨宽度并获得连击加分</p>' +
+    '<button type="button">开始游戏</button>' +
+    '<p>点击画面 / 空格键 放下方块</p>'
+  );
+}
+function showPause() {
+  showOverlay('<h2>已暂停</h2><p>点击画面或按空格继续</p>');
+}
+function showOver() {
+  state = 'over';
+  overGuard = 0.6;
+  var isNew = score > best;
+  if (isNew) {
+    best = score;
+    try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+  }
+  syncHud();
+  showOverlay(
+    '<h2>' + (isNew ? '新纪录！' : '游戏结束') + '</h2>' +
+    '<div class="big">' + score + '</div>' +
+    '<p>共叠 ' + (stack.length - 1) + ' 层 · 完美奖励 ' + bonus + ' 分 · 最高纪录 ' + best + '</p>' +
+    '<button type="button">再来一局</button>'
+  );
+}
+
+/* ================= 流程控制 ================= */
+function startGame() {
+  resetGame();
+  state = 'playing';
+  hideOverlay();
+}
+function resumeGame() {
+  state = 'playing';
+  hideOverlay();
+}
+function drop() {
+  var top = stack[stack.length - 1];
+  var mv = moving;
+  var left = Math.max(mv.x, top.x);
+  var right = Math.min(mv.x + mv.w, top.x + top.w);
+  var overlap = right - left;
+
+  if (overlap <= 2) {
+    /* 完全悬空：整块坠落，游戏结束 */
+    debris.push({ x: mv.x, w: mv.w, y: mv.y, vx: mv.dir * 40, vy: -60, hue: mv.hue });
+    moving = null;
+    state = 'dying';
+    dieT = 0;
+    return;
+  }
+
+  var perfect = Math.abs(mv.x - top.x) <= PERFECT_TOL && Math.abs(mv.w - top.w) <= PERFECT_TOL;
+  if (perfect) {
+    /* 完全对齐：宽度回涨一点并加分（连击越多奖励越高） */
+    combo += 1;
+    bonus += combo;
+    var newW = Math.min(INIT_W, top.w + REGROW);
+    var newX = top.x + top.w / 2 - newW / 2;   // 以塔顶中心对称回涨
+    stack.push({ x: newX, w: newW, hue: mv.hue });
+    texts.push({ s: '完美 +' + combo, x: newX + newW / 2, y: mv.y - 8, life: 1.1, max: 1.1 });
+  } else {
+    combo = 0;
+    stack.push({ x: left, w: overlap, hue: mv.hue });
+    /* 切掉悬空部分，生成坠落碎片 */
+    if (mv.x < left - 0.5) debris.push({ x: mv.x, w: left - mv.x, y: mv.y, vx: -70, vy: -40, hue: mv.hue });
+    if (mv.x + mv.w > right + 0.5) debris.push({ x: right, w: mv.x + mv.w - right, y: mv.y, vx: 70, vy: -40, hue: mv.hue });
+  }
+
+  score = stack.length - 1 + bonus;   // 层数 + 完美奖励
+  syncHud();
+  spawnMoving();
+}
+function act() {
+  if (state === 'ready') startGame();
+  else if (state === 'playing') drop();
+  else if (state === 'paused') resumeGame();
+  else if (state === 'over' && overGuard <= 0) startGame();
+}
+
+/* ================= 更新 ================= */
+function update(dt) {
+  /* 碎片坠落 */
+  for (var i = debris.length - 1; i >= 0; i--) {
+    var d = debris[i];
+    d.vy += 1500 * dt;
+    d.x += d.vx * dt;
+    d.y += d.vy * dt;
+    if (d.y > H + 80) debris.splice(i, 1);
+  }
+  /* 飘字上浮渐隐 */
+  for (var ti = texts.length - 1; ti >= 0; ti--) {
+    var tx = texts[ti];
+    tx.life -= dt;
+    tx.y -= 34 * dt;
+    if (tx.life <= 0) texts.splice(ti, 1);
+  }
+  /* 相机跟随：工作区（下一块放置位）不高于期望线 */
+  var workY = BASE_Y - (stack.length + 1) * BH;
+  var targetCam = Math.max(0, 210 - workY);
+  cam += (targetCam - cam) * Math.min(1, dt * 6);
+
+  if (state === 'playing') {
+    /* 塔越高移动越快 */
+    var sp = Math.min(430, 185 + (stack.length - 1) * 6.5);
+    moving.x += moving.dir * sp * dt;
+    var l = -26, r = W - moving.w + 26;
+    if (moving.x < l) { moving.x = l; moving.dir = 1; }
+    if (moving.x > r) { moving.x = r; moving.dir = -1; }
+  } else if (state === 'dying') {
+    dieT += dt;
+    if (dieT > 0.75) showOver();
+  }
+}
+
+/* ================= 绘制 ================= */
+function drawBlock(x, y, w, h, hue, isBase) {
+  if (w <= 0) return;
+  var sat = isBase ? 14 : 60;
+  var l = isBase ? 40 : 58;
+  ctx.fillStyle = 'hsl(' + hue + ',' + sat + '%,' + l + '%)';
+  ctx.fillRect(x, y, w, h);
+  /* 顶部亮面 */
+  ctx.fillStyle = 'hsl(' + hue + ',' + sat + '%,' + (l + 14) + '%)';
+  ctx.fillRect(x, y, w, Math.min(5, h * 0.25));
+  /* 底部暗面 */
+  ctx.fillStyle = 'hsl(' + hue + ',' + sat + '%,' + (l - 12) + '%)';
+  ctx.fillRect(x, y + h - 4, w, 4);
+  /* 描边 */
+  ctx.strokeStyle = 'hsl(' + hue + ',' + sat + '%,' + (l - 22) + '%)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+}
+function cloud(x, y) {
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  ctx.beginPath();
+  ctx.arc(x, y, 14, 0, Math.PI * 2);
+  ctx.arc(x + 14, y + 4, 10, 0, Math.PI * 2);
+  ctx.arc(x - 14, y + 5, 9, 0, Math.PI * 2);
+  ctx.fill();
+}
+function sun(x, y, r) {
+  ctx.fillStyle = 'rgba(255,214,112,.25)';
+  ctx.beginPath();
+  ctx.arc(x, y, r + 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,214,112,.85)';
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+}
+function draw() {
+  /* 背景：淡色天空 */
+  var bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#dceefb');
+  bg.addColorStop(1, '#f6f9f4');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  sun(W - 74, 84, 26);
+  cloud(W * 0.2, 96);
+  cloud(W * 0.75, 170);
+  cloud(W * 0.42, 40);
+
+  ctx.save();
+  ctx.translate(0, cam);
+
+  /* 基座（向下延伸出画面） */
+  drawBlock((W - INIT_W) / 2, BASE_Y, INIT_W, H - BASE_Y + 20, 210, true);
+  /* 塔身（只画可视范围内的层） */
+  for (var i = 0; i < stack.length; i++) {
+    var b = stack[i];
+    var y = BASE_Y - (i + 1) * BH;
+    if (y + BH < -40 || y > H + 40) continue;
+    drawBlock(b.x, y, b.w, BH, b.hue, false);
+  }
+  /* 坠落碎片 */
+  for (var d = 0; d < debris.length; d++) {
+    drawBlock(debris[d].x, debris[d].y, debris[d].w, BH, debris[d].hue, false);
+  }
+  /* 当前移动块 */
+  if (moving && (state === 'playing' || state === 'paused' || state === 'ready')) {
+    drawBlock(moving.x, moving.y, moving.w, BH, moving.hue, false);
+  }
+  /* 飘字 */
+  ctx.textAlign = 'center';
+  ctx.font = '700 20px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+  for (var t2 = 0; t2 < texts.length; t2++) {
+    ctx.globalAlpha = Math.max(0, texts[t2].life / texts[t2].max);
+    ctx.fillStyle = '#1a73e8';
+    ctx.fillText(texts[t2].s, texts[t2].x, texts[t2].y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+/* ================= 主循环 ================= */
+var lastFrame = performance.now();
+function loop(now) {
+  var dt = Math.min((now - lastFrame) / 1000, 0.05);
+  lastFrame = now;
+  if (overGuard > 0) overGuard -= dt;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ================= 输入（指针 + 键盘，兼容无 PointerEvent 的环境） ================= */
+function onTap(el, fn) {
+  if (window.PointerEvent) el.addEventListener('pointerdown', fn);
+  else {
+    el.addEventListener('touchstart', function (e) { e.preventDefault(); fn(e.touches[0]); }, { passive: false });
+    el.addEventListener('mousedown', fn);
+  }
+}
+onTap(stage, function () { act(); });
+window.addEventListener('keydown', function (e) {
+  if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
+    e.preventDefault();
+    if (!e.repeat) act();
+  }
+});
+
+/* 切后台自动暂停；回到前台重置时间基准，避免 delta 时间跳变 */
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) {
+    if (state === 'playing') { state = 'paused'; showPause(); }
+  } else {
+    lastFrame = performance.now();
+  }
+});
+
+/* ================= 启动 ================= */
+resetGame();
+showStart();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打字练习 - 拾光集</title>
+  <meta name="description" content="拾光集在线打字练习：键位、单词、文章三关进阶课程，虚拟键盘指法提示，成绩本地保存，纯离线运行。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/typing-tutor/app.html">
+  <style>
+    /* ===== 打字练习 · 拾光集自建工具（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    :root {
+      --bg: #eef1f5; --card: #ffffff; --bd: #dfe4ea;
+      --tx: #1f2937; --tx2: #6b7280;
+      --brand: #2563eb; --brand-weak: #dbeafe;
+      --ok: #16a34a; --err: #dc2626;
+      --u: 46px; /* 虚拟键盘单键基准宽 */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--tx);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.55; -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 26px 16px 44px; }
+    header { text-align: center; margin-bottom: 16px; }
+    header h1 { font-size: 26px; letter-spacing: 1px; }
+    header p { font-size: 13px; color: var(--tx2); margin-top: 4px; }
+
+    /* 顶部模式切换 */
+    .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .tab { padding: 9px 18px; border: 1px solid var(--bd); background: #fff; color: var(--tx2); border-radius: 999px; font-size: 15px; cursor: pointer; }
+    .tab.active { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+
+    /* 实时统计条 */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat { background: var(--card); border: 1px solid var(--bd); border-radius: 12px; padding: 9px 6px; text-align: center; }
+    .stat b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat span { font-size: 12px; color: var(--tx2); }
+
+    .panel { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 18px; }
+    .seg { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+    .seg button { padding: 7px 14px; border: 1px solid var(--bd); background: #f7f8fa; border-radius: 999px; font-size: 13px; color: var(--tx2); cursor: pointer; }
+    .seg button.active { background: var(--brand-weak); border-color: var(--brand); color: var(--brand); font-weight: 600; }
+    .tip { font-size: 13px; color: var(--tx2); text-align: center; margin-bottom: 10px; }
+    .best-line { font-size: 12px; color: var(--tx2); text-align: center; background: #f6f8fa; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; }
+
+    /* 键位模式大字展示区 */
+    .big-char { background: #f8fafc; border: 1px solid var(--bd); border-radius: 14px; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 14px; overflow: hidden; }
+    .big-char .ch { font-family: "SF Mono", Consolas, Menlo, "Courier New", monospace; font-size: 72px; font-weight: 600; line-height: 1.1; }
+    .big-char .hint { font-size: 13px; color: var(--tx2); margin-top: 6px; padding: 0 12px; text-align: center; }
+    .big-char.wrong .ch { color: var(--err); }
+    @keyframes shakeX { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 50% { transform: translateX(6px); } 80% { transform: translateX(-3px); } }
+    .shake { animation: shakeX .22s linear 1; }
+
+    /* 虚拟键盘（纯 CSS 绘制，单位宽 --u） */
+    .kb { width: calc(var(--u) * 15); max-width: 100%; margin: 0 auto 12px; background: #f2f4f7; border: 1px solid var(--bd); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; gap: 4px; overflow-x: auto; }
+    .kb-row { display: flex; justify-content: space-between; }
+    .key { flex: 0 0 auto; height: var(--u); border-radius: 6px; border: 1px solid #d3d9e0; display: flex; align-items: center; justify-content: center; font-size: calc(var(--u) * .34); color: #374151; user-select: none; background: #fff; }
+    /* 手指分区底色 */
+    .f-lp { background: #fde3e3; } .f-lr { background: #ffeadb; } .f-lm { background: #fff3c9; } .f-li { background: #dcf1dc; }
+    .f-ri { background: #d9e8fc; } .f-rm { background: #e6def8; } .f-rr { background: #fadcef; } .f-rp { background: #f2e8d9; } .f-th { background: #e5e8ec; }
+    .key.fn-key { font-size: calc(var(--u) * .22); color: #64748b; background: #e8ecf1; }
+    .key.target { outline: 2px solid var(--brand); background: var(--brand-weak); transform: translateY(1px); box-shadow: 0 2px 0 #93c5fd; }
+    .key.miss { background: #fecaca; border-color: var(--err); }
+    .kb-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: 12px; color: var(--tx2); margin-bottom: 4px; }
+    .kb-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 4px; border: 1px solid rgba(0,0,0,.08); vertical-align: -1px; }
+
+    /* 打字显示区（单词 / 英文文章共用着色规则） */
+    .word-display { background: #f8fafc; border: 1px solid var(--bd); border-radius: 14px; min-height: 96px; display: flex; align-items: center; justify-content: center; padding: 16px; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 34px; letter-spacing: 2px; margin-bottom: 12px; overflow-wrap: anywhere; text-align: center; cursor: text; }
+    .type-box { background: #f8fafc; border: 1px solid var(--bd); border-radius: 14px; padding: 16px 18px; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 19px; line-height: 2; white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 12px; min-height: 84px; cursor: text; }
+    .word-display .idle, .type-box .idle { font-family: inherit; font-size: 14px; color: #9ca3af; letter-spacing: 0; }
+    span.done { color: var(--ok); }
+    span.cur { background: #1f2937; color: #fff; border-radius: 4px; animation: caret 1.1s step-end infinite; }
+    @keyframes caret { 50% { opacity: .55; } }
+    span.err { color: var(--err); background: #fee2e2; border-radius: 4px; }
+    .src-label { font-size: 13px; color: var(--tx2); margin-bottom: 8px; }
+
+    /* 中文对照输入 */
+    .cn-src { background: #f8fafc; border: 1px solid var(--bd); border-radius: 14px; padding: 14px 18px; font-size: 18px; line-height: 2; margin-bottom: 10px; }
+    .cn-src span.err { color: #fff; background: var(--err); }
+    textarea { width: 100%; min-height: 132px; padding: 12px 14px; border: 1px solid var(--bd); border-radius: 12px; font-size: 17px; line-height: 1.9; font-family: inherit; background: #fff; color: var(--tx); resize: vertical; }
+    textarea:focus { outline: 2px solid var(--brand); outline-offset: 0; }
+    textarea[readonly] { background: #f6f8fa; color: var(--tx2); }
+    .cmp { margin-top: 12px; font-size: 13px; }
+    .cmp .cmp-title { font-weight: 600; margin-bottom: 6px; }
+    .cmp .cmp-empty { color: var(--tx2); }
+    .cmp ul { list-style: none; }
+    .cmp li { padding: 3px 0; color: var(--tx2); }
+    .cmp li b { color: var(--err); }
+
+    .actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .btn { padding: 10px 24px; border-radius: 10px; border: 1px solid var(--bd); background: #fff; color: var(--tx); font-size: 15px; cursor: pointer; }
+    .btn:hover { border-color: #c3ccd6; }
+    .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+    .btn.primary:hover { background: #1d4fd8; border-color: #1d4fd8; }
+
+    /* 成绩单弹层 */
+    .modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal .mask { position: absolute; inset: 0; background: rgba(15,23,42,.45); }
+    .modal .card { position: relative; width: 100%; max-width: 430px; background: #fff; border-radius: 16px; padding: 22px 22px 18px; box-shadow: 0 24px 60px rgba(15,23,42,.28); animation: popIn .16s ease; }
+    @keyframes popIn { from { transform: scale(.95); opacity: 0; } }
+    .modal h3 { text-align: center; font-size: 18px; margin-bottom: 8px; }
+    .r-speed { text-align: center; margin: 4px 0 12px; }
+    .r-speed b { font-size: 46px; color: var(--brand); font-variant-numeric: tabular-nums; }
+    .r-speed small { font-size: 14px; color: var(--tx2); margin-left: 4px; }
+    .badge { display: inline-block; background: #f59e0b; color: #fff; font-size: 12px; line-height: 1; border-radius: 999px; padding: 4px 9px; vertical-align: 8px; margin-left: 6px; }
+    .r-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .r-box { font-size: 13px; color: var(--tx2); background: #f6f8fa; border-radius: 10px; padding: 9px 12px; margin-bottom: 8px; line-height: 1.7; }
+    .r-box b { color: var(--tx); }
+
+    footer { margin-top: 22px; text-align: center; font-size: 12px; color: #9ca3af; }
+
+    /* 隐藏输入收集器：承接物理键盘与移动端软键盘的字符输入 */
+    #ghost { position: fixed; bottom: 0; left: 0; width: 2px; height: 2px; opacity: 0; border: 0; padding: 0; background: transparent; }
+
+    @media (max-width: 760px) { :root { --u: 38px; } }
+    @media (max-width: 700px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .big-char { min-height: 122px; } .big-char .ch { font-size: 56px; }
+      .word-display { font-size: 26px; }
+      .type-box { font-size: 16px; line-height: 1.9; }
+      .cn-src { font-size: 16px; }
+      .r-speed b { font-size: 38px; }
+    }
+    @media (max-width: 640px) { :root { --u: 30px; } }
+    @media (max-width: 520px) { :root { --u: 26px; } }
+    @media (max-width: 420px) { :root { --u: 22px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>打字练习</h1>
+      <p>键位 · 单词 · 文章 三关进阶，成绩本地保存，纯离线运行</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-mode="keys" type="button">键位练习</button>
+      <button class="tab" data-mode="words" type="button">单词练习</button>
+      <button class="tab" data-mode="text" type="button">文章练习</button>
+    </nav>
+
+    <div class="stats">
+      <div class="stat"><b id="stSpeed">--</b><span>速度（<i id="stUnit" style="font-style:normal">KPM</i>）</span></div>
+      <div class="stat"><b id="stAcc">--</b><span>正确率</span></div>
+      <div class="stat"><b id="stTime">--</b><span>用时</span></div>
+      <div class="stat"><b id="stProg">--</b><span>进度</span></div>
+    </div>
+
+    <!-- 键位练习 -->
+    <section class="panel" id="panel-keys">
+      <div class="seg" id="keyStages">
+        <button type="button" class="active" data-stage="0">第 1 关 · Home 行</button>
+        <button type="button" data-stage="1">第 2 关 · 加下排</button>
+        <button type="button" data-stage="2">第 3 关 · 全键盘</button>
+      </div>
+      <div class="tip" id="keyTip"></div>
+      <div class="best-line" id="keyBest"></div>
+      <div class="big-char" id="bigChar">
+        <div class="ch" id="bigCh">打</div>
+        <div class="hint" id="bigHint">点击「开始练习」，按亮起的键位逐个击键</div>
+      </div>
+      <div class="kb" id="keyboard" aria-hidden="true"></div>
+      <div class="kb-legend">
+        <span><i class="f-lp"></i>左手小指</span>
+        <span><i class="f-lr"></i>左手无名指</span>
+        <span><i class="f-lm"></i>左手中指</span>
+        <span><i class="f-li"></i>左手食指</span>
+        <span><i class="f-ri"></i>右手食指</span>
+        <span><i class="f-rm"></i>右手中指</span>
+        <span><i class="f-rr"></i>右手无名指</span>
+        <span><i class="f-rp"></i>右手小指</span>
+        <span><i class="f-th"></i>拇指</span>
+      </div>
+      <div class="actions"><button class="btn primary" id="keyBtn" type="button">开始练习</button></div>
+    </section>
+
+    <!-- 单词练习 -->
+    <section class="panel" id="panel-words" hidden>
+      <div class="seg" id="wordLevels">
+        <button type="button" class="active" data-level="0">3-4 字母</button>
+        <button type="button" data-level="1">5-7 字母</button>
+        <button type="button" data-level="2">8 字母以上</button>
+      </div>
+      <div class="tip">每次随机 20 个单词，照打当前单词，打对自动进入下一个</div>
+      <div class="best-line" id="wordBest"></div>
+      <div class="word-display" id="wordBox"><span class="idle">点击「开始练习」后，这里会显示要照打的单词</span></div>
+      <div class="actions"><button class="btn primary" id="wordBtn" type="button">开始练习</button></div>
+    </section>
+
+    <!-- 文章练习 -->
+    <section class="panel" id="panel-text" hidden>
+      <div class="seg" id="textChips"></div>
+      <div class="best-line" id="textBest"></div>
+      <div id="textEnPart">
+        <div class="src-label">照打下方原文：已打字符变绿，当前字符深色高亮，打错标红（打对才会前进）</div>
+        <div class="type-box" id="textEnBox"></div>
+      </div>
+      <div id="textZhPart" hidden>
+        <div class="src-label">中文依赖输入法，无法逐键判定：先照打原文到输入框，再点「提交对照」逐字比对</div>
+        <div class="cn-src" id="textZhSrc"></div>
+        <textarea id="textZhInput" placeholder="在这里照打上方原文（建议关闭输入法联想）…" spellcheck="false"></textarea>
+        <div class="cmp" id="textZhCmp"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="textBtn" type="button">开始照打</button>
+        <button class="btn" id="textZhSubmit" type="button" hidden>提交对照</button>
+      </div>
+    </section>
+
+    <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+  </div>
+
+  <!-- 隐藏输入收集器 -->
+  <input id="ghost" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="打字输入收集框" tabindex="-1">
+
+  <!-- 成绩单弹层 -->
+  <div class="modal" id="resultModal" hidden>
+    <div class="mask" id="resultMask"></div>
+    <div class="card" role="dialog" aria-modal="true" aria-label="本组成绩单">
+      <h3>本组成绩单</h3>
+      <div class="r-speed"><b id="rSpeed">0</b><small id="rUnit">KPM</small><span class="badge" id="rBadge" hidden>新纪录</span></div>
+      <div class="r-grid">
+        <div class="stat"><b id="rAcc">--</b><span>正确率</span></div>
+        <div class="stat"><b id="rTime">--</b><span>用时</span></div>
+        <div class="stat"><b id="rProg">--</b><span>进度</span></div>
+      </div>
+      <div class="r-box" id="rErrs"></div>
+      <div class="r-box" id="rBest"></div>
+      <div class="r-box" id="rExtra" hidden></div>
+      <div class="actions">
+        <button class="btn primary" id="rAgain" type="button">再来一组</button>
+        <button class="btn" id="rClose" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ==================== 工具函数 ==================== */
+    function $(s) { return document.querySelector(s); }
+    /* HTML 转义：动态字符插入显示区前必须过这里 */
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    /* 正确率（键击口径）：正确 / (正确 + 错误)，百分数保留一位小数 */
+    function accPct(correct, err) {
+      var t = correct + err;
+      return t ? Math.round(correct / t * 1000) / 10 : 0;
+    }
+    function fmtTime(ms) {
+      var s = ms / 1000;
+      if (s < 60) return s.toFixed(1) + ' 秒';
+      var m = Math.floor(s / 60);
+      return m + ' 分 ' + Math.round(s - m * 60) + ' 秒';
+    }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+    /* 错误字符的可读名称（空格显示为汉字） */
+    function charName(c) { return c === ' ' ? '空格' : esc(c); }
+    /* 触发一次闪烁动画：先移除再强制回流，保证连续触发有效 */
+    function flash(el, cls, dur) {
+      el.classList.remove(cls);
+      void el.offsetWidth;
+      el.classList.add(cls);
+      setTimeout(function () { el.classList.remove(cls); }, dur || 280);
+    }
+
+    /* ==================== 本地最佳纪录（读写均包 try/catch，隐私模式不报错） ==================== */
+    function loadBest(key) {
+      try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+      catch (e) { return null; }
+    }
+    function saveBest(key, rec) {
+      try { localStorage.setItem(key, JSON.stringify(rec)); }
+      catch (e) { /* 写入失败则放弃纪录 */ }
+    }
+    function bestLine(key, unit) {
+      var b = loadBest(key);
+      if (!b) return '该难度暂无纪录，完成一组即可上榜';
+      return '历史最佳：' + b.speed + ' ' + unit + ' · 正确率 ' + b.acc + '%（' + b.date + '）';
+    }
+
+    /* ==================== 内置课程数据 ==================== */
+    /* 键位课程三关的随机字符池 */
+    var STAGES = [
+      { pool: 'asdfjkl;', tip: '第 1 关 · 只练 Home 行（A S D F J K L ;）：手指停在基准键位，靠触觉找键，不要看键盘。' },
+      { pool: 'asdfjkl;zxcvbnm,./', tip: '第 2 关 · Home 行 + 下排（Z X C V B N M , . /）：手指从基准位向左下、右下斜探，击完立刻归位。' },
+      { pool: "abcdefghijklmnopqrstuvwxyz0123456789-=[]\\;',./", tip: '第 3 关 · 全键盘：26 个字母 + 数字 + 常用符号，注意保持大写锁定关闭。' }
+    ];
+    var LEVEL_NAMES = ['3-4 字母', '5-7 字母', '8 字母以上'];
+    /* 120 个常用英文单词，按长度分三档，每档 40 个 */
+    var WORDS = [
+      ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his',
+       'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy', 'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use', 'time', 'game'],
+      ['about', 'after', 'again', 'below', 'could', 'every', 'first', 'great', 'house', 'learn', 'never', 'other', 'place', 'right', 'small', 'sound', 'still', 'study', 'their', 'there',
+       'water', 'where', 'which', 'world', 'would', 'write', 'answer', 'around', 'before', 'change',
+       'because', 'example', 'another', 'between', 'country', 'morning', 'nothing', 'teacher', 'problem', 'thought'],
+      ['computer', 'practice', 'keyboard', 'language', 'sentence', 'together', 'question', 'remember', 'standard', 'surprise', 'mountain', 'national', 'material', 'personal', 'position', 'possible', 'children', 'business', 'interest', 'tomorrow',
+       'important', 'different', 'education', 'beautiful', 'character', 'community', 'knowledge', 'sometimes', 'wonderful', 'adventure', 'difficult', 'happiness',
+       'understand', 'experience', 'technology', 'information', 'university', 'everything', 'development', 'performance']
+    ];
+    /* 文章练习 8 段：英文 4 段逐字符判定，中文 4 段提交后逐字比对 */
+    var TEXTS = [
+      { lang: 'en', title: '英文 · 入门短句', body: 'Practice every day. Keep your fingers on the home row. Do not look at the keyboard. Type slowly but correctly, and speed will come by itself.' },
+      { lang: 'en', title: '英文 · 全字母句', body: 'The quick brown fox jumps over the lazy dog. This famous sentence uses every letter of the English alphabet at least once.' },
+      { lang: 'en', title: '英文 · 小小科普', body: 'A computer is a machine that stores and processes information. It follows a program, which is a list of clear steps written by people.' },
+      { lang: 'en', title: '英文 · 坚持练习', body: 'Typing well saves time every single day. Slow and steady practice builds real speed. Trust your fingers and keep your eyes on the screen.' },
+      { lang: 'zh', title: '中文 · 春日写景', body: '春天来了，风变软了，柳树抽出嫩绿的枝条。孩子们在河边放风筝，笑声顺着河水飘向远方，连桥下的流水都显得欢快起来。' },
+      { lang: 'zh', title: '中文 · 街角清晨', body: '清晨的街角，豆浆的热气混着油条的香味。老人慢悠悠地散步，学生背着书包小跑，早餐店门口排起小队，城市就这样慢慢醒了。' },
+      { lang: 'zh', title: '中文 · 读书偶得', body: '读书的目的不在于记住每一句话，而在于让文字慢慢改变我们看世界的方式，让我们在喧嚣的日子里，依然保持一份内心的安静。' },
+      { lang: 'zh', title: '中文 · 练字练心', body: '练字如练心，一日不可荒废。今天多打一个字，明天就少一分犹豫。坚持是所有技巧里最朴素、也最有力量的那一种，请慢慢来。' }
+    ];
+    /* 虚拟键盘布局（104 键主区简化版）：[键帽文字, 代码, 宽度单位, 手指分区] */
+    var KB = [
+      [['`', '`', 1, 'lp'], ['1', '1', 1, 'lp'], ['2', '2', 1, 'lr'], ['3', '3', 1, 'lm'], ['4', '4', 1, 'li'], ['5', '5', 1, 'li'], ['6', '6', 1, 'ri'], ['7', '7', 1, 'ri'], ['8', '8', 1, 'rm'], ['9', '9', 1, 'rr'], ['0', '0', 1, 'rp'], ['-', '-', 1, 'rp'], ['=', '=', 1, 'rp'], ['退格', 'Backspace', 2, 'rp']],
+      [['Tab', 'Tab', 1.5, 'lp'], ['q', 'q', 1, 'lp'], ['w', 'w', 1, 'lr'], ['e', 'e', 1, 'lm'], ['r', 'r', 1, 'li'], ['t', 't', 1, 'li'], ['y', 'y', 1, 'ri'], ['u', 'u', 1, 'ri'], ['i', 'i', 1, 'rm'], ['o', 'o', 1, 'rr'], ['p', 'p', 1, 'rp'], ['[', '[', 1, 'rp'], [']', ']', 1, 'rp'], ['\\', '\\', 1.5, 'rp']],
+      [['大写锁定', 'CapsLock', 1.75, 'lp'], ['a', 'a', 1, 'lp'], ['s', 's', 1, 'lr'], ['d', 'd', 1, 'lm'], ['f', 'f', 1, 'li'], ['g', 'g', 1, 'li'], ['h', 'h', 1, 'ri'], ['j', 'j', 1, 'ri'], ['k', 'k', 1, 'rm'], ['l', 'l', 1, 'rr'], [';', ';', 1, 'rp'], ["'", "'", 1, 'rp'], ['回车', 'Enter', 2.25, 'rp']],
+      [['Shift', 'ShiftLeft', 2.25, 'lp'], ['z', 'z', 1, 'lp'], ['x', 'x', 1, 'lr'], ['c', 'c', 1, 'lm'], ['v', 'v', 1, 'li'], ['b', 'b', 1, 'li'], ['n', 'n', 1, 'ri'], ['m', 'm', 1, 'ri'], [',', ',', 1, 'rm'], ['.', '.', 1, 'rr'], ['/', '/', 1, 'rp'], ['Shift', 'ShiftRight', 2.75, 'rp']],
+      [['Ctrl', 'ControlLeft', 1.25, 'th'], ['Win', 'MetaLeft', 1.25, 'th'], ['Alt', 'AltLeft', 1.25, 'th'], ['空格', 'Space', 6.25, 'th'], ['Alt', 'AltRight', 1.25, 'th'], ['Fn', 'Fn', 1.25, 'th'], ['菜单', 'ContextMenu', 1.25, 'th'], ['Ctrl', 'ControlRight', 1.25, 'th']]
+    ];
+
+    /* ==================== DOM 引用与全局状态 ==================== */
+    var ghost = $('#ghost');           /* 隐藏输入收集器：统一承接三模式的击键 */
+    var keyBtn = $('#keyBtn'), wordBtn = $('#wordBtn'), textBtn = $('#textBtn');
+    var textZhSubmit = $('#textZhSubmit'), textZhInput = $('#textZhInput'), textZhCmp = $('#textZhCmp');
+    var resultModal = $('#resultModal');
+    var mode = 'keys';                 /* 当前 tab：keys | words | text */
+
+    var K = { stage: 0, running: false, queue: [], idx: 0, correct: 0, err: 0, charErr: {}, startT: 0, charT: 0, dtSum: 0 };
+    var W = { level: 0, running: false, list: [], idx: 0, pos: 0, correct: 0, err: 0, charErr: {}, startT: 0 };
+    var T = { idx: 0, lang: 'en', running: false, chars: [], pos: 0, correct: 0, err: 0, charErr: {}, startT: 0, done: false, final: null, zhGot: 0 };
+
+    function currentRunning() {
+      if (mode === 'keys') return K.running;
+      if (mode === 'words') return W.running;
+      return T.running;
+    }
+    function currentBestKey() {
+      if (mode === 'keys') return 'typing-tutor-keys-' + (K.stage + 1);
+      if (mode === 'words') return 'typing-tutor-words-' + (W.level + 1);
+      return 'typing-tutor-text-' + T.lang + '-' + (T.idx + 1);
+    }
+
+    /* ==================== 虚拟键盘渲染 ==================== */
+    var keyEls = {};                   /* 键代码 -> 键元素，用于目标键高亮 */
+    function buildKeyboard() {
+      var html = '';
+      KB.forEach(function (row) {
+        html += '<div class="kb-row">';
+        row.forEach(function (k) {
+          /* 键帽文字超过一个字符视为功能键，用中性样式 */
+          var isFn = k[0].length > 1;
+          html += '<div class="key' + (isFn ? ' fn-key' : '') + ' f-' + k[3] + '" data-code="' + esc(k[1]) + '" style="width:calc(var(--u)*' + k[2] + ')">' + esc(k[0]) + '</div>';
+        });
+        html += '</div>';
+      });
+      $('#keyboard').innerHTML = html;
+      var nodes = $('#keyboard').querySelectorAll('.key');
+      Array.prototype.forEach.call(nodes, function (el) { keyEls[el.getAttribute('data-code')] = el; });
+    }
+    var curTargetEl = null;
+    function setTarget(ch) {
+      clearTarget();
+      curTargetEl = keyEls[ch] || null;
+      if (curTargetEl) curTargetEl.classList.add('target');
+    }
+    function clearTarget() {
+      if (curTargetEl) { curTargetEl.classList.remove('target'); curTargetEl = null; }
+    }
+
+    /* ==================== 键位练习 ==================== */
+    /* 生成一组随机字符，避免相邻重复 */
+    function genQueue(pool, n) {
+      var out = [], prev = '';
+      for (var i = 0; i < n; i++) {
+        var c, guard = 0;
+        do { c = pool.charAt(Math.floor(Math.random() * pool.length)); } while (c === prev && ++guard < 10);
+        out.push(c); prev = c;
+      }
+      return out;
+    }
+    function resetKeyUI() {
+      K.queue = []; K.idx = 0; K.startT = 0; K.charT = 0; K.dtSum = 0;
+      clearTarget();
+      $('#bigCh').textContent = '打';
+      $('#bigHint').textContent = '点击「开始练习」，按亮起的键位逐个击键';
+    }
+    /* 展示当前目标字符并点亮键盘对应键 */
+    function showKeyChar() {
+      K.charT = performance.now();     /* 该字符的出现时刻，用于统计每键用时 */
+      var ch = K.queue[K.idx];
+      $('#bigCh').textContent = ch;
+      $('#bigHint').textContent = '第 ' + (K.idx + 1) + ' / ' + K.queue.length + ' 键 · 看到字符后立即击键';
+      setTarget(ch);
+    }
+    function startKeys() {
+      K.queue = genQueue(STAGES[K.stage].pool, 30);
+      K.idx = 0; K.correct = 0; K.err = 0; K.charErr = {}; K.dtSum = 0;
+      K.startT = performance.now();
+      K.running = true;
+      keyBtn.textContent = '结束本组';
+      showKeyChar();
+      ghost.focus();
+      updateStats();
+    }
+    function hitKey(ch) {
+      var target = K.queue[K.idx];
+      if (ch === target) {
+        if (K.charT) K.dtSum += performance.now() - K.charT;  /* 累计该键用时（含纠错） */
+        K.correct++;
+        K.idx++;
+        if (K.idx >= K.queue.length) { updateStats(); finishKeys(); return; }
+        showKeyChar();
+      } else {
+        /* 打错：目标键标红抖动，大字变红抖动，不前进 */
+        K.err++;
+        K.charErr[target] = (K.charErr[target] || 0) + 1;
+        flash($('#bigChar'), 'shake');
+        flash($('#bigChar'), 'wrong');
+        var el = keyEls[target];
+        if (el) flash(el, 'miss', 320);
+      }
+      updateStats();
+    }
+    function finishKeys() {
+      K.running = false;
+      keyBtn.textContent = '开始练习';
+      ghost.blur();
+      var total = K.correct + K.err;
+      if (!K.startT || total === 0) { resetKeyUI(); updateStats(); return; }  /* 一键未打则静默重置 */
+      var elapsed = performance.now() - K.startT;
+      var avg = K.idx ? K.dtSum / K.idx : 0;  /* 已打对键的平均用时 */
+      showResult({
+        key: 'typing-tutor-keys-' + (K.stage + 1),
+        speed: K.correct / Math.max(elapsed, 1000) * 60000,
+        unit: 'KPM',
+        acc: accPct(K.correct, K.err),
+        time: elapsed,
+        errs: K.charErr,
+        progress: K.idx + ' / ' + K.queue.length + ' 键',
+        extra: '<b>平均每键用时</b>：' + (avg / 1000).toFixed(2) + ' 秒（含纠错时间）'
+      });
+      resetKeyUI();
+      updateStats();
+    }
+    keyBtn.addEventListener('click', function () {
+      if (K.running) finishKeys(); else startKeys();
+    });
+    $('#keyStages').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var s = +b.getAttribute('data-stage');
+      if (s === K.stage && !K.running) return;
+      K.running = false;               /* 切关即终止当前组（不出成绩单） */
+      K.stage = s;
+      Array.prototype.forEach.call($('#keyStages').children, function (x) { x.classList.toggle('active', x === b); });
+      resetKeyUI();
+      refreshKeyStage();
+      updateStats();
+    });
+    function refreshKeyStage() {
+      $('#keyTip').textContent = STAGES[K.stage].tip;
+      $('#keyBest').textContent = bestLine('typing-tutor-keys-' + (K.stage + 1), 'KPM');
+    }
+
+    /* ==================== 单词练习 ==================== */
+    function renderWordIdle() {
+      $('#wordBox').innerHTML = '<span class="idle">点击「开始练习」后，这里会显示要照打的单词</span>';
+    }
+    function renderWord() {
+      var w = W.list[W.idx] || '';
+      var html = '';
+      for (var i = 0; i < w.length; i++) {
+        var cls = i < W.pos ? ' class="done"' : (i === W.pos ? ' class="cur"' : '');
+        html += '<span' + cls + '>' + esc(w.charAt(i)) + '</span>';
+      }
+      $('#wordBox').innerHTML = html;
+    }
+    function startWords() {
+      W.list = shuffle(WORDS[W.level]).slice(0, 20);  /* 该档随机抽 20 个 */
+      W.idx = 0; W.pos = 0; W.correct = 0; W.err = 0; W.charErr = {};
+      W.startT = performance.now();
+      W.running = true;
+      wordBtn.textContent = '结束本组';
+      renderWord();
+      ghost.focus();
+      updateStats();
+    }
+    function hitWord(ch) {
+      var w = W.list[W.idx];
+      var target = w.charAt(W.pos);
+      if (ch === target) {
+        W.correct++; W.pos++;
+        if (W.pos >= w.length) {       /* 整词打对，自动进入下一个 */
+          W.idx++; W.pos = 0;
+          if (W.idx >= W.list.length) { updateStats(); finishWords(); return; }
+        }
+        renderWord();
+      } else {
+        W.err++;
+        W.charErr[target] = (W.charErr[target] || 0) + 1;
+        var cur = $('#wordBox .cur');
+        if (cur) flash(cur, 'err');
+        flash($('#wordBox'), 'shake');
+      }
+      updateStats();
+    }
+    function finishWords() {
+      W.running = false;
+      wordBtn.textContent = '开始练习';
+      ghost.blur();
+      var total = W.correct + W.err;
+      if (!W.startT || total === 0) { renderWordIdle(); updateStats(); return; }
+      var elapsed = performance.now() - W.startT;
+      showResult({
+        key: 'typing-tutor-words-' + (W.level + 1),
+        speed: W.correct / Math.max(elapsed, 1000) * 60000,
+        unit: 'KPM',
+        acc: accPct(W.correct, W.err),
+        time: elapsed,
+        errs: W.charErr,
+        progress: W.idx + ' / ' + W.list.length + ' 词',
+        extra: '<b>词档</b>：' + esc(LEVEL_NAMES[W.level])
+      });
+      renderWordIdle();
+      updateStats();
+    }
+    wordBtn.addEventListener('click', function () {
+      if (W.running) finishWords(); else startWords();
+    });
+    $('#wordLevels').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var lv = +b.getAttribute('data-level');
+      if (lv === W.level && !W.running) return;
+      W.running = false;
+      W.level = lv;
+      Array.prototype.forEach.call($('#wordLevels').children, function (x) { x.classList.toggle('active', x === b); });
+      renderWordIdle();
+      $('#wordBest').textContent = bestLine('typing-tutor-words-' + (W.level + 1), 'KPM');
+      updateStats();
+    });
+
+    /* ==================== 文章练习 ==================== */
+    function buildTextChips() {
+      var box = $('#textChips');
+      TEXTS.forEach(function (t, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = t.title;
+        b.setAttribute('data-idx', i);
+        if (i === 0) b.className = 'active';
+        box.appendChild(b);
+      });
+      box.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        setTextIdx(+b.getAttribute('data-idx'));
+      });
+    }
+    /* 切换段落：英文准备逐字符判定，中文准备对照输入 */
+    function setTextIdx(i) {
+      if (T.idx === i && !T.running && T.chars.length) return;
+      if (T.running) stopTextSilent();
+      T.idx = i;
+      T.lang = TEXTS[i].lang;
+      /* 英文保留空格参与判定；中文去掉空白后逐字比对 */
+      T.chars = Array.from(T.lang === 'en' ? TEXTS[i].body : TEXTS[i].body.replace(/\s+/g, ''));
+      T.pos = 0; T.correct = 0; T.err = 0; T.charErr = {};
+      T.startT = 0; T.done = false; T.final = null; T.zhGot = 0;
+      Array.prototype.forEach.call($('#textChips').children, function (x) {
+        x.classList.toggle('active', +x.getAttribute('data-idx') === i);
+      });
+      var isEn = T.lang === 'en';
+      $('#textEnPart').hidden = !isEn;
+      $('#textZhPart').hidden = isEn;
+      textZhSubmit.hidden = true;
+      textZhInput.readOnly = false;
+      textZhCmp.innerHTML = '';
+      textBtn.textContent = isEn ? '开始照打' : '开始作答';
+      if (isEn) renderTextEn(); else renderTextZhIdle();
+      $('#textBest').textContent = bestLine('typing-tutor-text-' + T.lang + '-' + (T.idx + 1), 'CPM');
+      updateStats();
+    }
+    /* 英文段渲染：已打绿、当前高亮、其余默认 */
+    function renderTextEn() {
+      var html = '';
+      var showPos = T.running || T.done;
+      for (var i = 0; i < T.chars.length; i++) {
+        var cls = '';
+        if (showPos && i < T.pos) cls = 'done';
+        else if (T.running && i === T.pos) cls = 'cur';
+        html += '<span' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(T.chars[i]) + '</span>';
+      }
+      $('#textEnBox').innerHTML = html;
+    }
+    function renderTextZhIdle() {
+      $('#textZhSrc').textContent = TEXTS[T.idx].body;
+    }
+    /* 静默终止当前段落（切段 / 放弃时用，不出成绩单） */
+    function stopTextSilent() {
+      T.running = false; T.done = false; T.final = null;
+      T.pos = 0; T.correct = 0; T.err = 0; T.charErr = {}; T.startT = 0; T.zhGot = 0;
+      textZhSubmit.hidden = true;
+      textZhInput.readOnly = false;
+      textZhCmp.innerHTML = '';
+      textBtn.textContent = T.lang === 'en' ? '开始照打' : '开始作答';
+      if (T.lang === 'en') renderTextEn(); else renderTextZhIdle();
+      updateStats();
+    }
+    function startTextEn() {
+      T.pos = 0; T.correct = 0; T.err = 0; T.charErr = {};
+      T.done = false; T.final = null;
+      T.startT = performance.now();
+      T.running = true;
+      textBtn.textContent = '结束本段';
+      renderTextEn();
+      ghost.focus();
+      updateStats();
+    }
+    function hitTextEn(ch) {
+      var target = T.chars[T.pos];
+      if (ch === target) {
+        T.correct++; T.pos++;
+        if (T.pos >= T.chars.length) { updateStats(); finishText(); return; }
+        renderTextEn();
+      } else {
+        /* 打错标红闪烁，不前进，打对才越过 */
+        T.err++;
+        T.charErr[target] = (T.charErr[target] || 0) + 1;
+        var cur = $('#textEnBox .cur');
+        if (cur) flash(cur, 'err');
+      }
+      updateStats();
+    }
+    function finishText() {
+      T.running = false; T.done = true;
+      textBtn.textContent = '重打本段';
+      ghost.blur();
+      var total = T.correct + T.err;
+      if (!T.startT || total === 0) { stopTextSilent(); updateStats(); return; }
+      var elapsed = performance.now() - T.startT;
+      var speed = T.correct / Math.max(elapsed, 1000) * 60000;
+      T.final = { speed: speed, acc: accPct(T.correct, T.err), time: elapsed };
+      showResult({
+        key: 'typing-tutor-text-en-' + (T.idx + 1),
+        speed: speed, unit: 'CPM',
+        acc: T.final.acc, time: elapsed,
+        errs: T.charErr,
+        progress: T.pos + ' / ' + T.chars.length + ' 字符',
+        extra: '<b>段落</b>：' + esc(TEXTS[T.idx].title)
+      });
+      renderTextEn();
+      updateStats();
+    }
+    function startTextZh() {
+      T.pos = 0; T.correct = 0; T.err = 0; T.charErr = {};
+      T.done = false; T.final = null; T.zhGot = 0;
+      T.startT = performance.now();
+      T.running = true;
+      textZhInput.value = '';
+      textZhInput.readOnly = false;
+      textZhCmp.innerHTML = '';
+      renderTextZhIdle();
+      textBtn.textContent = '放弃本段';
+      textZhSubmit.hidden = false;
+      textZhInput.focus();
+      updateStats();
+    }
+    /* 中文段提交：逐字符比对原文与输入 */
+    function submitTextZh() {
+      if (!T.running) return;
+      var raw = Array.from(textZhInput.value.replace(/\s+/g, ''));
+      if (!T.chars.length || raw.length === 0) {
+        textZhCmp.innerHTML = '<div class="cmp-empty">还没有输入内容，请先照打上方原文再提交。</div>';
+        return;
+      }
+      T.running = false;
+      textZhInput.readOnly = true;
+      textBtn.textContent = '重打本段';
+      textZhSubmit.hidden = true;
+      var src = T.chars;
+      var n = Math.min(src.length, raw.length);
+      var correct = 0;
+      for (var i = 0; i < n; i++) { if (raw[i] === src[i]) correct++; }
+      for (var j = 0; j < src.length; j++) {
+        if (!(j < n && raw[j] === src[j])) {
+          T.charErr[src[j]] = (T.charErr[src[j]] || 0) + 1;
+        }
+      }
+      renderTextZhCompare(src, raw, n);
+      var elapsed = performance.now() - (T.startT || performance.now());
+      var speed = correct / Math.max(elapsed, 1000) * 60000;
+      var acc = Math.round(correct / src.length * 1000) / 10;
+      T.done = true;
+      T.final = { speed: speed, acc: acc, time: elapsed };
+      var lenTip = '';
+      if (raw.length < src.length) lenTip = '比原文少打 ' + (src.length - raw.length) + ' 个字，缺少部分按错字计。';
+      else if (raw.length > src.length) lenTip = '比原文多打 ' + (raw.length - src.length) + ' 个字，多余部分未计入。';
+      showResult({
+        key: 'typing-tutor-text-zh-' + (T.idx + 1),
+        speed: speed, unit: 'CPM', acc: acc, time: elapsed,
+        errs: T.charErr,
+        progress: correct + ' / ' + src.length + ' 字正确',
+        extra: '<b>段落</b>：' + esc(TEXTS[T.idx].title) + (lenTip ? '<br>' + lenTip : '')
+      });
+      updateStats();
+    }
+    /* 中文对照结果渲染：原文逐字着色 + 错字明细列表 */
+    function renderTextZhCompare(src, raw, n) {
+      var html = '';
+      for (var i = 0; i < src.length; i++) {
+        var ok = i < n && raw[i] === src[i];
+        html += '<span class="' + (ok ? 'done' : 'err') + '">' + esc(src[i]) + '</span>';
+      }
+      $('#textZhSrc').innerHTML = html;
+      var details = [];
+      for (var j = 0; j < src.length; j++) {
+        if (!(j < n && raw[j] === src[j])) details.push(j);
+      }
+      var lines = '';
+      details.slice(0, 8).forEach(function (p) {
+        var got = p < raw.length ? raw[p] : '（漏打）';
+        lines += '<li>第 ' + (p + 1) + ' 字：应为「' + esc(src[p]) + '」，实输「' + esc(got) + '」</li>';
+      });
+      if (details.length > 8) lines += '<li>…其余 ' + (details.length - 8) + ' 处从略</li>';
+      textZhCmp.innerHTML = '<div class="cmp-title">逐字对照</div><ul>' + lines + '</ul><div style="margin-top:4px">绿色为正确，红色为错字。</div>';
+    }
+    textBtn.addEventListener('click', function () {
+      if (T.lang === 'en') {
+        if (T.running) finishText(); else startTextEn();
+      } else {
+        if (T.running) { stopTextSilent(); } else { startTextZh(); }
+      }
+    });
+    textZhSubmit.addEventListener('click', submitTextZh);
+    /* 中文输入：首次敲键已计在 startT，这里只刷新进度字数 */
+    textZhInput.addEventListener('input', function () {
+      if (T.lang === 'zh' && T.running) {
+        T.zhGot = Array.from(textZhInput.value.replace(/\s+/g, '')).length;
+        updateStats();
+      }
+    });
+    /* 中文输入框内 Ctrl+Enter / Cmd+Enter 快捷提交 */
+    textZhInput.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitTextZh(); }
+    });
+
+    /* ==================== 统一输入通道 ==================== */
+    /* 三种模式的英文击键都从隐藏输入框读取，桌面物理键盘与移动端软键盘通用 */
+    ghost.addEventListener('input', function () {
+      var v = ghost.value;
+      ghost.value = '';
+      for (var i = 0; i < v.length; i++) {
+        var ch = v.charAt(i);
+        if (mode === 'keys' && K.running) hitKey(ch);
+        else if (mode === 'words' && W.running) hitWord(ch);
+        else if (mode === 'text' && T.running && T.lang === 'en') hitTextEn(ch);
+      }
+    });
+    /* 练习进行中意外失焦（点了别处）时自动抢回焦点，保证击键不丢 */
+    ghost.addEventListener('blur', function () {
+      if (currentRunning()) {
+        setTimeout(function () { try { ghost.focus(); } catch (e) { /* 忽略 */ } }, 30);
+      }
+    });
+    function focusGhost() { try { ghost.focus(); } catch (e) { /* 忽略 */ } }
+    /* 点击显示区重新聚焦（移动端借此唤起软键盘） */
+    $('#wordBox').addEventListener('click', function () { if (W.running) focusGhost(); });
+    $('#textEnBox').addEventListener('click', function () { if (T.running && T.lang === 'en') focusGhost(); });
+
+    /* ==================== Tab 切换 ==================== */
+    var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var panels = { keys: $('#panel-keys'), words: $('#panel-words'), text: $('#panel-text') };
+    function switchMode(m) {
+      if (m === mode) return;
+      /* 切换时静默终止进行中的练习（不出成绩单） */
+      K.running = false; W.running = false;
+      if (T.running) stopTextSilent();
+      ghost.blur();
+      mode = m;
+      tabBtns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-mode') === m); });
+      Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== m; });
+      updateStats();
+    }
+    tabBtns.forEach(function (b) {
+      b.addEventListener('click', function () { switchMode(b.getAttribute('data-mode')); });
+    });
+
+    /* ==================== 实时统计条 ==================== */
+    function updateStats() {
+      var speed = 0, acc = 0, time = 0, prog = '--', unit = 'KPM';
+      if (mode === 'keys') {
+        if (K.startT) {
+          time = performance.now() - K.startT;
+          speed = K.correct / Math.max(time, 1000) * 60000;
+          acc = accPct(K.correct, K.err);
+        }
+        if (K.queue.length) prog = K.idx + ' / ' + K.queue.length;
+      } else if (mode === 'words') {
+        if (W.startT) {
+          time = performance.now() - W.startT;
+          speed = W.correct / Math.max(time, 1000) * 60000;
+          acc = accPct(W.correct, W.err);
+        }
+        if (W.list.length) prog = W.idx + ' / ' + W.list.length;
+      } else {
+        unit = 'CPM';
+        if (T.done && T.final) {         /* 已出分：定格最终成绩 */
+          speed = T.final.speed; acc = T.final.acc; time = T.final.time;
+        } else if (T.startT && T.running) {
+          time = performance.now() - T.startT;
+          speed = T.correct / Math.max(time, 1000) * 60000;
+          acc = accPct(T.correct, T.err);
+        }
+        if (T.chars.length) {
+          prog = T.lang === 'en' ? (T.pos + ' / ' + T.chars.length) : (T.zhGot + ' / ' + T.chars.length);
+        }
+      }
+      $('#stSpeed').textContent = speed ? String(Math.round(speed * 10) / 10) : '--';
+      $('#stUnit').textContent = unit;
+      $('#stAcc').textContent = acc ? acc + '%' : '--';
+      $('#stTime').textContent = time ? fmtTime(time) : '--';
+      $('#stProg').textContent = prog;
+    }
+    /* 练习进行中每 200ms 刷新一次实时统计 */
+    setInterval(function () { if (currentRunning()) updateStats(); }, 200);
+
+    /* ==================== 成绩单弹层 ==================== */
+    function errsText(map) {
+      var arr = Object.keys(map).map(function (k) { return { c: k, n: map[k] }; });
+      if (!arr.length) return '<b>错误字符 TOP3</b>：全程零错误，漂亮！';
+      arr.sort(function (a, b) { return b.n - a.n; });
+      var top = arr.slice(0, 3).map(function (x) { return '「' + charName(x.c) + '」错 ' + x.n + ' 次'; });
+      return '<b>错误字符 TOP3</b>：' + top.join('、') + (arr.length > 3 ? '（共 ' + arr.length + ' 种）' : '');
+    }
+    /* 展示成绩单：先更新最佳纪录（速度更快才算破纪录），再弹出 */
+    function showResult(o) {
+      var best = loadBest(o.key);
+      var isNew = false;
+      if (!best || o.speed > best.speed) {
+        saveBest(o.key, { speed: Math.round(o.speed * 10) / 10, acc: o.acc, date: todayStr() });
+        isNew = true;
+        best = loadBest(o.key);
+      }
+      $('#rSpeed').textContent = String(Math.round(o.speed * 10) / 10);
+      $('#rUnit').textContent = o.unit;
+      $('#rBadge').hidden = !isNew;
+      $('#rAcc').textContent = o.acc + '%';
+      $('#rTime').textContent = fmtTime(o.time);
+      $('#rProg').textContent = o.progress;
+      $('#rErrs').innerHTML = errsText(o.errs);
+      $('#rBest').innerHTML = best
+        ? '<b>历史最佳</b>：' + best.speed + ' ' + o.unit + ' · 正确率 ' + best.acc + '%（' + best.date + '）'
+        : '';
+      var extra = $('#rExtra');
+      if (o.extra) { extra.hidden = false; extra.innerHTML = o.extra; }
+      else { extra.hidden = true; }
+      resultModal.hidden = false;
+      /* 面板里的最佳纪录行同步刷新 */
+      if (mode === 'keys') refreshKeyStage();
+      else if (mode === 'words') $('#wordBest').textContent = bestLine('typing-tutor-words-' + (W.level + 1), 'KPM');
+      else $('#textBest').textContent = bestLine('typing-tutor-text-' + T.lang + '-' + (T.idx + 1), 'CPM');
+      ghost.blur();
+    }
+    function closeModal() { resultModal.hidden = true; }
+    $('#resultMask').addEventListener('click', closeModal);
+    $('#rClose').addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !resultModal.hidden) closeModal();
+    });
+    /* 「再来一组」按当前模式与难度直接重开 */
+    $('#rAgain').addEventListener('click', function () {
+      closeModal();
+      if (mode === 'keys') startKeys();
+      else if (mode === 'words') startWords();
+      else if (T.lang === 'en') startTextEn();
+      else startTextZh();
+    });
+
+    /* ==================== 初始化 ==================== */
+    buildKeyboard();
+    buildTextChips();
+    refreshKeyStage();
+    $('#wordBest').textContent = bestLine('typing-tutor-words-1', 'KPM');
+    setTextIdx(0);
+    updateStats();
+  })();
+  </script>
+</body>
+</html>
