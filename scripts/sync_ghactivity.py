@@ -25,19 +25,49 @@ def fetch(url):
         return res.read().decode('utf-8', errors='ignore')
 
 
-def from_contributions():
-    """近一年每日贡献数：解析贡献日历片段里的 data-date / data-count"""
-    today = date.today()
-    frm = today - timedelta(days=370)
-    url = f'https://github.com/users/{USER}/contributions?from={frm.isoformat()}&to={today.isoformat()}'
-    html = fetch(url)
+def parse_calendar(html):
+    """从一份贡献日历 HTML 里抠出 {日期: 次数}。
+
+    GitHub 2026 改版后 <td> 不再带 data-count，计数挪进了与 td 同 id 配对的
+    <tool-tip> 文本（如「8 contributions on July 6th.」/「No contributions …」）；
+    旧结构（data-date + data-count 属性）留作兜底。
+    """
     days = {}
-    # 两种属性顺序都兼容
+    # 新结构：td 的 id ↔ tool-tip 的 for 同名配对，数字从文本里抠
+    cells = {}
+    for tag in re.findall(r'<td[^>]*>', html):
+        d = re.search(r'data-date="(\d{4}-\d{2}-\d{2})"', tag)
+        cid = re.search(r'id="(contribution-day-component-[^"]+)"', tag)
+        if d and cid:
+            cells[cid.group(1)] = d.group(1)
+    for cid, text in re.findall(
+            r'<tool-tip[^>]*for="(contribution-day-component-[^"]+)"[^>]*>(.*?)</tool-tip>',
+            html, re.S):
+        d = cells.get(cid)
+        if not d:
+            continue
+        m = re.search(r'(\d+)\s+contributions?', text)
+        days[d] = int(m.group(1)) if m else 0
+    if days:
+        return days
+    # 旧结构兜底：两种属性顺序都兼容
     for d, c in re.findall(r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*?data-count="(\d+)"', html):
         days[d] = int(c)
     for c, d in re.findall(r'data-count="(\d+)"[^>]*?data-date="(\d{4}-\d{2}-\d{2})"', html):
         days.setdefault(d, int(c))
     return days
+
+
+def from_contributions():
+    """近一年每日贡献数。GitHub 已忽略 from/to 参数、只按自然年返回日历，
+    所以今年 + 去年各抓一份合并，再裁到近 370 天窗口。"""
+    today = date.today()
+    days = {}
+    for year in (today.year - 1, today.year):
+        html = fetch(f'https://github.com/users/{USER}/contributions?from={year}-01-01&to={year}-12-31')
+        days.update(parse_calendar(html))
+    frm = (today - timedelta(days=390)).isoformat() # 390 天 > 前端 54 周(378 天)窗口，保证格子不缺
+    return {d: c for d, c in days.items() if frm <= d <= today.isoformat()}
 
 
 def from_events():
