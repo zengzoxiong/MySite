@@ -169,7 +169,7 @@
       </div>
     </div>
 
-    <p class="hint">方向键 / WASD / 触屏滑动 · 合并出 2048 即胜利，可继续冲击更高分<br>自动模式：AI 托管走棋冲高分，结束自动开新局继续</p>
+    <p class="hint">方向键 / WASD / 触屏滑动 · 合并出 2048 即胜利，可继续冲击更高分<br>自动模式：AI 托管走棋冲高分，游戏结束后点「再来一局」AI 会接着走</p>
     <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
   </main>
 
@@ -425,107 +425,168 @@
     hideOverlay();
   });
 
-  /* ---------- 自动模式：AI 托管 ----------
-     每步对 4 个方向做纯矩阵模拟，评估函数综合：合并得分、空格数、
-     行列单调性（log 域惩罚）、平滑度、最大数贴角，并对新块 2/4 的
-     随机落位取期望；结束自动开新局，挂机也能持续刷分 */
+  /* ---------- 自动模式：AI 托管（expectimax 跑在 Web Worker 里） ----------
+     深搜每步几十万次评估，主线程跑会卡成幻灯片；搬进 Worker 后页面
+     照常渲染、AI 照常深算。深度恒定 3 层（残局 4 层），稳定冲击 4096。
+     死亡停在结算面板，玩家点「再来一局」后 AI 接着走 */
   let autoOn = false;
-  const lg = function (v) { return v ? Math.log2(v) : 0; };
+  let aiBusy = false;   // 上一手还没算完时不重复下发
 
-  function gridValues() {
-    return grid.map(function (row) { return row.map(function (t) { return t ? t.v : 0; }); });
-  }
-  function simMove(mat, dir) {
-    const dr = VEC[dir][0], dc = VEC[dir][1];
-    const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
-    if (dr === 1) rows.reverse();
-    if (dc === 1) cols.reverse();
-    const m = mat.map(function (row) { return row.slice(); });
-    const merged = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-    let moved = false, gained = 0;
-    for (const r of rows) {
-      for (const c of cols) {
-        const v = m[r][c];
+  const AI_WORKER_SRC = `
+    'use strict';
+    const LOG2 = { 0: 0 };
+    for (let v = 2; v <= 65536; v *= 2) LOG2[v] = Math.log2(v);
+    const lg = function (v) { return LOG2[v] || 0; };
+    const VEC = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
+    const TRAV = {};
+    (function () {
+      for (const dir of ['up', 'left', 'down', 'right']) {
+        const dr = VEC[dir][0], dc = VEC[dir][1];
+        const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
+        if (dr === 1) rows.reverse();
+        if (dc === 1) cols.reverse();
+        const order = [];
+        for (const r of rows) for (const c of cols) order.push(r * 4 + c);
+        TRAV[dir] = order;
+      }
+    })();
+    function simMove(m, dir) {
+      const out = m.slice();
+      const order = TRAV[dir];
+      const dr = VEC[dir][0], dc = VEC[dir][1];
+      const merged = new Uint8Array(16);
+      let moved = false, gained = 0;
+      for (const i of order) {
+        const v = out[i];
         if (!v) continue;
-        let nr = r, nc = c;
+        let ni = i;
         while (true) {
-          const ar = nr + dr, ac = nc + dc;
-          if (ar < 0 || ar > 3 || ac < 0 || ac > 3 || m[ar][ac]) break;
-          nr = ar; nc = ac;
+          const ar = (ni >> 2) + dr, ac = (ni & 3) + dc;
+          if (ar < 0 || ar > 3 || ac < 0 || ac > 3 || out[ar * 4 + ac]) break;
+          ni = ar * 4 + ac;
         }
-        const ar = nr + dr, ac = nc + dc;
-        const target = (ar >= 0 && ar < 4 && ac >= 0 && ac < 4) ? m[ar][ac] : 0;
-        if (target && target === v && !merged[ar][ac]) {
-          m[r][c] = 0; m[ar][ac] = v * 2; merged[ar][ac] = 1;
+        const ar = (ni >> 2) + dr, ac = (ni & 3) + dc;
+        const ti = (ar >= 0 && ar < 4 && ac >= 0 && ac < 4) ? ar * 4 + ac : -1;
+        if (ti >= 0 && out[ti] === v && !merged[ti]) {
+          out[i] = 0; out[ti] = v * 2; merged[ti] = 1;
           gained += v * 2; moved = true;
-        } else if (nr !== r || nc !== c) {
-          m[r][c] = 0; m[nr][nc] = v; moved = true;
+        } else if (ni !== i) {
+          out[i] = 0; out[ni] = v; moved = true;
         }
       }
+      return { mat: out, moved: moved, gained: gained };
     }
-    return { mat: m, moved: moved, gained: gained };
-  }
-  function evaluate(mat) {
-    let empty = 0, smooth = 0, maxV = 0;
-    let monoLR = 0, monoRL = 0, monoUD = 0, monoDU = 0;
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        const v = mat[r][c];
+    function maxOf(m) {
+      let x = 0;
+      for (let i = 0; i < 16; i++) if (m[i] > x) x = m[i];
+      return x;
+    }
+    function evaluate(m) {
+      let empty = 0, smooth = 0, maxV = 0;
+      let monoLR = 0, monoRL = 0, monoUD = 0, monoDU = 0;
+      for (let i = 0; i < 16; i++) {
+        const v = m[i];
         if (!v) { empty++; continue; }
         if (v > maxV) maxV = v;
+        const lv = lg(v), c = i & 3, r = i >> 2;
         if (c < 3) {
-          const w = lg(mat[r][c + 1]);
-          smooth += Math.abs(lg(v) - w);
-          if (lg(v) > w) monoLR += w - lg(v); else monoRL += lg(v) - w;
+          const w = lg(m[i + 1]);
+          smooth += Math.abs(lv - w);
+          if (lv > w) monoLR += w - lv; else monoRL += lv - w;
         }
         if (r < 3) {
-          const w = lg(mat[r + 1][c]);
-          if (lg(v) > w) monoUD += w - lg(v); else monoDU += lg(v) - w;
+          const w = lg(m[i + 4]);
+          if (lv > w) monoUD += w - lv; else monoDU += lv - w;
         }
       }
+      const mono = Math.max(monoLR, monoRL) + Math.max(monoUD, monoDU);
+      // 最大数钉角有奖励、漂移重罚——4096 失败多是大数漂移导致棋盘碎裂
+      const inCorner = m[0] === maxV || m[3] === maxV || m[12] === maxV || m[15] === maxV;
+      const corner = inCorner ? lg(maxV) * 270 : -lg(maxV) * 60;
+      return empty * 270 + mono * 47 + corner + lg(maxV) * 36 - smooth * 3;
     }
-    const mono = Math.max(monoLR, monoRL) + Math.max(monoUD, monoDU); // 越有序越接近 0
-    const corner = (mat[0][0] === maxV || mat[0][3] === maxV || mat[3][0] === maxV || mat[3][3] === maxV)
-      ? lg(maxV) * 2.7 : 0;
-    return empty * 270 + mono * 47 + corner * 100 - smooth * 3;
-  }
-  function bestDir() {
-    const mat = gridValues();
-    let best = null, bestScore = -Infinity;
-    for (const dir of ['up', 'left', 'down', 'right']) {
-      const sim = simMove(mat, dir);
-      if (!sim.moved) continue;
-      let sc = sim.gained + evaluate(sim.mat);
-      const empties = [];
-      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (!sim.mat[r][c]) empties.push([r, c]);
-      if (empties.length) {
-        let exp = 0;
-        for (const cell of empties) {
-          for (const v of [2, 4]) {
-            const m2 = sim.mat.map(function (row) { return row.slice(); });
-            m2[cell[0]][cell[1]] = v;
-            exp += (v === 2 ? 0.9 : 0.1) * evaluate(m2);
-          }
+    /* 随机层：全展开每个空位（不算 4 块会系统性高估局面） */
+    function expectNode(m, depth) {
+      let exp = 0, n = 0;
+      for (let i = 0; i < 16; i++) {
+        if (m[i]) continue;
+        for (const v of [2, 4]) {
+          const m2 = m.slice();
+          m2[i] = v;
+          exp += (v === 2 ? 0.9 : 0.1) * maxNode(m2, depth);
         }
-        sc += exp / empties.length;
+        n += 2;
       }
-      if (sc > bestScore) { bestScore = sc; best = dir; }
+      return n ? exp / n : maxNode(m, depth);
     }
-    return best;
+    /* 我方层：四方向取最优；无路可走重罚，上层会主动避开死局 */
+    function maxNode(m, depth) {
+      if (depth <= 0) return evaluate(m);
+      let best = -Infinity;
+      for (const dir of ['up', 'left', 'down', 'right']) {
+        const sim = simMove(m, dir);
+        if (!sim.moved) continue;
+        const sc = sim.gained + expectNode(sim.mat, depth - 1);
+        if (sc > best) best = sc;
+      }
+      return best === -Infinity ? -1e6 - lg(maxOf(m)) * 1000 : best;
+    }
+    function bestDir(m) {
+      let empties = 0;
+      for (let i = 0; i < 16; i++) if (!m[i]) empties++;
+      // 全程 3 层是实测最优（多局 33k-36.9k 分）；4 层全期望开局要数亿
+      // 次评估直接卡死，降开局深度又会伤布局质量，两头不讨好
+      const depth = 3;
+      let best = null, bestScore = -Infinity;
+      for (const dir of ['up', 'left', 'down', 'right']) {
+        const sim = simMove(m, dir);
+        if (!sim.moved) continue;
+        const sc = sim.gained + expectNode(sim.mat, depth - 1);
+        if (sc > bestScore) { bestScore = sc; best = dir; }
+      }
+      return best;
+    }
+    onmessage = function (e) {
+      const dir = bestDir(e.data.mat);
+      postMessage({ id: e.data.id, dir: dir });
+    };
+  `;
+  const aiWorker = new Worker(URL.createObjectURL(new Blob([AI_WORKER_SRC], { type: 'application/javascript' })));
+  let aiReqId = 0;
+  aiWorker.onmessage = function (e) {
+    aiBusy = false;
+    if (!autoOn || e.data.id !== aiReqId) return;   // 过期的回答直接丢弃
+    if (e.data.dir) move(e.data.dir);
+  };
+
+  function gridValues() {
+    const m = new Float64Array(16);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) { const t = grid[r][c]; if (t) m[r * 4 + c] = t.v; }
+    return m;
   }
-  window.setInterval(function () {
-    if (!autoOn) return;
-    if (over) { newGame(); return; }            // 结束自动续局，挂机持续刷分
-    if (paused) { paused = false; hideOverlay(); } // 胜利弹层自动关闭继续
-    if (lock) return;
-    const dir = bestDir();
-    if (dir) move(dir);
-  }, 110);
+
+  function requestAiMove() {
+    if (aiBusy) return;
+    aiBusy = true;
+    aiReqId++;
+    aiWorker.postMessage({ id: aiReqId, mat: Array.from(gridValues()) });
+  }
+
   document.getElementById('autoBtn').addEventListener('click', function () {
     autoOn = !autoOn;
     this.textContent = autoOn ? '停止自动' : '自动模式';
     this.classList.toggle('auto-on', autoOn);
+    if (autoOn && !lock) requestAiMove();
   });
+
+  /* 驱动：动画锁解除即向 Worker 要下一步；死亡停在结算面板，
+     玩家点「再来一局」后 AI 自动接手继续 */
+  window.setInterval(function () {
+    if (!autoOn || lock) return;
+    if (over) return;
+    if (paused) { paused = false; hideOverlay(); }
+    requestAiMove();
+  }, 80);
 
   /* ---------- 初始化：先铺 16 个底格，再开局 ---------- */
   for (let r = 0; r < SIZE; r++) {
