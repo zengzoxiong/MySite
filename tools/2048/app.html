@@ -90,10 +90,11 @@
       z-index: 1;
       transition: left .13s ease-in-out, top .13s ease-in-out;
     }
-    .len1 { font-size: calc(var(--tw) * .52); }
-    .len2 { font-size: calc(var(--tw) * .46); }
-    .len3 { font-size: calc(var(--tw) * .36); }
-    .len4 { font-size: calc(var(--tw) * .27); }
+    /* 字号必须用实像素：--tw 里的 100% 在 font-size 上下文里是父字号而非棋盘宽 */
+    .len1 { font-size: calc(var(--tw-px, 80px) * .52); }
+    .len2 { font-size: calc(var(--tw-px, 80px) * .46); }
+    .len3 { font-size: calc(var(--tw-px, 80px) * .36); }
+    .len4 { font-size: calc(var(--tw-px, 80px) * .27); }
 
     /* 经典配色 */
     .v2    { background: #eee4da; color: #776e65; }
@@ -178,6 +179,15 @@
   const WIN_VALUE = 2048;  // 胜利目标
 
   const board = document.getElementById('board');
+
+  // 把格子实际边长写进 --tw-px 供 font-size 使用（width 可用 100%，字号不行）
+  function syncTileFont() {
+    const gap = parseFloat(getComputedStyle(board).getPropertyValue('--gap')) || 10;
+    const tw = (board.clientWidth - 5 * gap) / 4;
+    board.style.setProperty('--tw-px', tw.toFixed(2) + 'px');
+  }
+  syncTileFont();
+  window.addEventListener('resize', syncTileFont);
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best');
   const scoreStat = document.getElementById('scoreStat');

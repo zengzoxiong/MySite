@@ -101,7 +101,7 @@
       justify-content: center;
       background: linear-gradient(180deg, #ffffff, #f1f5f9);
       color: #3f5568;
-      font-size: calc(var(--tw) / 2.3);
+      font-size: calc(var(--tw-px, 60px) / 2.3); /* 同 2048：字号用实像素，--tw 的 100% 进 font-size 是父字号 */
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       box-shadow: 0 2px 6px rgba(50, 75, 100, .28);
@@ -179,6 +179,16 @@
   'use strict';
   /* ================= 数字华容道主逻辑（零依赖，纯本地运行） ================= */
   const board = document.getElementById('board');
+
+  // 格子实际边长写进 --tw-px 供字号使用；--n 随档位变化，换档与窗口变化都要同步
+  function syncTileFont() {
+    const gap = parseFloat(getComputedStyle(board).getPropertyValue('--gap')) || 8;
+    const n = parseInt(getComputedStyle(board).getPropertyValue('--n')) || 4;
+    const tw = (board.clientWidth - (n + 1) * gap) / n;
+    board.style.setProperty('--tw-px', tw.toFixed(2) + 'px');
+  }
+  syncTileFont();
+  window.addEventListener('resize', syncTileFont);
   const movesEl = document.getElementById('moves');
   const timeEl = document.getElementById('time');
   const bestLine = document.getElementById('bestLine');
@@ -341,6 +351,7 @@
   function newGame(size) {
     n = size;
     board.style.setProperty('--n', n);
+    syncTileFont();
     stopTimer();
     moves = 0; seconds = 0; over = false;
     movesEl.textContent = '0';
