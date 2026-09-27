@@ -55,34 +55,41 @@ const cmdk = document.getElementById('cmdk');
 const cmdkInput = document.getElementById('cmdkInput');
 const cmdkList = document.getElementById('cmdkList');
 
-// 初始化
+// 初始化单步容错：SWR 缓存优先模式下，老访客可能短暂持有新旧错配的资源
+// （旧 index.html/appearance.js + 新 script.js），某一步可能因元素/函数缺失抛异常，
+// 不能让它把后面的初始化全部拦腰截断（否则时钟/天气/播放器/仪表盘整片挂掉）
+function safeInit(name, fn) {
+    try { fn(); } catch (e) { console.error('[拾光集] 初始化失败:', name, e); }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadLinks();
-    initTheme();
-    initAnimSetting();
-    applyFontFromStorage();
-    initSettingsModal();
-    initPalette();
-    initMusicPlayer();
-    initSidebar();
-    initEventListeners();
-    initDashboard();
+    safeInit('loadLinks', loadLinks);
+    safeInit('initTheme', initTheme);
+    safeInit('initAnimSetting', initAnimSetting);
+    safeInit('applyFontFromStorage', applyFontFromStorage);
+    safeInit('initSettingsModal', initSettingsModal);
+    safeInit('initPalette', initPalette);
+    safeInit('initMusicPlayer', initMusicPlayer);
+    safeInit('initSidebar', initSidebar);
+    safeInit('initEventListeners', initEventListeners);
+    safeInit('initDashboard', initDashboard);
 });
 
 // ===== 首页仪表盘 =====
 function initDashboard() {
     homeNav.classList.add('active');
-    initClock();
-    initWeather();
-    initQuote();
-    initCheckin();
-    initProgress();
-    initGitHubStats();
-    initTodo();
-    initSectionToggles();
+    safeInit('initClock', initClock);
+    safeInit('initWeather', initWeather);
+    safeInit('initQuote', initQuote);
+    safeInit('initCheckin', initCheckin);
+    safeInit('initProgress', initProgress);
+    safeInit('initGitHubStats', initGitHubStats);
+    safeInit('initTodo', initTodo);
+    safeInit('initSectionToggles', initSectionToggles);
 
     // 点击天气区域手动刷新
     const heroWeather = document.getElementById('heroWeather');
+    if (!heroWeather) return; // 资源错配时元素可能缺失，别在尾部抛异常
     heroWeather.addEventListener('click', () => initWeather(true));
     heroWeather.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {

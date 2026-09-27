@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（stale-while-revalidate） */
-const CACHE = 'mysite-v15';
+const CACHE = 'mysite-v16'; // v16: 强制清撕裂旧缓存（新 script.js 配旧 index.html/appearance.js 曾致初始化中断）
 // 运行时缓存（PRECACHE 之外的同源资源）条目上限：工具页/海报会随浏览不断
 // 进缓存，不修剪的话老访客的存储无限增长；超出按写入顺序淘汰最旧的
 const RUNTIME_MAX = 300;
