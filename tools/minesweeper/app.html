@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>扫雷 - 拾光集</title>
+  <meta name="description" content="拾光集在线小游戏：经典扫雷，初级 / 中级 / 高级三档，首次点击必定安全，纯本地运行。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/minesweeper/app.html">
+  <style>
+    /* ===== 扫雷 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f4f4f0;
+      color: #4e5a52;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 12px 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 720px; }
+
+    header { margin-bottom: 12px; }
+    h1 { font-size: 30px; color: #3e5147; letter-spacing: 2px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #8a9a8e; }
+
+    /* 计数与重开（经典布局：雷数 - 笑脸 - 计时） */
+    .hud { display: flex; align-items: stretch; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .counter {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e4e2da;
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 10px rgba(110, 120, 105, .10);
+    }
+    .cico { display: inline-flex; width: 20px; height: 20px; }
+    .cico svg { width: 100%; height: 100%; }
+    .cval {
+      font-family: Consolas, Menlo, monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #c62828;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1px;
+    }
+    .face {
+      width: 46px;
+      height: 46px;
+      border: 1px solid #e4e2da;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      padding: 5px;
+      box-shadow: 0 2px 10px rgba(110, 120, 105, .12);
+      touch-action: manipulation;
+    }
+    .face svg { width: 100%; height: 100%; }
+    .face:active { transform: translateY(1px); }
+
+    /* 难度档位 */
+    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
+    .seg button {
+      flex: 1;
+      border: 1px solid #e0ded6;
+      background: #fff;
+      color: #5c6b60;
+      padding: 8px 0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      touch-action: manipulation;
+    }
+    .seg button.active { background: #5f8f6e; border-color: #5f8f6e; color: #fff; }
+
+    /* 雷区：窄屏放不下时允许横向滚动（高级 30 列） */
+    .board-scroll { position: relative; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
+    .board {
+      --cs: 32px;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), var(--cs));
+      grid-auto-rows: var(--cs);
+      gap: 2px;
+      width: max-content;
+      margin: 0 auto;
+      padding: 8px;
+      background: #cbc7bd;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .cell {
+      background: #e9e5db;
+      border-radius: 4px;
+      box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .85), inset -2px -2px 0 rgba(0, 0, 0, .10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: calc(var(--cs) * .55);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+    }
+    .cell.open { background: #f7f4ee; box-shadow: inset 0 0 0 1px #ded9cd; cursor: default; }
+    .cell.boom { background: #ef5350; }
+    .cell svg { width: 64%; height: 64%; pointer-events: none; }
+
+    /* 胜负弹层 */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      border-radius: 12px;
+      background: rgba(250, 250, 246, .88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .ov-title { font-size: 32px; font-weight: 800; color: #3e5147; }
+    .overlay.win .ov-title { color: #3f9d6d; }
+    .ov-sub { font-size: 14px; color: #75857a; }
+    .btn {
+      border: 0;
+      background: #5f8f6e;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(95, 143, 110, .35);
+      touch-action: manipulation;
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .best { margin-top: 12px; text-align: center; font-size: 13px; color: #7f9184; font-variant-numeric: tabular-nums; }
+    .hint { margin-top: 6px; text-align: center; font-size: 13px; color: #9aa99d; }
+    footer { margin-top: 24px; text-align: center; font-size: 12px; color: #b3bdb2; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>扫雷</h1>
+      <p class="sub">翻开所有安全格，别踩雷</p>
+    </header>
+
+    <section class="hud">
+      <div class="counter">
+        <span class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5v17" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M7 4.2 18.5 8 7 11.8Z" fill="#e53935"/></svg></span>
+        <span class="cval" id="mineLeft">010</span>
+      </div>
+      <button class="face" id="faceBtn" type="button" title="重新开始"></button>
+      <div class="counter">
+        <span class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#78909c" stroke-width="2"/><path d="M12 7v5l3.4 2" stroke="#78909c" stroke-width="2" stroke-linecap="round" fill="none"/></svg></span>
+        <span class="cval" id="time">000</span>
+      </div>
+    </section>
+
+    <div class="seg" id="seg">
+      <button type="button" data-level="0" class="active">初级</button>
+      <button type="button" data-level="1">中级</button>
+      <button type="button" data-level="2">高级</button>
+    </div>
+
+    <div class="board-scroll" id="scroll">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle"></p>
+        <p class="ov-sub" id="ovSub"></p>
+        <button class="btn" id="againBtn" type="button">再来一局</button>
+      </div>
+    </div>
+
+    <p class="best" id="bestLine"></p>
+    <p class="hint">左键翻开 · 右键插旗 · 手机长按插旗 · 首次点击必定安全</p>
+    <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+  </main>
+
+  <script>
+  'use strict';
+  /* ================= 扫雷主逻辑（零依赖，纯本地运行） ================= */
+  const LEVELS = [
+    { id: 'beginner', label: '初级', rows: 9,  cols: 9,  mines: 10 },
+    { id: 'middle',   label: '中级', rows: 16, cols: 16, mines: 40 },
+    { id: 'expert',   label: '高级', rows: 16, cols: 30, mines: 99 }
+  ];
+
+  /* 经典数字配色：1 蓝 2 绿 3 红 4 藏青 5 暗红 6 青 7 黑 8 灰 */
+  const NUM_COLORS = ['', '#0000cc', '#008000', '#cc0000', '#00007a', '#7a0000', '#008080', '#000000', '#7a7a7a'];
+
+  /* 内联 SVG 图标（雷 / 旗 / 错旗 / 三张表情），不使用 emoji */
+  const SVG_MINE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6v18.8M2.6 12h18.8M5.4 5.4l13.2 13.2M18.6 5.4 5.4 18.6" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="6.2" fill="#37474f"/><circle cx="9.8" cy="9.8" r="1.7" fill="#fff" opacity=".8"/></svg>';
+  const SVG_FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5v17" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M7 4.2 18.5 8 7 11.8Z" fill="#e53935"/></svg>';
+  const SVG_FLAG_WRONG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5v17" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M7 4.2 18.5 8 7 11.8Z" fill="#9e9e9e"/><path d="M4.5 4.5 19.5 19.5M19.5 4.5 4.5 19.5" stroke="#e53935" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>';
+  const FACE_OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#ffd54f" stroke="#c9a227" stroke-width="1.4"/><circle cx="8.6" cy="9.8" r="1.35" fill="#5d4037"/><circle cx="15.4" cy="9.8" r="1.35" fill="#5d4037"/><path d="M7.8 14.2q4.2 4 8.4 0" fill="none" stroke="#5d4037" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const FACE_DEAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#ffd54f" stroke="#c9a227" stroke-width="1.4"/><path d="M7 8.4l3 3M10 8.4l-3 3M14 8.4l3 3M17 8.4l-3 3" stroke="#5d4037" stroke-width="1.5" stroke-linecap="round"/><path d="M8 16.6q4 -3.2 8 0" fill="none" stroke="#5d4037" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const FACE_COOL = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#ffd54f" stroke="#c9a227" stroke-width="1.4"/><rect x="5.6" y="8.6" width="5.4" height="3.6" rx="1.4" fill="#37474f"/><rect x="13" y="8.6" width="5.4" height="3.6" rx="1.4" fill="#37474f"/><path d="M11 9.6h2" stroke="#37474f" stroke-width="1.2"/><path d="M8.2 15.8q3.8 2.8 7.6 0" fill="none" stroke="#5d4037" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+  const board = document.getElementById('board');
+  const scrollEl = document.getElementById('scroll');
+  const mineLeftEl = document.getElementById('mineLeft');
+  const timeEl = document.getElementById('time');
+  const faceBtn = document.getElementById('faceBtn');
+  const bestLine = document.getElementById('bestLine');
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const ovSub = document.getElementById('ovSub');
+
+  let level = LEVELS[0];
+  let cells = [];        // cells[i] = { mine, adj, state }，state：0 未翻 / 1 已翻 / 2 插旗
+  let cellEls = [];
+  let placed = false;    // 是否已布雷（首次翻开之后）
+  let over = false;
+  let flags = 0;
+  let revealed = 0;
+  let seconds = 0;
+  let timerId = null;
+
+  /* ---------- 本地存储（每档位一个最佳用时，读写都兜底） ---------- */
+  function bestKey() { return 'minesweeper.best.' + level.id; }
+  function loadBest() {
+    try {
+      const raw = localStorage.getItem(bestKey());
+      return raw == null ? null : parseInt(raw, 10);
+    } catch (e) { return null; }
+  }
+  function saveBest(sec) {
+    try { localStorage.setItem(bestKey(), String(sec)); }
+    catch (e) { /* 写入失败时静默忽略 */ }
+  }
+  function updateBestLine() {
+    const b = loadBest();
+    bestLine.textContent = level.label + '最佳纪录：' + (b == null ? '暂无' : b + ' 秒');
+  }
+
+  /* ---------- 计时与计数 ---------- */
+  function startTimer() {
+    stopTimer();
+    timerId = window.setInterval(function () {
+      seconds = Math.min(999, seconds + 1);
+      timeEl.textContent = String(seconds).padStart(3, '0');
+    }, 1000);
+  }
+  function stopTimer() {
+    if (timerId) { window.clearInterval(timerId); timerId = null; }
+  }
+  function updateMineCounter() {
+    const left = level.mines - flags;
+    mineLeftEl.textContent = left < 0
+      ? '-' + String(Math.min(99, Math.abs(left))).padStart(2, '0')
+      : String(left).padStart(3, '0');
+  }
+
+  /* ---------- 建盘 ---------- */
+  function buildDom() {
+    board.style.setProperty('--cols', level.cols);
+    fitBoard();
+    board.querySelectorAll('.cell').forEach(function (el) { el.remove(); });
+    cellEls = [];
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < level.rows * level.cols; i++) {
+      const el = document.createElement('div');
+      el.className = 'cell';
+      el.dataset.i = i;
+      frag.appendChild(el);
+      cellEls.push(el);
+    }
+    board.appendChild(frag);
+  }
+  function fitBoard() {
+    // 依容器宽度计算格子尺寸；16/30 列在窄屏下自然横向滚动
+    const gaps = 2 * (level.cols - 1);
+    let cs = Math.floor((scrollEl.clientWidth - 16 - gaps - 4) / level.cols);
+    cs = Math.max(20, Math.min(32, cs));
+    board.style.setProperty('--cs', cs + 'px');
+  }
+  function reset() {
+    stopTimer();
+    seconds = 0; flags = 0; revealed = 0; placed = false; over = false;
+    timeEl.textContent = '000';
+    cells = Array.from({ length: level.rows * level.cols }, function () {
+      return { mine: false, adj: 0, state: 0 };
+    });
+    setFace(FACE_OK);
+    updateMineCounter();
+    updateBestLine();
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+    buildDom();
+  }
+
+  /* ---------- 邻居与布雷 ---------- */
+  function forEachNeighbor(i, fn) {
+    const r = Math.floor(i / level.cols), c = i % level.cols;
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < level.rows && nc >= 0 && nc < level.cols) fn(nr * level.cols + nc);
+      }
+    }
+  }
+  // 首点安全：首次点击及其周边 9 格都不布雷
+  function placeMines(safe) {
+    const excluded = new Set([safe]);
+    forEachNeighbor(safe, function (j) { excluded.add(j); });
+    let pool = [];
+    for (let i = 0; i < cells.length; i++) if (!excluded.has(i)) pool.push(i);
+    if (pool.length < level.mines) {
+      // 兜底：可布格数不足时退化为仅排除首点（本项目三档不会触发）
+      pool = [];
+      for (let i = 0; i < cells.length; i++) if (i !== safe) pool.push(i);
+    }
+    for (let k = 0; k < level.mines; k++) {
+      const j = k + Math.floor(Math.random() * (pool.length - k));
+      const tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp;
+      cells[pool[k]].mine = true;
+    }
+    for (let i = 0; i < cells.length; i++) {
+      let cnt = 0;
+      forEachNeighbor(i, function (j) { if (cells[j].mine) cnt++; });
+      cells[i].adj = cnt;
+    }
+  }
+
+  /* ---------- 翻开 / 插旗 ---------- */
+  function paintCell(i) {
+    const c = cells[i], el = cellEls[i];
+    el.style.color = '';
+    el.className = 'cell' + (c.state === 1 ? ' open' : '');
+    if (c.state === 1) {
+      if (c.mine) { el.innerHTML = SVG_MINE; }
+      else if (c.adj > 0) { el.textContent = c.adj; el.style.color = NUM_COLORS[c.adj]; }
+      else { el.innerHTML = ''; }
+    } else if (c.state === 2) {
+      el.innerHTML = SVG_FLAG;
+    } else {
+      el.innerHTML = '';
+    }
+  }
+  function reveal(i) {
+    if (over) return;
+    const c = cells[i];
+    if (c.state !== 0) return;               // 已翻开或已插旗的格不动
+    if (!placed) { placeMines(i); placed = true; startTimer(); }   // 首翻才布雷并计时
+    if (c.mine) { lose(i); return; }
+    const stack = [i];
+    while (stack.length) {
+      const k = stack.pop();
+      const cell = cells[k];
+      if (cell.state !== 0 || cell.mine) continue;
+      cell.state = 1;
+      revealed++;
+      paintCell(k);
+      if (cell.adj === 0) {
+        forEachNeighbor(k, function (j) { if (cells[j].state === 0) stack.push(j); });
+      }
+    }
+    checkWin();
+  }
+  function toggleFlag(i) {
+    if (over) return;
+    const c = cells[i];
+    if (c.state === 1) return;
+    c.state = (c.state === 2) ? 0 : 2;
+    flags += (c.state === 2) ? 1 : -1;
+    paintCell(i);
+    updateMineCounter();
+  }
+
+  /* ---------- 胜负 ---------- */
+  function checkWin() {
+    if (revealed !== level.rows * level.cols - level.mines) return;
+    over = true;
+    stopTimer();
+    flags = level.mines;                     // 剩余的雷自动插旗
+    updateMineCounter();
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i].mine && cells[i].state !== 2) { cells[i].state = 2; paintCell(i); }
+    }
+    setFace(FACE_COOL);
+    const old = loadBest();
+    let record = false;
+    if (old == null || seconds < old) { record = true; saveBest(seconds); }
+    updateBestLine();
+    showOverlay(true, '用时 ' + seconds + ' 秒' + (record ? ' · 新纪录！' : ''));
+  }
+  function lose(hit) {
+    over = true;
+    stopTimer();
+    for (let i = 0; i < cells.length; i++) {
+      const c = cells[i], el = cellEls[i];
+      if (c.mine && c.state !== 2) {         // 亮出所有雷，踩中的那颗标红
+        el.className = 'cell open' + (i === hit ? ' boom' : '');
+        el.innerHTML = SVG_MINE;
+      } else if (!c.mine && c.state === 2) { // 插错的旗加红叉
+        el.innerHTML = SVG_FLAG_WRONG;
+      }
+    }
+    setFace(FACE_DEAD);
+    showOverlay(false, '踩到雷了 · 用时 ' + seconds + ' 秒');
+  }
+  function showOverlay(win, sub) {
+    ovTitle.textContent = win ? '胜利！' : '游戏结束';
+    ovSub.textContent = sub;
+    overlay.classList.toggle('win', !!win);
+    overlay.hidden = false;
+    void overlay.offsetWidth;                // 同步回流后再加 open，保证过渡生效
+    overlay.classList.add('open');
+  }
+
+  /* ---------- 表情按钮（SVG 绘制，非 emoji） ---------- */
+  function setFace(svg) { faceBtn.innerHTML = svg; }
+
+  /* ---------- 输入：点击 / 右键 / 长按 ---------- */
+  let pressTimer = null;
+  let longFired = false;       // 长按已插旗，用于吞掉随后触发的 contextmenu / click
+  let suppressClick = false;
+
+  board.addEventListener('click', function (e) {
+    if (suppressClick) { suppressClick = false; return; }
+    const cell = e.target.closest('.cell');
+    if (cell) reveal(+cell.dataset.i);
+  });
+  board.addEventListener('contextmenu', function (e) {
+    e.preventDefault();                      // 桌面右键插旗；同时吞掉安卓长按的系统菜单
+    if (longFired) { longFired = false; return; }
+    const cell = e.target.closest('.cell');
+    if (cell) toggleFlag(+cell.dataset.i);
+  });
+  board.addEventListener('touchstart', function (e) {
+    longFired = false;
+    const cell = e.target.closest('.cell');
+    if (!cell || over) return;
+    pressTimer = window.setTimeout(function () {
+      longFired = true;
+      suppressClick = true;
+      toggleFlag(+cell.dataset.i);
+      if (navigator.vibrate) { try { navigator.vibrate(30); } catch (err) { /* 忽略 */ } }
+    }, 380);
+  }, { passive: true });
+  board.addEventListener('touchmove', function () { window.clearTimeout(pressTimer); }, { passive: true });
+  board.addEventListener('touchend', function () { window.clearTimeout(pressTimer); }, { passive: true });
+  board.addEventListener('touchcancel', function () { window.clearTimeout(pressTimer); }, { passive: true });
+
+  /* ---------- 输入：档位 / 重开 ---------- */
+  document.querySelectorAll('#seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      level = LEVELS[+b.dataset.level];
+      document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      reset();
+    });
+  });
+  faceBtn.addEventListener('click', reset);
+  document.getElementById('againBtn').addEventListener('click', reset);
+  window.addEventListener('resize', fitBoard);
+
+  /* ---------- 启动 ---------- */
+  reset();
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>贪吃蛇 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/snake/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368}
+.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
+.stage{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
+[hidden]{display:none!important}
+.overlay h2{font-size:24px;margin-bottom:10px;color:#202124}
+.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>贪吃蛇</h1>
+    <div class="hud">
+      <span>分数 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <button id="pauseBtn" class="btn-plain" type="button">暂停</button>
+    </div>
+  </header>
+  <div class="stage">
+    <canvas id="cv" width="480" height="480"></canvas>
+    <div class="overlay" id="ovStart">
+      <div>
+        <h2>贪吃蛇</h2>
+        <p>方向键或 WASD 控制移动，触屏在棋盘上滑动即可<br>吃到红色食物得分变长，撞墙或咬到自己就结束了<br>蛇越长爬得越快，看看你能吃多少</p>
+        <button id="btnStart" type="button">开始游戏</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovOver" hidden>
+      <div>
+        <h2 id="overTitle">游戏结束</h2>
+        <p id="overInfo"></p>
+        <button id="btnRestart" type="button">再来一局</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovPause" hidden>
+      <div>
+        <h2>已暂停</h2>
+        <button id="btnResume" type="button">继续游戏</button>
+      </div>
+    </div>
+  </div>
+  <p class="tips">键盘：方向键 或 WASD 转向，空格 暂停或继续<br>触屏：在棋盘上朝目标方向滑动</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<script>
+(() => {
+'use strict';
+// ---------- 画布与常量（24x24 网格，每格 20px） ----------
+const N=24, CELL=20, W=N*CELL, H=N*CELL;
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d');
+const scoreEl=$('score'), bestEl=$('best'), pauseBtn=$('pauseBtn');
+const ovStart=$('ovStart'), ovOver=$('ovOver'), ovPause=$('ovPause');
+const overTitle=$('overTitle'), overInfo=$('overInfo');
+
+// ---------- 最高分存取 ----------
+let best=0;
+try{best=+localStorage.getItem('snakeBest')||0}catch(e){}
+function saveBest(v){try{localStorage.setItem('snakeBest',v)}catch(e){}}
+bestEl.textContent=best;
+
+// ---------- 状态 ----------
+let state='ready';   // ready / playing / paused / over
+let snake, dir, queue, food, eaten, score, stepMs, acc, shownScore;
+let floats=[], overAt=0;   // 得分浮字与死亡时刻（撞击红闪用）
+function reset(){
+  snake=[{x:11,y:12},{x:10,y:12},{x:9,y:12}];
+  dir={x:1,y:0}; queue=[]; eaten=0; score=0; stepMs=160; acc=0; shownScore=-1;
+  floats=[];
+  placeFood(); scoreEl.textContent='0';
+}
+function placeFood(){
+  const occ=new Set(snake.map(s=>s.x+'_'+s.y)), free=[];
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!occ.has(x+'_'+y))free.push({x,y});
+  food=free.length?free[Math.random()*free.length|0]:null;   // null 表示蛇占满全场
+}
+function setPanel(){
+  ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';
+  pauseBtn.textContent=state==='paused'?'继续':'暂停';
+}
+function start(){reset();state='playing';setPanel();}
+function pause(){if(state!=='playing')return;state='paused';setPanel();}
+function resume(){if(state!=='paused')return;state='playing';setPanel();}
+function gameOver(win){
+  state='over';overAt=performance.now();
+  const s=Math.floor(score), isNew=s>best&&s>0;
+  if(isNew){best=s;saveBest(s);bestEl.textContent=best;}
+  overTitle.textContent=win?'通关了！':'游戏结束';
+  overInfo.textContent='本局得分 '+s+' · '+(isNew?'新纪录！':(win?'吃满全场':'历史最高 '+best));
+  setPanel();
+}
+
+// ---------- 步进 ----------
+function step(){
+  while(queue.length){                        // 取第一个合法转向（原地掉头不认）
+    const d=queue.shift();
+    if(d.x!==-dir.x||d.y!==-dir.y){dir=d;break;}
+  }
+  const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  const eat=food&&h.x===food.x&&h.y===food.y;
+  const body=eat?snake:snake.slice(0,-1);     // 不吃时尾巴让位，追尾尖不算死
+  if(h.x<0||h.y<0||h.x>=N||h.y>=N||body.some(s=>s.x===h.x&&s.y===h.y)){gameOver(false);return;}
+  snake.unshift(h);
+  if(eat){
+    eaten++;score+=10;
+    floats.push({x:h.x*CELL+10,y:h.y*CELL+10,t:40});   // 得分浮字
+    stepMs=Math.max(70,160-eaten*4);          // 速度随长度渐进加快
+    placeFood();
+    if(!food){gameOver(true);return;}
+  }else snake.pop();
+}
+
+// ---------- 绘制 ----------
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.fill();
+}
+function draw(t){
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){   // 浅色棋盘底
+    ctx.fillStyle=(x+y)%2?'#eef1f5':'#f7f9fb';
+    ctx.fillRect(x*CELL,y*CELL,CELL,CELL);
+  }
+  ctx.strokeStyle='#dde1e6';ctx.lineWidth=2;  // 边框提示撞墙即死
+  ctx.strokeRect(1,1,W-2,H-2);
+  if(food){
+    const r=6+Math.sin(t/220)*1.4;            // 食物呼吸脉动
+    ctx.fillStyle='#e03131';
+    ctx.beginPath();ctx.arc(food.x*CELL+10,food.y*CELL+10,r,0,6.3);ctx.fill();
+  }
+  const n=snake.length;
+  for(let i=n-1;i>=0;i--){                    // 从尾到头画，尾部渐淡
+    const s=snake[i];
+    ctx.globalAlpha=i===0?1:.45+.55*(1-i/n);
+    ctx.fillStyle=i===0?'#2b8a3e':'#37b24d';
+    roundRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2,5);
+  }
+  ctx.globalAlpha=1;
+  const h=snake[0],cx=h.x*CELL+10,cy=h.y*CELL+10;   // 头部眼睛随朝向偏移
+  const px=-dir.y,py=dir.x;
+  ctx.fillStyle='#fff';ctx.beginPath();
+  ctx.arc(cx+dir.x*4+px*4,cy+dir.y*4+py*4,2.2,0,6.3);
+  ctx.arc(cx+dir.x*4-px*4,cy+dir.y*4-py*4,2.2,0,6.3);
+  ctx.fill();
+  ctx.fillStyle='#1b4326';ctx.beginPath();   // 瞳孔
+  ctx.arc(cx+dir.x*5+px*4,cy+dir.y*5+py*4,1,0,6.3);
+  ctx.arc(cx+dir.x*5-px*4,cy+dir.y*5-py*4,1,0,6.3);
+  ctx.fill();
+  // 得分浮字（+10 上飘渐隐）
+  for(let i=floats.length-1;i>=0;i--){
+    const f=floats[i];f.t--;
+    if(f.t<=0){floats.splice(i,1);continue;}
+    ctx.fillStyle='rgba(43,138,62,'+(f.t/40)+')';
+    ctx.font='bold 14px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('+10',f.x,f.y-(40-f.t)*.6);
+    ctx.textAlign='left';
+  }
+  if(state==='over'&&performance.now()-overAt<600){   // 撞击瞬间红闪反馈
+    ctx.fillStyle='rgba(224,49,49,'+(.25*(1-(performance.now()-overAt)/600))+')';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+// ---------- 输入：键盘 ----------
+const DIRS={
+  ArrowUp:{x:0,y:-1},KeyW:{x:0,y:-1},
+  ArrowDown:{x:0,y:1},KeyS:{x:0,y:1},
+  ArrowLeft:{x:-1,y:0},KeyA:{x:-1,y:0},
+  ArrowRight:{x:1,y:0},KeyD:{x:1,y:0}
+};
+function turn(d){
+  if(state==='ready'){start();queue.push(d);}
+  else if(state==='playing'&&queue.length<3)queue.push(d);
+}
+addEventListener('keydown',e=>{
+  const d=DIRS[e.code];
+  if(d){e.preventDefault();turn(d);}
+  else if(e.code==='Space'){
+    e.preventDefault();
+    if(state==='ready')start();
+    else if(state==='playing')pause();
+    else if(state==='paused')resume();
+    else if(state==='over')start();
+  }
+  else if(e.code==='Escape'||e.code==='KeyP'){state==='playing'?pause():resume();}
+});
+
+// ---------- 输入：滑动手势 ----------
+let tsx=0,tsy=0;
+cv.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;
+},{passive:false});
+cv.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const t=e.touches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
+  if(Math.abs(dx)<24&&Math.abs(dy)<24)return;
+  turn(Math.abs(dx)>Math.abs(dy)?{x:dx>0?1:-1,y:0}:{x:0,y:dy>0?1:-1});
+  tsx=t.clientX;tsy=t.clientY;   // 重置起点，支持连续滑动多次转向
+},{passive:false});
+
+// ---------- 面板按钮与暂停 ----------
+ovStart.addEventListener('click',start);
+ovOver.addEventListener('click',start);
+ovPause.addEventListener('click',resume);
+$('btnStart').addEventListener('click',start);
+$('btnRestart').addEventListener('click',start);
+$('btnResume').addEventListener('click',resume);
+pauseBtn.addEventListener('click',()=>{state==='playing'?pause():resume();});
+document.addEventListener('visibilitychange',()=>{   // 切后台自动暂停
+  if(document.hidden&&state==='playing')pause();
+});
+
+// ---------- 主循环（固定步长推进，渲染每帧） ----------
+let last=performance.now();
+function loop(t){
+  const dt=Math.min(t-last,50);last=t;   // 钳制大间隔，防跳帧暴走
+  if(state==='playing'){
+    acc+=dt;
+    while(acc>=stepMs&&state==='playing'){acc-=stepMs;step();}
+  }
+  draw(t);
+  requestAnimationFrame(loop);
+}
+reset();setPanel();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

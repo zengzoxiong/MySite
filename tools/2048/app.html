@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2048 - 拾光集</title>
+  <meta name="description" content="拾光集在线小游戏：2048，方向键或滑动合并相同数字方块，纯本地运行，无需联网。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/2048/app.html">
+  <style>
+    /* ===== 2048 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #faf6ef;
+      color: #6b6157;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 16px 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 460px; }
+
+    header { margin-bottom: 14px; }
+    h1 { font-size: 40px; line-height: 1.1; color: #7b6f63; letter-spacing: 2px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #a2937f; }
+
+    .hud { display: flex; gap: 10px; margin-bottom: 14px; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #eee3d3;
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(170, 145, 110, .10);
+    }
+    .stat .lab { display: block; font-size: 12px; color: #ab9c88; letter-spacing: 3px; }
+    .stat .val { display: block; margin-top: 2px; font-size: 22px; font-weight: 700; color: #7b6f63; font-variant-numeric: tabular-nums; }
+    .stat.bump { animation: bump .18s ease; }
+    @keyframes bump { 50% { transform: scale(1.07); } }
+
+    .btn {
+      border: 0;
+      background: #8f7a66;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(143, 122, 102, .35);
+      touch-action: manipulation;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: #e08a3c; }
+    .hud .btn { align-self: stretch; }
+
+    /* 棋盘：16 个底格 + 绝对定位方块，坐标全部由 CSS 变量 --x/--y 经 calc 换算，天然响应式 */
+    .board {
+      --gap: 10px;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: #b9ab9c;
+      border-radius: 14px;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .cellbg, .tile {
+      --tw: calc((100% - 5 * var(--gap)) / 4);
+      position: absolute;
+      width: var(--tw);
+      height: var(--tw);
+      border-radius: 9px;
+      left: calc(var(--gap) + var(--x) * (var(--tw) + var(--gap)));
+      top:  calc(var(--gap) + var(--y) * (var(--tw) + var(--gap)));
+    }
+    .cellbg { background: rgba(255, 250, 240, .38); }
+    .tile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      z-index: 1;
+      transition: left .13s ease-in-out, top .13s ease-in-out;
+    }
+    .len1 { font-size: calc(var(--tw) * .52); }
+    .len2 { font-size: calc(var(--tw) * .46); }
+    .len3 { font-size: calc(var(--tw) * .36); }
+    .len4 { font-size: calc(var(--tw) * .27); }
+
+    /* 经典配色 */
+    .v2    { background: #eee4da; color: #776e65; }
+    .v4    { background: #ede0c8; color: #776e65; }
+    .v8    { background: #f2b179; color: #fff9f0; }
+    .v16   { background: #f59563; color: #fff9f0; }
+    .v32   { background: #f67c5f; color: #fff9f0; }
+    .v64   { background: #f65e3b; color: #fff9f0; }
+    .v128  { background: #edcf72; color: #fff9f0; }
+    .v256  { background: #edcc61; color: #fff9f0; }
+    .v512  { background: #edc850; color: #fff9f0; }
+    .v1024 { background: #edc53f; color: #fff9f0; }
+    .v2048 { background: #edc22e; color: #fff9f0; box-shadow: 0 0 18px rgba(237, 194, 46, .55); }
+    .vx    { background: #3c3a32; color: #fff9f0; }
+
+    /* 出现 / 合并动画 */
+    .tile.appear { animation: appear .18s ease .05s backwards; }
+    @keyframes appear { from { transform: scale(0); opacity: 0; } }
+    .tile.pop { animation: pop .18s ease; }
+    @keyframes pop { 50% { transform: scale(1.22); } }
+
+    /* 胜负弹层（hidden + 同步回流 + open，保证过渡生效） */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      border-radius: 14px;
+      background: rgba(253, 249, 242, .86);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .ov-title { font-size: 34px; font-weight: 800; color: #7b6f63; }
+    .overlay.win .ov-title { color: #d98b28; }
+    .ov-sub { font-size: 14px; color: #8d8175; padding: 0 16px; }
+    .ov-btns { display: flex; gap: 10px; margin-top: 8px; }
+    .ov-btns .btn { padding: 10px 18px; }
+
+    .hint { margin-top: 14px; text-align: center; font-size: 13px; color: #ab9c88; }
+    footer { margin-top: 28px; text-align: center; font-size: 12px; color: #bfb2a0; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>2048</h1>
+      <p class="sub">滑动合并相同数字，目标 2048</p>
+    </header>
+
+    <section class="hud">
+      <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
+      <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
+      <button class="btn" id="newBtn" type="button">新游戏</button>
+    </section>
+
+    <div class="board" id="board">
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle"></p>
+        <p class="ov-sub" id="ovSub"></p>
+        <div class="ov-btns">
+          <button class="btn" id="ovContinue" type="button" hidden>继续挑战</button>
+          <button class="btn primary" id="ovRestart" type="button">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint">方向键 / WASD / 触屏滑动 · 合并出 2048 即胜利，可继续冲击更高分</p>
+    <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+  </main>
+
+  <script>
+  'use strict';
+  /* ================= 2048 主逻辑（零依赖，纯本地运行） ================= */
+  const SIZE = 4;          // 棋盘 4×4
+  const MOVE_MS = 140;     // 滑动动画时长，与 CSS transition 对应
+  const WIN_VALUE = 2048;  // 胜利目标
+
+  const board = document.getElementById('board');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const scoreStat = document.getElementById('scoreStat');
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const ovSub = document.getElementById('ovSub');
+  const ovContinue = document.getElementById('ovContinue');
+  const ovRestart = document.getElementById('ovRestart');
+
+  let grid = [];           // grid[行][列] = 方块对象 或 null
+  let score = 0;
+  let best = loadBest();
+  let won = false;         // 是否已合成过 2048（避免重复弹胜利窗）
+  let over = false;        // 是否已无路可走
+  let paused = false;      // 胜利弹层挂起中
+  let lock = false;        // 滑动动画期间锁输入
+
+  bestEl.textContent = best;
+
+  /* ---------- 本地存储（读写都兜底，隐私模式不报错） ---------- */
+  function loadBest() {
+    try { return parseInt(localStorage.getItem('2048.best'), 10) || 0; }
+    catch (e) { return 0; }
+  }
+  function saveBest() {
+    try { localStorage.setItem('2048.best', String(best)); }
+    catch (e) { /* 写入失败时静默忽略 */ }
+  }
+
+  /* ---------- 方块构建与定位 ---------- */
+  // 位置全部走 CSS 变量 --x（列）/ --y（行），由 calc 换算成 left/top
+  function setPos(t) {
+    t.el.style.setProperty('--x', t.c);
+    t.el.style.setProperty('--y', t.r);
+  }
+  function tileClass(v, extra) {
+    const cls = 'tile v' + (v > WIN_VALUE ? 'x' : v) + ' len' + Math.min(String(v).length, 4);
+    return extra ? cls + ' ' + extra : cls;
+  }
+  function createTile(r, c, v, appear) {
+    const el = document.createElement('div');
+    el.className = tileClass(v, appear ? 'appear' : '');
+    el.textContent = v;
+    const t = { r: r, c: c, v: v, el: el, merging: false };
+    setPos(t);            // 先定位再入 DOM，避免从默认位置产生过渡
+    grid[r][c] = t;
+    board.appendChild(el);
+    return t;
+  }
+  function emptyGrid() {
+    return Array.from({ length: SIZE }, function () { return Array(SIZE).fill(null); });
+  }
+  function randomEmptyCell() {
+    const list = [];
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) if (!grid[r][c]) list.push([r, c]);
+    }
+    return list.length ? list[Math.floor(Math.random() * list.length)] : null;
+  }
+  function spawnTile() {
+    const p = randomEmptyCell();
+    if (p) createTile(p[0], p[1], Math.random() < 0.9 ? 2 : 4, true);
+  }
+
+  /* ---------- 移动与合并 ---------- */
+  const VEC = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
+
+  function move(dir) {
+    if (lock || over || paused) return;
+    const dr = VEC[dir][0], dc = VEC[dir][1];
+    const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
+    if (dr === 1) rows.reverse();     // 从靠边一侧开始遍历，保证合并次序正确
+    if (dc === 1) cols.reverse();
+
+    let moved = false;
+    const merges = [];                // [滑入的块, 被合入的块]
+    for (const r of rows) {
+      for (const c of cols) {
+        const t = grid[r][c];
+        if (!t) continue;
+        t.merging = false;
+        // 一路滑到最远的空格
+        let nr = r, nc = c;
+        while (true) {
+          const ar = nr + dr, ac = nc + dc;
+          if (ar < 0 || ar >= SIZE || ac < 0 || ac >= SIZE || grid[ar][ac]) break;
+          nr = ar; nc = ac;
+        }
+        const ar = nr + dr, ac = nc + dc;
+        const target = (ar >= 0 && ar < SIZE && ac >= 0 && ac < SIZE) ? grid[ar][ac] : null;
+        if (target && target.v === t.v && !target.merging) {
+          // 可合并：t 滑到 target 上，动画结束后二合一
+          grid[r][c] = null;
+          t.r = ar; t.c = ac;
+          setPos(t);
+          target.merging = true;
+          merges.push([t, target]);
+          moved = true;
+        } else if (nr !== r || nc !== c) {
+          // 仅滑动
+          grid[r][c] = null;
+          grid[nr][nc] = t;
+          t.r = nr; t.c = nc;
+          setPos(t);
+          moved = true;
+        }
+      }
+    }
+    if (!moved) return;
+
+    lock = true;
+    window.setTimeout(function () {
+      // 应用合并结果：移除被吞的块，留下的一方翻倍并弹一下
+      for (const pair of merges) {
+        const gone = pair[0], stay = pair[1];
+        gone.el.remove();
+        stay.v *= 2;
+        stay.el.className = tileClass(stay.v, 'pop');
+        stay.el.textContent = stay.v;
+        addScore(stay.v);
+        if (stay.v >= WIN_VALUE && !won) {
+          won = true;
+          paused = true;
+          showOverlay('win');
+        }
+      }
+      spawnTile();
+      lock = false;
+      checkOver();
+    }, MOVE_MS);
+  }
+
+  function addScore(n) {
+    score += n;
+    scoreEl.textContent = score;
+    scoreStat.classList.remove('bump');
+    void scoreStat.offsetWidth;
+    scoreStat.classList.add('bump');
+    if (score > best) {
+      best = score;
+      bestEl.textContent = best;
+      saveBest();
+    }
+  }
+
+  function checkOver() {
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const t = grid[r][c];
+        if (!t) return;                                                          // 还有空格
+        if (c < SIZE - 1 && grid[r][c + 1] && grid[r][c + 1].v === t.v) return;  // 横向可合
+        if (r < SIZE - 1 && grid[r + 1][c] && grid[r + 1][c].v === t.v) return;  // 纵向可合
+      }
+    }
+    over = true;
+    showOverlay('lose');
+  }
+
+  /* ---------- 弹层 ---------- */
+  function showOverlay(kind) {
+    if (kind === 'win') {
+      ovTitle.textContent = '胜利！';
+      ovSub.textContent = '你合成出了 2048，可以继续挑战更高分数';
+      ovContinue.hidden = false;
+      overlay.classList.add('win');
+    } else {
+      ovTitle.textContent = '游戏结束';
+      ovSub.textContent = '最终分数 ' + score + (score > 0 && score >= best ? ' · 新纪录！' : '');
+      ovContinue.hidden = true;
+      overlay.classList.remove('win');
+    }
+    overlay.hidden = false;
+    void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+    overlay.classList.add('open');
+  }
+  function hideOverlay() {
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+  }
+
+  /* ---------- 开局 ---------- */
+  function newGame() {
+    board.querySelectorAll('.tile').forEach(function (el) { el.remove(); });
+    grid = emptyGrid();
+    score = 0;
+    scoreEl.textContent = '0';
+    won = false;
+    over = false;
+    paused = false;
+    lock = false;
+    hideOverlay();
+    spawnTile();
+    spawnTile();
+  }
+
+  /* ---------- 输入：键盘 ---------- */
+  const KEYMAP = {
+    ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+    a: 'left', d: 'right', w: 'up', s: 'down',
+    A: 'left', D: 'right', W: 'up', S: 'down'
+  };
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const dir = KEYMAP[e.key];
+    if (!dir) return;
+    e.preventDefault();       // 阻止方向键滚动页面
+    move(dir);
+  });
+
+  /* ---------- 输入：触屏滑动 ---------- */
+  let touchStart = null;
+  board.addEventListener('touchstart', function (e) {
+    touchStart = e.changedTouches[0];
+  }, { passive: true });
+  board.addEventListener('touchmove', function (e) {
+    e.preventDefault();       // 棋盘上滑动不滚动页面（配合 touch-action: none）
+  }, { passive: false });
+  board.addEventListener('touchend', function (e) {
+    if (!touchStart) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.clientX;
+    const dy = t.clientY - touchStart.clientY;
+    touchStart = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;   // 位移太短不算滑动
+    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  }, { passive: true });
+
+  /* ---------- 按钮 ---------- */
+  document.getElementById('newBtn').addEventListener('click', newGame);
+  ovRestart.addEventListener('click', newGame);
+  ovContinue.addEventListener('click', function () {
+    paused = false;
+    hideOverlay();
+  });
+
+  /* ---------- 初始化：先铺 16 个底格，再开局 ---------- */
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const bg = document.createElement('div');
+      bg.className = 'cellbg';
+      bg.style.setProperty('--x', c);
+      bg.style.setProperty('--y', r);
+      board.appendChild(bg);
+    }
+  }
+  newGame();
+  </script>
+</body>
+</html>

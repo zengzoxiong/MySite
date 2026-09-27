@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恐龙快跑 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dino-run/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368}
+.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
+.hud .flash{animation:pop .5s}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
+.stage{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
+[hidden]{display:none!important}
+.overlay h2{font-size:24px;margin-bottom:10px;color:#202124}
+.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
+.touch-btns{display:none;gap:12px;margin-top:12px}
+.touch-btns button{flex:1;padding:14px;font-size:16px}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>恐龙快跑</h1>
+    <div class="hud">
+      <span>分数 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <button id="dayBtn" class="btn-plain" type="button">夜间</button>
+    </div>
+  </header>
+  <div class="stage">
+    <canvas id="cv" width="900" height="260"></canvas>
+    <div class="overlay" id="ovStart">
+      <div>
+        <h2>恐龙快跑</h2>
+        <p>跳过仙人掌，下蹲躲开低飞的翼龙<br>越跑越快，每 400 分昼夜交替一次</p>
+        <button id="btnStart" type="button">开始游戏</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovOver" hidden>
+      <div>
+        <h2 id="overTitle">游戏结束</h2>
+        <p id="overInfo"></p>
+        <button id="btnRestart" type="button">再来一局</button>
+        <p>按空格也可以重开</p>
+      </div>
+    </div>
+    <div class="overlay" id="ovPause" hidden>
+      <div>
+        <h2>已暂停</h2>
+        <button id="btnResume" type="button">继续游戏</button>
+      </div>
+    </div>
+  </div>
+  <div class="touch-btns" id="touchBtns">
+    <button id="btnDuck" class="btn-plain" type="button">下蹲（按住）</button>
+    <button id="btnJump" type="button">跳跃</button>
+  </div>
+  <p class="tips">键盘：空格 或 上方向键 跳跃，下方向键 下蹲（空中按下加速落地）<br>触屏：点「跳跃」或点画面跳起，按住「下蹲」贴地滑行</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<script>
+(() => {
+'use strict';
+// ---------- 画布与常量（逻辑分辨率固定 900x260，CSS 缩放适配） ----------
+const W=900, H=260, GROUND=222, DINO_X=62;
+const GRAVITY=0.55, JUMP_V=-12, SPEED0=6, SPEED_MAX=13;
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d');
+const scoreEl=$('score'), bestEl=$('best'), dayBtn=$('dayBtn');
+const ovStart=$('ovStart'), ovOver=$('ovOver'), ovPause=$('ovPause');
+const overTitle=$('overTitle'), overInfo=$('overInfo');
+
+// ---------- 昼夜两套配色（rgb 数组，便于插值过渡） ----------
+const DAY={bg:[247,248,250],ink:[86,90,96],cloud:[203,208,216],ground:[128,133,141]};
+const NIGHT={bg:[22,24,30],ink:[202,207,216],cloud:[54,58,68],ground:[106,112,124]};
+const mix=(a,b,t)=>'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';
+
+// ---------- 像素点阵（'X' 为实心；恐龙头朝右） ----------
+const BODY=[
+'.............XXXXXXXX.',
+'............XXXXXXXXXX',
+'............XX.XXXXXXX',
+'............XXXXXXXXXX',
+'............XXXXXXXXXX',
+'............XXXXXXXXXX',
+'............XXXXXXX...',
+'X...........XXXXXX....',
+'XX..........XXXXXXX...',
+'XXX.......XXXXXXXXXXXX',
+'XXXX....XXXXXXXXXXXXX.',
+'XXXXXXXXXXXXXXXXXXXX..',
+'.XXXXXXXXXXXXXXXXXXX..',
+'..XXXXXXXXXXXXXXXX....',
+'...XXXXXXXXXXXXXX.....',
+'....XXXXXXXXXXX.......',
+'.....XXXXXXXX.........',
+'......XXXXXX..........'
+];
+const LEGS_STAND=['......XXX..XXX........','......XX....XX........','......XX....XX........','......X.....X.........','......XX....XX........','.....XXX...XXX........'];
+const LEGS_RUN1=['......XXX..XXX........','......XX....XX........','......XX..............','......X...............','......XX..............','.....XXX..............'];
+const LEGS_RUN2=['......XXX..XXX........','......XX....XX........','............XX........','............X.........','............XX........','............XXX.......'];
+const DEAD=BODY.map((r,i)=>(i===2||i===3)?'............X..XXXXXXX':r);  // 死亡：眼睛睁大
+const FRAME={
+  stand:BODY.concat(LEGS_STAND),
+  run1:BODY.concat(LEGS_RUN1),
+  run2:BODY.concat(LEGS_RUN2),
+  dead:DEAD.concat(LEGS_STAND)
+};
+// 下蹲形态（更矮更长，头前伸贴地）
+const DUCK1=[
+'..................XXXXXXXXX.....',
+'.................XXX.XXXXXXX....',
+'.................XXXXXXXXXXX....',
+'.................XXXXXXXXXXX....',
+'.................XXXXXXX........',
+'X................XXXXXXXXXX.....',
+'XX...............XXXXXXXX.......',
+'XXX..XXXXXXXXXXXXXXXXXXXX.......',
+'XXXXXXXXXXXXXXXXXXXXXXXX........',
+'.XXXXXXXXXXXXXXXXXXXXXXX........',
+'..XXXXXXXXXXXXXXXXXXXXX.........',
+'...XXXXX..XXXXXXXXX.............',
+'...XXX.....XXX..................',
+'...XX......XX...................',
+'..XXX.....XXX...................'
+];
+const DUCK2=DUCK1.slice(0,11).concat([
+'...XXXXX..XXXXXXXXX.............',
+'...XXX......XXX.................',
+'...XX.......XX..................',
+'..XXX......XXX..................'
+]);
+// 翼龙两帧（扇翅）
+const BIRD_UP=[
+'............XX......',
+'............XXX.....',
+'............XXXX....',
+'............XXXXX...',
+'XXXX........XXXXXX..',
+'XXXXXX....XXXXXXXXXX',
+'...XXXXXXXXXXXXXXXXX',
+'.....XXXXXXXXXXXXXXX',
+'.......XXXXXXXXXX...',
+'.........XXXXX......'
+];
+const BIRD_DOWN=[
+'....................',
+'XXXX................',
+'XXXXXX....XXXXXXXXXX',
+'...XXXXXXXXXXXXXXXXX',
+'.....XXXXXXXXXXXXXXX',
+'.......XXXXXXXXXX...',
+'.........XXXXX......',
+'..........XXXX......',
+'..........XXX.......',
+'..........XX........'
+];
+
+// ---------- 状态 ----------
+let state='ready';   // ready / playing / paused / over
+let dino, obs, clouds, speed, dist, score, distNext;
+let nightAmt=0, groundOff=0, runT=0, flapT=0, overAt=0;
+let manualNight=null, lastAuto=false, shownScore=-1, downHeld=false, fastFall=false;
+let best=loadBest(); bestEl.textContent=best;
+function loadBest(){try{return +localStorage.getItem('dinoRunBest')||0}catch(e){return 0}}
+function saveBest(){try{localStorage.setItem('dinoRunBest',best)}catch(e){}}
+
+function reset(){
+  dino={y:GROUND-48,vy:0,onGround:true,duck:false};
+  obs=[]; speed=SPEED0; dist=0; score=0; distNext=420; shownScore=-1;
+  clouds=[{x:140,y:58,v:.5},{x:430,y:34,v:.9},{x:700,y:76,v:.3}];
+}
+function setPanel(){ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';}
+function start(){reset();state='playing';setPanel();}
+function pause(){if(state!=='playing')return;state='paused';setPanel();}
+function resume(){if(state!=='paused')return;state='playing';setPanel();}
+function gameOver(){
+  state='over';overAt=performance.now();
+  const s=Math.floor(score), isNew=s>best&&s>0;
+  if(isNew){best=s;saveBest();bestEl.textContent=best;}
+  overTitle.textContent=isNew?'新纪录！':'游戏结束';
+  overInfo.textContent='本局得分 '+s+' · 历史最高 '+best;
+  setPanel();
+}
+
+// ---------- 障碍生成 ----------
+function spawn(){
+  if(score>240&&speed>7&&Math.random()<0.32){   // 速度起来后才出现翼龙
+    const tops=[180,158,130];                   // 三条航线：高档跑过、中档下蹲、低档必须跳
+    obs.push({type:'bird',x:W+30,top:tops[Math.random()*3|0],w:40,h:20,sp:.4+Math.random()*.6});
+  }else{
+    const big=Math.random()<0.4, n=1+(Math.random()*3|0), cw=big?16:12;
+    obs.push({type:'cactus',x:W+30,w:n*cw+(n-1)*6,h:big?50:34,cw:cw,n:n,sp:0});
+  }
+  distNext=300+speed*22+Math.random()*280;      // 间隔随速度拉大，保证可跳
+}
+
+// ---------- 碰撞 ----------
+const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+function dinoBox(){
+  return dino.duck?{x:DINO_X+8,y:GROUND-27,w:48,h:24}:{x:DINO_X+6,y:dino.y+6,w:32,h:40};
+}
+function obsBox(o){
+  return o.type==='bird'?{x:o.x+4,y:o.top+3,w:32,h:14}:{x:o.x+2,y:GROUND-o.h+2,w:o.w-4,h:o.h-2};
+}
+
+// ---------- 逻辑更新（k 为相对 60fps 的时间系数） ----------
+function update(k){
+  speed=Math.min(SPEED_MAX,SPEED0+dist*0.00058);   // 速度渐进加快
+  dist+=speed*k; score=dist*0.032;
+  const si=Math.floor(score);
+  if(si!==shownScore){                              // 每满 100 分闪烁提示
+    if(si>0&&Math.floor(si/100)>Math.floor(shownScore/100)){scoreEl.classList.remove('flash');void scoreEl.offsetWidth;scoreEl.classList.add('flash');}
+    shownScore=si; scoreEl.textContent=si;
+  }
+  // 昼夜：每 400 分自动交替，按钮可手动切换
+  const auto=Math.floor(score/400)%2===1;
+  if(auto!==lastAuto){lastAuto=auto;if(manualNight!==null)manualNight=auto;}
+  const target=manualNight===null?auto:manualNight;
+  nightAmt+=(target-nightAmt)*Math.min(1,.05*k);
+  if(Math.abs(target-nightAmt)<.002)nightAmt=target;
+  const want=nightAmt>.5?'白昼':'夜间';
+  if(dayBtn.textContent!==want)dayBtn.textContent=want;
+  // 恐龙物理
+  if(!dino.onGround){
+    dino.vy+=GRAVITY*(fastFall?2.6:1)*k;
+    dino.y+=dino.vy*k;
+    if(dino.y>=GROUND-48){dino.y=GROUND-48;dino.vy=0;dino.onGround=true;if(downHeld)dino.duck=true;fastFall=false;}
+  }
+  if(dino.onGround)runT+=k;
+  // 云与地面滚动
+  for(const c of clouds){c.x-=(speed*.16+c.v)*k;if(c.x<-60){c.x=W+Math.random()*140;c.y=26+Math.random()*58;}}
+  groundOff=(groundOff+speed*k)%28;
+  // 障碍推进与生成
+  distNext-=speed*k;
+  if(distNext<=0)spawn();
+  flapT+=k;
+  for(let i=obs.length-1;i>=0;i--){const o=obs[i];o.x-=(speed+o.sp)*k;if(o.x+o.w<-40)obs.splice(i,1);}
+  const db=dinoBox();
+  for(const o of obs){if(hit(db,obsBox(o))){gameOver();return;}}
+}
+
+// ---------- 绘制 ----------
+function drawSprite(g,x,y,s,color){
+  ctx.fillStyle=color;
+  for(let r=0;r<g.length;r++){const row=g[r];
+    for(let c=0;c<row.length;c++)if(row[c]==='X')ctx.fillRect(x+c*s,y+r*s,s,s);
+  }
+}
+function drawCloud(c,color){
+  ctx.fillStyle=color;ctx.beginPath();
+  ctx.arc(c.x,c.y,9,0,6.3);ctx.arc(c.x+12,c.y-5,12,0,6.3);ctx.arc(c.x+25,c.y,9,0,6.3);ctx.fill();
+}
+function drawCactus(o,color){
+  ctx.fillStyle=color;
+  for(let i=0;i<o.n;i++){
+    const x=o.x+i*(o.cw+6),top=GROUND-o.h;
+    ctx.fillRect(x,top,o.cw,o.h);
+    const ay=top+o.h*.42,aw=o.cw*.5;
+    ctx.fillRect(x-aw,ay,aw,5);ctx.fillRect(x-aw,ay-11,5,14);
+    ctx.fillRect(x+o.cw-2,ay+7,aw,5);ctx.fillRect(x+o.cw-2+aw-5,ay-4,5,14);
+  }
+}
+function draw(){
+  const t=nightAmt,col={};
+  for(const key in DAY)col[key]=mix(DAY[key],NIGHT[key],t);
+  ctx.fillStyle=col.bg;ctx.fillRect(0,0,W,H);
+  for(const c of clouds)drawCloud(c,col.cloud);
+  ctx.fillStyle=col.ground;
+  ctx.fillRect(0,GROUND,W,2);
+  for(let x=-groundOff;x<W;x+=28)ctx.fillRect(x,GROUND+9,14,3);
+  for(const o of obs){
+    if(o.type==='cactus')drawCactus(o,col.ink);
+    else drawSprite((flapT/10|0)%2?BIRD_DOWN:BIRD_UP,o.x,o.top,2,col.ink);
+  }
+  let g;
+  if(state==='over')g=FRAME.dead;
+  else if(dino.duck)g=(runT/8|0)%2?DUCK2:DUCK1;
+  else if(!dino.onGround)g=FRAME.stand;
+  else g=(runT/6|0)%2?FRAME.run2:FRAME.run1;
+  drawSprite(g,DINO_X,dino.duck?GROUND-30:dino.y,2,col.ink);
+}
+
+// ---------- 输入 ----------
+function primary(){          // 空格 / 点击的统一行为：开始、跳跃、重开、继续
+  if(state==='ready')start();
+  else if(state==='playing'&&dino.onGround){dino.vy=JUMP_V;dino.onGround=false;dino.duck=false;fastFall=false;}
+  else if(state==='over'&&performance.now()-overAt>500)start();
+  else if(state==='paused')resume();
+}
+function pressDown(){        // 下蹲按下：地面变蹲，空中加速落
+  if(state!=='playing')return;
+  downHeld=true;
+  if(dino.onGround)dino.duck=true;else fastFall=true;
+}
+function releaseDown(){downHeld=false;dino.duck=false;fastFall=false;}
+addEventListener('keydown',e=>{
+  if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();primary();}
+  else if(e.code==='ArrowDown'){e.preventDefault();pressDown();}
+  else if(e.code==='KeyP'){state==='playing'?pause():resume();}
+});
+addEventListener('keyup',e=>{if(e.code==='ArrowDown')releaseDown();});
+cv.addEventListener('mousedown',primary);
+ovStart.addEventListener('click',start);
+ovOver.addEventListener('click',()=>{if(performance.now()-overAt>500)start();});
+ovPause.addEventListener('click',resume);
+$('btnStart').addEventListener('click',start);
+$('btnRestart').addEventListener('click',start);
+$('btnResume').addEventListener('click',resume);
+dayBtn.addEventListener('click',()=>{manualNight=nightAmt>.5?0:1;});
+// 触屏：画面点按跳，另给两颗大按钮（仅触屏设备显示）
+const btnJump=$('btnJump'), btnDuck=$('btnDuck');
+if('ontouchstart' in window||navigator.maxTouchPoints>0)$('touchBtns').style.display='flex';
+btnJump.addEventListener('touchstart',e=>{e.preventDefault();primary();},{passive:false});
+btnDuck.addEventListener('touchstart',e=>{e.preventDefault();pressDown();},{passive:false});
+btnDuck.addEventListener('touchend',e=>{e.preventDefault();releaseDown();},{passive:false});
+
+// 切后台自动暂停，防止回来时跳帧撞死
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause();});
+
+// ---------- 主循环 ----------
+let last=performance.now();
+function loop(t){
+  const k=Math.min(t-last,50)/16.667;last=t;
+  if(state==='playing')update(k);
+  draw();
+  requestAnimationFrame(loop);
+}
+reset();setPanel();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

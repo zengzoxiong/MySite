@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打砖块 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/breakout/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368;flex-wrap:wrap}
+.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
+.lives{display:flex;align-items:center;gap:5px}
+.life{width:10px;height:10px;border-radius:50%;background:#e03131;display:inline-block}
+.life.lost{background:#d9dce1}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
+.stage{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
+[hidden]{display:none!important}
+.overlay h2{font-size:24px;margin-bottom:10px;color:#202124}
+.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>打砖块</h1>
+    <div class="hud">
+      <span>分数 <b id="score">0</b></span>
+      <span>关卡 <b id="level">1</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <span id="lives" class="lives"></span>
+      <button id="pauseBtn" class="btn-plain" type="button">暂停</button>
+    </div>
+  </header>
+  <div class="stage">
+    <canvas id="cv" width="640" height="480"></canvas>
+    <div class="overlay" id="ovStart">
+      <div>
+        <h2>打砖块</h2>
+        <p>移动挡板接住小球，打光全部砖块进入下一关<br>球碰到挡板的位置不同，反弹角度也不同<br>共 3 条命，越往后球速越快</p>
+        <button id="btnStart" type="button">开始游戏</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovOver" hidden>
+      <div>
+        <h2>游戏结束</h2>
+        <p id="overInfo"></p>
+        <button id="btnRestart" type="button">再来一局</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovPause" hidden>
+      <div>
+        <h2>已暂停</h2>
+        <button id="btnResume" type="button">继续游戏</button>
+      </div>
+    </div>
+  </div>
+  <p class="tips">键盘：左右方向键 移动挡板，空格 发射小球，P 暂停<br>鼠标：移动控制挡板，点击发射 · 触屏：按住拖动挡板，轻点发射</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<script>
+(() => {
+'use strict';
+// ---------- 画布与常量（逻辑分辨率 640x480，CSS 缩放适配） ----------
+const W=640, H=480, COLS=8, ROWS=6, BW=70, BH=20, GAP=6, TOP=48;
+const LEFT=(W-(COLS*BW+(COLS-1)*GAP))/2;
+const COLORS=['#e03131','#e8590c','#f08c00','#2f9e44','#1971c2','#7048e8'];
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d');
+const scoreEl=$('score'), bestEl=$('best'), levelEl=$('level'), livesEl=$('lives');
+const ovStart=$('ovStart'), ovOver=$('ovOver'), ovPause=$('ovPause'), overInfo=$('overInfo');
+
+// ---------- 最高分存取 ----------
+let best=0;
+try{best=+localStorage.getItem('breakoutBest')||0}catch(e){}
+function saveBest(v){try{localStorage.setItem('breakoutBest',v)}catch(e){}}
+bestEl.textContent=best;
+
+// ---------- 状态 ----------
+let state='ready';   // ready / playing / paused / over
+let bricks, paddle, ball, lives, level, score, keys, msg, shownScore;
+const speedOf=()=>Math.min(7.6,4.6+(level-1)*.55);   // 每关提速
+function buildBricks(){
+  bricks=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    bricks.push({x:LEFT+c*(BW+GAP),y:TOP+r*(BH+GAP),row:r,alive:true});
+}
+function resetBall(){ball={x:W/2,y:H-60,vx:0,vy:0,r:7,stuck:true};}
+function resetGame(){
+  level=1;lives=3;score=0;keys={};msg=null;shownScore=-1;
+  paddle={x:W/2-46,y:H-36,w:92,h:14};
+  buildBricks();resetBall();renderHud();
+}
+function renderHud(){
+  scoreEl.textContent=Math.floor(score);levelEl.textContent=level;
+  livesEl.innerHTML='';
+  for(let i=0;i<3;i++){const d=document.createElement('i');d.className='life'+(i<lives?'':' lost');livesEl.appendChild(d);}
+}
+function setPanel(){ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';}
+function start(){resetGame();state='playing';setPanel();}
+function pause(){if(state!=='playing')return;state='paused';setPanel();}
+function resume(){if(state!=='paused')return;state='playing';setPanel();}
+function gameOver(){
+  state='over';
+  const s=Math.floor(score), isNew=s>best&&s>0;
+  if(isNew){best=s;saveBest(s);bestEl.textContent=best;}
+  overInfo.textContent='本局得分 '+s+' · 到达第 '+level+' 关 · '+(isNew?'新纪录！':'历史最高 '+best);
+  setPanel();
+}
+function launch(){
+  if(state!=='playing'||!ball.stuck)return;
+  const a=Math.random()*.7-.35, v=speedOf();   // 随机小角度发射，保证向上
+  ball.vx=Math.sin(a)*v;ball.vy=-Math.cos(a)*v;ball.stuck=false;
+}
+function levelUp(){
+  level++;buildBricks();resetBall();renderHud();
+  msg={text:'第 '+level+' 关，球速提升',t:110};   // 画布居中浮字，约 1.8 秒
+}
+function loseLife(){
+  lives--;renderHud();
+  if(lives<=0){gameOver();return;}
+  resetBall();
+}
+
+// ---------- 物理更新（k 为相对 60fps 的时间系数） ----------
+function update(k){
+  if(keys.l)paddle.x-=8.5*k;
+  if(keys.r)paddle.x+=8.5*k;
+  paddle.x=Math.max(8,Math.min(W-8-paddle.w,paddle.x));
+  if(ball.stuck){ball.x=paddle.x+paddle.w/2;ball.y=paddle.y-ball.r-1;}
+  else{
+    const sp=Math.hypot(ball.vx,ball.vy),steps=Math.max(1,Math.ceil(sp*k/6));
+    for(let i=0;i<steps&&state==='playing';i++)moveBall(k/steps);   // 分子步推进，防高速穿砖
+  }
+  if(msg){msg.t-=k;if(msg.t<=0)msg=null;}
+  const si=Math.floor(score);
+  if(si!==shownScore){shownScore=si;scoreEl.textContent=si;}
+}
+function moveBall(k){
+  const r=ball.r;
+  ball.x+=ball.vx*k;ball.y+=ball.vy*k;
+  // 墙壁反弹
+  if(ball.x<r){ball.x=r;ball.vx=Math.abs(ball.vx);}
+  if(ball.x>W-r){ball.x=W-r;ball.vx=-Math.abs(ball.vx);}
+  if(ball.y<r){ball.y=r;ball.vy=Math.abs(ball.vy);}
+  // 挡板反弹：角度随击中位置偏移（边角更斜，中心更直）
+  if(ball.vy>0&&ball.y+r>=paddle.y&&ball.y-r<=paddle.y+paddle.h&&ball.x>paddle.x-r&&ball.x<paddle.x+paddle.w+r){
+    const hitPos=Math.max(-1,Math.min(1,(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2)));
+    const v=Math.hypot(ball.vx,ball.vy)||speedOf();
+    ball.vx=Math.sin(hitPos*1.05)*v;
+    ball.vy=-Math.cos(hitPos*1.05)*v;
+    ball.y=paddle.y-r-.5;
+  }
+  // 砖块：按穿透更深的轴决定反弹方向
+  for(const b of bricks){
+    if(!b.alive)continue;
+    if(ball.x+r>b.x&&ball.x-r<b.x+BW&&ball.y+r>b.y&&ball.y-r<b.y+BH){
+      b.alive=false;score+=(ROWS-b.row)*10;
+      const ox=Math.min(ball.x+r-b.x,b.x+BW-(ball.x-r));
+      const oy=Math.min(ball.y+r-b.y,b.y+BH-(ball.y-r));
+      if(ox<oy)ball.vx=-ball.vx;else ball.vy=-ball.vy;
+      if(bricks.every(x=>!x.alive))levelUp();
+      break;
+    }
+  }
+  // 掉出底部
+  if(ball.y-r>H)loseLife();
+}
+
+// ---------- 绘制 ----------
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.fill();
+}
+function draw(){
+  ctx.fillStyle='#f7f9fb';ctx.fillRect(0,0,W,H);
+  for(const b of bricks){
+    if(!b.alive)continue;
+    ctx.fillStyle=COLORS[b.row];
+    roundRect(b.x,b.y,BW,BH,5);
+  }
+  ctx.fillStyle='#343a40';
+  roundRect(paddle.x,paddle.y,paddle.w,paddle.h,7);
+  ctx.fillStyle='#1a73e8';
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,6.3);ctx.fill();
+  if(msg){
+    ctx.fillStyle='rgba(32,33,36,.55)';
+    ctx.font='bold 26px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(msg.text,W/2,H/2);
+    ctx.textAlign='left';
+  }
+}
+
+// ---------- 输入：键盘 ----------
+addEventListener('keydown',e=>{
+  if(e.code==='ArrowLeft'||e.code==='KeyA'){keys.l=true;e.preventDefault();}
+  else if(e.code==='ArrowRight'||e.code==='KeyD'){keys.r=true;e.preventDefault();}
+  else if(e.code==='Space'||e.code==='ArrowUp'){
+    e.preventDefault();
+    if(state==='ready')start();
+    else if(state==='playing')launch();
+    else if(state==='paused')resume();
+    else if(state==='over')start();
+  }else if(e.code==='KeyP'){state==='playing'?pause():resume();}
+});
+addEventListener('keyup',e=>{
+  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.l=false;
+  if(e.code==='ArrowRight'||e.code==='KeyD')keys.r=false;
+});
+
+// ---------- 输入：鼠标 / 触摸（坐标按显示缩放换算） ----------
+function gameX(clientX){
+  const r=cv.getBoundingClientRect();
+  return (clientX-r.left)*W/r.width;
+}
+cv.addEventListener('mousemove',e=>{if(state==='playing')paddle.x=gameX(e.clientX)-paddle.w/2;});
+cv.addEventListener('click',()=>{if(state==='playing')launch();});
+let tX=null;
+cv.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const t=e.touches[0];tX=t.clientX;
+  if(state==='playing')paddle.x=gameX(tX)-paddle.w/2;
+},{passive:false});
+cv.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(state==='playing')paddle.x=gameX(e.touches[0].clientX)-paddle.w/2;
+},{passive:false});
+cv.addEventListener('touchend',e=>{
+  e.preventDefault();
+  const t=e.changedTouches[0];
+  const moved=tX!==null&&Math.abs(t.clientX-tX)>12;   // 明显拖动算移挡板，轻点算发射
+  tX=null;
+  if(!moved&&state==='playing')launch();
+},{passive:false});
+
+// ---------- 面板按钮与暂停 ----------
+ovStart.addEventListener('click',start);
+ovOver.addEventListener('click',start);
+ovPause.addEventListener('click',resume);
+$('btnStart').addEventListener('click',start);
+$('btnRestart').addEventListener('click',start);
+$('btnResume').addEventListener('click',resume);
+$('pauseBtn').addEventListener('click',()=>{state==='playing'?pause():resume();});
+document.addEventListener('visibilitychange',()=>{   // 切后台自动暂停
+  if(document.hidden&&state==='playing')pause();
+});
+
+// ---------- 主循环 ----------
+let last=performance.now();
+function loop(t){
+  const k=Math.min(t-last,50)/16.667;last=t;   // 钳制大间隔，防跳帧暴走
+  if(state==='playing')update(k);
+  draw();
+  requestAnimationFrame(loop);
+}
+resetGame();setPanel();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

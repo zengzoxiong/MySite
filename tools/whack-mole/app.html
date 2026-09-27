@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打地鼠 - 拾光集</title>
+<meta name="description" content="打地鼠小游戏：30 秒限时挑战，点中冒头的地鼠得分、连击有加成，小心混进来的炸弹，最高分保存在本地。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/whack-mole/app.html">
+<style>
+:root { --primary:#2f9e44; --danger:#dc2626; --ink:#1f2430; --muted:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+button { font-family:inherit; }
+[hidden] { display:none !important; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:#f2f4f7; color:var(--ink); min-height:100vh;
+  display:flex; justify-content:center; padding:24px 14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap { width:100%; max-width:560px; }
+.head { text-align:center; margin-bottom:16px; }
+.head h1 { font-size:26px; letter-spacing:1px; }
+.head .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+.panel { background:#fff; border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(31,41,55,.08); }
+/* 计分栏 */
+.hud { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:center; font-size:14px; color:var(--muted); margin-bottom:14px; }
+.hud b { color:var(--ink); font-size:17px; margin-left:4px; font-variant-numeric:tabular-nums; }
+.hud .warn { color:var(--danger); }
+/* 草地舞台 */
+.stage { position:relative; background:linear-gradient(180deg,#cdeec3,#a9dc97); border-radius:14px; padding:12px; overflow:hidden; }
+.stage.shake { animation:shakeX .3s ease; }
+@keyframes shakeX {
+  0%,100% { transform:translateX(0); }
+  25% { transform:translateX(-6px); }
+  50% { transform:translateX(6px); }
+  75% { transform:translateX(-3px); }
+}
+.holes { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.hole { position:relative; height:96px; overflow:hidden; border-radius:12px; touch-action:manipulation; }
+.hole.up { cursor:pointer; }
+/* 洞口：深色椭圆，位于地鼠身后 */
+.mound { position:absolute; left:8%; right:8%; bottom:4px; height:22px; border-radius:50%;
+  background:radial-gradient(ellipse at center, #6b4a2f 0%, #573a24 60%, #4a301d 100%);
+  box-shadow:inset 0 4px 6px rgba(0,0,0,.45); }
+/* 地鼠 / 炸弹载体：藏起时整体沉到格子外，由 overflow hidden 裁剪 */
+.actor { position:absolute; left:8%; right:8%; top:0; bottom:0;
+  display:flex; align-items:flex-end; justify-content:center;
+  transform:translateY(103%); transition:transform .16s ease-out; pointer-events:none; }
+.hole.up .actor { transform:translateY(4%); }
+.actor svg { width:80%; display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+/* 命中飘分 */
+.float-txt { position:absolute; left:50%; top:14%; font-weight:700; font-size:18px;
+  pointer-events:none; z-index:5; animation:floatUp .7s ease-out forwards; }
+@keyframes floatUp {
+  from { opacity:1; transform:translate(-50%,0); }
+  to { opacity:0; transform:translate(-50%,-28px); }
+}
+/* 遮罩层：开局说明与结算共用 */
+.overlay { position:absolute; inset:0; background:rgba(255,255,255,.9); border-radius:14px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; text-align:center; padding:16px; z-index:10; }
+.overlay h2 { font-size:22px; }
+.ov-desc { color:var(--muted); font-size:13.5px; max-width:340px; line-height:1.6; }
+.ov-score { font-size:15px; }
+.ov-score b { font-size:22px; color:var(--primary); }
+.ov-best { color:var(--muted); font-size:13px; }
+.ov-new { color:#d97706; font-weight:700; font-size:14px; }
+.btn { border:0; border-radius:10px; padding:11px 26px; font-size:15px; cursor:pointer; }
+.btn.primary { background:var(--primary); color:#fff; }
+.btn.primary:active { transform:scale(.97); }
+.tip { color:#9aa3af; font-size:12.5px; margin-top:12px; text-align:center; }
+.foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
+@media (max-width:420px) {
+  .head h1 { font-size:22px; }
+  .hole { height:86px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>打地鼠</h1>
+    <p class="sub">30 秒限时挑战，手快有手慢无</p>
+  </header>
+  <section class="panel">
+    <div class="hud">
+      <span>得分 <b id="hudScore">0</b></span>
+      <span>连击 <b id="hudCombo">0</b></span>
+      <span>时间 <b id="hudTime">30</b></span>
+      <span>最高分 <b id="hudBest">0</b></span>
+    </div>
+    <div id="stage" class="stage">
+      <div id="holes" class="holes"></div>
+      <div id="overlay" class="overlay">
+        <div id="startView">
+          <h2>准备好了吗</h2>
+          <p class="ov-desc">点中冒头的地鼠得分，连击越高加成越多；地鼠越打越快；小心炸弹，点中扣 20 分并清空连击。</p>
+          <button id="btnStart" class="btn primary" type="button">开始游戏</button>
+          <p class="ov-best">最高分 <b id="ovBestStart">0</b></p>
+        </div>
+        <div id="endView" hidden>
+          <h2>时间到</h2>
+          <p id="endNew" class="ov-new" hidden>新纪录！</p>
+          <p class="ov-score">本局得分 <b id="endScore">0</b></p>
+          <p class="ov-best">最高分 <b id="endBest">0</b></p>
+          <button id="btnAgain" class="btn primary" type="button">再来一局</button>
+        </div>
+      </div>
+    </div>
+    <p class="tip">地鼠 +10 分起步，连击每层加 2 分（最多加 10）；只有炸弹会打断连击。</p>
+  </section>
+  <footer class="foot">拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+
+<script>
+'use strict';
+/* ================= 本地最高分读写（key 带工具 slug 前缀，异常静默） ================= */
+function loadNum(key) { try { const v = localStorage.getItem(key); return v === null ? 0 : (Number(v) || 0); } catch (e) { return 0; } }
+function saveNum(key, v) { try { localStorage.setItem(key, String(v)); } catch (e) { /* 隐私模式等场景写失败不阻断 */ } }
+const BEST_KEY = 'whack-mole-best';
+
+/* ================= 地鼠与炸弹的内联 SVG（不用 emoji） ================= */
+const MOLE_SVG =
+  '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+    '<circle cx="28" cy="24" r="12" fill="#8d6e63"/><circle cx="72" cy="24" r="12" fill="#8d6e63"/>' +
+    '<circle cx="28" cy="24" r="6" fill="#d7b899"/><circle cx="72" cy="24" r="6" fill="#d7b899"/>' +
+    '<ellipse cx="50" cy="58" rx="34" ry="38" fill="#a1887f"/>' +
+    '<ellipse cx="50" cy="70" rx="19" ry="15" fill="#e6c9a8"/>' +
+    '<circle cx="38" cy="48" r="5.5" fill="#3e2723"/><circle cx="62" cy="48" r="5.5" fill="#3e2723"/>' +
+    '<circle cx="39.8" cy="46.2" r="1.8" fill="#ffffff"/><circle cx="63.8" cy="46.2" r="1.8" fill="#ffffff"/>' +
+    '<ellipse cx="50" cy="62" rx="6" ry="4.5" fill="#5d4037"/>' +
+    '<g stroke="#5d4037" stroke-width="1.8" stroke-linecap="round">' +
+      '<line x1="30" y1="60" x2="42" y2="63"/><line x1="30" y1="68" x2="42" y2="67"/>' +
+      '<line x1="70" y1="60" x2="58" y2="63"/><line x1="70" y1="68" x2="58" y2="67"/>' +
+    '</g>' +
+    '<rect x="44" y="72" width="5.5" height="8" rx="1.5" fill="#ffffff"/><rect x="50.5" y="72" width="5.5" height="8" rx="1.5" fill="#ffffff"/>' +
+  '</svg>';
+const BOMB_SVG =
+  '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+    '<circle cx="48" cy="62" r="30" fill="#37474f"/>' +
+    '<ellipse cx="38" cy="52" rx="8" ry="5" fill="#5d7482" transform="rotate(-30 38 52)"/>' +
+    '<rect x="42" y="26" width="12" height="10" rx="2" fill="#607d8b"/>' +
+    '<path d="M54 28 Q64 14 74 20" fill="none" stroke="#8d6e63" stroke-width="5" stroke-linecap="round"/>' +
+    '<g stroke="#ffb300" stroke-width="4" stroke-linecap="round">' +
+      '<line x1="76" y1="18" x2="82" y2="10"/>' +
+      '<line x1="78" y1="22" x2="88" y2="22"/>' +
+      '<line x1="74" y1="14" x2="72" y2="6"/>' +
+    '</g>' +
+    '<circle cx="80" cy="9" r="4" fill="#ffd54f"/>' +
+  '</svg>';
+
+/* ================= DOM 引用 ================= */
+const stage = document.getElementById('stage');
+const holesEl = document.getElementById('holes');
+const overlay = document.getElementById('overlay');
+const startView = document.getElementById('startView');
+const endView = document.getElementById('endView');
+const btnStart = document.getElementById('btnStart');
+const btnAgain = document.getElementById('btnAgain');
+const hudScore = document.getElementById('hudScore');
+const hudCombo = document.getElementById('hudCombo');
+const hudTime = document.getElementById('hudTime');
+const hudBest = document.getElementById('hudBest');
+const ovBestStart = document.getElementById('ovBestStart');
+const endScore = document.getElementById('endScore');
+const endBest = document.getElementById('endBest');
+const endNew = document.getElementById('endNew');
+
+/* ================= 游戏状态 ================= */
+const TOTAL_TIME = 30;   // 一局时长（秒）
+const BOMB_RATE = 0.15;  // 炸弹出现概率
+let holes = [];
+let score = 0, combo = 0, timeLeft = TOTAL_TIME, playing = false;
+let bestScore = 0;
+let spawnTimer = null, countdownTimer = null;
+
+/* ================= 生成 9 个地洞 ================= */
+for (let i = 0; i < 9; i++) {
+  const el = document.createElement('div');
+  el.className = 'hole';
+  el.dataset.i = String(i);
+  el.setAttribute('aria-label', '地洞');
+  el.innerHTML = '<span class="mound"></span><span class="actor"></span>';
+  holesEl.appendChild(el);
+  holes.push({
+    el: el,
+    actor: el.querySelector('.actor'),
+    busy: false,   // 该洞是否被占用（冒头 + 收回清理中）
+    up: false,     // 地鼠 / 炸弹是否处于冒头状态
+    hit: false,    // 本轮是否已被点中，防重复计分
+    hideTimer: null,
+    cleanTimer: null
+  });
+}
+
+/* ================= 轻量音效（WebAudio 本地生成，失败静默） ================= */
+let actx = null;
+function beep(freq, dur, type) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = type || 'square';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.06, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) { /* 音频不可用时静默 */ }
+}
+
+/* ================= 难度曲线：分数越高，地鼠停留越短、刷新越密 ================= */
+function popDuration() { return Math.max(520, 1050 - score * 12); }
+function gapDuration() { return Math.max(280, 560 - score * 8) + Math.random() * 220; }
+
+/* ================= 冒头 / 收回 ================= */
+function popHole(h) {
+  h.busy = true; h.up = true; h.hit = false;
+  const isBomb = Math.random() < BOMB_RATE;
+  h.actor.innerHTML = isBomb ? BOMB_SVG : MOLE_SVG;
+  h.actor.classList.add(isBomb ? 'bomb' : 'mole');
+  h.el.classList.add('up');
+  h.hideTimer = setTimeout(() => hideHole(h), popDuration());
+}
+function hideHole(h) {
+  if (!h.up) return;
+  h.up = false;
+  clearTimeout(h.hideTimer);
+  h.el.classList.remove('up');
+  if (h.cleanTimer) return;   // 已在清理阶段，避免重复安排导致状态卡死
+  h.cleanTimer = setTimeout(() => {
+    h.cleanTimer = null;
+    h.actor.innerHTML = '';
+    h.actor.classList.remove('mole', 'bomb');
+    h.busy = false; h.hit = false;
+  }, 180);
+}
+/* 结束时彻底复位某个洞 */
+function resetHole(h) {
+  clearTimeout(h.hideTimer); clearTimeout(h.cleanTimer);
+  h.hideTimer = null; h.cleanTimer = null;
+  h.busy = false; h.up = false; h.hit = false;
+  h.actor.innerHTML = '';
+  h.actor.classList.remove('mole', 'bomb');
+  h.el.classList.remove('up');
+}
+
+/* ================= 刷怪循环：只在空闲洞冒头 ================= */
+function spawnLoop() {
+  if (!playing) return;
+  const idle = holes.filter(h => !h.busy);
+  if (idle.length) popHole(idle[Math.floor(Math.random() * idle.length)]);
+  spawnTimer = setTimeout(spawnLoop, gapDuration());
+}
+
+/* ================= 命中判定（事件委托，只有冒头状态可命中） ================= */
+holesEl.addEventListener('click', (e) => {
+  if (!playing) return;
+  const holeEl = e.target.closest('.hole');
+  if (!holeEl) return;
+  const h = holes[Number(holeEl.dataset.i)];
+  if (!h.up || h.hit) return;
+  h.hit = true;
+  if (h.actor.classList.contains('bomb')) {
+    /* 点中炸弹：扣分并清空连击，舞台抖动 */
+    score = Math.max(0, score - 20);
+    combo = 0;
+    beep(140, 0.3, 'sawtooth');
+    floatText(h, '-20', '#dc2626');
+    stage.classList.remove('shake');
+    void stage.offsetWidth;   // 强制回流，保证抖动动画可重播
+    stage.classList.add('shake');
+    setTimeout(() => stage.classList.remove('shake'), 350);
+  } else {
+    /* 点中地鼠：连击加成（先按当前连击算加成，再自增） */
+    const gain = 10 + Math.min(combo, 5) * 2;
+    combo++;
+    score += gain;
+    beep(880, 0.09);
+    floatText(h, '+' + gain, '#2f9e44');
+  }
+  renderHud();
+  hideHole(h);
+});
+
+/* 命中处飘分文字，750ms 后兜底移除（不依赖 animationend） */
+function floatText(h, text, color) {
+  const s = document.createElement('span');
+  s.className = 'float-txt';
+  s.textContent = text;
+  s.style.color = color;
+  h.el.appendChild(s);
+  setTimeout(() => s.remove(), 750);
+}
+
+/* ================= HUD ================= */
+function renderHud() {
+  hudScore.textContent = score;
+  hudCombo.textContent = combo;
+  hudTime.textContent = timeLeft;
+  hudTime.classList.toggle('warn', playing && timeLeft <= 10);
+  hudBest.textContent = bestScore;
+}
+
+/* ================= 开局 / 结束 ================= */
+function startGame() {
+  stopTimers();
+  holes.forEach(resetHole);
+  score = 0; combo = 0; timeLeft = TOTAL_TIME;
+  bestScore = loadNum(BEST_KEY);
+  playing = true;
+  renderHud();
+  overlay.hidden = true;
+  spawnTimer = setTimeout(spawnLoop, 500);
+  countdownTimer = setInterval(() => {
+    timeLeft--;
+    renderHud();
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+function endGame() {
+  playing = false;
+  stopTimers();
+  holes.forEach(resetHole);
+  /* 结算最高分 */
+  const isNew = score > bestScore;
+  if (isNew) { bestScore = score; saveNum(BEST_KEY, score); }
+  endScore.textContent = score;
+  endBest.textContent = bestScore;
+  endNew.hidden = !isNew;
+  startView.hidden = true;
+  endView.hidden = false;
+  overlay.hidden = false;
+  renderHud();
+  beep(523, 0.25, 'triangle');
+}
+function stopTimers() {
+  if (spawnTimer) { clearTimeout(spawnTimer); spawnTimer = null; }
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+}
+
+btnStart.addEventListener('click', startGame);
+btnAgain.addEventListener('click', startGame);
+
+/* 初始化：展示历史最高分 */
+bestScore = loadNum(BEST_KEY);
+ovBestStart.textContent = bestScore;
+hudBest.textContent = bestScore;
+</script>
+</body>
+</html>

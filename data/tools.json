@@ -919,6 +919,83 @@
       "description": "把 docx / xlsx / Markdown / CSV / JSON / 代码文本 / 图片排成 A4 纸张导出 PDF，可选纸张、方向与边距，支持打印成矢量 PDF 或直接下载文件",
       "icon": "🧾",
       "category": "实用工具"
+    },
+    {
+      "name": "恐龙快跑",
+      "path": "dino-run/app.html",
+      "description": "像素小恐龙横版跑酷，跳跃躲避仙人掌与翼龙",
+      "icon": "🦖",
+      "category": "小游戏"
+    },
+    {
+      "name": "贪吃蛇",
+      "path": "snake/app.html",
+      "description": "经典贪吃蛇，键盘或滑动操控，越吃越快",
+      "icon": "🐍",
+      "category": "小游戏"
+    },
+    {
+      "name": "打砖块",
+      "path": "breakout/app.html",
+      "description": "经典弹球打砖块，多关卡递进，支持鼠标与触屏",
+      "icon": "🧱",
+      "category": "小游戏"
+    },
+    {
+      "name": "2048",
+      "path": "2048/app.html",
+      "description": "滑动合并数字方块，冲击 2048 与更高分",
+      "icon": "🔢",
+      "category": "小游戏"
+    },
+    {
+      "name": "数字华容道",
+      "path": "slide-puzzle/app.html",
+      "description": "滑块拼图复原 1-N 顺序，三档难度保证可解",
+      "icon": "🧩",
+      "category": "小游戏"
+    },
+    {
+      "name": "扫雷",
+      "path": "minesweeper/app.html",
+      "description": "经典扫雷三档规格，首点安全，长按插旗",
+      "icon": "💣",
+      "category": "小游戏"
+    },
+    {
+      "name": "记忆翻牌",
+      "path": "memory-flip/app.html",
+      "description": "翻牌配对记忆挑战，双难度计时计步",
+      "icon": "🎴",
+      "category": "小游戏"
+    },
+    {
+      "name": "打地鼠",
+      "path": "whack-mole/app.html",
+      "description": "30 秒限时打地鼠，连击加成小心炸弹",
+      "icon": "🔨",
+      "category": "小游戏"
+    },
+    {
+      "name": "手速反应测试",
+      "path": "reaction-test/app.html",
+      "description": "反应速度与瞄准精度双模式测试，记录最佳",
+      "icon": "⚡",
+      "category": "小游戏"
+    },
+    {
+      "name": "方块消除",
+      "path": "tetris-block/app.html",
+      "description": "经典落块消除，消行升级加速，支持触屏按键",
+      "icon": "🎮",
+      "category": "小游戏"
+    },
+    {
+      "name": "太空射击",
+      "path": "space-shooter/app.html",
+      "description": "波次推进太空射击，走位躲避弹幕，爆炸粒子",
+      "icon": "🚀",
+      "category": "小游戏"
     }
   ]
 }

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手速反应测试 - 拾光集</title>
+<meta name="description" content="手速反应测试：等待面板变绿后尽快点击测出毫秒级反应时间，另有瞄准测试模式，5 次平均与历史最佳保存在本地。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/reaction-test/app.html">
+<style>
+:root { --primary:#2563eb; --danger:#c92a2a; --ink:#1f2430; --muted:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+button { font-family:inherit; }
+[hidden] { display:none !important; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:#f2f4f7; color:var(--ink); min-height:100vh;
+  display:flex; justify-content:center; padding:24px 14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap { width:100%; max-width:620px; }
+.head { text-align:center; margin-bottom:16px; }
+.head h1 { font-size:26px; letter-spacing:1px; }
+.head .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+.panel { background:#fff; border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(31,41,55,.08); }
+/* 模式切换 */
+.tabs { display:flex; justify-content:center; margin-bottom:14px; }
+.seg { display:inline-flex; background:#eef1f5; border-radius:10px; padding:3px; }
+.tab { border:0; background:transparent; padding:8px 18px; border-radius:8px; font-size:14px; color:var(--muted); cursor:pointer; }
+.tab.active { background:#fff; color:var(--primary); font-weight:600; box-shadow:0 1px 3px rgba(31,41,55,.12); }
+/* 大面板：可点击区域，颜色随状态切换 */
+.pad { position:relative; border-radius:14px; min-height:220px; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:16px; cursor:pointer; user-select:none;
+  transition:background-color .15s ease; touch-action:manipulation; }
+.pad.idle, .pad.between { background:#eef1f5; }
+.pad.wait { background:#e8590c; color:#fff; }
+.pad.ready { background:#2f9e44; color:#fff; }
+.pad.fail { background:var(--danger); color:#fff; }
+.pad.done { background:#e6f4ea; }
+.pad-main { font-size:26px; font-weight:700; }
+.pad-sub { font-size:13.5px; margin-top:8px; opacity:.85; }
+.pad.aim { min-height:300px; }
+/* 瞄准测试的目标按钮 */
+.target { position:absolute; border:0; background:transparent; padding:0; cursor:pointer; z-index:5; touch-action:manipulation; }
+.target svg { width:100%; height:100%; display:block; }
+/* 每轮成绩列表 */
+.chips { min-height:30px; margin-top:12px; text-align:center; }
+.chip { display:inline-block; background:#eef1f5; border-radius:999px; padding:4px 11px; font-size:13px; margin:3px 4px 0 0; font-variant-numeric:tabular-nums; }
+.result-row { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:12px; font-size:14px; color:var(--muted); }
+.result-row b { color:var(--ink); font-size:16px; margin-left:2px; }
+.row-actions { display:flex; justify-content:center; margin-top:12px; }
+.btn { border:0; border-radius:10px; padding:8px 18px; font-size:13.5px; cursor:pointer; }
+.btn.ghost { background:#eef1f5; color:var(--ink); }
+.foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
+@media (max-width:420px) { .head h1 { font-size:22px; } .pad-main { font-size:22px; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>手速反应测试</h1>
+    <p class="sub">测测你的反应有多少毫秒</p>
+  </header>
+  <section class="panel">
+    <div class="tabs" role="tablist" aria-label="模式切换">
+      <button id="tabReact" class="tab active" type="button" role="tab" aria-selected="true">经典反应</button>
+      <button id="tabAim" class="tab" type="button" role="tab" aria-selected="false">瞄准测试</button>
+    </div>
+
+    <!-- 模式一：经典反应 -->
+    <div id="reactBox">
+      <div id="reactPad" class="pad idle" role="button" tabindex="0" aria-label="反应测试面板，点击或按回车开始">
+        <p id="reactMain" class="pad-main">点击开始</p>
+        <p id="reactSub" class="pad-sub">面板变绿后立刻点击，共 5 轮</p>
+      </div>
+      <div id="reactChips" class="chips" aria-label="本轮各次成绩"></div>
+      <div class="result-row">
+        <span>本轮平均 <b id="reactAvg">--</b></span>
+        <span>历史最佳 <b id="reactBest">--</b></span>
+      </div>
+      <div class="row-actions"><button id="reactReset" class="btn ghost" type="button">重置本轮</button></div>
+    </div>
+
+    <!-- 模式二：瞄准测试 -->
+    <div id="aimBox" hidden>
+      <div id="aimPad" class="pad idle aim" role="button" tabindex="0" aria-label="瞄准测试面板，点击或按回车开始">
+        <p id="aimMain" class="pad-main">点击开始</p>
+        <p id="aimSub" class="pad-sub">目标随机出现后尽快点中它，共 5 轮</p>
+        <button id="aimTarget" class="target" type="button" aria-label="目标" hidden>
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <circle cx="50" cy="50" r="46" fill="#ffffff"/>
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#dc2626" stroke-width="8"/>
+            <circle cx="50" cy="50" r="28" fill="#dc2626"/>
+            <circle cx="50" cy="50" r="13" fill="#ffffff"/>
+            <circle cx="50" cy="50" r="5" fill="#dc2626"/>
+          </svg>
+        </button>
+      </div>
+      <div id="aimChips" class="chips" aria-label="本轮各次成绩"></div>
+      <div class="result-row">
+        <span>本轮平均 <b id="aimAvg">--</b></span>
+        <span>历史最佳 <b id="aimBest">--</b></span>
+      </div>
+      <div class="row-actions"><button id="aimReset" class="btn ghost" type="button">重置本轮</button></div>
+    </div>
+  </section>
+  <footer class="foot">拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+
+<script>
+'use strict';
+/* ================= 本地纪录读写（key 带工具 slug 前缀，异常静默） ================= */
+function loadNum(key) { try { const v = localStorage.getItem(key); return v === null ? 0 : (Number(v) || 0); } catch (e) { return 0; } }
+function saveNum(key, v) { try { localStorage.setItem(key, String(v)); } catch (e) { /* 隐私模式等场景写失败不阻断 */ } }
+const BEST_REACT_KEY = 'reaction-test-best';       // 经典反应：历史最佳平均（毫秒）
+const BEST_AIM_KEY = 'reaction-test-aim-best';     // 瞄准测试：历史最佳平均（毫秒）
+const ROUNDS = 5;                                  // 每组轮数
+
+/* ================= DOM 引用 ================= */
+const tabReact = document.getElementById('tabReact');
+const tabAim = document.getElementById('tabAim');
+const reactBox = document.getElementById('reactBox');
+const aimBox = document.getElementById('aimBox');
+const reactPad = document.getElementById('reactPad');
+const reactMain = document.getElementById('reactMain');
+const reactSub = document.getElementById('reactSub');
+const reactChips = document.getElementById('reactChips');
+const reactAvg = document.getElementById('reactAvg');
+const reactBest = document.getElementById('reactBest');
+const reactResetBtn = document.getElementById('reactReset');
+const aimPad = document.getElementById('aimPad');
+const aimMain = document.getElementById('aimMain');
+const aimSub = document.getElementById('aimSub');
+const aimTarget = document.getElementById('aimTarget');
+const aimChips = document.getElementById('aimChips');
+const aimAvg = document.getElementById('aimAvg');
+const aimBest = document.getElementById('aimBest');
+const aimResetBtn = document.getElementById('aimReset');
+
+/* ================= 公共工具 ================= */
+function renderChips(box, arr) { box.innerHTML = arr.map(v => '<span class="chip">' + v + '</span>').join(''); }
+function avgOf(arr) { return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length); }
+
+/* ================= 模式一：经典反应 ================= */
+/* phase: idle 待点击 / waiting 等待变绿 / ready 变绿待点击 / fail 抢跳 / done 整组完成 */
+const react = { phase: 'idle', t0: 0, waitTimer: null, results: [], coolUntil: 0 };
+
+function setReactPad(cls, main, sub) {
+  reactPad.className = 'pad ' + cls;
+  reactMain.textContent = main;
+  reactSub.textContent = sub;
+}
+/* 一轮开始：随机 1 至 5 秒后变绿 */
+function startReactRound() {
+  react.phase = 'waiting';
+  setReactPad('wait', '等待变绿…', '变绿的瞬间点击，提前点击判负');
+  react.waitTimer = setTimeout(() => {
+    react.phase = 'ready';
+    react.t0 = performance.now();
+    setReactPad('ready', '点！', '');
+  }, 1000 + Math.random() * 4000);
+}
+/* 整组完成：算平均并更新最佳纪录 */
+function finishReact() {
+  const avg = avgOf(react.results);
+  reactAvg.textContent = avg + ' ms';
+  const best = loadNum(BEST_REACT_KEY);
+  const isNew = !best || avg < best;
+  if (isNew) saveNum(BEST_REACT_KEY, avg);
+  reactBest.textContent = (isNew ? avg : best) + ' ms';
+  react.phase = 'done';
+  setReactPad('done', '平均 ' + avg + ' ms', isNew ? '新纪录！点击面板再来一组' : '历史最佳 ' + best + ' ms，点击面板再来一组');
+}
+function onReactPad() {
+  const now = performance.now();
+  if (now < react.coolUntil) return;   // 防连点：结果刚出或刚判负时的冷却期
+  if (react.phase === 'idle' || react.phase === 'done') { startReactRound(); return; }
+  if (react.phase === 'fail') { startReactRound(); return; }
+  if (react.phase === 'waiting') {
+    /* 抢跳判负：本轮作废，重新等待 */
+    clearTimeout(react.waitTimer);
+    react.phase = 'fail';
+    react.coolUntil = now + 600;
+    setReactPad('fail', '抢跳啦', '本轮作废，点击面板重新等待信号');
+    return;
+  }
+  if (react.phase === 'ready') {
+    /* 正式命中：记录毫秒数 */
+    const ms = Math.round(performance.now() - react.t0);
+    react.results.push(ms);
+    renderChips(reactChips, react.results);
+    if (react.results.length >= ROUNDS) { finishReact(); return; }
+    react.phase = 'idle';
+    react.coolUntil = now + 350;
+    setReactPad('idle', ms + ' ms', '点击面板继续第 ' + (react.results.length + 1) + ' 轮');
+  }
+}
+function resetReact() {
+  clearTimeout(react.waitTimer);
+  react.phase = 'idle';
+  react.results = [];
+  reactChips.innerHTML = '';
+  reactAvg.textContent = '--';
+  setReactPad('idle', '点击开始', '面板变绿后立刻点击，共 ' + ROUNDS + ' 轮');
+}
+
+/* ================= 模式二：瞄准测试 ================= */
+/* phase: idle 待点击 / waiting 目标即将出现 / targeting 目标在场 / done 整组完成 */
+const aim = { phase: 'idle', t0: 0, timer: null, results: [], coolUntil: 0 };
+
+function setAimText(main, sub) { aimMain.textContent = main; aimSub.textContent = sub; }
+function startAimRound() {
+  aim.phase = 'waiting';
+  setAimText('盯紧面板…', '目标随时出现');
+  aim.timer = setTimeout(spawnTarget, 400 + Math.random() * 600);
+}
+/* 目标随机出现在面板内（留边距，尺寸 44 至 64 像素） */
+function spawnTarget() {
+  const rect = aimPad.getBoundingClientRect();
+  const s = 44 + Math.random() * 20;
+  const margin = 10;
+  const x = margin + Math.random() * Math.max(1, rect.width - s - margin * 2);
+  const y = margin + Math.random() * Math.max(1, rect.height - s - margin * 2);
+  aimTarget.style.width = s + 'px';
+  aimTarget.style.height = s + 'px';
+  aimTarget.style.left = x + 'px';
+  aimTarget.style.top = y + 'px';
+  aimTarget.hidden = false;
+  aimMain.hidden = true;
+  aimSub.hidden = true;
+  aim.t0 = performance.now();
+  aim.phase = 'targeting';
+}
+function finishAim() {
+  const avg = avgOf(aim.results);
+  aimAvg.textContent = avg + ' ms';
+  const best = loadNum(BEST_AIM_KEY);
+  const isNew = !best || avg < best;
+  if (isNew) saveNum(BEST_AIM_KEY, avg);
+  aimBest.textContent = (isNew ? avg : best) + ' ms';
+  aim.phase = 'done';
+  aimPad.className = 'pad done aim';
+  aimMain.hidden = false;
+  aimSub.hidden = false;
+  setAimText('平均 ' + avg + ' ms', isNew ? '新纪录！点击面板再来一组' : '历史最佳 ' + best + ' ms，点击面板再来一组');
+}
+function onAimPad() {
+  if (performance.now() < aim.coolUntil) return;
+  if (aim.phase === 'idle' || aim.phase === 'done') startAimRound();
+  /* waiting / targeting 阶段点空不做惩罚：点空本身就会拉高平均用时 */
+}
+function resetAim() {
+  clearTimeout(aim.timer);
+  aimTarget.hidden = true;
+  aimMain.hidden = false;
+  aimSub.hidden = false;
+  aim.phase = 'idle';
+  aim.results = [];
+  aimChips.innerHTML = '';
+  aimAvg.textContent = '--';
+  aimPad.className = 'pad idle aim';
+  setAimText('点击开始', '目标随机出现后尽快点中它，共 ' + ROUNDS + ' 轮');
+}
+
+/* 目标命中（阻止冒泡，避免触发面板的点击逻辑） */
+aimTarget.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (aim.phase !== 'targeting') return;
+  const ms = Math.round(performance.now() - aim.t0);
+  aimTarget.hidden = true;
+  aimMain.hidden = false;
+  aimSub.hidden = false;
+  aim.results.push(ms);
+  renderChips(aimChips, aim.results);
+  if (aim.results.length >= ROUNDS) { finishAim(); return; }
+  aim.phase = 'idle';
+  aim.coolUntil = performance.now() + 350;   // 防连点误触下一轮
+  aimPad.className = 'pad idle aim';
+  setAimText(ms + ' ms', '点击面板继续第 ' + (aim.results.length + 1) + ' 轮');
+});
+
+/* ================= 面板事件（点击 + 键盘） ================= */
+reactPad.addEventListener('click', onReactPad);
+aimPad.addEventListener('click', onAimPad);
+function bindKey(pad, handler) {
+  pad.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); handler(); }
+  });
+}
+bindKey(reactPad, onReactPad);
+bindKey(aimPad, onAimPad);
+
+/* ================= 模式切换（切走即重置该模式进行中的轮次，避免后台定时器干扰） ================= */
+let mode = 'react';
+function switchMode(m) {
+  if (m === mode) return;
+  mode = m;
+  tabReact.classList.toggle('active', m === 'react');
+  tabAim.classList.toggle('active', m === 'aim');
+  tabReact.setAttribute('aria-selected', String(m === 'react'));
+  tabAim.setAttribute('aria-selected', String(m === 'aim'));
+  reactBox.hidden = m !== 'react';
+  aimBox.hidden = m !== 'aim';
+  resetReact();
+  resetAim();
+}
+tabReact.addEventListener('click', () => switchMode('react'));
+tabAim.addEventListener('click', () => switchMode('aim'));
+
+/* ================= 重置按钮 ================= */
+reactResetBtn.addEventListener('click', resetReact);
+aimResetBtn.addEventListener('click', resetAim);
+
+/* ================= 初始化：渲染历史最佳 ================= */
+const rb = loadNum(BEST_REACT_KEY);
+reactBest.textContent = rb ? rb + ' ms' : '--';
+const ab = loadNum(BEST_AIM_KEY);
+aimBest.textContent = ab ? ab + ' ms' : '--';
+</script>
+</body>
+</html>

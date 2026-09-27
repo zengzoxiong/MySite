@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记忆翻牌 - 拾光集</title>
+<meta name="description" content="记忆翻牌小游戏：翻开的卡片中找出所有成对的几何图形，提供 4×4 与 6×6 两种难度，最佳纪录保存在本地。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/memory-flip/app.html">
+<style>
+:root { --primary:#2563eb; --danger:#dc2626; --ink:#1f2430; --muted:#6b7280; --line:#e5e7eb; }
+* { box-sizing:border-box; margin:0; padding:0; }
+button { font-family:inherit; }
+[hidden] { display:none !important; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:#f2f4f7; color:var(--ink); min-height:100vh;
+  display:flex; justify-content:center; padding:24px 14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap { width:100%; max-width:620px; }
+.head { text-align:center; margin-bottom:16px; }
+.head h1 { font-size:26px; letter-spacing:1px; }
+.head .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+.panel { background:#fff; border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(31,41,55,.08); }
+.toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px; }
+.seg { display:inline-flex; background:#eef1f5; border-radius:10px; padding:3px; }
+.seg-btn { border:0; background:transparent; padding:7px 14px; border-radius:8px; font-size:14px; color:var(--muted); cursor:pointer; }
+.seg-btn.active { background:#fff; color:var(--primary); font-weight:600; box-shadow:0 1px 3px rgba(31,41,55,.12); }
+.stats { display:flex; gap:12px; flex:1; flex-wrap:wrap; align-items:center; font-size:13px; color:var(--muted); min-width:0; }
+.stats b { color:var(--ink); font-size:15px; margin-left:2px; }
+.btn { border:0; border-radius:10px; padding:9px 16px; font-size:14px; cursor:pointer; }
+.btn.primary { background:var(--primary); color:#fff; }
+.btn.primary:active { transform:scale(.97); }
+.btn.ghost { background:#eef1f5; color:var(--ink); }
+/* 卡牌区：perspective 提供 3D 翻转景深 */
+.board { display:grid; gap:8px; perspective:1000px; }
+.board.cols-4 { grid-template-columns:repeat(4,1fr); }
+.board.cols-6 { grid-template-columns:repeat(6,1fr); gap:6px; }
+.card { position:relative; aspect-ratio:1/1; border:0; background:transparent; padding:0; cursor:pointer; }
+.card:disabled { cursor:default; }
+.card-inner { position:absolute; inset:0; transform-style:preserve-3d; transition:transform .38s ease; }
+.card.flipped .card-inner, .card.matched .card-inner { transform:rotateY(180deg); }
+.card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+.card-face.back {
+  background-color:#3d5a80;
+  background-image:radial-gradient(circle, rgba(255,255,255,.85) 2px, transparent 2.6px);
+  background-size:12px 12px; background-position:center;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
+}
+.card-face.front { background:#ffffff; box-shadow:inset 0 0 0 2px var(--line); transform:rotateY(180deg); }
+.card-face.front svg { width:62%; height:62%; display:block; }
+.card.miss .card-face.front { box-shadow:inset 0 0 0 2px var(--danger); }
+.card.matched { transition:opacity .45s ease, transform .45s ease; opacity:0; transform:scale(.55); pointer-events:none; }
+.tip { color:#9aa3af; font-size:12.5px; margin-top:12px; text-align:center; }
+.foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
+/* 成绩弹层 */
+.modal { position:fixed; inset:0; background:rgba(31,41,55,.45); display:flex; align-items:center; justify-content:center; padding:16px; z-index:50; }
+.modal-card { background:#fff; border-radius:16px; padding:24px 20px; width:100%; max-width:320px; text-align:center; box-shadow:0 12px 40px rgba(31,41,55,.25); }
+.modal-card h2 { font-size:20px; margin-bottom:6px; }
+.new-record { color:#d97706; font-weight:700; font-size:14px; }
+.win-stats { display:flex; justify-content:space-between; gap:8px; margin:16px 0; }
+.win-stat { flex:1; background:#f5f7fa; border-radius:10px; padding:10px 6px; }
+.win-stat span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+.win-stat b { font-size:15px; }
+.win-actions { display:flex; gap:10px; justify-content:center; }
+@media (max-width:420px) {
+  .head h1 { font-size:22px; }
+  .stats { gap:8px; font-size:12px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>记忆翻牌</h1>
+    <p class="sub">翻开卡片，找出所有成对的几何图形</p>
+  </header>
+  <section class="panel">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="难度选择">
+        <button id="btn4" class="seg-btn active" type="button">4 × 4</button>
+        <button id="btn6" class="seg-btn" type="button">6 × 6</button>
+      </div>
+      <div class="stats">
+        <span>步数 <b id="stMoves">0</b></span>
+        <span>用时 <b id="stTime">0:00</b></span>
+        <span>最佳 <b id="stBest">--</b></span>
+      </div>
+      <button id="btnRestart" class="btn ghost" type="button">重新开始</button>
+    </div>
+    <div id="board" class="board cols-4" aria-label="卡牌区"></div>
+    <p class="tip">两张不匹配会短暂锁板；最佳纪录按难度分别记录（先比步数，再比用时）。</p>
+  </section>
+  <footer class="foot">拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+
+<div id="winModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle" hidden>
+  <div class="modal-card">
+    <h2 id="winTitle">全部配对完成！</h2>
+    <p id="winNew" class="new-record" hidden>新纪录！</p>
+    <div class="win-stats">
+      <div class="win-stat"><span>步数</span><b id="winMoves">0</b></div>
+      <div class="win-stat"><span>用时</span><b id="winTime">0:00</b></div>
+      <div class="win-stat"><span>历史最佳</span><b id="winBest">--</b></div>
+    </div>
+    <div class="win-actions">
+      <button id="btnAgain" class="btn primary" type="button">再来一局</button>
+      <button id="btnClose" class="btn ghost" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================= 本地纪录读写（key 带工具 slug 前缀，异常静默） ================= */
+function loadJSON(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function saveJSON(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* 隐私模式等场景写失败不阻断 */ } }
+/* 最佳纪录按难度分别存：memory-flip-best-4 / memory-flip-best-6，值为 { moves, time } */
+const BEST_KEY = 'memory-flip-best-';
+
+/* ================= 18 种卡面几何图形（内联 SVG，不用 emoji） ================= */
+const SHAPES = [
+  { name: '圆形',   svg: '<circle cx="50" cy="50" r="34" fill="#e74c3c"/>' },
+  { name: '三角形', svg: '<polygon points="50,14 88,82 12,82" fill="#e67e22"/>' },
+  { name: '正方形', svg: '<rect x="16" y="16" width="68" height="68" rx="12" fill="#d4a017"/>' },
+  { name: '五角星', svg: '<polygon points="50,14 59.4,39.1 86.1,40.3 65.2,56.9 72.3,82.7 50,68 27.7,82.7 34.8,56.9 13.9,40.3 40.6,39.1" fill="#27ae60"/>' },
+  { name: '月牙',   svg: '<circle cx="46" cy="50" r="34" fill="#16a085"/><circle cx="64" cy="41" r="27" fill="#ffffff"/>' },
+  { name: '菱形',   svg: '<polygon points="50,10 88,50 50,90 12,50" fill="#2980b9"/>' },
+  { name: '六边形', svg: '<polygon points="88,50 69,82.9 31,82.9 12,50 31,17.1 69,17.1" fill="#8e44ad"/>' },
+  { name: '心形',   svg: '<path d="M50 84 C20 62 12 40 24 26 C34 14 46 18 50 30 C54 18 66 14 76 26 C88 40 80 62 50 84 Z" fill="#c0392b"/>' },
+  { name: '十字',   svg: '<path d="M38 12 H62 V38 H88 V62 H62 V88 H38 V62 H12 V38 H38 Z" fill="#0e7490"/>' },
+  { name: '圆环',   svg: '<circle cx="50" cy="50" r="25" fill="none" stroke="#2c3e50" stroke-width="16"/>' },
+  { name: '五边形', svg: '<polygon points="50,16 86.1,42.3 72.3,84.7 27.7,84.7 13.9,42.3" fill="#7f8c8d"/>' },
+  { name: '水滴',   svg: '<path d="M50 10 C50 10 82 46 82 64 A32 32 0 1 1 18 64 C18 46 50 10 50 10 Z" fill="#00a8bd"/>' },
+  { name: '闪电',   svg: '<polygon points="56,8 24,54 46,54 38,92 76,42 52,42" fill="#f1c40f"/>' },
+  { name: '梯形',   svg: '<polygon points="26,22 74,22 92,78 8,78" fill="#795548"/>' },
+  { name: '半圆',   svg: '<path d="M12 66 A38 38 0 0 1 88 66 Z" fill="#455a64"/>' },
+  { name: '八角星', svg: '<polygon points="50,10 56.5,34.3 78.3,21.7 65.7,43.5 90,50 65.7,56.5 78.3,78.3 56.5,65.7 50,90 43.5,65.7 21.7,78.3 34.3,56.5 10,50 34.3,43.5 21.7,21.7 43.5,34.3" fill="#e91e63"/>' },
+  { name: '四叶花', svg: '<circle cx="50" cy="27" r="19" fill="#689f38"/><circle cx="50" cy="73" r="19" fill="#689f38"/><circle cx="27" cy="50" r="19" fill="#689f38"/><circle cx="73" cy="50" r="19" fill="#689f38"/><circle cx="50" cy="50" r="15" fill="#689f38"/>' },
+  { name: '太阳',   svg: '<g stroke="#ff7043" stroke-width="9" stroke-linecap="round"><line x1="50" y1="8" x2="50" y2="22"/><line x1="50" y1="78" x2="50" y2="92"/><line x1="8" y1="50" x2="22" y2="50"/><line x1="78" y1="50" x2="92" y2="50"/><line x1="20.3" y1="20.3" x2="30.2" y2="30.2"/><line x1="79.7" y1="20.3" x2="69.8" y2="30.2"/><line x1="20.3" y1="79.7" x2="30.2" y2="69.8"/><line x1="79.7" y1="79.7" x2="69.8" y2="69.8"/></g><circle cx="50" cy="50" r="18" fill="#ff7043"/>' }
+];
+
+/* ================= DOM 引用 ================= */
+const board = document.getElementById('board');
+const stMoves = document.getElementById('stMoves');
+const stTime = document.getElementById('stTime');
+const stBest = document.getElementById('stBest');
+const btn4 = document.getElementById('btn4');
+const btn6 = document.getElementById('btn6');
+const btnRestart = document.getElementById('btnRestart');
+const winModal = document.getElementById('winModal');
+const winTitle = document.getElementById('winTitle');
+const winNew = document.getElementById('winNew');
+const winMoves = document.getElementById('winMoves');
+const winTime = document.getElementById('winTime');
+const winBest = document.getElementById('winBest');
+const btnAgain = document.getElementById('btnAgain');
+const btnClose = document.getElementById('btnClose');
+
+/* ================= 游戏状态 ================= */
+let size = 4;            // 边长：4 或 6
+let pairs = 8;           // 对数：边长的平方除以二
+let firstCard = null;    // 当前已翻开待配对的第一张
+let lock = false;        // 配对失败翻回期间锁板，防连点第三张
+let matchedCount = 0;    // 已配对成功的对数
+let moves = 0;           // 步数（每翻开两张记一步）
+let seconds = 0;         // 用时（秒）
+let started = false;     // 是否已翻开第一张（计时起点）
+let timerId = null;
+
+/* ================= 工具函数 ================= */
+/* Fisher-Yates 就地洗牌，返回原数组方便链式使用 */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+/* 秒数格式化为 分:秒 */
+function fmtTime(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+/* ================= 渲染 ================= */
+/* 生成一张卡片：外层 button 负责点击与状态类，内层 card-inner 做 3D 翻转 */
+function buildCard(shapeIdx) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'card';
+  btn.dataset.shape = String(shapeIdx);
+  btn.setAttribute('aria-label', '未翻开的卡片');
+  btn.innerHTML =
+    '<span class="card-inner">' +
+      '<span class="card-face back"></span>' +
+      '<span class="card-face front"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' + SHAPES[shapeIdx].svg + '</svg></span>' +
+    '</span>';
+  return btn;
+}
+function flip(card) { card.classList.add('flipped'); card.setAttribute('aria-label', '已翻开的卡片'); }
+function unflip(card) { card.classList.remove('flipped'); card.setAttribute('aria-label', '未翻开的卡片'); }
+function renderHud() { stMoves.textContent = moves; stTime.textContent = fmtTime(seconds); }
+function renderBest() {
+  const best = loadJSON(BEST_KEY + size);
+  stBest.textContent = best ? best.moves + ' 步 / ' + fmtTime(best.time) : '--';
+}
+
+/* ================= 计时 ================= */
+function startTimer() {
+  timerId = setInterval(() => { seconds++; stTime.textContent = fmtTime(seconds); }, 1000);
+}
+function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+
+/* ================= 开局 ================= */
+function startGame() {
+  firstCard = null; lock = false; matchedCount = 0; moves = 0; seconds = 0; started = false;
+  stopTimer(); renderHud(); renderBest();
+  /* 随机抽取 pairs 种图形，各复制两份后洗牌 */
+  const pool = shuffle(SHAPES.map((_, i) => i)).slice(0, pairs);
+  const deck = shuffle(pool.concat(pool));
+  board.innerHTML = '';
+  board.className = 'board cols-' + size;
+  deck.forEach(i => board.appendChild(buildCard(i)));
+  hideModal();
+}
+
+/* ================= 点击判定（事件委托） ================= */
+board.addEventListener('click', (e) => {
+  const card = e.target.closest('.card');
+  if (!card || lock || card.disabled) return;
+  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  if (!started) { started = true; startTimer(); }   // 第一次翻牌才开始计时
+  flip(card);
+  if (!firstCard) { firstCard = card; return; }      // 第一张：等待第二张
+
+  /* 第二张：计步并判定 */
+  moves++; renderHud();
+  const a = firstCard, b = card;
+  firstCard = null;
+  if (a.dataset.shape === b.dataset.shape) {
+    /* 配对成功：保持正面，短暂停留后消隐 */
+    matchedCount++;
+    a.classList.add('matched'); b.classList.add('matched');
+    a.disabled = true; b.disabled = true;
+    if (matchedCount === pairs) { stopTimer(); setTimeout(showWin, 550); }
+  } else {
+    /* 配对失败：标记红色边框，锁板后翻回 */
+    lock = true;
+    a.classList.add('miss'); b.classList.add('miss');
+    setTimeout(() => {
+      unflip(a); unflip(b);
+      a.classList.remove('miss'); b.classList.remove('miss');
+      lock = false;
+    }, 750);
+  }
+});
+
+/* ================= 胜利结算与最佳纪录 ================= */
+function showWin() {
+  const key = BEST_KEY + size;
+  const best = loadJSON(key);
+  /* 新纪录判定：步数更少，或步数相同且用时更短 */
+  const isNew = !best || moves < best.moves || (moves === best.moves && seconds < best.time);
+  if (isNew) saveJSON(key, { moves: moves, time: seconds });
+  const cur = isNew ? { moves: moves, time: seconds } : best;
+  winTitle.textContent = '全部配对完成！';
+  winNew.hidden = !isNew;
+  winMoves.textContent = moves + ' 步';
+  winTime.textContent = fmtTime(seconds);
+  winBest.textContent = cur.moves + ' 步 / ' + fmtTime(cur.time);
+  renderBest();
+  openModal();
+}
+function openModal() { winModal.hidden = false; }
+function hideModal() { winModal.hidden = true; }
+
+/* ================= 难度与按钮 ================= */
+function setDifficulty(n) {
+  size = n;
+  pairs = (n * n) / 2;
+  btn4.classList.toggle('active', n === 4);
+  btn6.classList.toggle('active', n === 6);
+  startGame();
+}
+btn4.addEventListener('click', () => setDifficulty(4));
+btn6.addEventListener('click', () => setDifficulty(6));
+btnRestart.addEventListener('click', startGame);
+btnAgain.addEventListener('click', startGame);
+btnClose.addEventListener('click', hideModal);
+winModal.addEventListener('click', (e) => { if (e.target === winModal) hideModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !winModal.hidden) hideModal(); });
+
+/* 初始化：默认 4 × 4 */
+startGame();
+</script>
+</body>
+</html>
