@@ -99,12 +99,21 @@ let clockDateEl = null;
 let clockStyle = '';
 let clockDigits = []; // 6 个数字单元，与 HHMMSS 一一对应
 let clockTimer = 0;
+let clockCatchUpTimer = 0; // 跳秒补翻的串联定时器
+let clockLastSec = -1; // 上次渲染的秒数，用于检测跳秒
 
 function initClock() {
     clockEl = document.getElementById('clockTime');
     clockDateEl = document.getElementById('clockDate');
     applyClockStyle();
-    if (!clockTimer) clockTimer = setInterval(clockTick, 1000);
+    scheduleClockTick();
+}
+
+// 贴着秒边界渲染（+20ms 缓冲）。setInterval(1000) 会累积漂移，偶发被推迟
+// 超过 1s 时读到的直接是下一秒，中间的秒数就再也不会显示（如 55 跳 57）
+function scheduleClockTick() {
+    clearTimeout(clockTimer);
+    clockTimer = setTimeout(clockTick, 1000 - (Date.now() % 1000) + 20);
 }
 
 // 按 localStorage.clockStyle 重建数字单元；风格没变时只刷一次时间
@@ -113,6 +122,8 @@ function applyClockStyle() {
     const style = window.SiteAppearance ? SiteAppearance.clockStyleFromStorage() : 'plain';
     if (style === clockStyle) { clockTick(); return; }
     clockDigits.forEach(c => { clearTimeout(c._ckTimer); c._ckDone = null; }); // 拆掉旧单元上的兜底定时器
+    clearTimeout(clockCatchUpTimer); // 补翻链一并作废
+    clockLastSec = -1;
     clockStyle = style;
     clockEl.dataset.style = style;
     clockDigits = [];
@@ -173,19 +184,47 @@ function buildClockCell(style) {
     return cell;
 }
 
+function renderClockDigits(t) {
+    for (let i = 0; i < clockDigits.length; i++) clockSetDigit(clockDigits[i], t[i]);
+}
+
 function clockTick() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const t = pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
     const shown = `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4)}`;
+    const sec = now.getSeconds();
     if (clockStyle === 'plain') {
         clockEl.textContent = shown;
     } else {
-        for (let i = 0; i < clockDigits.length; i++) clockSetDigit(clockDigits[i], t[i]);
+        // 与上次显示的秒差 2~3 秒（tick 被偶发推迟）时把跳过的秒快速补翻，
+        // 数字一个都不丢；差更多说明是后台标签深度节流，直接显示当前值
+        const gap = clockLastSec === -1 ? 1 : (sec - clockLastSec + 60) % 60;
+        const catchUp = gap >= 2 && gap <= 3 && !clockAnimOff();
+        if (catchUp) {
+            const missed = [];
+            for (let g = gap - 1; g >= 1; g--) {
+                const d = new Date(now.getTime() - g * 1000);
+                missed.push(pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()));
+            }
+            const seq = missed.concat([t]);
+            const run = (idx) => {
+                clockCatchUpTimer = setTimeout(() => {
+                    if (!clockDigits.length) return; // 换风格重建后不再补旧值
+                    renderClockDigits(seq[idx]);
+                    if (idx + 1 < seq.length) run(idx + 1);
+                }, idx === 0 ? 0 : 300); // 300ms 翻完一段即打断落定翻下一段，总时长不超 1s
+            };
+            run(0);
+        } else {
+            renderClockDigits(t);
+        }
     }
+    clockLastSec = sec;
     // 卡片风格下 textContent 是新旧两层叠出来的（复制会拿到重复数字），统一用 aria-label 报时
     clockEl.setAttribute('aria-label', shown);
     clockDateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 星期${CLOCK_WEEKDAYS[now.getDay()]}`;
+    scheduleClockTick();
 }
 
 // 关掉动画（或系统要求减少动效）时必须走瞬时替换：
