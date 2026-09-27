@@ -19,6 +19,8 @@ jobs:
           python-version: '3.12'
 
       - name: 拉取贡献数据并更新 gh-activity.json
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # 本人 PAT：GraphQL 视角含私有仓库贡献；未配置时自动降级公开数据
         run: python scripts/sync_ghactivity.py
 
       - name: 有变化时提交

@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """同步 GitHub 贡献热力图数据到 data/gh-activity.json。
 
-主源：github.com/users/<user>/contributions 的 HTML 片段（rect 带 data-date/data-count），
-覆盖近一年；拿不到（网络/结构变化）时回退 api.github.com 公开 events（仅近 90 天）。
-输出：{ "user", "fetchedAt", "days": { "YYYY-MM-DD": 次数 } }，供首页右上角热力图面板渲染。
+主源（配置 GH_TOKEN 时）：GraphQL contributionsCollection——本人 PAT 视角
+自动包含私有仓库贡献；其次：github.com/users/<user>/contributions 的 HTML
+片段（rect 带 data-date，计数在配对 tool-tip 文本里），覆盖近一年但仅公开
+贡献；都拿不到（网络/结构变化）时回退 api.github.com 公开 events（仅近 90 天）。
+输出：{ "user", "source", "fetchedAt", "days": { "YYYY-MM-DD": 次数 } }，供首页右上角热力图面板渲染。
 
-用法：python scripts/sync_ghactivity.py
+用法：GH_TOKEN=<pat> python scripts/sync_ghactivity.py   # token 只走环境变量，绝不入库
 """
 import json
+import os
 import re
 import urllib.request
 from datetime import date, timedelta
@@ -23,6 +26,44 @@ def fetch(url):
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=30) as res:
         return res.read().decode('utf-8', errors='ignore')
+
+
+def from_graphql(token):
+    """近一年每日贡献数（含私有仓库）：本人 PAT 视角的 contributionsCollection
+    自动计入私有贡献，无需额外参数（includePrivateContributions 已从 schema 移除）。"""
+    today = date.today()
+    query = '''
+query($login: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $login) {
+    contributionsCollection(from: $from, to: $to) {
+      contributionCalendar { weeks { contributionDays { date contributionCount } } }
+    }
+  }
+}'''
+    body = json.dumps({
+        'query': query,
+        'variables': {
+            'login': USER,
+            'from': (today - timedelta(days=370)).isoformat() + 'T00:00:00Z',
+            'to': today.isoformat() + 'T23:59:59Z'
+        }
+    }).encode()
+    req = urllib.request.Request('https://api.github.com/graphql', data=body, headers={
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'User-Agent': UA['User-Agent']
+    })
+    with urllib.request.urlopen(req, timeout=30) as res:
+        data = json.load(res)
+    if data.get('errors'):
+        raise RuntimeError(data['errors'][0].get('message', 'GraphQL 查询失败'))
+    days = {}
+    for week in data['data']['user']['contributionsCollection']['contributionCalendar']['weeks']:
+        for day in week['contributionDays']:
+            days[day['date'][:10]] = day['contributionCount']
+    # 裁到 390 天窗口（与公开路径一致，> 前端 54 周(378 天)）
+    frm = (today - timedelta(days=390)).isoformat()
+    return {d: c for d, c in days.items() if frm <= d <= today.isoformat()}
 
 
 def parse_calendar(html):
@@ -91,12 +132,21 @@ def from_events():
 def main():
     days = {}
     source = 'none'
-    try:
-        days = from_contributions()
-        if days:
-            source = 'contributions'
-    except Exception as e:
-        print('contributions 源失败:', e)
+    token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
+    if token:
+        try:
+            days = from_graphql(token)
+            if days:
+                source = 'contributions-private' # 本人 PAT 视角，含私有仓库贡献
+        except Exception as e:
+            print('GraphQL 源失败:', e)
+    if not days:
+        try:
+            days = from_contributions()
+            if days:
+                source = 'contributions'
+        except Exception as e:
+            print('contributions 源失败:', e)
     if not days:
         try:
             days = from_events()
