@@ -82,11 +82,11 @@ bestEl.textContent=best;
 
 // ---------- 状态 ----------
 let state='ready';   // ready / playing / paused / over
-let snake, dir, queue, food, eaten, score, stepMs, acc, shownScore;
+let snake, dir, queue, food, eaten, score, stepMs, acc;
 let floats=[], overAt=0;   // 得分浮字与死亡时刻（撞击红闪用）
 function reset(){
   snake=[{x:11,y:12},{x:10,y:12},{x:9,y:12}];
-  dir={x:1,y:0}; queue=[]; eaten=0; score=0; stepMs=160; acc=0; shownScore=-1;
+  dir={x:1,y:0}; queue=[]; eaten=0; score=0; stepMs=160; acc=0;
   floats=[];
   placeFood(); scoreEl.textContent='0';
 }
@@ -124,6 +124,7 @@ function step(){
   snake.unshift(h);
   if(eat){
     eaten++;score+=10;
+    scoreEl.textContent=score;                 // 同步 HUD 分数
     floats.push({x:h.x*CELL+10,y:h.y*CELL+10,t:40});   // 得分浮字
     stepMs=Math.max(70,160-eaten*4);          // 速度随长度渐进加快
     placeFood();
