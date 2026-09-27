@@ -72,9 +72,24 @@ def main():
     if not out:
         raise SystemExit('一首歌词都没取到，放弃写入（避免把文件清空）')
 
-    with open(OUT, 'w', encoding='utf-8') as f:
-        json.dump(out, f, ensure_ascii=False)
+    # 接口半残只取回零头时保留旧库整库不写（覆盖缩水后要等接口恢复才补得回来）
+    try:
+        old_n = len(json.load(open(OUT, encoding='utf-8')))
+    except Exception:
+        old_n = 0
+    if old_n and len(out) * 2 < old_n:
+        raise SystemExit(f'仅取回 {len(out)}/{old_n} 首歌词（低于 50%），疑似接口异常，放弃写入')
+
+
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
         f.write('\n')
+    os.replace(tmp, path)
+
+    write_json(OUT, out, indent=None)
     size = os.path.getsize(OUT) // 1024
     print(f'已写入 lyrics.json：{len(out)}/{len(ids)} 首有歌词，缺 {len(miss)} 首，约 {size}KB')
     if miss:

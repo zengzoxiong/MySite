@@ -79,9 +79,20 @@ def build():
 
 def main():
     data = build()
-    with open(OUT, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    if len(data['tracks']) < 20:
+        # 榜单接口半残只解析出零头曲目时保留旧文件，别让 50 首歌单一夜缩水
+        raise RuntimeError(f'仅解析到 {len(data["tracks"])} 首曲目（<20），疑似接口异常，放弃写入')
+
+
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
         f.write('\n')
+    os.replace(tmp, path)
+
+    write_json(OUT, data)
     print(f'已更新 explore.json：{len(data["tracks"])} 首（{data["source"]["date"]}）')
     sys.exit(0)
 

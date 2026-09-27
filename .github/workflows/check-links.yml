@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# 写数据的定时任务共用一条队列，谁在跑后面的等，避免相邻任务同时 push 互相顶掉
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest

@@ -61,30 +61,6 @@
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-        }
-
-        .accent-dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            padding: 0;
-            position: relative;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-
-        .accent-dot:hover { transform: scale(1.15); }
-
-        .accent-dot.active {
-            box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--text-primary);
-        }
-
-        .accent-dots {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
             margin-top: 2px;
         }
 
@@ -172,8 +148,12 @@
 
     <script>
         const KEY_ANIM = 'animEnabled', KEY_FOCUS = 'focusFirst';
+        // 隐私模式/站点数据被禁时读写会抛异常，统一走安全通道
+        const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+        const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* 忽略 */ } };
+        const lsDel = (k) => { try { localStorage.removeItem(k); } catch (e) { /* 忽略 */ } };
         const notify = (type) => {
-            try { parent.postMessage({ type }, '*'); } catch (e) { /* 独立打开时无父页 */ }
+            try { parent.postMessage({ type }, location.origin); } catch (e) { /* 独立打开时无父页 */ }
         };
         const AP = window.SiteAppearance;
 
@@ -188,7 +168,7 @@
         const applyTheme = () => { themeSelect.value = AP.applyThemeMode(); };
         applyTheme();
         themeSelect.addEventListener('change', () => {
-            localStorage.setItem(AP.KEY_THEME, themeSelect.value);
+            lsSet(AP.KEY_THEME, themeSelect.value);
             applyTheme();
             notify('settings-changed');
         });
@@ -197,22 +177,22 @@
         // 动画效果
         const animBox = document.getElementById('settingAnim');
         const applyAnim = () => {
-            const on = localStorage.getItem(KEY_ANIM) !== 'off';
+            const on = lsGet(KEY_ANIM) !== 'off';
             document.body.classList.toggle('no-anim', !on);
             animBox.checked = on;
         };
         applyAnim();
         animBox.addEventListener('change', () => {
-            localStorage.setItem(KEY_ANIM, animBox.checked ? 'on' : 'off');
+            lsSet(KEY_ANIM, animBox.checked ? 'on' : 'off');
             document.body.classList.toggle('no-anim', !animBox.checked);
             notify('settings-changed');
         });
 
         // 搜索聚焦首条
         const focusBox = document.getElementById('settingFocusFirst');
-        focusBox.checked = localStorage.getItem(KEY_FOCUS) !== 'off';
+        focusBox.checked = lsGet(KEY_FOCUS) !== 'off';
         focusBox.addEventListener('change', () => {
-            localStorage.setItem(KEY_FOCUS, focusBox.checked ? 'on' : 'off');
+            lsSet(KEY_FOCUS, focusBox.checked ? 'on' : 'off');
         });
 
         // ===== 主题色（预设清单来自 assets/appearance.js） =====
@@ -220,7 +200,7 @@
         const KEY_ACCENT = AP.KEY_ACCENT;
 
         function readAccentSaved() {
-            try { return JSON.parse(localStorage.getItem(KEY_ACCENT) || 'null'); }
+            try { return JSON.parse(lsGet(KEY_ACCENT) || 'null'); }
             catch (e) { return null; }
         }
 
@@ -235,7 +215,7 @@
                 dot.title = a.name;
                 dot.setAttribute('aria-label', '主题色：' + a.name);
                 dot.addEventListener('click', () => {
-                    localStorage.setItem(KEY_ACCENT, JSON.stringify({ id: a.id, p: a.p, s: a.s }));
+                    lsSet(KEY_ACCENT, JSON.stringify({ id: a.id, p: a.p, s: a.s }));
                     AP.applyAccent(a.id);
                     notify('accent-changed');
                     renderAccentDots();
@@ -264,13 +244,13 @@
         fillSelect(clockSelect, AP.CLOCK_STYLES);
 
         fontSelect.addEventListener('change', () => {
-            localStorage.setItem(AP.KEY_FONT, fontSelect.value);
+            lsSet(AP.KEY_FONT, fontSelect.value);
             notify('settings-changed'); // 先让父页并行去加载，别等本页字体就绪
             AP.applySiteFont(fontSelect.value); // 本页（iframe）也跟着换字体
         });
 
         clockSelect.addEventListener('change', () => {
-            localStorage.setItem(AP.KEY_CLOCK, clockSelect.value);
+            lsSet(AP.KEY_CLOCK, clockSelect.value);
             notify('settings-changed');
         });
 
@@ -321,8 +301,13 @@
             return row;
         }
 
-        function renderCityList(items, loading) {
+        function renderCityList(items, loading, failText) {
             cityList.innerHTML = '';
+            if (failText) {
+                cityList.appendChild(cityRow(null, failText));
+                cityList.hidden = false;
+                return;
+            }
             if (loading) {
                 cityList.appendChild(cityRow(null, '搜索中…'));
                 cityList.hidden = false;
@@ -362,13 +347,17 @@
             hideCityList();
         }
 
+        let citySearchSeq = 0;
         citySearch.addEventListener('input', () => {
             clearTimeout(citySearchTimer);
+            const seq = ++citySearchSeq;
             const q = citySearch.value.trim();
             if (!q) { hideCityList(); return; }
             renderCityList(null, true);
             citySearchTimer = setTimeout(() => {
-                searchCity(q).then((items) => renderCityList(items)).catch(() => renderCityList([]));
+                searchCity(q)
+                    .then((items) => { if (seq === citySearchSeq) renderCityList(items); })
+                    .catch(() => { if (seq === citySearchSeq) renderCityList(null, false, '搜索失败，请稍后再试'); });
             }, 300);
         });
         citySearch.addEventListener('keydown', (e) => {
@@ -383,13 +372,13 @@
         });
 
         function syncFontFromStorage() {
-            const id = AP.fontById(localStorage.getItem(AP.KEY_FONT)).id;
+            const id = AP.fontById(lsGet(AP.KEY_FONT)).id;
             fontSelect.value = id;
             return AP.applySiteFont(id); // 本页（iframe）也跟着换字体
         }
 
         function syncClockFromStorage() {
-            clockSelect.value = AP.clockStyleById(localStorage.getItem(AP.KEY_CLOCK)).id;
+            clockSelect.value = AP.clockStyleById(lsGet(AP.KEY_CLOCK)).id;
         }
 
         syncFontFromStorage();
@@ -400,7 +389,7 @@
         const clearBtn = document.getElementById('settingClearCache');
         clearBtn.addEventListener('click', () => {
             ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
-                .forEach(k => localStorage.removeItem(k));
+                .forEach(k => lsDel(k));
             notify('clear-cache');
             clearBtn.textContent = '✓';
             setTimeout(() => { clearBtn.textContent = '清除'; }, 1600);

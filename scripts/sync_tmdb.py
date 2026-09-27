@@ -24,12 +24,22 @@ def fetch(url, binary=False, timeout=25):
 
 
 def parse_ld(html):
-    m = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+    # type 属性未必是首个/唯一属性，放宽到任意属性顺序
+    m = re.search(r'<script[^>]+ld\+json[^>]*>(.*?)</script>', html, re.S)
     if not m:
         return None
     txt = m.group(1)
     txt = txt[txt.find('{'):txt.rfind('}') + 1]
     return json.loads(txt)
+
+
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
+        f.write('\n')
+    os.replace(tmp, path)
 
 
 def movie_release(mtype, tid):
@@ -57,7 +67,8 @@ def sync_entry(entry):
 
     if mtype == 'tv':
         sd = ld.get('startDate')
-        release = sd[:10] if sd else None
+        # 年/年月精度（"2016"/"2023-10"）不入库，保留旧值，避免文件里日期格式参差
+        release = sd[:10] if sd and len(sd) >= 10 else None
     else:
         time.sleep(DELAY)
         release = movie_release(mtype, tid)
@@ -73,6 +84,7 @@ def main():
     data = json.load(open(path, encoding='utf-8'))
     changed = 0
     total = 0
+    fails = 0
     for entry in data['items']:
         total += 1
         try:
@@ -80,13 +92,17 @@ def main():
                 changed += 1
                 print(f"[更新] {entry['title']} 评分={entry.get('rating')} 上映={entry.get('release')}")
         except Exception as e:
+            fails += 1
             print(f"[跳过] {entry.get('title')}: {e}")
         time.sleep(DELAY)
 
+    # 大面积解析失败说明 TMDB 页面结构变了，宁可红灯也不能静默“无更新”
+    if total and fails * 10 >= total * 3:
+        print(f'解析失败率过高（{fails}/{total}），TMDB 页面结构可能已变化')
+        sys.exit(1)
+
     if changed:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-            f.write('\n')
+        write_json(path, data)
     print(f'完成：{total} 条中更新 {changed} 条')
     sys.exit(0)
 

@@ -28,6 +28,16 @@ def fetch(url):
         return res.read().decode('utf-8', errors='ignore')
 
 
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
+        f.write('\n')
+    os.replace(tmp, path)
+
+
+
 def from_graphql(token):
     """近一年每日贡献数（含私有仓库）：本人 PAT 视角的 contributionsCollection
     自动计入私有贡献，无需额外参数（includePrivateContributions 已从 schema 移除）。"""
@@ -155,7 +165,7 @@ def main():
         except Exception as e:
             print('events 源失败:', e)
     out = {'user': USER, 'source': source, 'fetchedAt': date.today().isoformat(), 'days': days}
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    write_json(OUT, out)
     print(f'贡献同步完成：source={source}，{len(days)} 天有记录，共 {sum(days.values())} 次')
 
 

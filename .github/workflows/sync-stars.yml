@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# 写数据的定时任务共用一条队列，谁在跑后面的等，避免相邻任务同时 push 互相顶掉
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -19,6 +24,8 @@ jobs:
           python-version: '3.12'
 
       - name: 拉取 GitHub Stars 并更新 stars.json
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # 带认证避开共享 IP 的匿名限额
         run: python scripts/sync_stars.py
 
       - name: 有变化时提交

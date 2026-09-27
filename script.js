@@ -1,6 +1,6 @@
 // 全局状态
 let allLinks = [];
-let linkHealth = {}; // 死链体检结果（工作流每周写 data/link-health.json），失效链接出角标
+let linkHealth = {}; // 死链体检结果（工作流每周二凌晨写 data/link-health.json），失效链接出角标
 let allTools = [];
 let mediaData = { types: [], items: [] };
 let pluginsData = { skills: { groups: [] }, mcps: [] };
@@ -10,7 +10,7 @@ let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'skills' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'search'
 let currentPluginCat = '';
 let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
@@ -60,6 +60,17 @@ const cmdkList = document.getElementById('cmdkList');
 // 不能让它把后面的初始化全部拦腰截断（否则时钟/天气/播放器/仪表盘整片挂掉）
 function safeInit(name, fn) {
     try { fn(); } catch (e) { console.error('[拾光集] 初始化失败:', name, e); }
+}
+
+// 隐私模式/站点数据被禁时 localStorage 读写会直接抛异常，统一走安全通道
+function lsGet(key) {
+    try { return lsGet(key); } catch (e) { return null; }
+}
+function lsSet(key, value) {
+    try { lsSet(key, value); } catch (e) { /* 存不上就算了 */ }
+}
+function lsDel(key) {
+    try { lsDel(key); } catch (e) { /* 忽略 */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -341,7 +352,7 @@ async function reversePlaceName(lat, lon) {
     const key = `reverseGeo:${lat.toFixed(2)},${lon.toFixed(2)}`;
     if (reverseGeoCache.has(key)) return reverseGeoCache.get(key);
     let name = '';
-    try { name = localStorage.getItem(key) || ''; } catch (e) { /* 隐私模式忽略 */ }
+    try { name = lsGet(key) || ''; } catch (e) { /* 隐私模式忽略 */ }
     if (!name) {
         try {
             const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-Hans`;
@@ -351,7 +362,7 @@ async function reversePlaceName(lat, lon) {
             name = d.locality || d.city || d.principalSubdivision || '';
             // 去掉市/县/区后缀，与城市搜索的无后缀风格对齐；自治县/自治旗与单字名保留
             if (name.length >= 3 && /[市县区]$/.test(name) && !name.endsWith('自治县') && !name.endsWith('自治旗')) name = name.slice(0, -1);
-            try { localStorage.setItem(key, name); } catch (e) { /* 忽略 */ }
+            try { lsSet(key, name); } catch (e) { /* 忽略 */ }
         } catch (e) {
             console.error('反向地理编码失败:', e);
         }
@@ -364,7 +375,13 @@ async function reversePlaceName(lat, lon) {
 // 再决定是否敲接口，定位弹窗 / 接口慢都不再拖首屏，外部请求也减半
 const WEATHER_TTL = 10 * 60 * 1000;
 function readWeatherSnap() {
-    try { return JSON.parse(localStorage.weatherSnap || 'null'); } catch (e) { return null; }
+    try {
+        const s = JSON.parse(localStorage.weatherSnap || 'null');
+        // 老版本快照可能缺字段，直接渲染会露出 undefined——字段齐才认
+        return (s && typeof s.lat === 'number' && typeof s.lon === 'number'
+            && typeof s.icon === 'string' && typeof s.temp === 'string'
+            && typeof s.desc === 'string' && typeof s.extra === 'string') ? s : null;
+    } catch (e) { return null; }
 }
 function writeWeatherSnap(snap) {
     try { localStorage.weatherSnap = JSON.stringify(snap); } catch (e) { /* 忽略 */ }
@@ -414,7 +431,9 @@ async function fetchWeather(city, ctx) {
             lat = snap.lat;
             lon = snap.lon;
         } else {
-            const pos = await Promise.race([geo, new Promise(r => setTimeout(r, 1500))]);
+            let geoTimer;
+            const pos = await Promise.race([geo, new Promise(r => { geoTimer = setTimeout(() => r(null), 1500); })]);
+            clearTimeout(geoTimer);
             if (pos) { lat = pos.lat; lon = pos.lon; }
             else { lat = FALLBACK_CITY.lat; lon = FALLBACK_CITY.lon; }
         }
@@ -434,7 +453,7 @@ async function fetchWeatherAt(lat, lon, labelP, fromAuto, ctx) {
     const [w, l] = await Promise.allSettled([fetchWeatherData(lat, lon), labelP]);
     const label = l.status === 'fulfilled' ? l.value : '';
     if (w.status !== 'fulfilled') {
-        if (!ctx.painted && !ctx.manual) {
+        if (!ctx.painted) {
             document.getElementById('weatherDesc').textContent = label ? `${label} · 天气获取失败` : '天气获取失败';
         }
         console.error('天气加载失败:', w.reason);
@@ -615,7 +634,7 @@ function todayKey(d = new Date()) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 function isCheckedInToday() {
-    try { return !!localStorage.getItem('checkin:' + todayKey()); } catch (e) { return false; }
+    try { return !!lsGet('checkin:' + todayKey()); } catch (e) { return false; }
 }
 
 function buildTodayFortune() {
@@ -639,8 +658,8 @@ function buildTodayFortune() {
 // 连续签到：昨天签过就 +1，断了重计
 function peekCheckinStreak() {
     const today = todayKey();
-    const last = localStorage.getItem('checkinLast');
-    const stored = Number(localStorage.getItem('checkinStreak') || 0);
+    const last = lsGet('checkinLast');
+    const stored = Number(lsGet('checkinStreak') || 0);
     if (last === today) return stored || 1;
     const yest = new Date(); yest.setDate(yest.getDate() - 1);
     return last === todayKey(yest) ? stored + 1 : 1;
@@ -649,9 +668,9 @@ function recordCheckin() {
     const streak = peekCheckinStreak();
     const today = todayKey();
     try {
-        localStorage.setItem('checkin:' + today, String(Date.now()));
-        localStorage.setItem('checkinLast', today);
-        localStorage.setItem('checkinStreak', String(streak));
+        lsSet('checkin:' + today, String(Date.now()));
+        lsSet('checkinLast', today);
+        lsSet('checkinStreak', String(streak));
     } catch (e) { /* 隐私模式下签不了也照样出签，只是不记 */ }
     return streak;
 }
@@ -931,7 +950,8 @@ function closeTalisman() {
     if (modal.hidden) return;
     modal.classList.remove('open');
     document.body.classList.remove('modal-open');
-    setTimeout(() => { modal.hidden = true; }, 200);
+    // 过渡结束后收起；期间若被重新打开（.open 已加回）就不能再藏，否则弹层凭空消失
+    setTimeout(() => { if (!modal.classList.contains('open')) modal.hidden = true; }, 200);
     if (talismanLastFocus && talismanLastFocus.focus) talismanLastFocus.focus();
 }
 
@@ -971,12 +991,14 @@ function initCheckin() {
         saveTalismanPng(document.getElementById('talismanCanvas'), todayKey());
     });
     const copyBtn = document.getElementById('talismanCopy');
+    let copyResetTimer = 0;
     copyBtn.addEventListener('click', () => {
         const old = copyBtn.textContent;
+        clearTimeout(copyResetTimer); // 连点时只保留最后一次的恢复计划
         copyTalismanPng(document.getElementById('talismanCanvas'))
             .then(() => { copyBtn.textContent = '已复制'; })
             .catch(() => { copyBtn.textContent = '不支持复制'; });
-        setTimeout(() => { copyBtn.textContent = old; }, 1600);
+        copyResetTimer = setTimeout(() => { copyBtn.textContent = old; }, 1600);
     });
     // ESC 只关签符弹层，不触发全局“回首页”
     document.addEventListener('keydown', (e) => {
@@ -1059,7 +1081,7 @@ async function initGitHubStats() {
 }
 
 // --- GitHub 贡献热力图（右上角展开面板） ---
-// 数据由 .github/workflows/sync-ghactivity.yml 每周写 data/gh-activity.json：
+// 数据由 .github/workflows/sync-ghactivity.yml 每日写 data/gh-activity.json：
 // { fetchedAt, days: { 'YYYY-MM-DD': 次数 } }
 let ghActivity = null;
 
@@ -1082,7 +1104,7 @@ function renderGhHeat() {
     const fetchedEl = document.getElementById('ghFetched');
     const days = ghActivity && ghActivity.days;
     if (!days) {
-        heat.innerHTML = '<span class="gh-empty">暂无贡献数据（工作流每周一同步）</span>';
+        heat.innerHTML = '<span class="gh-empty">暂无贡献数据（工作流每日同步）</span>';
         totalEl.textContent = '';
         fetchedEl.textContent = '';
         return;
@@ -1120,14 +1142,14 @@ const TODO_KEY = 'dashboardTodos';
 
 function getTodos() {
     try {
-        return JSON.parse(localStorage.getItem(TODO_KEY)) || [];
+        return JSON.parse(lsGet(TODO_KEY)) || [];
     } catch {
         return [];
     }
 }
 
 function saveTodos(todos) {
-    localStorage.setItem(TODO_KEY, JSON.stringify(todos));
+    lsSet(TODO_KEY, JSON.stringify(todos));
 }
 
 function todoItemHtml(t) {
@@ -1211,13 +1233,13 @@ function initSectionToggles() {
     document.querySelectorAll('.sidebar-section-title[data-section]').forEach(btn => {
         const section = btn.closest('.sidebar-section');
         const key = 'sidebarSection_' + btn.dataset.section;
-        if (localStorage.getItem(key) !== 'expanded') {
+        if (lsGet(key) !== 'expanded') {
             // 默认收起，只有显式保存过 expanded 才展开
             section.classList.add('section-collapsed');
         }
         btn.addEventListener('click', () => {
             section.classList.toggle('section-collapsed');
-            localStorage.setItem(key, section.classList.contains('section-collapsed') ? 'collapsed' : 'expanded');
+            lsSet(key, section.classList.contains('section-collapsed') ? 'collapsed' : 'expanded');
         });
     });
 }
@@ -1299,7 +1321,7 @@ function renderGhStars(animate = false) {
                 <select id="starsSort">${sortOptions}</select>
             </label>
         </div>
-        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + starsData.updated : ''}</div>
+        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + escapeHtml(starsData.updated) : ''}</div>
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
     recalcMarquee();
@@ -1336,6 +1358,7 @@ function mpRenderNow() {
     mp.el.song.textContent = t.title;
     mp.el.artist.textContent = t.artist || '';
     if (t.cover) mp.el.cover.src = t.cover;
+    else mp.el.cover.removeAttribute('src'); // 不清会残留上一首的封面
     mp.el.time.textContent = `0:00 / ${fmtTime(t.dur)}`;
     mp.el.fill.style.width = '0%';
     mp.el.list.querySelectorAll('.on').forEach(n => n.classList.remove('on'));
@@ -1434,14 +1457,14 @@ function mpUseList(list, autoplay) {
 function mpSetMode(mode) {
     mp.mode = mode;
     mp.fails = 0;
-    localStorage.setItem('mpMode', mode);
+    lsSet('mpMode', mode);
     mpShowMode();
     if (mode === 'explore') mpLoadExplore();
     else mpUseList(mp.playlist);
 }
 
 function mpLoadExplore() {
-    if (mp.explore) {
+    if (mp.explore && mp.explore.length) {
         mp.tracks = mp.explore;
         mp.el.list.innerHTML = mpListHtml();
         mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
@@ -1458,7 +1481,7 @@ function mpLoadExplore() {
             mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
         })
         .catch(() => {
-            mp.explore = [];
+            mp.explore = null; // 置空而非 []：[] 是 truthy 会把失败缓存成“已加载”，模式卡死无法重试
             if (mp.mode === 'explore') mpSetMode('loop');
         });
 }
@@ -1575,13 +1598,13 @@ function initMusicPlayer() {
         mp.el.vol.style.setProperty('--v', v);
         mp.el.volWrap.dataset.lv = v <= 0 ? 0 : v < 0.34 ? 1 : v < 0.67 ? 2 : 3;
     };
-    const savedVol = localStorage.getItem('mpVolume');
+    const savedVol = lsGet('mpVolume');
     mp.audio.volume = savedVol === null ? 1 : Number(savedVol);
     mp.el.vol.value = mp.audio.volume;
     syncVol();
 
     // 静音：点小喇叭切换，记忆状态；图标打叉变红，音量条填充归零展示
-    mp.audio.muted = localStorage.getItem('mpMuted') === '1';
+    mp.audio.muted = lsGet('mpMuted') === '1';
     const syncMute = () => {
         mp.el.volWrap.dataset.muted = mp.audio.muted ? '1' : '0';
         const muteBtn = document.getElementById('mpMuteToggle');
@@ -1592,23 +1615,28 @@ function initMusicPlayer() {
         } else syncVol(); // 解除静音恢复滑块值
     };
     syncMute();
-    document.getElementById('mpMuteToggle').addEventListener('click', () => {
+    const toggleMute = () => {
         mp.audio.muted = !mp.audio.muted;
-        localStorage.setItem('mpMuted', mp.audio.muted ? '1' : '0');
+        lsSet('mpMuted', mp.audio.muted ? '1' : '0');
         syncMute();
+    };
+    const muteToggle = document.getElementById('mpMuteToggle');
+    muteToggle.addEventListener('click', toggleMute);
+    muteToggle.addEventListener('keydown', (e) => { // span[role=button] 的键盘承诺
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMute(); }
     });
     mp.el.vol.addEventListener('input', () => {
         mp.audio.volume = Number(mp.el.vol.value);
         if (mp.audio.muted) { // 拖音量条 = 想要声音，顺手解除静音
             mp.audio.muted = false;
-            localStorage.setItem('mpMuted', '0');
+            lsSet('mpMuted', '0');
             syncMute();
         }
-        localStorage.setItem('mpVolume', mp.el.vol.value);
+        lsSet('mpVolume', mp.el.vol.value);
         syncVol();
     });
 
-    const savedMode = localStorage.getItem('mpMode');
+    const savedMode = lsGet('mpMode');
     if (MP_MODES.includes(savedMode)) mp.mode = savedMode;
     mpShowMode();
     mp.el.mode.addEventListener('click', () => mpSetMode(MP_MODES[(MP_MODES.indexOf(mp.mode) + 1) % MP_MODES.length]));
@@ -1642,7 +1670,8 @@ function initMusicPlayer() {
         const l = mp.lyricLines[Number(line.dataset.i)];
         if (!l) return;
         mpPlayToggle(true);
-        const seek = () => { mp.audio.currentTime = l.t; };
+        const cur = () => mp.tracks[mp.idx] || {};
+        const seek = () => { if (mp.audio.src === cur().src) mp.audio.currentTime = l.t; };
         if (mp.audio.readyState >= 1) seek();
         else mp.audio.addEventListener('loadedmetadata', seek, { once: true });
     });
@@ -1659,6 +1688,7 @@ function initMusicPlayer() {
     mp.audio.addEventListener('error', () => {
         const t = mp.tracks[mp.idx];
         if (!t || mp.audio.src !== t.src) return; // 换曲打断的旧请求
+        mp.loaded = false; // 连跳放弃后同曲再点播放要重挂 src，否则假显示播放中无声
         mpSetBusy(false);
         mpSyncUI();
         // 探索榜单可能混入已变灰的版权曲，连续跳过几首仍失败才提示
@@ -1839,47 +1869,6 @@ async function loadLinks() {
     }
 }
 
-// 技能卡片构建（视图与搜索复用）：无图标，标题行 + 命令行 + 来源
-function skillCardHtml(s) {
-    const install = s.upstream === 'local-only'
-        ? ''
-        : `npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}`;
-    const link = s.upstream === 'local-only' ? ''
-        : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
-    return `
-    <div class="skill-card">
-        <div class="skill-title-row">
-            <span class="skill-name">${escapeHtml(s.name)}</span>
-            ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
-            ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
-            ${install ? `<button class="copy-btn" data-cmd="${install}">复制</button>` : ''}
-        </div>
-        ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
-        <div class="skill-meta">${link}</div>
-    </div>`;
-}
-
-// MCP 卡片构建：说明 + 可展开配置 + 官方页面
-function mcpCardHtml(m) {
-    const configText = escapeHtml(JSON.stringify(m.config, null, 2));
-    const home = m.homepage
-        ? `<a class="skill-link" href="${m.homepage}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
-        : '<span class="skill-link">本地自部署</span>';
-    return `
-    <div class="skill-card">
-        <div class="skill-title-row">
-            <span class="skill-name">${escapeHtml(m.name)}</span>
-            <span class="skill-tag">${m.type === 'http' ? 'HTTP' : 'STDIO'}</span>
-        </div>
-        <div class="skill-desc">${escapeHtml(m.desc)}</div>
-        <details class="config-block">
-            <summary>配置方法</summary>
-            <pre>${configText}</pre>
-        </details>
-        <div class="skill-meta">${home}</div>
-    </div>`;
-}
-
 // GitHub Stars 卡片构建：≥1000 显示 x.xk（一位小数）
 function fmtStars(n) {
     return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
@@ -1887,14 +1876,14 @@ function fmtStars(n) {
 
 function starCardHtml(r) {
     return `
-    <a class="skill-card" href="${r.url}" target="_blank" rel="noopener noreferrer">
+    <a class="skill-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">
         <div class="skill-title-row">
             <span class="skill-name">${escapeHtml(r.full_name)}</span>
             <span class="skill-stars">★ ${fmtStars(r.stars)}</span>
         </div>
         ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
         <div class="skill-meta">
-            <span class="skill-tag">星标于 ${r.starred_at}</span>
+            <span class="skill-tag">星标于 ${escapeHtml(r.starred_at)}</span>
         </div>
     </a>`;
 }
@@ -1903,18 +1892,18 @@ function starCardHtml(r) {
 function skillCardHtml(s) {
     const install = s.upstream === 'local-only'
         ? ''
-        : `npx skills add ${s.upstream}${s.local ? '/' + s.name : ''}`;
+        : `npx skills add ${escapeHtml(s.upstream)}${s.local ? '/' + escapeHtml(s.name) : ''}`;
     const link = s.upstream === 'local-only' ? ''
-        : `<a class="skill-link" href="https://github.com/${s.upstream}${s.local ? '/tree/main/skills/' + s.name : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
+        : `<a class="skill-link" href="https://github.com/${escapeHtml(s.upstream)}${s.local ? '/tree/main/skills/' + escapeHtml(s.name) : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
     return `
     <div class="skill-card">
         <div class="skill-title-row">
             <span class="skill-name">${escapeHtml(s.name)}</span>
             ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
             ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
-            ${install ? `<button class="copy-btn" data-cmd="${install}">复制</button>` : ''}
+            ${install ? `<button class="copy-btn" data-cmd="${escapeHtml(install)}">复制</button>` : ''}
         </div>
-        ${install ? `<div class="skill-cmd"><code>${install}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
+        ${install ? `<div class="skill-cmd"><code>${escapeHtml(install)}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
         <div class="skill-meta">${link}</div>
     </div>`;
 }
@@ -1923,7 +1912,7 @@ function skillCardHtml(s) {
 function mcpCardHtml(m) {
     const configText = escapeHtml(JSON.stringify(m.config, null, 2));
     const home = m.homepage
-        ? `<a class="skill-link" href="${m.homepage}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
+        ? `<a class="skill-link" href="${escapeHtml(m.homepage)}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
         : '<span class="skill-link">本地自部署</span>';
     return `
     <div class="skill-card">
@@ -1987,27 +1976,10 @@ function bindCopyButtons() {
 function renderSidebarTools() {
     const categories = [...new Set(allTools.map(t => t.category))];
     sidebarTools.innerHTML = categories.map(cat => `
-        <div class="sidebar-item" role="button" tabindex="0" data-tool-category="${cat}">
-            <span class="item-text">${cat}</span>
+        <div class="sidebar-item" role="button" tabindex="0" data-tool-category="${escapeHtml(cat)}">
+            <span class="item-text">${escapeHtml(cat)}</span>
         </div>
     `).join('');
-
-    // 绑定工具分类点击事件
-    sidebarTools.addEventListener('click', (e) => {
-        const item = e.target.closest('.sidebar-item');
-        if (!item) return;
-        sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        homeNav.classList.remove('active');
-        currentToolCategory = item.dataset.toolCategory;
-        currentView = 'tools';
-        searchFrom = 'tools';
-        searchInput.value = '';
-        renderTools(true);
-        if (window.innerWidth <= 768) {
-            closeMobileMenu();
-        }
-    });
 }
 
 // 渲染侧栏分类区
@@ -2017,8 +1989,8 @@ function renderSidebarCategories(categories) {
             <span class="item-text">我的 Stars</span>
         </div>
     ` + categories.map(cat => `
-        <div class="sidebar-item" role="button" tabindex="0" data-category="${cat}">
-            <span class="item-text">${cat}</span>
+        <div class="sidebar-item" role="button" tabindex="0" data-category="${escapeHtml(cat)}">
+            <span class="item-text">${escapeHtml(cat)}</span>
         </div>
     `).join('');
 }
@@ -2052,10 +2024,10 @@ function buildLinkCard(link, i) {
         : '';
     // 尝试加载 favicon，两级失败后回退到 emoji
     const faviconHtml = domain
-        ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${escapeJs(emojiIcon)}'};" width="32" height="32" loading="lazy">`
+        ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${escapeJs(escapeHtml(emojiIcon))}'};" width="32" height="32" loading="lazy">`
         : emojiIcon;
     return `
-    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
+    <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-card">
         <div class="icon">${faviconHtml}</div>
         <div class="info">
             <div class="title">${escapeHtml(link.title)}${deadBadge}</div>
@@ -2068,7 +2040,7 @@ function buildLinkCard(link, i) {
 function buildToolCard(tool, i) {
     const faviconUrl = tool.icon || '';
     return `
-    <a href="tools/${tool.path}" target="_blank" rel="noopener noreferrer" class="link-card">
+    <a href="tools/${escapeHtml(tool.path)}" target="_blank" rel="noopener noreferrer" class="link-card">
         <div class="icon">${faviconUrl ? `<span style="font-size:1.2rem">${escapeHtml(faviconUrl)}</span>` : '🔧'}</div>
         <div class="info">
             <div class="title">${escapeHtml(tool.name)}</div>
@@ -2079,14 +2051,16 @@ function buildToolCard(tool, i) {
 }
 
 function buildMediaCard(item, i) {
-    const title = escapeHtml(item.title || '');
+    const rawTitle = item.title || '';
+    const title = escapeHtml(rawTitle);
+    const phChar = escapeHtml(rawTitle.charAt(0)); // 占位字取原始标题，转义串开头当字形会露 &amp; 之类
     const statusClass = item.status === '在看' ? ' watching' : (item.status === '想看' ? ' wish' : '');
     const gradient = TYPE_GRADIENTS[item.type] || TYPE_GRADIENTS['默认'];
     return `
-    <${item.url ? 'a' : 'div'} class="media-card"${item.url ? ` href="${item.url}" target="_blank" rel="noopener noreferrer"` : ''}>
+    <${item.url ? 'a' : 'div'} class="media-card"${item.url ? ` href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"` : ''}>
         <div class="media-cover">
-            <div class="media-ph" style="background:${gradient}"><span class="ph-char">${title.charAt(0)}</span><span class="ph-title">${title}</span></div>
-            ${item.cover ? `<img src="${item.cover}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
+            <div class="media-ph" style="background:${gradient}"><span class="ph-char">${phChar}</span><span class="ph-title">${title}</span></div>
+            ${item.cover ? `<img src="${escapeHtml(item.cover)}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
             ${item.status ? `<span class="badge-status${statusClass}">${escapeHtml(item.status)}</span>` : ''}
             ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
             ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}
@@ -2242,7 +2216,7 @@ function initAnimSetting() {
 }
 
 function applyAnimFromStorage() {
-    document.body.classList.toggle('no-anim', localStorage.getItem('animEnabled') === 'off');
+    document.body.classList.toggle('no-anim', lsGet('animEnabled') === 'off');
 }
 
 // 界面字体：字体清单与按需加载都在 assets/appearance.js（settings.html 共用同一份）
@@ -2252,7 +2226,7 @@ function applyFontFromStorage() {
 
 // 搜索回车聚焦首条结果
 function focusFirstResult() {
-    if (localStorage.getItem('focusFirst') === 'off') return;
+    if (lsGet('focusFirst') === 'off') return;
     const first = linksGrid.querySelector('.link-card') || mediaGrid.querySelector('.media-card');
     if (first) first.focus();
 }
@@ -2270,7 +2244,7 @@ function initSettingsModal() {
     const close = () => {
         settingsModal.classList.remove('open');
         document.body.classList.remove('modal-open');
-        setTimeout(() => { settingsModal.hidden = true; }, 200);
+        setTimeout(() => { if (!settingsModal.classList.contains('open')) settingsModal.hidden = true; }, 200);
         settingsBtn.focus(); // 焦点还原
     };
     settingsBtn.addEventListener('click', open);
@@ -2286,8 +2260,6 @@ function initSettingsModal() {
     window.addEventListener('message', (e) => {
         if (e.origin !== location.origin) return;
         if (e.data && e.data.type === 'accent-changed') {
-            if (window.SiteAppearance) SiteAppearance.applyAccentFromStorage();
-        } else if (e.data && e.data.type === 'accent-changed') {
             if (window.SiteAppearance) SiteAppearance.applyAccentFromStorage();
         } else if (e.data && e.data.type === 'settings-changed') {
             applyThemeFromStorage();
@@ -2343,28 +2315,31 @@ const IC = {
 
 // 面板动作：外观模式三态循环（浅色→深色→跟随系统）
 function cycleThemeMode() {
+    if (!window.SiteAppearance) return; // appearance.js 加载失败时这三条命令整体跳过
     const order = ['light', 'dark', 'system'];
-    const cur = window.SiteAppearance ? SiteAppearance.themeModeFromStorage() : 'system';
+    const cur = SiteAppearance.themeModeFromStorage();
     const next = order[(order.indexOf(cur) + 1) % order.length];
-    localStorage.setItem(SiteAppearance.KEY_THEME, next);
+    lsSet(SiteAppearance.KEY_THEME, next);
     SiteAppearance.applyThemeMode();
 }
 
 // 面板动作：时钟风格循环（简约→翻页→上滑→叠卡→滚轮→立方）
 function cycleClockStyle() {
+    if (!window.SiteAppearance) return;
     const ids = SiteAppearance.CLOCK_STYLES.map(s => s.id);
     const next = ids[(ids.indexOf(clockStyle) + 1) % ids.length];
-    localStorage.setItem(SiteAppearance.KEY_CLOCK, next);
+    lsSet(SiteAppearance.KEY_CLOCK, next);
     applyClockStyle();
 }
 
 // 面板动作：界面字体循环（含系统默认）
 function cycleSiteFont() {
+    if (!window.SiteAppearance) return;
     const fonts = SiteAppearance.SITE_FONTS;
-    const cur = localStorage.getItem(SiteAppearance.KEY_FONT) || 'system';
+    const cur = lsGet(SiteAppearance.KEY_FONT) || 'system';
     const idx = fonts.findIndex(f => f.id === cur);
     const next = fonts[(idx + 1) % fonts.length];
-    localStorage.setItem(SiteAppearance.KEY_FONT, next.id);
+    lsSet(SiteAppearance.KEY_FONT, next.id);
     SiteAppearance.applySiteFont(next.id);
 }
 
@@ -2376,7 +2351,7 @@ function buildCmdkCommands() {
         { icon: IC.clock, label: '切换首页时钟风格', run: cycleClockStyle },
         { icon: IC.type, label: '切换界面字体', run: cycleSiteFont },
         { icon: IC.motion, label: '切换动画效果', run: () => {
-            localStorage.setItem('animEnabled',
+            lsSet('animEnabled',
                 document.body.classList.contains('no-anim') ? 'on' : 'off');
             applyAnimFromStorage();
         } },
@@ -2409,7 +2384,8 @@ function buildCmdkCommands() {
 }
 
 function toggleCmdk() {
-    cmdk.hidden ? openCmdk() : closeCmdk();
+    // 以 .open 为准（hidden 要等关闭过渡结束才翻转，用它判断会让快速重开失灵）
+    cmdk.classList.contains('open') ? closeCmdk() : openCmdk();
 }
 
 function openCmdk() {
@@ -2425,7 +2401,7 @@ function openCmdk() {
 
 function closeCmdk() {
     cmdk.classList.remove('open');
-    setTimeout(() => { cmdk.hidden = true; }, 150);
+    setTimeout(() => { if (!cmdk.classList.contains('open')) cmdk.hidden = true; }, 150);
     cmdkInput.blur();
 }
 
@@ -2436,7 +2412,7 @@ function renderCmdkList(query) {
         list = [{ icon: IC.search, label: '搜索：' + query, search: query }, ...list];
     }
     cmdkList.innerHTML = list.map((c, i) => `
-        <li class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
+        <li role="option" aria-selected="${i === cmdkActive}" class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
     `).join('');
     cmdkList.__items = list;
     const active = cmdkList.querySelector('.active');
@@ -2500,7 +2476,7 @@ function initPalette() {
 
 // 侧栏
 function initSidebar() {
-    const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    const collapsed = lsGet('sidebarCollapsed') === 'true';
     if (collapsed) {
         sidebar.classList.add('collapsed');
         document.body.classList.add('sidebar-collapsed');
@@ -2511,7 +2487,7 @@ function toggleSidebar() {
     sidebar.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-collapsed');
     const isCollapsed = sidebar.classList.contains('collapsed');
-    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    lsSet('sidebarCollapsed', isCollapsed);
 }
 
 // 移动端菜单
@@ -2527,6 +2503,23 @@ function closeMobileMenu() {
 
 // 事件监听
 function initEventListeners() {
+    // 工具分类点击（事件委托绑容器一次，renderSidebarTools 重渲染不重复绑）
+    sidebarTools.addEventListener('click', (e) => {
+        const item = e.target.closest('.sidebar-item');
+        if (!item) return;
+        sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        homeNav.classList.remove('active');
+        currentToolCategory = item.dataset.toolCategory;
+        currentView = 'tools';
+        searchFrom = 'tools';
+        searchInput.value = '';
+        renderTools(true);
+        if (window.innerWidth <= 768) {
+            closeMobileMenu();
+        }
+    });
+
     // 搜索：全域搜索（收藏 + 工具 + 影视），清空后恢复原视图
     searchInput.addEventListener('input', () => {
         const term = searchInput.value.toLowerCase().trim();
@@ -2666,13 +2659,16 @@ function initEventListeners() {
     // 键盘快捷键
     document.addEventListener('keydown', (e) => {
         // Ctrl/Cmd + K 打开/关闭命令面板
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
             toggleCmdk();
         }
-        // ESC 返回首页并清空搜索
+        // ESC 返回首页并清空搜索；弹层/热力图面板开着时交给它们自己的处理器，
+        // 不回首页（按状态判断而非注册顺序，stopImmediatePropagation 拦不住先注册的监听）
         if (e.key === 'Escape') {
-            goHome();
+            const overlayOpen = ['settingsModal', 'talismanModal', 'cmdk', 'ghPanel']
+                .some((id) => { const el = document.getElementById(id); return el && !el.hidden; });
+            if (!overlayOpen) goHome();
         }
     });
 

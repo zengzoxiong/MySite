@@ -10,12 +10,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def fetch_page(page):
+    headers = {
+        'User-Agent': 'mysite-sync',
+        'Accept': 'application/vnd.github.star+json',  # 返回带 starred_at
+    }
+    # Actions 共享出口 IP 的匿名限额（60 次/时）常被打爆，有 token 就带上
+    token = os.environ.get('GH_TOKEN')
+    if token:
+        headers['Authorization'] = 'Bearer ' + token
     req = urllib.request.Request(
         f'https://api.github.com/users/{USER}/starred?per_page=100&page={page}',
-        headers={
-            'User-Agent': 'mysite-sync',
-            'Accept': 'application/vnd.github.star+json',  # 返回带 starred_at
-        })
+        headers=headers)
     return json.load(urllib.request.urlopen(req, timeout=30))
 
 
@@ -39,10 +44,16 @@ def main():
     items.sort(key=lambda x: x['starred_at'], reverse=True)
 
     path = os.path.join(ROOT, 'data', 'stars.json')
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump({'updated': items[0]['starred_at'] if items else '', 'repos': items},
-                  f, ensure_ascii=False, indent=2)
+
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
         f.write('\n')
+    os.replace(tmp, path)
+
+    write_json(path, {'updated': items[0]['starred_at'] if items else '', 'repos': items})
     print(f'stars.json：{len(items)} 个仓库')
 
 

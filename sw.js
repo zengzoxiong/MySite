@@ -21,8 +21,12 @@ const PRECACHE = [
 ];
 
 self.addEventListener('install', (e) => {
-    self.skipWaiting();
-    e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)));
+    e.waitUntil((async () => {
+        self.skipWaiting();
+        const cache = await caches.open(CACHE);
+        // 单个预缓存失败只跳过该条，别让 install 整体失败卡在旧版本；缺的运行时会补
+        await Promise.all(PRECACHE.map((p) => cache.add(p).catch((err) => console.warn('预缓存跳过:', p, err))));
+    })());
 });
 
 self.addEventListener('activate', (e) => {
@@ -42,9 +46,11 @@ self.addEventListener('fetch', (e) => {
         caches.match(e.request).then((cached) => {
             const fetched = fetch(e.request)
                 .then((res) => {
-                    if (res && res.ok) {
+                    if (res && res.status === 200) { // 206（音频 Range）等不能进 cache.put
                         const clone = res.clone();
-                        caches.open(CACHE).then((c) => c.put(e.request, clone).then(() => trimRuntime(c)));
+                        caches.open(CACHE)
+                            .then((c) => c.put(e.request, clone).then(() => trimRuntime(c)))
+                            .catch(() => { }); // put 失败不影响本次响应
                     }
                     return res;
                 })

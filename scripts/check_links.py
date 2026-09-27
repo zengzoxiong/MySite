@@ -26,6 +26,16 @@ TIMEOUT = 15
 NOW = datetime.now(timezone.utc).strftime('%Y-%m-%d')
 
 
+
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
+        f.write('\n')
+    os.replace(tmp, path)
+
+
 def probe(url):
     """返回 (状态码, 故障类型, 最终url)；故障类型 dns/ssl/net 表示没拿到 HTTP 响应"""
     req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'text/html,*/*'})
@@ -102,9 +112,7 @@ def main():
                    'suspect': len(suspect), 'dead': len(dead)},
         'results': results,
     }
-    with open(dst, 'w', encoding='utf-8') as f:
-        json.dump(out, f, ensure_ascii=False, indent=2)
-        f.write('\n')
+    write_json(dst, out)
     print(f'体检完成：{len(urls)} 条，ok {out["counts"]["ok"]}，suspect {len(suspect)}，dead {len(dead)}')
     for u in dead:
         print('  DEAD   ', u, results[u]['status'], results[u]['reason'])

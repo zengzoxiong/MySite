@@ -27,7 +27,7 @@ MySite/
 │   ├── agent-plugins.json# Agent Skills 注册表 + MCP 清单
 │   ├── stars.json        # GitHub Stars（工作流自动同步，勿手改）
 │   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
-│   ├── gh-activity.json  # GitHub 贡献热力图（工作流每周同步，勿手改）
+│   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
@@ -81,7 +81,7 @@ MySite/
 
 ### 4. Agent Plugin（data/agent-plugins.json）
 
-注册表模式：`groups[].items[]` 每项 `{name, upstream: "owner/repo", local?: true}`，安装命令指向上游作者仓库（内容保持上游最新、署名归原作者）。`upstream: "local-only"` 表示本地技能无公开仓库。MCP 清单在同文件 `mcps[]`（`config` 中密钥一律占位符，绝不提交真实密钥）。
+注册表模式：`skills.groups[].items[]` 每项 `{name, upstream: "owner/repo", local?: true}`，安装命令指向上游作者仓库（内容保持上游最新、署名归原作者）。`upstream: "local-only"` 表示本地技能无公开仓库。MCP 清单在同文件 `mcps[]`（`config` 中密钥一律占位符，绝不提交真实密钥）。
 
 ### 5. 我的 Stars（data/stars.json）
 
@@ -188,9 +188,9 @@ MySite/
 - `sync-tmdb.yml`：每日 05:00（北京）刷新 media.json 的 TMDB 评分/上映时间，有变化才提交
 - `sync-stars.yml`：每日 05:10 同步 GitHub Stars 到 stars.json
 - `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
-- `check-links.yml`：每周一 05:30 体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
+- `check-links.yml`：北京时间每周二 05:30（UTC 周一 21:30）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
 - `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
-- `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（主源 contributions 片段近一年，回退 events 近 90 天），有变化才提交
+- `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
 - 三个工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线
