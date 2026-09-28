@@ -1955,8 +1955,10 @@ body.no-anim .mp-lyric > div {
 
 /* 底部中央：今日一言 */
 .quote-corner {
-    left: 0;
-    right: 0;
+    /* 居中区域夹在左下进度（250px）与右下待办（300px）之间，
+       留 18px 缝隙：窄桌面下三件不再互相压盖 */
+    left: 268px;
+    right: 318px;
     bottom: 4px;
     max-width: 640px;
     margin: 0 auto;
@@ -2731,13 +2733,6 @@ body.no-anim .mp-lyric > div {
     border-top-color: var(--accent-color);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-}
-
-/* 中屏：收窄一言宽度，避免与左下/右下组件重叠 */
-@media (max-width: 1300px) and (min-width: 1151px) {
-    .quote-corner {
-        max-width: 400px;
-    }
 }
 
 /* 窄屏：四角组件改为纵向流式排布 */
