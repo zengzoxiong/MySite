@@ -156,6 +156,17 @@
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #3f9d6d; }
     .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+    .jump { display: inline-flex; gap: 6px; align-items: center; }
+    .jump input {
+      width: 74px;
+      padding: 10px 8px;
+      border: 1px solid #cfe0ee;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 14px;
+      text-align: center;
+      color: #3f5568;
+    }
 
     /* 状态消息 */
     .msg-bar {
@@ -241,6 +252,7 @@
 
     <!-- 统计 -->
     <div class="hud">
+      <div class="stat"><span class="lab">题号</span><span class="val" id="noVal">#1</span></div>
       <div class="stat"><span class="lab">用时</span><span class="val" id="timeVal">00:00</span></div>
       <div class="stat"><span class="lab">提示</span><span class="val" id="hintVal">3</span></div>
       <div class="stat"><span class="lab">最佳</span><span class="val" id="bestVal">--:--</span></div>
@@ -271,7 +283,8 @@
       <button class="btn primary" id="hintBtn" type="button">提示（剩 3 次）</button>
       <button class="btn ghost" id="eraseBtn" type="button">擦除</button>
       <button class="btn ghost" id="restartBtn" type="button">重开本题</button>
-      <button class="btn ghost" id="nextBtn" type="button">换一题</button>
+      <button class="btn ghost" id="nextBtn" type="button">随机抽题</button>
+      <span class="jump"><input id="jumpInput" type="number" min="1" max="999" placeholder="题号" aria-label="题号 1 到 999"><button class="btn ghost" id="jumpBtn" type="button">跳转</button></span>
     </div>
 
     <!-- 状态消息 -->
@@ -304,31 +317,138 @@
 
   <script>
     /* ================= 数独 · 游戏逻辑 =================
-       题库：12 个预设谜题，q 为谜面（. 表示空格），a 为完整答案；
-       所有谜题均通过自验：答案行/列/宫无重复、谜面与答案一致、解唯一。 */
+       题库：种子生成式题库，编号 1-999（入门/中等/困难各一套）。
+       题号 -> 种子 -> 现场生成完整解再挖空（挖空全程校验唯一解）：
+       同编号同难度恒定生成同一题，可把「第 N 题」分享给朋友互相挑战；
+       题面零存储，加载开销与题库规模无关。 */
 
-    const PUZZLES = [
-      { diff: '入门', q: '72.1........8.76....193...238.7.2...596...27121.6953..9.....12.873261.5....5.98.7', a: '728156493439827615651934782384712569596483271217695348945378126873261954162549837' },
-      { diff: '入门', q: '73.94..1.2....13.816..37.2...4..5.8..7.3.81.4...41.7.6392..4.674..78...268...3.4.', a: '738942615249561378165837429914675283576328194823419756392154867451786932687293541' },
-      { diff: '入门', q: '53....46..42.53..9..926...84..5.28717.16..23..2....9.68.7..162..6...5..491432....', a: '538917462642853719179264358496532871781649235325178946857491623263785194914326587' },
-      { diff: '入门', q: '389..26.7..1....3..6......1.12..49.3..59..1.26.31.8.4.73.28...415..6..9.9.85.1376', a: '389412657241675839567893421812754963475936182693128745736289514154367298928541376' },
-      { diff: '中等', q: '4.8.9.326..5.3.1..23..1...5.....753......2.1...216..9..7...1..96218.......9573...', a: '418795326795236148236418975164987532987352614352164897573621489621849753849573261' },
-      { diff: '中等', q: '14..7859.52..6...383.2...6.6..1.7.......4.7..71.82..4.2..9..3.636..8......5.1....', a: '146378592529461873837295164654137928982546731713829645278954316361782459495613287' },
-      { diff: '中等', q: '3....9647..63..9...89.4..139.8.5....2.....4.....27..39.6..235.4......7...9516..2.', a: '312589647746312985589746213938654172271938456654271839167823594823495761495167328' },
-      { diff: '中等', q: '.3251..47...23....91.....63.....793.72.9...1....4816...6...2....9.1..7..5..768.2.', a: '632519847478236591915874263184627935726953418359481672867392154293145786541768329' },
-      { diff: '困难', q: '.57.3..14.........8..9....5.14..9..8...3...2..83.....64.68...32..81.3.......9....', a: '657238914149756283832941765214569378965387421783412596496875132578123649321694857' },
-      { diff: '困难', q: '...........5.3689..2.75....376.2....5..36...1....49....8...51..65.......2...9..6.', a: '163982574745136892928754316376821459594367281812549637489675123657213948231498765' },
-      { diff: '困难', q: '....7.....8.25......9...54.4....98.769..834.....1..........5.769.4.3...8....2..5.', a: '542976183183254769769318542421569837695783421837142695218495376954637218376821954' },
-      { diff: '困难', q: '...5....3541...6.7....2.4...3...7...8......611.6..5.9..1.95......563....6.....8..', a: '762514983541389627398726415239167548854293761176845392417958236985632174623471859' }
-    ];
+    /* mulberry32 伪随机数发生器——同一题号永远复现同一道题的关键 */
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        var t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function shuffled(arr, rnd) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    }
+
+    /* 完整解：对标准解做数字置换 / 行带 / 列堆 / 转置变换，恒为合法终盘 */
+    function genSolution(rnd) {
+      const g = new Array(81);
+      for (let r = 0; r < 9; r++)
+        for (let c = 0; c < 9; c++)
+          g[r * 9 + c] = (r * 3 + Math.floor(r / 3) + c) % 9 + 1;
+      const perm = shuffled([1, 2, 3, 4, 5, 6, 7, 8, 9], rnd);
+      for (let i = 0; i < 81; i++) g[i] = perm[g[i] - 1];
+      const bands = shuffled([0, 1, 2], rnd);
+      const rowsIn = [0, 1, 2].map(function () { return shuffled([0, 1, 2], rnd); });
+      const stacks = shuffled([0, 1, 2], rnd);
+      const colsIn = [0, 1, 2].map(function () { return shuffled([0, 1, 2], rnd); });
+      const out = new Array(81);
+      for (let r = 0; r < 9; r++) {
+        const rr = bands[Math.floor(r / 3)] * 3 + rowsIn[Math.floor(r / 3)][r % 3];
+        for (let c = 0; c < 9; c++) {
+          const cc = stacks[Math.floor(c / 3)] * 3 + colsIn[Math.floor(c / 3)][c % 3];
+          out[r * 9 + c] = g[rr * 9 + cc];
+        }
+      }
+      if (rnd() < 0.5) {
+        const t = new Array(81);
+        for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) t[c * 9 + r] = out[r * 9 + c];
+        return t;
+      }
+      return out;
+    }
+
+    /* 解计数（数到 limit 即停）：挖空时校验唯一解，MRV 剪枝保证速度 */
+    function countSolutions(g, limit) {
+      const rows = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const cols = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const boxes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 81; i++) {
+        const v = g[i];
+        if (!v) continue;
+        const b = 1 << v;
+        rows[Math.floor(i / 9)] |= b;
+        cols[i % 9] |= b;
+        boxes[Math.floor(i / 27) * 3 + Math.floor((i % 9) / 3)] |= b;
+      }
+      let count = 0;
+      function dfs() {
+        if (count >= limit) return;
+        let best = -1, bestMask = 0, bestCnt = 10;
+        for (let i = 0; i < 81; i++) {
+          if (g[i]) continue;
+          const r = Math.floor(i / 9), c = i % 9;
+          const used = rows[r] | cols[c] | boxes[Math.floor(r / 3) * 3 + Math.floor(c / 3)];
+          const mask = ~used & 0x3FE;   // 可用数字位（bit 1-9）
+          let cnt = 0;
+          for (let m = mask; m; m &= m - 1) cnt++;
+          if (cnt === 0) return;
+          if (cnt < bestCnt) { bestCnt = cnt; bestMask = mask; best = i; if (cnt === 1) break; }
+        }
+        if (best === -1) { count++; return; }
+        const r = Math.floor(best / 9), c = best % 9;
+        const box = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+        for (let v = 1; v <= 9; v++) {
+          const b = 1 << v;
+          if (!(bestMask & b)) continue;
+          g[best] = v; rows[r] |= b; cols[c] |= b; boxes[box] |= b;
+          dfs();
+          g[best] = 0; rows[r] ^= b; cols[c] ^= b; boxes[box] ^= b;
+          if (count >= limit) return;
+        }
+      }
+      dfs();
+      return count;
+    }
+
+    /* 挖空：随机顺序逐格尝试移除，唯一解被破坏就还原；
+       目标提示数按难度（入门 40 / 中等 33 / 困难 26） */
+    function digPuzzle(solution, targetGivens, rnd) {
+      const g = solution.slice();
+      const order = shuffled([...Array(81).keys()], rnd);
+      let givens = 81;
+      for (let k = 0; k < order.length && givens > targetGivens; k++) {
+        const i = order[k];
+        const backup = g[i];
+        g[i] = 0;
+        if (countSolutions(g.slice(), 2) === 1) givens--;
+        else g[i] = backup;
+      }
+      return g;
+    }
+
+    const DIFF_GIVENS = { '入门': 40, '中等': 33, '困难': 26 };
+    function generatePuzzle(no, diff) {
+      const diffIdx = ['入门', '中等', '困难'].indexOf(diff);
+      const seed = (no * 2654435761 + (diffIdx + 1) * 40503) >>> 0;
+      const rnd = mulberry32(seed);
+      const solution = genSolution(rnd);
+      const g = digPuzzle(solution, DIFF_GIVENS[diff], rnd);
+      return {
+        diff: diff,
+        no: no,
+        q: g.map(function (v) { return v ? String(v) : '.'; }).join(''),
+        a: solution.join('')
+      };
+    }
 
     // 难度 -> 最佳用时存储键（带 slug 前缀）
     const BEST_KEY = { '入门': 'sudoku_best_easy', '中等': 'sudoku_best_medium', '困难': 'sudoku_best_hard' };
 
     // 游戏状态
     let curDiff = '入门';
-    let curIndex = 0;          // 当前难度下的题号（0-3）
-    let puzzle = null;         // 当前题目 { diff, q, a }
+    let curNo = 1;             // 题库编号 1-999，同编号同难度恒定生成同一题
+    let puzzle = null;         // 当前题目 { diff, no, q, a }
     let grid = [];             // 81 格当前值（0 表示空）
     let given = [];            // 81 格是否预设
     let selected = -1;         // 选中格索引
@@ -499,7 +619,7 @@
       if (isNew) saveBest(curDiff, sec);
       updateBest();
 
-      let msg = '难度 <b>' + curDiff + '</b>，用时 <b>' + fmtTime(sec) + '</b> 完成。<br>';
+      let msg = '题号 <b>#' + curNo + '</b> · 难度 <b>' + curDiff + '</b>，用时 <b>' + fmtTime(sec) + '</b> 完成。<br>';
       if (isNew) msg += '刷新本难度最佳用时。';
       else msg += '本难度最佳用时：' + fmtTime(prev) + '。';
       document.getElementById('winMsg').innerHTML = msg;
@@ -512,9 +632,7 @@
       document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
     }
     function loadPuzzle() {
-      // 在当前难度的 4 题中按 curIndex 取题
-      const list = PUZZLES.filter(function (p) { return p.diff === curDiff; });
-      puzzle = list[curIndex % list.length];
+      puzzle = generatePuzzle(curNo, curDiff);
       grid = [];
       given = [];
       for (let i = 0; i < 81; i++) {
@@ -531,13 +649,25 @@
       document.getElementById('timeVal').textContent = '00:00';
       document.getElementById('hintVal').textContent = '3';
       document.getElementById('hintBtn').textContent = '提示（剩 3 次）';
+      document.getElementById('noVal').textContent = '#' + curNo;
       updateBest();
       render();
       winModal.hidden = true;
-      setMsg('点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。', '');
+      setMsg('题号 #' + curNo + '（' + curDiff + '）。点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。', '');
     }
     function nextPuzzle() {
-      curIndex = (curIndex + 1) % 4;
+      // 从 1-999 编号题库随机抽一题（避开当前题号）
+      let n = 1 + Math.floor(Math.random() * 999);
+      if (n === curNo) n = (n % 999) + 1;
+      curNo = n;
+      loadPuzzle();
+    }
+    function jumpToPuzzle() {
+      const input = document.getElementById('jumpInput');
+      const n = parseInt(input.value, 10);
+      if (!(n >= 1 && n <= 999)) { setMsg('题号范围是 1 到 999。', 'err'); return; }
+      curNo = n;
+      input.value = '';
       loadPuzzle();
     }
 
@@ -549,7 +679,6 @@
       document.querySelectorAll('#diffSeg button').forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
       curDiff = btn.dataset.diff;
-      curIndex = 0;
       loadPuzzle();
     });
 
@@ -576,6 +705,10 @@
     document.getElementById('eraseBtn').addEventListener('click', eraseCell);
     document.getElementById('restartBtn').addEventListener('click', loadPuzzle);
     document.getElementById('nextBtn').addEventListener('click', nextPuzzle);
+    document.getElementById('jumpBtn').addEventListener('click', jumpToPuzzle);
+    document.getElementById('jumpInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); jumpToPuzzle(); }
+    });
     document.getElementById('winNextBtn').addEventListener('click', nextPuzzle);
     document.getElementById('winRetryBtn').addEventListener('click', loadPuzzle);
     document.getElementById('winCloseBtn').addEventListener('click', function () {
