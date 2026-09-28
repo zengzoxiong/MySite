@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>井字棋 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/tic-tac-toe/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{font-size:13px;color:#5f6368;font-variant-numeric:tabular-nums}
+.hud b{color:#202124;font-size:15px;margin:0 2px}
+.panel{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:inline-flex;background:#f1f3f4;border-radius:10px;padding:3px}
+.seg button{font:inherit;border:0;background:transparent;color:#5f6368;font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;cursor:pointer}
+.seg button.on{background:#fff;color:#1a73e8;box-shadow:0 1px 4px rgba(60,64,67,.16);font-weight:600}
+.seg button:active{transform:scale(.96)}
+.status{font-size:14px;color:#5f6368;margin-bottom:12px;text-align:center;min-height:20px}
+/* 棋盘：3x3 玻璃格 */
+.board-wrap{position:relative;width:100%;max-width:360px;margin:0 auto}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{position:relative;aspect-ratio:1/1;border:0;border-radius:12px;background:#f1f3f4;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cell:active{transform:scale(.96)}
+.cell:disabled{cursor:default;transform:none}
+.cell.win{background:#e8f0fe}
+/* X 与 O 用纯 CSS 绘制 */
+.mark{position:relative;width:52%;height:52%;animation:pop .18s ease}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.cell.x .mark::before,.cell.x .mark::after{content:"";position:absolute;left:50%;top:50%;width:100%;height:11%;min-height:8px;border-radius:8px;background:#3c4043}
+.cell.x .mark::before{transform:translate(-50%,-50%) rotate(45deg)}
+.cell.x .mark::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.cell.o .mark{border:10px solid #1a73e8;border-radius:50%;width:52%;height:52%;box-sizing:border-box}
+/* 胜利连线动画 */
+.winline{position:absolute;left:0;top:0;height:8px;border-radius:8px;background:#e5484d;opacity:.85;transform-origin:left center;transform:rotate(0deg) scaleX(0);transition:transform .45s ease;pointer-events:none}
+.winline.show{transform:rotate(var(--angle)) scaleX(1)}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+.btn-plain{background:#f1f3f4;color:#3c4043;padding:9px 18px;font-weight:500}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>井字棋</h1>
+    <div class="hud">胜 <b id="sWin">0</b> · 平 <b id="sDraw">0</b> · 负 <b id="sLose">0</b></div>
+  </header>
+  <div class="panel">
+    <div class="seg" id="diffSeg">
+      <button type="button" data-diff="easy">简单</button>
+      <button type="button" data-diff="hard" class="on">困难</button>
+    </div>
+    <div class="seg" id="firstSeg">
+      <button type="button" data-first="player" class="on">玩家先手</button>
+      <button type="button" data-first="ai">电脑先手</button>
+    </div>
+  </div>
+  <div class="status" id="statusText">你执 X，点击格子落子</div>
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <button class="cell" type="button" data-i="0"></button>
+      <button class="cell" type="button" data-i="1"></button>
+      <button class="cell" type="button" data-i="2"></button>
+      <button class="cell" type="button" data-i="3"></button>
+      <button class="cell" type="button" data-i="4"></button>
+      <button class="cell" type="button" data-i="5"></button>
+      <button class="cell" type="button" data-i="6"></button>
+      <button class="cell" type="button" data-i="7"></button>
+      <button class="cell" type="button" data-i="8"></button>
+    </div>
+    <div class="winline" id="winLine"></div>
+  </div>
+  <div class="actions">
+    <button id="newBtn" type="button">重新开局</button>
+  </div>
+  <p class="tips">玩家执 X，电脑执 O · 电脑先手时双方互换执子<br>困难档使用 minimax 算法几乎不败；简单档有三成概率随手落子</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<script>
+(() => {
+'use strict';
+
+// ================= 元素引用 =================
+const cells = Array.from(document.querySelectorAll('.cell'));
+const statusText = document.getElementById('statusText');
+const winLine = document.getElementById('winLine');
+const sWin = document.getElementById('sWin');
+const sDraw = document.getElementById('sDraw');
+const sLose = document.getElementById('sLose');
+const diffSeg = document.getElementById('diffSeg');
+const firstSeg = document.getElementById('firstSeg');
+const newBtn = document.getElementById('newBtn');
+
+// ================= 比分存取（localStorage，带 slug 前缀） =================
+let score = { win: 0, draw: 0, lose: 0 };
+try {
+  const raw = localStorage.getItem('tic-tac-toe-score');
+  if (raw) {
+    const obj = JSON.parse(raw);
+    for (const k of ['win', 'draw', 'lose']) if (typeof obj[k] === 'number') score[k] = obj[k];
+  }
+} catch (e) { /* 读失败用默认值 */ }
+function saveScore() {
+  try { localStorage.setItem('tic-tac-toe-score', JSON.stringify(score)); } catch (e) {}
+}
+function updateHud() {
+  sWin.textContent = score.win;
+  sDraw.textContent = score.draw;
+  sLose.textContent = score.lose;
+}
+updateHud();
+
+// ================= 对局状态 =================
+const WINS = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],  // 三行
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],  // 三列
+  [0, 4, 8], [2, 4, 6]              // 两斜
+];
+let board = new Array(9).fill('');   // '' / 'X' / 'O'
+let turn = 'X';                      // 当前行棋方
+let playerMark = 'X';                // 玩家执子（先手时 X，电脑先手时 O）
+let aiMark = 'O';
+let diff = 'hard';                   // easy / hard
+let over = false;
+let aiTimer = null;
+
+// 判定胜负：返回胜者标记，平局返回 'D'，未结束返回 ''
+function winnerOf(b) {
+  for (const [a, c, d] of WINS) {
+    if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+  }
+  return b.every(Boolean) ? 'D' : '';
+}
+
+// ================= minimax（3x3 全搜索，几乎不败） =================
+// 返回分值：aiMark 赢为正（越快赢分越高），玩家赢为负（越慢输分越高），平局 0
+function minimax(b, side, depth) {
+  const w = winnerOf(b);
+  if (w === aiMark) return 10 - depth;
+  if (w === playerMark) return depth - 10;
+  if (w === 'D') return 0;
+  let best = side === aiMark ? -Infinity : Infinity;
+  for (let i = 0; i < 9; i++) {
+    if (b[i]) continue;
+    b[i] = side;
+    const s = minimax(b, side === aiMark ? playerMark : aiMark, depth + 1);
+    b[i] = '';
+    best = side === aiMark ? Math.max(best, s) : Math.min(best, s);
+  }
+  return best;
+}
+
+// 电脑选点：困难档取最优；简单档 30% 概率随机落子
+function pickMove() {
+  const empties = [];
+  for (let i = 0; i < 9; i++) if (!board[i]) empties.push(i);
+  if (!empties.length) return -1;
+  if (diff === 'easy' && empties.length > 1 && Math.random() < 0.3) {
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+  let best = -Infinity, move = empties[0];
+  for (const i of empties) {
+    board[i] = aiMark;
+    const s = minimax(board, playerMark, 1);
+    board[i] = '';
+    if (s > best) { best = s; move = i; }
+  }
+  return move;
+}
+
+// ================= 渲染与流程 =================
+function render() {
+  for (let i = 0; i < 9; i++) {
+    const cell = cells[i];
+    cell.classList.toggle('x', board[i] === 'X');
+    cell.classList.toggle('o', board[i] === 'O');
+    if (!board[i]) cell.innerHTML = '';
+    else if (!cell.firstChild) cell.innerHTML = '<span class="mark"></span>';
+  }
+}
+
+function setBusy(busy) {
+  for (const cell of cells) cell.disabled = busy || over || !!board[cell.dataset.i];
+}
+
+function endGame(w) {
+  over = true;
+  setBusy(true);
+  if (w === 'D') {
+    score.draw += 1;
+    statusText.textContent = '棋逢对手，本局平局';
+  } else if (w === playerMark) {
+    score.win += 1;
+    statusText.textContent = '你赢了，漂亮的一局';
+  } else {
+    score.lose += 1;
+    statusText.textContent = '电脑获胜，再接再厉';
+  }
+  saveScore();
+  updateHud();
+  if (w !== 'D') {
+    // 画出胜利连线并播放生长动画
+    const line = WINS.find(([a, c, d]) => board[a] === w && board[a] === board[c] && board[a] === board[d]);
+    for (const i of line) cells[i].classList.add('win');
+    drawWinLine(line);
+  }
+}
+
+// 依据胜线上首尾格子的中心点计算连线的位置、长度与角度
+function drawWinLine(line) {
+  const wrap = document.querySelector('.board-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const gap = 8;
+  const size = (rect.width - gap * 2) / 3;   // 单格边长（棋盘 3 格 + 2 缝）
+  const center = i => {
+    const r = i % 3, c = Math.floor(i / 3);
+    return {
+      x: r * (size + gap) + size / 2,
+      y: c * (size + gap) + size / 2
+    };
+  };
+  const a = center(line[0]), b = center(line[2]);
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.sqrt(dx * dx + dy * dy) + size * 0.5;  // 两端各多出半格更饱满
+  const angle = Math.atan2(dy, dx);
+  winLine.style.left = (a.x - size * 0.25 * Math.cos(angle)) + 'px';
+  winLine.style.top = (a.y - size * 0.25 * Math.sin(angle)) + 'px';
+  winLine.style.width = len + 'px';
+  winLine.style.setProperty('--angle', angle + 'rad');
+  // 先复位再展开，保证每次都触发生长动画
+  winLine.classList.remove('show');
+  void winLine.offsetWidth;
+  winLine.classList.add('show');
+}
+
+function aiMove() {
+  aiTimer = null;
+  if (over) return;
+  const i = pickMove();
+  if (i < 0) return;
+  board[i] = aiMark;
+  render();
+  const w = winnerOf(board);
+  if (w) { endGame(w); return; }
+  turn = playerMark;
+  statusText.textContent = '轮到你了（执 ' + playerMark + '）';
+  setBusy(false);
+}
+
+function newGame() {
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  board = new Array(9).fill('');
+  over = false;
+  turn = 'X';
+  winLine.classList.remove('show');
+  for (const cell of cells) cell.classList.remove('win');
+  render();
+  if (playerMark === 'X') {
+    statusText.textContent = '你执 X，点击格子落子';
+    setBusy(false);
+  } else {
+    // 电脑先手：AI 执 X 立即落子
+    statusText.textContent = '电脑执 X 先手，思考中';
+    setBusy(true);
+    aiTimer = setTimeout(aiMove, 350);
+  }
+}
+
+// ================= 事件 =================
+for (const cell of cells) {
+  cell.addEventListener('click', () => {
+    const i = Number(cell.dataset.i);
+    if (over || turn !== playerMark || board[i]) return;
+    board[i] = playerMark;
+    render();
+    const w = winnerOf(board);
+    if (w) { endGame(w); return; }
+    turn = aiMark;
+    statusText.textContent = '电脑思考中';
+    setBusy(true);
+    aiTimer = setTimeout(aiMove, 300);
+  });
+}
+
+// 难度切换
+diffSeg.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  diff = btn.dataset.diff;
+  for (const b of diffSeg.querySelectorAll('button')) b.classList.toggle('on', b === btn);
+  newGame();
+});
+
+// 先手切换：双方互换执子
+firstSeg.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  for (const b of firstSeg.querySelectorAll('button')) b.classList.toggle('on', b === btn);
+  if (btn.dataset.first === 'player') {
+    playerMark = 'X'; aiMark = 'O';
+  } else {
+    playerMark = 'O'; aiMark = 'X';
+  }
+  newGame();
+});
+
+newBtn.addEventListener('click', newGame);
+
+// ================= 启动 =================
+newGame();
+})();
+</script>
+</body>
+</html>

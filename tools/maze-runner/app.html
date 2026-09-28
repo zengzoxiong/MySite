@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>迷宫寻宝 - 拾光集</title>
+  <meta name="description" content="拾光集在线小游戏：迷宫寻宝，递归回溯随机生成迷宫，三档难度，收集星星赢取三星评级，纯本地运行。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/maze-runner/app.html">
+  <style>
+    /* ===== 迷宫寻宝 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f3f6f9;
+      color: #4d5d6c;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 16px 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 560px; }
+
+    header { margin-bottom: 14px; }
+    h1 { font-size: 30px; color: #3f5568; letter-spacing: 1px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #8ba0b2; line-height: 1.7; }
+
+    /* 难度档位 */
+    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
+    .seg button {
+      flex: 1;
+      border: 1px solid #e2eaf1;
+      background: #fff;
+      color: #5c7186;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(90, 120, 150, .08);
+      touch-action: manipulation;
+    }
+    .seg button.active { background: #4f7ea8; border-color: #4f7ea8; color: #fff; }
+
+    /* 顶部统计 */
+    .hud { display: flex; gap: 10px; margin-bottom: 12px; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(90, 120, 150, .10);
+    }
+    .stat .lab { display: block; font-size: 12px; color: #93a8ba; letter-spacing: 2px; }
+    .stat .val {
+      display: block; margin-top: 2px; font-size: 21px; font-weight: 700;
+      color: #3f5568; font-variant-numeric: tabular-nums;
+    }
+    .stat .val .mini-star { display: inline-block; width: 15px; height: 15px; vertical-align: -2px; }
+
+    /* 迷宫棋盘 */
+    .board-card {
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 4px 18px rgba(90, 120, 150, .12);
+      margin-bottom: 12px;
+    }
+    .board {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      touch-action: none;
+    }
+    .grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+    }
+    .cell {
+      border-style: solid;
+      border-color: #5c6f80;
+      border-width: 0;
+    }
+    .cell.start { background: #e6f4ec; }
+    .cell.exit { background: #fdeeea; }
+
+    /* 棋子层：玩家 / 星星 / 出口旗（内联 SVG，绝对定位随格子尺寸缩放） */
+    .piece {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: left .12s linear, top .12s linear;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .piece svg { width: 82%; height: 82%; }
+    #flagPiece svg { width: 74%; height: 74%; }
+
+    /* 操作按钮 */
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 0;
+      background: #4f7ea8;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 11px 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(79, 126, 168, .35);
+      touch-action: manipulation;
+      flex: 1;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: #3f9d6d; }
+    .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+
+    /* 屏幕方向按钮（手机端） */
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 58px);
+      grid-template-rows: repeat(3, 58px);
+      gap: 8px;
+      margin: 0 auto 12px;
+    }
+    .dpad .btn-d {
+      border: 1px solid #d5e2ed;
+      border-radius: 14px;
+      background: #fff;
+      color: #4f7ea8;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(90, 120, 150, .14);
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dpad .btn-d:active { transform: translateY(1px); background: #eaf2f8; }
+    .dpad .up { grid-column: 2; grid-row: 1; }
+    .dpad .left { grid-column: 1; grid-row: 2; }
+    .dpad .mid { grid-column: 2; grid-row: 2; background: #eef4f9; cursor: default; border-style: none; }
+    .dpad .right { grid-column: 3; grid-row: 2; }
+    .dpad .down { grid-column: 2; grid-row: 3; }
+    .dpad .btn-d svg { width: 26px; height: 26px; }
+
+    /* 玩法说明 */
+    .tips {
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #6b7f91;
+      box-shadow: 0 2px 10px rgba(90, 120, 150, .08);
+      margin-bottom: 14px;
+    }
+    .tips h2 { font-size: 15px; color: #3f5568; margin-bottom: 4px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; }
+    .legend .item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .sw { width: 22px; height: 22px; border-radius: 5px; flex: none; display: flex; align-items: center; justify-content: center; }
+    .sw svg { width: 18px; height: 18px; }
+    .sw.start { background: #e6f4ec; border: 1px solid #bfe0cc; }
+    .sw.exit { background: #fdeeea; border: 1px solid #f2c9be; }
+
+    /* 完成弹层 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(52, 70, 86, .45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 26px 24px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 18px 50px rgba(40, 60, 80, .3);
+    }
+    .modal-card h2 { font-size: 24px; color: #3f9d6d; margin-bottom: 10px; }
+    .modal-card .msg { font-size: 14px; color: #6b7f91; line-height: 1.9; }
+    .modal-card .msg b { color: #3f5568; font-size: 18px; font-variant-numeric: tabular-nums; }
+    .rate { display: flex; justify-content: center; gap: 10px; margin: 12px 0 4px; }
+    .rate svg { width: 42px; height: 42px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-actions .btn { padding: 11px 8px; font-size: 14px; }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #a7b8c6;
+      padding: 6px 0 2px;
+    }
+
+    @media (max-width: 420px) {
+      h1 { font-size: 25px; }
+      .stat .val { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>迷宫寻宝</h1>
+      <p class="sub">从绿色入口出发，找到红色出口。迷宫每次随机生成（递归回溯算法），路上散落 3 颗星星，集齐并在目标时间内抵达出口即可拿到三星评级。</p>
+    </header>
+
+    <!-- 难度档位 -->
+    <div class="seg" id="diffSeg">
+      <button type="button" data-size="11" class="active">简单 11×11</button>
+      <button type="button" data-size="17">中等 17×17</button>
+      <button type="button" data-size="25">困难 25×25</button>
+    </div>
+
+    <!-- 统计 -->
+    <div class="hud">
+      <div class="stat"><span class="lab">步数</span><span class="val" id="stepsVal">0</span></div>
+      <div class="stat"><span class="lab">用时</span><span class="val" id="timeVal">00:00</span></div>
+      <div class="stat"><span class="lab">星星</span><span class="val" id="starVal">0 / 3</span></div>
+      <div class="stat"><span class="lab">最佳</span><span class="val" id="bestVal">--:--</span></div>
+    </div>
+
+    <!-- 迷宫棋盘 -->
+    <div class="board-card">
+      <div class="board" id="board">
+        <div class="grid" id="grid"></div>
+        <div class="piece" id="flagPiece" aria-hidden="true"></div>
+        <div class="piece" id="starPiece0" aria-hidden="true"></div>
+        <div class="piece" id="starPiece1" aria-hidden="true"></div>
+        <div class="piece" id="starPiece2" aria-hidden="true"></div>
+        <div class="piece" id="playerPiece" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="controls">
+      <button class="btn primary" id="newBtn" type="button">换一局（新迷宫）</button>
+      <button class="btn ghost" id="retryBtn" type="button">重走本局</button>
+    </div>
+
+    <!-- 手机端方向按钮 -->
+    <div class="dpad" aria-label="方向控制">
+      <button class="btn-d up" type="button" data-dir="up" aria-label="向上">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 9H5z" fill="currentColor"/></svg>
+      </button>
+      <button class="btn-d left" type="button" data-dir="left" aria-label="向左">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l9-7v14z" fill="currentColor"/></svg>
+      </button>
+      <div class="btn-d mid" aria-hidden="true"></div>
+      <button class="btn-d right" type="button" data-dir="right" aria-label="向右">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12l-9 7V5z" fill="currentColor"/></svg>
+      </button>
+      <button class="btn-d down" type="button" data-dir="down" aria-label="向下">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19l-7-9h14z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <!-- 玩法说明 -->
+    <div class="tips">
+      <h2>玩法说明</h2>
+      <div>目标：从绿色入口走到红色出口，沿途收集 3 颗星星。</div>
+      <div>评级：完成即得 1 星；用时不超过目标时间或集齐 3 颗星星得 2 星；两者同时达成得 3 星。</div>
+      <div>目标时间：简单 60 秒 / 中等 150 秒 / 困难 300 秒。</div>
+      <div>操作：方向键或 W A S D 移动，也可在迷宫上滑动，或点屏幕方向按钮。</div>
+      <div class="legend">
+        <div class="item">
+          <span class="sw start">
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="20" cy="14" r="7" fill="#3f9d6d"/>
+              <path d="M8 34c0-6.6 5.4-12 12-12s12 5.4 12 12z" fill="#3f9d6d"/>
+            </svg>
+          </span>
+          入口（小人）
+        </div>
+        <div class="item">
+          <span class="sw exit">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 3v18" stroke="#8c4a3c" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 4h12l-3 4 3 4H6z" fill="#d9534f"/>
+            </svg>
+          </span>
+          出口
+        </div>
+        <div class="item">
+          <span class="sw">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.6L12 17.5 6.1 20.6l1.2-6.6L2.5 9.4l6.6-.9z" fill="#e0a92e"/>
+            </svg>
+          </span>
+          星星
+        </div>
+      </div>
+    </div>
+
+    <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+  </div>
+
+  <!-- 完成弹层 -->
+  <div class="modal" id="winModal" hidden>
+    <div class="modal-card">
+      <h2>走出迷宫</h2>
+      <div class="rate" id="rateBox"></div>
+      <div class="msg" id="winMsg"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="winNewBtn" type="button">再来一局</button>
+        <button class="btn ghost" id="winCloseBtn" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================= 迷宫寻宝 · 游戏逻辑 =================
+       迷宫生成：递归回溯（深度优先 + 随机邻居），格子四壁用位集合表示
+       星星位置：取解路径 25% / 50% / 75% 处的格子，保证“路上”一定收集得到 */
+
+    const SIZES = [11, 17, 25];
+    const PAR_TIME = { 11: 60, 17: 150, 25: 300 };   // 各难度目标时间（秒）
+
+    let n = 11;                 // 迷宫边长（格数）
+    let walls = [];             // walls[r][c] = {n,e,s,w}，true 表示有墙
+    let visited = [];
+    let stars = [];             // 3 颗星星坐标
+    let player = { r: 0, c: 0 };
+    let steps = 0, collected = 0;
+    let startTime = 0, timerId = null, finished = false;
+
+    const gridEl = document.getElementById('grid');
+    const boardEl = document.getElementById('board');
+    const playerPiece = document.getElementById('playerPiece');
+    const flagPiece = document.getElementById('flagPiece');
+    const starPieces = [
+      document.getElementById('starPiece0'),
+      document.getElementById('starPiece1'),
+      document.getElementById('starPiece2')
+    ];
+
+    /* ---------- localStorage 读写（带 slug 前缀，包 try/catch） ---------- */
+    function bestKey(size) { return 'mazeRunner_best_' + size; }
+    function loadBest(size) {
+      try {
+        const v = localStorage.getItem(bestKey(size));
+        return v === null ? null : parseFloat(v);
+      } catch (e) { return null; }
+    }
+    function saveBest(size, seconds) {
+      try { localStorage.setItem(bestKey(size), String(seconds)); } catch (e) { /* 隐私模式下忽略 */ }
+    }
+
+    /* ---------- 迷宫生成：递归回溯 ---------- */
+    function generateMaze(size) {
+      n = size;
+      walls = [];
+      visited = [];
+      for (let r = 0; r < n; r++) {
+        walls.push([]);
+        visited.push([]);
+        for (let c = 0; c < n; c++) {
+          walls[r].push({ n: true, e: true, s: true, w: true });
+          visited[r].push(false);
+        }
+      }
+      // 递归回溯（用显式栈实现，避免深层递归）
+      const stack = [{ r: 0, c: 0 }];
+      visited[0][0] = true;
+      const dirs = [
+        { dr: -1, dc: 0, a: 'n', b: 's' },
+        { dr: 1, dc: 0, a: 's', b: 'n' },
+        { dr: 0, dc: -1, a: 'w', b: 'e' },
+        { dr: 0, dc: 1, a: 'e', b: 'w' }
+      ];
+      while (stack.length > 0) {
+        const cur = stack[stack.length - 1];
+        // 收集未访问的邻居
+        const cands = [];
+        for (const d of dirs) {
+          const nr = cur.r + d.dr, nc = cur.c + d.dc;
+          if (nr >= 0 && nr < n && nc >= 0 && nc < n && !visited[nr][nc]) {
+            cands.push({ nr: nr, nc: nc, d: d });
+          }
+        }
+        if (cands.length === 0) {
+          stack.pop();
+          continue;
+        }
+        const pick = cands[Math.floor(Math.random() * cands.length)];
+        walls[cur.r][cur.c][pick.d.a] = false;
+        walls[pick.nr][pick.nc][pick.d.b] = false;
+        visited[pick.nr][pick.nc] = true;
+        stack.push({ r: pick.nr, c: pick.nc });
+      }
+      // 入口开在左上、出口开在右下
+      walls[0][0].w = false;
+      walls[n - 1][n - 1].e = false;
+    }
+
+    /* ---------- 求解路径（BFS），用于在“路上”放星星 ---------- */
+    function solvePath() {
+      const prev = [];
+      for (let r = 0; r < n; r++) {
+        prev.push([]);
+        for (let c = 0; c < n; c++) prev[r].push(null);
+      }
+      const q = [{ r: 0, c: 0 }];
+      const seen = new Set(['0,0']);
+      while (q.length > 0) {
+        const cur = q.shift();
+        if (cur.r === n - 1 && cur.c === n - 1) break;
+        const w = walls[cur.r][cur.c];
+        const moves = [
+          { dr: -1, dc: 0, open: !w.n },
+          { dr: 1, dc: 0, open: !w.s },
+          { dr: 0, dc: -1, open: !w.w },
+          { dr: 0, dc: 1, open: !w.e }
+        ];
+        for (const m of moves) {
+          if (!m.open) continue;
+          const nr = cur.r + m.dr, nc = cur.c + m.dc;
+          const k = nr + ',' + nc;
+          if (nr < 0 || nr >= n || nc < 0 || nc >= n || seen.has(k)) continue;
+          seen.add(k);
+          prev[nr][nc] = cur;
+          q.push({ r: nr, c: nc });
+        }
+      }
+      // 回溯出完整路径
+      const path = [];
+      let cur = { r: n - 1, c: n - 1 };
+      while (cur) {
+        path.unshift(cur);
+        cur = prev[cur.r][cur.c];
+      }
+      return path;
+    }
+
+    /* ---------- 渲染 ---------- */
+    function cellSizePct() { return 100 / n; }
+    function placePiece(el, r, c) {
+      const s = cellSizePct();
+      el.style.width = s + '%';
+      el.style.height = s + '%';
+      el.style.left = (c * s) + '%';
+      el.style.top = (r * s) + '%';
+    }
+    const PLAYER_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true">' +
+      '<circle cx="20" cy="14" r="7" fill="#4f7ea8"/>' +
+      '<path d="M8 34c0-6.6 5.4-12 12-12s12 5.4 12 12z" fill="#4f7ea8"/></svg>';
+    const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.6L12 17.5 6.1 20.6l1.2-6.6L2.5 9.4l6.6-.9z" fill="#e0a92e"/></svg>';
+    const FLAG_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M6 3v18" stroke="#8c4a3c" stroke-width="2" stroke-linecap="round"/>' +
+      '<path d="M6 4h12l-3 4 3 4H6z" fill="#d9534f"/></svg>';
+
+    function renderMaze() {
+      gridEl.style.gridTemplateColumns = 'repeat(' + n + ', 1fr)';
+      gridEl.style.gridTemplateRows = 'repeat(' + n + ', 1fr)';
+      let html = '';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          const w = walls[r][c];
+          const style = [
+            'border-top-width:' + (w.n ? 2 : 0) + 'px',
+            'border-right-width:' + (w.e ? 2 : 0) + 'px',
+            'border-bottom-width:' + (w.s ? 2 : 0) + 'px',
+            'border-left-width:' + (w.w ? 2 : 0) + 'px'
+          ].join(';');
+          let cls = 'cell';
+          if (r === 0 && c === 0) cls += ' start';
+          if (r === n - 1 && c === n - 1) cls += ' exit';
+          html += '<div class="' + cls + '" style="' + style + '"></div>';
+        }
+      }
+      gridEl.innerHTML = html;
+    }
+    function renderPieces() {
+      playerPiece.innerHTML = PLAYER_SVG;
+      flagPiece.innerHTML = FLAG_SVG;
+      placePiece(playerPiece, player.r, player.c);
+      placePiece(flagPiece, n - 1, n - 1);
+      for (let i = 0; i < 3; i++) {
+        if (stars[i] && !stars[i].got) {
+          starPieces[i].innerHTML = STAR_SVG;
+          placePiece(starPieces[i], stars[i].r, stars[i].c);
+        } else {
+          starPieces[i].innerHTML = '';
+        }
+      }
+    }
+
+    /* ---------- 计时 ---------- */
+    function fmtTime(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      return (m < 10 ? '0' + m : m) + ':' + (s % 60 < 10 ? '0' + (s % 60) : (s % 60));
+    }
+    function elapsed() {
+      return startTime ? (Date.now() - startTime) / 1000 : 0;
+    }
+    function tick() {
+      document.getElementById('timeVal').textContent = fmtTime(elapsed());
+    }
+    function startTimer() {
+      if (startTime || finished) return;
+      startTime = Date.now();
+      timerId = setInterval(tick, 250);
+    }
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    /* ---------- 移动 ---------- */
+    function move(dr, dc) {
+      if (finished) return;
+      const w = walls[player.r][player.c];
+      if (dr === -1 && w.n) return;
+      if (dr === 1 && w.s) return;
+      if (dc === -1 && w.w) return;
+      if (dc === 1 && w.e) return;
+      const nr = player.r + dr, nc = player.c + dc;
+      if (nr < 0 || nr >= n || nc < 0 || nc >= n) return;
+      startTimer();
+      player = { r: nr, c: nc };
+      steps++;
+      // 拾取星星
+      for (const st of stars) {
+        if (!st.got && st.r === nr && st.c === nc) {
+          st.got = true;
+          collected++;
+        }
+      }
+      renderPieces();
+      document.getElementById('stepsVal').textContent = steps;
+      document.getElementById('starVal').textContent = collected + ' / 3';
+      if (nr === n - 1 && nc === n - 1) finish();
+    }
+
+    /* ---------- 完成与评级 ---------- */
+    function starSvg(filled) {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.6L12 17.5 6.1 20.6l1.2-6.6L2.5 9.4l6.6-.9z" ' +
+        'fill="' + (filled ? '#e0a92e' : '#ffffff') + '" stroke="#d9a441" stroke-width="1.2"/></svg>';
+    }
+    function finish() {
+      finished = true;
+      stopTimer();
+      const sec = elapsed();
+      const timeOK = sec <= PAR_TIME[n];
+      const starsOK = collected === 3;
+      // 评级：完成 1 星；时间达标或星星集齐 2 星；两者兼得 3 星
+      let rate = 1;
+      if (timeOK || starsOK) rate = 2;
+      if (timeOK && starsOK) rate = 3;
+
+      const prev = loadBest(n);
+      const isNew = prev === null || sec < prev;
+      if (isNew) saveBest(n, sec);
+      updateBest();
+
+      document.getElementById('rateBox').innerHTML =
+        starSvg(rate >= 1) + starSvg(rate >= 2) + starSvg(rate >= 3);
+      let msg = '用时 <b>' + fmtTime(sec) + '</b>，步数 <b>' + steps + '</b>，收集星星 <b>' +
+        collected + ' / 3</b>，获得 <b>' + rate + '</b> 星评价。<br>';
+      if (isNew) msg += '刷新本难度最佳用时。';
+      else msg += '本难度最佳用时：' + fmtTime(prev) + '。';
+      if (!timeOK && !starsOK) msg += '<br>再快一些或把星星找齐，就能升到更高评价。';
+      document.getElementById('winMsg').innerHTML = msg;
+      document.getElementById('winModal').hidden = false;
+    }
+
+    /* ---------- 开局 / 重开 ---------- */
+    function updateBest() {
+      const best = loadBest(n);
+      document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
+    }
+    function newGame() {
+      stopTimer();
+      generateMaze(n);
+      // 星星放在解路径 25% / 50% / 75% 处
+      const path = solvePath();
+      stars = [];
+      const usedIdx = new Set();
+      const fracs = [0.25, 0.5, 0.75];
+      for (const f of fracs) {
+        let idx = Math.min(path.length - 2, Math.max(1, Math.round(path.length * f)));
+        // 防止两颗星星落在同一格：必要时沿路径顺移
+        while (usedIdx.has(idx) && idx < path.length - 2) idx++;
+        while (usedIdx.has(idx) && idx > 1) idx--;
+        usedIdx.add(idx);
+        stars.push({ r: path[idx].r, c: path[idx].c, got: false });
+      }
+      player = { r: 0, c: 0 };
+      steps = 0;
+      collected = 0;
+      startTime = 0;
+      finished = false;
+      document.getElementById('stepsVal').textContent = '0';
+      document.getElementById('starVal').textContent = '0 / 3';
+      document.getElementById('timeVal').textContent = '00:00';
+      renderMaze();
+      renderPieces();
+      updateBest();
+      document.getElementById('winModal').hidden = true;
+    }
+
+    /* 重走本局：保留当前迷宫，只重置小人、星星与计时 */
+    function retryGame() {
+      if (!walls.length) { newGame(); return; }
+      stopTimer();
+      player = { r: 0, c: 0 };
+      steps = 0;
+      collected = 0;
+      startTime = 0;
+      finished = false;
+      stars.forEach(function (s) { s.got = false; });
+      document.getElementById('stepsVal').textContent = '0';
+      document.getElementById('starVal').textContent = '0 / 3';
+      document.getElementById('timeVal').textContent = '00:00';
+      renderPieces();
+      document.getElementById('winModal').hidden = true;
+    }
+
+    /* ---------- 事件绑定 ---------- */
+    // 难度档位
+    document.getElementById('diffSeg').addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-size]');
+      if (!btn) return;
+      document.querySelectorAll('#diffSeg button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      n = parseInt(btn.dataset.size, 10);
+      newGame();
+    });
+
+    // 键盘：方向键 / WASD
+    window.addEventListener('keydown', function (e) {
+      const k = e.key.toLowerCase();
+      const dirs = {
+        arrowup: [-1, 0], w: [-1, 0],
+        arrowdown: [1, 0], s: [1, 0],
+        arrowleft: [0, -1], a: [0, -1],
+        arrowright: [0, 1], d: [0, 1]
+      };
+      if (dirs[k]) {
+        e.preventDefault();
+        move(dirs[k][0], dirs[k][1]);
+      } else if (k === 'escape') {
+        document.getElementById('winModal').hidden = true;
+      }
+    });
+
+    // 屏幕方向按钮
+    document.querySelectorAll('.dpad .btn-d[data-dir]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const map = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
+        const d = map[btn.dataset.dir];
+        move(d[0], d[1]);
+      });
+    });
+
+    // 触屏滑动
+    let touchX = 0, touchY = 0;
+    boardEl.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      touchX = e.touches[0].clientX;
+      touchY = e.touches[0].clientY;
+    }, { passive: true });
+    boardEl.addEventListener('touchend', function (e) {
+      if (e.changedTouches.length !== 1) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      const dy = e.changedTouches[0].clientY - touchY;
+      const TH = 18;   // 滑动阈值（像素）
+      if (Math.abs(dx) < TH && Math.abs(dy) < TH) return;
+      if (Math.abs(dx) > Math.abs(dy)) move(0, dx > 0 ? 1 : -1);
+      else move(dy > 0 ? 1 : -1, 0);
+    });
+
+    document.getElementById('newBtn').addEventListener('click', newGame);
+    document.getElementById('retryBtn').addEventListener('click', retryGame);
+    document.getElementById('winNewBtn').addEventListener('click', newGame);
+    document.getElementById('winCloseBtn').addEventListener('click', function () {
+      document.getElementById('winModal').hidden = true;
+    });
+
+    /* ---------- 启动 ---------- */
+    newGame();
+  </script>
+</body>
+</html>

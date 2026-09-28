@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数独 - 拾光集</title>
+  <meta name="description" content="拾光集在线小游戏：数独，内置 12 个预设谜题（入门/中等/困难各 4 题），冲突即时标红，支持检查与提示，纯本地运行。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/sudoku/app.html">
+  <style>
+    /* ===== 数独 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f3f6f9;
+      color: #4d5d6c;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 16px 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 520px; }
+
+    header { margin-bottom: 14px; }
+    h1 { font-size: 30px; color: #3f5568; letter-spacing: 1px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #8ba0b2; line-height: 1.7; }
+
+    /* 难度档位 */
+    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
+    .seg button {
+      flex: 1;
+      border: 1px solid #e2eaf1;
+      background: #fff;
+      color: #5c7186;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(90, 120, 150, .08);
+      touch-action: manipulation;
+    }
+    .seg button.active { background: #4f7ea8; border-color: #4f7ea8; color: #fff; }
+
+    /* 顶部统计 */
+    .hud { display: flex; gap: 10px; margin-bottom: 12px; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(90, 120, 150, .10);
+    }
+    .stat .lab { display: block; font-size: 12px; color: #93a8ba; letter-spacing: 2px; }
+    .stat .val {
+      display: block; margin-top: 2px; font-size: 21px; font-weight: 700;
+      color: #3f5568; font-variant-numeric: tabular-nums;
+    }
+
+    /* 数独棋盘 */
+    .board-card {
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 4px 18px rgba(90, 120, 150, .12);
+      margin-bottom: 12px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      width: 100%;
+      border: 3px solid #5c6f80;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .cell {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(17px, 4.6vw, 24px);
+      font-weight: 600;
+      color: #4f7ea8;
+      background: #fff;
+      border-right: 1px solid #c8d4de;
+      border-bottom: 1px solid #c8d4de;
+      cursor: pointer;
+      user-select: none;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 九宫分隔线 */
+    .cell.br { border-right: 3px solid #5c6f80; }
+    .cell.bb { border-bottom: 3px solid #5c6f80; }
+    /* 预设数字（题面） */
+    .cell.given { color: #33475a; font-weight: 700; background: #f4f7fa; }
+    /* 选中与关联高亮 */
+    .cell.peer { background: #eef4f9; }
+    .cell.same { background: #e2edf6; }
+    .cell.selected { background: #cfe4f3; box-shadow: inset 0 0 0 2px #4f7ea8; }
+    /* 冲突与错误 */
+    .cell.conflict { color: #c0392b; background: #fbe3e0; }
+    .cell.wrong { color: #c0392b; background: #fbe3e0; }
+
+    /* 数字键盘 */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .numpad button {
+      border: 1px solid #d5e2ed;
+      background: #fff;
+      color: #4f7ea8;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 12px 0;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(90, 120, 150, .10);
+      touch-action: manipulation;
+      font-variant-numeric: tabular-nums;
+    }
+    .numpad button:active { transform: translateY(1px); background: #eaf2f8; }
+    .numpad button.erase { font-size: 14px; font-weight: 600; color: #8c6f9a; }
+
+    /* 功能按钮 */
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 0;
+      background: #4f7ea8;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 11px 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(79, 126, 168, .35);
+      touch-action: manipulation;
+      flex: 1;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: #3f9d6d; }
+    .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+
+    /* 状态消息 */
+    .msg-bar {
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #6b7f91;
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+    .msg-bar.ok { color: #2f8b52; border-color: #c6e6d3; background: #f0f9f3; }
+    .msg-bar.err { color: #c0392b; border-color: #f0c9c2; background: #fdf1ef; }
+
+    /* 玩法说明 */
+    .tips {
+      background: #fff;
+      border: 1px solid #e2eaf1;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #6b7f91;
+      box-shadow: 0 2px 10px rgba(90, 120, 150, .08);
+      margin-bottom: 14px;
+    }
+    .tips h2 { font-size: 15px; color: #3f5568; margin-bottom: 4px; }
+
+    /* 完成弹层 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(52, 70, 86, .45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 26px 24px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 18px 50px rgba(40, 60, 80, .3);
+    }
+    .modal-card h2 { font-size: 24px; color: #3f9d6d; margin-bottom: 10px; }
+    .modal-card .msg { font-size: 14px; color: #6b7f91; line-height: 1.9; }
+    .modal-card .msg b { color: #3f5568; font-size: 18px; font-variant-numeric: tabular-nums; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-actions .btn { padding: 11px 8px; font-size: 14px; }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #a7b8c6;
+      padding: 6px 0 2px;
+    }
+
+    @media (max-width: 420px) {
+      h1 { font-size: 25px; }
+      .stat .val { font-size: 18px; }
+      .numpad button { padding: 10px 0; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>数独</h1>
+      <p class="sub">在每行、每列、每个 3×3 宫内填入 1-9 且不重复。内置 12 个预设谜题（入门 / 中等 / 困难各 4 题），冲突即时标红，支持检查与提示。</p>
+    </header>
+
+    <!-- 难度档位 -->
+    <div class="seg" id="diffSeg">
+      <button type="button" data-diff="入门" class="active">入门</button>
+      <button type="button" data-diff="中等">中等</button>
+      <button type="button" data-diff="困难">困难</button>
+    </div>
+
+    <!-- 统计 -->
+    <div class="hud">
+      <div class="stat"><span class="lab">用时</span><span class="val" id="timeVal">00:00</span></div>
+      <div class="stat"><span class="lab">提示</span><span class="val" id="hintVal">3</span></div>
+      <div class="stat"><span class="lab">最佳</span><span class="val" id="bestVal">--:--</span></div>
+    </div>
+
+    <!-- 棋盘 -->
+    <div class="board-card">
+      <div class="board" id="board" aria-label="数独棋盘"></div>
+    </div>
+
+    <!-- 数字键盘 -->
+    <div class="numpad" id="numpad">
+      <button type="button" data-num="1">1</button>
+      <button type="button" data-num="2">2</button>
+      <button type="button" data-num="3">3</button>
+      <button type="button" data-num="4">4</button>
+      <button type="button" data-num="5">5</button>
+      <button type="button" data-num="6">6</button>
+      <button type="button" data-num="7">7</button>
+      <button type="button" data-num="8">8</button>
+      <button type="button" data-num="9">9</button>
+      <button type="button" class="erase" data-num="0">擦除</button>
+    </div>
+
+    <!-- 功能按钮 -->
+    <div class="controls">
+      <button class="btn" id="checkBtn" type="button">检查</button>
+      <button class="btn primary" id="hintBtn" type="button">提示（剩 3 次）</button>
+      <button class="btn ghost" id="eraseBtn" type="button">擦除</button>
+      <button class="btn ghost" id="restartBtn" type="button">重开本题</button>
+      <button class="btn ghost" id="nextBtn" type="button">换一题</button>
+    </div>
+
+    <!-- 状态消息 -->
+    <div class="msg-bar" id="msgBar">点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。</div>
+
+    <!-- 玩法说明 -->
+    <div class="tips">
+      <h2>玩法说明</h2>
+      <div>规则：每行、每列、每个粗线 3×3 宫内的数字 1-9 各出现一次，灰底数字是题面预设、不可修改。</div>
+      <div>填数：点选格子后按数字键盘或键盘 1-9 输入；方向键移动选中格，Backspace / Delete / 0 擦除。</div>
+      <div>辅助：填错会即时标红冲突；「检查」核对全部答案；「提示」随机填一个正确数字，每题限 3 次。</div>
+      <div>记录：完成用时会按难度记录最佳成绩（入门 / 中等 / 困难分别统计）。</div>
+    </div>
+
+    <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+  </div>
+
+  <!-- 完成弹层 -->
+  <div class="modal" id="winModal" hidden>
+    <div class="modal-card">
+      <h2>数独完成</h2>
+      <div class="msg" id="winMsg"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="winNextBtn" type="button">换一题</button>
+        <button class="btn ghost" id="winRetryBtn" type="button">重开本题</button>
+        <button class="btn ghost" id="winCloseBtn" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================= 数独 · 游戏逻辑 =================
+       题库：12 个预设谜题，q 为谜面（. 表示空格），a 为完整答案；
+       所有谜题均通过自验：答案行/列/宫无重复、谜面与答案一致、解唯一。 */
+
+    const PUZZLES = [
+      { diff: '入门', q: '72.1........8.76....193...238.7.2...596...27121.6953..9.....12.873261.5....5.98.7', a: '728156493439827615651934782384712569596483271217695348945378126873261954162549837' },
+      { diff: '入门', q: '73.94..1.2....13.816..37.2...4..5.8..7.3.81.4...41.7.6392..4.674..78...268...3.4.', a: '738942615249561378165837429914675283576328194823419756392154867451786932687293541' },
+      { diff: '入门', q: '53....46..42.53..9..926...84..5.28717.16..23..2....9.68.7..162..6...5..491432....', a: '538917462642853719179264358496532871781649235325178946857491623263785194914326587' },
+      { diff: '入门', q: '389..26.7..1....3..6......1.12..49.3..59..1.26.31.8.4.73.28...415..6..9.9.85.1376', a: '389412657241675839567893421812754963475936182693128745736289514154367298928541376' },
+      { diff: '中等', q: '4.8.9.326..5.3.1..23..1...5.....753......2.1...216..9..7...1..96218.......9573...', a: '418795326795236148236418975164987532987352614352164897573621489621849753849573261' },
+      { diff: '中等', q: '14..7859.52..6...383.2...6.6..1.7.......4.7..71.82..4.2..9..3.636..8......5.1....', a: '146378592529461873837295164654137928982546731713829645278954316361782459495613287' },
+      { diff: '中等', q: '3....9647..63..9...89.4..139.8.5....2.....4.....27..39.6..235.4......7...9516..2.', a: '312589647746312985589746213938654172271938456654271839167823594823495761495167328' },
+      { diff: '中等', q: '.3251..47...23....91.....63.....793.72.9...1....4816...6...2....9.1..7..5..768.2.', a: '632519847478236591915874263184627935726953418359481672867392154293145786541768329' },
+      { diff: '困难', q: '.57.3..14.........8..9....5.14..9..8...3...2..83.....64.68...32..81.3.......9....', a: '657238914149756283832941765214569378965387421783412596496875132578123649321694857' },
+      { diff: '困难', q: '...........5.3689..2.75....376.2....5..36...1....49....8...51..65.......2...9..6.', a: '163982574745136892928754316376821459594367281812549637489675123657213948231498765' },
+      { diff: '困难', q: '....7.....8.25......9...54.4....98.769..834.....1..........5.769.4.3...8....2..5.', a: '542976183183254769769318542421569837695783421837142695218495376954637218376821954' },
+      { diff: '困难', q: '...5....3541...6.7....2.4...3...7...8......611.6..5.9..1.95......563....6.....8..', a: '762514983541389627398726415239167548854293761176845392417958236985632174623471859' }
+    ];
+
+    // 难度 -> 最佳用时存储键（带 slug 前缀）
+    const BEST_KEY = { '入门': 'sudoku_best_easy', '中等': 'sudoku_best_medium', '困难': 'sudoku_best_hard' };
+
+    // 游戏状态
+    let curDiff = '入门';
+    let curIndex = 0;          // 当前难度下的题号（0-3）
+    let puzzle = null;         // 当前题目 { diff, q, a }
+    let grid = [];             // 81 格当前值（0 表示空）
+    let given = [];            // 81 格是否预设
+    let selected = -1;         // 选中格索引
+    let hintsLeft = 3;
+    let startTime = 0, timerId = null, finished = false;
+
+    const boardEl = document.getElementById('board');
+    const msgBar = document.getElementById('msgBar');
+    const winModal = document.getElementById('winModal');
+
+    /* ---------- localStorage 读写（包 try/catch） ---------- */
+    function loadBest(diff) {
+      try {
+        const v = localStorage.getItem(BEST_KEY[diff]);
+        return v === null ? null : parseFloat(v);
+      } catch (e) { return null; }
+    }
+    function saveBest(diff, seconds) {
+      try { localStorage.setItem(BEST_KEY[diff], String(seconds)); } catch (e) { /* 隐私模式下忽略 */ }
+    }
+
+    /* ---------- 计时 ---------- */
+    function fmtTime(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      return (m < 10 ? '0' + m : m) + ':' + (s % 60 < 10 ? '0' + (s % 60) : (s % 60));
+    }
+    function elapsed() { return startTime ? (Date.now() - startTime) / 1000 : 0; }
+    function tick() { document.getElementById('timeVal').textContent = fmtTime(elapsed()); }
+    function startTimer() {
+      if (startTime || finished) return;
+      startTime = Date.now();
+      timerId = setInterval(tick, 250);
+    }
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+
+    /* ---------- 冲突检测：行 / 列 / 宫 ---------- */
+    function computeConflicts() {
+      const bad = new Set();
+      const i = (r, c) => r * 9 + c;
+      const mark = function (idxList) {
+        const seen = new Map();
+        for (const idx of idxList) {
+          const v = grid[idx];
+          if (!v) continue;
+          if (seen.has(v)) { bad.add(idx); bad.add(seen.get(v)); }
+          else seen.set(v, idx);
+        }
+      };
+      for (let r = 0; r < 9; r++) mark([0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (c) { return i(r, c); }));
+      for (let c = 0; c < 9; c++) mark([0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (r) { return i(r, c); }));
+      for (let br = 0; br < 3; br++) {
+        for (let bc = 0; bc < 3; bc++) {
+          const list = [];
+          for (let dr = 0; dr < 3; dr++) {
+            for (let dc = 0; dc < 3; dc++) list.push(i(br * 3 + dr, bc * 3 + dc));
+          }
+          mark(list);
+        }
+      }
+      return bad;
+    }
+
+    /* ---------- 渲染 ---------- */
+    function render() {
+      const conflicts = computeConflicts();
+      let html = '';
+      for (let idx = 0; idx < 81; idx++) {
+        const r = Math.floor(idx / 9), c = idx % 9;
+        let cls = 'cell';
+        if (c === 2 || c === 5) cls += ' br';
+        if (r === 2 || r === 5) cls += ' bb';
+        if (given[idx]) cls += ' given';
+        if (conflicts.has(idx)) cls += ' conflict';
+        if (idx === selected) cls += ' selected';
+        else if (selected >= 0) {
+          const sr = Math.floor(selected / 9), sc = selected % 9;
+          const sameBox = Math.floor(sr / 3) === Math.floor(r / 3) && Math.floor(sc / 3) === Math.floor(c / 3);
+          if (r === sr || c === sc || sameBox) cls += ' peer';
+          else if (grid[idx] && grid[idx] === grid[selected]) cls += ' same';
+        }
+        html += '<div class="' + cls + '" data-idx="' + idx + '">' + (grid[idx] || '') + '</div>';
+      }
+      boardEl.innerHTML = html;
+    }
+    function setMsg(text, type) {
+      msgBar.textContent = text;
+      msgBar.className = 'msg-bar' + (type ? ' ' + type : '');
+    }
+
+    /* ---------- 填数 / 擦除 ---------- */
+    function placeNumber(num) {
+      if (finished || selected < 0) return;
+      if (given[selected]) {
+        setMsg('灰底数字是题面预设，不能修改。', 'err');
+        return;
+      }
+      if (grid[selected] === num) return;
+      startTimer();
+      grid[selected] = num;
+      render();
+      checkComplete();
+    }
+    function eraseCell() {
+      if (finished || selected < 0) return;
+      if (given[selected]) {
+        setMsg('灰底数字是题面预设，不能修改。', 'err');
+        return;
+      }
+      if (!grid[selected]) return;
+      grid[selected] = 0;
+      render();
+      setMsg('已擦除该格。', '');
+    }
+
+    /* ---------- 检查 / 提示 ---------- */
+    function checkBoard() {
+      if (finished) return;
+      let wrong = 0, empty = 0;
+      for (let i = 0; i < 81; i++) {
+        if (!grid[i]) empty++;
+        else if (grid[i] !== parseInt(puzzle.a[i], 10)) wrong++;
+      }
+      render();
+      if (wrong > 0) setMsg('有 ' + wrong + ' 处填错，红色格子需要修改。', 'err');
+      else if (empty > 0) setMsg('目前全部正确，还剩 ' + empty + ' 个空格，继续加油。', 'ok');
+      else setMsg('全部正确。', 'ok');
+    }
+    function useHint() {
+      if (finished) return;
+      if (hintsLeft <= 0) {
+        setMsg('本题提示次数已用完。', 'err');
+        return;
+      }
+      // 收集空格或填错的格子，随机填一个正确数
+      const cands = [];
+      for (let i = 0; i < 81; i++) {
+        if (!given[i] && grid[i] !== parseInt(puzzle.a[i], 10)) cands.push(i);
+      }
+      if (cands.length === 0) {
+        setMsg('没有可填的格子了。', 'ok');
+        return;
+      }
+      const idx = cands[Math.floor(Math.random() * cands.length)];
+      grid[idx] = parseInt(puzzle.a[idx], 10);
+      selected = idx;
+      hintsLeft--;
+      startTimer();
+      render();
+      document.getElementById('hintVal').textContent = hintsLeft;
+      document.getElementById('hintBtn').textContent = '提示（剩 ' + hintsLeft + ' 次）';
+      setMsg('已填入一个正确数字。', 'ok');
+      checkComplete();
+    }
+
+    /* ---------- 完成判定与庆祝 ---------- */
+    function checkComplete() {
+      for (let i = 0; i < 81; i++) {
+        if (grid[i] !== parseInt(puzzle.a[i], 10)) return;
+      }
+      finished = true;
+      stopTimer();
+      const sec = elapsed();
+      const prev = loadBest(curDiff);
+      const isNew = prev === null || sec < prev;
+      if (isNew) saveBest(curDiff, sec);
+      updateBest();
+
+      let msg = '难度 <b>' + curDiff + '</b>，用时 <b>' + fmtTime(sec) + '</b> 完成。<br>';
+      if (isNew) msg += '刷新本难度最佳用时。';
+      else msg += '本难度最佳用时：' + fmtTime(prev) + '。';
+      document.getElementById('winMsg').innerHTML = msg;
+      winModal.hidden = false;
+    }
+
+    /* ---------- 载入题目 ---------- */
+    function updateBest() {
+      const best = loadBest(curDiff);
+      document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
+    }
+    function loadPuzzle() {
+      // 在当前难度的 4 题中按 curIndex 取题
+      const list = PUZZLES.filter(function (p) { return p.diff === curDiff; });
+      puzzle = list[curIndex % list.length];
+      grid = [];
+      given = [];
+      for (let i = 0; i < 81; i++) {
+        const ch = puzzle.q[i];
+        const v = ch === '.' ? 0 : parseInt(ch, 10);
+        grid.push(v);
+        given.push(v !== 0);
+      }
+      selected = -1;
+      hintsLeft = 3;
+      finished = false;
+      stopTimer();
+      startTime = 0;
+      document.getElementById('timeVal').textContent = '00:00';
+      document.getElementById('hintVal').textContent = '3';
+      document.getElementById('hintBtn').textContent = '提示（剩 3 次）';
+      updateBest();
+      render();
+      winModal.hidden = true;
+      setMsg('点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。', '');
+    }
+    function nextPuzzle() {
+      curIndex = (curIndex + 1) % 4;
+      loadPuzzle();
+    }
+
+    /* ---------- 事件绑定 ---------- */
+    // 难度档位
+    document.getElementById('diffSeg').addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-diff]');
+      if (!btn) return;
+      document.querySelectorAll('#diffSeg button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      curDiff = btn.dataset.diff;
+      curIndex = 0;
+      loadPuzzle();
+    });
+
+    // 点击格子选中
+    boardEl.addEventListener('click', function (e) {
+      const cell = e.target.closest('.cell');
+      if (!cell) return;
+      selected = parseInt(cell.dataset.idx, 10);
+      render();
+    });
+
+    // 数字键盘
+    document.getElementById('numpad').addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-num]');
+      if (!btn) return;
+      const num = parseInt(btn.dataset.num, 10);
+      if (num === 0) eraseCell();
+      else placeNumber(num);
+    });
+
+    // 功能按钮
+    document.getElementById('checkBtn').addEventListener('click', checkBoard);
+    document.getElementById('hintBtn').addEventListener('click', useHint);
+    document.getElementById('eraseBtn').addEventListener('click', eraseCell);
+    document.getElementById('restartBtn').addEventListener('click', loadPuzzle);
+    document.getElementById('nextBtn').addEventListener('click', nextPuzzle);
+    document.getElementById('winNextBtn').addEventListener('click', nextPuzzle);
+    document.getElementById('winRetryBtn').addEventListener('click', loadPuzzle);
+    document.getElementById('winCloseBtn').addEventListener('click', function () {
+      winModal.hidden = true;
+    });
+
+    // 键盘输入：1-9 填数，0 / Backspace / Delete 擦除，方向键移动选中格
+    window.addEventListener('keydown', function (e) {
+      const k = e.key;
+      if (k >= '1' && k <= '9') {
+        e.preventDefault();
+        placeNumber(parseInt(k, 10));
+        return;
+      }
+      if (k === '0' || k === 'Backspace' || k === 'Delete') {
+        e.preventDefault();
+        eraseCell();
+        return;
+      }
+      const moves = {
+        ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1
+      };
+      if (moves[k] !== undefined) {
+        e.preventDefault();
+        if (selected < 0) { selected = 0; render(); return; }
+        // 左右移动不跨行
+        if ((k === 'ArrowLeft' && selected % 9 === 0) || (k === 'ArrowRight' && selected % 9 === 8)) return;
+        const next = selected + moves[k];
+        if (next >= 0 && next < 81) { selected = next; render(); }
+        return;
+      }
+      if (k === 'Escape') winModal.hidden = true;
+    });
+
+    /* ---------- 启动 ---------- */
+    loadPuzzle();
+  </script>
+</body>
+</html>

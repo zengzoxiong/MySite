@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猜数字 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/bulls-cows/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{font-size:13px;color:#5f6368;font-variant-numeric:tabular-nums}
+.hud b{color:#202124;font-size:15px;margin:0 2px}
+.status{font-size:14px;color:#5f6368;text-align:center;margin-bottom:12px;min-height:20px}
+.status.err{color:#e5484d}
+/* 输入位：四个数字框 */
+.slots{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
+.slot{width:56px;height:64px;border-radius:12px;background:#f1f3f4;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#202124;font-variant-numeric:tabular-nums}
+.slot.filled{background:#e8f0fe;color:#1a73e8}
+.slots.shake{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+/* 屏幕数字键盘 */
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:12px auto 0}
+.pad button{font:inherit;border:0;border-radius:12px;background:#f1f3f4;color:#202124;font-size:19px;font-weight:600;padding:13px 0;cursor:pointer;font-variant-numeric:tabular-nums}
+.pad button:active{transform:scale(.95)}
+.pad button:disabled{opacity:.4;cursor:default;transform:none}
+.pad .submit{background:#1a73e8;color:#fff}
+.pad .submit:disabled{background:#9ec1f2;opacity:1}
+/* 历史记录 */
+.history{margin-top:14px;background:#f8f9fa;border-radius:12px;padding:10px 12px;min-height:96px;max-height:196px;overflow-y:auto}
+.history h2{font-size:13px;font-weight:600;color:#5f6368;margin-bottom:6px}
+.history ol{list-style:none}
+.history li{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;padding:5px 2px;border-bottom:1px solid #eceff1;font-variant-numeric:tabular-nums}
+.history li:last-child{border-bottom:0}
+.history .no{color:#9aa0a6;width:42px;flex:none}
+.history .guess{font-weight:700;color:#202124;letter-spacing:2px}
+.history .res{color:#1a73e8;font-weight:600}
+.history .res.hit{color:#e5484d}
+.history .empty{color:#bdc1c6;font-size:12.5px;text-align:center;padding:18px 0}
+/* 结果弹层 */
+.overlay{position:fixed;inset:0;background:rgba(32,33,36,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay[hidden]{display:none}
+.dialog{background:#fff;border-radius:16px;padding:26px 26px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.22)}
+.dialog h2{font-size:21px;margin-bottom:10px;color:#202124}
+.dialog .answer{font-size:26px;font-weight:700;letter-spacing:6px;color:#1a73e8;margin:10px 0;font-variant-numeric:tabular-nums}
+.dialog p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
+.dialog button{font:inherit;border:0;border-radius:10px;padding:10px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer;margin-top:12px}
+.dialog button:active{transform:scale(.96)}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.btn-plain{font:inherit;border:0;border-radius:10px;padding:9px 18px;background:#f1f3f4;color:#3c4043;font-weight:500;cursor:pointer}
+.btn-plain:active{transform:scale(.96)}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>猜数字（1A2B）</h1>
+    <div class="hud">累计得分 <b id="totalScore">0</b> · 胜场 <b id="winCount">0</b></div>
+  </header>
+  <div class="status" id="statusText">电脑已想好 4 位不重复数字，开始猜测吧</div>
+  <div class="slots" id="slots">
+    <div class="slot" id="slot0"></div>
+    <div class="slot" id="slot1"></div>
+    <div class="slot" id="slot2"></div>
+    <div class="slot" id="slot3"></div>
+  </div>
+  <div class="pad" id="pad">
+    <button type="button" data-d="1">1</button>
+    <button type="button" data-d="2">2</button>
+    <button type="button" data-d="3">3</button>
+    <button type="button" data-d="4">4</button>
+    <button type="button" data-d="5">5</button>
+    <button type="button" data-d="6">6</button>
+    <button type="button" data-d="7">7</button>
+    <button type="button" data-d="8">8</button>
+    <button type="button" data-d="9">9</button>
+    <button type="button" class="btn-plain" id="backBtn">退格</button>
+    <button type="button" data-d="0">0</button>
+    <button type="button" class="submit" id="submitBtn" disabled>提交</button>
+  </div>
+  <div class="history">
+    <h2>猜测历史（共 8 次机会）</h2>
+    <ol id="historyList"><li class="empty">还没有猜过，输入 4 位数字后点提交</li></ol>
+  </div>
+  <div class="actions">
+    <button class="btn-plain" id="restartBtn" type="button">重新开局</button>
+  </div>
+  <p class="tips">A = 数字与位置都对，B = 数字对但位置不对<br>8 次内猜中即获胜，按剩余次数计分（剩几次得几分）</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<div class="overlay" id="resultOverlay" hidden>
+  <div class="dialog">
+    <h2 id="resultTitle">猜中了</h2>
+    <div class="answer" id="resultAnswer"></div>
+    <p id="resultInfo"></p>
+    <button type="button" id="resultBtn">再来一局</button>
+  </div>
+</div>
+<script>
+(() => {
+'use strict';
+
+// ================= 元素引用 =================
+const slotsEl = document.getElementById('slots');
+const slotEls = [0, 1, 2, 3].map(i => document.getElementById('slot' + i));
+const pad = document.getElementById('pad');
+const backBtn = document.getElementById('backBtn');
+const submitBtn = document.getElementById('submitBtn');
+const statusText = document.getElementById('statusText');
+const historyList = document.getElementById('historyList');
+const totalScoreEl = document.getElementById('totalScore');
+const winCountEl = document.getElementById('winCount');
+const restartBtn = document.getElementById('restartBtn');
+const overlay = document.getElementById('resultOverlay');
+const resultTitle = document.getElementById('resultTitle');
+const resultAnswer = document.getElementById('resultAnswer');
+const resultInfo = document.getElementById('resultInfo');
+const resultBtn = document.getElementById('resultBtn');
+
+const MAX_TRIES = 8;   // 总机会次数
+
+// ================= 纪录存取（localStorage，带 slug 前缀） =================
+let record = { total: 0, wins: 0 };
+try {
+  const raw = localStorage.getItem('bulls-cows-score');
+  if (raw) {
+    const obj = JSON.parse(raw);
+    if (typeof obj.total === 'number') record.total = obj.total;
+    if (typeof obj.wins === 'number') record.wins = obj.wins;
+  }
+} catch (e) { /* 读失败用默认值 */ }
+function saveRecord() {
+  try { localStorage.setItem('bulls-cows-score', JSON.stringify(record)); } catch (e) {}
+}
+function updateHud() {
+  totalScoreEl.textContent = record.total;
+  winCountEl.textContent = record.wins;
+}
+updateHud();
+
+// ================= 对局状态 =================
+let secret = '';     // 4 位不重复数字字符串
+let input = '';      // 当前输入
+let history = [];    // [{guess, a, b}]
+let over = false;
+
+// 生成 4 位不重复数字（0-9 洗牌取前 4，允许 0 开头）
+function makeSecret() {
+  const pool = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+  }
+  return pool.slice(0, 4).join('');
+}
+
+// 计算 nA mB：A 数字与位置都对，B 数字对位置不对
+function judge(guess) {
+  let a = 0, b = 0;
+  for (let i = 0; i < 4; i++) {
+    if (guess[i] === secret[i]) a++;
+    else if (secret.indexOf(guess[i]) >= 0) b++;
+  }
+  return { a, b };
+}
+
+// ================= 渲染 =================
+function renderSlots() {
+  for (let i = 0; i < 4; i++) {
+    slotEls[i].textContent = input[i] || '';
+    slotEls[i].classList.toggle('filled', !!input[i]);
+  }
+  // 位数不足或存在重复数字时禁用提交
+  const unique = new Set(input).size === input.length;
+  submitBtn.disabled = over || input.length !== 4 || !unique;
+}
+
+function renderHistory() {
+  if (!history.length) {
+    historyList.innerHTML = '<li class="empty">还没有猜过，输入 4 位数字后点提交</li>';
+    return;
+  }
+  historyList.innerHTML = history.map((h, i) => (
+    '<li><span class="no">第 ' + (i + 1) + ' 次</span>' +
+    '<span class="guess">' + h.guess + '</span>' +
+    '<span class="res' + (h.a === 4 ? ' hit' : '') + '">' + h.a + 'A' + h.b + 'B</span></li>'
+  )).join('');
+  historyList.parentElement.scrollTop = historyList.parentElement.scrollHeight;
+}
+
+function setStatus(msg, isErr) {
+  statusText.textContent = msg;
+  statusText.classList.toggle('err', !!isErr);
+}
+
+function shake() {
+  slotsEl.classList.remove('shake');
+  void slotsEl.offsetWidth;
+  slotsEl.classList.add('shake');
+}
+
+// ================= 输入与提交 =================
+function pressDigit(d) {
+  if (over) return;
+  if (input.length >= 4) { shake(); return; }
+  if (input.indexOf(d) >= 0) {   // 防重复数字
+    shake();
+    setStatus('数字不能重复，请换一个', true);
+    return;
+  }
+  input += d;
+  renderSlots();
+  setStatus('继续输入，凑满 4 位后提交');
+}
+
+function backspace() {
+  if (over || !input.length) return;
+  input = input.slice(0, -1);
+  renderSlots();
+  setStatus('已删除一位，重新输入');
+}
+
+function submit() {
+  if (over) return;
+  if (input.length !== 4 || new Set(input).size !== 4) {
+    shake();
+    setStatus('需要 4 位互不相同的数字才能提交', true);
+    return;
+  }
+  const { a, b } = judge(input);
+  history.push({ guess: input, a, b });
+  renderHistory();
+  input = '';
+  renderSlots();
+
+  if (a === 4) {
+    // 猜中：按剩余次数计分
+    const remain = MAX_TRIES - history.length;
+    record.wins += 1;
+    record.total += remain;
+    saveRecord();
+    updateHud();
+    over = true;
+    renderSlots();
+    showResult(true, remain);
+    return;
+  }
+  if (history.length >= MAX_TRIES) {
+    over = true;
+    renderSlots();
+    showResult(false, 0);
+    return;
+  }
+  const left = MAX_TRIES - history.length;
+  setStatus('结果是 ' + a + 'A' + b + 'B，还剩 ' + left + ' 次机会');
+}
+
+// 结果弹层：胜利显示得分，失败显示答案
+function showResult(win, remain) {
+  resultTitle.textContent = win ? '猜中了！' : '机会用完了';
+  resultAnswer.textContent = secret;
+  resultInfo.textContent = win
+    ? ('第 ' + history.length + ' 次猜中，剩余 ' + remain + ' 次机会，本局得分 +' + remain)
+    : ('正确答案是 ' + secret + '，本局不得分，再试一局吧');
+  overlay.hidden = false;
+}
+
+// ================= 重开 =================
+function newGame() {
+  secret = makeSecret();
+  input = '';
+  history = [];
+  over = false;
+  overlay.hidden = true;
+  renderSlots();
+  renderHistory();
+  setStatus('电脑已想好 4 位不重复数字，开始猜测吧');
+}
+
+// ================= 事件 =================
+pad.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.disabled) return;
+  if (btn === backBtn) { backspace(); return; }
+  if (btn === submitBtn) { submit(); return; }
+  if (btn.dataset.d !== undefined) pressDigit(btn.dataset.d);
+});
+
+// 实体键盘同步支持：数字键输入、退格删除、回车提交
+document.addEventListener('keydown', (e) => {
+  if (!overlay.hidden) {
+    if (e.key === 'Enter') newGame();
+    return;
+  }
+  if (e.key >= '0' && e.key <= '9') pressDigit(e.key);
+  else if (e.key === 'Backspace') backspace();
+  else if (e.key === 'Enter') submit();
+});
+
+restartBtn.addEventListener('click', newGame);
+resultBtn.addEventListener('click', newGame);
+
+// ================= 启动 =================
+newGame();
+})();
+</script>
+</body>
+</html>

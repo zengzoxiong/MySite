@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五子棋 - 拾光集</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/gobang/app.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:620px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:700}
+.hud{display:flex;align-items:center;gap:8px;font-size:14px;color:#5f6368;font-variant-numeric:tabular-nums}
+.hud b{color:#202124;font-size:16px}
+.status{font-size:14px;color:#5f6368;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.status .dot{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.18)}
+.status .dot.black{background:radial-gradient(circle at 35% 30%,#6b6b6b,#111)}
+.status .dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cfcfcf)}
+.stage{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:manipulation;background:#e9c98f;box-shadow:inset 0 0 0 1px rgba(120,80,30,.18)}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.45;cursor:default;transform:none}
+.btn-plain{background:#f1f3f4;color:#3c4043;padding:9px 18px;font-weight:500}
+.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main class="card">
+  <header>
+    <h1>五子棋</h1>
+    <div class="hud">
+      <span>黑胜 <b id="blackWin">0</b></span>
+      <span>:</span>
+      <span>白胜 <b id="whiteWin">0</b></span>
+    </div>
+  </header>
+  <div class="status"><span class="dot black" id="turnDot"></span><span id="statusText">黑棋先行，点击棋盘交叉点落子</span></div>
+  <div class="stage">
+    <canvas id="board" width="1040" height="1040"></canvas>
+  </div>
+  <div class="actions">
+    <button id="undoBtn" class="btn-plain" type="button">悔棋</button>
+    <button id="restartBtn" type="button">重新开局</button>
+  </div>
+  <p class="tips">同屏双人对战 · 黑先白后轮流落子 · 先在横、竖、斜任一方向连成五子者获胜<br>最新一手带红色圆环标记，获胜五子会被高亮连线</p>
+  <footer>拾光集 · 在线小游戏 · 纯本地运行</footer>
+</main>
+<script>
+(() => {
+'use strict';
+
+// ================= 常量：15 路标准棋盘 =================
+const N = 15;                                    // 棋盘路数
+const SIZE = 520;                                // 画布逻辑尺寸（正方形）
+const PAD = 26;                                  // 棋盘四边留白
+const CELL = (SIZE - PAD * 2) / (N - 1);         // 相邻交叉点间距
+const STARS = [[3, 3], [3, 11], [11, 3], [11, 11], [7, 7]];  // 星位（0 起下标）
+
+const cv = document.getElementById('board');
+const ctx = cv.getContext('2d');
+const statusText = document.getElementById('statusText');
+const turnDot = document.getElementById('turnDot');
+const blackWinEl = document.getElementById('blackWin');
+const whiteWinEl = document.getElementById('whiteWin');
+const undoBtn = document.getElementById('undoBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+// 高分屏适配：画布按 dpr 放大，坐标仍用逻辑尺寸
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+cv.width = SIZE * dpr;
+cv.height = SIZE * dpr;
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+// ================= 计分存取（localStorage，带 slug 前缀） =================
+let score = { black: 0, white: 0 };
+try {
+  const raw = localStorage.getItem('gobang-score');
+  if (raw) {
+    const obj = JSON.parse(raw);
+    if (typeof obj.black === 'number') score.black = obj.black;
+    if (typeof obj.white === 'number') score.white = obj.white;
+  }
+} catch (e) { /* 隐私模式等读取失败时用默认值 */ }
+function saveScore() {
+  try { localStorage.setItem('gobang-score', JSON.stringify(score)); } catch (e) {}
+}
+function updateHud() {
+  blackWinEl.textContent = score.black;
+  whiteWinEl.textContent = score.white;
+}
+updateHud();
+
+// ================= 对局状态 =================
+let board = [];      // 0 空 / 1 黑 / 2 白
+let moves = [];      // 落子顺序 [{x,y,p}]
+let current = 1;     // 当前行棋方
+let over = false;    // 是否已分出胜负或和棋
+let winCells = null; // 获胜五子坐标列表
+let winRecorded = false; // 本局胜负是否已计分（悔棋时要退还）
+let hover = null;    // 鼠标悬停的空位（半透明预览）
+
+function reset() {
+  board = Array.from({ length: N }, () => new Array(N).fill(0));
+  moves = [];
+  current = 1;
+  over = false;
+  winCells = null;
+  winRecorded = false;
+  hover = null;
+  statusText.textContent = '黑棋先行，点击棋盘交叉点落子';
+  turnDot.className = 'dot black';
+  draw();
+}
+
+// ================= 绘制 =================
+function draw() {
+  // 棋盘底色
+  ctx.clearRect(0, 0, SIZE, SIZE);
+  ctx.fillStyle = '#e9c98f';
+  ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // 网格线：中间细、边框略粗
+  ctx.strokeStyle = '#8a6234';
+  for (let i = 0; i < N; i++) {
+    const p = PAD + i * CELL;
+    ctx.lineWidth = (i === 0 || i === N - 1) ? 1.8 : 1;
+    ctx.beginPath();
+    ctx.moveTo(PAD, p); ctx.lineTo(PAD + (N - 1) * CELL, p);
+    ctx.moveTo(p, PAD); ctx.lineTo(p, PAD + (N - 1) * CELL);
+    ctx.stroke();
+  }
+
+  // 星位
+  ctx.fillStyle = '#7a5227';
+  for (const [sx, sy] of STARS) {
+    ctx.beginPath();
+    ctx.arc(PAD + sx * CELL, PAD + sy * CELL, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 悬停预览（未结束且该位为空时）
+  if (!over && hover && board[hover.y][hover.x] === 0) {
+    drawStone(hover.x, hover.y, current, 0.32, false, false);
+  }
+
+  // 棋子
+  for (const m of moves) {
+    const isLast = (m === moves[moves.length - 1]);
+    const isWin = !!(winCells && winCells.some(c => c.x === m.x && c.y === m.y));
+    drawStone(m.x, m.y, m.p, 1, isLast, isWin);
+  }
+
+  // 获胜连线
+  if (winCells && winCells.length >= 2) {
+    const a = winCells[0], b = winCells[winCells.length - 1];
+    ctx.save();
+    ctx.strokeStyle = 'rgba(229,72,77,.4)';
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(PAD + a.x * CELL, PAD + a.y * CELL);
+    ctx.lineTo(PAD + b.x * CELL, PAD + b.y * CELL);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// 画一枚棋子：p 为 1 黑 / 2 白，alpha 用于悬停预览
+function drawStone(x, y, p, alpha, isLast, isWin) {
+  const cx = PAD + x * CELL, cy = PAD + y * CELL, r = CELL * 0.44;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.12, cx, cy, r);
+  if (p === 1) {
+    g.addColorStop(0, '#707070');
+    g.addColorStop(0.35, '#2c2c2c');
+    g.addColorStop(1, '#0c0c0c');
+  } else {
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.7, '#f1f1f1');
+    g.addColorStop(1, '#c6c6c6');
+  }
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  if (p === 2) {
+    ctx.strokeStyle = 'rgba(0,0,0,.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 最新一手：红色圆环
+  if (isLast) {
+    ctx.save();
+    ctx.strokeStyle = '#e5484d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 2.5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  // 获胜五子：加亮红色描边
+  if (isWin) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(229,72,77,.85)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ================= 胜负判定（横竖两种斜向，共四向） =================
+function inBoard(x, y) { return x >= 0 && x < N && y >= 0 && y < N; }
+
+// 返回获胜的连续五子坐标（不足五子返回 null），起点终点在首尾便于画线
+function checkWin(x, y, p) {
+  const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+  for (const [dx, dy] of dirs) {
+    const head = [{ x, y }], tail = [];
+    let nx = x + dx, ny = y + dy;
+    while (inBoard(nx, ny) && board[ny][nx] === p) {
+      head.push({ x: nx, y: ny });
+      nx += dx; ny += dy;
+    }
+    nx = x - dx; ny = y - dy;
+    while (inBoard(nx, ny) && board[ny][nx] === p) {
+      tail.push({ x: nx, y: ny });
+      nx -= dx; ny -= dy;
+    }
+    const line = tail.reverse().concat(head);
+    if (line.length >= 5) return line;
+  }
+  return null;
+}
+
+// ================= 落子 / 悔棋 =================
+function place(x, y) {
+  if (over || board[y][x] !== 0) return;
+  board[y][x] = current;
+  moves.push({ x, y, p: current });
+  hover = null;
+
+  const win = checkWin(x, y, current);
+  if (win) {
+    winCells = win;
+    over = true;
+    winRecorded = true;
+    if (current === 1) score.black += 1; else score.white += 1;
+    saveScore();
+    updateHud();
+    statusText.textContent = (current === 1 ? '黑棋' : '白棋') + '五子连珠，本局获胜';
+  } else if (moves.length === N * N) {
+    over = true;
+    statusText.textContent = '棋盘落满，本局和棋';
+  } else {
+    current = 3 - current;
+    statusText.textContent = '轮到' + (current === 1 ? '黑棋' : '白棋') + '落子';
+    turnDot.className = 'dot ' + (current === 1 ? 'black' : 'white');
+  }
+  draw();
+}
+
+function undo() {
+  if (!moves.length) return;
+  const last = moves.pop();
+  board[last.y][last.x] = 0;
+  // 若上一手导致了胜负，悔棋时退还计分并恢复对局
+  if (winRecorded) {
+    if (last.p === 1) score.black = Math.max(0, score.black - 1);
+    else score.white = Math.max(0, score.white - 1);
+    winRecorded = false;
+    saveScore();
+    updateHud();
+  }
+  over = false;
+  winCells = null;
+  current = last.p;
+  statusText.textContent = '已悔棋，轮到' + (current === 1 ? '黑棋' : '白棋') + '落子';
+  turnDot.className = 'dot ' + (current === 1 ? 'black' : 'white');
+  draw();
+}
+
+// ================= 事件 =================
+// 把画布坐标换算成交叉点下标（画布可被 CSS 缩放，需按显示尺寸折算）
+function pointToCell(clientX, clientY) {
+  const rect = cv.getBoundingClientRect();
+  const px = (clientX - rect.left) * SIZE / rect.width;
+  const py = (clientY - rect.top) * SIZE / rect.height;
+  const x = Math.round((px - PAD) / CELL);
+  const y = Math.round((py - PAD) / CELL);
+  if (!inBoard(x, y)) return null;
+  // 点得太偏不算落子，避免点到格线外也上子
+  const dx = px - (PAD + x * CELL), dy = py - (PAD + y * CELL);
+  if (Math.sqrt(dx * dx + dy * dy) > CELL * 0.62) return null;
+  return { x, y };
+}
+
+cv.addEventListener('click', (e) => {
+  const cell = pointToCell(e.clientX, e.clientY);
+  if (cell) place(cell.x, cell.y);
+});
+
+cv.addEventListener('mousemove', (e) => {
+  const cell = pointToCell(e.clientX, e.clientY);
+  const next = (cell && board[cell.y][cell.x] === 0 && !over) ? cell : null;
+  if (JSON.stringify(next) !== JSON.stringify(hover)) {
+    hover = next;
+    draw();
+  }
+});
+cv.addEventListener('mouseleave', () => {
+  if (hover) { hover = null; draw(); }
+});
+
+undoBtn.addEventListener('click', undo);
+restartBtn.addEventListener('click', reset);
+
+// ================= 启动 =================
+reset();
+})();
+</script>
+</body>
+</html>

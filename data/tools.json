@@ -1024,6 +1024,48 @@
       "description": "键位、单词、文章三关课程，虚拟键盘指法提示，练 speed",
       "icon": "⌨",
       "category": "小游戏"
+    },
+    {
+      "name": "五子棋",
+      "path": "gobang/app.html",
+      "description": "同屏双人对战，15 路棋盘连五取胜，支持悔棋与计分",
+      "icon": "⚫",
+      "category": "小游戏"
+    },
+    {
+      "name": "井字棋",
+      "path": "tic-tac-toe/app.html",
+      "description": "人机对战三连棋，困难模式 AI 几乎不败，简单档留活路",
+      "icon": "❌",
+      "category": "小游戏"
+    },
+    {
+      "name": "猜数字",
+      "path": "bulls-cows/app.html",
+      "description": "经典 1A2B 猜数字，8 次机会，屏幕键盘输入",
+      "icon": "🔢",
+      "category": "小游戏"
+    },
+    {
+      "name": "推箱子",
+      "path": "sokoban/app.html",
+      "description": "经典推箱入洞，5 关渐进，支持撤销与每关最佳步数",
+      "icon": "📦",
+      "category": "小游戏"
+    },
+    {
+      "name": "迷宫寻宝",
+      "path": "maze-runner/app.html",
+      "description": "随机迷宫寻出口，收集星星评星，三档难度",
+      "icon": "🌀",
+      "category": "小游戏"
+    },
+    {
+      "name": "数独",
+      "path": "sudoku/app.html",
+      "description": "12 道题库三种难度，冲突标红，提示限 3 次",
+      "icon": "🔢",
+      "category": "小游戏"
     }
   ]
 }
