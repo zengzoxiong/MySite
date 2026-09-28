@@ -76,6 +76,13 @@
       "icon": "🔤"
     },
     {
+      "title": "Godbolt",
+      "url": "https://godbolt.org/",
+      "description": "编译器探索器，写代码实时看汇编输出，同屏对比不同版本编译器的差异，C/C++/Rust/Go 等几十种语言都能试。",
+      "category": "代码工具",
+      "icon": "⚙️"
+    },
+    {
       "title": "kkFileView",
       "url": "https://www.kkview.cn/zh-cn/index.html",
       "description": "一个预览地址覆盖 Office、PDF、图片、音视频、压缩包、CAD、3D 模型等常见文件类型。独立部署，快速接入业务系统，提供统一的在线预览体验。",
