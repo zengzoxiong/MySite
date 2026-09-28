@@ -72,11 +72,10 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
       position: fixed;
       top: 0; right: 0; bottom: 0;
       width: 272px;
-      overflow-y: auto;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
       background: #fff;
       border-left: 1px solid #d7dee8;
       box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      padding: 20px 18px;
       z-index: 190;
       transform: translateX(0);
       transition: transform .28s cubic-bezier(.22, .9, .3, 1);
@@ -84,14 +83,17 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
       font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
     .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
     .rules-panel h2 {
       font-size: 15px;
       color: #3f5568;
       margin: 0 0 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
     }
     .rules-panel h3 {
       font-size: 12.5px;
@@ -101,36 +103,31 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
     }
     .rules-panel ul { margin: 0; padding-left: 18px; }
     .rules-panel li { margin: 4px 0; }
-    .rules-close {
-      border: 1px solid #cfe0ee;
-      background: #f0f6fc;
-      color: #4a6f9e;
-      border-radius: 8px;
-      padding: 5px 10px;
-      font: 600 12px/1 inherit;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .rules-close:active { transform: translateY(1px); }
-    .rules-tab {
-      position: fixed;
-      right: 0; top: 50%;
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
       transform: translateY(-50%);
-      z-index: 191;
-      writing-mode: vertical-lr;
-      padding: 16px 9px;
-      border-radius: 10px 0 0 10px;
-      background: #fff;
+      width: 30px;
+      height: 116px;
+      padding: 0;
       border: 1px solid #d7dee8;
       border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
       box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
       color: #4a6f9e;
       font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
       cursor: pointer;
-      display: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       touch-action: manipulation;
     }
-    .rules-tab.show { display: block; }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
     body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
     @media (min-width: 1100px) {
       body.rules-open { padding-right: 272px; }
@@ -383,7 +380,9 @@ requestAnimationFrame(loop);
 })();
 </script>
   <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <h2>游戏规则<button class="rules-close" id="rulesClose" type="button">收起 ›</button></h2>
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
     
       <h3>玩法</h3>
       <ul>
@@ -396,33 +395,29 @@ requestAnimationFrame(loop);
         <li>← → / 鼠标移动 / 触屏拖动：移动挡板</li>
         <li>空格 / 点击：发球　P：暂停</li>
       </ul>
+    </div>
   </aside>
-  <button class="rules-tab" id="rulesTab" type="button" aria-label="展开游戏规则">玩法</button>
   <script>
-  (function () {{
+  (function () {
     var panel = document.getElementById('rulesPanel');
-    var tab = document.getElementById('rulesTab');
+    var handle = document.getElementById('rulesHandle');
     var saved = null;
-    try {{ saved = localStorage.getItem('gameRulesOpen'); }} catch (e) {{ }}
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
     var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
-    function apply() {{
+    function apply() {
       panel.classList.toggle('closed', !open);
-      tab.classList.toggle('show', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
       document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
-    }}
-    document.getElementById('rulesClose').addEventListener('click', function () {{
-      open = false;
-      try {{ localStorage.setItem('gameRulesOpen', '0'); }} catch (e) {{ }}
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
       apply();
-    }});
-    tab.addEventListener('click', function () {{
-      open = true;
-      try {{ localStorage.setItem('gameRulesOpen', '1'); }} catch (e) {{ }}
-      apply();
-    }});
+    });
     window.addEventListener('resize', apply);
     apply();
-  }})();
+  })();
   </script>
 </body>
 </html>
