@@ -1063,7 +1063,7 @@
     {
       "name": "数独",
       "path": "sudoku/app.html",
-      "description": "12 道题库三种难度，冲突标红，提示限 3 次",
+      "description": "2997 道题按编号现场生成，输题号直达、可与朋友挑战同一题，冲突标红，提示限 3 次",
       "icon": "🔢",
       "category": "小游戏"
     }

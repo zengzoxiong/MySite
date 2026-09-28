@@ -156,16 +156,27 @@
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #3f9d6d; }
     .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
-    .jump { display: inline-flex; gap: 6px; align-items: center; }
-    .jump input {
-      width: 74px;
-      padding: 10px 8px;
-      border: 1px solid #cfe0ee;
-      border-radius: 10px;
+    /* 题号栏即输入框：点数字直接改，回车 / 失焦跳转 */
+    .no-wrap { display: flex; align-items: center; justify-content: center; gap: 1px; }
+    .no-wrap b { font-weight: 700; }
+    .no-input {
+      width: 64px;
+      border: none;
+      background: transparent;
       font: inherit;
-      font-size: 14px;
-      text-align: center;
+      font-size: 21px;
+      font-weight: 700;
       color: #3f5568;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      padding: 0;
+    }
+    .no-input:focus { outline: 2px solid #cfe0ee; border-radius: 8px; }
+    .no-input::-webkit-outer-spin-button,
+    .no-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .no-input { -moz-appearance: textfield; appearance: textfield; }
+    @media (max-width: 560px) {
+      .no-input { width: 54px; font-size: 18px; }
     }
 
     /* 状态消息 */
@@ -252,7 +263,7 @@
 
     <!-- 统计 -->
     <div class="hud">
-      <div class="stat"><span class="lab">题号</span><span class="val" id="noVal">#1</span></div>
+      <div class="stat"><span class="lab">题号</span><span class="val no-wrap"><b>#</b><input id="noVal" class="no-input" type="number" min="1" max="999" value="1" aria-label="题号 1 到 999，输入后回车跳转"></span></div>
       <div class="stat"><span class="lab">用时</span><span class="val" id="timeVal">00:00</span></div>
       <div class="stat"><span class="lab">提示</span><span class="val" id="hintVal">3</span></div>
       <div class="stat"><span class="lab">最佳</span><span class="val" id="bestVal">--:--</span></div>
@@ -284,7 +295,6 @@
       <button class="btn ghost" id="eraseBtn" type="button">擦除</button>
       <button class="btn ghost" id="restartBtn" type="button">重开本题</button>
       <button class="btn ghost" id="nextBtn" type="button">随机抽题</button>
-      <span class="jump"><input id="jumpInput" type="number" min="1" max="999" placeholder="题号" aria-label="题号 1 到 999"><button class="btn ghost" id="jumpBtn" type="button">跳转</button></span>
     </div>
 
     <!-- 状态消息 -->
@@ -649,11 +659,11 @@
       document.getElementById('timeVal').textContent = '00:00';
       document.getElementById('hintVal').textContent = '3';
       document.getElementById('hintBtn').textContent = '提示（剩 3 次）';
-      document.getElementById('noVal').textContent = '#' + curNo;
+      document.getElementById('noVal').value = curNo;
       updateBest();
       render();
       winModal.hidden = true;
-      setMsg('题号 #' + curNo + '（' + curDiff + '）。点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。', '');
+      setMsg('题号 #' + curNo + '（' + curDiff + '）。点题号可输入编号跳转；点格子后用数字键盘或键盘 1-9 填数，Backspace 擦除。', '');
     }
     function nextPuzzle() {
       // 从 1-999 编号题库随机抽一题（避开当前题号）
@@ -663,11 +673,15 @@
       loadPuzzle();
     }
     function jumpToPuzzle() {
-      const input = document.getElementById('jumpInput');
+      const input = document.getElementById('noVal');
       const n = parseInt(input.value, 10);
-      if (!(n >= 1 && n <= 999)) { setMsg('题号范围是 1 到 999。', 'err'); return; }
+      if (!(n >= 1 && n <= 999)) {
+        input.value = curNo;   // 非法输入恢复当前题号
+        setMsg('题号范围是 1 到 999。', 'err');
+        return;
+      }
+      if (n === curNo) { input.value = curNo; return; }
       curNo = n;
-      input.value = '';
       loadPuzzle();
     }
 
@@ -705,10 +719,11 @@
     document.getElementById('eraseBtn').addEventListener('click', eraseCell);
     document.getElementById('restartBtn').addEventListener('click', loadPuzzle);
     document.getElementById('nextBtn').addEventListener('click', nextPuzzle);
-    document.getElementById('jumpBtn').addEventListener('click', jumpToPuzzle);
-    document.getElementById('jumpInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); jumpToPuzzle(); }
+    const noInput = document.getElementById('noVal');
+    noInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); jumpToPuzzle(); noInput.blur(); }
     });
+    noInput.addEventListener('blur', jumpToPuzzle);
     document.getElementById('winNextBtn').addEventListener('click', nextPuzzle);
     document.getElementById('winRetryBtn').addEventListener('click', loadPuzzle);
     document.getElementById('winCloseBtn').addEventListener('click', function () {
