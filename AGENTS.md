@@ -28,6 +28,7 @@ MySite/
 │   ├── stars.json        # GitHub Stars（工作流自动同步，勿手改）
 │   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
 │   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
+│   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
@@ -119,6 +120,16 @@ MySite/
 - **首页时钟风格**：`localStorage.clockStyle`，6 选 1（简约/翻页/上滑/叠卡/滚轮/立方，见 `CLOCK_STYLES`）。除「简约」直接写 `textContent` 外，其余五种把 HH:MM:SS 拆成 6 个 `.ck-cell`（`.ck-a` 当前层撑尺寸、`.ck-b` 新值层绝对定位叠在上面），只有值变了的单元加 `.anim`；样式全在 styles.css 的 `.hero-clock[data-style=…]` 块。`no-anim`/`prefers-reduced-motion` 下走瞬时替换（否则 animationend/transitionend 不触发，单元会卡在动画中间态）；script.js 里 `clockSetDigit`/`clockRollTo` 的 1600ms 兜底定时器要大于 CSS 动画时长。滚轮是 0-9 再补一个 0 的长条，跨 9→0 借末尾那份 0 继续向下滚、滚完瞬移回第一个 0。卡片风格下 `textContent` 是新旧两层叠出来的（复制会拿到重复数字），读屏/报时靠 `role="timer"` + 每秒更新的 `aria-label`。
 - **天气城市**：`localStorage.weatherCity`，**默认自动定位**（存 `'auto'` 或空）；自定义城市存 JSON `{name,lat,lon,sub}`，由设置页搜 Open-Meteo 地理编码（`geocoding-api.open-meteo.com/v1/search`，`language=zh`）任选，**不维护固定城市清单**；结果副标题 `sub` 从细到粗拼 `admin2·admin1·country`（跳过与城市名互为前缀的层级），用来区分同名城市（湖北有两个「峰口」，分属荆州/黄冈），并对「名称+sub」完全相同的行去重。自动定位走 `navigator.geolocation.getCurrentPosition`（10 分钟缓存、8s 超时）；**定位结果不写「当前位置」**，而是用 BigDataCloud 反向地理编码（`reverse-geocode-client`，`localityLanguage=zh-Hans` 出简体）取 `locality`（最低一级市/县/区，兜底 `city`→`principalSubdivision`）显示，去掉末尾市/县/区后缀；Nominatim 在国内不可达，别换回去。**拒绝授权/不支持/超时静默回退西安**（script.js 的 `FALLBACK_CITY`），不给额外提示。**天气快照**：坐标+地名+渲染结果存 `localStorage.weatherSnap`（10 分钟 TTL，`raw` 字段绑定城市），冷启动先铺快照再决定敲不敲接口；auto 且无快照时给定位 1.5s 预算、超了先用西安，定位晚到且坐标差超过 0.05° 再后台校正；天气与反向地名 `Promise.allSettled` 并行拉。Open-Meteo 统一传 `timezone=auto` 让接口按坐标推时区，别为城市硬编时区。设置里改城市后父页只在存储串（`weatherCityRaw()`）真的变化时才重拉天气，避免改个深色模式也去敲天气接口。读写 helper 在 appearance.js：`getWeatherCity`/`setWeatherCity`/`weatherCityLabel`/`weatherCityRaw`。
 
+### 8. 汇率（data/fx.json + 侧栏「汇率」视图）
+
+- **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布），页面文案已写明「非盘中实时报价」——别宣称实时行情。
+- **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD], latest:{币种:值}, series:[[日期, 8 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。
+- **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 15:40（北京 23:40，ECB 发布后）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
+- **视图**：侧栏「汇率 → 汇率走势」进入，`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 8 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
+- 涨跌色是 `--up-color`（红涨）/`--down-color`（绿跌），明暗各一套；图表颜色全部走 CSS 类 + 变量，**别在 JS 里硬编颜色**。
+- 全域搜索输入币种名/代码/别名（`fxSearchHits`）会出现「汇率」分组，点击跳到汇率视图并选中该币种。
+- **别把 data/fx.json 加进 PRECACHE**：509 KB 且每日变，走运行时缓存（SWR）即可。
+
 ## 前端架构与约定（script.js / styles.css）
 
 ### 首页签到（拾光签）
@@ -134,7 +145,7 @@ MySite/
 
 ### 视图状态机
 
-`currentView`：`home`（仪表盘）/ `links`（网站收藏）/ `tools`（在线工具）/ `media`（影视）/ `plugin`（Agent Plugin）/ `ghstars`（Stars）/ `search`（全域搜索）。
+`currentView`：`home`（仪表盘）/ `links`（网站收藏）/ `tools`（在线工具）/ `media`（影视）/ `plugin`（Agent Plugin）/ `ghstars`（Stars）/ `fx`（汇率）/ `search`（全域搜索）。
 
 - **新增视图必须同步改**：`renderCurrentView()` 分发、`goHome()` 复位、侧栏点击处理器（含 `searchFrom` 与搜索框清空）、全域搜索 `renderSearchResults`
 - 搜索框输入即进入 `search` 视图（分组结果 + 加载过渡 + `searchSeq` 防竞态），清空后恢复 `searchFrom` 视图
@@ -191,7 +202,8 @@ MySite/
 - `check-links.yml`：北京时间每周二 05:30（UTC 周一 21:30）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
 - `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
 - `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
-- 三个工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
+- `sync-fx.yml`：每日 23:40（北京）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交
+- 写数据的工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线
 

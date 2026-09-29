@@ -11,6 +11,8 @@
     --star-color: #f59e0b; /* 星标琥珀 */
     --seal-ink: #fdf6ec;
     --dead-color: #c0392b; /* 死链体检失效角标 */
+    --up-color: #c0392b; /* 汇率上涨/外币升值（红涨绿跌） */
+    --down-color: #11875d; /* 汇率下跌/外币贬值 */
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border-color: #eaeaea;
@@ -41,6 +43,8 @@
     --seal-ink: #fdf6ec;
     --star-color: #f59e0b;
     --dead-color: #d95843;
+    --up-color: #e0705c; /* 汇率上涨/外币升值 */
+    --down-color: #3fbf8f; /* 汇率下跌/外币贬值 */
     --text-secondary: #888888;
     --text-tertiary: #555555;
     --border-color: #222222;
@@ -3412,6 +3416,295 @@ body.no-anim .mp-lyric > div {
     margin-top: 2px;
 }
 
+/* ===== 汇率视图（ECB 参考价走势） ===== */
+.fx-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fx-wrap.anim {
+    animation: fadeUp 0.4s ease backwards;
+}
+
+.fx-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fx-title {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.fx-sub {
+    margin-top: 4px;
+    font-size: 0.76rem;
+    color: var(--text-tertiary);
+}
+
+.fx-ranges {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background-color: var(--search-bg);
+}
+
+.fx-range {
+    padding: 5px 12px;
+    border: 0;
+    border-radius: 7px;
+    background: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.76rem;
+    cursor: pointer;
+}
+
+.fx-range:hover {
+    color: var(--text-primary);
+}
+
+.fx-range.active {
+    background-color: var(--card-bg);
+    color: var(--accent-color);
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+}
+
+.fx-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 12px;
+}
+
+.fx-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.fx-card:hover {
+    transform: translateY(-2px);
+}
+
+.fx-card.active {
+    border-color: var(--accent-color);
+}
+
+.fx-card-head,
+.fx-card-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+
+.fx-card-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.fx-card-code {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+}
+
+.fx-card-value {
+    font-size: 1.32rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-card-unit,
+.fx-card-diff {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+}
+
+.fx-card-diff {
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-card-diff.up,
+.fx-chart-delta.up {
+    color: var(--up-color);
+}
+
+.fx-card-diff.down,
+.fx-chart-delta.down {
+    color: var(--down-color);
+}
+
+.fx-chart-card {
+    padding: 16px 18px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    background-color: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+}
+
+.fx-chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.fx-chart-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.fx-chart-delta {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-chart {
+    position: relative;
+    height: 300px;
+}
+
+.fx-svg {
+    display: block;
+    width: 100%;
+}
+
+.fx-grid {
+    stroke: var(--border-color);
+    stroke-width: 1;
+}
+
+.fx-axis {
+    fill: var(--text-tertiary);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-line {
+    fill: none;
+    stroke: var(--accent-color);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.fx-area {
+    fill: url(#fxArea);
+}
+
+.fx-area-a {
+    stop-color: var(--accent-color);
+    stop-opacity: 0.22;
+}
+
+.fx-area-b {
+    stop-color: var(--accent-color);
+    stop-opacity: 0;
+}
+
+.fx-dot-last {
+    fill: var(--accent-color);
+}
+
+.fx-cross {
+    stroke: var(--text-tertiary);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.fx-cross-dot {
+    fill: var(--accent-color);
+    stroke: var(--card-bg);
+    stroke-width: 1.5;
+}
+
+.fx-tip {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 10px;
+    transform: translate(-50%, -100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card-hover);
+    font-size: 0.74rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.fx-tip b {
+    font-weight: 600;
+}
+
+.fx-tip span {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+.fx-note {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+}
+
+.fx-hit {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .fx-cards {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .fx-chart {
+        height: 240px;
+    }
+}
+
 @media (max-width: 768px) {
     .media-cards {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -3428,7 +3721,10 @@ body.no-anim .mp-lyric > div {
     .corner,
     .gh-panel,
     .settings-modal-box,
-    .cmdk-box {
+    .cmdk-box,
+    .fx-card,
+    .fx-chart-card,
+    .fx-tip {
         background-color: var(--bg-color);
     }
 }
@@ -3436,7 +3732,9 @@ body.no-anim .mp-lyric > div {
 /* 手机上几十张玻璃卡片的 backdrop-filter 合成压力大，降级为实底保滚动帧率 */
 @media (max-width: 768px) {
     .link-card,
-    .skill-card {
+    .skill-card,
+    .fx-card,
+    .fx-chart-card {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         background-color: var(--bg-color);

@@ -10,7 +10,7 @@ let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'search'
 let currentPluginCat = '';
 let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
@@ -47,6 +47,7 @@ const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
 const sidebarPlugin = document.getElementById('sidebarPlugin');
+const sidebarFx = document.getElementById('sidebarFx');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const settingsBackdrop = document.getElementById('settingsBackdrop');
@@ -1274,6 +1275,7 @@ function goHome() {
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     homeNav.classList.add('active');
     renderLinks();
     searchInput.blur();
@@ -1288,6 +1290,7 @@ function renderCurrentView(animate = false) {
     else if (currentView === 'media') renderMedia(animate);
     else if (currentView === 'plugin') renderPluginCat(currentPluginCat);
     else if (currentView === 'ghstars') renderGhStars(animate);
+    else if (currentView === 'fx') renderFx(animate);
     else renderLinks(animate);
 }
 
@@ -1767,8 +1770,9 @@ function renderSearchResults(term) {
         .filter(s => match(s.name) || match(s.description || ''));
     const mcps = (pluginsData.mcps || []).filter(m => match(m.name) || match(m.desc || ''));
     const stars = (starsData.repos || []).filter(r => match(r.full_name) || match(r.desc) || match(r.language));
+    const fx = fxSearchHits(term);
 
-    const total = links.length + tools.length + media.length + skills.length + mcps.length + stars.length;
+    const total = links.length + tools.length + media.length + skills.length + mcps.length + stars.length + fx.length;
     if (total === 0) {
         linksGrid.innerHTML = `
             <div class="search-group" style="grid-column:1/-1">
@@ -1802,6 +1806,9 @@ function renderSearchResults(term) {
     if (stars.length) {
         html += group('GitHub Stars', stars.length, `<div class="skills-cards">${stars.map(starCardHtml).join('')}</div>`);
     }
+    if (fx.length) {
+        html += group('汇率', fx.length, `<div class="skills-cards">${fx.map(fxSearchCard).join('')}</div>`);
+    }
     linksGrid.innerHTML = html;
     recalcMarquee();
     bindCopyButtons();
@@ -1815,6 +1822,330 @@ function renderSidebarMedia() {
             <span class="item-text">${t}</span>
         </div>
     `).join('');
+}
+
+// ===== 汇率视图（ECB 参考价，data/fx.json 由 sync-fx 工作流每日同步） =====
+const FX_META = {
+    USD: { name: '美元', per: 1, alias: '美金' },
+    EUR: { name: '欧元', per: 1, alias: '' },
+    JPY: { name: '日元', per: 100, alias: '日币' },
+    GBP: { name: '英镑', per: 1, alias: '' },
+    HKD: { name: '港币', per: 1, alias: '港元' },
+    KRW: { name: '韩元', per: 100, alias: '韩币' },
+    SGD: { name: '新加坡元', per: 1, alias: '新元' },
+    AUD: { name: '澳元', per: 1, alias: '澳大利亚元' },
+};
+// [天数, 按钮文案]，0 = 全部
+const FX_RANGES = [[7, '7 天'], [30, '30 天'], [90, '90 天'], [365, '1 年'], [0, '全部']];
+
+let fxData = null;
+let fxLoading = null;
+let fxCurrent = 'USD';
+let fxRangeDays = 90;
+let fxGeom = null;
+
+function fxMeta(code) {
+    return FX_META[code] || { name: code, per: 1, alias: '' };
+}
+
+// 数据存的是「1 人民币 = X 外币」，展示统一换算成「per 单位外币 = ? 人民币」
+function fxValue(code, raw) {
+    return raw ? fxMeta(code).per / raw : null;
+}
+
+function fxRateText(code, v) {
+    if (v == null || !isFinite(v)) return '—';
+    return v >= 1 ? v.toFixed(4) : v.toFixed(5);
+}
+
+function fxUnitText(code) {
+    const m = fxMeta(code);
+    return `${m.per > 1 ? m.per + ' ' : '1 '}${m.name}`;
+}
+
+// 涨跌方向与文案（值上升 = 该货币对人民币升值）
+function fxDiffInfo(diff) {
+    if (diff == null) return { dir: 'flat', text: '—' };
+    const dir = Math.abs(diff) < 0.005 ? 'flat' : diff > 0 ? 'up' : 'down';
+    const arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '';
+    return { dir: dir, text: `${arrow} ${Math.abs(diff).toFixed(2)}%`.trim() };
+}
+
+function loadFxData() {
+    if (fxData) return Promise.resolve(fxData);
+    if (!fxLoading) {
+        fxLoading = (async () => {
+            try {
+                const res = await fetch('data/fx.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const d = await res.json();
+                if (!Array.isArray(d.columns) || !Array.isArray(d.series) || !d.series.length) {
+                    throw new Error('数据结构异常');
+                }
+                fxData = d;
+                if (!d.columns.includes(fxCurrent)) fxCurrent = d.columns[0];
+            } catch (e) {
+                console.error('汇率数据加载失败', e);
+                fxLoading = null; // 允许下次重试
+            }
+        })();
+    }
+    return fxLoading.then(() => fxData);
+}
+
+function renderFx(animate = false) {
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+    mediaGrid.innerHTML = `
+        <div class="fx-wrap">
+            <div class="fx-head">
+                <div>
+                    <h2 class="fx-title">人民币汇率</h2>
+                    <div class="fx-sub" id="fxSub">加载中…</div>
+                </div>
+                <div class="fx-ranges" id="fxRanges">
+                    ${FX_RANGES.map(([d, label]) => `<button class="fx-range${d === fxRangeDays ? ' active' : ''}" type="button" data-fx-range="${d}">${label}</button>`).join('')}
+                </div>
+            </div>
+            <div class="fx-cards" id="fxCards"></div>
+            <div class="fx-chart-card">
+                <div class="fx-chart-head">
+                    <span class="fx-chart-name" id="fxChartName"></span>
+                    <span class="fx-chart-delta" id="fxChartDelta"></span>
+                </div>
+                <div class="fx-chart" id="fxChart"><div class="fx-placeholder">数据加载中…</div></div>
+                <div class="fx-note">数据来源：欧洲央行参考汇率，每工作日发布一次（非盘中实时报价）</div>
+            </div>
+        </div>`;
+    const wrap = mediaGrid.querySelector('.fx-wrap');
+    if (wrap && animate && !document.body.classList.contains('no-anim')) wrap.classList.add('anim');
+
+    loadFxData().then((data) => {
+        if (currentView !== 'fx') return; // 加载期间切走了
+        if (!data) {
+            document.getElementById('fxSub').textContent = '汇率数据加载失败';
+            document.getElementById('fxChart').innerHTML = '<div class="fx-placeholder">数据加载失败，切走再回来可重试</div>';
+            return;
+        }
+        fxPaintCards();
+        fxPaintChart();
+    });
+}
+
+function fxPaintCards() {
+    const rows = fxData.series;
+    const last = rows[rows.length - 1];
+    const prev = rows.length > 1 ? rows[rows.length - 2] : null;
+    document.getElementById('fxCards').innerHTML = fxData.columns.map((code, ci) => {
+        const v = fxValue(code, last[ci + 1]);
+        const p = prev ? fxValue(code, prev[ci + 1]) : null;
+        const info = fxDiffInfo(p ? (v - p) / p * 100 : null);
+        return `
+            <button class="fx-card${code === fxCurrent ? ' active' : ''}" type="button" data-fx-code="${escapeHtml(code)}">
+                <span class="fx-card-head">
+                    <span class="fx-card-name">${escapeHtml(fxMeta(code).name)}</span>
+                    <span class="fx-card-code">${escapeHtml(code)}</span>
+                </span>
+                <span class="fx-card-value">${fxRateText(code, v)}</span>
+                <span class="fx-card-foot">
+                    <span class="fx-card-unit">${escapeHtml(fxUnitText(code))}</span>
+                    <span class="fx-card-diff ${info.dir}">${info.text}</span>
+                </span>
+            </button>`;
+    }).join('');
+    document.getElementById('fxSub').textContent =
+        `${fxData.columns.length} 种主流货币 · 最新数据 ${last[0]}（${fxData.sourceName}）`;
+}
+
+// 按天数切片历史（0 = 全部）；按日历日回退，取区间内第一条起的全部交易日
+function fxSlice() {
+    const rows = fxData.series;
+    if (!fxRangeDays) return rows;
+    const d = new Date(rows[rows.length - 1][0] + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() - fxRangeDays);
+    const from = d.toISOString().slice(0, 10);
+    let i = rows.length - 1;
+    while (i > 0 && rows[i - 1][0] >= from) i--;
+    return rows.slice(i);
+}
+
+function fxAxisText(v) {
+    return v >= 100 ? v.toFixed(1) : v >= 1 ? v.toFixed(2) : v.toFixed(4);
+}
+
+function fxPaintChart() {
+    const box = document.getElementById('fxChart');
+    if (!box || !fxData) return;
+    const code = fxCurrent;
+    const ci = fxData.columns.indexOf(code) + 1;
+    const pts = [];
+    for (const row of fxSlice()) {
+        const v = fxValue(code, row[ci]);
+        if (v != null) pts.push({ date: row[0], v: v });
+    }
+    document.getElementById('fxChartName').textContent = `${fxMeta(code).name} / 人民币`;
+    const deltaEl = document.getElementById('fxChartDelta');
+    if (pts.length < 2) {
+        deltaEl.textContent = '';
+        box.innerHTML = '<div class="fx-placeholder">该区间暂无足够数据</div>';
+        fxGeom = null;
+        return;
+    }
+
+    const diff = (pts[pts.length - 1].v - pts[0].v) / pts[0].v * 100;
+    const info = fxDiffInfo(diff);
+    deltaEl.className = 'fx-chart-delta ' + info.dir;
+    deltaEl.textContent = `区间 ${diff >= 0 ? '+' : '-'}${Math.abs(diff).toFixed(2)}% · ${pts[0].date} 起`;
+
+    const w = Math.max(box.clientWidth || 0, 320);
+    const h = box.clientHeight || 300;
+    const padL = 62, padR = 20, padT = 18, padB = 32;
+    const innerW = w - padL - padR, innerH = h - padT - padB;
+    const vals = pts.map(p => p.v);
+    let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    if (max - min < 1e-9) {
+        max += 0.5;
+        min -= 0.5;
+    } else {
+        const pad = (max - min) * 0.08;
+        min -= pad;
+        max += pad;
+    }
+    const X = i => padL + innerW * i / (pts.length - 1);
+    const Y = v => padT + innerH - (v - min) / (max - min) * innerH;
+    const path = pts.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(' ');
+    const area = `${path} L${X(pts.length - 1).toFixed(1)} ${(padT + innerH).toFixed(1)} L${X(0).toFixed(1)} ${(padT + innerH).toFixed(1)} Z`;
+
+    const ticks = [];
+    for (let t = 0; t <= 4; t++) ticks.push({ y: padT + innerH * t / 4, v: max - (max - min) * t / 4 });
+    const step = Math.max(1, Math.round((pts.length - 1) / 4));
+    const labelIdx = [];
+    let lastLabel = '';
+    const pushLabel = (i) => {
+        const label = pts[i].date.slice(2, 7).replace('-', '/');
+        if (label === lastLabel) return; // 避免末尾两个月标签重复
+        labelIdx.push(i);
+        lastLabel = label;
+    };
+    for (let i = 0; i < pts.length; i += step) pushLabel(i);
+    pushLabel(pts.length - 1);
+
+    box.innerHTML = `
+        <svg class="fx-svg" viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="${escapeHtml(fxMeta(code).name)}兑人民币走势">
+            <defs>
+                <linearGradient id="fxArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop class="fx-area-a" offset="0%"></stop>
+                    <stop class="fx-area-b" offset="100%"></stop>
+                </linearGradient>
+            </defs>
+            ${ticks.map(t => `<line class="fx-grid" x1="${padL}" y1="${t.y.toFixed(1)}" x2="${(w - padR).toFixed(1)}" y2="${t.y.toFixed(1)}"></line>` +
+            `<text class="fx-axis" x="${padL - 8}" y="${(t.y + 4).toFixed(1)}" text-anchor="end">${fxAxisText(t.v)}</text>`).join('')}
+            ${labelIdx.map(i => `<text class="fx-axis" x="${X(i).toFixed(1)}" y="${h - 10}" text-anchor="middle">${escapeHtml(pts[i].date.slice(2, 7).replace('-', '/'))}</text>`).join('')}
+            <path class="fx-area" d="${area}"></path>
+            <path class="fx-line" d="${path}"></path>
+            <circle class="fx-dot-last" cx="${X(pts.length - 1).toFixed(1)}" cy="${Y(pts[pts.length - 1].v).toFixed(1)}" r="3.5"></circle>
+            <line class="fx-cross" x1="0" y1="${padT}" x2="0" y2="${padT + innerH}" style="display:none"></line>
+            <circle class="fx-cross-dot" r="4" style="display:none"></circle>
+        </svg>
+        <div class="fx-tip" id="fxTip" hidden></div>`;
+
+    fxGeom = { pts: pts, X: X, Y: Y, padL: padL, w: w, h: h };
+    const svg = box.querySelector('svg');
+    svg.addEventListener('mousemove', fxHover);
+    svg.addEventListener('mouseleave', fxHoverEnd);
+    svg.addEventListener('touchstart', fxHover, { passive: true });
+    svg.addEventListener('touchmove', fxHover, { passive: true });
+    svg.addEventListener('touchend', fxHoverEnd);
+}
+
+function fxHover(e) {
+    if (!fxGeom) return;
+    const box = document.getElementById('fxChart');
+    const svg = box && box.querySelector('svg');
+    if (!svg) return;
+    const touch = e.touches && e.touches[0];
+    const clientX = touch ? touch.clientX : e.clientX;
+    if (clientX == null) return;
+    const rect = svg.getBoundingClientRect();
+    const k = rect.width / fxGeom.w || 1; // 屏幕像素 / viewBox 单位
+    const x = (clientX - rect.left) / k;
+    const gap = fxGeom.pts.length > 1 ? fxGeom.X(1) - fxGeom.X(0) : 1;
+    let i = Math.round((x - fxGeom.padL) / gap);
+    i = Math.max(0, Math.min(fxGeom.pts.length - 1, i));
+    const p = fxGeom.pts[i];
+    const px = fxGeom.X(i), py = fxGeom.Y(p.v);
+    const cross = svg.querySelector('.fx-cross'), dot = svg.querySelector('.fx-cross-dot');
+    cross.setAttribute('x1', px);
+    cross.setAttribute('x2', px);
+    cross.style.display = '';
+    dot.setAttribute('cx', px);
+    dot.setAttribute('cy', py);
+    dot.style.display = '';
+    const tip = document.getElementById('fxTip');
+    tip.hidden = false;
+    tip.innerHTML = `<b>${escapeHtml(p.date)}</b><span>${escapeHtml(fxUnitText(fxCurrent))} = ${fxRateText(fxCurrent, p.v)} 人民币</span>`;
+    tip.style.left = Math.min(Math.max(px * k, 70), rect.width - 70) + 'px';
+    tip.style.top = Math.max(py * k - 6, 10) + 'px';
+}
+
+function fxHoverEnd() {
+    const box = document.getElementById('fxChart');
+    const svg = box && box.querySelector('svg');
+    if (svg) {
+        const cross = svg.querySelector('.fx-cross'), dot = svg.querySelector('.fx-cross-dot');
+        if (cross) cross.style.display = 'none';
+        if (dot) dot.style.display = 'none';
+    }
+    const tip = document.getElementById('fxTip');
+    if (tip) tip.hidden = true;
+}
+
+// 全域搜索里的货币匹配（名称 / 代码 / 常见别名）
+function fxSearchHits(term) {
+    const t = (term || '').toLowerCase().trim();
+    if (!t) return [];
+    const codes = fxData ? fxData.columns : Object.keys(FX_META);
+    return codes.filter(code => {
+        const m = fxMeta(code);
+        return code.toLowerCase().includes(t) || m.name.includes(term) || (m.alias && m.alias.includes(term));
+    });
+}
+
+function fxSearchCard(code) {
+    const m = fxMeta(code);
+    let rate = '';
+    if (fxData && fxData.latest && fxData.latest[code]) {
+        rate = `${fxUnitText(code)} = ${fxRateText(code, fxValue(code, fxData.latest[code]))} 人民币`;
+    }
+    return `
+    <div class="skill-card fx-hit" role="button" tabindex="0" data-fx-goto="${code}">
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(m.name)} / 人民币</span>
+            <span class="skill-tag">${code}</span>
+        </div>
+        <div class="skill-desc">${escapeHtml(rate || '点击查看汇率走势')}</div>
+        <div class="skill-meta"><span class="skill-tag">${fxData ? '最新 ' + escapeHtml(fxData.updated) : '汇率走势'}</span></div>
+    </div>`;
+}
+
+// 进入汇率视图（code 为空则保留当前选中货币）
+function fxGoTo(code) {
+    if (code) fxCurrent = code;
+    currentView = 'fx';
+    searchFrom = 'fx';
+    searchInput.value = '';
+    sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.add('active'));
+    homeNav.classList.remove('active');
+    renderFx(true);
+    if (window.innerWidth <= 768) {
+        closeMobileMenu();
+    }
 }
 
 // 加载链接数据
@@ -2531,6 +2862,7 @@ function initEventListeners() {
                 sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 homeNav.classList.remove('active');
             }
             renderSearchWithLoading(term);
@@ -2638,6 +2970,43 @@ function initEventListeners() {
         }
     });
 
+    // 汇率入口（侧栏）
+    sidebarFx.addEventListener('click', (e) => {
+        if (!e.target.closest('.sidebar-item')) return;
+        fxGoTo(null);
+    });
+
+    // 汇率视图内：切换币种 / 切换区间（内容区事件委托）
+    mediaGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.fx-card');
+        if (card) {
+            fxCurrent = card.dataset.fxCode;
+            fxPaintCards();
+            fxPaintChart();
+            return;
+        }
+        const range = e.target.closest('.fx-range');
+        if (range) {
+            fxRangeDays = Number(range.dataset.fxRange);
+            mediaGrid.querySelectorAll('.fx-range').forEach(b => b.classList.toggle('active', b === range));
+            fxPaintChart();
+        }
+    });
+
+    // 搜索结果里的货币条目：跳到汇率视图并选中该币种
+    linksGrid.addEventListener('click', (e) => {
+        const hit = e.target.closest('[data-fx-goto]');
+        if (hit) fxGoTo(hit.dataset.fxGoto);
+    });
+    linksGrid.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const hit = e.target.closest('[data-fx-goto]');
+        if (hit) {
+            e.preventDefault();
+            fxGoTo(hit.dataset.fxGoto);
+        }
+    });
+
     // 影视筛选芯片点击 + 排序切换（内容区，事件委托）
     mediaGrid.addEventListener('click', (e) => {
         const statusChip = e.target.closest('[data-status-chip]');
@@ -2690,6 +3059,7 @@ function initEventListeners() {
                 closeMobileMenu();
             }
             recalcMarquee();
+            if (currentView === 'fx') fxPaintChart(); // 图表宽度随容器变，重画一次
         }, 200);
     });
 
