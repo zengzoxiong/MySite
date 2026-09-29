@@ -155,7 +155,7 @@ MySite/
 
 `buildLinkCard` / `buildToolCard` / `buildMediaCard` / `skillCardHtml` / `mcpCardHtml` / `starCardHtml`。规则：
 
-- 所有动态文本必须过 `escapeHtml`（拼接进内联 onerror 字符串用 `escapeJs`）
+- 所有动态文本必须过 `escapeHtml`；favicon 两级失败后的兜底图标是 **img 的兄弟节点**（`.fav-fallback`，由 onerror 切显隐），**别把内容拼进内联 onerror 字符串**（SVG 里的引号会把属性截断）
 - 卡片布局统一：横向、小图标/纯文字、标题行 + 徽标 + meta 行；样式在 `.skill-card` 系列
 - 影视卡片有 `fadeUp` 入场动画时只加 `.anim` 类（搜索重渲染不重播）
 
@@ -165,6 +165,16 @@ MySite/
 - 玻璃面板 = 半透明 `var(--card-bg)` + `backdrop-filter: var(--glass-blur)` + `1px var(--glass-border)` 描边
 - 背后有 `body::before` 环境光斑（玻璃需透出色彩），暗色主题有独立光斑定义
 - 明暗主题靠 `[data-theme="dark"]` 变量覆盖；原生控件需 `color-scheme` 声明
+
+### 可访问性约定（2026-09 全站修复，改样式时别破）
+
+- **对比度**：`--text-secondary`（明 `#4b5563` / 暗 `#9aa3b2`）与 `--text-tertiary`（明 `#5f6774` / 暗 `#8b93a1`）都按 ≥4.5:1 调过——原先 tertiary 是 `#9ca3af`（明 2.3:1）/`#555`（暗 2.5:1），玻璃卡上的小字基本看不清。**改这两个值时按「玻璃卡合成色」验算**（卡片是 rgba 0.55~0.6 叠在 `--bg-color` 上）。
+- **字号**：全站不再有 <12px（`0.75rem`）的信息性文字；音乐播放器时长、角标、meta 行等原来 0.62~0.74rem 的一律提到 0.75rem。
+- **键盘焦点**：`styles.css` 顶部有一条 `:focus-visible { outline: 2px solid var(--accent-color) !important }`，`!important` 是为了压过各输入框的 `outline: none`——**这条别删**，删除等于把键盘用户的可视焦点去掉。
+- **触控目标**：图标按钮（`.home-btn`/`.settings-btn`/`.sidebar-collapse-btn`/`.gh-expand`）桌面 28px、移动端 36px；音乐静音图标本体 15px，用 `.mp-mute::after { inset: -5px }` 把可点区扩到 25px。
+- **图标零 emoji**：天气图标是 `WEATHER_ICONS` 里的内联 SVG（`weatherIconSvg()`），WMO 映射表存的是**图标键**（如 `sun`/`rain`）而不是 emoji——键会写进 `localStorage.weatherSnap`，旧快照里的 emoji 串会被兜底成温度计图标，**改键名要考虑旧快照**。卡片图标兜底同理：数据里有 `icon`（emoji，既有约定）就用它，没有才用 `CARD_ICON_SVG`。站点里保留的 `★`（评分/星标）与 `✓`（复制反馈）是排版字形，不是 emoji。
+- **标题层级**：每个视图恰好一个 h1——首页是 `.sr-only` 的站名；网站收藏 / 在线工具 / 影视 / Stars / Agent Plugin / 搜索用共用标题条 `#viewHead`（`setViewHead(title, sub)`，传空字符串即隐藏）；**汇率视图例外**：它自带 `h1.fx-title` + 区间按钮，renderFx 里显式 `setViewHead('')`。搜索分组标题是 h2。新增视图时记得调 `setViewHead()`，否则该视图没有 h1。
+- **汇率图表键盘可达**：SVG 有 `tabindex="0"` + `<title>` + 带最新值/区间涨跌的 `aria-label`，聚焦即播报最新点；左右方向键逐日移动读数（`fxKeyIndex`）、Home/End 跳两端、Esc 收起，读数写进 `#fxA11y`（`aria-live`）。
 
 ### 已知坑位（全部实战踩过，勿再踩）
 

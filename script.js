@@ -316,18 +316,39 @@ function clockRollTo(cell, ch, prev, instant) {
 }
 
 // --- 天气（Open-Meteo 免费接口，无需密钥；城市在设置里选，默认西安，也可自动定位） ---
+// [天气文案, 图标键]；图标键会被写进天气快照，改名要兼容旧快照（旧快照存的是 emoji，会走兜底图标）
 const WMO_CODES = {
-    0: ['晴', '☀️'], 1: ['多云转晴', '🌤️'], 2: ['多云', '⛅'], 3: ['阴', '☁️'],
-    45: ['雾', '🌫️'], 48: ['雾凇', '🌫️'],
-    51: ['小毛毛雨', '🌦️'], 53: ['毛毛雨', '🌦️'], 55: ['大毛毛雨', '🌧️'],
-    56: ['冻毛毛雨', '🌧️'], 57: ['冻毛毛雨', '🌧️'],
-    61: ['小雨', '🌧️'], 63: ['中雨', '🌧️'], 65: ['大雨', '🌧️'],
-    66: ['冻雨', '🌧️'], 67: ['冻雨', '🌧️'],
-    71: ['小雪', '🌨️'], 73: ['中雪', '🌨️'], 75: ['大雪', '❄️'], 77: ['雪粒', '🌨️'],
-    80: ['小阵雨', '🌦️'], 81: ['阵雨', '🌦️'], 82: ['强阵雨', '⛈️'],
-    85: ['小阵雪', '🌨️'], 86: ['阵雪', '🌨️'],
-    95: ['雷阵雨', '⛈️'], 96: ['雷阵雨伴冰雹', '⛈️'], 99: ['雷阵雨伴冰雹', '⛈️']
+    0: ['晴', 'sun'], 1: ['多云转晴', 'cloudSun'], 2: ['多云', 'cloudSun'], 3: ['阴', 'cloud'],
+    45: ['雾', 'fog'], 48: ['雾凇', 'fog'],
+    51: ['小毛毛雨', 'drizzle'], 53: ['毛毛雨', 'drizzle'], 55: ['大毛毛雨', 'rain'],
+    56: ['冻毛毛雨', 'rain'], 57: ['冻毛毛雨', 'rain'],
+    61: ['小雨', 'rain'], 63: ['中雨', 'rain'], 65: ['大雨', 'rain'],
+    66: ['冻雨', 'sleet'], 67: ['冻雨', 'sleet'],
+    71: ['小雪', 'snow'], 73: ['中雪', 'snow'], 75: ['大雪', 'snow'], 77: ['雪粒', 'snow'],
+    80: ['小阵雨', 'drizzle'], 81: ['阵雨', 'rain'], 82: ['强阵雨', 'thunder'],
+    85: ['小阵雪', 'snow'], 86: ['阵雪', 'snow'],
+    95: ['雷阵雨', 'thunder'], 96: ['雷阵雨伴冰雹', 'thunder'], 99: ['雷阵雨伴冰雹', 'thunder']
 };
+
+// 天气图标一律内联 SVG（站点规范：不用 emoji 当图标）；描边走 currentColor，随主题变色
+const WEATHER_ICONS = {
+    sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.4M12 19v2.4M2.6 12h2.4M19 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/>',
+    cloudSun: '<circle cx="8.2" cy="7.8" r="3"/><path d="M8.2 2.4v1.6M2.8 7.8h1.6M4.4 4l1.1 1.1M12 4l-1.1 1.1"/><path d="M16.8 19.4H8.6a3.6 3.6 0 0 1-.3-7.2 4.4 4.4 0 0 1 8.3 1.2 3 3 0 0 1 .2 6Z"/>',
+    cloud: '<path d="M16.8 18.6H8.4a3.8 3.8 0 0 1-.4-7.6 4.8 4.8 0 0 1 9 1.3 3.2 3.2 0 0 1-.2 6.3Z"/>',
+    fog: '<path d="M16.4 13.4H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M5.2 17h13.6M7.6 20.4h9"/>',
+    drizzle: '<path d="M16.4 12.6H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M9.4 16.4v1.8M13.4 16.4v1.8M17.4 16.4v1.8"/>',
+    rain: '<path d="M16.4 12.6H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M9.8 15.6 8.6 19.8M13.6 15.6l-1.2 4.2M17.4 15.6l-1.2 4.2"/>',
+    sleet: '<path d="M16.4 12.6H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M9.6 15.6 8.6 18.4M14.6 15.6v1.4M14 20.6l1.4-1.4M15.4 20.6 14 19.2"/>',
+    snow: '<path d="M16.4 12.6H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M9.4 16.5h.01M13.4 16.5h.01M11.4 20h.01M15.4 20h.01"/>',
+    thunder: '<path d="M16.4 12.6H8.6a3.3 3.3 0 0 1-.3-6.6 4.3 4.3 0 0 1 8 1.2 2.9 2.9 0 0 1 .1 5.4Z"/><path d="M13.2 14.6 10.4 19h2.8l-1 3.4 3.4-5h-2.8l1-2.8Z"/>',
+    thermo: '<path d="M12 3.6a1.9 1.9 0 0 0-1.9 1.9v7a3.4 3.4 0 1 0 3.8 0v-7A1.9 1.9 0 0 0 12 3.6Z"/><path d="M12 9.4v6"/>'
+};
+
+function weatherIconSvg(key) {
+    const body = WEATHER_ICONS[key] || WEATHER_ICONS.thermo;
+    return `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
 
 const FALLBACK_CITY = { name: '西安', lat: 34.34, lon: 108.94 }; // 自动定位拿不到坐标时的兜底
 let lastWeatherRaw = ''; // 最近一次发起查询的城市存储串，设置变更时据此判断要不要重拉
@@ -392,7 +413,8 @@ function paintWeather(w) {
     const heroWeather = document.getElementById('heroWeather');
     heroWeather.title = w.label ? `点击刷新${w.label}天气` : '点击刷新天气';
     heroWeather.setAttribute('aria-label', heroWeather.title);
-    document.getElementById('weatherIcon').textContent = w.icon;
+    // 图标来自本地常量表（非用户输入），这里用 innerHTML 只是为了塞内联 SVG
+    document.getElementById('weatherIcon').innerHTML = weatherIconSvg(w.icon);
     document.getElementById('weatherTemp').textContent = w.temp;
     document.getElementById('weatherDesc').textContent = w.desc;
     document.getElementById('weatherExtra').textContent = w.extra;
@@ -475,7 +497,7 @@ async function fetchWeatherData(lat, lon) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const cur = data.current;
-    const [text, icon] = WMO_CODES[cur.weather_code] || ['未知', '🌡️'];
+    const [text, icon] = WMO_CODES[cur.weather_code] || ['未知', 'thermo'];
     const daily = data.daily;
     return {
         text, icon,
@@ -1157,7 +1179,7 @@ function todoItemHtml(t) {
     return `<li class="todo-item ${t.done ? 'done' : ''}" data-id="${t.id}">
         <input type="checkbox" class="todo-check" ${t.done ? 'checked' : ''} title="完成">
         <span class="todo-text">${escapeHtml(t.text)}</span>
-        <button class="todo-del" title="删除">✕</button>
+        <button class="todo-del" title="删除" aria-label="删除待办"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </li>`;
 }
 
@@ -1296,6 +1318,7 @@ function renderCurrentView(animate = false) {
 
 // 渲染 GitHub Stars（工作流每日同步的星标仓库）
 function renderGhStars(animate = false) {
+    setViewHead('我的 Stars', 'GitHub 星标仓库 · 工作流每日同步');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1736,6 +1759,7 @@ function renderSearchWithLoading(term) {
     mediaGrid.style.display = 'none';
     linksGrid.style.display = 'grid';
     emptyState.style.display = 'none';
+    setViewHead(`搜索“${term}”`, '全域搜索：网站收藏 / 在线工具 / 影视 / Agent Plugin / Stars / 汇率');
     // 过渡加载态：短暂显示骨架，随后渲染分组结果
     const seq = ++searchSeq;
     if (document.hidden) { renderSearchResults(term); return; } // 后台标签跳过等待
@@ -1773,6 +1797,7 @@ function renderSearchResults(term) {
     const fx = fxSearchHits(term);
 
     const total = links.length + tools.length + media.length + skills.length + mcps.length + stars.length + fx.length;
+    setViewHead(`搜索“${term}”`, total ? `共 ${total} 条结果` : '没有匹配结果');
     if (total === 0) {
         linksGrid.innerHTML = `
             <div class="search-group" style="grid-column:1/-1">
@@ -1783,7 +1808,7 @@ function renderSearchResults(term) {
 
     const group = (label, count, inner) => `
         <div class="search-group" style="grid-column:1/-1">
-            <div class="search-group-head">${label}<span class="search-group-count">${count} 条</span></div>
+            <h2 class="search-group-head">${label}<span class="search-group-count">${count} 条</span></h2>
             <div class="links-grid search-group-body">${inner}</div>
         </div>`;
 
@@ -1843,6 +1868,7 @@ let fxLoading = null;
 let fxCurrent = 'USD';
 let fxRangeDays = 90;
 let fxGeom = null;
+let fxKeyIndex = null; // 键盘读数的当前数据点下标
 
 function fxMeta(code) {
     return FX_META[code] || { name: code, per: 1, alias: '' };
@@ -1898,11 +1924,12 @@ function renderFx(animate = false) {
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
+    setViewHead(''); // 汇率视图自带标题条（含区间按钮），不用共用标题
     mediaGrid.innerHTML = `
         <div class="fx-wrap">
             <div class="fx-head">
                 <div>
-                    <h2 class="fx-title">人民币汇率</h2>
+                    <h1 class="fx-title">人民币汇率</h1>
                     <div class="fx-sub" id="fxSub">加载中…</div>
                 </div>
                 <div class="fx-ranges" id="fxRanges">
@@ -2032,8 +2059,15 @@ function fxPaintChart() {
     for (let i = 0; i < pts.length; i += step) pushLabel(i);
     pushLabel(pts.length - 1);
 
+    const lastPt = pts[pts.length - 1];
+    const chartLabel = `${fxMeta(code).name}兑人民币走势图：${pts[0].date} 至 ${lastPt.date}，最新 `
+        + `${fxUnitText(code)} = ${fxRateText(code, lastPt.v)} 人民币，区间涨跌 `
+        + `${diff >= 0 ? '+' : '-'}${Math.abs(diff).toFixed(2)}%。按左右方向键逐日读数`;
+
     box.innerHTML = `
-        <svg class="fx-svg" viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="${escapeHtml(fxMeta(code).name)}兑人民币走势">
+        <svg class="fx-svg" viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img"
+             tabindex="0" aria-label="${escapeHtml(chartLabel)}">
+            <title>${escapeHtml(chartLabel)}</title>
             <defs>
                 <linearGradient id="fxArea" x1="0" y1="0" x2="0" y2="1">
                     <stop class="fx-area-a" offset="0%"></stop>
@@ -2049,15 +2083,48 @@ function fxPaintChart() {
             <line class="fx-cross" x1="0" y1="${padT}" x2="0" y2="${padT + innerH}" style="display:none"></line>
             <circle class="fx-cross-dot" r="4" style="display:none"></circle>
         </svg>
-        <div class="fx-tip" id="fxTip" hidden></div>`;
+        <div class="fx-tip" id="fxTip" hidden></div>
+        <p class="sr-only" id="fxA11y" aria-live="polite"></p>`;
 
     fxGeom = { pts: pts, X: X, Y: Y, padL: padL, w: w, h: h };
+    fxKeyIndex = null;
     const svg = box.querySelector('svg');
     svg.addEventListener('mousemove', fxHover);
     svg.addEventListener('mouseleave', fxHoverEnd);
     svg.addEventListener('touchstart', fxHover, { passive: true });
     svg.addEventListener('touchmove', fxHover, { passive: true });
     svg.addEventListener('touchend', fxHoverEnd);
+    svg.addEventListener('focus', () => fxShowPoint(fxKeyIndex == null ? pts.length - 1 : fxKeyIndex)); // 聚焦即读出最新值
+    svg.addEventListener('keydown', fxKeyNav);
+}
+
+// 把第 i 个数据点显示到十字线 + tooltip（鼠标/触摸与键盘共用），并同步读屏播报
+function fxShowPoint(i) {
+    if (!fxGeom) return;
+    const box = document.getElementById('fxChart');
+    const svg = box && box.querySelector('svg');
+    if (!svg) return;
+    i = Math.max(0, Math.min(fxGeom.pts.length - 1, i));
+    fxKeyIndex = i;
+    const p = fxGeom.pts[i];
+    const px = fxGeom.X(i), py = fxGeom.Y(p.v);
+    const cross = svg.querySelector('.fx-cross'), dot = svg.querySelector('.fx-cross-dot');
+    cross.setAttribute('x1', px);
+    cross.setAttribute('x2', px);
+    cross.style.display = '';
+    dot.setAttribute('cx', px);
+    dot.setAttribute('cy', py);
+    dot.style.display = '';
+    const text = `${p.date}，${fxUnitText(fxCurrent)} = ${fxRateText(fxCurrent, p.v)} 人民币`;
+    const tip = document.getElementById('fxTip');
+    tip.hidden = false;
+    tip.innerHTML = `<b>${escapeHtml(p.date)}</b><span>${escapeHtml(fxUnitText(fxCurrent))} = ${fxRateText(fxCurrent, p.v)} 人民币</span>`;
+    const rect = svg.getBoundingClientRect();
+    const k = rect.width / fxGeom.w || 1; // 屏幕像素 / viewBox 单位
+    tip.style.left = Math.min(Math.max(px * k, 70), rect.width - 70) + 'px';
+    tip.style.top = Math.max(py * k - 6, 10) + 'px';
+    const live = document.getElementById('fxA11y');
+    if (live) live.textContent = text;
 }
 
 function fxHover(e) {
@@ -2069,25 +2136,30 @@ function fxHover(e) {
     const clientX = touch ? touch.clientX : e.clientX;
     if (clientX == null) return;
     const rect = svg.getBoundingClientRect();
-    const k = rect.width / fxGeom.w || 1; // 屏幕像素 / viewBox 单位
+    const k = rect.width / fxGeom.w || 1;
     const x = (clientX - rect.left) / k;
     const gap = fxGeom.pts.length > 1 ? fxGeom.X(1) - fxGeom.X(0) : 1;
-    let i = Math.round((x - fxGeom.padL) / gap);
-    i = Math.max(0, Math.min(fxGeom.pts.length - 1, i));
-    const p = fxGeom.pts[i];
-    const px = fxGeom.X(i), py = fxGeom.Y(p.v);
-    const cross = svg.querySelector('.fx-cross'), dot = svg.querySelector('.fx-cross-dot');
-    cross.setAttribute('x1', px);
-    cross.setAttribute('x2', px);
-    cross.style.display = '';
-    dot.setAttribute('cx', px);
-    dot.setAttribute('cy', py);
-    dot.style.display = '';
-    const tip = document.getElementById('fxTip');
-    tip.hidden = false;
-    tip.innerHTML = `<b>${escapeHtml(p.date)}</b><span>${escapeHtml(fxUnitText(fxCurrent))} = ${fxRateText(fxCurrent, p.v)} 人民币</span>`;
-    tip.style.left = Math.min(Math.max(px * k, 70), rect.width - 70) + 'px';
-    tip.style.top = Math.max(py * k - 6, 10) + 'px';
+    fxShowPoint(Math.round((x - fxGeom.padL) / gap));
+}
+
+// 键盘读数：方向键逐日移动、Home/End 跳到两端、Esc 收起十字线
+function fxKeyNav(e) {
+    if (!fxGeom) return;
+    const last = fxGeom.pts.length - 1;
+    const from = fxKeyIndex == null ? last : fxKeyIndex;
+    let i = from;
+    if (e.key === 'ArrowLeft') i = from - 1;
+    else if (e.key === 'ArrowRight') i = from + 1;
+    else if (e.key === 'Home') i = 0;
+    else if (e.key === 'End') i = last;
+    else if (e.key === 'Escape') {
+        fxHoverEnd();
+        return;
+    } else {
+        return;
+    }
+    e.preventDefault();
+    fxShowPoint(i);
 }
 
 function fxHoverEnd() {
@@ -2267,6 +2339,7 @@ function renderPluginCat(cat) {
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
+    setViewHead(cat === 'mcps' ? 'Agent MCP' : 'Agent Skills', 'Agent Plugin · 本页注册表内容来自各自上游仓库');
 
     let cards;
     let countLabel;
@@ -2340,26 +2413,28 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// 供内联 onerror 字符串安全拼接
-function escapeJs(s) {
-    return String(s).replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
-}
+// 卡片图标兜底：数据没给 icon 时用内联 SVG（数据里的 emoji 兜底字段是既有约定，保留）
+const CARD_ICON_SVG = {
+    link: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    tool: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>'
+};
 
 function buildLinkCard(link, i) {
     const domain = getDomain(link.url);
-    const emojiIcon = link.icon || '🔗';
+    // favicon 两级失败后露出的兜底：数据里的 icon（emoji）优先，没有则内联 SVG。
+    // 兜底做成 img 的兄弟节点、由 onerror 切换，避免把 SVG 塞进内联事件字符串里
+    const fallbackHtml = link.icon ? escapeHtml(link.icon) : CARD_ICON_SVG.link;
     // 死链体检判死的链接在标题行出红标（suspect 不出标，宁漏报不误报）
     const health = linkHealth[link.url];
     const deadBadge = health && health.state === 'dead'
         ? ` <span class="link-dead" title="链接体检失效（${escapeHtml(health.checkedAt || '')}）">失效</span>`
         : '';
-    // 尝试加载 favicon，两级失败后回退到 emoji
-    const faviconHtml = domain
-        ? `<img src="https://favicon.im/${domain}" alt="" onerror="this.onerror=null;this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';this.onerror=function(){this.parentElement.innerHTML='${escapeJs(escapeHtml(emojiIcon))}'};" width="32" height="32" loading="lazy">`
-        : emojiIcon;
+    const iconHtml = domain
+        ? `<img src="https://favicon.im/${domain}" alt="" width="32" height="32" loading="lazy" onerror="if(this.dataset.alt!=='1'){this.dataset.alt='1';this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';}else{this.hidden=true;this.nextElementSibling.hidden=false;}"><span class="fav-fallback" hidden>${fallbackHtml}</span>`
+        : `<span class="fav-fallback">${fallbackHtml}</span>`;
     return `
     <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-card">
-        <div class="icon">${faviconHtml}</div>
+        <div class="icon">${iconHtml}</div>
         <div class="info">
             <div class="title">${escapeHtml(link.title)}${deadBadge}</div>
             <div class="description">${escapeHtml(link.description)}</div>
@@ -2369,10 +2444,10 @@ function buildLinkCard(link, i) {
 }
 
 function buildToolCard(tool, i) {
-    const faviconUrl = tool.icon || '';
+    const iconHtml = tool.icon ? escapeHtml(tool.icon) : CARD_ICON_SVG.tool;
     return `
     <a href="tools/${escapeHtml(tool.path)}" target="_blank" rel="noopener noreferrer" class="link-card">
-        <div class="icon">${faviconUrl ? `<span style="font-size:1.2rem">${escapeHtml(faviconUrl)}</span>` : '🔧'}</div>
+        <div class="icon">${iconHtml}</div>
         <div class="info">
             <div class="title">${escapeHtml(tool.name)}</div>
             <div class="description">${escapeHtml(tool.description)}</div>
@@ -2404,6 +2479,19 @@ function buildMediaCard(item, i) {
 }
 
 // 渲染链接卡片
+// 视图标题条（各视图共用一个 h1）：传空标题即隐藏（首页与汇率视图用不到）
+function setViewHead(title, sub) {
+    const head = document.getElementById('viewHead');
+    if (!head) return;
+    if (!title) {
+        head.hidden = true;
+        return;
+    }
+    document.getElementById('viewTitle').textContent = title;
+    document.getElementById('viewSub').textContent = sub || '';
+    head.hidden = false;
+}
+
 function renderLinks(animate = false) {
     // 首页视图：仅显示仪表盘，不显示收藏卡片
     if (currentView === 'home') {
@@ -2411,6 +2499,7 @@ function renderLinks(animate = false) {
         linksGrid.style.display = 'none';
         mediaGrid.style.display = 'none';
         emptyState.style.display = 'none';
+        setViewHead('');
         recalcMarquee(); // 仪表盘刚显示，重新量一次歌名是否溢出
         return;
     }
@@ -2421,6 +2510,9 @@ function renderLinks(animate = false) {
     const filteredLinks = currentCategory
         ? allLinks.filter(link => link.category === currentCategory)
         : allLinks;
+
+    setViewHead(currentCategory || '网站收藏',
+        `${currentCategory ? '网站收藏 · ' : ''}共 ${filteredLinks.length} 个站点`);
 
     if (filteredLinks.length === 0) {
         linksGrid.style.display = 'none';
@@ -2447,6 +2539,9 @@ function renderTools(animate = false) {
         ? allTools.filter(tool => tool.category === currentToolCategory)
         : allTools;
 
+    setViewHead(currentToolCategory || '在线工具',
+        `${currentToolCategory ? '在线工具 · ' : ''}共 ${filteredTools.length} 个工具`);
+
     linksGrid.style.display = 'grid';
     linksGrid.innerHTML = filteredTools.map((tool, i) => {
         const animClass = animate ? ' anim' : '';
@@ -2466,6 +2561,9 @@ function renderMedia(animate = false) {
 
     // 状态过滤（全部 / 想看 / 在看 / 看过）
     if (currentStatusFilter) items = items.filter(i => i.status === currentStatusFilter);
+
+    setViewHead(currentMediaType || '影视收藏',
+        `影视收藏${currentStatusFilter ? ' · 只看' + currentStatusFilter : ''}`);
 
     // 排序
     const sorted = [...items];

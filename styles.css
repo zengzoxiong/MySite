@@ -13,8 +13,8 @@
     --dead-color: #c0392b; /* 死链体检失效角标 */
     --up-color: #c0392b; /* 汇率上涨/外币升值（红涨绿跌） */
     --down-color: #11875d; /* 汇率下跌/外币贬值 */
-    --text-secondary: #6b7280;
-    --text-tertiary: #9ca3af;
+    --text-secondary: #4b5563; /* 4b5563：玻璃卡上 7.4:1，正文/次级文字统一 ≥4.5:1 */
+    --text-tertiary: #5f6774; /* 5f6774：卡片 5.6:1 / 页面底 5.1:1，原 #9ca3af 仅 2.3:1 */
     --border-color: #eaeaea;
     --accent-color: #2563eb;
     --accent-2: #8b5cf6;
@@ -45,8 +45,8 @@
     --dead-color: #d95843;
     --up-color: #e0705c; /* 汇率上涨/外币升值 */
     --down-color: #3fbf8f; /* 汇率下跌/外币贬值 */
-    --text-secondary: #888888;
-    --text-tertiary: #555555;
+    --text-secondary: #9aa3b2; /* 暗色次级：7.3:1 */
+    --text-tertiary: #8b93a1; /* 暗色三级：6.0:1，原 #555 仅 2.5:1 */
     --border-color: #222222;
     --accent-color: #60a5fa;
     --accent-2: #a78bfa;
@@ -67,6 +67,13 @@
 /* hidden 属性语义优先：组件自己的 display 规则（flex 等）不得压过它（坑位 11） */
 [hidden] {
     display: none !important;
+}
+
+/* 键盘焦点环：:focus-visible 只在键盘操作时出现（鼠标点击不显示），
+   !important 保证不被各处的 outline:none / box-shadow 焦点样式覆盖 */
+:focus-visible {
+    outline: 2px solid var(--accent-color) !important;
+    outline-offset: 2px;
 }
 
 body {
@@ -291,7 +298,7 @@ body::before {
     justify-content: space-between;
     width: 100%;
     font-family: inherit;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-tertiary);
     text-transform: uppercase;
@@ -583,7 +590,7 @@ body.modal-open {
     border-radius: 8px;
     background: none;
     color: var(--text-secondary);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-family: inherit;
     cursor: pointer;
     flex-shrink: 0;
@@ -719,7 +726,7 @@ body.modal-open {
     flex: 1;
     min-width: 0;
     color: var(--text-tertiary);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1208,7 +1215,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .section-label {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-tertiary);
     letter-spacing: 1.5px;
@@ -1327,7 +1334,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .gh-panel-total {
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
 }
 
@@ -1358,7 +1365,7 @@ body.sidebar-collapsed .main-content {
     align-items: center;
     gap: 4px;
     margin-top: 8px;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
 }
 
@@ -1374,7 +1381,7 @@ body.sidebar-collapsed .main-content {
 .github-stats {
     display: flex;
     gap: 10px;
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     transition: color 0.2s;
 }
@@ -1537,7 +1544,7 @@ body.no-anim .mp-lyric > div {
 .mp-ly-empty {
     padding: 18px 0;
     text-align: center;
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
 }
 
@@ -1552,7 +1559,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .mp-artist {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     max-width: 100%;
     overflow: hidden;
@@ -1775,7 +1782,7 @@ body.no-anim .mp-lyric > div {
 .mp-item-no {
     width: 18px;
     flex-shrink: 0;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     opacity: 0.65;
     font-variant-numeric: tabular-nums;
 }
@@ -1792,7 +1799,7 @@ body.no-anim .mp-lyric > div {
 .mp-item-artist {
     width: 84px;
     flex-shrink: 0;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1803,7 +1810,7 @@ body.no-anim .mp-lyric > div {
     width: 32px;
     flex-shrink: 0;
     text-align: right;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     font-variant-numeric: tabular-nums;
 }
@@ -1895,7 +1902,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .mp-time {
-    font-size: 0.66rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     margin-top: 1px;
     font-variant-numeric: tabular-nums;
@@ -1923,7 +1930,7 @@ body.no-anim .mp-lyric > div {
     right: 0;
     z-index: 1; /* 低于 .corner 的 2：gh-panel 展开时不被芯片盖住标题行 */
     padding: 4px 12px;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     animation: fadeDown 0.5s ease 0.35s backwards;
 }
@@ -2083,7 +2090,7 @@ body.no-anim .mp-lyric > div {
     border-radius: 99px;
     background: var(--dead-color);
     color: #fff;
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     font-weight: 600;
     vertical-align: 1px;
 }
@@ -2571,7 +2578,7 @@ body.no-anim .mp-lyric > div {
 .skill-cmd {
     margin-top: 5px;
     font-family: Consolas, Monaco, monospace;
-    font-size: 0.73rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2586,7 +2593,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .skill-tag {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     padding: 2px 9px;
     border-radius: 99px;
     background-color: var(--hover-bg);
@@ -2600,7 +2607,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .skill-link {
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     text-decoration: none;
     transition: color 0.2s;
@@ -2620,7 +2627,7 @@ body.no-anim .mp-lyric > div {
 
 .config-block summary {
     padding: 7px 12px;
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     cursor: pointer;
     list-style: none;
@@ -2649,14 +2656,14 @@ body.no-anim .mp-lyric > div {
 
 .config-hint {
     color: var(--text-tertiary);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
 }
 
 .config-block pre {
     margin: 0;
     padding: 10px 12px;
     font-family: Consolas, Monaco, monospace;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     line-height: 1.6;
     color: var(--text-secondary);
     overflow-x: auto;
@@ -2670,7 +2677,7 @@ body.no-anim .mp-lyric > div {
     border-radius: 7px;
     background: none;
     color: var(--text-secondary);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-family: inherit;
     cursor: pointer;
     flex-shrink: 0;
@@ -2704,7 +2711,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .search-group-count {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 400;
     color: var(--text-tertiary);
 }
@@ -2874,7 +2881,7 @@ body.no-anim .mp-lyric > div {
 
 .link-card .category {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     padding: 2px 8px;
     background-color: var(--hover-bg);
     border-radius: 4px;
@@ -3277,7 +3284,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .media-ph .ph-title {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.78);
     padding: 0 8px;
     text-align: center;
@@ -3292,7 +3299,7 @@ body.no-anim .mp-lyric > div {
     top: 8px;
     left: 8px;
     padding: 2px 9px;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     border-radius: 99px;
     background: rgba(0, 0, 0, 0.55);
     color: #fff;
@@ -3313,7 +3320,7 @@ body.no-anim .mp-lyric > div {
     top: 8px;
     right: 8px;
     padding: 2px 9px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     border-radius: 99px;
     background: rgba(0, 0, 0, 0.55);
     color: #fbbf24;
@@ -3339,7 +3346,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .media-overlay p {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     line-height: 1.55;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -3411,9 +3418,50 @@ body.no-anim .mp-lyric > div {
 }
 
 .media-meta {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
     margin-top: 2px;
+}
+
+.link-card .fav-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+    color: var(--text-tertiary);
+}
+
+/* ===== 视图标题条（网站收藏 / 在线工具 / 影视 / Stars 共用一个 h1） ===== */
+.view-head {
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.view-title {
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.view-sub {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 视觉隐藏但保留给读屏（首页语义 h1 用） */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* ===== 汇率视图（ECB 参考价走势） ===== */
@@ -3525,7 +3573,7 @@ body.no-anim .mp-lyric > div {
 }
 
 .fx-card-code {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     letter-spacing: 0.04em;
     color: var(--text-tertiary);
 }
@@ -3539,7 +3587,7 @@ body.no-anim .mp-lyric > div {
 
 .fx-card-unit,
 .fx-card-diff {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
 }
 
@@ -3660,7 +3708,7 @@ body.no-anim .mp-lyric > div {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--shadow-card-hover);
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     color: var(--text-primary);
     white-space: nowrap;
     pointer-events: none;
@@ -3687,7 +3735,7 @@ body.no-anim .mp-lyric > div {
 
 .fx-note {
     margin-top: 10px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--text-tertiary);
 }
 
@@ -3712,6 +3760,60 @@ body.no-anim .mp-lyric > div {
     }
 }
 
+
+/* ===== 交互反馈与触控目标（可访问性修） ===== */
+
+/* 按下反馈：卡片/条目按下时轻微收缩，键盘与触控都有明确回应 */
+.link-card:active,
+.skill-card:active,
+.media-card:active,
+.fx-card:active,
+.sidebar-item:active,
+.todo-item:active {
+    transform: scale(0.985);
+}
+
+/* 触控目标：WCAG 2.5.8 要求至少 24×24 CSS px，桌面取 28、移动端再放大 */
+.home-btn,
+.settings-btn,
+.sidebar-collapse-btn {
+    width: 28px;
+    height: 28px;
+}
+
+.gh-expand {
+    width: 28px;
+    height: 28px;
+}
+
+/* 静音图标本体 15px，用伪元素把可点区扩到 25px（视觉不变） */
+.mp-mute {
+    position: relative;
+}
+
+.mp-mute::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+}
+
+@media (max-width: 768px) {
+    .home-btn,
+    .settings-btn,
+    .sidebar-collapse-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .gh-expand {
+        width: 32px;
+        height: 32px;
+    }
+
+    .fx-range {
+        padding: 8px 14px;
+    }
+}
 
 /* 液态玻璃降级：不支持 backdrop-filter 时用不透明底色 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

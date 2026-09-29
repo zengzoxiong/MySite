@@ -94,19 +94,25 @@
     </aside>
 
     <!-- 移动端菜单按钮 -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn" title="打开菜单">☰</button>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" title="打开菜单" aria-label="打开菜单">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+    </button>
 
     <!-- 右侧内容区 -->
     <main class="main-content" id="mainContent">
         <!-- 首页仪表盘：全屏沉浸式，无卡片 -->
         <section class="dashboard" id="dashboard">
+            <!-- 首页不做可见标题（沉浸式仪表盘），但要有语义 h1 供读屏定位 -->
+            <h1 class="sr-only">拾光集 · 个人数字花园</h1>
             <!-- 中央主视觉：时钟 + 天气 -->
             <div class="hero">
                 <div class="hero-clock" id="clockTime" role="timer" aria-label="--:--:--">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
                 <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气" aria-live="polite">
                     <div class="weather-main">
-                        <span class="weather-icon" id="weatherIcon">🌤️</span>
+                        <span class="weather-icon" id="weatherIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.2" cy="7.8" r="3"/><path d="M8.2 2.4v1.6M2.8 7.8h1.6M4.4 4l1.1 1.1M12 4l-1.1 1.1"/><path d="M16.8 19.4H8.6a3.6 3.6 0 0 1-.3-7.2 4.4 4.4 0 0 1 8.3 1.2 3 3 0 0 1 .2 6Z"/></svg></span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>
                         <span class="weather-desc" id="weatherDesc">天气获取中...</span>
                     </div>
@@ -143,11 +149,11 @@
             </div>
 
             <!-- 右上：站点访问统计（不蒜子，加载失败自动隐藏） -->
-            <div class="corner site-stat" id="siteStat" style="display:none">
+            <footer class="corner site-stat" id="siteStat" style="display:none">
                 <span id="busuanzi_container_site_pv" style="display:none">
                     本站访问 <span id="busuanzi_value_site_pv"></span> 次 · <span id="busuanzi_value_site_uv"></span> 位访客
                 </span>
-            </div>
+            </footer>
 
             <!-- 左上：迷你音乐播放器（点箭头展开：大封面 + 进度条 + 控制 + 歌单） -->
             <div class="music-wrap" id="musicWrap">
@@ -302,6 +308,12 @@
             </div>
         </section>
 
+        <!-- 各视图统一标题条（首页不显示；汇率视图自带标题 + 区间按钮，不复用这条） -->
+        <header class="view-head" id="viewHead" hidden>
+            <h1 class="view-title" id="viewTitle"></h1>
+            <p class="view-sub" id="viewSub"></p>
+        </header>
+
         <div class="links-grid" id="linksGrid"></div>
         <div class="media-grid" id="mediaGrid" style="display: none;"></div>
 
@@ -309,7 +321,7 @@
         <div class="settings-modal" id="settingsModal" hidden>
             <div class="settings-backdrop" id="settingsBackdrop"></div>
             <div class="settings-modal-box" role="dialog" aria-modal="true" aria-label="设置">
-                <button class="settings-modal-close" id="settingsClose" title="关闭设置">✕</button>
+                <button class="settings-modal-close" id="settingsClose" title="关闭设置" aria-label="关闭设置"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
                 <iframe src="settings.html" title="设置"></iframe>
             </div>
         </div>
@@ -318,7 +330,7 @@
         <div class="talisman-modal" id="talismanModal" hidden>
             <div class="talisman-backdrop" id="talismanBackdrop"></div>
             <div class="talisman-box" role="dialog" aria-modal="true" aria-label="今日签到符">
-                <button class="talisman-close" id="talismanClose" title="关闭">✕</button>
+                <button class="talisman-close" id="talismanClose" title="关闭" aria-label="关闭"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
                 <canvas id="talismanCanvas" class="talisman-canvas" role="img" aria-label="今日签到符图片"></canvas>
                 <div class="talisman-actions">
                     <button class="talisman-btn" id="talismanSave">保存 PNG</button>
