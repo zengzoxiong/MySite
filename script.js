@@ -46,8 +46,7 @@ const dashboard = document.getElementById('dashboard');
 const homeNav = document.getElementById('homeNav');
 const mediaGrid = document.getElementById('mediaGrid');
 const sidebarMedia = document.getElementById('sidebarMedia');
-const sidebarPlugin = document.getElementById('sidebarPlugin');
-const sidebarFx = document.getElementById('sidebarFx');
+const sidebarData = document.getElementById('sidebarData');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const settingsBackdrop = document.getElementById('settingsBackdrop');
@@ -1296,8 +1295,7 @@ function goHome() {
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     homeNav.classList.add('active');
     renderLinks();
     searchInput.blur();
@@ -2429,8 +2427,7 @@ function fxGoTo(code) {
     sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.add('active'));
+    sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.toggle('active', !!i.dataset.fx));
     homeNav.classList.remove('active');
     renderFx(true);
     if (window.innerWidth <= 768) {
@@ -2604,13 +2601,9 @@ function renderSidebarTools() {
     `).join('');
 }
 
-// 渲染侧栏分类区
+// 渲染侧栏分类区（我的 Stars 已移至「数据看板」分区）
 function renderSidebarCategories(categories) {
-    sidebarCategories.innerHTML = `
-        <div class="sidebar-item" role="button" tabindex="0" data-ghstars="1">
-            <span class="item-text">我的 Stars</span>
-        </div>
-    ` + categories.map(cat => `
+    sidebarCategories.innerHTML = categories.map(cat => `
         <div class="sidebar-item" role="button" tabindex="0" data-category="${escapeHtml(cat)}">
             <span class="item-text">${escapeHtml(cat)}</span>
         </div>
@@ -2957,6 +2950,7 @@ const IC = {
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l2.4 5 5.6.7-4.1 3.8 1.1 5.5-5-2.8-5 2.8 1.1-5.5L4 9.7 9.6 9z"/></svg>',
     wrench: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.9 2.9-2.1-2.1z"/></svg>',
     film: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 5v14M16 5v14M4 10h4M4 14h4M16 10h4M16 14h4"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v14h16"/><path d="M7.5 14.5l3.5-4 3 2.5 4.5-6"/></svg>',
     search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>'
 };
 
@@ -3010,11 +3004,17 @@ function buildCmdkCommands() {
             if (isCheckedInToday()) openTalisman();
             else document.getElementById('checkinBtn').click();
         } },
-        { icon: IC.plug, label: 'Agent Plugin：Agent Skills', run: () => {
-            document.querySelector('#sidebarPlugin [data-plugin-cat="skills"]')?.click();
+        { icon: IC.chart, label: '数据看板：汇率走势', run: () => {
+            document.querySelector('#sidebarData [data-fx]')?.click();
         } },
-        { icon: IC.plug, label: 'Agent Plugin：Agent MCP', run: () => {
-            document.querySelector('#sidebarPlugin [data-plugin-cat="mcps"]')?.click();
+        { icon: IC.star, label: '数据看板：我的 Stars', run: () => {
+            document.querySelector('#sidebarData [data-ghstars]')?.click();
+        } },
+        { icon: IC.plug, label: '数据看板：Agent Skills', run: () => {
+            document.querySelector('#sidebarData [data-plugin-cat="skills"]')?.click();
+        } },
+        { icon: IC.plug, label: '数据看板：Agent MCP', run: () => {
+            document.querySelector('#sidebarData [data-plugin-cat="mcps"]')?.click();
         } },
         { icon: IC.wrench, label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
     ];
@@ -3157,6 +3157,7 @@ function initEventListeners() {
         sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
+        sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         currentToolCategory = item.dataset.toolCategory;
         currentView = 'tools';
         searchFrom = 'tools';
@@ -3177,8 +3178,7 @@ function initEventListeners() {
                 sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                sidebarFx.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 homeNav.classList.remove('active');
             }
             renderSearchWithLoading(term);
@@ -3214,17 +3214,8 @@ function initEventListeners() {
         sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
+        sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         searchInput.value = ''; // 切视图清空搜索，避免残留
-        if (item.dataset.ghstars) {
-            currentCategory = '';
-            currentView = 'ghstars';
-            searchFrom = 'ghstars';
-            renderGhStars(true);
-            if (window.innerWidth <= 768) {
-                closeMobileMenu();
-            }
-            return;
-        }
         currentCategory = item.dataset.category;
         currentView = 'links';
         searchFrom = 'links';
@@ -3258,6 +3249,7 @@ function initEventListeners() {
         sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         homeNav.classList.remove('active');
+        sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
         currentMediaType = item.dataset.mediaType;
         currentStatusFilter = '';
         currentView = 'media';
@@ -3269,27 +3261,33 @@ function initEventListeners() {
         }
     });
 
-    // Agent Plugin 分类点击（侧栏：Agent Skills / Agent MCP）
-    sidebarPlugin.addEventListener('click', (e) => {
+    // 数据看板入口（侧栏：我的 Stars / 汇率走势 / Agent Skills / Agent MCP）
+    sidebarData.addEventListener('click', (e) => {
         const item = e.target.closest('.sidebar-item');
         if (!item) return;
-        sidebarPlugin.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
+        if (item.dataset.fx) {
+            fxGoTo(null);
+            return;
+        }
+        sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.toggle('active', i === item));
         homeNav.classList.remove('active');
-        currentPluginCat = item.dataset.pluginCat;
-        currentView = 'plugin';
-        searchFrom = 'plugin';
-        searchInput.value = '';
-        renderPluginCat(currentPluginCat);
+        searchInput.value = ''; // 切视图清空搜索，避免残留
+        if (item.dataset.ghstars) {
+            // 我的 Stars：工作流每日同步的星标仓库
+            currentCategory = '';
+            currentView = 'ghstars';
+            searchFrom = 'ghstars';
+            renderGhStars(true);
+        } else {
+            // Agent Skills / Agent MCP：注册表视图
+            currentPluginCat = item.dataset.pluginCat;
+            currentView = 'plugin';
+            searchFrom = 'plugin';
+            renderPluginCat(currentPluginCat);
+        }
         if (window.innerWidth <= 768) {
             closeMobileMenu();
         }
-    });
-
-    // 汇率入口（侧栏）
-    sidebarFx.addEventListener('click', (e) => {
-        if (!e.target.closest('.sidebar-item')) return;
-        fxGoTo(null);
     });
 
     // 汇率视图内：切换币种 / 切换区间 / 换算器（内容区事件委托）
