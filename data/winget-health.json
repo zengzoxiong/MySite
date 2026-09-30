@@ -1,0 +1,66 @@
+{
+  "source": "https://github.com/microsoft/winget-pkgs",
+  "checkedAt": "2026-09-30",
+  "packages": {
+    "7zip.7zip": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "26.03"
+    },
+    "ClashVergeRev.ClashVergeRev": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "2.5.6"
+    },
+    "Daum.PotPlayer": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "26.08.19.0"
+    },
+    "DigitalScholar.Zotero": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "10.0.3"
+    },
+    "Kingsoft.WPSOffice.CN": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "12.1.0.28505"
+    },
+    "Microsoft.VisualStudioCode": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "1.139.1"
+    },
+    "NetEase.UURemote": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "4.42.1.2835"
+    },
+    "Obsidian.Obsidian": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "1.13.7"
+    },
+    "OpenJS.NodeJS.LTS": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "24.19.0"
+    },
+    "Tencent.QQ.NT": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "9.9.33.52230"
+    },
+    "Tencent.TencentMeeting": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "3.46.11.413"
+    },
+    "Tencent.WeChat.Universal": {
+      "ok": true,
+      "checkedAt": "2026-09-30",
+      "latest": "4.1.15.13"
+    }
+  }
+}

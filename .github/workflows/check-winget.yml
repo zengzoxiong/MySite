@@ -1,0 +1,41 @@
+name: winget 包体检
+
+on:
+  schedule:
+    - cron: '50 22 * * *' # 每日 UTC 22:50（北京时间 06:50）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 写数据的定时任务共用一条队列，谁在跑后面的等，避免相邻任务同时 push 互相顶掉
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 体检 links.json 的 winget 包并更新 winget-health.json
+        run: python scripts/check_winget.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 提限速到 5000 次/时，防 runner 共享限速误伤
+
+      - name: 有变化时提交
+        run: |
+          if [[ -n $(git status --porcelain data/winget-health.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/winget-health.json
+            git commit -m "chore: 定时体检 winget 包可用性"
+            git push
+          else
+            echo "体检结果无变化，跳过提交"
+          fi

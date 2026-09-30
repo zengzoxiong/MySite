@@ -1,6 +1,7 @@
 // 全局状态
 let allLinks = [];
 let linkHealth = {}; // 死链体检结果（工作流每周二凌晨写 data/link-health.json），失效链接出角标
+let wingetHealth = {}; // winget 包体检结果（工作流每日写 data/winget-health.json），批量安装栏显示版本/失效态
 let allTools = [];
 let mediaData = { types: [], items: [] };
 let pluginsData = { skills: { groups: [] }, mcps: [] };
@@ -2453,6 +2454,13 @@ async function loadLinks() {
         } catch (error) {
             console.error('死链体检结果加载失败:', error);
         }
+        // winget 包体检结果独立加载：缺失/失败只是批量安装栏少了版本与失效提示
+        try {
+            const wingetRes = await fetch('data/winget-health.json');
+            if (wingetRes.ok) wingetHealth = (await wingetRes.json()).packages || {};
+        } catch (error) {
+            console.error('winget 体检结果加载失败:', error);
+        }
         renderSidebarTools();
         renderSidebarCategories(linksData.categories);
         renderLinks();
@@ -2640,6 +2648,12 @@ function buildLinkCard(link, i) {
     const deadBadge = health && health.state === 'dead'
         ? ` <span class="link-dead" title="链接体检失效（${escapeHtml(health.checkedAt || '')}）">失效</span>`
         : '';
+    // 带 winget 字段的软件出「winget」小标；体检发现包失效则出红标
+    const wingetBadge = link.winget
+        ? (wingetHealth[link.winget] && wingetHealth[link.winget].ok === false
+            ? ' <span class="link-winget off" title="每日体检发现 winget 包已失效">winget 失效</span>'
+            : ' <span class="link-winget" title="可用 winget 命令行安装，见下方批量安装栏">winget</span>')
+        : '';
     const iconHtml = domain
         ? `<img src="https://favicon.im/${domain}" alt="" width="32" height="32" loading="lazy" onerror="if(this.dataset.alt!=='1'){this.dataset.alt='1';this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';}else{this.hidden=true;this.nextElementSibling.hidden=false;}"><span class="fav-fallback" hidden>${fallbackHtml}</span>`
         : `<span class="fav-fallback">${fallbackHtml}</span>`;
@@ -2647,7 +2661,7 @@ function buildLinkCard(link, i) {
     <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-card">
         <div class="icon">${iconHtml}</div>
         <div class="info">
-            <div class="title">${escapeHtml(link.title)}${deadBadge}</div>
+            <div class="title">${escapeHtml(link.title)}${deadBadge}${wingetBadge}</div>
             <div class="description">${escapeHtml(link.description)}</div>
             <span class="category">${escapeHtml(link.category)}</span>
         </div>
@@ -2725,6 +2739,8 @@ function renderLinks(animate = false) {
     setViewHead(currentCategory || '网站收藏',
         `${currentCategory ? '网站收藏 · ' : ''}共 ${filteredLinks.length} 个站点`);
 
+    renderWingetBar(); // 「常用软件下载」分类带批量安装栏，其他视图收起
+
     if (filteredLinks.length === 0) {
         linksGrid.style.display = 'none';
         emptyState.style.display = 'block';
@@ -2738,6 +2754,89 @@ function renderLinks(animate = false) {
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
         return buildLinkCard(link, i).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
     }).join('');
+}
+
+// ===== winget 批量安装（「常用软件下载」分类：勾选软件 → 下载 .ps1 一键装机脚本） =====
+// 包可用性与最新版本来自 data/winget-health.json（工作流每日体检），文件缺失只影响提示不影响下载
+const WINGET_CATEGORY = '常用软件下载';
+let wingetSel = [];
+try { wingetSel = JSON.parse(lsGet('wingetSel') || '[]') || []; } catch { wingetSel = []; }
+
+function wingetLinks() {
+    return currentCategory === WINGET_CATEGORY ? allLinks.filter(l => l.winget) : [];
+}
+
+// 体检判失效仅依据 ok===false（脚本只对 404 判死，网络异常沿用旧记录，宁漏报不误报）
+function wingetDead(id) {
+    return wingetHealth[id] && wingetHealth[id].ok === false;
+}
+
+function renderWingetBar() {
+    const bar = document.getElementById('wingetBar');
+    const links = wingetLinks();
+    if (!links.length) {
+        bar.hidden = true;
+        return;
+    }
+    // 选中状态收敛：清掉已移除条目，失效包强制落选
+    wingetSel = wingetSel.filter(id => links.some(l => l.winget === id) && !wingetDead(id));
+    lsSet('wingetSel', JSON.stringify(wingetSel));
+    bar.innerHTML = `
+        <div class="winget-head">
+            <span class="winget-title">批量安装</span>
+            <span class="winget-hint">勾选软件 → 下载 winget 一键安装脚本</span>
+            <span class="winget-count" id="wingetCount"></span>
+            <button type="button" class="winget-btn" id="wingetAll">全选</button>
+            <button type="button" class="winget-btn" id="wingetNone">清空</button>
+            <button type="button" class="winget-btn primary" id="wingetDownload" disabled>下载 .ps1</button>
+        </div>
+        <div class="winget-chips">
+            ${links.map(l => {
+                const h = wingetHealth[l.winget];
+                const isDead = wingetDead(l.winget);
+                const attr = isDead
+                    ? 'disabled title="每日体检发现 winget 包已失效"'
+                    : `title="winget install -e --id ${escapeHtml(l.winget)}"`;
+                return `<button type="button" class="winget-chip" data-winget-id="${escapeHtml(l.winget)}" aria-pressed="${wingetSel.includes(l.winget)}" ${attr}>${escapeHtml(l.title)}${h && h.latest ? `<i>${escapeHtml(h.latest)}</i>` : ''}</button>`;
+            }).join('')}
+        </div>`;
+    bar.hidden = false;
+    syncWingetCount();
+}
+
+function syncWingetCount() {
+    const total = wingetLinks().filter(l => !wingetDead(l.winget)).length;
+    const count = document.getElementById('wingetCount');
+    const btn = document.getElementById('wingetDownload');
+    if (count) count.textContent = `已选 ${wingetSel.length} / ${total}`;
+    if (btn) btn.disabled = !wingetSel.length;
+}
+
+function downloadWingetScript() {
+    if (!wingetSel.length) return;
+    // 按 links.json 里的出现顺序排，装机的先后顺序稳定
+    const lines = allLinks.filter(l => wingetSel.includes(l.winget))
+        .map(l => `winget install -e --id ${l.winget} --accept-source-agreements --accept-package-agreements`);
+    const date = new Date().toISOString().slice(0, 10);
+    const name = `winget-install-${date}.ps1`;
+    const content = [
+        '# 拾光集 · winget 批量安装脚本',
+        `# 生成日期：${date} · https://zengzoxiong.github.io/MySite`,
+        '# 运行方式：右键本文件「使用 PowerShell 运行」，或在 PowerShell 中执行：',
+        `#   powershell -ExecutionPolicy Bypass -File .\\${name}`,
+        '# 每条命令独立执行，单个失败不影响后续；--accept 参数免去逐条确认',
+        '',
+        ...lines,
+        '',
+    ].join('\r\n');
+    // 加 \ufeff BOM：Windows PowerShell 5.1 会把无 BOM 的 UTF-8 中文注释按 ANSI 读成乱码
+    const blob = new Blob(['\ufeff' + content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // 渲染工具卡片
@@ -3287,6 +3386,30 @@ function initEventListeners() {
         }
         if (window.innerWidth <= 768) {
             closeMobileMenu();
+        }
+    });
+
+    // winget 批量安装栏（事件委托绑容器一次，renderWingetBar 重渲染不重绑）
+    document.getElementById('wingetBar').addEventListener('click', (e) => {
+        const chip = e.target.closest('.winget-chip');
+        if (chip) {
+            const id = chip.dataset.wingetId;
+            wingetSel = wingetSel.includes(id) ? wingetSel.filter(x => x !== id) : [...wingetSel, id];
+            chip.setAttribute('aria-pressed', String(wingetSel.includes(id)));
+            lsSet('wingetSel', JSON.stringify(wingetSel));
+            syncWingetCount();
+            return;
+        }
+        if (e.target.closest('#wingetAll')) {
+            wingetSel = wingetLinks().filter(l => !wingetDead(l.winget)).map(l => l.winget);
+            lsSet('wingetSel', JSON.stringify(wingetSel));
+            renderWingetBar();
+        } else if (e.target.closest('#wingetNone')) {
+            wingetSel = [];
+            lsSet('wingetSel', JSON.stringify(wingetSel));
+            renderWingetBar();
+        } else if (e.target.closest('#wingetDownload')) {
+            downloadWingetScript();
         }
     });
 

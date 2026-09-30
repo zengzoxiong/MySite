@@ -4136,3 +4136,81 @@ body.no-anim .mp-lyric > div {
         background-color: var(--bg-color);
     }
 }
+
+/* ===== winget 批量安装栏（常用软件下载分类：勾选软件 → 下载 .ps1） ===== */
+.winget-bar {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    display: grid;
+    gap: 10px;
+}
+.winget-bar[hidden] { display: none !important; }
+.winget-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.winget-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+.winget-hint { font-size: 0.75rem; color: var(--text-tertiary); }
+.winget-count { margin-left: auto; font-size: 0.75rem; color: var(--text-secondary); }
+.winget-btn {
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+.winget-btn.primary {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+}
+.winget-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.winget-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.winget-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.winget-chip i {
+    font-style: normal;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+.winget-chip[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    border-color: var(--accent-color);
+}
+.winget-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.link-winget {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 0 5px;
+    margin-left: 2px;
+    vertical-align: 1px;
+}
+.link-winget.off {
+    color: var(--dead-color);
+    border-color: var(--dead-color);
+}

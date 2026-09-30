@@ -54,6 +54,7 @@ MySite/
 - `icon` 是 favicon 加载失败时的兜底 emoji（站点整体禁 emoji，但此字段为功能性兜底，保留）
 - 卡片构建在 `buildLinkCard()`，动态文本已过 `escapeHtml`
 - **死链体检**：`.github/workflows/check-links.yml` 每周一 05:30（北京）跑 `scripts/check_links.py`，结果写 `data/link-health.json`（**勿手改**），三档 `ok/suspect/dead`、宁漏报不误报（403/429/5xx/超时只记 suspect 不出标；404/410 或两次 DNS 失败才判 dead）；状态+状态码没变时整条沿用旧记录，文件字节不变则工作流跳过提交。`buildLinkCard` 读全局 `linkHealth` 给 dead 链接标题行加「失效」红丸（`--dead-color`），suspect 不出标
+- **winget 批量安装**：`data/links.json` 有可选字段 `winget: "<包id>"`（只给 winget 官方源确实存在的软件配；msstore 商店 id 不在 winget-pkgs 仓库、验证不了，别配）。`.github/workflows/check-winget.yml` 每日 06:50（北京）跑 `scripts/check_winget.py`，查 microsoft/winget-pkgs 仓库验证包目录存在并取最新版本，写 `data/winget-health.json`（**勿手改**；404 才判失效、网络异常沿用旧记录宁漏报不误报；无变化跳过提交）。**仓库路径规则：发布者与包名中的点都拆成目录层级**（`Tencent.QQ.NT` → `manifests/t/Tencent/QQ/NT`，`7zip.7zip` → `7/7zip/7zip`），版本目录名必须以数字开头（过滤 Insiders 之类非版本子目录）。「常用软件下载」分类视图顶部的批量安装栏：chip 勾选（状态存 `localStorage.wingetSel`）→「下载 .ps1」生成一键装机脚本（UTF-8 带 BOM，防 PowerShell 5.1 把中文注释按 ANSI 读成乱码；`--accept-*` 参数免交互确认）；失效包 chip 禁用并强制落选，带 winget 字段的卡片标题行出「winget」小标、失效出红标
 
 ### 2. 影视收藏（data/media.json）——数据规范最严格的部分
 
@@ -215,6 +216,7 @@ MySite/
 - `sync-stars.yml`：每日 05:10 同步 GitHub Stars 到 stars.json
 - `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
 - `check-links.yml`：北京时间每周二 05:30（UTC 周一 21:30）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
+- `check-winget.yml`：每日 06:50（北京）体检 links.json 的 winget 包可用性到 data/winget-health.json（详见「网站收藏」小节），有变化才提交
 - `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
 - `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
 - `sync-fx.yml`：每日 23:40（北京）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交

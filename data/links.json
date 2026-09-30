@@ -108,56 +108,64 @@
       "url": "https://im.qq.com",
       "description": "腾讯QQ NT官方下载页面，全新NT架构，支持Windows、Mac、Linux、Android、iOS等全平台。",
       "category": "常用软件下载",
-      "icon": "💬"
+      "icon": "💬",
+      "winget": "Tencent.QQ.NT"
     },
     {
       "title": "微信",
       "url": "https://weixin.qq.com/",
       "description": "微信官方下载页面，支持Windows、Mac、Linux等桌面平台。",
       "category": "常用软件下载",
-      "icon": "💚"
+      "icon": "💚",
+      "winget": "Tencent.WeChat.Universal"
     },
     {
       "title": "腾讯会议",
       "url": "https://meeting.tencent.com/download-center.html",
       "description": "腾讯会议官方下载中心，支持Windows、Mac、Linux、iOS、Android等平台。",
       "category": "常用软件下载",
-      "icon": "📹"
+      "icon": "📹",
+      "winget": "Tencent.TencentMeeting"
     },
     {
       "title": "WPS Office",
       "url": "https://platform.wps.cn/",
       "description": "WPS Office官方网站，全平台免费下载，支持多人在线协作编辑文档。",
       "category": "常用软件下载",
-      "icon": "📝"
+      "icon": "📝",
+      "winget": "Kingsoft.WPSOffice.CN"
     },
     {
       "title": "7-Zip",
       "url": "https://www.7-zip.org/",
       "description": "开源免费的高压缩比文件压缩工具，支持7z、ZIP、RAR等多种格式。",
       "category": "常用软件下载",
-      "icon": "📦"
+      "icon": "📦",
+      "winget": "7zip.7zip"
     },
     {
       "title": "PotPlayer",
       "url": "https://potplayer.daum.net/",
       "description": "功能强大的多媒体播放器，支持几乎所有视频格式，硬件加速，界面简洁。",
       "category": "常用软件下载",
-      "icon": "▶️"
+      "icon": "▶️",
+      "winget": "Daum.PotPlayer"
     },
     {
       "title": "Visual Studio Code",
       "url": "https://code.visualstudio.com/",
       "description": "微软出品的免费开源代码编辑器，支持丰富的扩展生态系统。",
       "category": "常用软件下载",
-      "icon": "💻"
+      "icon": "💻",
+      "winget": "Microsoft.VisualStudioCode"
     },
     {
       "title": "Clash Verge Rev",
       "url": "https://github.com/clash-verge-rev/clash-verge-rev/releases",
       "description": "基于 Tauri 的 Clash GUI 客户端，支持 Windows、Mac、Linux，开源免费。",
       "category": "常用软件下载",
-      "icon": "🌐"
+      "icon": "🌐",
+      "winget": "ClashVergeRev.ClashVergeRev"
     },
     {
       "title": "CCSwitch",
@@ -171,7 +179,8 @@
       "url": "https://nodejs.org/zh-cn/download/",
       "description": "Node.js 官方下载页面，JavaScript 运行时环境，支持多平台。",
       "category": "常用软件下载",
-      "icon": "💚"
+      "icon": "💚",
+      "winget": "OpenJS.NodeJS.LTS"
     },
     {
       "title": "Watt Toolkit",
@@ -185,14 +194,16 @@
       "url": "https://obsidian.md/download",
       "description": "强大的知识管理和笔记应用，支持双向链接、本地存储、插件扩展。",
       "category": "常用软件下载",
-      "icon": "💎"
+      "icon": "💎",
+      "winget": "Obsidian.Obsidian"
     },
     {
       "title": "UU远程",
       "url": "https://uuyc.163.com/",
       "description": "网易UU远程控制软件，真4K真免费，支持远程桌面、文件传输、远程游戏。",
       "category": "常用软件下载",
-      "icon": "🖥️"
+      "icon": "🖥️",
+      "winget": "NetEase.UURemote"
     },
     {
       "title": "向日葵远程控制",
@@ -206,7 +217,8 @@
       "url": "https://www.zotero.org/download/",
       "description": "免费开源的文献管理工具，支持浏览器插件、多端同步、论文引用管理。",
       "category": "常用软件下载",
-      "icon": "📚"
+      "icon": "📚",
+      "winget": "DigitalScholar.Zotero"
     },
     {
       "title": "火绒安全",
