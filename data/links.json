@@ -183,6 +183,14 @@
       "winget": "OpenJS.NodeJS.LTS"
     },
     {
+      "title": "PowerShell 7",
+      "url": "https://github.com/PowerShell/PowerShell",
+      "description": "微软官方新一代跨平台命令行 Shell 与自动化脚本环境，可与 winget 配合一键装机。",
+      "category": "常用软件下载",
+      "icon": "⌨️",
+      "winget": "Microsoft.PowerShell"
+    },
+    {
       "title": "Watt Toolkit",
       "url": "https://steampp.net/",
       "description": "Steam++ 瓦特工具箱，Steam 辅助工具，支持网络加速、账号切换、库存管理等。",
