@@ -307,12 +307,19 @@
         <header class="view-head" id="viewHead" hidden>
             <h1 class="view-title" id="viewTitle"></h1>
             <p class="view-sub" id="viewSub"></p>
+            <button class="winget-mode-btn" id="wingetModeBtn" hidden title="进入批量安装模式：只显示可命令行安装的软件，勾选后下载 .ps1 脚本">批量安装</button>
         </header>
 
-        <!-- winget 批量安装栏：仅「常用软件下载」分类显示（renderLinks 控制） -->
-        <div class="winget-bar" id="wingetBar" hidden></div>
         <div class="links-grid" id="linksGrid"></div>
         <div class="media-grid" id="mediaGrid" style="display: none;"></div>
+
+        <!-- winget 批量安装操作条：批量模式下浮出（挂容器直下，避免 fixed 被祖先 transform 劫持） -->
+        <div class="winget-dock" id="wingetDock" hidden>
+            <span class="winget-dock-count" id="wingetCount">已选 0</span>
+            <button type="button" class="winget-btn" id="wingetAll">全选</button>
+            <button type="button" class="winget-btn" id="wingetNone">清空</button>
+            <button type="button" class="winget-btn primary" id="wingetDownload" disabled>下载 .ps1</button>
+        </div>
 
         <!-- 设置弹层：iframe 独立页（放最外层容器直下，避免被侧栏 transform/overflow 影响） -->
         <div class="settings-modal" id="settingsModal" hidden>

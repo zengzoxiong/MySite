@@ -4137,70 +4137,104 @@ body.no-anim .mp-lyric > div {
     }
 }
 
-/* ===== winget 批量安装栏（常用软件下载分类：勾选软件 → 下载 .ps1） ===== */
-.winget-bar {
-    background: var(--card-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    display: grid;
-    gap: 10px;
+/* ===== winget 批量安装（右上角入口 + 勾选卡片 + 底部操作条） ===== */
+.view-head { position: relative; } /* 给「批量安装」入口按钮定位 */
+.winget-mode-btn {
+    position: absolute;
+    right: 0;
+    bottom: 12px;
+    border: 1px solid var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
 }
-.winget-bar[hidden] { display: none !important; }
-.winget-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+.winget-mode-btn:hover { background: color-mix(in srgb, var(--accent-color) 20%, transparent); }
+/* 模式中的「退出安装」：退回低调描边，弱化主行动色 */
+.winget-mode-btn.exit {
+    border-color: var(--glass-border);
+    background: transparent;
+    color: var(--text-secondary);
 }
-.winget-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
-.winget-hint { font-size: 0.75rem; color: var(--text-tertiary); }
-.winget-count { margin-left: auto; font-size: 0.75rem; color: var(--text-secondary); }
+.winget-mode-btn.exit:hover { background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+/* 操作条按钮：玻璃胶囊风格，与全站按钮统一 */
 .winget-btn {
     border: 1px solid var(--glass-border);
     background: transparent;
     color: var(--text-primary);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.75rem;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 0.8rem;
     cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
 }
+.winget-btn:hover { background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
 .winget-btn.primary {
     background: var(--accent-color);
     border-color: var(--accent-color);
     color: #fff;
 }
+.winget-btn.primary:hover { background: color-mix(in srgb, var(--accent-color) 85%, #000); }
 .winget-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.winget-chips {
+/* 勾选模式卡片：点击切换选中而不是打开链接 */
+.link-card[data-pick] { position: relative; cursor: pointer; }
+.link-card[data-winget-off="1"] { opacity: 0.5; cursor: not-allowed; }
+.pick-mark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--glass-border);
+    background: var(--card-bg);
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.winget-chip {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    border: 1px solid var(--glass-border);
-    background: transparent;
-    color: var(--text-primary);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    cursor: pointer;
+    justify-content: center;
+    font-size: 13px;
+    color: transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.winget-chip i {
-    font-style: normal;
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-}
-.winget-chip[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+.link-card[data-pick][aria-checked="true"] {
     border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
 }
-.winget-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.link-card[data-pick][aria-checked="true"] .pick-mark {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+}
+.link-card[data-pick][aria-checked="true"] .pick-mark { color: #fff; }
+/* 底部悬浮操作条（fixed 挂容器直下，自身 translate 只做入场过渡） */
+.winget-dock {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 10px 14px 10px 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transform: translate(-50%, 16px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.winget-dock[hidden] { display: none !important; }
+.winget-dock.open {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+}
+.winget-dock-count { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; }
 .link-winget {
     font-size: 0.75rem;
     color: var(--text-tertiary);

@@ -2638,7 +2638,7 @@ const CARD_ICON_SVG = {
     tool: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>'
 };
 
-function buildLinkCard(link, i) {
+function buildLinkCard(link, i, pickMode = false) {
     const domain = getDomain(link.url);
     // favicon 两级失败后露出的兜底：数据里的 icon（emoji）优先，没有则内联 SVG。
     // 兜底做成 img 的兄弟节点、由 onerror 切换，避免把 SVG 塞进内联事件字符串里
@@ -2652,11 +2652,26 @@ function buildLinkCard(link, i) {
     const wingetBadge = link.winget
         ? (wingetHealth[link.winget] && wingetHealth[link.winget].ok === false
             ? ' <span class="link-winget off" title="每日体检发现 winget 包已失效">winget 失效</span>'
-            : ' <span class="link-winget" title="可用 winget 命令行安装，见下方批量安装栏">winget</span>')
+            : ' <span class="link-winget" title="可用 winget 命令行安装">winget</span>')
         : '';
     const iconHtml = domain
         ? `<img src="https://favicon.im/${domain}" alt="" width="32" height="32" loading="lazy" onerror="if(this.dataset.alt!=='1'){this.dataset.alt='1';this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';}else{this.hidden=true;this.nextElementSibling.hidden=false;}"><span class="fav-fallback" hidden>${fallbackHtml}</span>`
         : `<span class="fav-fallback">${fallbackHtml}</span>`;
+    // 批量安装模式的卡片是勾选器：点击切换选中而不是打开链接；
+    // class 属性保持 "link-card" 开头，renderLinks 的动画类注入 replace 依赖这个前缀
+    if (pickMode) {
+        const off = wingetDead(link.winget);
+        return `
+    <div class="link-card" data-pick="1" data-winget-pick="${escapeHtml(link.winget)}" role="checkbox" aria-checked="${wingetSel.includes(link.winget)}" tabindex="0" aria-label="${escapeHtml(link.title)}"${off ? ' data-winget-off="1" aria-disabled="true"' : ''}>
+        <div class="icon">${iconHtml}</div>
+        <div class="info">
+            <div class="title">${escapeHtml(link.title)}${deadBadge}${wingetBadge}</div>
+            <div class="description">${escapeHtml(link.description)}</div>
+            <span class="category">${escapeHtml(link.category)}</span>
+        </div>
+        <span class="pick-mark" aria-hidden="true">✓</span>
+    </div>`;
+    }
     return `
     <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-card">
         <div class="icon">${iconHtml}</div>
@@ -2708,13 +2723,16 @@ function buildMediaCard(item, i) {
 function setViewHead(title, sub) {
     const head = document.getElementById('viewHead');
     if (!head) return;
-    if (!title) {
+    if (title) {
+        document.getElementById('viewTitle').textContent = title;
+        document.getElementById('viewSub').textContent = sub || '';
+        head.hidden = false;
+    } else {
         head.hidden = true;
-        return;
     }
-    document.getElementById('viewTitle').textContent = title;
-    document.getElementById('viewSub').textContent = sub || '';
-    head.hidden = false;
+    // 「批量安装」入口默认收起：只有「常用软件下载」分类的 renderLinks 会重新显示，
+    // 防止切到工具/影视等其他视图时按钮残留在共用标题条上
+    document.getElementById('wingetModeBtn').hidden = true;
 }
 
 function renderLinks(animate = false) {
@@ -2725,6 +2743,7 @@ function renderLinks(animate = false) {
         mediaGrid.style.display = 'none';
         emptyState.style.display = 'none';
         setViewHead('');
+        if (wingetMode) { wingetMode = false; hideWingetDock(); document.getElementById('wingetModeBtn').hidden = true; }
         recalcMarquee(); // 仪表盘刚显示，重新量一次歌名是否溢出
         return;
     }
@@ -2732,14 +2751,29 @@ function renderLinks(animate = false) {
     dashboard.classList.add('hidden');
     mediaGrid.style.display = 'none';
 
-    const filteredLinks = currentCategory
+    // winget 批量安装状态收敛：离开「常用软件下载」分类自动退出勾选模式
+    if (wingetMode && currentCategory !== WINGET_CATEGORY) {
+        wingetMode = false;
+        hideWingetDock();
+    }
+
+    let filteredLinks = currentCategory
         ? allLinks.filter(link => link.category === currentCategory)
         : allLinks;
+    if (wingetMode) filteredLinks = filteredLinks.filter(link => link.winget);
 
     setViewHead(currentCategory || '网站收藏',
-        `${currentCategory ? '网站收藏 · ' : ''}共 ${filteredLinks.length} 个站点`);
+        wingetMode
+            ? '批量安装模式 · 点击卡片勾选要安装的软件'
+            : `${currentCategory ? '网站收藏 · ' : ''}共 ${filteredLinks.length} 个站点`);
 
-    renderWingetBar(); // 「常用软件下载」分类带批量安装栏，其他视图收起
+    // 按钮显隐/文案要在 setViewHead 之后设置：setViewHead 默认把它收起，
+    // 只有「常用软件下载」分类重新亮出（模式中变为「退出安装」）
+    const wingetModeBtn = document.getElementById('wingetModeBtn');
+    wingetModeBtn.hidden = currentCategory !== WINGET_CATEGORY;
+    wingetModeBtn.textContent = wingetMode ? '退出安装' : '批量安装';
+    wingetModeBtn.classList.toggle('exit', wingetMode);
+    wingetModeBtn.title = wingetMode ? '退出批量安装模式' : '进入批量安装模式：只显示可命令行安装的软件，勾选后下载 .ps1 脚本';
 
     if (filteredLinks.length === 0) {
         linksGrid.style.display = 'none';
@@ -2752,64 +2786,64 @@ function renderLinks(animate = false) {
     linksGrid.innerHTML = filteredLinks.map((link, i) => {
         const animClass = animate ? ' anim' : '';
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
-        return buildLinkCard(link, i).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
+        return buildLinkCard(link, i, wingetMode).replace('class="link-card', `class="link-card${animClass}"${animDelay}`);
     }).join('');
+
+    if (wingetMode) showWingetDock();
 }
 
-// ===== winget 批量安装（「常用软件下载」分类：勾选软件 → 下载 .ps1 一键装机脚本） =====
+// ===== winget 批量安装（「常用软件下载」分类：右上角进入勾选模式 → 下载 .ps1 一键装机脚本） =====
 // 包可用性与最新版本来自 data/winget-health.json（工作流每日体检），文件缺失只影响提示不影响下载
 const WINGET_CATEGORY = '常用软件下载';
+let wingetMode = false; // 批量安装模式：网格只留可装软件，点击卡片即勾选
 let wingetSel = [];
 try { wingetSel = JSON.parse(lsGet('wingetSel') || '[]') || []; } catch { wingetSel = []; }
-
-function wingetLinks() {
-    return currentCategory === WINGET_CATEGORY ? allLinks.filter(l => l.winget) : [];
-}
 
 // 体检判失效仅依据 ok===false（脚本只对 404 判死，网络异常沿用旧记录，宁漏报不误报）
 function wingetDead(id) {
     return wingetHealth[id] && wingetHealth[id].ok === false;
 }
 
-function renderWingetBar() {
-    const bar = document.getElementById('wingetBar');
-    const links = wingetLinks();
-    if (!links.length) {
-        bar.hidden = true;
-        return;
-    }
-    // 选中状态收敛：清掉已移除条目，失效包强制落选
-    wingetSel = wingetSel.filter(id => links.some(l => l.winget === id) && !wingetDead(id));
-    lsSet('wingetSel', JSON.stringify(wingetSel));
-    bar.innerHTML = `
-        <div class="winget-head">
-            <span class="winget-title">批量安装</span>
-            <span class="winget-hint">勾选软件 → 下载 winget 一键安装脚本</span>
-            <span class="winget-count" id="wingetCount"></span>
-            <button type="button" class="winget-btn" id="wingetAll">全选</button>
-            <button type="button" class="winget-btn" id="wingetNone">清空</button>
-            <button type="button" class="winget-btn primary" id="wingetDownload" disabled>下载 .ps1</button>
-        </div>
-        <div class="winget-chips">
-            ${links.map(l => {
-                const h = wingetHealth[l.winget];
-                const isDead = wingetDead(l.winget);
-                const attr = isDead
-                    ? 'disabled title="每日体检发现 winget 包已失效"'
-                    : `title="winget install -e --id ${escapeHtml(l.winget)}"`;
-                return `<button type="button" class="winget-chip" data-winget-id="${escapeHtml(l.winget)}" aria-pressed="${wingetSel.includes(l.winget)}" ${attr}>${escapeHtml(l.title)}${h && h.latest ? `<i>${escapeHtml(h.latest)}</i>` : ''}</button>`;
-            }).join('')}
-        </div>`;
-    bar.hidden = false;
-    syncWingetCount();
+function enterWingetMode() {
+    wingetMode = true;
+    renderLinks(true);
 }
 
-function syncWingetCount() {
-    const total = wingetLinks().filter(l => !wingetDead(l.winget)).length;
+function exitWingetMode() {
+    wingetMode = false;
+    hideWingetDock();
+    renderLinks(true);
+}
+
+function showWingetDock() {
+    const dock = document.getElementById('wingetDock');
+    dock.hidden = false;
+    void dock.offsetHeight; // 同步强制回流再挂过渡类（后台标签页 rAF 被节流，不能走 rAF）
+    dock.classList.add('open');
+    updateWingetDock();
+}
+
+function hideWingetDock() {
+    const dock = document.getElementById('wingetDock');
+    if (dock.hidden) return;
+    dock.classList.remove('open');
+    // no-anim / prefers-reduced-motion 下 transitionend 不触发，定时兜底（坑位 5）
+    setTimeout(() => { if (!dock.classList.contains('open')) dock.hidden = true; }, 240);
+}
+
+function updateWingetDock() {
     const count = document.getElementById('wingetCount');
     const btn = document.getElementById('wingetDownload');
-    if (count) count.textContent = `已选 ${wingetSel.length} / ${total}`;
+    if (count) count.textContent = `已选 ${wingetSel.length}`;
     if (btn) btn.disabled = !wingetSel.length;
+}
+
+// 全选/清空后不重渲染网格（避免重播入场动画），逐卡同步勾选态
+function refreshPickCards() {
+    linksGrid.querySelectorAll('[data-winget-pick]').forEach(card => {
+        card.setAttribute('aria-checked', String(wingetSel.includes(card.dataset.wingetPick)));
+    });
+    updateWingetDock();
 }
 
 function downloadWingetScript() {
@@ -3279,6 +3313,8 @@ function initEventListeners() {
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 homeNav.classList.remove('active');
+                // 搜索覆盖收藏网格，批量安装模式一并退出
+                if (wingetMode) { wingetMode = false; hideWingetDock(); }
             }
             renderSearchWithLoading(term);
             return;
@@ -3389,28 +3425,41 @@ function initEventListeners() {
         }
     });
 
-    // winget 批量安装栏（事件委托绑容器一次，renderWingetBar 重渲染不重绑）
-    document.getElementById('wingetBar').addEventListener('click', (e) => {
-        const chip = e.target.closest('.winget-chip');
-        if (chip) {
-            const id = chip.dataset.wingetId;
-            wingetSel = wingetSel.includes(id) ? wingetSel.filter(x => x !== id) : [...wingetSel, id];
-            chip.setAttribute('aria-pressed', String(wingetSel.includes(id)));
-            lsSet('wingetSel', JSON.stringify(wingetSel));
-            syncWingetCount();
-            return;
-        }
+    // winget 批量安装：右上角入口（模式中变「退出安装」），操作条按钮（事件委托绑容器一次，重渲染不重绑）
+    document.getElementById('wingetModeBtn').addEventListener('click', () => {
+        wingetMode ? exitWingetMode() : enterWingetMode();
+    });
+    document.getElementById('wingetDock').addEventListener('click', (e) => {
         if (e.target.closest('#wingetAll')) {
-            wingetSel = wingetLinks().filter(l => !wingetDead(l.winget)).map(l => l.winget);
+            wingetSel = allLinks.filter(l => l.winget && l.category === WINGET_CATEGORY && !wingetDead(l.winget))
+                .map(l => l.winget);
             lsSet('wingetSel', JSON.stringify(wingetSel));
-            renderWingetBar();
+            refreshPickCards();
         } else if (e.target.closest('#wingetNone')) {
             wingetSel = [];
             lsSet('wingetSel', JSON.stringify(wingetSel));
-            renderWingetBar();
+            refreshPickCards();
         } else if (e.target.closest('#wingetDownload')) {
             downloadWingetScript();
         }
+    });
+
+    // 批量安装模式：点击卡片即勾选/取消（不打开链接），失效包不可选
+    linksGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-winget-pick]');
+        if (!card || card.dataset.wingetOff) return;
+        const id = card.dataset.wingetPick;
+        wingetSel = wingetSel.includes(id) ? wingetSel.filter(x => x !== id) : [...wingetSel, id];
+        lsSet('wingetSel', JSON.stringify(wingetSel));
+        card.setAttribute('aria-checked', String(wingetSel.includes(id)));
+        updateWingetDock();
+    });
+    linksGrid.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const card = e.target.closest('[data-winget-pick]');
+        if (!card) return;
+        e.preventDefault();
+        card.click();
     });
 
     // 汇率视图内：切换币种 / 切换区间 / 换算器（内容区事件委托）
@@ -3488,11 +3537,15 @@ function initEventListeners() {
             toggleCmdk();
         }
         // ESC 返回首页并清空搜索；弹层/热力图面板开着时交给它们自己的处理器，
-        // 不回首页（按状态判断而非注册顺序，stopImmediatePropagation 拦不住先注册的监听）
+        // 不回首页（按状态判断而非注册顺序，stopImmediatePropagation 拦不住先注册的监听）；
+        // 批量安装模式下 ESC 优先退出模式
         if (e.key === 'Escape') {
             const overlayOpen = ['settingsModal', 'talismanModal', 'cmdk', 'ghPanel']
                 .some((id) => { const el = document.getElementById(id); return el && !el.hidden; });
-            if (!overlayOpen) goHome();
+            if (!overlayOpen) {
+                if (wingetMode) exitWingetMode();
+                else goHome();
+            }
         }
     });
 

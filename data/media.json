@@ -1707,6 +1707,15 @@
       "url": "https://www.themoviedb.org/movie/350499",
       "cover": "assets/media/pokemon-hoopa.jpg",
       "comment": "历代神兽大乱斗，胡帕的顽皮撑起全片。"
+    },
+    {
+      "title": "给阿嬷的情书",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.9,
+      "release": "2026-04-17",
+      "url": "https://www.themoviedb.org/movie/1671548",
+      "cover": "assets/media/letter-to-grandma.jpg"
     }
   ]
 }
