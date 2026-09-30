@@ -3526,6 +3526,300 @@ body.no-anim .mp-lyric > div {
     box-shadow: var(--shadow-card);
 }
 
+/* 汇率换算（双向计算器，置于视图最下方） */
+.fx-conv {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px 18px;
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    background-color: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+}
+
+/* 顶部一道主题色微光，和上面图表卡区分开 */
+.fx-conv::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    opacity: 0.55;
+}
+
+.fx-conv-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.fx-conv-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.fx-conv-rate {
+    padding: 3px 10px;
+    border-radius: 99px;
+    background-color: var(--hover-bg);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.fx-conv-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fx-conv-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.fx-conv-input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--search-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.fx-conv-input::placeholder {
+    font-weight: 400;
+    color: var(--text-tertiary);
+}
+
+.fx-conv-input:focus {
+    border-color: var(--accent-color);
+}
+
+/* 结果栏淡主题底色：一眼区分「输入 / 输出」 */
+.fx-conv-out {
+    background-color: color-mix(in srgb, var(--accent-color) 9%, var(--search-bg));
+}
+
+/* 去掉数字输入框的上下箭头，保持干净 */
+.fx-conv-input::-webkit-outer-spin-button,
+.fx-conv-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.fx-conv-input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.fx-conv-select {
+    flex: none;
+    width: 150px;
+    padding: 12px 34px 12px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--search-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+    transition: border-color 0.15s;
+}
+
+.fx-conv-select:hover,
+.fx-conv-select:focus {
+    border-color: var(--accent-color);
+}
+
+/* 互换键压在两栏之间，像一个浮起的小圆钮 */
+.fx-conv-swap {
+    position: relative;
+    z-index: 1;
+    align-self: center;
+    margin: -6px 0;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.fx-conv-swap:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.fx-conv-swap:active {
+    transform: scale(0.9);
+}
+
+.fx-conv-swap svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (max-width: 768px) {
+    .fx-conv-select {
+        flex: 1 1 100%;
+        width: auto;
+    }
+}
+
+/* ===== ChatGPT Plus 各区实付榜 ===== */
+.cp-board {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    background-color: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+}
+
+.cp-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cp-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.cp-chip {
+    padding: 3px 10px;
+    border-radius: 99px;
+    background-color: var(--hover-bg);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cp-row {
+    display: grid;
+    grid-template-columns: 26px minmax(96px, 1fr) 128px 104px 84px;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-row-head {
+    padding: 0 10px 2px;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+/* 榜首一行铺一层主题色淡底 */
+.cp-top {
+    background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
+}
+
+.cp-rank {
+    font-weight: 600;
+    color: var(--text-tertiary);
+}
+
+.cp-top .cp-rank {
+    color: var(--accent-color);
+}
+
+.cp-region {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.cp-code {
+    margin-left: 6px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-tertiary);
+}
+
+.cp-local {
+    color: var(--text-secondary);
+}
+
+.cp-cny {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.cp-diff.up {
+    color: var(--up-color);
+}
+
+.cp-diff.down {
+    color: var(--down-color);
+}
+
+@media (max-width: 768px) {
+    .cp-row {
+        grid-template-columns: 16px minmax(48px, 1fr) 78px 72px 44px;
+        gap: 6px;
+        padding: 8px;
+        font-size: 0.78rem;
+    }
+
+    .cp-row-head {
+        padding: 0 8px 2px;
+    }
+
+    .cp-code {
+        display: none;
+    }
+}
+
 .fx-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));

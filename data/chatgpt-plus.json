@@ -1,0 +1,20 @@
+{
+  "product": "ChatGPT Plus",
+  "checkedAt": "2026-09-30",
+  "sourceUrl": "https://help.openai.com/zh-hans-cn/articles/10421635-multicurrency-billing",
+  "note": "OpenAI 按购买力平价分区定价、以本地货币结算。下表是各区含税挂牌价，人民币金额按当日参考价换算；分区价格会随 OpenAI 调整，实付以结账页为准。",
+  "regions": [
+    { "region": "菲律宾", "code": "PH", "currency": "PHP", "price": 999, "note": "含 12% VAT，目前各区最低档" },
+    { "region": "韩国", "code": "KR", "currency": "KRW", "price": 29000, "note": "含 10% VAT" },
+    { "region": "巴西", "code": "BR", "currency": "BRL", "price": 99.9, "note": "州税 7~25% 不等" },
+    { "region": "美国", "code": "US", "currency": "USD", "price": 19.99, "note": "基准区；官网标价 20 美元，App Store 内购 19.99 美元，部分州另征数字服务税" },
+    { "region": "澳大利亚", "code": "AU", "currency": "AUD", "price": 29.99, "note": "含 10% GST" },
+    { "region": "日本", "code": "JP", "currency": "JPY", "price": 3000, "note": "含 10% 消费税；App Store 内购另有 2,860 日元档" },
+    { "region": "印度", "code": "IN", "currency": "INR", "price": 1999, "note": "含 18% GST" },
+    { "region": "加拿大", "code": "CA", "currency": "CAD", "price": 24.99, "note": "含 5~15% GST/HST，各省不同" },
+    { "region": "泰国", "code": "TH", "currency": "THB", "price": 699, "note": "含 7% VAT" },
+    { "region": "德国", "code": "DE", "currency": "EUR", "price": 19, "note": "含 VAT 19%；欧盟 B2C 按购买人所在国税率（17~27%）" },
+    { "region": "土耳其", "code": "TR", "currency": "TRY", "price": 999.99 },
+    { "region": "马来西亚", "code": "MY", "currency": "MYR", "price": 99.9, "note": "含 8% SST" }
+  ]
+}

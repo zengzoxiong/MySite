@@ -1859,6 +1859,13 @@ const FX_META = {
     KRW: { name: '韩元', per: 100, alias: '韩币' },
     SGD: { name: '新加坡元', per: 1, alias: '新元' },
     AUD: { name: '澳元', per: 1, alias: '澳大利亚元' },
+    TRY: { name: '土耳其里拉', per: 1, alias: '里拉' },
+    INR: { name: '印度卢比', per: 1, alias: '卢比' },
+    PHP: { name: '菲律宾比索', per: 1, alias: '比索' },
+    BRL: { name: '巴西雷亚尔', per: 1, alias: '雷亚尔' },
+    CAD: { name: '加拿大元', per: 1, alias: '加元' },
+    THB: { name: '泰铢', per: 1, alias: '' },
+    MYR: { name: '马来西亚林吉特', per: 1, alias: '马币' },
 };
 // [天数, 按钮文案]，0 = 全部
 const FX_RANGES = [[7, '7 天'], [30, '30 天'], [90, '90 天'], [365, '1 年'], [0, '全部']];
@@ -1887,6 +1894,196 @@ function fxRateText(code, v) {
 function fxUnitText(code) {
     const m = fxMeta(code);
     return `${m.per > 1 ? m.per + ' ' : '1 '}${m.name}`;
+}
+
+// ===== 汇率换算（双向）：数据是「1 CNY = X 外币」，统一以人民币为桥算交叉汇率 =====
+let fxConv = { amount: 100, from: 'CNY', to: 'USD' };
+
+function fxRawOf(code) {
+    if (!fxData) return null;
+    if (fxData.latest && fxData.latest[code]) return fxData.latest[code];
+    const i = (fxData.columns || []).indexOf(code);
+    const rows = fxData.series || [];
+    return i >= 0 && rows.length ? rows[rows.length - 1][i + 1] : null;
+}
+
+// amount 个 from 货币折合多少 to 货币
+function fxConvert(amount, from, to) {
+    if (!isFinite(amount)) return null;
+    if (from === to) return amount;
+    const rf = from === 'CNY' ? 1 : fxRawOf(from);
+    const rt = to === 'CNY' ? 1 : fxRawOf(to);
+    if (!rf || !rt) return null;
+    return amount / rf * rt;
+}
+
+// 换算结果保留最多 4 位小数（够用且不丢可读性）
+function fxAmt(v) {
+    if (v == null || !isFinite(v)) return '';
+    return String(Math.round(v * 1e4) / 1e4);
+}
+
+// 汇率行按量级保留有效位：1 美元 = 6.7105 / 1 人民币 = 0.14902 这种量级都要看得出差别
+function fxRateAmt(v) {
+    if (v == null || !isFinite(v)) return '';
+    const d = v >= 100 ? 2 : v >= 1 ? 4 : v >= 0.01 ? 5 : 6;
+    return String(Number(v.toFixed(d)));
+}
+
+// 展示口径沿用卡片习惯：日元/韩元按 100 单位报价
+function fxConvUnit(code) {
+    return code === 'CNY' ? 1 : (fxMeta(code).per || 1);
+}
+
+function fxConvName(code) {
+    return code === 'CNY' ? '人民币' : fxMeta(code).name;
+}
+
+function fxConvRateText(from, to) {
+    const p = fxConvert(fxConvUnit(from), from, to);
+    if (p == null) return '';
+    return `${fxConvUnit(from)} ${fxConvName(from)} = ${fxRateAmt(p)} ${fxConvName(to)}`;
+}
+
+function fxConvOptions(selected) {
+    const codes = ['CNY'].concat(fxData ? fxData.columns : Object.keys(FX_META));
+    return codes.map(c =>
+        `<option value="${escapeHtml(c)}"${c === selected ? ' selected' : ''}>${escapeHtml(`${fxConvName(c)} ${c}`)}</option>`
+    ).join('');
+}
+
+// src='a' 表示用户改的是上面那栏（自 from 换算到 to），'b' 相反
+function fxConvUpdate(src) {
+    const a = document.getElementById('fxConvA');
+    const b = document.getElementById('fxConvB');
+    if (!a || !b) return;
+    const v = parseFloat(src === 'b' ? b.value : a.value);
+    const r = fxConvert(v, src === 'b' ? fxConv.to : fxConv.from, src === 'b' ? fxConv.from : fxConv.to);
+    const out = r == null ? '' : fxAmt(r);
+    if (src === 'b') a.value = out;
+    else b.value = out;
+    if (src === 'a') fxConv.amount = isFinite(v) ? v : 0;
+    const rate = document.getElementById('fxConvRate');
+    if (rate) {
+        const base = fxConvRateText(fxConv.from, fxConv.to);
+        rate.textContent = base && fxData && fxData.updated ? `${base} · ${fxData.updated}` : base;
+    }
+}
+
+function fxConvInit() {
+    const from = document.getElementById('fxConvFrom');
+    const to = document.getElementById('fxConvTo');
+    const a = document.getElementById('fxConvA');
+    if (!from || !to || !a) return;
+    from.innerHTML = fxConvOptions(fxConv.from);
+    to.innerHTML = fxConvOptions(fxConv.to);
+    a.value = fxAmt(fxConv.amount);
+    fxConvUpdate('a');
+}
+
+function fxConvSwap() {
+    const a = document.getElementById('fxConvA');
+    if (!a) return;
+    const oldFrom = fxConv.from;
+    fxConv.from = fxConv.to;
+    fxConv.to = oldFrom;
+    const from = document.getElementById('fxConvFrom');
+    const to = document.getElementById('fxConvTo');
+    if (from) from.value = fxConv.from;
+    if (to) to.value = fxConv.to;
+    fxConvUpdate('a'); // 金额留在上栏，按新方向重算
+}
+
+// ===== ChatGPT Plus 各区实付榜（$20 基准价 + 当地税率，人民币按当日 ECB 汇率换算） =====
+let cpData = null;
+let cpLoading = null;
+
+function loadCpData() {
+    if (cpData) return Promise.resolve(cpData);
+    if (!cpLoading) {
+        cpLoading = (async () => {
+            try {
+                const res = await fetch('data/chatgpt-plus.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const d = await res.json();
+                if (!Array.isArray(d.regions) || !d.regions.length) throw new Error('数据结构异常');
+                cpData = d;
+            } catch (e) {
+                console.error('ChatGPT Plus 榜单数据加载失败', e);
+                cpLoading = null; // 允许下次重试
+            }
+        })();
+    }
+    return cpLoading.then(() => cpData);
+}
+
+// 各区今日实付：本地挂牌价 ÷「1 人民币 = X 本币」的今日参考价（OpenAI 按 PPP 分区定价、本地货币结算）
+function cpRows() {
+    if (!cpData) return [];
+    return cpData.regions.map(r => {
+        const raw = fxRawOf(r.currency);
+        return Object.assign({}, r, { cny: raw ? r.price / raw : null });
+    }).filter(r => r.cny != null).sort((a, b) => a.cny - b.cny);
+}
+
+// 本地货币按各区习惯格式化（₱999.00 / ₩29,000 / RM99.90）
+function cpMoney(code, v) {
+    try {
+        return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).format(v);
+    } catch (e) {
+        return `${code} ${v}`;
+    }
+}
+
+function cpPaintBoard() {
+    const box = document.getElementById('cpBoard');
+    if (!box) return;
+    const rows = cpRows();
+    if (!rows.length) {
+        box.innerHTML = '<div class="fx-placeholder">榜单数据加载中…</div>';
+        return;
+    }
+    const base = rows.find(r => r.code === 'US') || rows[0];
+    box.innerHTML = `
+        <div class="cp-head">
+            <span class="cp-title">ChatGPT Plus 各区实付榜</span>
+            <span class="cp-chip">各区含税挂牌价 · 汇率 ${escapeHtml(fxData.updated)}</span>
+        </div>
+        <div class="cp-list" role="table" aria-label="ChatGPT Plus 各区挂牌价与折合人民币（按人民币升序）">
+            <div class="cp-row cp-row-head" role="row">
+                <span role="columnheader">#</span>
+                <span role="columnheader">区域</span>
+                <span role="columnheader">当地价格</span>
+                <span role="columnheader">折合人民币</span>
+                <span role="columnheader">对比美区</span>
+            </div>
+            ${rows.map((r, i) => {
+                const diff = (r.cny - base.cny) / base.cny * 100;
+                const dir = Math.abs(diff) < 0.05 ? 'flat' : diff > 0 ? 'up' : 'down';
+                const txt = dir === 'flat' ? '基准' : `${diff > 0 ? '+' : '-'}${Math.abs(diff).toFixed(1)}%`;
+                return `
+                <div class="cp-row${i === 0 ? ' cp-top' : ''}" role="row">
+                    <span class="cp-rank" role="cell">${i + 1}</span>
+                    <span class="cp-region" role="cell">${escapeHtml(r.region)}<span class="cp-code">${escapeHtml(r.code)}</span></span>
+                    <span class="cp-local" role="cell" title="${escapeHtml(r.note || '')}">${escapeHtml(cpMoney(r.currency, r.price))}</span>
+                    <span class="cp-cny" role="cell">¥${r.cny.toFixed(2)}</span>
+                    <span class="cp-diff ${dir}" role="cell">${txt}</span>
+                </div>`;
+            }).join('')}
+        </div>
+        <div class="fx-note">${escapeHtml(cpData.note)} 各区挂牌价核对 ${escapeHtml(cpData.checkedAt)} · <a href="${escapeHtml(cpData.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方多币种计费说明 ↗</a></div>`;
+}
+
+function cpInit() {
+    loadCpData().then((cp) => {
+        if (currentView !== 'fx') return; // 加载期间切走了
+        if (!cp) {
+            const box = document.getElementById('cpBoard');
+            if (box) box.innerHTML = '<div class="fx-placeholder">榜单数据加载失败</div>';
+            return;
+        }
+        cpPaintBoard();
+    });
 }
 
 // 涨跌方向与文案（值上升 = 该货币对人民币升值）
@@ -1943,8 +2140,27 @@ function renderFx(animate = false) {
                     <span class="fx-chart-delta" id="fxChartDelta"></span>
                 </div>
                 <div class="fx-chart" id="fxChart"><div class="fx-placeholder">数据加载中…</div></div>
-                <div class="fx-note">数据来源：欧洲央行参考汇率，每工作日发布一次（非盘中实时报价）</div>
             </div>
+            <div class="fx-conv">
+                <div class="fx-conv-head">
+                    <span class="fx-conv-title">汇率换算</span>
+                    <span class="fx-conv-rate" id="fxConvRate"></span>
+                </div>
+                <div class="fx-conv-body">
+                    <div class="fx-conv-row">
+                        <input class="fx-conv-input" id="fxConvA" type="number" inputmode="decimal" min="0" step="any" placeholder="金额" aria-label="换算金额">
+                        <select class="fx-conv-select" id="fxConvFrom" aria-label="换算源货币"></select>
+                    </div>
+                    <button class="fx-conv-swap" id="fxConvSwap" type="button" title="互换货币" aria-label="互换源货币与目标货币">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v13M9 17l-3-3M9 17l3-3"/><path d="M15 20V7M15 7l-3 3M15 7l3 3"/></svg>
+                    </button>
+                    <div class="fx-conv-row">
+                        <input class="fx-conv-input fx-conv-out" id="fxConvB" type="number" inputmode="decimal" min="0" step="any" placeholder="结果" aria-label="换算结果">
+                        <select class="fx-conv-select" id="fxConvTo" aria-label="换算目标货币"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="cp-board" id="cpBoard"></div>
         </div>`;
     const wrap = mediaGrid.querySelector('.fx-wrap');
     if (wrap && animate && !document.body.classList.contains('no-anim')) wrap.classList.add('anim');
@@ -1958,6 +2174,8 @@ function renderFx(animate = false) {
         }
         fxPaintCards();
         fxPaintChart();
+        fxConvInit();
+        cpInit();
     });
 }
 
@@ -1983,7 +2201,7 @@ function fxPaintCards() {
             </button>`;
     }).join('');
     document.getElementById('fxSub').textContent =
-        `${fxData.columns.length} 种主流货币 · 最新数据 ${last[0]}（${fxData.sourceName}）`;
+        `${fxData.columns.length} 种货币 · 最新数据 ${last[0]}`;
 }
 
 // 按天数切片历史（0 = 全部）；按日历日回退，取区间内第一条起的全部交易日
@@ -3074,7 +3292,7 @@ function initEventListeners() {
         fxGoTo(null);
     });
 
-    // 汇率视图内：切换币种 / 切换区间（内容区事件委托）
+    // 汇率视图内：切换币种 / 切换区间 / 换算器（内容区事件委托）
     mediaGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.fx-card');
         if (card) {
@@ -3088,6 +3306,24 @@ function initEventListeners() {
             fxRangeDays = Number(range.dataset.fxRange);
             mediaGrid.querySelectorAll('.fx-range').forEach(b => b.classList.toggle('active', b === range));
             fxPaintChart();
+            return;
+        }
+        if (e.target.closest('#fxConvSwap')) fxConvSwap();
+    });
+
+    // 换算器输入/切换货币：任一栏输入都换算另一栏
+    mediaGrid.addEventListener('input', (e) => {
+        if (e.target.id === 'fxConvA') fxConvUpdate('a');
+        else if (e.target.id === 'fxConvB') fxConvUpdate('b');
+    });
+
+    mediaGrid.addEventListener('change', (e) => {
+        if (e.target.id === 'fxConvFrom') {
+            fxConv.from = e.target.value;
+            fxConvUpdate('a');
+        } else if (e.target.id === 'fxConvTo') {
+            fxConv.to = e.target.value;
+            fxConvUpdate('a');
         }
     });
 

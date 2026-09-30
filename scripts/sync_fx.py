@@ -12,7 +12,8 @@ import urllib.request
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/120.0 Safari/537.36')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SYMBOLS = ['USD', 'EUR', 'JPY', 'GBP', 'HKD', 'KRW', 'SGD', 'AUD']
+SYMBOLS = ['USD', 'EUR', 'JPY', 'GBP', 'HKD', 'KRW', 'SGD', 'AUD',
+           'TRY', 'INR', 'PHP', 'BRL', 'CAD', 'THB', 'MYR']
 API = 'https://api.frankfurter.dev/v1/1999-01-01..'
 
 

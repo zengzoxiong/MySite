@@ -29,6 +29,7 @@ MySite/
 │   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
 │   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
 │   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
+│   ├── chatgpt-plus.json # ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期，见「汇率」小节）
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
@@ -122,13 +123,17 @@ MySite/
 
 ### 8. 汇率（data/fx.json + 侧栏「汇率」视图）
 
-- **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布），页面文案已写明「非盘中实时报价」——别宣称实时行情。
-- **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD], latest:{币种:值}, series:[[日期, 8 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。
+- **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布）——**页面不写「数据来源/非实时」这类注脚（用户要求删掉），但也别对外宣称实时行情**，数据本身仍是日频。
+- **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD,TRY,INR,PHP,BRL,CAD,THB,MYR], latest:{币种:值}, series:[[日期, 15 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。**汇率卡片展示 `fxData.columns` 里的全部币种**（`fxPaintCards()` 直接按列渲染，15 种一屏铺开），`FX_META` 只负责名字与展示口径——**加币种务必同时改 `SYMBOLS` 和 `FX_META`**，漏了 meta 卡片会显示成裸代码。
 - **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 15:40（北京 23:40，ECB 发布后）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
-- **视图**：侧栏「汇率 → 汇率走势」进入，`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 8 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
+- **视图**：侧栏「汇率 → 汇率走势」进入，`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
 - 涨跌色是 `--up-color`（红涨）/`--down-color`（绿跌），明暗各一套；图表颜色全部走 CSS 类 + 变量，**别在 JS 里硬编颜色**。
 - 全域搜索输入币种名/代码/别名（`fxSearchHits`）会出现「汇率」分组，点击跳到汇率视图并选中该币种。
-- **别把 data/fx.json 加进 PRECACHE**：509 KB 且每日变，走运行时缓存（SWR）即可。
+- **换算器**：视图最下方的「汇率换算」是双向计算器（`fxConvert()` 以人民币为桥算交叉汇率，数据方向是「1 CNY = X 外币」，所以 `amount / raw[from] * raw[to]`；上栏改动算下栏、下栏改动算上栏，互换按钮只换货币并按上栏重算）。汇率行沿用日元/韩元按 100 单位报价的口径（`fxConvUnit()`）并带上数据日期；结果保留 4 位小数（`fxAmt`）、汇率行按量级保留有效位（`fxRateAmt`）。上栏是输入、下栏是结果（`.fx-conv-out` 用 `color-mix` 加一层主题色淡底做区分）。**别用 `type="number"` 的固有宽度做窄屏布局**：数字输入框 min-content ≈206px，配合下拉会把卡片撑破，`.fx-conv-row` 已加 `flex-wrap: wrap`。
+- **ChatGPT Plus 各区实付榜**：视图最下方（换算器之后）的榜单。**OpenAI 是按购买力平价（PPP）分区定价、以本地货币结算的**（官方「多币种计费」文档列出各地支持的币种），所以口径是「`regions[].price` 本地挂牌价 ÷ 当日该币种 ECB 参考价」→ 人民币（`cpRows()`），按人民币升序排、首行铺主题色淡底；「对比美区」列复用汇率涨跌色（更便宜绿、更贵红）。
+  - 数据在 `data/chatgpt-plus.json`：每区 `{region, code, currency, price, note}`，**人工核对维护**（`checkedAt` 记核对日期，`note` 写含税口径与渠道差异，如日本官网 ¥3,000 / App Store ¥2,860）。价格来源是公开报道交叉核对（OpenAI 官网/帮助中心对本机是 Cloudflare 403、App Store 各店按 IP 重定向，都无法自动抓取），**改价只改这个文件**。
+  - 本地货币格式化走 `cpMoney()`（`Intl.NumberFormat` + `narrowSymbol`）；币种必须能在 `data/fx.json` 里找到汇率，否则该行自动跳过（ECB 不覆盖 PKR/EGP/VND/TWD 等，所以巴基斯坦/埃及/越南这些区暂时入不了榜）。
+- **别把 data/fx.json 加进 PRECACHE**：约 860 KB（15 币种 × 26 年）且每日变，走运行时缓存（SWR）即可。
 
 ## 前端架构与约定（script.js / styles.css）
 
