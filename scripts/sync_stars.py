@@ -44,6 +44,9 @@ def main():
     items.sort(key=lambda x: x['starred_at'], reverse=True)
 
     path = os.path.join(ROOT, 'data', 'stars.json')
+    write_json(path, {'updated': items[0]['starred_at'] if items else '', 'repos': items})
+    print(f'stars.json：{len(items)} 个仓库')
+
 
 def write_json(path, obj, indent=2):
     """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
@@ -52,9 +55,6 @@ def write_json(path, obj, indent=2):
         json.dump(obj, f, ensure_ascii=False, indent=indent)
         f.write('\n')
     os.replace(tmp, path)
-
-    write_json(path, {'updated': items[0]['starred_at'] if items else '', 'repos': items})
-    print(f'stars.json：{len(items)} 个仓库')
 
 
 if __name__ == '__main__':
