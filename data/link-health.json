@@ -1,7 +1,7 @@
 {
   "counts": {
-    "total": 47,
-    "ok": 44,
+    "total": 49,
+    "ok": 46,
     "suspect": 3,
     "dead": 0
   },
@@ -68,6 +68,13 @@
       "state": "ok",
       "finalUrl": "",
       "checkedAt": "2026-09-25"
+    },
+    "https://godbolt.org/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-01"
     },
     "https://www.kkview.cn/zh-cn/index.html": {
       "status": 200,
@@ -159,6 +166,13 @@
       "state": "ok",
       "finalUrl": "",
       "checkedAt": "2026-09-25"
+    },
+    "https://github.com/PowerShell/PowerShell": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-01"
     },
     "https://steampp.net/": {
       "status": 200,

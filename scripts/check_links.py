@@ -12,6 +12,7 @@
 用法：python scripts/check_links.py [输入json] [输出json]
 """
 import json
+import os
 import socket
 import ssl
 import sys
