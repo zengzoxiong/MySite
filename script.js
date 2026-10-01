@@ -728,13 +728,28 @@ function drawVertical(ctx, text, x, y, advance, maxChars) {
 
 // 每日生成图配色盘：六套手工调的 HSL（暗色基调），亮色整体提亮降饱；种子选一套，
 // 保证任何一天抽到的都是协调色，而不是随机 hue 碰运气
+// 签面场景主题：16 盘 = 16 种「季节×时段×天气」组合，fx 挂场景特效标签
+// kind: sun=高挂烈日 low=半沉日月(山线裁切) moon=月(40%月牙否则满月+月海斑) null=无日月(雨夜)
+// fx: rays=放射光芒 geese=南飞雁阵 swallow=春燕 cloudbig=大朵云 rain=雨丝 snow=雪花
+//     mist=浓雾横带 snowcap=雪白山(近三层提亮) maple=枫枝红叶 plum=桃枝粉花 galaxy=银河
+//     firefly=萤火虫 lightning=闪电 reeds=湖畔芦苇 meteor=流星(40%概率) rainbow=彩虹(25%概率) petal=飘花瓣
 const SCENE_PALETTES = [
-    { sky: [[222, 45, 16], [268, 40, 34], [18, 72, 58]], ridge: [262, 30], sun: [38, 92, 74], stars: true },  // 暮紫
-    { sky: [[198, 58, 14], [186, 48, 34], [42, 82, 62]], ridge: [204, 32], sun: [48, 95, 78], stars: false }, // 海日
-    { sky: [[340, 44, 14], [352, 50, 34], [22, 74, 56]], ridge: [348, 30], sun: [32, 92, 72], stars: true },  // 绛霞
-    { sky: [[152, 34, 12], [162, 38, 30], [48, 62, 54]], ridge: [168, 26], sun: [52, 82, 74], stars: false }, // 松烟
-    { sky: [[215, 50, 10], [224, 44, 26], [206, 34, 46]], ridge: [214, 26], sun: [46, 60, 82], stars: true }, // 月夜
-    { sky: [[268, 40, 13], [288, 42, 30], [322, 52, 52]], ridge: [282, 28], sun: [40, 92, 78], stars: true }   // 紫夜
+    { sky: [[222, 45, 16], [268, 40, 34], [18, 72, 58]], ridge: [262, 30], sun: [38, 92, 74], stars: true,  kind: 'low',  fx: [] },                              // 暮紫 · 黄昏晴
+    { sky: [[198, 58, 14], [186, 48, 34], [42, 82, 62]], ridge: [204, 32], sun: [48, 95, 78], stars: false, kind: 'sun',  fx: ['rays'] },                              // 海日 · 夏昼烈日
+    { sky: [[340, 44, 14], [352, 50, 34], [22, 74, 56]], ridge: [348, 30], sun: [32, 92, 72], stars: true,  kind: 'low',  fx: ['geese'] },                             // 绛霞 · 秋暮雁阵
+    { sky: [[152, 34, 12], [162, 38, 30], [48, 62, 54]], ridge: [168, 26], sun: [52, 82, 74], stars: false, kind: null,   fx: ['rain'] },                              // 松烟 · 春夜细雨
+    { sky: [[215, 50, 10], [224, 44, 26], [206, 34, 46]], ridge: [214, 26], sun: [46, 60, 82], stars: true,  kind: 'moon', fx: [] },                                   // 月夜 · 满月星夜
+    { sky: [[268, 40, 13], [288, 42, 30], [322, 52, 52]], ridge: [282, 28], sun: [40, 92, 78], stars: true,  kind: 'moon', fx: ['galaxy', 'meteor'] },                 // 紫夜 · 月照银河
+    { sky: [[205, 55, 16], [24, 70, 42], [42, 88, 62]], ridge: [220, 30], sun: [45, 90, 75], stars: false,  kind: 'low',  fx: ['rays'] },                              // 晨曦 · 日出光芒
+    { sky: [[210, 30, 20], [210, 24, 38], [36, 50, 58]], ridge: [215, 22], sun: [40, 70, 78], stars: false, kind: 'sun',  fx: ['mist', 'snowcap'] },                   // 晨雾 · 冬晨雾雪
+    { sky: [[18, 60, 18], [8, 62, 36], [36, 80, 58]], ridge: [12, 36], sun: [22, 90, 70], stars: false,     kind: 'low',  fx: ['maple'] },                             // 枫晚 · 秋暮枫枝
+    { sky: [[190, 32, 26], [186, 28, 44], [160, 36, 64]], ridge: [188, 26], sun: [50, 60, 86], stars: false, kind: 'sun',  fx: ['swallow', 'cloudbig'] },              // 青瓷 · 春昼燕云
+    { sky: [[220, 14, 26], [220, 10, 42], [210, 12, 60]], ridge: [220, 12], sun: [45, 30, 85], stars: true,  kind: 'moon', fx: ['snow', 'snowcap'] },                  // 墨黛 · 冬夜雪月
+    { sky: [[330, 45, 20], [335, 40, 40], [350, 55, 62]], ridge: [335, 30], sun: [45, 85, 80], stars: false, kind: 'sun',  fx: ['plum', 'cloudbig', 'petal'] },        // 桃夭 · 春昼桃枝
+    { sky: [[195, 45, 10], [190, 40, 22], [170, 35, 38]], ridge: [190, 25], sun: [70, 40, 80], stars: true,  kind: 'moon', fx: ['firefly'] },                          // 萤夏 · 夏夜流萤
+    { sky: [[220, 20, 16], [222, 18, 28], [210, 15, 40]], ridge: [215, 18], sun: [50, 30, 80], stars: false, kind: null,   fx: ['rain', 'lightning', 'rainbow'] },     // 雷雨 · 夏昼骤雨
+    { sky: [[28, 45, 12], [24, 40, 26], [35, 50, 44]], ridge: [30, 26], sun: [45, 70, 82], stars: true,      kind: 'moon', fx: ['reeds'] },                            // 秋月 · 秋夜芦月
+    { sky: [[205, 35, 22], [208, 30, 42], [215, 25, 60]], ridge: [210, 16], sun: [50, 55, 88], stars: false, kind: 'sun',  fx: ['mist', 'snowcap'] }                   // 雪霁 · 冬昼初晴
 ];
 const hsl = (h, s, l, a) => (a === undefined ? `hsl(${h} ${s}% ${l}%)` : `hsl(${h} ${s}% ${l}% / ${a})`);
 
@@ -756,10 +771,11 @@ function ridgePath(ctx, W, baseY, amp, rnd, bottomY) {
     ctx.closePath();
 }
 
-// 每日生成图（网易云日签海报式全幅背景）：种子选配色盘与构图（山/湖），
+// 每日生成图（网易云日签海报式全幅背景）：种子选场景主题（季节×时段×天气）与构图（山/湖），
 // 同一天同一张图；上下再压暗角渐变保白字可读
 function drawTalismanScene(ctx, W, H, rnd, dark) {
     const p = SCENE_PALETTES[Math.floor(rnd() * SCENE_PALETTES.length)];
+    const fx = p.fx || [];
     const lift = dark ? 0 : 24; // 亮色提亮
     const dsat = dark ? 0 : -8; // 亮色稍降饱
     const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -769,6 +785,18 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
     });
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
+    // 彩虹：骤雨后 25% 概率一道淡虹拱（山会裁掉下半，只露拱顶）
+    if (fx.includes('rainbow') && rnd() < 0.25) {
+        const rbx = W * (0.3 + rnd() * 0.4), rby = H * 0.78, rbr = W * (0.5 + rnd() * 0.15);
+        const arc = ['255,90,90', '255,180,80', '255,235,110', '120,210,140', '110,180,255'];
+        ctx.lineWidth = 4;
+        for (let i = 0; i < arc.length; i++) {
+            ctx.strokeStyle = `rgba(${arc[i]},${dark ? 0.14 : 0.2})`;
+            ctx.beginPath();
+            ctx.arc(rbx, rby, rbr - i * 5, Math.PI, Math.PI * 2);
+            ctx.stroke();
+        }
+    }
     // 星点：大小/亮度不一，只在夜空或暗色主题出
     if (p.stars || dark) {
         const n = 30 + Math.floor(rnd() * 22);
@@ -779,39 +807,176 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
             ctx.fillRect(rnd() * W, rnd() * H * 0.52, sz, sz);
         }
     }
+    // 流星：银河夜 40% 概率一颗斜坠，头亮尾淡
+    if (fx.includes('meteor') && rnd() < 0.4) {
+        const mx = W * (0.4 + rnd() * 0.35), my = H * (0.05 + rnd() * 0.12);
+        const len = W * (0.14 + rnd() * 0.08);
+        const tx = mx - len * 0.85, ty = my + len * 0.5;
+        const g = ctx.createLinearGradient(tx, ty, mx, my);
+        g.addColorStop(0, 'rgba(255,255,255,0)');
+        g.addColorStop(1, 'rgba(255,255,255,0.85)');
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(mx, my);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // 银河：一道斜向淡白雾带压在星空上（紫夜）
+    if (fx.includes('galaxy')) {
+        ctx.save();
+        ctx.translate(W * 0.55, H * 0.16);
+        ctx.rotate(-0.45);
+        const g = ctx.createLinearGradient(0, -H * 0.07, 0, H * 0.07);
+        g.addColorStop(0, 'rgba(255,255,255,0)');
+        g.addColorStop(0.5, `rgba(255,255,255,${dark ? 0.1 : 0.09})`);
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(-W, -H * 0.07, W * 2, H * 0.14);
+        ctx.restore();
+    }
+    // 云带：两三团横向椭圆雾飘在上半区中右侧；大云主题（cloudbig）必出且更饱满
+    const bigCloud = fx.includes('cloudbig');
+    if (bigCloud || rnd() < 0.75) {
+        const clouds = (bigCloud ? 3 : 2) + Math.floor(rnd() * 2);
+        for (let i = 0; i < clouds; i++) {
+            const cw = W * (0.16 + rnd() * 0.22) * (bigCloud ? 1.25 : 1);
+            const ch = cw * (0.2 + rnd() * 0.12);
+            const cx = W * (0.42 + rnd() * 0.45), cy = H * (0.10 + rnd() * 0.22);
+            const g = ctx.createRadialGradient(cx, cy, ch * 0.2, cx, cy, cw);
+            g.addColorStop(0, `rgba(255,255,255,${dark ? 0.12 : (bigCloud ? 0.22 : 0.16)})`);
+            g.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(1, ch / cw);
+            ctx.translate(-cx, -cy);
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(cx, cy, cw, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
     // 日月 + 光晕：放在中左偏下，避开左上日期块与左侧题头
+    // sun=高挂烈日 low=半沉(圆心压到山脊线，下半被山盖) moon=夜月(40%月牙否则满月+月海斑)
+    // kind=null 的雨夜不出日月（被云雨遮蔽）；cx/r/sh 供湖面倒影复用，声明在块外
     const [sh, ss, sl] = p.sun;
-    const cx = W * (0.26 + rnd() * 0.12), cy = H * (0.34 + rnd() * 0.12), r = 20 + rnd() * 12;
+    const cx = W * (0.26 + rnd() * 0.12);
+    const cy = H * (p.kind === 'low' ? 0.46 + rnd() * 0.04 : 0.32 + rnd() * 0.12);
+    const r = 20 + rnd() * 12;
+    if (p.kind) {
+    const isMoon = p.kind === 'moon';
     const halo = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 3.4);
     halo.addColorStop(0, hsl(sh, ss, sl, dark ? 0.5 : 0.4));
     halo.addColorStop(1, hsl(sh, ss, sl, 0));
     ctx.fillStyle = halo;
     ctx.fillRect(cx - r * 3.4, cy - r * 3.4, r * 6.8, r * 6.8);
     ctx.fillStyle = hsl(sh, ss, Math.min(sl + (dark ? 6 : 4), 92));
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    // 飞鸟：左半天空两三点，国画味
+    const crescent = isMoon && rnd() < 0.4;
+    ctx.beginPath();
+    if (crescent) {
+        ctx.arc(cx, cy, r, Math.PI * 0.6, Math.PI * 2.4);
+        ctx.arc(cx + r * 0.42, cy - r * 0.1, r * 0.82, Math.PI * 2.25, Math.PI * 0.75, true);
+        ctx.closePath();
+    } else {
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    }
+    ctx.fill();
+    if (isMoon && !crescent) {
+        // 月海斑：满月面上两块低透明度暗斑，一眼是月不是日
+        ctx.fillStyle = hsl(sh, Math.max(ss - 20, 8), Math.max(sl - 14, 30), 0.4);
+        ctx.beginPath(); ctx.arc(cx - r * 0.3, cy - r * 0.15, r * 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + r * 0.26, cy + r * 0.26, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    }
+    if (fx.includes('rays')) {
+        // 放射光芒：绕日 12 条短晴线，烈日/日出专属
+        ctx.strokeStyle = hsl(sh, ss, Math.min(sl + 6, 92), dark ? 0.5 : 0.55);
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 12; i++) {
+            const ang = (i / 12) * Math.PI * 2 + rnd() * 0.12;
+            const r1 = r * 1.35, r2 = r * (1.85 + rnd() * 0.5);
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1);
+            ctx.lineTo(cx + Math.cos(ang) * r2, cy + Math.sin(ang) * r2);
+            ctx.stroke();
+        }
+    }
+    }
+    // 飞鸟：雁阵(V字五只) / 春燕(尾叉) / 普通两三点，国画味
     ctx.strokeStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(30,32,48,0.38)';
     ctx.lineWidth = 1.4;
     ctx.lineCap = 'round';
-    const birds = 2 + Math.floor(rnd() * 2);
-    for (let i = 0; i < birds; i++) {
-        const bx = W * (0.1 + rnd() * 0.34), by = H * (0.16 + rnd() * 0.2), bs = 5 + rnd() * 4;
+    const wing = (bx, by, bs) => {
         ctx.beginPath();
         ctx.moveTo(bx - bs, by);
         ctx.quadraticCurveTo(bx - bs / 2, by - bs * 0.7, bx, by);
         ctx.quadraticCurveTo(bx + bs / 2, by - bs * 0.7, bx + bs, by);
         ctx.stroke();
+    };
+    if (fx.includes('geese')) {
+        const gx = W * (0.42 + rnd() * 0.28), gy = H * (0.13 + rnd() * 0.1);
+        const spread = W * (0.045 + rnd() * 0.02);
+        for (let i = 0; i < 5; i++) {
+            const t = Math.ceil(i / 2) * (i % 2 ? 1 : -1);
+            wing(gx + t * spread, gy + Math.abs(t) * spread * 0.55, 4.5 + rnd() * 1.5);
+        }
+    } else if (fx.includes('swallow')) {
+        for (let i = 0; i < 2; i++) {
+            const bx = W * (0.14 + rnd() * 0.3), by = H * (0.16 + rnd() * 0.2), bs = 6 + rnd() * 3;
+            wing(bx, by, bs);
+            ctx.beginPath(); // 燕尾分叉两撇
+            ctx.moveTo(bx, by);
+            ctx.lineTo(bx - bs * 0.32, by + bs * 0.5);
+            ctx.moveTo(bx, by);
+            ctx.lineTo(bx + bs * 0.32, by + bs * 0.5);
+            ctx.stroke();
+        }
+    } else {
+        const birds = 2 + Math.floor(rnd() * 2);
+        for (let i = 0; i < birds; i++) {
+            wing(W * (0.1 + rnd() * 0.34), H * (0.16 + rnd() * 0.2), 5 + rnd() * 4);
+        }
     }
-    // 山脊四层 + 层间雾；种子决定要不要把最下层换成湖面
+    // 闪电：骤雨天 1~2 道折线，外层淡光晕 + 内层亮线
+    if (fx.includes('lightning')) {
+        const bolts = rnd() < 0.3 ? 2 : 1;
+        for (let b = 0; b < bolts; b++) {
+            let lx = W * (0.25 + rnd() * 0.5), ly = H * 0.02;
+            const pts = [[lx, ly]];
+            const n = 4 + Math.floor(rnd() * 2);
+            for (let i = 0; i < n; i++) {
+                lx += (rnd() - 0.5) * W * 0.1;
+                ly += H * (0.09 + rnd() * 0.05);
+                pts.push([lx, ly]);
+            }
+            ctx.lineJoin = 'round';
+            for (const [w, c] of [[5, `rgba(255,255,215,${dark ? 0.22 : 0.32})`], [1.8, 'rgba(255,255,240,0.95)']]) {
+                ctx.strokeStyle = c;
+                ctx.lineWidth = w;
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0], pts[0][1]);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+                ctx.stroke();
+            }
+        }
+    }
+    // 山脊四层 + 层间雾；种子决定要不要把最下层换成湖面；雪线主题近三层提亮成雪白山
     const lake = rnd() < 0.45;
     const horizon = lake ? H * 0.78 : H;
     const [rh, rs] = p.ridge;
+    const snowy = fx.includes('snowcap');
     for (let layer = 0; layer < 4; layer++) {
         const base = H * (0.5 + layer * 0.09) + (lake ? -H * 0.06 : 0);
         const amp = H * (0.16 - layer * 0.028);
-        const l = dark ? 15 - layer * 3 : 34 - layer * 7;
+        const cap = snowy && layer >= 1;
+        const l = cap ? (dark ? 26 : 60) : (dark ? 15 - layer * 3 : 34 - layer * 7);
         ridgePath(ctx, W, base, amp, rnd, horizon);
-        ctx.fillStyle = hsl(rh, Math.max(rs + dsat, 16), Math.max(l + lift * 0.4, 6));
+        ctx.fillStyle = hsl(rh, cap ? 8 : Math.max(rs + dsat, 16), Math.max(l + lift * 0.4, 6));
         ctx.fill();
         // 层间雾：山脊上方一条两端渐隐的亮带，拉出空气透视（顶端不渐隐会露硬边）
         const fog = ctx.createLinearGradient(0, base - amp, 0, base + 34);
@@ -820,6 +985,18 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
         fog.addColorStop(1, hsl(rh, 24, dark ? 62 : 92, 0));
         ctx.fillStyle = fog;
         ctx.fillRect(0, base - amp, W, amp + 34);
+    }
+    // 浓雾：晨雾主题再加两条全幅横雾压出能见度
+    if (fx.includes('mist')) {
+        for (let i = 0; i < 2; i++) {
+            const my = H * (0.4 + rnd() * 0.22);
+            const g = ctx.createLinearGradient(0, my - 30, 0, my + 30);
+            g.addColorStop(0, hsl(rh, 20, dark ? 60 : 90, 0));
+            g.addColorStop(0.5, hsl(rh, 20, dark ? 60 : 90, dark ? 0.14 : 0.26));
+            g.addColorStop(1, hsl(rh, 20, dark ? 60 : 90, 0));
+            ctx.fillStyle = g;
+            ctx.fillRect(0, my - 30, W, 60);
+        }
     }
     // 湖面：水色接天色不戛黑块，满幅细漱波光 + 日月倒影光斑
     if (lake) {
@@ -844,6 +1021,142 @@ function drawTalismanScene(ctx, W, H, rnd, dark) {
         }
         ctx.fillStyle = hsl(sh, ss, sl, 0.4);
         ctx.fillRect(0, horizon - 1, W, 1.2);
+        // 一叶小舟剪影 + 站立渔翁，40% 概率出现在水面（国画留白味）
+        if (rnd() < 0.4) {
+            const bx = W * (0.28 + rnd() * 0.42);
+            const by = horizon + (H - horizon) * (0.3 + rnd() * 0.32);
+            const bw = W * (0.06 + rnd() * 0.03);
+            const ink = hsl(rh, 30, dark ? 5 : 14, 0.85);
+            ctx.fillStyle = ink;
+            ctx.beginPath();
+            ctx.moveTo(bx - bw / 2, by);
+            ctx.quadraticCurveTo(bx - bw * 0.4, by + bw * 0.24, bx, by + bw * 0.26);
+            ctx.quadraticCurveTo(bx + bw * 0.4, by + bw * 0.24, bx + bw / 2, by);
+            ctx.quadraticCurveTo(bx, by - bw * 0.05, bx - bw / 2, by);
+            ctx.fill();
+            // 渔翁：身条 + 斗笠，两笔画在船中
+            const px = bx + bw * (rnd() < 0.5 ? -0.12 : 0.14);
+            const ph = bw * 0.34;
+            ctx.fillRect(px - ph * 0.16, by - ph, ph * 0.32, ph);
+            ctx.beginPath();
+            ctx.arc(px, by - ph - ph * 0.1, ph * 0.3, Math.PI, Math.PI * 2);
+            ctx.fill();
+            // 舟下一条细影
+            ctx.fillStyle = hsl(sh, ss, sl, 0.18);
+            ctx.fillRect(bx - bw * 0.6, by + bw * 0.34, bw * 1.2, 1.2);
+        }
+    }
+    // 萤火虫：夏夜山脚水面飘 14 团黄绿流光
+    if (fx.includes('firefly')) {
+        for (let i = 0; i < 14; i++) {
+            const fxp = rnd() * W, fyp = H * (0.45 + rnd() * 0.45);
+            const fr = 1.4 + rnd() * 1.4;
+            const gl = ctx.createRadialGradient(fxp, fyp, 0, fxp, fyp, fr * 4);
+            gl.addColorStop(0, `rgba(225,255,140,${(0.5 + rnd() * 0.4).toFixed(2)})`);
+            gl.addColorStop(0.4, 'rgba(200,255,120,0.25)');
+            gl.addColorStop(1, 'rgba(200,255,120,0)');
+            ctx.fillStyle = gl;
+            ctx.beginPath();
+            ctx.arc(fxp, fyp, fr * 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(240,255,180,0.95)';
+            ctx.beginPath();
+            ctx.arc(fxp, fyp, fr * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // 芦苇：秋月湖畔两侧细秆顶穗，只在出湖时画（芦苇长在水边）
+    if (fx.includes('reeds') && lake) {
+        const side = rnd() < 0.5;
+        const baseX = side ? W * (0.06 + rnd() * 0.12) : W * (0.82 + rnd() * 0.12);
+        for (let i = 0; i < 7; i++) {
+            const rx = baseX + (rnd() - 0.5) * W * 0.1;
+            const ry = horizon + (H - horizon) * (0.15 + rnd() * 0.5);
+            const rh2 = H * (0.08 + rnd() * 0.07);
+            const tipx = rx + (rnd() - 0.5) * 14;
+            ctx.strokeStyle = hsl(rh, 25, dark ? 6 : 16, 0.85);
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.quadraticCurveTo(rx + (tipx - rx) * 0.3, ry - rh2 * 0.6, tipx, ry - rh2);
+            ctx.stroke();
+            ctx.fillStyle = hsl(rh, 25, dark ? 8 : 18, 0.85);
+            ctx.beginPath();
+            ctx.ellipse(tipx, ry - rh2, 2.2, 6, (tipx - rx) * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // 花枝：桃枝粉花 / 枫枝红叶，从底部左右角伸入（底部无文字，不抢签面）
+    if (fx.includes('plum') || fx.includes('maple')) {
+        const isPlum = fx.includes('plum');
+        const fromLeft = rnd() < 0.5;
+        const dir = fromLeft ? 1 : -1;
+        const ox = fromLeft ? -8 : W + 8, oy = H * (0.86 + rnd() * 0.06);
+        const mx = ox + dir * W * (0.2 + rnd() * 0.1), my = oy - H * (0.05 + rnd() * 0.04);
+        ctx.strokeStyle = `rgba(45,34,30,${dark ? 0.7 : 0.8})`;
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.quadraticCurveTo(ox + dir * W * 0.1, oy - H * 0.012, mx, my);
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const bx2 = ox + dir * W * 0.11, by2 = oy - H * 0.022;
+        ctx.moveTo(bx2, by2);
+        ctx.quadraticCurveTo(bx2 + dir * W * 0.05, by2 - H * 0.01, bx2 + dir * W * 0.08, by2 - H * 0.045);
+        ctx.stroke();
+        const bloom = isPlum
+            ? (dark ? 'rgba(255,168,190,0.92)' : 'rgba(250,150,175,0.95)')
+            : (dark ? 'rgba(225,95,50,0.9)' : 'rgba(220,85,45,0.95)');
+        ctx.fillStyle = bloom;
+        for (let i = 0; i < (isPlum ? 9 : 7); i++) {
+            const t = 0.3 + rnd() * 0.7;
+            const fxp = ox + (mx - ox) * t + (rnd() - 0.5) * 10;
+            const fyp = oy + (my - oy) * t - H * 0.014 * t + (rnd() - 0.5) * 10;
+            ctx.beginPath();
+            ctx.arc(fxp, fyp, 3 + rnd() * 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            if (isPlum && rnd() < 0.6) { // 桃花花心一点亮
+                ctx.fillStyle = 'rgba(255,240,205,0.9)';
+                ctx.beginPath(); ctx.arc(fxp, fyp, 1.2, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = bloom;
+            }
+        }
+    }
+    // 天气前景：雨丝 / 雪花，压在最上层才像落在画面之前
+    if (fx.includes('rain')) {
+        ctx.strokeStyle = dark ? 'rgba(205,218,235,0.34)' : 'rgba(88,98,122,0.32)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 70; i++) {
+            const rx = rnd() * W, ry = rnd() * H, rl = 6 + rnd() * 10;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.lineTo(rx + rl * 0.18, ry + rl);
+            ctx.stroke();
+        }
+    }
+    if (fx.includes('snow')) {
+        for (let i = 0; i < 90; i++) {
+            ctx.fillStyle = `rgba(255,255,255,${(0.35 + rnd() * 0.5).toFixed(2)})`;
+            ctx.beginPath();
+            ctx.arc(rnd() * W, rnd() * H, 0.9 + rnd() * 1.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    // 樱吹雪：春昼主题满幅飘粉瓣，随机旋转
+    if (fx.includes('petal')) {
+        for (let i = 0; i < 16; i++) {
+            ctx.save();
+            ctx.translate(rnd() * W, rnd() * H);
+            ctx.rotate(rnd() * Math.PI);
+            ctx.fillStyle = dark ? 'rgba(255,190,205,0.8)' : 'rgba(250,170,190,0.85)';
+            const ps = 2 + rnd() * 2.4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, ps, ps * 0.55, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
     }
     // 上暗角保日期白字；下暗角只留一点压住画面重心（底部已无文字）
     const top = ctx.createLinearGradient(0, 0, 0, H * 0.34);
@@ -1458,11 +1771,12 @@ const MP_MODE_NAME = { loop: '列表循环', one: '单曲循环', shuffle: '列�
 function mpStep(dir) {
     const n = mp.tracks.length;
     if (n < 2) return 0;
-    if (mp.mode === 'shuffle' || mp.mode === 'explore') {
+    if (mp.mode === 'shuffle') {
         let r = mp.idx;
         while (r === mp.idx) r = Math.floor(Math.random() * n);
         return r;
     }
+    // 列表循环与每日探索都按歌单顺序推进：探索歌单本身每日由工作流刷新，无需再随机
     return (mp.idx + dir + n) % n;
 }
 
@@ -1492,7 +1806,7 @@ function mpLoadExplore() {
     if (mp.explore && mp.explore.length) {
         mp.tracks = mp.explore;
         mp.el.list.innerHTML = mpListHtml();
-        mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
+        mpLoad(0, mp.playing); // 每日探索按歌单顺序播，从第一首开始
         return;
     }
     fetch('data/explore.json')
@@ -1503,7 +1817,7 @@ function mpLoadExplore() {
             if (mp.mode !== 'explore') return;
             mp.tracks = mp.explore;
             mp.el.list.innerHTML = mpListHtml();
-            mpLoad(Math.floor(Math.random() * mp.explore.length), mp.playing);
+            mpLoad(0, mp.playing);
         })
         .catch(() => {
             mp.explore = null; // 置空而非 []：[] 是 truthy 会把失败缓存成“已加载”，模式卡死无法重试
