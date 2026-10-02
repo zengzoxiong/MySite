@@ -27,6 +27,8 @@ def fetch_json(url, data=None):
         'User-Agent': UA,
         'Referer': 'https://music.163.com/',
         'Accept-Language': 'zh-CN,zh;q=0.9',
+        # 匿名游客 Cookie：网易对无 Cookie 的数据中心 IP 偶发返回空榜单
+        'Cookie': 'NMTID=mysite-sync-0001; os=pc; appver=2.10.13',
     })
     if data:
         req.add_header('Content-Type', 'application/x-www-form-urlencoded')
@@ -34,12 +36,15 @@ def fetch_json(url, data=None):
 
 
 def board_ids():
-    d = fetch_json(f'https://music.163.com/api/v3/playlist/detail?id={BOARD_ID}&n={LIMIT}&s=0')
-    pl = d.get('playlist') or {}
-    ids = [t['id'] for t in (pl.get('trackIds') or [])][:LIMIT]
-    if not ids:  # 少数情况直接返回 tracks
-        ids = [t['id'] for t in (pl.get('tracks') or [])][:LIMIT]
-    return ids
+    for _ in range(2):  # 风控偶发空榜单，重试一次
+        d = fetch_json(f'https://music.163.com/api/v3/playlist/detail?id={BOARD_ID}&n={LIMIT}&s=0')
+        pl = d.get('playlist') or {}
+        ids = [t['id'] for t in (pl.get('trackIds') or [])][:LIMIT]
+        if not ids:  # 少数情况直接返回 tracks
+            ids = [t['id'] for t in (pl.get('tracks') or [])][:LIMIT]
+        if ids:
+            return ids
+    return []
 
 
 def details(ids):
@@ -82,6 +87,9 @@ def main():
     if len(data['tracks']) < 20:
         # 榜单接口半残只解析出零头曲目时保留旧文件，别让 50 首歌单一夜缩水
         raise RuntimeError(f'仅解析到 {len(data["tracks"])} 首曲目（<20），疑似接口异常，放弃写入')
+    write_json(OUT, data)
+    print(f'已更新 explore.json：{len(data["tracks"])} 首（{data["source"]["date"]}）')
+    sys.exit(0)
 
 
 def write_json(path, obj, indent=2):
@@ -91,10 +99,6 @@ def write_json(path, obj, indent=2):
         json.dump(obj, f, ensure_ascii=False, indent=indent)
         f.write('\n')
     os.replace(tmp, path)
-
-    write_json(OUT, data)
-    print(f'已更新 explore.json：{len(data["tracks"])} 首（{data["source"]["date"]}）')
-    sys.exit(0)
 
 
 if __name__ == '__main__':
