@@ -51,7 +51,7 @@
     {
       "title": "Re:从零开始的异世界生活 第四季",
       "type": "番剧",
-      "status": "想看",
+      "status": "在看",
       "rating": 8.1,
       "release": "2026-04-08",
       "comment": "第四季开播，追番中之前的等待。",
@@ -1716,6 +1716,24 @@
       "release": "2026-04-17",
       "url": "https://www.themoviedb.org/movie/1671548",
       "cover": "assets/media/letter-to-grandma.jpg"
+    },
+    {
+      "title": "一拳超人 第一季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 8.2,
+      "release": "2015-10-05",
+      "url": "https://www.themoviedb.org/tv/63926/season/1",
+      "cover": "assets/media/one-punch-s1.jpg"
+    },
+    {
+      "title": "一拳超人 第二季",
+      "type": "番剧",
+      "status": "看过",
+      "rating": 7.4,
+      "release": "2019-04-10",
+      "url": "https://www.themoviedb.org/tv/63926/season/2",
+      "cover": "assets/media/one-punch-s2.png"
     }
   ]
 }
