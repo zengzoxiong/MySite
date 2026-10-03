@@ -3,7 +3,7 @@
   "source": {
     "provider": "网易云音乐",
     "board": "云音乐飙升榜",
-    "date": "2026-10-02",
+    "date": "2026-10-03",
     "count": 50
   },
   "tracks": [
@@ -18,14 +18,14 @@
       "title": "牵我的手好吗",
       "artist": "吴琳珂Moske",
       "src": "https://music.163.com/song/media/outer/url?id=3434747816.mp3",
-      "cover": "https://p3.music.126.net/nmaLZTVSB92Ggqhl9zhB6g==/109951173919639815.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/nmaLZTVSB92Ggqhl9zhB6g==/109951173919639815.jpg?param=400y400",
       "dur": 243
     },
     {
       "title": "花骨朵",
       "artist": "洛天依Official / 亞細亞曠世奇才",
       "src": "https://music.163.com/song/media/outer/url?id=3438968283.mp3",
-      "cover": "https://p3.music.126.net/_nQm6G_r2169K752DvbwoA==/109951173972266080.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/_nQm6G_r2169K752DvbwoA==/109951173972266080.jpg?param=400y400",
       "dur": 167
     },
     {
@@ -46,7 +46,7 @@
       "title": "异想天开",
       "artist": "肖战",
       "src": "https://music.163.com/song/media/outer/url?id=3440528000.mp3",
-      "cover": "https://p4.music.126.net/EKF1_0K4a49EYk3bjyf2TQ==/109951174018605045.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/EKF1_0K4a49EYk3bjyf2TQ==/109951174018605045.jpg?param=400y400",
       "dur": 197
     },
     {
@@ -60,7 +60,7 @@
       "title": "Patient Zero",
       "artist": "Taylor Swift",
       "src": "https://music.163.com/song/media/outer/url?id=3440858634.mp3",
-      "cover": "https://p3.music.126.net/-5Zrxxe-acnG3Hph1bcLMQ==/109951174017690356.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/-5Zrxxe-acnG3Hph1bcLMQ==/109951174017690356.jpg?param=400y400",
       "dur": 226
     },
     {
@@ -74,7 +74,7 @@
       "title": "一样的我们",
       "artist": "颜人中",
       "src": "https://music.163.com/song/media/outer/url?id=3439412532.mp3",
-      "cover": "https://p4.music.126.net/evIZYwTr-99_eMAqcS5sTw==/109951173977316636.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/evIZYwTr-99_eMAqcS5sTw==/109951173977316636.jpg?param=400y400",
       "dur": 226
     },
     {
@@ -88,7 +88,7 @@
       "title": "底色 (难道我又多想了)",
       "artist": "350Ton-Xll！",
       "src": "https://music.163.com/song/media/outer/url?id=3436887140.mp3",
-      "cover": "https://p3.music.126.net/W0j1Z-UZPv_g1eqqxYDyNg==/109951173946982670.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/W0j1Z-UZPv_g1eqqxYDyNg==/109951173946982670.jpg?param=400y400",
       "dur": 188
     },
     {
@@ -137,15 +137,8 @@
       "title": "不合时宜",
       "artist": "肖战",
       "src": "https://music.163.com/song/media/outer/url?id=3440528006.mp3",
-      "cover": "https://p3.music.126.net/EKF1_0K4a49EYk3bjyf2TQ==/109951174018605045.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/EKF1_0K4a49EYk3bjyf2TQ==/109951174018605045.jpg?param=400y400",
       "dur": 226
-    },
-    {
-      "title": "Splendid Radiance",
-      "artist": "Director / Jasr / Mking",
-      "src": "https://music.163.com/song/media/outer/url?id=3433225075.mp3",
-      "cover": "https://p3.music.126.net/fUt0wq8iD7gkAX8O_ENf0g==/109951173903789730.jpg?param=400y400",
-      "dur": 111
     },
     {
       "title": "机会到了我们出",
@@ -158,7 +151,7 @@
       "title": "睡前别想太多",
       "artist": "李雨霏_晚饭",
       "src": "https://music.163.com/song/media/outer/url?id=3440961675.mp3",
-      "cover": "https://p3.music.126.net/CdAZ76__lHkE_HcjXgR_4w==/109951173999807018.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/CdAZ76__lHkE_HcjXgR_4w==/109951173999807018.jpg?param=400y400",
       "dur": 210
     },
     {
@@ -172,7 +165,7 @@
       "title": "王子系变装",
       "artist": "圈圈菌",
       "src": "https://music.163.com/song/media/outer/url?id=3436976392.mp3",
-      "cover": "https://p4.music.126.net/jMu--9nIik9CcijiWEKXgA==/109951173947903976.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/jMu--9nIik9CcijiWEKXgA==/109951173947903976.jpg?param=400y400",
       "dur": 93
     },
     {
@@ -186,7 +179,7 @@
       "title": "名为你的雨季",
       "artist": "moli",
       "src": "https://music.163.com/song/media/outer/url?id=3431881323.mp3",
-      "cover": "https://p4.music.126.net/ILrIQ8CkDGvU7ECnzln4ag==/109951173890097757.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/ILrIQ8CkDGvU7ECnzln4ag==/109951173890097757.jpg?param=400y400",
       "dur": 118
     },
     {
@@ -200,7 +193,7 @@
       "title": "读心术 (Live版)",
       "artist": "欧阳娜娜 / 姚晓棠",
       "src": "https://music.163.com/song/media/outer/url?id=3431614397.mp3",
-      "cover": "https://p4.music.126.net/Ep1QVpM5EIOBDDldtSvbOw==/109951173886588062.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/Ep1QVpM5EIOBDDldtSvbOw==/109951173886588062.jpg?param=400y400",
       "dur": 270
     },
     {
@@ -214,7 +207,7 @@
       "title": "FALA SÉRIO（inst）",
       "artist": "Vico8 / GOLD999",
       "src": "https://music.163.com/song/media/outer/url?id=3437783847.mp3",
-      "cover": "https://p4.music.126.net/yJJKNNxQT8OxtFE-mRckLQ==/109951173957306582.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/yJJKNNxQT8OxtFE-mRckLQ==/109951173957306582.jpg?param=400y400",
       "dur": 158
     },
     {
@@ -228,28 +221,28 @@
       "title": "振乾坤",
       "artist": "张杰",
       "src": "https://music.163.com/song/media/outer/url?id=3440154073.mp3",
-      "cover": "https://p3.music.126.net/ZYvWL0ELh27YOrmloZowJw==/109951173986803954.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/ZYvWL0ELh27YOrmloZowJw==/109951173986803954.jpg?param=400y400",
       "dur": 252
     },
     {
       "title": "双子 FT· PearBae小梨",
       "artist": "BOBBYNOPEACE / PearBae小梨",
       "src": "https://music.163.com/song/media/outer/url?id=3433792108.mp3",
-      "cover": "https://p3.music.126.net/vdo6DnHm12P0fm6CAbcNsQ==/109951173920123200.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/vdo6DnHm12P0fm6CAbcNsQ==/109951173920123200.jpg?param=400y400",
       "dur": 184
     },
     {
       "title": "秋天的海",
       "artist": "周传雄",
       "src": "https://music.163.com/song/media/outer/url?id=3436364770.mp3",
-      "cover": "https://p3.music.126.net/R5l12gWhV4rdeMIV9Xfq3Q==/109951173942013924.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/R5l12gWhV4rdeMIV9Xfq3Q==/109951173942013924.jpg?param=400y400",
       "dur": 157
     },
     {
       "title": "Here （Radio Edit）",
       "artist": "ErGuuu",
       "src": "https://music.163.com/song/media/outer/url?id=3431277650.mp3",
-      "cover": "https://p3.music.126.net/Fn4ATAwvi5-1zW1uD7LLJA==/109951173881920782.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/Fn4ATAwvi5-1zW1uD7LLJA==/109951173881920782.jpg?param=400y400",
       "dur": 132
     },
     {
@@ -298,7 +291,7 @@
       "title": "高雅且隐晦",
       "artist": "卡力老虎 / 周乘羽",
       "src": "https://music.163.com/song/media/outer/url?id=3440172851.mp3",
-      "cover": "https://p4.music.126.net/rt6_mInoqx0iqImk9qng2w==/109951173986994634.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/rt6_mInoqx0iqImk9qng2w==/109951173986994634.jpg?param=400y400",
       "dur": 157
     },
     {
@@ -312,7 +305,7 @@
       "title": "清醒",
       "artist": "step.jad依加",
       "src": "https://music.163.com/song/media/outer/url?id=3439379059.mp3",
-      "cover": "https://p3.music.126.net/x9Dhc1Gfyni06fkSIT4gYA==/109951173977023556.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/x9Dhc1Gfyni06fkSIT4gYA==/109951173977023556.jpg?param=400y400",
       "dur": 275
     },
     {
@@ -326,7 +319,7 @@
       "title": "Furious(GHETTO HOUSE)",
       "artist": "BOY / chao",
       "src": "https://music.163.com/song/media/outer/url?id=3436711168.mp3",
-      "cover": "https://p3.music.126.net/bSeCUwi3--DsQsY5D87H-g==/109951173945547968.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/bSeCUwi3--DsQsY5D87H-g==/109951173945547968.jpg?param=400y400",
       "dur": 139
     },
     {
@@ -347,7 +340,7 @@
       "title": "月声尽，心灯明",
       "artist": "鸣潮先约电台 / jixwang / Cassie Wei",
       "src": "https://music.163.com/song/media/outer/url?id=3440655477.mp3",
-      "cover": "https://p4.music.126.net/f_QRzKF5p9ulRJ5q2M6R6A==/109951173993049764.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/f_QRzKF5p9ulRJ5q2M6R6A==/109951173993049764.jpg?param=400y400",
       "dur": 255
     },
     {
@@ -356,6 +349,13 @@
       "src": "https://music.163.com/song/media/outer/url?id=3431380966.mp3",
       "cover": "https://p3.music.126.net/YDEZZkdj_8-5pYliR5g3-Q==/109951173883353714.jpg?param=400y400",
       "dur": 153
+    },
+    {
+      "title": "Boss Life (狂放人生) (Live)",
+      "artist": "弹壳Danko",
+      "src": "https://music.163.com/song/media/outer/url?id=3432120298.mp3",
+      "cover": "https://p4.music.126.net/54ZvDx0RoiwMfUTM1JH31A==/109951173887507367.jpg?param=400y400",
+      "dur": 240
     }
   ]
 }
