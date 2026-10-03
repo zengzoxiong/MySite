@@ -51,10 +51,10 @@
     {
       "title": "Re:从零开始的异世界生活 第四季",
       "type": "番剧",
-      "status": "在看",
+      "status": "看过",
       "rating": 8.1,
       "release": "2026-04-08",
-      "comment": "第四季开播，追番中之前的等待。",
+      "comment": "这一季背着沉睡的雷姆远赴贤者之塔，试炼层层揭开艾米莉亚的过去，昴也终于回答了「你的爱是否只是自我满足」的质问。",
       "cover": "assets/media/re-zero-s4.jpg",
       "url": "https://anilist.co/anime/189046"
     },
@@ -1734,6 +1734,26 @@
       "release": "2019-04-10",
       "url": "https://www.themoviedb.org/tv/63926/season/2",
       "cover": "assets/media/one-punch-s2.png"
+    },
+    {
+      "title": "间谍过家家 第三季",
+      "type": "番剧",
+      "status": "想看",
+      "rating": 8.2,
+      "release": "2025-10-04",
+      "url": "https://anilist.co/anime/177937",
+      "cover": "assets/media/spy-x-family-s3.jpg",
+      "comment": "阿尼亚一家回归，第三季排上补番日程。"
+    },
+    {
+      "title": "相合之物",
+      "type": "番剧",
+      "status": "在看",
+      "rating": 7.4,
+      "release": "2022-04-06",
+      "url": "https://anilist.co/anime/132532",
+      "cover": "assets/media/deaimon.png",
+      "comment": "京都和菓子店绿松的四季，一果与阿和从生疏到家人，治愈日常里全是暖意。"
     }
   ]
 }
