@@ -1774,6 +1774,24 @@
       "url": "https://anilist.co/anime/100675",
       "cover": "assets/media/saekano-fine.png",
       "comment": "补番计划的终点，加藤惠的最终章。"
+    },
+    {
+      "title": "幼儿园战争",
+      "type": "番剧",
+      "status": "想看",
+      "url": "https://anilist.co/anime/199597",
+      "cover": "assets/media/youchien-wars.png",
+      "comment": "最强杀手卧底幼儿园的无厘头喜剧，2027 春放送预定，先排进清单。"
+    },
+    {
+      "title": "败犬女主太多了！",
+      "type": "番剧",
+      "status": "在看",
+      "rating": 8.0,
+      "release": "2024-07-14",
+      "url": "https://anilist.co/anime/171457",
+      "cover": "assets/media/makeine.jpg",
+      "comment": "败犬们的夏天，霞之丘诗羽声优的小八全集，边笑边意难平。"
     }
   ]
 }
