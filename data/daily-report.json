@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-04",
+  "updated": "2026-10-05",
   "sections": {
     "trending": [
       {
         "name": "KKKKhazix/AIHOT",
         "url": "https://github.com/KKKKhazix/AIHOT",
         "desc": "一个自己找热点、自己写日报的网站框架。把信源和精选标准换成你的，它就是你的行业热点站。",
-        "stars": 5446,
+        "stars": 5760,
+        "language": "TypeScript"
+      },
+      {
+        "name": "CopilotKit/OpenDots",
+        "url": "https://github.com/CopilotKit/OpenDots",
+        "desc": "Your always-on AI coworkers that move between text, calls, and Slack.",
+        "stars": 3176,
         "language": "TypeScript"
       },
       {
         "name": "rehan-remade/universal-modder",
         "url": "https://github.com/rehan-remade/universal-modder",
         "desc": "Point Claude at any game. Skills, tools and the fal MCP that let Claude Code mod almost any PC game you own: recon, reverse engineering, fal-generated art/3D/au",
-        "stars": 2649,
+        "stars": 3094,
         "language": "Python"
       },
       {
         "name": "feder-cr/dots",
         "url": "https://github.com/feder-cr/dots",
         "desc": "Open-source dots for the web: an AI agent with its own browser, one that does not get blocked.",
-        "stars": 2574,
+        "stars": 2599,
         "language": "Python"
-      },
-      {
-        "name": "CopilotKit/OpenDots",
-        "url": "https://github.com/CopilotKit/OpenDots",
-        "desc": "Your always-on AI coworkers that move between text, calls, and Slack.",
-        "stars": 2574,
-        "language": "TypeScript"
       },
       {
         "name": "wy51ai/floorplan-3d",
         "url": "https://github.com/wy51ai/floorplan-3d",
         "desc": "",
-        "stars": 1362,
+        "stars": 1384,
         "language": "HTML"
-      },
-      {
-        "name": "firelex/jeff",
-        "url": "https://github.com/firelex/jeff",
-        "desc": "Millisecond decisions, any domain: a 0.8B open \"System 1\" model that picks between your options with calibrated probabilities. One base, swappable LoRA adapters",
-        "stars": 1351,
-        "language": "Python"
       },
       {
         "name": "nanaism/yomiyasu",
         "url": "https://github.com/nanaism/yomiyasu",
         "desc": "AI生成の日本語を自然な日本語へ推敲するAgent Skill / Agent Skill for Refining AI-Generated Japanese into Natural Japanese",
-        "stars": 1324,
+        "stars": 1378,
+        "language": "Python"
+      },
+      {
+        "name": "firelex/jeff",
+        "url": "https://github.com/firelex/jeff",
+        "desc": "Millisecond decisions, any domain: a 0.8B open \"System 1\" model that picks between your options with calibrated probabilities. One base, swappable LoRA adapters",
+        "stars": 1371,
         "language": "Python"
       },
       {
         "name": "edenfunf/reelmimic",
         "url": "https://github.com/edenfunf/reelmimic",
         "desc": "Show it a video you love. Get a new video in the same style. An AI crew (Claude Code or Codex) plans, builds and reviews it with you.",
-        "stars": 1116,
+        "stars": 1265,
         "language": "JavaScript"
-      },
-      {
-        "name": "CAPCOM-TD-OSS/REDox",
-        "url": "https://github.com/CAPCOM-TD-OSS/REDox",
-        "desc": "High-performance, token-based structured data engine for .NET. A core component of REX, the technology behind CAPCOM's next-generation game engine.",
-        "stars": 989,
-        "language": "C#"
       },
       {
         "name": "facebookincubator/muse-gadget-sdk",
         "url": "https://github.com/facebookincubator/muse-gadget-sdk",
         "desc": "Open source SDK to build Muse gadgets",
-        "stars": 891,
+        "stars": 1151,
         "language": "C"
+      },
+      {
+        "name": "CAPCOM-TD-OSS/REDox",
+        "url": "https://github.com/CAPCOM-TD-OSS/REDox",
+        "desc": "High-performance, token-based structured data engine for .NET. A core component of REX, the technology behind CAPCOM's next-generation game engine.",
+        "stars": 1023,
+        "language": "C#"
       }
     ],
     "hn": [
       {
-        "id": 49949235,
-        "title": "We're going to need default hard budget caps on pretty much everything",
-        "url": "https://simonwillison.net/2026/Oct/3/default-hard-budget-caps/",
-        "hn": "https://news.ycombinator.com/item?id=49949235",
-        "score": 202,
-        "comments": 106
+        "id": 49953495,
+        "title": "Run Qwen 3.8 Flash Next (125B) on consumer hardware (RTX 4090) at 100T/s",
+        "url": "https://github.com/Niko1221/Strata",
+        "hn": "https://news.ycombinator.com/item?id=49953495",
+        "score": 517,
+        "comments": 258
       },
       {
-        "id": 49949438,
-        "title": "Bob Cringely Has Died",
-        "url": "https://news.ycombinator.com/item?id=49949438",
-        "hn": "https://news.ycombinator.com/item?id=49949438",
-        "score": 132,
-        "comments": 18
+        "id": 49957116,
+        "title": "Turn off Apple Intelligence on macOS 27 and get its disk space back",
+        "url": "https://github.com/omlahore/RemoveMacAI",
+        "hn": "https://news.ycombinator.com/item?id=49957116",
+        "score": 212,
+        "comments": 117
       },
       {
-        "id": 49946393,
-        "title": "Hole Punch: Sling your spaceship around gravitational fields",
-        "url": "https://notoriousbfg.com/hole-punch/",
-        "hn": "https://news.ycombinator.com/item?id=49946393",
-        "score": 244,
-        "comments": 61
+        "id": 49957068,
+        "title": "Improper redaction reveals Google Data Center water and electricity usage",
+        "url": "https://www.1011now.com/2026/09/30/more-questions-than-answers-about-lincolns-google-data-center-water-electricity-usage/",
+        "hn": "https://news.ycombinator.com/item?id=49957068",
+        "score": 141,
+        "comments": 189
       },
       {
-        "id": 49946355,
-        "title": "Treachery in the Rodin Museum 3D scan verdict",
-        "url": "https://cosmowenman.substack.com/p/rodin-museum-3d-scan-verdict",
-        "hn": "https://news.ycombinator.com/item?id=49946355",
-        "score": 93,
-        "comments": 48
+        "id": 49933461,
+        "title": "A map of every lighthouse",
+        "url": "https://mapped.earth/lighthouses/world",
+        "hn": "https://news.ycombinator.com/item?id=49933461",
+        "score": 147,
+        "comments": 64
       },
       {
-        "id": 49946895,
-        "title": "The work by Valve's Timur Kristóf on improving old AMD GPUs on Linux",
-        "url": "https://www.phoronix.com/news/XDC-2026-Valve-Timur-AMDGPU",
-        "hn": "https://news.ycombinator.com/item?id=49946895",
-        "score": 155,
-        "comments": 21
+        "id": 49943637,
+        "title": "Infidel Goes Wild",
+        "url": "https://blog.zarfhome.com/2026/10/infidel-goes-wild",
+        "hn": "https://news.ycombinator.com/item?id=49943637",
+        "score": 9,
+        "comments": 0
       },
       {
-        "id": 49947631,
-        "title": "Reasons I didn't become an EMT, ranked",
-        "url": "https://ben.stolovitz.com/posts/reasons-not-emt-ranked/",
-        "hn": "https://news.ycombinator.com/item?id=49947631",
-        "score": 108,
-        "comments": 50
+        "id": 49957117,
+        "title": "Homa: The end of TCP for AI clusters [video]",
+        "url": "https://www.youtube.com/watch?v=eZ8WWZzoaR0",
+        "hn": "https://news.ycombinator.com/item?id=49957117",
+        "score": 35,
+        "comments": 6
       },
       {
-        "id": 49923873,
-        "title": "Celebrating the 100th birthday of the kidney donated to him as a teenager",
-        "url": "https://www.whec.com/top-news/webster-man-celebrating-the-100th-birthday-of-the-kidney-his-mom-donated-to-him-as-a-teenager/",
-        "hn": "https://news.ycombinator.com/item?id=49923873",
-        "score": 152,
-        "comments": 40
+        "id": 49934078,
+        "title": "Results from the ASIC puzzle",
+        "url": "https://blog.janestreet.com/asic-puzzle-results/",
+        "hn": "https://news.ycombinator.com/item?id=49934078",
+        "score": 63,
+        "comments": 24
       },
       {
-        "id": 49948332,
-        "title": "OpenAI safety leader quits, warning AI company's culture is 'broken'",
-        "url": "https://www.theguardian.com/technology/2026/oct/03/openai-safety-leader-quits-warning-ai-companys-culture-is-broken",
-        "hn": "https://news.ycombinator.com/item?id=49948332",
-        "score": 193,
-        "comments": 139
+        "id": 49956771,
+        "title": "Show HN: Build with Python – a beginner course where your code draws",
+        "url": "https://scimigo.com/en/learn/build-with-python/01-draw-with-python",
+        "hn": "https://news.ycombinator.com/item?id=49956771",
+        "score": 16,
+        "comments": 3
       },
       {
-        "id": 49942706,
-        "title": "Kolibri: A Sovereign Open-Weight Model",
-        "url": "https://aleph-alpha.com/en/blog/kolibri-has-landed-a-sovereign-open-weight-model/",
-        "hn": "https://news.ycombinator.com/item?id=49942706",
-        "score": 528,
-        "comments": 303
+        "id": 49956092,
+        "title": "All I wanted was a custom domain email",
+        "url": "https://jacobg.co/emails-at-jacobg-co/",
+        "hn": "https://news.ycombinator.com/item?id=49956092",
+        "score": 22,
+        "comments": 23
       },
       {
-        "id": 49910462,
-        "title": "So You Think You Could Be an Electrician?",
-        "url": "https://asteriskmag.com/issues/15/so-you-think-you-could-be-an-electrician",
-        "hn": "https://news.ycombinator.com/item?id=49910462",
-        "score": 24,
-        "comments": 14
+        "id": 49916753,
+        "title": "Page Table Memory Consumption",
+        "url": "https://frn.sh/pagetables/",
+        "hn": "https://news.ycombinator.com/item?id=49916753",
+        "score": 28,
+        "comments": 2
       }
     ]
   }
