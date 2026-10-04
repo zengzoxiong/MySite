@@ -2,7 +2,7 @@ name: 同步 GitHub Stars
 
 on:
   schedule:
-    - cron: '10 21 * * *' # 每日 UTC 21:10（北京时间凌晨 5:10）
+    - cron: '30 18 * * *' # 每日 UTC 18:30（北京时间 02:30，深夜低峰）
   workflow_dispatch:
 
 permissions:

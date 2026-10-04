@@ -2,7 +2,7 @@ name: 汇率同步
 
 on:
   schedule:
-    - cron: '40 15 * * *' # 每日 UTC 15:40（北京 23:40），欧洲央行当日参考价发布后
+    - cron: '7 18 * * *' # 每日 UTC 18:07（北京时间 02:07，深夜低峰；ECB 参考价北京 23 点前后已发布）
   workflow_dispatch:
 
 permissions:

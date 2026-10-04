@@ -54,8 +54,8 @@ MySite/
 
 - `icon` 是 favicon 加载失败时的兜底 emoji（站点整体禁 emoji，但此字段为功能性兜底，保留）
 - 卡片构建在 `buildLinkCard()`，动态文本已过 `escapeHtml`
-- **死链体检**：`.github/workflows/check-links.yml` 每周一 05:30（北京）跑 `scripts/check_links.py`，结果写 `data/link-health.json`（**勿手改**），三档 `ok/suspect/dead`、宁漏报不误报（403/429/5xx/超时只记 suspect 不出标；404/410 或两次 DNS 失败才判 dead）；状态+状态码没变时整条沿用旧记录，文件字节不变则工作流跳过提交。`buildLinkCard` 读全局 `linkHealth` 给 dead 链接标题行加「失效」红丸（`--dead-color`），suspect 不出标
-- **winget 批量安装**：`data/links.json` 有可选字段 `winget: "<包id>"`（只给 winget 官方源确实存在的软件配；msstore 商店 id 不在 winget-pkgs 仓库、验证不了，别配）。`.github/workflows/check-winget.yml` 每日 06:50（北京）跑 `scripts/check_winget.py`，查 microsoft/winget-pkgs 仓库验证包目录存在并取最新版本，写 `data/winget-health.json`（**勿手改**；404 才判失效、网络异常沿用旧记录宁漏报不误报；无变化跳过提交）。**仓库路径规则：发布者与包名中的点都拆成目录层级**（`Tencent.QQ.NT` → `manifests/t/Tencent/QQ/NT`，`7zip.7zip` → `7/7zip/7zip`），版本目录名必须以数字开头（过滤 Insiders 之类非版本子目录）。**交互是「批量安装模式」**（不是常驻栏）：「常用软件下载」分类的标题条右侧出现「批量安装」按钮（`#wingetModeBtn`，`renderLinks` 控制显隐），点进后网格只渲染带 winget 字段的卡片（`buildLinkCard(link, i, true)` 的 pick 变体，div + `data-pick` + `role="checkbox"`，点击勾选不打开链接），底部浮出操作条 `#wingetDock`（全选/清空/下载 .ps1）；模式中右上角按钮变为「退出安装」（低调描边样式）；勾选状态存 `localStorage.wingetSel` 跨会话保留；失效包卡片置灰不可选并强制落选；「下载 .ps1」生成一键装机脚本（UTF-8 带 BOM，防 PowerShell 5.1 把中文注释按 ANSI 读成乱码；`--accept-*` 参数免交互确认）。退出方式：右上角「退出安装」/ Esc / 切走分类（`renderLinks` 开头收敛 `wingetMode`）。dock 挂容器直下——fixed 元素别放进有 transform 的祖先（坑位 1）
+- **死链体检**：`.github/workflows/check-links.yml` 每周二 03:45（北京，深夜低峰）跑 `scripts/check_links.py`，结果写 `data/link-health.json`（**勿手改**），三档 `ok/suspect/dead`、宁漏报不误报（403/429/5xx/超时只记 suspect 不出标；404/410 或两次 DNS 失败才判 dead）；状态+状态码没变时整条沿用旧记录，文件字节不变则工作流跳过提交。`buildLinkCard` 读全局 `linkHealth` 给 dead 链接标题行加「失效」红丸（`--dead-color`），suspect 不出标
+- **winget 批量安装**：`data/links.json` 有可选字段 `winget: "<包id>"`（只给 winget 官方源确实存在的软件配；msstore 商店 id 不在 winget-pkgs 仓库、验证不了，别配）。`.github/workflows/check-winget.yml` 每日 03:15（北京，深夜低峰）跑 `scripts/check_winget.py`，查 microsoft/winget-pkgs 仓库验证包目录存在并取最新版本，写 `data/winget-health.json`（**勿手改**；404 才判失效、网络异常沿用旧记录宁漏报不误报；无变化跳过提交）。**仓库路径规则：发布者与包名中的点都拆成目录层级**（`Tencent.QQ.NT` → `manifests/t/Tencent/QQ/NT`，`7zip.7zip` → `7/7zip/7zip`），版本目录名必须以数字开头（过滤 Insiders 之类非版本子目录）。**交互是「批量安装模式」**（不是常驻栏）：「常用软件下载」分类的标题条右侧出现「批量安装」按钮（`#wingetModeBtn`，`renderLinks` 控制显隐），点进后网格只渲染带 winget 字段的卡片（`buildLinkCard(link, i, true)` 的 pick 变体，div + `data-pick` + `role="checkbox"`，点击勾选不打开链接），底部浮出操作条 `#wingetDock`（全选/清空/下载 .ps1）；模式中右上角按钮变为「退出安装」（低调描边样式）；勾选状态存 `localStorage.wingetSel` 跨会话保留；失效包卡片置灰不可选并强制落选；「下载 .ps1」生成一键装机脚本（UTF-8 带 BOM，防 PowerShell 5.1 把中文注释按 ANSI 读成乱码；`--accept-*` 参数免交互确认）。退出方式：右上角「退出安装」/ Esc / 切走分类（`renderLinks` 开头收敛 `wingetMode`）。dock 挂容器直下——fixed 元素别放进有 transform 的祖先（坑位 1）
 
 ### 2. 影视收藏（data/media.json）——数据规范最严格的部分
 
@@ -78,7 +78,7 @@ MySite/
 2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`。
    工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
 - **从上游搬来的页面必须去品牌**：`tools/*` 多数源自 `justhtmls/html-tools`，页面里的 `JustHTMLs`/`htmls.dev` 字样（返回链接文案、示例数据、`<title>` 后缀、页脚版权、作者徽标）和 `<link rel="canonical">` 都要改成本站（title/页脚用「拾光集」，canonical 指向 `https://zengzoxiong.github.io/MySite/tools/<工具>/index.html`——留着来源站 canonical 会把 SEO 权重白送出去）。署名只保留说明页的「查看源码」按钮（指向上游仓库）。
-- **工具页体检**：`.github/workflows/check-tools.yml` 在 `tools/**`/`data/tools.json`/脚本变动时 + 每周一 05:40（北京）跑 `scripts/check_tools.py`，五项检查：tools.json 登记双向一致、canonical 指向本站、引用 `../../favicon.svg`、含「拾光集」署名、无 `JustHTMLs`/`htmls.dev` 残留；违例退出码 1 让 CI 红灯并写 step summary，**不自动改文件**。存量 123 页已于 2026-09 一次性补齐 title 后缀/canonical/favicon，新搬页面先跑一遍脚本再提交。
+- **工具页体检**：`.github/workflows/check-tools.yml` 在 `tools/**`/`data/tools.json`/脚本变动时 + 每周一 04:04（北京，深夜低峰）跑 `scripts/check_tools.py`，五项检查：tools.json 登记双向一致、canonical 指向本站、引用 `../../favicon.svg`、含「拾光集」署名、无 `JustHTMLs`/`htmls.dev` 残留；违例退出码 1 让 CI 红灯并写 step summary，**不自动改文件**。存量 123 页已于 2026-09 一次性补齐 title 后缀/canonical/favicon，新搬页面先跑一遍脚本再提交。
 - 说明页的图标样式表走 cdnjs，`onerror` 兜底到本地副本 `assets/vendor/fontawesome/css/all.min.css`（css + 4 个 woff2，字形路径写死 `../webfonts/`，别挪目录）——已断掉 cdnjs 实测过 solid/regular/brands 三套字形都能从本地渲染。
 - **`tools/file-preview`（文件在线预览）是纯前端解析**，对标 kkFileView 但不需要服务端：PDF / 图片 / 音视频 / 文本 / JSON / CSV 走浏览器原生（零依赖），只有 docx / xlsx / zip / md 才按类型 `loadLib()` 懒加载 `assets/vendor/{jszip,docx-preview,exceljs,marked}`（合计约 1.06 MB，其中 exceljs 842 KB，首屏不下）。表格用 **ExcelJS 而不是 SheetJS**：SheetJS 社区版不读 `styles.xml`，拿不到底色/字体/对齐；换 ExcelJS 后才能还原样式。两个坑记牢——`cell.text` **不套数字格式**，要过 `fmtCell()`（百分比 / 小数位 / 千分位 / 日期）；Excel 里 `sz` 是百分之一磅、`a:ln@w` 是 EMU（除 12700 得磅）。加格式只改 `kindOf` + `dispatch` 分派表，**别在首屏引 script**。安全底线：Markdown 与 HTML 的渲染结果只进 `<iframe sandbox>`（无 `allow-scripts`），`sanitize()` 会剥掉 script/iframe/object/embed/link 并清空 `img[src]`（否则文件内容能发起第三方请求当外带通道）；SVG 走 `<img>` 不内联；文本一律 `textContent`。**代码高亮是自写的词法器**：`tokenize()` 按语言配置分类关键字/字符串/注释/数字/标签，表格右上角有「打印 / 存 PDF」按钮（`window.print()` + 一段 `@media print` 隐藏外壳），不引 PDF 生成库。已知限制：pptx 与 doc/ppt/xls 等 OLE 复合文档、HEIC、7z/rar、PSD、CAD/3D 一律不做（pptx 曾做过版式还原，因转 PDF 仍需排版引擎、纯前端做不到而移除，改用「多格式转 PDF」）；遇到时靠魔数嗅探给可操作提示；文本只渲染前 400 KB、单文件上限 200 MB、压缩包成员上限 50 MB。
 - **`tools/to-pdf`（多格式转 PDF）**：docx / xlsx / md / csv / json / 文本 / 图片排成纸张（A4·A3·Letter、纵横、三档边距、三档字号），两条出口——`window.print()` 出矢量 PDF（中文可选中，`@page` 尺寸随设置注入 `<style>`），或懒加载 `html2canvas + jspdf`（约 600 KB）截图逐页切图 `doc.save()` 下载位图 PDF。截图路径有 30000 px 高度上限，超了提示改用打印。两个出口的差异必须在页面上写清楚，别让用户以为下载的是矢量。
@@ -104,7 +104,7 @@ MySite/
 - 音量是 `input[type=range]` 自绘细条（高 3px），**无滑块圆点**（`::-webkit-slider-thumb` 设成 0×0 透明），音量大小由两处表达：填充段深浅（JS 把值写进 CSS 变量 `--v`，填充用 `color-mix(in srgb, var(--text-secondary) calc(20% + 80% * var(--v)), transparent)`）+ 喇叭图标音波道数（`#mpVolWrap` 上的 `data-lv` 0/1/2/3，CSS 控制 `.w1/.w2/.w3` 显隐）
 - **四种播放模式**：按钮在控制行右端 `.mp-side` 里、三条横杠的左侧，**纯图标无文字**（网易云式线性图标，`.mi-loop/.mi-one/.mi-shuffle/.mi-explore` 四选一），点击循环切换，`title` 只显示四个字的模式名（列表循环 / 单曲循环 / 列表随机 / 每日探索），状态存 `localStorage.mpMode`；`one` 置 `audio.loop=true`，`explore` 把曲目源换成 `data/explore.json`。索引推进统一走 `mpStep(dir)`，**别再用 `mp.idx ± 1`**
 - **切换 SVG 图标显隐必须用 `toggleAttribute('hidden', …)`**：`hidden` 不是 SVGElement 的反射属性，写 `svgEl.hidden = true` 只挂了个 JS 属性、DOM 不变，图标看着"切了模式没切图标"（踩过）
-- **探索模式数据**：`data/explore.json` 由 `scripts/sync_explore.py` 从网易云「云音乐飙升榜」(id 3779629) 取前 50 首生成，`.github/workflows/sync-explore.yml` 每日 05:20（北京）刷新，**勿手改**；榜单里混入的 VIP/版权曲会在播放报错时由 `mp.fails` 计数自动跳最多 8 首，跳完才提示失败
+- **探索模式数据**：`data/explore.json` 由 `scripts/sync_explore.py` 从网易云「云音乐飙升榜」(id 3779629) 取前 50 首生成，`.github/workflows/sync-explore.yml` 每日 02:45（北京，深夜低峰）刷新，**勿手改**；榜单里混入的 VIP/版权曲会在播放报错时由 `mp.fails` 计数自动跳最多 8 首，跳完才提示失败
 
 - 迷你条与展开控制区是**两套按钮**（`.mp-transport` 展开时 `display:none`，`.mp-ctrl` 在面板内），靠类名 `.mp-prev/.mp-next/.mp-playbtn` 一起绑定，`mpSyncUI()` 用 `querySelectorAll('.mp-ic-play/.mp-ic-pause')` 同步图标——加按钮别只改一处
 - 音量值持久化在 `localStorage.mpVolume`
@@ -127,7 +127,7 @@ MySite/
 
 - **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布）——**页面不写「数据来源/非实时」这类注脚（用户要求删掉），但也别对外宣称实时行情**，数据本身仍是日频。
 - **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD,TRY,INR,PHP,BRL,CAD,THB,MYR], latest:{币种:值}, series:[[日期, 15 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。**汇率卡片展示 `fxData.columns` 里的全部币种**（`fxPaintCards()` 直接按列渲染，15 种一屏铺开），`FX_META` 只负责名字与展示口径——**加币种务必同时改 `SYMBOLS` 和 `FX_META`**，漏了 meta 卡片会显示成裸代码。
-- **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 15:40（北京 23:40，ECB 发布后）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
+- **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 18:07（北京 02:07，深夜低峰；ECB 参考价北京 23 点前后已发布）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
 - **视图**：侧栏「数据看板 → 汇率走势」进入（「数据看板」分区收纳「我的 Stars」「汇率走势」「每日日报」「Agent Skills」「Agent MCP」五项：前三者是工作流每日同步的数据视图，后两者是注册表视图，Stars 原先挂在「网站收藏」、Agent Plugin 原先独占分区，2026-09 一并移入），`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
 - 涨跌色是 `--up-color`（红涨）/`--down-color`（绿跌），明暗各一套；图表颜色全部走 CSS 类 + 变量，**别在 JS 里硬编颜色**。
 - 全域搜索输入币种名/代码/别名（`fxSearchHits`）会出现「汇率」分组，点击跳到汇率视图并选中该币种。
@@ -213,15 +213,15 @@ MySite/
 
 ## 定时任务（GitHub Actions）
 
-- `sync-tmdb.yml`：每日 05:00（北京）刷新 media.json 的 TMDB 评分/上映时间，有变化才提交
-- `sync-stars.yml`：每日 05:10 同步 GitHub Stars 到 stars.json
-- `sync-explore.yml`：每日 05:20 同步网易云飙升榜到 data/explore.json（播放器探索模式用）
-- `check-links.yml`：北京时间每周二 05:30（UTC 周一 21:30）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
-- `check-winget.yml`：每日 06:50（北京）体检 links.json 的 winget 包可用性到 data/winget-health.json（详见「网站收藏」小节），有变化才提交
-- `check-tools.yml`：tools/** 变动时 + 每周一 05:40 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
-- `sync-ghactivity.yml`：每日 05:50 同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
-- `sync-fx.yml`：每日 23:40（北京）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交
-- `daily-report.yml`：每日 10:10（北京）同步数据看板「每日日报」（GitHub Trending 精选——官方 Search API 近 7 天新建仓库按星排序 + Hacker News 首页十条，官方 Firebase API）到 data/daily-report.json，无变化跳过提交
+- `sync-tmdb.yml`：每日 02:15（北京，深夜低峰）刷新 media.json 的 TMDB 评分/上映时间，有变化才提交
+- `sync-stars.yml`：每日 02:30（北京，深夜低峰）同步 GitHub Stars 到 stars.json
+- `sync-explore.yml`：每日 02:45（北京，深夜低峰）同步网易云飙升榜到 data/explore.json（播放器探索模式用）
+- `check-links.yml`：北京时间每周二 03:45（UTC 周一 19:45）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交
+- `check-winget.yml`：每日 03:15（北京，深夜低峰）体检 links.json 的 winget 包可用性到 data/winget-health.json（详见「网站收藏」小节），有变化才提交
+- `check-tools.yml`：tools/** 变动时 + 每周一 04:04 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
+- `sync-ghactivity.yml`：每日 03:03（北京，深夜低峰）同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
+- `sync-fx.yml`：每日 02:07（北京，深夜低峰；ECB 参考价北京 23 点前后已发布）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交
+- `daily-report.yml`：每日 03:30（北京，深夜低峰）同步数据看板「每日日报」（GitHub Trending 精选——官方 Search API 近 7 天新建仓库按星排序 + Hacker News 首页十条，官方 Firebase API）到 data/daily-report.json，无变化跳过提交
 - 写数据的工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线

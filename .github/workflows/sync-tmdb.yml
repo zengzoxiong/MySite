@@ -2,7 +2,7 @@ name: 同步 TMDB 评分
 
 on:
   schedule:
-    - cron: '0 21 * * *' # 每日 UTC 21:00（北京时间凌晨 5 点）
+    - cron: '15 18 * * *' # 每日 UTC 18:15（北京时间 02:15，深夜低峰）
   workflow_dispatch:
 
 permissions:

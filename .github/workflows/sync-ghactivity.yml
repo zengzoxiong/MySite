@@ -2,7 +2,7 @@ name: 同步 GitHub 贡献热力图
 
 on:
   schedule:
-    - cron: '50 21 * * *' # 每日 UTC 21:50（北京时间凌晨 5:50）
+    - cron: '3 19 * * *' # 每日 UTC 19:03（北京时间 03:03，深夜低峰）
   workflow_dispatch:
 
 permissions:

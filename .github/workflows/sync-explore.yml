@@ -2,7 +2,7 @@ name: 同步探索歌单与歌词
 
 on:
   schedule:
-    - cron: '20 21 * * *' # 每日 UTC 21:20（北京时间凌晨 5:20）
+    - cron: '45 18 * * *' # 每日 UTC 18:45（北京时间 02:45，深夜低峰）
   workflow_dispatch:
 
 permissions:
