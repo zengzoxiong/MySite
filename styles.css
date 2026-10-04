@@ -4248,3 +4248,54 @@ body.no-anim .mp-lyric > div {
     color: var(--dead-color);
     border-color: var(--dead-color);
 }
+
+/* ===== 每日日报（数据看板：Trending 精选 + Hacker News 十条） ===== */
+.daily-sec {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 2px 0 10px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 14px;
+}
+.hn-card .hn-title {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    flex: 1;
+    min-width: 0;
+}
+.hn-card .hn-title:hover { color: var(--accent-color); }
+.hn-card .hn-link { cursor: pointer; }
+.hn-card .hn-link:hover {
+    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* ===== 首页天气区空气质量：等级徽标 + 近 24h AQI 曲线 ===== */
+.air-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 7px;
+}
+.air-line[hidden] { display: none !important; }
+.air-badge {
+    font-size: 0.75rem;
+    padding: 1px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.air-num {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.air-spark {
+    flex: 1;
+    min-width: 56px;
+    height: 30px;
+    opacity: 0.9;
+}

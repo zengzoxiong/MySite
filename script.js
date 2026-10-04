@@ -11,7 +11,7 @@ let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'daily' | 'search'
 let currentPluginCat = '';
 let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
@@ -417,7 +417,14 @@ function paintWeather(w) {
     document.getElementById('weatherIcon').innerHTML = weatherIconSvg(w.icon);
     document.getElementById('weatherTemp').textContent = w.temp;
     document.getElementById('weatherDesc').textContent = w.desc;
-    document.getElementById('weatherExtra').textContent = w.extra;
+    // 天气区结构化：文本行 + 空气质量区（AQI 徽标 + 24h 曲线，loadAirQuality 控制显隐）
+    const we = document.getElementById('weatherExtra');
+    we.innerHTML = '<span id="weatherExtraText"></span>' +
+        '<div class="air-line" id="airBox" hidden><span class="air-badge" id="airLevel"></span>' +
+        '<span class="air-num" id="airNum"></span>' +
+        '<svg class="air-spark" viewBox="0 0 200 36" preserveAspectRatio="none" aria-hidden="true">' +
+        '<polyline id="airLine" fill="none" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>';
+    document.getElementById('weatherExtraText').textContent = w.extra;
 }
 
 async function initWeather(manual = false) {
@@ -428,7 +435,7 @@ async function initWeather(manual = false) {
     const snapMine = !!(snap && snap.raw === lastWeatherRaw);
     const ctx = { manual, painted: snapMine };
     // 新鲜快照直接用，一次外部请求都不发；过期快照先铺上当占位，下面继续拉新
-    if (snapMine) paintWeather(snap);
+    if (snapMine) { paintWeather(snap); loadAirQuality(snap.lat, snap.lon, lastWeatherRaw); }
     if (snapMine && !manual && Date.now() - snap.ts < WEATHER_TTL) return;
 
     if (manual) document.getElementById('weatherIcon').classList.add('refreshing');
@@ -486,6 +493,65 @@ async function fetchWeatherAt(lat, lon, labelP, fromAuto, ctx) {
     const desc = label ? `${label} · ${text}` : text;
     paintWeather({ icon, temp, desc, extra, label });
     writeWeatherSnap({ raw: lastWeatherRaw, auto: fromAuto, lat, lon, label, icon, temp, desc, extra, ts: Date.now() });
+    loadAirQuality(lat, lon, lastWeatherRaw); // 空气质量随天气坐标并行补位，不阻塞
+}
+
+// ===== 空气质量（Open-Meteo Air Quality，免密钥）：AQI 徽标 + 近 24 小时曲线 =====
+// 挂在天气区 weatherExtra 里；60 分钟快照缓存绑定天气坐标，失败静默只藏 AQI 区
+const AIR_TTL = 60 * 60 * 1000;
+const AIR_LEVELS = [
+    [50, '优', '#4caf50'], [100, '良', '#c9a400'], [150, '轻度污染', '#ff7043'],
+    [200, '中度污染', '#e53935'], [300, '重度污染', '#8e24aa'], [Infinity, '严重污染', '#795548']
+];
+function airLevel(v) {
+    for (const lv of AIR_LEVELS) if (v <= lv[0]) return { name: lv[1], color: lv[2] };
+    return AIR_LEVELS[0];
+}
+function readAirSnap(raw) {
+    try {
+        const s = JSON.parse(localStorage.airSnap || 'null');
+        return (s && s.raw === raw && typeof s.aqi === 'number' && Array.isArray(s.points) && s.points.length > 1) ? s : null;
+    } catch (e) { return null; }
+}
+function paintAir(aqi, level, points) {
+    const box = document.getElementById('airBox');
+    if (!box) return;
+    document.getElementById('airLevel').textContent = level.name;
+    document.getElementById('airLevel').style.background = `color-mix(in srgb, ${level.color} 22%, transparent)`;
+    document.getElementById('airLevel').style.color = level.color;
+    document.getElementById('airNum').textContent = 'AQI ' + aqi;
+    // 折线 y 轴按数据自适应（下限 100 保曲线不顶格），AQI 越高点越靠上
+    const w = 200, h = 36;
+    const max = Math.max(100, ...points) * 1.05;
+    const step = w / (points.length - 1);
+    const pts = points.map((v, i) => `${(i * step).toFixed(1)},${(h - Math.max(v, 0) / max * (h - 4) - 2).toFixed(1)}`).join(' ');
+    const line = document.getElementById('airLine');
+    line.setAttribute('points', pts);
+    line.style.stroke = level.color;
+    box.hidden = false;
+}
+async function loadAirQuality(lat, lon, rawKey) {
+    const snap = readAirSnap(rawKey);
+    if (snap) {
+        paintAir(snap.aqi, airLevel(snap.aqi), snap.points);
+        if (Date.now() - snap.ts < AIR_TTL) return;
+    }
+    try {
+        const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}` +
+            '&hourly=us_aqi&past_days=1&forecast_days=1&timezone=auto';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const arr = ((await res.json()).hourly || {}).us_aqi;
+        const valid = (arr || []).filter(v => v !== null && v !== undefined);
+        if (!valid.length) return;
+        const aqi = Math.round(valid[valid.length - 1]);
+        const points = valid.slice(-24).map(v => Math.round(v));
+        const level = airLevel(aqi);
+        paintAir(aqi, level, points);
+        try { localStorage.airSnap = JSON.stringify({ raw: rawKey, ts: Date.now(), aqi, points }); } catch (e) { /* 忽略 */ }
+    } catch (e) {
+        console.error('空气质量加载失败:', e); // 静默：AQI 区保持隐藏，不影响天气
+    }
 }
 
 async function fetchWeatherData(lat, lon) {
@@ -1259,6 +1325,77 @@ function talismanFontSample(f) {
     return ['拾光签', f.luck, f.sentence, f.lunarText, f.weekday, f.festival].join('');
 }
 
+// ===== 每日日报（数据看板 · GitHub Trending 精选 + Hacker News 首页十条） =====
+// 数据 data/daily-report.json 由每日 10:10 工作流同步；懒加载，失败显示占位可重进重试
+let dailyReport = null;
+let dailyLoading = false;
+
+function renderDailyReport(animate = false) {
+    setViewHead('每日日报', 'GitHub Trending 精选 + Hacker News 首页十条 · 每日同步');
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+    if (!dailyReport) {
+        mediaGrid.innerHTML = '<div class="media-count">日报加载中…</div>';
+        ensureDailyReport();
+        return;
+    }
+    const t = dailyReport.sections.trending || [];
+    const hn = dailyReport.sections.hn || [];
+    const anim = animate ? ' anim' : '';
+    mediaGrid.innerHTML = `
+        <div class="daily-sec">GitHub Trending · 近 7 天热门新仓库</div>
+        ${t.length ? `<div class="skills-cards${anim}">${t.map(trendingCardHtml).join('')}</div>`
+            : '<div class="media-count">本板块今日拉取失败，明早同步会重试</div>'}
+        <div class="daily-sec" style="margin-top:18px">Hacker News · 首页十条</div>
+        ${hn.length ? `<div class="skills-cards${anim}">${hn.map(hnCardHtml).join('')}</div>`
+            : '<div class="media-count">本板块今日拉取失败，明早同步会重试</div>'}
+        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(dailyReport.updated || '—')} · 每日 10:10 自动同步</div>`;
+}
+
+function ensureDailyReport() {
+    if (dailyLoading) return;
+    dailyLoading = true;
+    fetch('data/daily-report.json')
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { dailyReport = d; })
+        .catch(e => {
+            console.error('每日日报加载失败:', e);
+            dailyReport = { updated: '', sections: {} }; // 占位：板块区显示失败提示，重进视图可重试
+        })
+        .finally(() => { dailyLoading = false; if (currentView === 'daily') renderDailyReport(true); });
+}
+
+function trendingCardHtml(r) {
+    return `
+    <a class="skill-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(r.name)}</span>
+            <span class="skill-stars">★ ${fmtStars(r.stars)}</span>
+        </div>
+        ${r.desc ? `<div class="skill-desc">${escapeHtml(r.desc)}</div>` : ''}
+        <div class="skill-meta">
+            ${r.language ? `<span class="skill-tag">${escapeHtml(r.language)}</span>` : ''}
+        </div>
+    </a>`;
+}
+
+function hnCardHtml(r) {
+    // 主体是 div：标题链文章、讨论链 HN，两个出口不嵌套
+    return `
+    <div class="skill-card hn-card">
+        <div class="skill-title-row">
+            <a class="hn-title" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.title)}</a>
+            <span class="skill-stars">▲ ${r.score}</span>
+        </div>
+        <div class="skill-meta">
+            <a class="skill-tag hn-link" href="${escapeHtml(r.hn)}" target="_blank" rel="noopener noreferrer">讨论 ${r.comments}</a>
+            <span class="skill-tag">${escapeHtml(getDomain(r.url) || 'news.ycombinator.com')}</span>
+        </div>
+    </div>`;
+}
+
 async function openTalisman() {
     const modal = document.getElementById('talismanModal');
     const canvas = document.getElementById('talismanCanvas');
@@ -1625,6 +1762,7 @@ function renderCurrentView(animate = false) {
     else if (currentView === 'plugin') renderPluginCat(currentPluginCat);
     else if (currentView === 'ghstars') renderGhStars(animate);
     else if (currentView === 'fx') renderFx(animate);
+    else if (currentView === 'daily') renderDailyReport(animate);
     else renderLinks(animate);
 }
 
@@ -3727,6 +3865,11 @@ function initEventListeners() {
             currentView = 'ghstars';
             searchFrom = 'ghstars';
             renderGhStars(true);
+        } else if (item.dataset.daily) {
+            // 每日日报：Trending 精选 + Hacker News 十条
+            currentView = 'daily';
+            searchFrom = 'daily';
+            renderDailyReport(true);
         } else {
             // Agent Skills / Agent MCP：注册表视图
             currentPluginCat = item.dataset.pluginCat;

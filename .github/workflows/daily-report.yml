@@ -1,0 +1,41 @@
+name: 每日日报同步
+
+on:
+  schedule:
+    - cron: '10 2 * * *' # 每日 UTC 02:10（北京时间 10:10）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 写数据的定时任务共用一条队列，谁在跑后面的等，避免相邻任务同时 push 互相顶掉
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 同步 GitHub Trending 精选与 Hacker News 十条
+        run: python scripts/sync_daily_report.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 提搜索限额，远超每日一次所需
+
+      - name: 有变化时提交
+        run: |
+          if [[ -n $(git status --porcelain data/daily-report.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/daily-report.json
+            git commit -m "chore: 定时同步每日日报（Trending + Hacker News）"
+            git push
+          else
+            echo "日报内容无变化，跳过提交"
+          fi
