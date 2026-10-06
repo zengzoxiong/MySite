@@ -1,9 +1,9 @@
 {
   "counts": {
     "total": 49,
-    "ok": 46,
-    "suspect": 3,
-    "dead": 0
+    "ok": 44,
+    "suspect": 4,
+    "dead": 1
   },
   "results": {
     "https://tools.video/zh-CN": {
@@ -91,11 +91,11 @@
       "checkedAt": "2026-09-25"
     },
     "https://www.ruancang.net/": {
-      "status": 200,
+      "status": 403,
       "reason": "http",
-      "state": "ok",
+      "state": "suspect",
       "finalUrl": "",
-      "checkedAt": "2026-09-25"
+      "checkedAt": "2026-10-06"
     },
     "https://im.qq.com": {
       "status": 200,
@@ -134,10 +134,10 @@
     },
     "https://potplayer.daum.net/": {
       "status": 0,
-      "reason": "net",
-      "state": "suspect",
+      "reason": "dns",
+      "state": "dead",
       "finalUrl": "",
-      "checkedAt": "2026-09-25"
+      "checkedAt": "2026-10-06"
     },
     "https://code.visualstudio.com/": {
       "status": 200,
@@ -315,11 +315,11 @@
       "checkedAt": "2026-09-25"
     },
     "https://www.hello-algo.com/chapter_hello_algo/": {
-      "status": 200,
+      "status": 429,
       "reason": "http",
-      "state": "ok",
+      "state": "suspect",
       "finalUrl": "",
-      "checkedAt": "2026-09-25"
+      "checkedAt": "2026-10-06"
     },
     "https://github.com/BillSchofield/WorkingEffectivelyWithLegacyCode": {
       "status": 200,
