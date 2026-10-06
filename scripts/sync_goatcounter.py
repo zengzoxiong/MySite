@@ -26,6 +26,15 @@ NOW = dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime('%Y-%m-%d')
 TODAY = dt.date.today()  # UTC；GoatCounter 按站点时区记账，差半天对趋势无影响
 
 
+def _err_text(body):
+    """GoatCounter 的 HTTP 错误是 HTML 错误页，提取其中的可读原因"""
+    m = re.search(r'<h1[^>]*>(.*?)</h1>\s*(?:<p[^>]*>(.*?)</p>)?', body, re.S)
+    if m:
+        strip = lambda s: re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', s or '')).strip()
+        return f'{strip(m.group(1))}: {strip(m.group(2))}'
+    return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', body)).strip()[:120]
+
+
 def fetch_json(url, token):
     req = urllib.request.Request(url, headers={
         'User-Agent': 'mysite-sync/1.0',
@@ -36,6 +45,11 @@ def fetch_json(url, token):
     for attempt in range(3):  # runner 偶发 DNS 解析失败，重试跨过抖动
         try:
             return json.loads(urllib.request.urlopen(req, timeout=30).read().decode('utf-8', 'ignore'))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8', 'ignore')
+            last_err = RuntimeError(f'HTTP {e.code} {_err_text(body)}')
+            print(f'请求失败（第 {attempt + 1} 次）：{last_err}，稍后重试')
+            time.sleep(10)
         except urllib.error.URLError as e:
             last_err = e
             print(f'请求失败（第 {attempt + 1} 次）：{e}，稍后重试')
