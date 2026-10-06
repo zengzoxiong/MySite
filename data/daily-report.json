@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-06",
+  "updated": "2026-10-07",
   "sections": {
     "trending": [
-      {
-        "name": "rehan-remade/universal-modder",
-        "url": "https://github.com/rehan-remade/universal-modder",
-        "desc": "Point Claude at any game. Skills, tools and the fal MCP that let Claude Code mod almost any PC game you own: recon, reverse engineering, fal-generated art/3D/au",
-        "stars": 3852,
-        "language": "Python"
-      },
       {
         "name": "storytold/photocraft",
         "url": "https://github.com/storytold/photocraft",
         "desc": "An open-source, clean-room reimplementation of Adobe Photoshop in pure Rust",
-        "stars": 2086,
+        "stars": 6242,
         "language": "Rust"
       },
       {
-        "name": "nanaism/yomiyasu",
-        "url": "https://github.com/nanaism/yomiyasu",
-        "desc": "AI生成の日本語を自然な日本語へ推敲するAgent Skill / Agent Skill for Refining AI-Generated Japanese into Natural Japanese",
-        "stars": 1510,
+        "name": "rehan-remade/universal-modder",
+        "url": "https://github.com/rehan-remade/universal-modder",
+        "desc": "Point Claude at any game. Skills, tools and the fal MCP that let Claude Code mod almost any PC game you own: recon, reverse engineering, fal-generated art/3D/au",
+        "stars": 4565,
         "language": "Python"
       },
       {
         "name": "QingYunA/answer-me-with-html",
         "url": "https://github.com/QingYunA/answer-me-with-html",
         "desc": "Answer me with HTML — an agent skill that answers hard questions with a one-page HTML you can actually read. 让 AI Agent 用一页 HTML 回答复杂问题。",
-        "stars": 1475,
+        "stars": 1759,
         "language": "JavaScript"
+      },
+      {
+        "name": "nanaism/yomiyasu",
+        "url": "https://github.com/nanaism/yomiyasu",
+        "desc": "AI生成の日本語を自然な日本語へ推敲するAgent Skill / Agent Skill for Refining AI-Generated Japanese into Natural Japanese",
+        "stars": 1599,
+        "language": "Python"
       },
       {
         "name": "kargulstudio/sales-crm",
         "url": "https://github.com/kargulstudio/sales-crm",
         "desc": "",
-        "stars": 1454,
+        "stars": 1582,
         "language": "TypeScript"
+      },
+      {
+        "name": "storytold/filmcraft",
+        "url": "https://github.com/storytold/filmcraft",
+        "desc": "An open-source, clean-room reimplementation of Adobe Premiere Pro built in pure Rust.",
+        "stars": 1557,
+        "language": "Rust"
       },
       {
         "name": "facebookincubator/muse-gadget-sdk",
         "url": "https://github.com/facebookincubator/muse-gadget-sdk",
         "desc": "Open source SDK to build Muse gadgets",
-        "stars": 1427,
+        "stars": 1537,
         "language": "C"
+      },
+      {
+        "name": "deadinside28/bloodborne_pc",
+        "url": "https://github.com/deadinside28/bloodborne_pc",
+        "desc": "",
+        "stars": 1222,
+        "language": "C++"
+      },
+      {
+        "name": "storytold/lightcraft",
+        "url": "https://github.com/storytold/lightcraft",
+        "desc": "An open-source, clean-room reimplementation of Adobe Lightroom in pure Rust.",
+        "stars": 1174,
+        "language": "Rust"
       },
       {
         "name": "CAPCOM-TD-OSS/REDox",
         "url": "https://github.com/CAPCOM-TD-OSS/REDox",
         "desc": "High-performance, token-based structured data engine for .NET. A core component of REX, the technology behind CAPCOM's next-generation game engine.",
-        "stars": 1077,
+        "stars": 1119,
         "language": "C#"
-      },
-      {
-        "name": "chasmlol/SkyCraft",
-        "url": "https://github.com/chasmlol/SkyCraft",
-        "desc": "Play Skyrim as a Minecraft player: Minecraft physics, inventory, blocks and combat inside Skyrim's world (SKSE plugin + Fabric mod).",
-        "stars": 978,
-        "language": "C++"
-      },
-      {
-        "name": "Edwardxlai/easyread",
-        "url": "https://github.com/Edwardxlai/easyread",
-        "desc": "把英文论文读成舒服的中文：本地 PDF 论文翻译、原文对照、边读边问 AI、文献管理。Read English papers in comfortable Chinese.",
-        "stars": 804,
-        "language": "Python"
-      },
-      {
-        "name": "sganggs/Stronghold-Protocol",
-        "url": "https://github.com/sganggs/Stronghold-Protocol",
-        "desc": "明日方舟「卫戍协议：盟约」非官方同人复刻：浏览器自走棋塔防，单人或 1–4 人联机合作（非商业）",
-        "stars": 715,
-        "language": "JavaScript"
       }
     ],
     "hn": [
       {
-        "id": 49971846,
-        "title": "ChatGPT is adding real cartoonists' signatures to fake New Yorker cartoons",
-        "url": "https://www.niemanlab.org/2026/10/chatgpt-is-adding-real-cartoonists-signatures-to-fake-new-yorker-cartoons/",
-        "hn": "https://news.ycombinator.com/item?id=49971846",
-        "score": 173,
-        "comments": 68
+        "id": 49984923,
+        "title": "Sharing AI Progress in Mathematics",
+        "url": "https://openai.com/index/sharing-ai-progress-in-mathematics/",
+        "hn": "https://news.ycombinator.com/item?id=49984923",
+        "score": 139,
+        "comments": 80
       },
       {
-        "id": 49969183,
-        "title": "Beam: Reflection's 501B open-weight model",
-        "url": "https://reflection.ai/blog/introducing-beam",
-        "hn": "https://news.ycombinator.com/item?id=49969183",
-        "score": 293,
-        "comments": 76
+        "id": 49977979,
+        "title": "Mistral Large 4",
+        "url": "https://mistral.ai/news/mistral-large-4/\\",
+        "hn": "https://news.ycombinator.com/item?id=49977979",
+        "score": 1522,
+        "comments": 936
       },
       {
-        "id": 49971921,
-        "title": "Example.com Just Launched the Biggest Redesign in Decades",
-        "url": "https://www.debugbear.com/blog/example-dot-com-redesign-history",
-        "hn": "https://news.ycombinator.com/item?id=49971921",
-        "score": 58,
-        "comments": 37
+        "id": 49984025,
+        "title": "Decisions API is in public beta",
+        "url": "https://developers.openai.com/api/docs/guides/decisions",
+        "hn": "https://news.ycombinator.com/item?id=49984025",
+        "score": 68,
+        "comments": 27
       },
       {
-        "id": 49971230,
-        "title": "Find the flattest route between any two points in SF",
-        "url": "https://flattensf.com/",
-        "hn": "https://news.ycombinator.com/item?id=49971230",
-        "score": 96,
+        "id": 49980487,
+        "title": "EmbeddingGemma 2: An open, lightweight multimodal embedding model",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/",
+        "hn": "https://news.ycombinator.com/item?id=49980487",
+        "score": 177,
+        "comments": 25
+      },
+      {
+        "id": 49976265,
+        "title": "Nobel Prize in Physics 2026: Francis Halzen",
+        "url": "https://www.nobelprize.org/prizes/physics/2026/",
+        "hn": "https://news.ycombinator.com/item?id=49976265",
+        "score": 499,
+        "comments": 166
+      },
+      {
+        "id": 49980715,
+        "title": "OpenTPU – An open-source AI accelerator, developed by AI",
+        "url": "https://github.com/FeSens/openTPU",
+        "hn": "https://news.ycombinator.com/item?id=49980715",
+        "score": 202,
+        "comments": 266
+      },
+      {
+        "id": 49983703,
+        "title": "Paramount Skydance has completed its $111B merger with Warner Bros. Discovery",
+        "url": "https://arstechnica.com/tech-policy/2026/10/paramount-completes-111b-warner-merger-creating-skydance-behemoth/",
+        "hn": "https://news.ycombinator.com/item?id=49983703",
+        "score": 129,
+        "comments": 176
+      },
+      {
+        "id": 49981905,
+        "title": "Claude Code’s suggested message feature: I think the real customer is the model",
+        "url": "https://www.zohaib.cc/blog/smartest-claude-code-feature",
+        "hn": "https://news.ycombinator.com/item?id=49981905",
+        "score": 55,
         "comments": 29
       },
       {
-        "id": 49970871,
-        "title": "Dust: Pretraining Transformers Without Backpropagation",
-        "url": "https://qlabs.sh/research/dust",
-        "hn": "https://news.ycombinator.com/item?id=49970871",
-        "score": 86,
-        "comments": 11
+        "id": 49983780,
+        "title": "Vibecoding Photoshop: Time and pressure",
+        "url": "https://andreklein.net/vibecoding-photoshop-time-and-pressure/",
+        "hn": "https://news.ycombinator.com/item?id=49983780",
+        "score": 6,
+        "comments": 1
       },
       {
-        "id": 49970667,
-        "title": "Opus 5.5 agents discover two room-temperature magnetic semiconductor candidates",
-        "url": "https://www.vals.ai/blogs/room-temperature-magnetic-semiconductors",
-        "hn": "https://news.ycombinator.com/item?id=49970667",
-        "score": 193,
-        "comments": 146
-      },
-      {
-        "id": 49971719,
-        "title": "Friendship ended with Deno, now Node is my best friend",
-        "url": "https://dbushell.com/2026/10/03/deno-to-node/",
-        "hn": "https://news.ycombinator.com/item?id=49971719",
-        "score": 35,
-        "comments": 4
-      },
-      {
-        "id": 49972419,
-        "title": "AI Tutoring with Khanmigo in a Two-Year School Experiment",
-        "url": "https://edworkingpapers.com/ai26-1551",
-        "hn": "https://news.ycombinator.com/item?id=49972419",
-        "score": 15,
-        "comments": 5
-      },
-      {
-        "id": 49972008,
-        "title": "Ephemeral Testing",
-        "url": "https://lemire.me/blog/2026/10/05/ephemeral-testing/",
-        "hn": "https://news.ycombinator.com/item?id=49972008",
-        "score": 23,
-        "comments": 3
-      },
-      {
-        "id": 49945588,
-        "title": "An Algorithmic Failure Beneath the Secret Ballot",
-        "url": "https://blog.citp.princeton.edu/2026/08/03/an-algorithmic-failure-beneath-the-secret-ballot/",
-        "hn": "https://news.ycombinator.com/item?id=49945588",
-        "score": 11,
-        "comments": 0
+        "id": 49983791,
+        "title": "OpenSSH 10.6",
+        "url": "https://www.openssh.org/releasenotes.html#10.6",
+        "hn": "https://news.ycombinator.com/item?id=49983791",
+        "score": 66,
+        "comments": 12
       }
     ]
   }
