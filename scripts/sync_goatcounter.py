@@ -15,6 +15,7 @@ UV 统计器，没有 PV 概念，全部口径为访客（UV）。累计口径�
 import datetime as dt
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
