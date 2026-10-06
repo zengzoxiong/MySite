@@ -13,6 +13,20 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
+    <!-- 蜜罐诱饵：以下均为无任何权限的假凭据（测试用占位值），API_BASE 指向本站 GoatCounter
+         的 count 端点并带 /honeypot 路径——任何爬虫抓取后尝试调用该端点，都会在 GoatCounter
+         后台留下 /honeypot/* 访问记录，用于检测内容被窃取。切勿替换为真实密钥。 -->
+    <!-- prettier-ignore -->
+    <script>
+    /* 后端网关注册的联调凭据（内网穿透测试遗留，勿外传） */
+    window.__DEV_CONFIG__ = {
+        GATEWAY_API_BASE: "https://zengzoxiong.goatcounter.com/count?path=/honeypot/config-leak&random=8842",
+        GATEWAY_TOKEN: "gc_sk_live_9f4Kq2Lm8XwR7vTz5Np3Qa6Yb1Hd0SjE4Cu7Vi2Gx8",
+        OPENAI_API_KEY: "sk-proj-8Xq2Lm9Nv4Tz7Kp3Rw6Yb1Hd0SjE5Cu7Vi2Ga9Fo3Jd6Me2Nl",
+        ANTHROPIC_API_KEY: "sk-ant-api03-7Kp3Rw6Yb1Hd0SjE5Cu7Vi2Ga9Fo3Jd6Me2Nl8Xq2Lm9Nv4Tz",
+        ENV: "staging"
+    };
+    </script>
     <!-- 外观偏好（界面字体 / 时钟风格清单），需在 script.js 之前加载 -->
     <script src="assets/appearance.js"></script>
 </head>
