@@ -1924,17 +1924,6 @@ body.no-anim .mp-lyric > div {
     transition: width 0.2s linear;
 }
 
-/* 右上：站点访问统计（不蒜子） */
-.site-stat {
-    top: 52px;
-    right: 0;
-    z-index: 1; /* 低于 .corner 的 2：gh-panel 展开时不被芯片盖住标题行 */
-    padding: 4px 12px;
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    animation: fadeDown 0.5s ease 0.35s backwards;
-}
-
 .github-stats b {
     color: var(--text-primary);
     font-size: 0.88rem;
@@ -4299,3 +4288,71 @@ body.no-anim .mp-lyric > div {
     height: 30px;
     opacity: 0.9;
 }
+
+/* ===== 访问统计（数据看板：GoatCounter 每日同步） ===== */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.stat-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: grid;
+    gap: 4px;
+}
+.stat-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    font-variant-numeric: tabular-nums;
+}
+.stat-label { font-size: 0.75rem; color: var(--text-secondary); }
+.stats-chart {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 16px;
+}
+.stats-chart svg { width: 100%; height: 160px; display: block; }
+.stats-line-pv {
+    fill: none;
+    stroke: var(--accent-color);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+.stats-line-uv {
+    fill: none;
+    stroke: #34a853;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+.stats-dot-uv { fill: #34a853; }
+.stats-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.stats-legend .lg {
+    display: inline-block;
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+.lg-pv { background: var(--accent-color); }
+.lg-uv { background: #34a853; }
+.stats-x-axis { margin-left: auto; }

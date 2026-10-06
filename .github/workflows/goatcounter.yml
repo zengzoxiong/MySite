@@ -1,0 +1,43 @@
+name: 访问统计同步
+
+on:
+  schedule:
+    - cron: '47 19 * * *' # 每日 UTC 19:47（北京时间 03:47，深夜低峰）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 写数据的定时任务共用一条队列，谁在跑后面的等，避免相邻任务同时 push 互相顶掉
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: 同步 GoatCounter 访问统计
+        run: python scripts/sync_goatcounter.py
+        env:
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }} # GoatCounter 后台 Settings→API 生成
+          GOATCOUNTER_SITE: ${{ secrets.GOATCOUNTER_SITE || 'zengzoxiong' }}
+          GOATCOUNTER_START: '2026-10-06' # 站点注册日，累计口径起点
+
+      - name: 有变化时提交
+        run: |
+          if [[ -n $(git status --porcelain data/goatcounter-stats.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/goatcounter-stats.json
+            git commit -m "chore: 定时同步访问统计"
+            git push
+          else
+            echo "访问统计无变化，跳过提交"
+          fi

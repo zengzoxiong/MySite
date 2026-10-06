@@ -41,7 +41,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // 只处理同源 GET 请求；外部资源（天气/一言/GitHub API/不蒜子/favicon）直连不缓存
+    // 只处理同源 GET 请求；外部资源（天气/一言/GitHub API/GoatCounter/favicon）直连不缓存
     const url = new URL(e.request.url);
     if (e.request.method !== 'GET' || url.origin !== location.origin) return;
 

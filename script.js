@@ -11,7 +11,7 @@ let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'daily' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'daily' | 'stats' | 'search'
 let currentPluginCat = '';
 let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
@@ -1396,6 +1396,85 @@ function hnCardHtml(r) {
     </div>`;
 }
 
+// ===== 访问统计（数据看板 · GoatCounter API 每日同步） =====
+// 站点码来自 goatcounter.com（https://{码}.goatcounter.com），注入计数脚本用；
+// 数据看板明细由 scripts/sync_goatcounter.py 每日同步（API token 在仓库 secret）
+const GOATCOUNTER_CODE = 'zengzoxiong';
+let statsData = null;
+let statsLoading = false;
+
+function renderStats(animate = false) {
+    setViewHead('访问统计', 'GoatCounter · 浏览/访客趋势 · 每日同步');
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+    if (!statsData) {
+        mediaGrid.innerHTML = '<div class="media-count">访问统计加载中…</div>';
+        ensureStats();
+        return;
+    }
+    const days = statsData.days || [];
+    const last30 = days.slice(-30);
+    const last7 = days.slice(-7);
+    const sum = (arr, k) => arr.reduce((s, d) => s + (d[k] || 0), 0);
+    const total = statsData.total || { pv: 0, visitors: 0 };
+    const pv30 = sum(last30, 'pv'), uv30 = sum(last30, 'visitors');
+    const pv7 = sum(last7, 'pv'), uv7 = sum(last7, 'visitors');
+    const cards = `
+        <div class="stats-cards">
+            <div class="stat-card"><span class="stat-num">${total.pv}</span><span class="stat-label">累计浏览（PV）</span></div>
+            <div class="stat-card"><span class="stat-num">${total.visitors}</span><span class="stat-label">累计访客（UV）</span></div>
+            <div class="stat-card"><span class="stat-num">${pv7}</span><span class="stat-label">近 7 天浏览</span></div>
+            <div class="stat-card"><span class="stat-num">${uv7}</span><span class="stat-label">近 7 天访客</span></div>
+            <div class="stat-card"><span class="stat-num">${pv30}</span><span class="stat-label">近 30 天浏览</span></div>
+            <div class="stat-card"><span class="stat-num">${uv30}</span><span class="stat-label">近 30 天访客</span></div>
+        </div>`;
+    mediaGrid.innerHTML = `
+        ${cards}
+        <div class="daily-sec" style="margin-top:20px">近 30 天趋势 · 蓝为浏览（PV）/ 绿为访客（UV）</div>
+        ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}
+        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(statsData.updated || '—')} · 每日 03:47 同步 · IP/来源等访客明细在 GoatCounter 后台查看</div>`;
+}
+
+// 近 30 天双折线：720×160 SVG，y 轴按两组数据最大值自适应
+function statsChartHtml(days) {
+    const w = 720, h = 160, pad = 10;
+    const maxV = Math.max(...days.map(d => Math.max(d.pv, d.visitors)), 1) * 1.15;
+    const step = (w - pad * 2) / (days.length - 1);
+    const pt = (v, i) => `${(pad + i * step).toFixed(1)},${(h - pad - (v / maxV) * (h - pad * 2)).toFixed(1)}`;
+    const pvLine = days.map((d, i) => pt(d.pv, i)).join(' ');
+    const uvLine = days.map((d, i) => pt(d.visitors, i)).join(' ');
+    const marks = days.map((d, i) =>
+        `<circle cx="${(pad + i * step).toFixed(1)}" cy="${(h - pad - (d.visitors / maxV) * (h - pad * 2)).toFixed(1)}" r="2.2" class="stats-dot-uv"/>`).join('');
+    return `
+    <div class="stats-chart">
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天浏览与访客趋势折线图">
+            <polyline class="stats-line-pv" points="${pvLine}"/>
+            <polyline class="stats-line-uv" points="${uvLine}"/>
+            ${marks}
+        </svg>
+        <div class="stats-legend">
+            <span><i class="lg lg-pv"></i>浏览 PV</span>
+            <span><i class="lg lg-uv"></i>访客 UV</span>
+            <span class="stats-x-axis">${escapeHtml(days[0].date.slice(5))} ~ ${escapeHtml(days[days.length - 1].date.slice(5))}</span>
+        </div>
+    </div>`;
+}
+
+function ensureStats() {
+    if (statsLoading) return;
+    statsLoading = true;
+    fetch('data/goatcounter-stats.json')
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { statsData = d; })
+        .catch(e => {
+            console.error('访问统计加载失败:', e);
+            statsData = { updated: '', days: [], total: {} }; // 占位：汇总归零，重进视图可重试
+        })
+        .finally(() => { statsLoading = false; if (currentView === 'stats') renderStats(true); });
+}
+
 async function openTalisman() {
     const modal = document.getElementById('talismanModal');
     const canvas = document.getElementById('talismanCanvas');
@@ -1763,6 +1842,7 @@ function renderCurrentView(animate = false) {
     else if (currentView === 'ghstars') renderGhStars(animate);
     else if (currentView === 'fx') renderFx(animate);
     else if (currentView === 'daily') renderDailyReport(animate);
+    else if (currentView === 'stats') renderStats(animate);
     else renderLinks(animate);
 }
 
@@ -3870,6 +3950,11 @@ function initEventListeners() {
             currentView = 'daily';
             searchFrom = 'daily';
             renderDailyReport(true);
+        } else if (item.dataset.stats) {
+            // 访问统计：GoatCounter 每日同步的浏览/访客趋势
+            currentView = 'stats';
+            searchFrom = 'stats';
+            renderStats(true);
         } else {
             // Agent Skills / Agent MCP：注册表视图
             currentPluginCat = item.dataset.pluginCat;
@@ -4028,18 +4113,18 @@ function initEventListeners() {
         }, 200);
     });
 
-    // 访客统计：不蒜子是纯装饰第三方脚本，等首屏加载完、浏览器空闲再注入，
-    // 不与关键资源抢带宽；成功取到数值后才显示胶囊，失败保持隐藏
+    // 访客统计：GoatCounter 给数据看板的明细统计，右上角的数字胶囊已由其替代下线。
+    // 纯装饰第三方脚本，等首屏加载完、浏览器空闲再注入，不与关键资源抢带宽
     window.addEventListener('load', () => {
         const inject = () => {
-            const s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://busuanzi.cc/js/busuanzi/2.3/busuanzi.pure.mini.js';
-            s.onload = () => setTimeout(() => {
-                const pv = document.getElementById('busuanzi_value_site_pv');
-                if (pv && pv.textContent.trim()) document.getElementById('siteStat').style.display = '';
-            }, 800);
-            document.head.appendChild(s);
+            // GoatCounter：站点码为空（未注册/未配置）时跳过注入
+            if (GOATCOUNTER_CODE) {
+                const gc = document.createElement('script');
+                gc.async = true;
+                gc.setAttribute('data-goatcounter', `https://${GOATCOUNTER_CODE}.goatcounter.com/count`);
+                gc.src = '//gc.zgo.at/count.js';
+                document.head.appendChild(gc);
+            }
         };
         if ('requestIdleCallback' in window) requestIdleCallback(inject, { timeout: 4000 });
         else setTimeout(inject, 1500);

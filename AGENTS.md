@@ -29,6 +29,7 @@ MySite/
 │   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
 │   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
 │   ├── daily-report.json # 数据看板「每日日报」Trending+HN（工作流每日同步，勿手改）
+│   ├── goatcounter-stats.json # 数据看板「访问统计」PV/UV（GoatCounter API 每日同步，勿手改）
 │   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
 │   ├── chatgpt-plus.json # ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期，见「汇率」小节）
 │   └── playlist.json     # 首页音乐播放器歌单
@@ -137,6 +138,13 @@ MySite/
   - 本地货币格式化走 `cpMoney()`（`Intl.NumberFormat` + `narrowSymbol`）；币种必须能在 `data/fx.json` 里找到汇率，否则该行自动跳过（ECB 不覆盖 PKR/EGP/VND/TWD 等，所以巴基斯坦/埃及/越南这些区暂时入不了榜）。
 - **别把 data/fx.json 加进 PRECACHE**：约 860 KB（15 币种 × 26 年）且每日变，走运行时缓存（SWR）即可。
 
+### 8.5 访问统计（data/goatcounter-stats.json + 数据看板视图）
+
+- **数据源**：GoatCounter（goatcounter.com，个人站免费）；站点码 `zengzoxiong` 常量在 script.js（`GOATCOUNTER_CODE`），计数脚本由 script.js 在浏览器空闲时懒注入（data-goatcounter → gc.zgo.at/count.js）
+- **同步**：`.github/workflows/goatcounter.yml` 每日 03:47（北京）跑 `scripts/sync_goatcounter.py`，从 GoatCounter API v0（stat/range，90 天分段）拉逐日 PV/UV 写 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（后台 Settings→API 生成），无变化跳过提交
+- **视图**：侧栏「数据看板 → 访问统计」（`renderStats()`，复用 #mediaGrid）：累计/近 7 天/近 30 天 PV·UV 汇总卡 + 近 30 天双折线（PV 蓝 / UV 绿），访客 IP/来源等明细只在 GoatCounter 后台网页看（API 不暴露原始 visits）
+- **隐私**：明文收集访客 IP 需谨慎（PIPL），GoatCounter 后台可关闭明文 IP 记录；接入第三方统计建议页面提供隐私说明
+
 ## 前端架构与约定（script.js / styles.css）
 
 ### 首页签到（拾光签）
@@ -222,6 +230,7 @@ MySite/
 - `check-tools.yml`：tools/** 变动时 + 每周一 04:04 体检工具页去品牌/自引用（详见「在线工具」小节），纯 CI 守卫不提交
 - `sync-ghactivity.yml`：每日 03:03（北京，深夜低峰）同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
 - `sync-fx.yml`：每日 02:07（北京，深夜低峰；ECB 参考价北京 23 点前后已发布）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交
+- `goatcounter.yml`：每日 03:47（北京，深夜低峰）从 GoatCounter API 同步访问统计（PV/UV 累计与逐日）到 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（GoatCounter 后台 Settings→API 生成），无变化跳过提交
 - `daily-report.yml`：每日 03:30（北京，深夜低峰）同步数据看板「每日日报」（GitHub Trending 精选——官方 Search API 近 7 天新建仓库按星排序 + Hacker News 首页十条，官方 Firebase API）到 data/daily-report.json，无变化跳过提交
 - 写数据的工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
