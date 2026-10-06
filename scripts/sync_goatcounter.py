@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +31,15 @@ def fetch_json(url, token):
         'Authorization': 'Bearer ' + token,
         'Accept': 'application/json',
     })
-    return json.loads(urllib.request.urlopen(req, timeout=30).read().decode('utf-8', 'ignore'))
+    last_err = None
+    for attempt in range(3):  # runner 偶发 DNS 解析失败，重试跨过抖动
+        try:
+            return json.loads(urllib.request.urlopen(req, timeout=30).read().decode('utf-8', 'ignore'))
+        except urllib.error.URLError as e:
+            last_err = e
+            print(f'请求失败（第 {attempt + 1} 次）：{e}，稍后重试')
+            time.sleep(10)
+    raise last_err
 
 
 def pull_range(base, token, start, end):
