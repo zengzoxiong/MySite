@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 """每日同步 GoatCounter 访问统计到 data/goatcounter-stats.json。
 
-数据源：GoatCounter 官方 API v0（免费层可用），需要仓库 secret `GOATCOUNTER_TOKEN`
-（GoatCounter 后台 Settings → API → Generate new token），站点码
-`GOATCOUNTER_SITE`（如 zengzoxiong，对应 https://{site}.goatcounter.com）。
+数据源：GoatCounter 官方 API v0（免费层可用）。需要仓库 secret `GOATCOUNTER_TOKEN`
+（后台 Settings → API → Generate new token），站点码 `GOATCOUNTER_SITE`
+（如 zengzoxiong，对应 https://{site}.goatcounter.com——已实测该子域即 API base）。
 
-累计口径从 `GOATCOUNTER_START`（站点注册日，YYYY-MM-DD）起算；API 的 stat/range
-单次区间有限制，脚本按 90 天分段拉取再按日合并。产出：
-  { updated, site, total: {pv, visitors}, days: [{date, pv, visitors}, ...] }
+端点 /api/v0/stats/total 返回「按日访客数（visitors）」：GoatCounter 是隐私优先的
+UV 统计器，没有 PV 概念，全部口径为访客（UV）。累计口径从 `GOATCOUNTER_START`
+（站点注册日）起算；stat 区间单次有限制，按 90 天分段拉取再按日合并。产出：
+  { updated, site, total_visitors, days: [{date, visitors}, ...] }
 结果与上次字节一致时不写文件，工作流据此跳过提交。
 """
 import datetime as dt
@@ -22,7 +23,7 @@ import urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'data', 'goatcounter-stats.json')
 NOW = dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime('%Y-%m-%d')
-TODAY = dt.date.today()  # UTC（GoatCounter 按站点时区记账，差半天对趋势无影响）
+TODAY = dt.date.today()  # UTC；GoatCounter 按站点时区记账，差半天对趋势无影响
 
 
 def fetch_json(url, token):
@@ -42,13 +43,6 @@ def fetch_json(url, token):
     raise last_err
 
 
-def pull_range(base, token, start, end):
-    """拉一段区间（GoatCounter stat/range，day 值形如 'YYYY-MM-DD 00:00:00'）"""
-    url = (f'https://{base}/api/v0/stat/range'
-           f'?start={start.isoformat()}&end={end.isoformat()}')
-    return fetch_json(url, token)
-
-
 def main():
     token = os.environ.get('GOATCOUNTER_TOKEN')
     if not token:
@@ -64,11 +58,13 @@ def main():
         if cur > TODAY:
             break
         end = min(cur + dt.timedelta(days=89), TODAY)
-        stats = pull_range(base, token, cur, end).get('stats') or []
-        for row in stats:
+        url = (f'https://{base}.goatcounter.com/api/v0/stats/total'
+               f'?start={cur.isoformat()}T00:00&end={end.isoformat()}T23:00')
+        rows = fetch_json(url, token).get('stats') or []
+        for row in rows:
             day = (row.get('day') or '')[:10]
             if day:
-                days[day] = (row.get('pv') or 0, row.get('visitors') or 0)
+                days[day] = row.get('daily') or 0
         if end >= TODAY:
             break
         cur = end + dt.timedelta(days=1)
@@ -77,13 +73,12 @@ def main():
     if not days:
         raise SystemExit('未拉到任何统计数据，疑似 token/站点码有误')
 
-    ordered = [{'date': k, 'pv': v[0], 'visitors': v[1]} for k, v in sorted(days.items())]
+    ordered = [{'date': k, 'visitors': v} for k, v in sorted(days.items())]
     result = {
         'note': '数据看板「访问统计」，由 GitHub Actions 每日从 GoatCounter API 同步；勿手改。',
         'updated': NOW,
         'site': base + '.goatcounter.com',
-        'total': {'pv': sum(v[0] for v in days.values()),
-                  'visitors': sum(v[1] for v in days.values())},
+        'total_visitors': sum(days.values()),
         'days': ordered,
     }
     payload = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
@@ -96,7 +91,7 @@ def main():
     with open(tmp, 'w', encoding='utf-8') as f:
         f.write(payload)
     os.replace(tmp, out_path)
-    print(f'已写入 {out_path}：累计 PV {result["total"]["pv"]} / UV {result["total"]["visitors"]}（{len(ordered)} 天）')
+    print(f'已写入 {out_path}：累计访客 {result["total_visitors"]}（{len(ordered)} 天）')
 
 
 if __name__ == '__main__':

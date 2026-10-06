@@ -1404,7 +1404,7 @@ let statsData = null;
 let statsLoading = false;
 
 function renderStats(animate = false) {
-    setViewHead('访问统计', 'GoatCounter · 浏览/访客趋势 · 每日同步');
+    setViewHead('访问统计', 'GoatCounter · 访客（UV）趋势 · 每日同步');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1418,44 +1418,38 @@ function renderStats(animate = false) {
     const last30 = days.slice(-30);
     const last7 = days.slice(-7);
     const sum = (arr, k) => arr.reduce((s, d) => s + (d[k] || 0), 0);
-    const total = statsData.total || { pv: 0, visitors: 0 };
-    const pv30 = sum(last30, 'pv'), uv30 = sum(last30, 'visitors');
-    const pv7 = sum(last7, 'pv'), uv7 = sum(last7, 'visitors');
+    const totalUv = statsData.total_visitors || 0;
+    const uv30 = sum(last30, 'visitors');
+    const uv7 = sum(last7, 'visitors');
     const cards = `
         <div class="stats-cards">
-            <div class="stat-card"><span class="stat-num">${total.pv}</span><span class="stat-label">累计浏览（PV）</span></div>
-            <div class="stat-card"><span class="stat-num">${total.visitors}</span><span class="stat-label">累计访客（UV）</span></div>
-            <div class="stat-card"><span class="stat-num">${pv7}</span><span class="stat-label">近 7 天浏览</span></div>
+            <div class="stat-card"><span class="stat-num">${totalUv}</span><span class="stat-label">累计访客（UV）</span></div>
             <div class="stat-card"><span class="stat-num">${uv7}</span><span class="stat-label">近 7 天访客</span></div>
-            <div class="stat-card"><span class="stat-num">${pv30}</span><span class="stat-label">近 30 天浏览</span></div>
             <div class="stat-card"><span class="stat-num">${uv30}</span><span class="stat-label">近 30 天访客</span></div>
         </div>`;
     mediaGrid.innerHTML = `
         ${cards}
-        <div class="daily-sec" style="margin-top:20px">近 30 天趋势 · 蓝为浏览（PV）/ 绿为访客（UV）</div>
+        <div class="daily-sec" style="margin-top:20px">近 30 天访客（UV）趋势</div>
         ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}
         <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(statsData.updated || '—')} · 每日 03:47 同步 · IP/来源等访客明细在 GoatCounter 后台查看</div>`;
 }
 
-// 近 30 天双折线：720×160 SVG，y 轴按两组数据最大值自适应
+// 近 30 天访客单折线：720×160 SVG，y 轴按数据最大值自适应
 function statsChartHtml(days) {
     const w = 720, h = 160, pad = 10;
-    const maxV = Math.max(...days.map(d => Math.max(d.pv, d.visitors)), 1) * 1.15;
+    const maxV = Math.max(...days.map(d => d.visitors), 1) * 1.15;
     const step = (w - pad * 2) / (days.length - 1);
     const pt = (v, i) => `${(pad + i * step).toFixed(1)},${(h - pad - (v / maxV) * (h - pad * 2)).toFixed(1)}`;
-    const pvLine = days.map((d, i) => pt(d.pv, i)).join(' ');
     const uvLine = days.map((d, i) => pt(d.visitors, i)).join(' ');
-    const marks = days.map((d, i) =>
-        `<circle cx="${(pad + i * step).toFixed(1)}" cy="${(h - pad - (d.visitors / maxV) * (h - pad * 2)).toFixed(1)}" r="2.2" class="stats-dot-uv"/>`).join('');
+    const dots = days.map((d, i) =>
+        `<circle cx="${(pad + i * step).toFixed(1)}" cy="${(h - pad - (d.visitors / maxV) * (h - pad * 2)).toFixed(1)}" r="2.4"/>`).join('');
     return `
     <div class="stats-chart">
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天浏览与访客趋势折线图">
-            <polyline class="stats-line-pv" points="${pvLine}"/>
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天访客（UV）趋势折线图">
             <polyline class="stats-line-uv" points="${uvLine}"/>
-            ${marks}
+            ${dots}
         </svg>
         <div class="stats-legend">
-            <span><i class="lg lg-pv"></i>浏览 PV</span>
             <span><i class="lg lg-uv"></i>访客 UV</span>
             <span class="stats-x-axis">${escapeHtml(days[0].date.slice(5))} ~ ${escapeHtml(days[days.length - 1].date.slice(5))}</span>
         </div>
