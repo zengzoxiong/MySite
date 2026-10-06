@@ -82,7 +82,7 @@
       "title": "间谍过家家 第二季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.5,
+      "rating": 7.6,
       "comment": "克洛妮大作战+豪华客轮篇，约尔太太帅炸。",
       "cover": "assets/media/spy-x-family-s2.jpg",
       "url": "https://www.themoviedb.org/tv/120089/season/2",
@@ -146,7 +146,7 @@
       "comment": "神综艺巅峰，金条之战至今是名场面。",
       "cover": "assets/media/go-fighting-s2.jpg",
       "url": "https://www.themoviedb.org/tv/89620/season/2",
-      "release": "2016"
+      "release": "2016-04-17"
     },
     {
       "title": "极限挑战 第三季",
@@ -166,14 +166,14 @@
       "comment": "开始有剧本痕迹，但智囊团留下不少好梗。",
       "cover": "assets/media/go-fighting-s4.jpg",
       "url": "https://www.themoviedb.org/tv/89620/season/4",
-      "release": "2018"
+      "release": "2018-04-29"
     },
     {
       "title": "奔跑吧兄弟 第一季",
       "type": "综艺",
       "status": "看过",
-      "rating": 5.7,
-      "release": "2014",
+      "rating": 7.8,
+      "release": "2014-10-10",
       "comment": "跑男元年，邓超领衔的撕名牌狂欢。",
       "url": "https://www.themoviedb.org/tv/98031/season/1",
       "cover": "assets/media/running-man-s1.jpg"
@@ -182,8 +182,8 @@
       "title": "奔跑吧兄弟 第二季",
       "type": "综艺",
       "status": "看过",
-      "rating": 5.7,
-      "release": "2015",
+      "rating": 7.2,
+      "release": "2015-04-17",
       "comment": "阵容磨合成熟，名场面井喷的一季。",
       "url": "https://www.themoviedb.org/tv/98031/season/2",
       "cover": "assets/media/running-man-s2.jpg"
@@ -192,8 +192,8 @@
       "title": "奔跑吧兄弟 第三季",
       "type": "综艺",
       "status": "看过",
-      "rating": 5.7,
-      "release": "2015",
+      "rating": 7.0,
+      "release": "2015-10-30",
       "comment": "黄金阵容的收官季，综艺感拉满。",
       "url": "https://www.themoviedb.org/tv/98031/season/3",
       "cover": "assets/media/running-man-s3.jpg"
@@ -203,7 +203,7 @@
       "type": "综艺",
       "status": "看过",
       "rating": 7.3,
-      "release": "2013",
+      "release": "2013-10-11",
       "comment": "萌娃初代目，Kimi、Angela、石头的村居日常。",
       "url": "https://www.themoviedb.org/tv/67559/season/1",
       "cover": "assets/media/dad-s1.jpg"
@@ -213,7 +213,7 @@
       "type": "综艺",
       "status": "看过",
       "rating": 7.3,
-      "release": "2014",
+      "release": "2014-06-20",
       "comment": "姐姐Grace与哥哥Joe加盟，萌力升级。",
       "url": "https://www.themoviedb.org/tv/67559/season/2",
       "cover": "assets/media/dad-s2.jpg"
@@ -232,7 +232,7 @@
       "title": "魔法禁书目录 II",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 4.9,
       "comment": "罗马正教篇，禁书目录世界观进一步展开。",
       "cover": "assets/media/magic-index-2.jpg",
       "url": "https://www.themoviedb.org/tv/30980/season/2",
@@ -242,7 +242,7 @@
       "title": "魔法禁书目录 III",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 6.5,
       "comment": "世界观收束的最终章，节奏快到飞起。",
       "cover": "assets/media/magic-index-3.jpg",
       "url": "https://www.themoviedb.org/tv/30980/season/3",
@@ -252,11 +252,11 @@
       "title": "干物妹！小埋R",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 7.0,
       "comment": "在外面是女神，在家里是干物妹。",
       "cover": "assets/media/umaru-r.jpg",
       "url": "https://www.themoviedb.org/tv/67126/season/2",
-      "release": "2017-10-09"
+      "release": "2017-10-08"
     },
     {
       "title": "埃罗芒阿老师",
@@ -321,7 +321,7 @@
       "title": "刀剑神域 Alicization篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 7.7,
       "comment": "Underworld篇开端，世界观彻底放大。",
       "cover": "assets/media/sao-alicization.jpg",
       "url": "https://www.themoviedb.org/tv/45782/season/3",
@@ -331,7 +331,7 @@
       "title": "刀剑神域 异界战争篇（上）",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 8.0,
       "comment": "爱丽丝篇后半，A神G座战斗燃爆。",
       "cover": "assets/media/sao-wou-1.jpg",
       "url": "https://www.themoviedb.org/tv/45782/season/4",
@@ -341,11 +341,11 @@
       "title": "刀剑神域 异界战争篇（下）",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 8.0,
       "comment": "最终决战，桐人觉醒名场面。",
       "cover": "assets/media/sao-wou-2.jpg",
       "url": "https://www.themoviedb.org/tv/45782/season/4",
-      "release": "2020-07-12"
+      "release": "2019-10-13"
     },
     {
       "title": "我的妹妹哪有这么可爱",
@@ -451,7 +451,7 @@
       "title": "伍六七之最强发型师",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 9.3,
       "comment": "梅花十三登场，笑点与刀子齐飞。",
       "cover": "assets/media/scissor-seven-2.jpg",
       "url": "https://www.themoviedb.org/tv/79141/season/2",
@@ -461,7 +461,7 @@
       "title": "伍六七之玄武国篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.7,
       "comment": "玄武国冒险，国产动画电影级演出。",
       "cover": "assets/media/scissor-seven-3.png",
       "url": "https://www.themoviedb.org/tv/79141/season/3",
@@ -471,7 +471,7 @@
       "title": "伍六七之暗影宿命",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.0,
       "comment": "暗影刺客的宿命逐渐揭开。",
       "cover": "assets/media/scissor-seven-4.png",
       "url": "https://www.themoviedb.org/tv/79141/season/4",
@@ -481,7 +481,7 @@
       "title": "伍六七之记忆碎片",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 6.4,
       "comment": "记忆碎片拼回真相，期待下一季。",
       "cover": "assets/media/scissor-seven-5.png",
       "url": "https://www.themoviedb.org/tv/79141/season/5",
@@ -511,7 +511,7 @@
       "title": "请问您今天要来点兔子吗？？",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.3,
+      "rating": 7.2,
       "comment": "还是那个可爱的咖啡屋，智乃长大了。",
       "cover": "assets/media/gochiusa-2.jpg",
       "url": "https://www.themoviedb.org/tv/60843/season/2",
@@ -662,8 +662,8 @@
       "type": "番剧",
       "status": "看过",
       "comment": "无声世界的少女物语，实验性叙事封神。",
-      "rating": 6.1,
-      "release": "2018",
+      "rating": 10.0,
+      "release": "2018-04-14",
       "url": "https://www.themoviedb.org/tv/68135/season/2",
       "cover": "assets/media/to-be-hero-leaf.jpg"
     },
@@ -711,7 +711,7 @@
       "title": "灵能百分百 第三季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.5,
+      "rating": 8.2,
       "release": "2022-10-06",
       "comment": "毕业与告别，最温柔的最终季。",
       "cover": "assets/media/mob-s3.jpg",
@@ -774,7 +774,7 @@
       "url": "https://www.themoviedb.org/tv/100049/season/2",
       "release": "2023-04-08",
       "cover": "assets/media/tonikawa-s2.png",
-      "rating": 8.5,
+      "rating": 7.1,
       "comment": "把婚后日常拍得不腻，靠的全是细节里的温柔。"
     },
     {
@@ -830,9 +830,9 @@
       "type": "番剧",
       "status": "看过",
       "url": "https://www.themoviedb.org/tv/94664/season/2",
-      "release": "2023-07-03",
+      "release": "2023-07-10",
       "cover": "assets/media/mushoku-s2.png",
-      "rating": 8.4,
+      "rating": 4.1,
       "comment": "鲁迪的成长在异世界番里少见的诚实，镜头语言依旧是天花板。"
     },
     {
@@ -852,7 +852,7 @@
       "url": "https://www.themoviedb.org/tv/45782/season/2",
       "release": "2014-07-05",
       "cover": "assets/media/sao-s2.jpg",
-      "rating": 8.1,
+      "rating": 6.8,
       "comment": "妖精之翼展开的时候，还是得承认这段最好看。"
     },
     {
@@ -888,8 +888,8 @@
       "title": "工作细胞 第二季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
-      "release": "2021-01-08",
+      "rating": 7.3,
+      "release": "2021-01-10",
       "url": "https://www.themoviedb.org/tv/80671/season/2",
       "cover": "assets/media/cells-at-work-s2.jpg",
       "comment": "37万亿打工人返岗续更，身体的日常又热闹起来。"
@@ -928,8 +928,8 @@
       "title": "想要成为影之实力者 第二季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
-      "release": "2023-10",
+      "rating": 7.3,
+      "release": "2023-10-04",
       "url": "https://www.themoviedb.org/tv/119495/season/2",
       "cover": "assets/media/eminence-s2.jpg",
       "comment": "外壳一直在玩梗，中段突然给了一段认真的过去，反差措手不及。"
@@ -1038,7 +1038,7 @@
       "title": "飞驰人生3",
       "type": "电影",
       "status": "看过",
-      "rating": 7.1,
+      "rating": 7.0,
       "release": "2026-02-17",
       "url": "https://www.themoviedb.org/movie/1462229",
       "cover": "assets/media/pegasus-3.jpg",
@@ -1248,7 +1248,7 @@
       "title": "全职高手之巅峰荣耀",
       "type": "电影",
       "status": "看过",
-      "rating": 6.4,
+      "rating": 6.5,
       "release": "2019-08-16",
       "url": "https://www.themoviedb.org/movie/613200",
       "cover": "assets/media/kings-avatar-movie.jpg",
@@ -1438,7 +1438,7 @@
       "release": "2023-01-07",
       "cover": "assets/media/oto-ninja-tenshi-s1.png",
       "url": "https://www.themoviedb.org/tv/154743/season/1",
-      "rating": 7.7,
+      "rating": 7.3,
       "comment": "椎名真昼的温柔带着点入侵性，看两人把距离一寸寸挪近。"
     },
     {
@@ -1448,7 +1448,8 @@
       "release": "2026-04-03",
       "cover": "assets/media/oto-ninja-tenshi-s2.jpg",
       "url": "https://www.themoviedb.org/tv/154743/season/2",
-      "comment": "藤宫周与椎名真昼的续篇，2026 年新番。"
+      "comment": "藤宫周与椎名真昼的续篇，2026 年新番。",
+      "rating": 6.1
     },
     {
       "title": "赛博朋克：边缘行者",
@@ -1474,7 +1475,7 @@
       "status": "想看",
       "url": "https://www.themoviedb.org/tv/94605/season/1",
       "rating": 8.7,
-      "release": "2021",
+      "release": "2021-11-06",
       "comment": "蔚与爆爆，皮尔特沃夫与祖安的姐妹宿命。",
       "cover": "assets/media/arcane-s1.jpg"
     },
@@ -1483,8 +1484,8 @@
       "type": "番剧",
       "status": "想看",
       "url": "https://www.themoviedb.org/tv/94605/season/2",
-      "rating": 8.7,
-      "release": "2024",
+      "rating": 8.0,
+      "release": "2024-11-09",
       "comment": "终章落幕，两姐妹的故事画上句点。",
       "cover": "assets/media/arcane-s2.jpg"
     },
@@ -1662,7 +1663,7 @@
       "title": "宝可梦 超级愿望",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 4.9,
       "release": "2010-09-23",
       "url": "https://www.themoviedb.org/tv/60572/season/14",
       "cover": "assets/media/pokemon-best-wishes.jpg",
@@ -1672,7 +1673,7 @@
       "title": "宝可梦 XY",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 7.2,
       "release": "2013-10-17",
       "url": "https://www.themoviedb.org/tv/60572/season/17",
       "cover": "assets/media/pokemon-xy.png",
@@ -1682,7 +1683,7 @@
       "title": "宝可梦 太阳&月亮",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 7.3,
       "release": "2016-11-17",
       "url": "https://www.themoviedb.org/tv/60572/season/20",
       "cover": "assets/media/pokemon-sun-moon.png",
@@ -1721,7 +1722,7 @@
       "title": "一拳超人 第一季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 8.4,
       "release": "2015-10-05",
       "url": "https://www.themoviedb.org/tv/63926/season/1",
       "cover": "assets/media/one-punch-s1.jpg"
@@ -1730,7 +1731,7 @@
       "title": "一拳超人 第二季",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.4,
+      "rating": 7.7,
       "release": "2019-04-10",
       "url": "https://www.themoviedb.org/tv/63926/season/2",
       "cover": "assets/media/one-punch-s2.png"
