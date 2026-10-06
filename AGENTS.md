@@ -214,7 +214,7 @@ MySite/
 
 ## 定时任务（GitHub Actions）
 
-- `sync-tmdb.yml`：每日 02:15（北京，深夜低峰）刷新 media.json 的 TMDB 评分/上映时间，有变化才提交
+- `sync-tmdb.yml`：每日 02:15（北京，深夜低峰）走 **TMDB 官方 API** 刷新 media.json 的评分/上映时间，有变化才提交。**依赖仓库 secret `TMDB_API_KEY`**（TMDB 设置→API→API Key (v3)，免费申请；TMDB 网页 2026-10 起对匿名抓取全面 403，网页解析版已作废）。分季条目（/season/N）API 直接返回 vote_average + air_date，此前手填的 AniList 分数会被归位 TMDB 口径
 - `sync-stars.yml`：每日 02:30（北京，深夜低峰）同步 GitHub Stars 到 stars.json
 - `sync-explore.yml`：每日 02:45（北京，深夜低峰）同步网易云飙升榜到 data/explore.json（播放器探索模式用）
 - `check-links.yml`：北京时间每周二 03:45（UTC 周一 19:45）体检网站收藏死链到 data/link-health.json（详见「网站收藏」小节），有变化才提交

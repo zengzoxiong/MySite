@@ -25,6 +25,8 @@ jobs:
 
       - name: 拉取 TMDB 评分并更新 media.json
         run: python scripts/sync_tmdb.py
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }} # TMDB 网页 403 后改走官方 API，key 免费申请
 
       - name: 有变化时提交
         run: |
