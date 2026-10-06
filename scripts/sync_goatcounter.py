@@ -19,6 +19,7 @@ import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -73,8 +74,12 @@ def main():
         if cur > TODAY:
             break
         end = min(cur + dt.timedelta(days=89), TODAY)
-        url = (f'https://{base}.goatcounter.com/api/v0/stats/total'
-               f'?start={cur.isoformat()}T00:00&end={end.isoformat()}T23:00')
+        # start/end 需 RFC3339（Go time.Time），formam 只认标准格式；时区按站点（UTC+8）
+        qs = urllib.parse.urlencode({
+            'start': f'{cur.isoformat()}T00:00:00+08:00',
+            'end': f'{end.isoformat()}T23:00:00+08:00',
+        })
+        url = f'https://{base}.goatcounter.com/api/v0/stats/total?{qs}'
         rows = fetch_json(url, token).get('stats') or []
         for row in rows:
             day = (row.get('day') or '')[:10]
