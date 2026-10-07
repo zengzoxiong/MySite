@@ -1602,11 +1602,16 @@ function tuSmoothPath(pts) {
 }
 
 // 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top6 各一线 + 其余合并；
-// 容器实际宽度渲染后测量（tuPaintTrend），避免 viewBox 拉伸把文字扯变形
+// 时间范围按日历窗口截取（近 7 天=末记录日往前 7 个日历日），窗口内无记录日补 0 保持时间轴连续
 function tuTrendLines(days) {
     const fd = tuFilteredDays(days);
-    const range = tuRangeDays > 0 ? fd.slice(-tuRangeDays) : fd;
-    if (range.length < 2) return null;
+    if (!fd.length) return null;
+    const endD = new Date(fd[fd.length - 1].date + 'T00:00:00');
+    let startD = new Date(fd[0].date + 'T00:00:00');
+    if (tuRangeDays > 0) {
+        startD = new Date(endD);
+        startD.setDate(startD.getDate() - (tuRangeDays - 1));
+    }
     const byDate = {};
     days.forEach(d => {
         const sums = {};
@@ -1615,18 +1620,58 @@ function tuTrendLines(days) {
         });
         byDate[d.date] = sums;
     });
+    const dates = [];
+    for (let t = new Date(startD); t <= endD; t.setDate(t.getDate() + 1)) {
+        dates.push(t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'));
+    }
+    if (dates.length < 2) return null;
     let lines;
     if (tuCurrentModel) {
-        lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: range.map(d => byDate[d.date][tuCurrentModel] || 0) }];
+        lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: dates.map(k => (byDate[k] || {})[tuCurrentModel] || 0) }];
     } else {
         const top = tuModelList(days).slice(0, 6).map(m => m.id);
         const topSet = new Set(top);
-        lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: range.map(d => byDate[d.date][id] || 0) }));
-        const others = range.map(d => Object.entries(byDate[d.date])
+        lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: dates.map(k => (byDate[k] || {})[id] || 0) }));
+        const others = dates.map(k => Object.entries(byDate[k] || {})
             .reduce((s, [id, v]) => s + (topSet.has(id) ? 0 : v), 0));
         if (others.some(v => v > 0)) lines.push({ id: '其他', cls: 'tu-c-other', values: others });
     }
-    return { dates: range.map(d => d.date), lines: lines };
+    return { dates: dates, lines: lines };
+}
+
+// 右栏「模型用量」环形图 + 图例：数据与趋势线同源（随时间范围/模型筛选联动）。
+// 注意 .tu-dl-seg 的 fill:none 必须定义在 .tu-c0 系列之后（同特异性靠后覆盖，否则圆环被填成实心）
+function tuDonutHtml(lines) {
+    if (!lines || !lines.length) return '';
+    const totals = lines.map(l => l.values.reduce((s, v) => s + v, 0));
+    const sum = totals.reduce((s, v) => s + v, 0);
+    if (sum <= 0) return '';
+    const R = 67, C = 2 * Math.PI * R;
+    let offset = 0;
+    const segs = lines.map((l, i) => {
+        const frac = totals[i] / sum;
+        const seg = `<circle class="tu-dl-seg ${l.cls}" cx="100" cy="100" r="${R}" stroke-width="22"` +
+            ` stroke-dasharray="${(frac * C).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}">` +
+            `<title>${escapeHtml(l.id)} · ${tuShort(totals[i])}（${(frac * 100).toFixed(1)}%）</title></circle>`;
+        offset += frac * C;
+        return seg;
+    }).join('');
+    const rows = lines.map((l, i) => `
+        <div class="tu-dl-row">
+            <i class="lg ${l.cls}"></i>
+            <div class="tu-dl-name"><b>${escapeHtml(l.id)}</b><span>${tuShort(totals[i])} tokens</span></div>
+            <span class="tu-dl-pct">${(totals[i] / sum * 100).toFixed(1)}%</span>
+        </div>`).join('');
+    return `
+        <div class="tu-dl-title">模型用量</div>
+        <div class="tu-dl-flex">
+            <svg viewBox="0 0 200 200" width="180" height="180" role="img" aria-label="各模型 Token 用量占比环形图">
+                <g transform="rotate(-90 100 100)">${segs}</g>
+                <text class="tu-dl-center" x="100" y="94" text-anchor="middle">${tuShort(sum)}</text>
+                <text class="tu-dl-sub" x="100" y="118" text-anchor="middle">tokens</text>
+            </svg>
+            <div class="tu-dl-list">${rows}</div>
+        </div>`;
 }
 
 function tuPaintTrend() {
@@ -1727,7 +1772,10 @@ function renderTokenUsage(animate = false) {
             <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
                 `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
         </div>
-        <div class="stats-chart tu-trend-wrap"><div id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div></div>
+        <div class="stats-chart tu-trend-flex">
+            <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
+            <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
+        </div>
         ${rows.length ? `
         <div class="media-count" style="margin:14px 0 8px">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
         <div class="tu-table-wrap">

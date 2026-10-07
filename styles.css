@@ -4429,6 +4429,22 @@ body.no-anim .mp-lyric > div {
     vertical-align: -1px;
 }
 .tu-trend-wrap { position: relative; }
+/* 趋势区左右布局：左趋势图、右模型用量环形图；窄屏自动换行堆叠 */
+.tu-trend-flex { display: flex; align-items: stretch; gap: 30px; flex-wrap: wrap; }
+.tu-trend-left { flex: 1; min-width: 0; position: relative; }
+.tu-trend-right { width: 350px; flex: none; }
+.tu-dl-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; }
+.tu-dl-flex { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.tu-dl-seg { fill: none; stroke-linecap: butt; }
+.tu-dl-center { font-size: 26px; font-weight: 700; fill: var(--text-primary); }
+.tu-dl-sub { font-size: 13px; fill: var(--text-tertiary); }
+.tu-dl-list { flex: 1; min-width: 200px; display: grid; gap: 10px; align-content: center; }
+.tu-dl-row { display: flex; align-items: center; gap: 8px; }
+.tu-dl-row .lg { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.tu-dl-name { flex: 1; display: grid; line-height: 1.35; }
+.tu-dl-name b { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+.tu-dl-name span { font-size: 0.75rem; color: var(--text-tertiary); }
+.tu-dl-pct { font-size: 0.8rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .tu-tip {
     position: absolute;
     top: 8px;
