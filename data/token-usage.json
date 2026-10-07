@@ -1,5 +1,1229 @@
 {
-  "updated": "",
-  "note": "API 用量日志离线导入生成。结构：days[].date 日期升序；models[].id 模型名，inCache 输入（缓存命中），inFresh 输入（未命中缓存），out 输出，total 总计（可省略，前端按三项求和兜底）",
-  "days": []
+  "updated": "2026-10-06",
+  "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的四套来源合并：ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后有导入脚本按同结构追加。勿手改。",
+  "sources": [
+    "ZCode_Token用量_按天汇总.csv",
+    "CCSwitch_API用量_按天.csv",
+    "amount-*.csv（deepseek 系平台）",
+    "usage_data_*.xlsx（mimo 系平台）"
+  ],
+  "days": [
+    {
+      "date": "2026-06-12",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 22144,
+          "inFresh": 195716,
+          "out": 1518,
+          "total": 219378
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 46528,
+          "inFresh": 46076,
+          "out": 1369,
+          "total": 93973
+        },
+        {
+          "id": "qwen3.7-plus",
+          "inCache": 45091,
+          "inFresh": 46658,
+          "out": 1073,
+          "total": 92822
+        },
+        {
+          "id": "glm-5.1",
+          "inCache": 41024,
+          "inFresh": 2325,
+          "out": 67,
+          "total": 43416
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 0,
+          "inFresh": 22886,
+          "out": 487,
+          "total": 23373
+        },
+        {
+          "id": "qwen3.7-max",
+          "inCache": 0,
+          "inFresh": 22617,
+          "out": 55,
+          "total": 22672
+        },
+        {
+          "id": "glm-4.7",
+          "inCache": 19456,
+          "inFresh": 2432,
+          "out": 346,
+          "total": 22234
+        }
+      ]
+    },
+    {
+      "date": "2026-06-13",
+      "models": [
+        {
+          "id": "qwen3.7-plus",
+          "inCache": 90667,
+          "inFresh": 137572,
+          "out": 2129,
+          "total": 230368
+        }
+      ]
+    },
+    {
+      "date": "2026-06-14",
+      "models": [
+        {
+          "id": "mimo-v2-flash",
+          "inCache": 2923157,
+          "inFresh": 87006,
+          "out": 9945,
+          "total": 3020108
+        },
+        {
+          "id": "qwen3.7-plus",
+          "inCache": 240307,
+          "inFresh": 171721,
+          "out": 3352,
+          "total": 415380
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 242432,
+          "inFresh": 51059,
+          "out": 3459,
+          "total": 296950
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 68224,
+          "inFresh": 46608,
+          "out": 10118,
+          "total": 124950
+        },
+        {
+          "id": "mimo-v2.5",
+          "inCache": 0,
+          "inFresh": 22313,
+          "out": 479,
+          "total": 22792
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 824,
+          "out": 802,
+          "total": 1626
+        }
+      ]
+    },
+    {
+      "date": "2026-06-16",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 20813952,
+          "inFresh": 809357,
+          "out": 132010,
+          "total": 21755319
+        },
+        {
+          "id": "mimo-v2-flash",
+          "inCache": 90281,
+          "inFresh": 17856,
+          "out": 2850,
+          "total": 110987
+        }
+      ]
+    },
+    {
+      "date": "2026-06-17",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 2688576,
+          "inFresh": 167769,
+          "out": 10298,
+          "total": 2866643
+        }
+      ]
+    },
+    {
+      "date": "2026-06-18",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 28092992,
+          "inFresh": 798086,
+          "out": 74157,
+          "total": 28965235
+        },
+        {
+          "id": "glm-4.7",
+          "inCache": 742528,
+          "inFresh": 39122,
+          "out": 6353,
+          "total": 788003
+        },
+        {
+          "id": "qwen3.7-plus",
+          "inCache": 0,
+          "inFresh": 49728,
+          "out": 16,
+          "total": 49744
+        }
+      ]
+    },
+    {
+      "date": "2026-06-19",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 176562432,
+          "inFresh": 2635841,
+          "out": 638610,
+          "total": 179836883
+        }
+      ]
+    },
+    {
+      "date": "2026-06-20",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 81008640,
+          "inFresh": 758512,
+          "out": 152381,
+          "total": 81919533
+        }
+      ]
+    },
+    {
+      "date": "2026-06-21",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 403427520,
+          "inFresh": 1182621,
+          "out": 246191,
+          "total": 404856332
+        }
+      ]
+    },
+    {
+      "date": "2026-06-22",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 3615488,
+          "inFresh": 318910,
+          "out": 15821,
+          "total": 3950219
+        }
+      ]
+    },
+    {
+      "date": "2026-06-23",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 35327680,
+          "inFresh": 1912763,
+          "out": 35785,
+          "total": 37276228
+        }
+      ]
+    },
+    {
+      "date": "2026-06-26",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 5297536,
+          "inFresh": 396776,
+          "out": 47479,
+          "total": 5741791
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 2412672,
+          "inFresh": 92637,
+          "out": 13975,
+          "total": 2519284
+        }
+      ]
+    },
+    {
+      "date": "2026-06-28",
+      "models": [
+        {
+          "id": "glm-4.7",
+          "inCache": 865280,
+          "inFresh": 100859,
+          "out": 3610,
+          "total": 969749
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 0,
+          "inFresh": 53633,
+          "out": 66,
+          "total": 53699
+        }
+      ]
+    },
+    {
+      "date": "2026-06-29",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 90585280,
+          "inFresh": 1790517,
+          "out": 122965,
+          "total": 92498762
+        },
+        {
+          "id": "glm-4.7",
+          "inCache": 3165696,
+          "inFresh": 209927,
+          "out": 15201,
+          "total": 3390824
+        },
+        {
+          "id": "glm-4.5-air",
+          "inCache": 200410,
+          "inFresh": 68114,
+          "out": 949,
+          "total": 269473
+        },
+        {
+          "id": "mimo-v2-flash",
+          "inCache": 640,
+          "inFresh": 532,
+          "out": 113,
+          "total": 1285
+        }
+      ]
+    },
+    {
+      "date": "2026-06-30",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 47318464,
+          "inFresh": 531103,
+          "out": 99801,
+          "total": 47949368
+        }
+      ]
+    },
+    {
+      "date": "2026-07-01",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 290816,
+          "inFresh": 49475,
+          "out": 1926,
+          "total": 342217
+        }
+      ]
+    },
+    {
+      "date": "2026-07-02",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 47682304,
+          "inFresh": 528997,
+          "out": 90143,
+          "total": 48301444
+        }
+      ]
+    },
+    {
+      "date": "2026-07-03",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 2759744,
+          "inFresh": 590571,
+          "out": 16668,
+          "total": 3366983
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 19200,
+          "inFresh": 20925,
+          "out": 6210,
+          "total": 46335
+        }
+      ]
+    },
+    {
+      "date": "2026-07-04",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 384,
+          "inFresh": 226,
+          "out": 20,
+          "total": 630
+        }
+      ]
+    },
+    {
+      "date": "2026-07-05",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 46947584,
+          "inFresh": 1263591,
+          "out": 108478,
+          "total": 48319653
+        }
+      ]
+    },
+    {
+      "date": "2026-07-06",
+      "models": [
+        {
+          "id": "glm-4.5-air",
+          "inCache": 7617059,
+          "inFresh": 484855,
+          "out": 27279,
+          "total": 8129193
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 2110272,
+          "inFresh": 79821,
+          "out": 20410,
+          "total": 2210503
+        },
+        {
+          "id": "glm-4.7",
+          "inCache": 1862400,
+          "inFresh": 87450,
+          "out": 3348,
+          "total": 1953198
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 896,
+          "inFresh": 4926,
+          "out": 652,
+          "total": 6474
+        }
+      ]
+    },
+    {
+      "date": "2026-07-07",
+      "models": [
+        {
+          "id": "glm-4.5-air",
+          "inCache": 3628902,
+          "inFresh": 310323,
+          "out": 7627,
+          "total": 3946852
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 1021696,
+          "inFresh": 250148,
+          "out": 2747,
+          "total": 1274591
+        },
+        {
+          "id": "mimo-v2.5",
+          "inCache": 885248,
+          "inFresh": 191467,
+          "out": 5371,
+          "total": 1082086
+        }
+      ]
+    },
+    {
+      "date": "2026-07-10",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 35860544,
+          "inFresh": 2243286,
+          "out": 246099,
+          "total": 38349929
+        },
+        {
+          "id": "glm-4.5-air",
+          "inCache": 1656816,
+          "inFresh": 94290,
+          "out": 5619,
+          "total": 1756725
+        }
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "models": [
+        {
+          "id": "glm-4.5-air",
+          "inCache": 1675835,
+          "inFresh": 126159,
+          "out": 8528,
+          "total": 1810522
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 96256,
+          "inFresh": 49413,
+          "out": 474,
+          "total": 146143
+        },
+        {
+          "id": "mimo-v2.5",
+          "inCache": 55552,
+          "inFresh": 55134,
+          "out": 724,
+          "total": 111410
+        }
+      ]
+    },
+    {
+      "date": "2026-07-12",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 5965056,
+          "inFresh": 538478,
+          "out": 17584,
+          "total": 6521118
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 43008,
+          "inFresh": 40551,
+          "out": 13427,
+          "total": 96986
+        }
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "models": [
+        {
+          "id": "mimo-v2.5",
+          "inCache": 1427776,
+          "inFresh": 122024,
+          "out": 8921,
+          "total": 1558721
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 640,
+          "inFresh": 342,
+          "out": 124,
+          "total": 1106
+        }
+      ]
+    },
+    {
+      "date": "2026-07-17",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 335872,
+          "inFresh": 86651,
+          "out": 2590,
+          "total": 425113
+        }
+      ]
+    },
+    {
+      "date": "2026-07-18",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 7006272,
+          "inFresh": 333878,
+          "out": 35325,
+          "total": 7375475
+        }
+      ]
+    },
+    {
+      "date": "2026-07-23",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 32642176,
+          "inFresh": 1745224,
+          "out": 159450,
+          "total": 34546850
+        }
+      ]
+    },
+    {
+      "date": "2026-07-24",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 84514624,
+          "inFresh": 1982142,
+          "out": 127714,
+          "total": 86624480
+        },
+        {
+          "id": "mimo-v2.5",
+          "inCache": 126976,
+          "inFresh": 50644,
+          "out": 1330,
+          "total": 178950
+        }
+      ]
+    },
+    {
+      "date": "2026-07-25",
+      "models": [
+        {
+          "id": "glm-4.6v",
+          "inCache": 1103688,
+          "inFresh": 288216,
+          "out": 4912,
+          "total": 1396816
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 512,
+          "inFresh": 323928,
+          "out": 67,
+          "total": 324507
+        }
+      ]
+    },
+    {
+      "date": "2026-07-26",
+      "models": [
+        {
+          "id": "glm-4.5-air",
+          "inCache": 3001270,
+          "inFresh": 86757,
+          "out": 6288,
+          "total": 3094315
+        }
+      ]
+    },
+    {
+      "date": "2026-07-27",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 29826176,
+          "inFresh": 275768,
+          "out": 112503,
+          "total": 30214447
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 8752640,
+          "inFresh": 138322,
+          "out": 7224,
+          "total": 8898186
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 900,
+          "out": 700,
+          "total": 1600
+        }
+      ]
+    },
+    {
+      "date": "2026-07-31",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 15399936,
+          "inFresh": 318488,
+          "out": 27940,
+          "total": 15746364
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 9181824,
+          "inFresh": 441868,
+          "out": 41239,
+          "total": 9664931
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 4733888,
+          "inFresh": 700234,
+          "out": 14554,
+          "total": 5448676
+        }
+      ]
+    },
+    {
+      "date": "2026-08-01",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 43160576,
+          "inFresh": 346893,
+          "out": 101522,
+          "total": 43608991
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 872,
+          "out": 305,
+          "total": 1177
+        }
+      ]
+    },
+    {
+      "date": "2026-08-03",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 1396480,
+          "inFresh": 120004,
+          "out": 6648,
+          "total": 1523132
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 482,
+          "out": 182,
+          "total": 664
+        }
+      ]
+    },
+    {
+      "date": "2026-08-04",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 337536,
+          "inFresh": 102909,
+          "out": 3903,
+          "total": 444348
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 870,
+          "out": 325,
+          "total": 1195
+        }
+      ]
+    },
+    {
+      "date": "2026-08-19",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 30223168,
+          "inFresh": 450825,
+          "out": 26019,
+          "total": 30700012
+        }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 1950976,
+          "inFresh": 424440,
+          "out": 5588,
+          "total": 2381004
+        }
+      ]
+    },
+    {
+      "date": "2026-08-21",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 41791104,
+          "inFresh": 550077,
+          "out": 185375,
+          "total": 42526556
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 35637824,
+          "inFresh": 1008603,
+          "out": 81278,
+          "total": 36727705
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 0,
+          "inFresh": 1888,
+          "out": 4350,
+          "total": 6238
+        }
+      ]
+    },
+    {
+      "date": "2026-08-23",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 56884864,
+          "inFresh": 945214,
+          "out": 84832,
+          "total": 57914910
+        }
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 18907136,
+          "inFresh": 1117739,
+          "out": 33589,
+          "total": 20058464
+        }
+      ]
+    },
+    {
+      "date": "2026-08-26",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 1365888,
+          "inFresh": 86160,
+          "out": 694,
+          "total": 1452742
+        }
+      ]
+    },
+    {
+      "date": "2026-08-27",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 22711616,
+          "inFresh": 476287,
+          "out": 113810,
+          "total": 23301713
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 2407424,
+          "inFresh": 796221,
+          "out": 711,
+          "total": 3204356
+        }
+      ]
+    },
+    {
+      "date": "2026-08-30",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 11801664,
+          "inFresh": 630356,
+          "out": 40465,
+          "total": 12472485
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 6849664,
+          "inFresh": 505790,
+          "out": 33370,
+          "total": 7388824
+        }
+      ]
+    },
+    {
+      "date": "2026-08-31",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 3360896,
+          "inFresh": 303010,
+          "out": 7087,
+          "total": 3670993
+        }
+      ]
+    },
+    {
+      "date": "2026-09-01",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 0,
+          "inFresh": 54660,
+          "out": 2639,
+          "total": 57299
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 0,
+          "inFresh": 1652,
+          "out": 2282,
+          "total": 3934
+        }
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "inCache": 5927936,
+          "inFresh": 91796,
+          "out": 38352,
+          "total": 6058084
+        },
+        {
+          "id": "deepseek-v4-pro",
+          "inCache": 0,
+          "inFresh": 1670,
+          "out": 475,
+          "total": 2145
+        }
+      ]
+    },
+    {
+      "date": "2026-09-06",
+      "models": [
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 9730496,
+          "inFresh": 842088,
+          "out": 10401,
+          "total": 10582985
+        }
+      ]
+    },
+    {
+      "date": "2026-09-13",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 11197440,
+          "inFresh": 320777,
+          "out": 126859,
+          "total": 11645076
+        }
+      ]
+    },
+    {
+      "date": "2026-09-14",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 138051136,
+          "inFresh": 2967604,
+          "out": 633028,
+          "total": 141651768
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 0,
+          "inFresh": 116220,
+          "out": 98,
+          "total": 116318
+        }
+      ]
+    },
+    {
+      "date": "2026-09-15",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 71628544,
+          "inFresh": 1383213,
+          "out": 200803,
+          "total": 73212560
+        },
+        {
+          "id": "GLM-5.3",
+          "inCache": 2603904,
+          "inFresh": 442711,
+          "out": 14597,
+          "total": 3061212
+        }
+      ]
+    },
+    {
+      "date": "2026-09-16",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 83207104,
+          "inFresh": 1804916,
+          "out": 153000,
+          "total": 85165020
+        },
+        {
+          "id": "GLM-5.3",
+          "inCache": 1501440,
+          "inFresh": 363489,
+          "out": 854,
+          "total": 1865783
+        }
+      ]
+    },
+    {
+      "date": "2026-09-17",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 34345152,
+          "inFresh": 2031245,
+          "out": 67582,
+          "total": 36443979
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 2877056,
+          "inFresh": 95336,
+          "out": 5671,
+          "total": 2978063
+        }
+      ]
+    },
+    {
+      "date": "2026-09-18",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 16528960,
+          "inFresh": 892946,
+          "out": 21402,
+          "total": 17443308
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 4026752,
+          "inFresh": 540523,
+          "out": 122533,
+          "total": 4689808
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "inCache": 786560,
+          "inFresh": 109833,
+          "out": 4068,
+          "total": 900461
+        },
+        {
+          "id": "GLM-5.3",
+          "inCache": 284288,
+          "inFresh": 83096,
+          "out": 3080,
+          "total": 370464
+        }
+      ]
+    },
+    {
+      "date": "2026-09-19",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 237126272,
+          "inFresh": 3396802,
+          "out": 212652,
+          "total": 240735726
+        }
+      ]
+    },
+    {
+      "date": "2026-09-20",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 9677440,
+          "inFresh": 890599,
+          "out": 6378,
+          "total": 10574417
+        }
+      ]
+    },
+    {
+      "date": "2026-09-26",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 13271360,
+          "inFresh": 1753017,
+          "out": 8144,
+          "total": 15032521
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 2816,
+          "inFresh": 4069,
+          "out": 748,
+          "total": 7633
+        }
+      ]
+    },
+    {
+      "date": "2026-09-27",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 230633408,
+          "inFresh": 4610918,
+          "out": 912293,
+          "total": 236156619
+        },
+        {
+          "id": "mimo-v2.6-flash",
+          "inCache": 20480,
+          "inFresh": 39780,
+          "out": 108,
+          "total": 60368
+        }
+      ]
+    },
+    {
+      "date": "2026-09-28",
+      "models": [
+        {
+          "id": "mimo-v2.6-pro",
+          "inCache": 176162688,
+          "inFresh": 2554406,
+          "out": 821171,
+          "total": 179538265
+        },
+        {
+          "id": "mimo-v2.6-flash",
+          "inCache": 316544,
+          "inFresh": 13902,
+          "out": 12386,
+          "total": 342832
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 0,
+          "inFresh": 393,
+          "out": 72,
+          "total": 465
+        }
+      ]
+    },
+    {
+      "date": "2026-09-30",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 36047936,
+          "inFresh": 1028638,
+          "out": 168732,
+          "total": 37245306
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 2087424,
+          "inFresh": 51792,
+          "out": 31774,
+          "total": 2170990
+        }
+      ]
+    },
+    {
+      "date": "2026-10-01",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 47165824,
+          "inFresh": 1567737,
+          "out": 160930,
+          "total": 48894491
+        }
+      ]
+    },
+    {
+      "date": "2026-10-02",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 17005952,
+          "inFresh": 979692,
+          "out": 27849,
+          "total": 18013493
+        }
+      ]
+    },
+    {
+      "date": "2026-10-03",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 5132352,
+          "inFresh": 930397,
+          "out": 11140,
+          "total": 6073889
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 972288,
+          "inFresh": 59365,
+          "out": 15431,
+          "total": 1047084
+        }
+      ]
+    },
+    {
+      "date": "2026-10-04",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 35251200,
+          "inFresh": 2245964,
+          "out": 44652,
+          "total": 37541816
+        },
+        {
+          "id": "deepseek-flash",
+          "inCache": 1595776,
+          "inFresh": 21611,
+          "out": 20551,
+          "total": 1637938
+        }
+      ]
+    },
+    {
+      "date": "2026-10-05",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 3195648,
+          "inFresh": 780211,
+          "out": 14671,
+          "total": 3990530
+        }
+      ]
+    },
+    {
+      "date": "2026-10-06",
+      "models": [
+        {
+          "id": "GLM-5.3-Flash",
+          "inCache": 93362112,
+          "inFresh": 4149920,
+          "out": 128884,
+          "total": 97640916
+        }
+      ]
+    }
+  ]
 }
