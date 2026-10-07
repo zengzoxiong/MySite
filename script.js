@@ -1552,7 +1552,7 @@ function tuHeatHtml(days) {
     }
     const maxV = Math.max(1, ...seq.map(c => c.day));
     const lv = v => v <= 0 ? 0 : v <= maxV * 0.1 ? 1 : v <= maxV * 0.3 ? 2 : v <= maxV * 0.6 ? 3 : 4;
-    const cw = 13, ch = 13, gap = 3;
+    const cw = 11, ch = 11, gap = 2;
     const heatW = 52 * (cw + gap), heatH = 7 * (ch + gap) - gap;
     // 月份标签：每月第一列（取该列周日的月份）
     const months = [];
@@ -1571,21 +1571,7 @@ function tuHeatHtml(days) {
         const left = Math.min(m.col * (cw + gap), heatW - 26);
         return `<span class="tu-hmon" style="left:${left}px">${m.label}</span>`;
     }).join('');
-    // 右侧区间用量信息（随模型筛选联动）；峰值日用缩写防长数字折行
-    const totalSum = fd.reduce((s, d) => s + d.total, 0);
-    const active = fd.filter(d => d.total > 0);
-    const avg = active.length ? Math.round(totalSum / active.length) : 0;
-    const peak = active.reduce((p, d) => d.total > p.total ? d : p, { date: '—', total: 0 });
-    const info = [
-        [tuFmt(totalSum), '区间合计'],
-        [tuFmt(avg), '活跃日均'],
-        [peak.date === '—' ? '—' : peak.date.slice(5) + ' · ' + tuShort(peak.total), '峰值日'],
-        [active.length + ' / ' + fd.length + ' 天', '有用量天数']
-    ].map(([n, l]) => `<div class="tu-info"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
-    return `<div class="tu-heat-flex">
-        <div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>
-        <div class="tu-heat-info">${info}</div>
-    </div>`;
+    return `<div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>`;
 }
 
 // Catmull-Rom → 三次贝塞尔平滑曲线
@@ -1766,15 +1752,21 @@ function renderTokenUsage(animate = false) {
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
         </div>
-        <div class="tu-sec"><span class="t">Token 活动</span></div>
-        <div class="stats-chart">${tuHeatHtml(days)}</div>
-        <div class="tu-sec"><span class="t">每日 Token 趋势</span>
-            <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
-                `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
-        </div>
-        <div class="stats-chart tu-trend-flex">
-            <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
-            <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
+        <div class="tu-duo">
+            <div class="tu-duo-left">
+                <div class="tu-sec"><span class="t">Token 活动</span></div>
+                <div class="stats-chart">${tuHeatHtml(days)}</div>
+            </div>
+            <div class="tu-duo-right">
+                <div class="tu-sec"><span class="t">每日 Token 趋势</span>
+                    <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
+                        `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
+                </div>
+                <div class="stats-chart tu-trend-flex">
+                    <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
+                    <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
+                </div>
+            </div>
         </div>
         ${rows.length ? `
         <div class="media-count" style="margin:14px 0 8px">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
