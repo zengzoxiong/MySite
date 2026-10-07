@@ -1736,7 +1736,7 @@ function renderTokenUsage(animate = false) {
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
     if (!tokenUsage) {
-        setViewHead('Token 用量', '', 'API Token 消耗 · 按模型与天统计');
+        setViewHead('Token 用量', '', 'API Token 消耗');
         mediaGrid.innerHTML = '<div class="media-count">Token 用量加载中…</div>';
         ensureTokenUsage();
         return;
@@ -1744,7 +1744,7 @@ function renderTokenUsage(animate = false) {
     const days = tokenUsage.days || [];
     const modelList = tuModelList(days);
     const rows = tuRows(days);
-    setViewHead('Token 用量', '', 'API Token 消耗 · 按模型与天统计 · 共 ' + rows.length + ' 条模型-天记录' + (tokenUsage.updated ? ' · 更新于 ' + tokenUsage.updated : ''));
+    setViewHead('Token 用量', '', 'API Token 消耗' + (tokenUsage.updated ? ' · 更新于 ' + tokenUsage.updated : ''));
     const sum = tuFilteredDays(days).reduce((s, d) => ({ inCache: s.inCache + d.inCache, inFresh: s.inFresh + d.inFresh, out: s.out + d.out, total: s.total + d.total }), { inCache: 0, inFresh: 0, out: 0, total: 0 });
     // 分页边界
     const pageCount = Math.max(1, Math.ceil(rows.length / tuPageSize));
