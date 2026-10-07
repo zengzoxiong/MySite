@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-06",
+  "checkedAt": "2026-10-07",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -19,8 +19,8 @@
     },
     "DigitalScholar.Zotero": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "10.0.5"
+      "checkedAt": "2026-10-07",
+      "latest": "10.0.6"
     },
     "Kingsoft.WPSOffice.CN": {
       "ok": true,
