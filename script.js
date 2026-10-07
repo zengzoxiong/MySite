@@ -1473,13 +1473,19 @@ let tokenUsage = null;
 let tokenUsageLoading = false;
 let tuCurrentModel = ''; // '' = 全部模型
 let tuRangeDays = 30; // 趋势图时间范围：7 / 30 / 0=全部
-let tuHeatMode = 'daily'; // 热力图着色：daily=每日 / weekly=每周合计 / cumulative=逐日累计
 let tuPage = 1; // 明细表当前页（1 起）
 let tuPageSize = 20; // 每页条数：10 / 20 / 50
 let tuTrendGeom = null; // 趋势图 hover 用几何信息
 
 function tuFmt(n) {
     return (n || 0).toLocaleString('zh-CN');
+}
+
+// 中文缩写（峰值日等紧凑场景）：404,856,332 → 4.05 亿 / 43,492,717 → 4,349.3 万
+function tuShort(n) {
+    if (n >= 1e8) return (n / 1e8).toFixed(2) + ' 亿';
+    if (n >= 1e4) return (n / 1e4).toLocaleString('zh-CN', { maximumFractionDigits: 1 }) + ' 万';
+    return tuFmt(n);
 }
 
 // token 数缩写：1234567 → 1.2M / 12345 → 12k / 345 → 345
@@ -1526,35 +1532,29 @@ function tuModelList(days) {
     return Object.entries(tot).filter(([, t]) => t > 0).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
 }
 
-// Token 活动热力图（仿贡献图：列=周、行=周日~周六）。着色随 tuHeatMode：
-// daily=当日用量 / weekly=所在周合计（同列同色）/ cumulative=自起始逐日累计
+// Token 活动热力图（GitHub 贡献图式：固定 52 列，列=周、行=周日~周六，结束于数据最后一天）。
+// 着色按当日用量五档；格子固定尺寸不拉伸（拉伸会把方格拉成胶囊）；右侧拼一栏区间用量信息
 function tuHeatHtml(days) {
     const fd = tuFilteredDays(days);
     if (!fd.length) return '';
     const byDate = {};
     fd.forEach(d => { byDate[d.date] = d.total; });
-    const startD = new Date(fd[0].date + 'T00:00:00');
-    startD.setDate(startD.getDate() - startD.getDay()); // 起点对齐周日
     const endD = new Date(fd[fd.length - 1].date + 'T00:00:00');
+    const endWeekStart = new Date(endD);
+    endWeekStart.setDate(endWeekStart.getDate() - endWeekStart.getDay()); // 末列的周日
+    const startD = new Date(endWeekStart);
+    startD.setDate(startD.getDate() - 51 * 7); // 固定 52 列
     const seq = [];
-    for (let t = new Date(startD); t <= endD; t.setDate(t.getDate() + 1)) {
+    for (let t = new Date(startD); seq.length < 52 * 7; t.setDate(t.getDate() + 1)) {
+        // 末列画满整周：结束日之后的格子按 0 处理（GitHub 式）
         const key = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
         seq.push({ date: key, day: byDate[key] || 0, row: t.getDay(), col: Math.floor(seq.length / 7) });
     }
-    const colSum = {};
-    let acc = 0;
-    seq.forEach(c => {
-        colSum[c.col] = (colSum[c.col] || 0) + c.day;
-        c.week = colSum[c.col];
-        acc += c.day;
-        c.cum = acc;
-    });
-    const val = c => tuHeatMode === 'daily' ? c.day : tuHeatMode === 'weekly' ? c.week : c.cum;
-    const maxV = Math.max(1, ...seq.map(val));
+    const maxV = Math.max(1, ...seq.map(c => c.day));
     const lv = v => v <= 0 ? 0 : v <= maxV * 0.1 ? 1 : v <= maxV * 0.3 ? 2 : v <= maxV * 0.6 ? 3 : 4;
-    const modeText = tuHeatMode === 'daily' ? '当日' : tuHeatMode === 'weekly' ? '本周' : '累计';
+    const cw = 13, ch = 13, gap = 3;
+    const heatW = 52 * (cw + gap), heatH = 7 * (ch + gap) - gap;
     // 月份标签：每月第一列（取该列周日的月份）
-    const cols = seq[seq.length - 1].col + 1;
     const months = [];
     let lastMon = '';
     seq.forEach(c => {
@@ -1562,13 +1562,30 @@ function tuHeatHtml(days) {
         const mon = Number(c.date.slice(5, 7)) + '月';
         if (mon !== lastMon) { months.push({ col: c.col, label: mon }); lastMon = mon; }
     });
-    const svg = `<svg viewBox="0 0 ${cols * 14} ${7 * 14}" width="100%" height="98" preserveAspectRatio="none" role="img" aria-label="Token 活动热力图">` +
+    const svg = `<svg viewBox="0 0 ${heatW} ${heatH}" width="${heatW}" height="${heatH}" role="img" aria-label="Token 活动热力图（近 52 周）">` +
         seq.map(c =>
-            `<rect class="tu-hcell lv${lv(val(c))}" x="${c.col * 14}" y="${c.row * 14}" width="11" height="11" rx="2.5"><title>${c.date} · ${modeText} ${tuFmt(val(c))}</title></rect>`
+            `<rect class="tu-hcell lv${lv(c.day)}" x="${c.col * (cw + gap)}" y="${c.row * (ch + gap)}" width="${cw}" height="${ch}" rx="3"><title>${c.date} · 当日 ${tuFmt(c.day)}</title></rect>`
         ).join('') + '</svg>';
-    const monLabels = months.map(m =>
-        `<span class="tu-hmon" style="left:${(m.col * 14 / (cols * 14) * 100).toFixed(2)}%">${m.label}</span>`).join('');
-    return `<div class="tu-heat-wrap">${svg}<div class="tu-heat-months">${monLabels}</div></div>`;
+    // 末尾月份标签回收到容器内（超出会连带出纵向滚动条）
+    const monLabels = months.map(m => {
+        const left = Math.min(m.col * (cw + gap), heatW - 26);
+        return `<span class="tu-hmon" style="left:${left}px">${m.label}</span>`;
+    }).join('');
+    // 右侧区间用量信息（随模型筛选联动）；峰值日用缩写防长数字折行
+    const totalSum = fd.reduce((s, d) => s + d.total, 0);
+    const active = fd.filter(d => d.total > 0);
+    const avg = active.length ? Math.round(totalSum / active.length) : 0;
+    const peak = active.reduce((p, d) => d.total > p.total ? d : p, { date: '—', total: 0 });
+    const info = [
+        [tuFmt(totalSum), '区间合计'],
+        [tuFmt(avg), '活跃日均'],
+        [peak.date === '—' ? '—' : peak.date.slice(5) + ' · ' + tuShort(peak.total), '峰值日'],
+        [active.length + ' / ' + fd.length + ' 天', '有用量天数']
+    ].map(([n, l]) => `<div class="tu-info"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
+    return `<div class="tu-heat-flex">
+        <div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>
+        <div class="tu-heat-info">${info}</div>
+    </div>`;
 }
 
 // Catmull-Rom → 三次贝塞尔平滑曲线
@@ -1693,7 +1710,8 @@ function renderTokenUsage(animate = false) {
     mediaGrid.innerHTML = `
         <div class="tu-toolbar">
             <label class="media-sort">模型
-                <select id="tuModel">${[''].concat(modelList.map(m => m.id)).map(id =>
+                <select id="tuModel">${[''].concat(modelList.map(m => m.id)
+                    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))).map(id =>
                     `<option value="${escapeHtml(id)}"${id === tuCurrentModel ? ' selected' : ''}>${id ? escapeHtml(id) : '全部模型'}</option>`).join('')}</select>
             </label>
         </div>
@@ -1703,10 +1721,7 @@ function renderTokenUsage(animate = false) {
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
         </div>
-        <div class="tu-sec"><span class="t">Token 活动</span>
-            <div class="tu-tabs">${[['daily', '每日'], ['weekly', '每周'], ['cumulative', '累计']].map(([m, label]) =>
-                `<button class="tu-tab${m === tuHeatMode ? ' active' : ''}" type="button" data-tu-mode="${m}">${label}</button>`).join('')}</div>
-        </div>
+        <div class="tu-sec"><span class="t">Token 活动</span></div>
         <div class="stats-chart">${tuHeatHtml(days)}</div>
         <div class="tu-sec"><span class="t">每日 Token 趋势</span>
             <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
@@ -4304,12 +4319,6 @@ function initEventListeners() {
             fxRangeDays = Number(range.dataset.fxRange);
             mediaGrid.querySelectorAll('.fx-range').forEach(b => b.classList.toggle('active', b === range));
             fxPaintChart();
-            return;
-        }
-        const tuMode = e.target.closest('[data-tu-mode]');
-        if (tuMode) {
-            tuHeatMode = tuMode.dataset.tuMode;
-            renderTokenUsage(false);
             return;
         }
         const tuRange = e.target.closest('[data-tu-range]');
