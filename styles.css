@@ -4339,10 +4339,114 @@ body.no-anim .mp-lyric > div {
 .stats-x-axis { margin-left: auto; }
 
 /* ===== Token 用量（数据看板 · 模型×天） ===== */
-/* 三类 token 的柱色/图例色：SVG rect 吃 fill，图例色条吃 background */
-.tu-c-cache { fill: var(--accent-color); background: var(--accent-color); }
-.tu-c-fresh { fill: #f59e0b; background: #f59e0b; }
-.tu-c-out { fill: #34a853; background: #34a853; }
+/* 分区标题行：左标题右切换 tabs */
+.tu-sec {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 22px 0 10px;
+}
+.tu-sec .t { font-size: 0.95rem; font-weight: 600; }
+.tu-tabs {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 9px;
+}
+.tu-tab {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+.tu-tab.active { background: var(--accent-color); color: #fff; }
+
+/* Token 活动热力图：列=周、行=周日~周六，五档色阶走 accent 混色（仿贡献图） */
+.tu-hcell { stroke: transparent; }
+.tu-hcell.lv0 { fill: color-mix(in srgb, var(--text-secondary) 14%, transparent); }
+.tu-hcell.lv1 { fill: color-mix(in srgb, var(--accent-color) 25%, transparent); }
+.tu-hcell.lv2 { fill: color-mix(in srgb, var(--accent-color) 50%, transparent); }
+.tu-hcell.lv3 { fill: color-mix(in srgb, var(--accent-color) 75%, transparent); }
+.tu-hcell.lv4 { fill: var(--accent-color); }
+.tu-hcell:hover { stroke: var(--accent-color); }
+.tu-heat-months { position: relative; height: 18px; margin-top: 4px; }
+.tu-hmon { position: absolute; top: 0; font-size: 0.75rem; color: var(--text-tertiary); }
+
+/* 趋势图多模型色板：SVG 折线吃 stroke，图例点吃 background */
+.tu-c0 { stroke: #3b82f6; fill: #3b82f6; background: #3b82f6; }
+.tu-c1 { stroke: #16a34a; fill: #16a34a; background: #16a34a; }
+.tu-c2 { stroke: #a855f7; fill: #a855f7; background: #a855f7; }
+.tu-c3 { stroke: #ef4444; fill: #ef4444; background: #ef4444; }
+.tu-c4 { stroke: #f59e0b; fill: #f59e0b; background: #f59e0b; }
+.tu-c5 { stroke: #14b8a6; fill: #14b8a6; background: #14b8a6; }
+.tu-c-other { stroke: var(--text-tertiary); fill: var(--text-tertiary); background: var(--text-tertiary); }
+.tu-line { fill: none; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.tu-cross { stroke: var(--accent-color); stroke-width: 1; stroke-dasharray: 3 3; }
+.tu-legend-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.tu-legend-line .lg {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: -1px;
+}
+.tu-trend-wrap { position: relative; }
+.tu-tip {
+    position: absolute;
+    top: 8px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 5;
+    display: grid;
+    gap: 2px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+.tu-tip b { margin-bottom: 2px; }
+
+/* 模型下拉行 + 明细分页 */
+.tu-toolbar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.tu-pager {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.tu-page-btn {
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.tu-page-btn:hover:not(:disabled) { border-color: var(--accent-color); }
+.tu-page-btn:disabled { opacity: 0.4; cursor: default; }
+.tu-page-info { min-width: 72px; text-align: center; }
+
 .tu-table-wrap {
     background: var(--card-bg);
     backdrop-filter: var(--glass-blur);

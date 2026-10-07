@@ -1472,21 +1472,26 @@ function ensureStats() {
 let tokenUsage = null;
 let tokenUsageLoading = false;
 let tuCurrentModel = ''; // '' = 全部模型
+let tuRangeDays = 30; // 趋势图时间范围：7 / 30 / 0=全部
+let tuHeatMode = 'daily'; // 热力图着色：daily=每日 / weekly=每周合计 / cumulative=逐日累计
+let tuPage = 1; // 明细表当前页（1 起）
+let tuPageSize = 20; // 每页条数：10 / 20 / 50
+let tuTrendGeom = null; // 趋势图 hover 用几何信息
 
 function tuFmt(n) {
     return (n || 0).toLocaleString('zh-CN');
 }
 
-// y 轴 token 数缩写：1234567 → 1.2M / 12345 → 12k / 345 → 345
+// token 数缩写：1234567 → 1.2M / 12345 → 12k / 345 → 345
 function tuAxisText(v) {
     if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
     if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'k';
     return String(Math.round(v));
 }
 
-// 近 30 天三类堆叠柱：720×200 SVG，柱色走 .tu-c-* 类（颜色定义在 CSS，JS 不硬编色）
-function tuChartHtml(days) {
-    const data = days.map(d => {
+// 按当前模型筛选 days：返回每天的合计 [{ date, inCache, inFresh, out, total }]
+function tuFilteredDays(days) {
+    return days.map(d => {
         let cache = 0, fresh = 0, out = 0;
         (d.models || []).forEach(m => {
             if (tuCurrentModel && m.id !== tuCurrentModel) return;
@@ -1494,55 +1499,175 @@ function tuChartHtml(days) {
             fresh += m.inFresh || 0;
             out += m.out || 0;
         });
-        return { date: d.date, cache: cache, fresh: fresh, out: out };
-    }).filter(d => d.cache + d.fresh + d.out > 0);
-    if (!data.length) return '';
-    const w = 720, h = 200, padT = 12, padB = 26, padL = 46;
-    const innerH = h - padT - padB;
-    const maxV = Math.max(1, ...data.map(d => d.cache + d.fresh + d.out)) * 1.08;
-    const n = data.length;
-    const slot = (w - padL - 8) / n;
-    const bw = Math.min(slot * 0.62, 28);
-    const y = v => padT + innerH * (1 - v / maxV);
-    const segDefs = [['cache', 'tu-c-cache', '输入（缓存命中）'], ['fresh', 'tu-c-fresh', '输入（未命中）'], ['out', 'tu-c-out', '输出']];
-    const bars = data.map((d, i) => {
-        const x = padL + 4 + i * slot + (slot - bw) / 2;
-        let acc = 0;
-        return segDefs.map(([k, cls, label]) => {
-            const v = d[k];
-            if (v <= 0) return '';
-            const y0 = y(acc + v);
-            const hh = Math.max(y(acc) - y0, 1);
-            acc += v;
-            return `<rect class="${cls}" x="${x.toFixed(1)}" y="${y0.toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" rx="1.5"><title>${escapeHtml(d.date)} · ${label} ${tuFmt(v)}</title></rect>`;
-        }).join('');
-    }).join('');
-    const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
-        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - 4}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
-        `<text class="fx-axis" x="${padL - 6}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${tuAxisText(maxV * (1 - t))}</text>`
-    ).join('');
-    // x 轴日期抽稀（≤7 个，末位必出，相邻去重）
-    const step = Math.max(1, Math.ceil(n / 7));
-    const labels = [];
-    let lastLabel = '';
-    for (let i = 0; i < n; i += step) {
-        const label = data[i].date.slice(5);
-        if (label !== lastLabel) { labels.push({ x: padL + 4 + i * slot + slot / 2, label: label }); lastLabel = label; }
+        return { date: d.date, inCache: cache, inFresh: fresh, out: out, total: cache + fresh + out };
+    });
+}
+
+// 「模型-天」明细行，日期倒序
+function tuRows(days) {
+    const rows = [];
+    [...days].reverse().forEach(d => {
+        (d.models || []).forEach(m => {
+            if (tuCurrentModel && m.id !== tuCurrentModel) return;
+            const total = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
+            rows.push({ date: d.date, id: m.id, inCache: m.inCache || 0, inFresh: m.inFresh || 0, out: m.out || 0, total: total });
+        });
+    });
+    return rows;
+}
+
+// 全量模型清单，按总用量降序
+function tuModelList(days) {
+    const tot = {};
+    days.forEach(d => (d.models || []).forEach(m => {
+        const t = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
+        tot[m.id] = (tot[m.id] || 0) + t;
+    }));
+    return Object.entries(tot).filter(([, t]) => t > 0).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
+}
+
+// Token 活动热力图（仿贡献图：列=周、行=周日~周六）。着色随 tuHeatMode：
+// daily=当日用量 / weekly=所在周合计（同列同色）/ cumulative=自起始逐日累计
+function tuHeatHtml(days) {
+    const fd = tuFilteredDays(days);
+    if (!fd.length) return '';
+    const byDate = {};
+    fd.forEach(d => { byDate[d.date] = d.total; });
+    const startD = new Date(fd[0].date + 'T00:00:00');
+    startD.setDate(startD.getDate() - startD.getDay()); // 起点对齐周日
+    const endD = new Date(fd[fd.length - 1].date + 'T00:00:00');
+    const seq = [];
+    for (let t = new Date(startD); t <= endD; t.setDate(t.getDate() + 1)) {
+        const key = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+        seq.push({ date: key, day: byDate[key] || 0, row: t.getDay(), col: Math.floor(seq.length / 7) });
     }
-    const lastDate = data[n - 1].date.slice(5);
-    if (lastLabel !== lastDate) labels.push({ x: padL + 4 + (n - 1) * slot + slot / 2, label: lastDate });
-    const xLabels = labels.map(l =>
-        `<text class="fx-axis" x="${l.x.toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(l.label)}</text>`
-    ).join('');
-    return `
-        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天 Token 用量堆叠柱状图">
-            ${grid}${bars}${xLabels}
+    const colSum = {};
+    let acc = 0;
+    seq.forEach(c => {
+        colSum[c.col] = (colSum[c.col] || 0) + c.day;
+        c.week = colSum[c.col];
+        acc += c.day;
+        c.cum = acc;
+    });
+    const val = c => tuHeatMode === 'daily' ? c.day : tuHeatMode === 'weekly' ? c.week : c.cum;
+    const maxV = Math.max(1, ...seq.map(val));
+    const lv = v => v <= 0 ? 0 : v <= maxV * 0.1 ? 1 : v <= maxV * 0.3 ? 2 : v <= maxV * 0.6 ? 3 : 4;
+    const modeText = tuHeatMode === 'daily' ? '当日' : tuHeatMode === 'weekly' ? '本周' : '累计';
+    // 月份标签：每月第一列（取该列周日的月份）
+    const cols = seq[seq.length - 1].col + 1;
+    const months = [];
+    let lastMon = '';
+    seq.forEach(c => {
+        if (c.row !== 0) return;
+        const mon = Number(c.date.slice(5, 7)) + '月';
+        if (mon !== lastMon) { months.push({ col: c.col, label: mon }); lastMon = mon; }
+    });
+    const svg = `<svg viewBox="0 0 ${cols * 14} ${7 * 14}" width="100%" height="98" preserveAspectRatio="none" role="img" aria-label="Token 活动热力图">` +
+        seq.map(c =>
+            `<rect class="tu-hcell lv${lv(val(c))}" x="${c.col * 14}" y="${c.row * 14}" width="11" height="11" rx="2.5"><title>${c.date} · ${modeText} ${tuFmt(val(c))}</title></rect>`
+        ).join('') + '</svg>';
+    const monLabels = months.map(m =>
+        `<span class="tu-hmon" style="left:${(m.col * 14 / (cols * 14) * 100).toFixed(2)}%">${m.label}</span>`).join('');
+    return `<div class="tu-heat-wrap">${svg}<div class="tu-heat-months">${monLabels}</div></div>`;
+}
+
+// Catmull-Rom → 三次贝塞尔平滑曲线
+function tuSmoothPath(pts) {
+    if (!pts.length) return '';
+    let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
+        d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)}` +
+             ` ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)}` +
+             ` ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+    }
+    return d;
+}
+
+// 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top6 各一线 + 其余合并；
+// 容器实际宽度渲染后测量（tuPaintTrend），避免 viewBox 拉伸把文字扯变形
+function tuTrendLines(days) {
+    const fd = tuFilteredDays(days);
+    const range = tuRangeDays > 0 ? fd.slice(-tuRangeDays) : fd;
+    if (range.length < 2) return null;
+    const byDate = {};
+    days.forEach(d => {
+        const sums = {};
+        (d.models || []).forEach(m => {
+            sums[m.id] = (sums[m.id] || 0) + (m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0));
+        });
+        byDate[d.date] = sums;
+    });
+    let lines;
+    if (tuCurrentModel) {
+        lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: range.map(d => byDate[d.date][tuCurrentModel] || 0) }];
+    } else {
+        const top = tuModelList(days).slice(0, 6).map(m => m.id);
+        const topSet = new Set(top);
+        lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: range.map(d => byDate[d.date][id] || 0) }));
+        const others = range.map(d => Object.entries(byDate[d.date])
+            .reduce((s, [id, v]) => s + (topSet.has(id) ? 0 : v), 0));
+        if (others.some(v => v > 0)) lines.push({ id: '其他', cls: 'tu-c-other', values: others });
+    }
+    return { dates: range.map(d => d.date), lines: lines };
+}
+
+function tuPaintTrend() {
+    const box = document.getElementById('tuTrendBox');
+    if (!box || !tuTrendGeom) return;
+    const { dates, lines } = tuTrendGeom;
+    const w = Math.max(box.clientWidth || 0, 320), h = 220;
+    const padL = 52, padR = 16, padT = 14, padB = 28;
+    const innerH = h - padT - padB;
+    const maxV = Math.max(1, ...lines.flatMap(l => l.values)) * 1.08;
+    const n = dates.length;
+    const step = n > 1 ? (w - padL - padR) / (n - 1) : 0;
+    const X = i => padL + step * i;
+    const Y = v => padT + innerH * (1 - v / maxV);
+    const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
+        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
+        `<text class="fx-axis" x="${padL - 8}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${tuAxisText(maxV * (1 - t))}</text>`).join('');
+    const labelStep = Math.max(1, Math.ceil(n / 7));
+    const xLabels = [];
+    let lastLabel = '';
+    for (let i = 0; i < n; i += labelStep) {
+        const label = dates[i].slice(5).replace('-', '/');
+        if (label !== lastLabel) { xLabels.push(`<text class="fx-axis" x="${X(i).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(label)}</text>`); lastLabel = label; }
+    }
+    const lastDate = dates[n - 1].slice(5).replace('-', '/');
+    if (lastLabel !== lastDate) xLabels.push(`<text class="fx-axis" x="${X(n - 1).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(lastDate)}</text>`);
+    const paths = lines.map(l => `<path class="tu-line ${l.cls}" d="${tuSmoothPath(l.values.map((v, i) => [X(i), Y(v)]))}"></path>`).join('');
+    box.innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="每日 Token 趋势图">
+            ${grid}${xLabels}${paths}
+            <line class="tu-cross" y1="${padT}" y2="${padT + innerH}" style="display:none"></line>
         </svg>
-        <div class="stats-legend">
-            <span><i class="lg tu-c-cache"></i>输入（缓存命中）</span>
-            <span><i class="lg tu-c-fresh"></i>输入（未命中）</span>
-            <span><i class="lg tu-c-out"></i>输出</span>
-        </div>`;
+        <div class="tu-tip" hidden></div>
+        <div class="tu-legend-line">${lines.map(l => `<span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)}</span>`).join('')}</div>`;
+    // hover：竖十字线 + 当日各线值 tooltip（鼠标/触摸共用）
+    const svg = box.querySelector('svg');
+    const tip = box.querySelector('.tu-tip');
+    const cross = box.querySelector('.tu-cross');
+    const show = (clientX) => {
+        const rect = svg.getBoundingClientRect();
+        let i = step ? Math.round((clientX - rect.left - padL * (rect.width / w)) / (step * rect.width / w)) : 0;
+        i = Math.max(0, Math.min(n - 1, i));
+        const px = (X(i) * rect.width / w).toFixed(1);
+        cross.setAttribute('x1', px);
+        cross.setAttribute('x2', px);
+        cross.style.display = '';
+        tip.hidden = false;
+        tip.innerHTML = `<b>${dates[i]}</b>` + lines.map(l =>
+            `<span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)} · ${tuFmt(l.values[i])}</span>`).join('');
+        const rel = clientX - rect.left;
+        tip.style.left = Math.min(Math.max(rel, 90), rect.width - 90) + 'px';
+    };
+    const hide = () => { cross.style.display = 'none'; tip.hidden = true; };
+    svg.addEventListener('mousemove', e => show(e.clientX));
+    svg.addEventListener('mouseleave', hide);
+    svg.addEventListener('touchstart', e => show(e.touches[0].clientX), { passive: true });
+    svg.addEventListener('touchmove', e => show(e.touches[0].clientX), { passive: true });
+    svg.addEventListener('touchend', hide);
 }
 
 function renderTokenUsage(animate = false) {
@@ -1557,46 +1682,57 @@ function renderTokenUsage(animate = false) {
         return;
     }
     const days = tokenUsage.days || [];
-    // 归纳模型清单（保持首次出现顺序）+ 汇总 + 「模型-天」明细行（日期倒序）
-    const models = [];
-    const rows = [];
-    const sum = { cache: 0, fresh: 0, out: 0, total: 0 };
-    [...days].reverse().forEach(d => {
-        (d.models || []).forEach(m => {
-            if (!models.includes(m.id)) models.push(m.id);
-            if (tuCurrentModel && m.id !== tuCurrentModel) return;
-            const total = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
-            sum.cache += m.inCache || 0;
-            sum.fresh += m.inFresh || 0;
-            sum.out += m.out || 0;
-            sum.total += total;
-            rows.push({ date: d.date, id: m.id, inCache: m.inCache || 0, inFresh: m.inFresh || 0, out: m.out || 0, total: total });
-        });
-    });
-    const chips = models.length > 1
-        ? `<div class="media-filters"><div class="media-chips">${[''].concat(models).map(m =>
-            `<button class="media-chip${m === tuCurrentModel ? ' active' : ''}" data-tu-chip="${escapeHtml(m)}">${m ? escapeHtml(m) : '全部模型'}</button>`).join('')}</div></div>`
-        : '';
+    const modelList = tuModelList(days);
+    const rows = tuRows(days);
+    const sum = tuFilteredDays(days).reduce((s, d) => ({ inCache: s.inCache + d.inCache, inFresh: s.inFresh + d.inFresh, out: s.out + d.out, total: s.total + d.total }), { inCache: 0, inFresh: 0, out: 0, total: 0 });
+    // 分页边界
+    const pageCount = Math.max(1, Math.ceil(rows.length / tuPageSize));
+    if (tuPage > pageCount) tuPage = pageCount;
+    const pageRows = rows.slice((tuPage - 1) * tuPageSize, tuPage * tuPageSize);
+    tuTrendGeom = tuTrendLines(days);
     mediaGrid.innerHTML = `
+        <div class="tu-toolbar">
+            <label class="media-sort">模型
+                <select id="tuModel">${[''].concat(modelList.map(m => m.id)).map(id =>
+                    `<option value="${escapeHtml(id)}"${id === tuCurrentModel ? ' selected' : ''}>${id ? escapeHtml(id) : '全部模型'}</option>`).join('')}</select>
+            </label>
+        </div>
         <div class="stats-cards">
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.cache)}</span><span class="stat-label">输入 · 缓存命中</span></div>
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.fresh)}</span><span class="stat-label">输入 · 未命中缓存</span></div>
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.inCache)}</span><span class="stat-label">输入 · 缓存命中</span></div>
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.inFresh)}</span><span class="stat-label">输入 · 未命中缓存</span></div>
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
         </div>
-        <div class="daily-sec" style="margin-top:20px">近 30 天用量构成</div>
-        ${days.length ? `<div class="stats-chart" style="margin-top:10px">${tuChartHtml(days.slice(-30))}</div>` : ''}
+        <div class="tu-sec"><span class="t">Token 活动</span>
+            <div class="tu-tabs">${[['daily', '每日'], ['weekly', '每周'], ['cumulative', '累计']].map(([m, label]) =>
+                `<button class="tu-tab${m === tuHeatMode ? ' active' : ''}" type="button" data-tu-mode="${m}">${label}</button>`).join('')}</div>
+        </div>
+        <div class="stats-chart">${tuHeatHtml(days)}</div>
+        <div class="tu-sec"><span class="t">每日 Token 趋势</span>
+            <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
+                `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
+        </div>
+        <div class="stats-chart tu-trend-wrap"><div id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div></div>
         ${rows.length ? `
-        ${chips}
-        <div class="media-count" style="margin:14px 0">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
+        <div class="media-count" style="margin:14px 0 8px">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
         <div class="tu-table-wrap">
             <table class="tu-table">
                 <thead><tr><th>日期</th><th>模型</th><th class="num">输入（缓存命中）</th><th class="num">输入（未命中）</th><th class="num">输出</th><th class="num">总计</th></tr></thead>
-                <tbody>${rows.map(r =>
+                <tbody>${pageRows.map(r =>
                     `<tr><td>${escapeHtml(r.date)}</td><td class="tu-model">${escapeHtml(r.id)}</td><td class="num">${tuFmt(r.inCache)}</td><td class="num">${tuFmt(r.inFresh)}</td><td class="num">${tuFmt(r.out)}</td><td class="num">${tuFmt(r.total)}</td></tr>`).join('')}</tbody>
             </table>
+        </div>
+        <div class="tu-pager">
+            <label class="media-sort">每页
+                <select id="tuPageSize">${[10, 20, 50].map(n =>
+                    `<option value="${n}"${n === tuPageSize ? ' selected' : ''}>${n} 条</option>`).join('')}</select>
+            </label>
+            <button class="tu-page-btn" type="button" id="tuPrev"${tuPage <= 1 ? ' disabled' : ''}>上一页</button>
+            <span class="tu-page-info">第 ${tuPage} / ${pageCount} 页</span>
+            <button class="tu-page-btn" type="button" id="tuNext"${tuPage >= pageCount ? ' disabled' : ''}>下一页</button>
         </div>` : '<div class="media-count" style="margin-top:16px">暂无用量数据，待导入 API 用量日志</div>'}
     `;
+    tuPaintTrend(); // 容器已入 DOM，实测宽度画趋势图
 }
 
 function ensureTokenUsage() {
@@ -4170,12 +4306,21 @@ function initEventListeners() {
             fxPaintChart();
             return;
         }
-        const tuChip = e.target.closest('[data-tu-chip]');
-        if (tuChip) {
-            tuCurrentModel = tuChip.dataset.tuChip;
+        const tuMode = e.target.closest('[data-tu-mode]');
+        if (tuMode) {
+            tuHeatMode = tuMode.dataset.tuMode;
             renderTokenUsage(false);
             return;
         }
+        const tuRange = e.target.closest('[data-tu-range]');
+        if (tuRange) {
+            tuRangeDays = Number(tuRange.dataset.tuRange);
+            tuPage = 1;
+            renderTokenUsage(false);
+            return;
+        }
+        if (e.target.closest('#tuPrev')) { tuPage = Math.max(1, tuPage - 1); renderTokenUsage(false); return; }
+        if (e.target.closest('#tuNext')) { tuPage += 1; renderTokenUsage(false); return; }
         if (e.target.closest('#fxConvSwap')) fxConvSwap();
     });
 
@@ -4224,6 +4369,14 @@ function initEventListeners() {
         } else if (e.target.id === 'starsSort') {
             starsSort = e.target.value;
             renderGhStars(false);
+        } else if (e.target.id === 'tuModel') {
+            tuCurrentModel = e.target.value;
+            tuPage = 1;
+            renderTokenUsage(false);
+        } else if (e.target.id === 'tuPageSize') {
+            tuPageSize = Number(e.target.value);
+            tuPage = 1;
+            renderTokenUsage(false);
         }
     });
 
@@ -4266,6 +4419,7 @@ function initEventListeners() {
             }
             recalcMarquee();
             if (currentView === 'fx') fxPaintChart(); // 图表宽度随容器变，重画一次
+            if (currentView === 'tokens') renderTokenUsage(false); // 趋势图宽度随容器变，重画一次
         }, 200);
     });
 

@@ -150,7 +150,7 @@ MySite/
 
 - **口径**：仿 ZCode 用量统计，按「模型 × 天」聚合四类 token：输入（缓存命中）/ 输入（未命中缓存）/ 输出 / 总计（`total` 可省略，前端按前三项求和兜底）
 - **数据结构**：`{ updated, days: [{ date, models: [{ id, inCache, inFresh, out, total }] }] }`，date 升序；由 API 用量日志离线导入生成（导入脚本待日志交付后补充），**暂无定时工作流，勿手改**
-- **视图**：侧栏「数据看板 → Token 用量」（`renderTokenUsage()`，视图 id `tokens`，复用 #mediaGrid）：四张汇总卡（复用 .stat-card）+ 近 30 天三类堆叠柱（`tuChartHtml()`，柱色走 `.tu-c-*` 类、网格/轴文字复用 .fx-grid/.fx-axis）+ 模型筛选 chips（复用 .media-chip，事件委托在 #mediaGrid 的 `data-tu-chip`，状态存 `tuCurrentModel`）+ 模型-天明细表（.tu-table，横向可滚）；已接入 renderCurrentView / 侧栏 data-token / 命令面板
+- **视图**：侧栏「数据看板 → Token 用量」（`renderTokenUsage()`，视图 id `tokens`，复用 #mediaGrid），仿 ZCode 用量统计布局：模型下拉筛选（#tuModel，全局联动汇总卡/热力图/趋势/明细，状态 `tuCurrentModel`）→ 四张汇总卡 → 「Token 活动」热力图（`tuHeatHtml()`，列=周行=周日的贡献图式格子，右上「每日/每周/累计」`data-tu-mode` 切换着色口径）→ 每日 Token 趋势（`tuPaintTrend()` 渲染后实测容器宽画多模型平滑折线，全部模型=Top6 各一线+其余合并为「其他」，右上「近 7 天/近 30 天/全部」`data-tu-range` 切换；hover 竖线 + 当日各线值 tooltip）→ 模型-天明细表（.tu-table）带分页（每页 10/20/50 `#tuPageSize` + 上一页/下一页，状态 `tuPage`/`tuPageSize`）；趋势折线颜色走 .tu-c0~7 八色板；已接入 renderCurrentView / 侧栏 data-token / 命令面板 / resize 重画
 
 ## 前端架构与约定（script.js / styles.css）
 
