@@ -164,6 +164,17 @@ def main():
                 source = 'events'
         except Exception as e:
             print('events 源失败:', e)
+    if not days:
+        raise SystemExit('三个数据源全部失败，放弃写入（保留旧数据）')
+
+    # 贡献数据没变就沿用旧文件（含旧 fetchedAt）：时间戳每天变会让「无变化跳过提交」永不生效
+    try:
+        with open(OUT, encoding='utf-8') as f:
+            if json.load(f).get('days') == days:
+                print('贡献数据无变化，文件保持不变')
+                return
+    except Exception:
+        pass
     out = {'user': USER, 'source': source, 'fetchedAt': date.today().isoformat(), 'days': days}
     write_json(OUT, out)
     print(f'贡献同步完成：source={source}，{len(days)} 天有记录，共 {sum(days.values())} 次')

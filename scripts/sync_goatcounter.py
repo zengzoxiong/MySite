@@ -50,6 +50,8 @@ def fetch_json(url, token):
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', 'ignore')
             last_err = RuntimeError(f'HTTP {e.code} {_err_text(body)}')
+            if e.code != 429 and 400 <= e.code < 500:
+                raise last_err  # token 失效/参数错等永久性错误，重试无意义
             print(f'请求失败（第 {attempt + 1} 次）：{last_err}，稍后重试')
             time.sleep(10)
         except urllib.error.URLError as e:
@@ -77,7 +79,7 @@ def main():
         # start/end 需 RFC3339（Go time.Time），formam 只认标准格式；时区按站点（UTC+8）
         qs = urllib.parse.urlencode({
             'start': f'{cur.isoformat()}T00:00:00+08:00',
-            'end': f'{end.isoformat()}T23:00:00+08:00',
+            'end': f'{end.isoformat()}T23:59:59+08:00',
         })
         url = f'https://{base}.goatcounter.com/api/v0/stats/total?{qs}'
         rows = fetch_json(url, token).get('stats') or []

@@ -107,8 +107,18 @@ def main():
                 packages[pkg_id] = {'ok': False, 'checkedAt': NOW, 'note': '接口异常未验证'}
                 print(f'未知 {pkg_id}（接口异常且无旧记录）')
             continue
+        prev = old.get(pkg_id)
+        if prev is not None and prev.get('ok') == ok and prev.get('latest', '') == latest:
+            # 状态与版本都没变：沿用旧记录（含旧核对日期），跨天重跑文件字节不变，避免空转提交
+            packages[pkg_id] = prev
+            print(f'{"可用" if ok else "失效"} {pkg_id}' + (f' 最新 {latest}' if latest else '') + '（无变化）')
+            continue
         packages[pkg_id] = {'ok': ok, 'checkedAt': NOW, **({'latest': latest} if latest else {})}
         print(f'{"可用" if ok else "失效"} {pkg_id}' + (f' 最新 {latest}' if latest else ''))
+
+    if packages == old:
+        print('体检结果无变化，文件保持不变')
+        return
 
     result = {
         'source': 'https://github.com/microsoft/winget-pkgs',
@@ -116,11 +126,6 @@ def main():
         'packages': packages,
     }
     payload = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
-    if os.path.exists(out_path):
-        with open(out_path, encoding='utf-8') as f:
-            if f.read() == payload:
-                print('体检结果无变化，文件保持不变')
-                return
     tmp = out_path + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
         f.write(payload)

@@ -2519,11 +2519,6 @@ body.no-anim .mp-lyric > div {
     transform: translateY(0) scale(0.99);
 }
 
-.skill-main {
-    flex: 1;
-    min-width: 0;
-}
-
 .skill-title-row {
     display: flex;
     align-items: center;
@@ -2641,11 +2636,6 @@ body.no-anim .mp-lyric > div {
 
 .config-block summary:hover {
     color: var(--accent-color);
-}
-
-.config-hint {
-    color: var(--text-tertiary);
-    font-size: 0.75rem;
 }
 
 .config-block pre {
@@ -4322,13 +4312,6 @@ body.no-anim .mp-lyric > div {
     padding: 16px;
 }
 .stats-chart svg { width: 100%; height: 160px; display: block; }
-.stats-line-pv {
-    fill: none;
-    stroke: var(--accent-color);
-    stroke-width: 2;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-}
 .stats-line-uv {
     fill: none;
     stroke: #34a853;
@@ -4336,7 +4319,6 @@ body.no-anim .mp-lyric > div {
     stroke-linejoin: round;
     stroke-linecap: round;
 }
-.stats-dot-uv { fill: #34a853; }
 .stats-legend {
     display: flex;
     align-items: center;
@@ -4353,7 +4335,6 @@ body.no-anim .mp-lyric > div {
     margin-right: 5px;
     vertical-align: middle;
 }
-.lg-pv { background: var(--accent-color); }
 .lg-uv { background: #34a853; }
 .stats-x-axis { margin-left: auto; }
 

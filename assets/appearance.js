@@ -50,6 +50,14 @@
     ];
 
     const KEY_FONT = 'fontFamily', KEY_CLOCK = 'clockStyle', KEY_WEATHER = 'weatherCity', KEY_THEME = 'theme';
+
+    // 隐私模式/站点数据被禁时 localStorage 读写会直接抛异常，统一走安全通道
+    function lsGet(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function lsSet(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) { /* 存不上就算了 */ }
+    }
     const root = document.documentElement;
     const cssCache = new Map(); // path -> Promise，同一份 CSS 只注入一次
     const preconnected = new Set();
@@ -112,7 +120,7 @@
     ];
 
     function themeModeFromStorage() {
-        const v = localStorage.getItem(KEY_THEME);
+        const v = lsGet(KEY_THEME);
         return v === 'light' || v === 'dark' ? v : 'system';
     }
 
@@ -218,17 +226,17 @@
     }
 
     function applySiteFontFromStorage() {
-        return applySiteFont(localStorage.getItem(KEY_FONT));
+        return applySiteFont(lsGet(KEY_FONT));
     }
 
     // 有效的时钟风格 id（script.js 重建时钟时用它挡掉 localStorage 里的脏值）
     function clockStyleFromStorage() {
-        return clockStyleById(localStorage.getItem(KEY_CLOCK)).id;
+        return clockStyleById(lsGet(KEY_CLOCK)).id;
     }
 
     // 天气城市：默认自动定位；自定义城市存 JSON（name/lat/lon/sub），脏值一律当自动定位
     function getWeatherCity() {
-        const raw = localStorage.getItem(KEY_WEATHER);
+        const raw = lsGet(KEY_WEATHER);
         if (raw && raw !== 'auto') {
             try {
                 const c = JSON.parse(raw);
@@ -242,7 +250,7 @@
 
     // value: 'auto' 或 { name, lat, lon, sub }
     function setWeatherCity(value) {
-        localStorage.setItem(KEY_WEATHER, value === 'auto' ? 'auto' : JSON.stringify(value));
+        lsSet(KEY_WEATHER, value === 'auto' ? 'auto' : JSON.stringify(value));
     }
 
     function weatherCityLabel() {
@@ -252,7 +260,7 @@
 
     // 原始存储串，供 script.js 判断城市是否真的变了（避免对象比较）
     function weatherCityRaw() {
-        return localStorage.getItem(KEY_WEATHER) || 'auto';
+        return lsGet(KEY_WEATHER) || 'auto';
     }
 
     window.SiteAppearance = {

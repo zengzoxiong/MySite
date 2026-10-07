@@ -7,7 +7,7 @@ on:
       - 'data/tools.json'
       - 'scripts/check_tools.py'
   schedule:
-    - cron: '4 20 * * 0' # 每周日 UTC 20:04（北京时间周一 04:04，深夜低峰）
+    - cron: '50 19 * * 0' # 每周日 UTC 19:50（北京时间周一 03:50，深夜低峰）
   workflow_dispatch:
 
 permissions:

@@ -55,6 +55,15 @@ def lyric_of(sid):
     return txt or None
 
 
+def write_json(path, obj, indent=2):
+    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
+    tmp = str(path) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, indent=indent)
+        f.write('\n')
+    os.replace(tmp, path)
+
+
 def main():
     ids = all_ids()
     if not ids:
@@ -79,15 +88,6 @@ def main():
         old_n = 0
     if old_n and len(out) * 2 < old_n:
         raise SystemExit(f'仅取回 {len(out)}/{old_n} 首歌词（低于 50%），疑似接口异常，放弃写入')
-
-
-def write_json(path, obj, indent=2):
-    """先写临时文件再原子替换：进程中途被杀不会留下半个 JSON 让下次运行崩溃"""
-    tmp = str(path) + '.tmp'
-    with open(tmp, 'w', encoding='utf-8') as f:
-        json.dump(obj, f, ensure_ascii=False, indent=indent)
-        f.write('\n')
-    os.replace(tmp, path)
 
     write_json(OUT, out, indent=None)
     size = os.path.getsize(OUT) // 1024

@@ -88,11 +88,12 @@ self.addEventListener('fetch', (e) => {
     );
 });
 
-// PRECACHE 里的条目按路径后缀认（ Pages 部署在 /MySite/ 下、本地在根下，都能对上）；
-// 以 / 结尾的是导航请求（对应 PRECACHE 里的 './'），也算预缓存
+// PRECACHE 里的条目按路径后缀认（Pages 部署在 /MySite/ 下、本地在根下，都能对上）；
+// './'（部署根导航）按 registration.scope 的路径认——不能放宽到「以 / 结尾就算」，
+// 否则工具页等任意目录式 URL 一旦进运行时缓存就永久躲过 LRU 淘汰
 function isPrecached(requestUrl) {
     const path = new URL(requestUrl).pathname;
-    if (path.endsWith('/')) return true;
+    if (path === new URL(self.registration.scope).pathname) return true;
     return PRECACHE.some((p) => p !== './' && path.endsWith(p.slice(2)));
 }
 

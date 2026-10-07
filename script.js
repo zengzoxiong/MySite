@@ -65,13 +65,10 @@ function safeInit(name, fn) {
 
 // 隐私模式/站点数据被禁时 localStorage 读写会直接抛异常，统一走安全通道
 function lsGet(key) {
-    try { return lsGet(key); } catch (e) { return null; }
+    try { return localStorage.getItem(key); } catch (e) { return null; }
 }
 function lsSet(key, value) {
-    try { lsSet(key, value); } catch (e) { /* 存不上就算了 */ }
-}
-function lsDel(key) {
-    try { lsDel(key); } catch (e) { /* 忽略 */ }
+    try { localStorage.setItem(key, value); } catch (e) { /* 存不上就算了 */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1326,7 +1323,7 @@ function talismanFontSample(f) {
 }
 
 // ===== 每日日报（数据看板 · GitHub Trending 精选 + Hacker News 首页十条） =====
-// 数据 data/daily-report.json 由每日 10:10 工作流同步；懒加载，失败显示占位可重进重试
+// 数据 data/daily-report.json 由每日 03:30（北京）工作流同步；懒加载，失败显示占位可重进重试
 let dailyReport = null;
 let dailyLoading = false;
 
@@ -1464,7 +1461,7 @@ function ensureStats() {
         .then(d => { statsData = d; })
         .catch(e => {
             console.error('访问统计加载失败:', e);
-            statsData = { updated: '', days: [], total: {} }; // 占位：汇总归零，重进视图可重试
+            statsData = { updated: '', days: [] }; // 占位：汇总归零，重进视图可重试
         })
         .finally(() => { statsLoading = false; if (currentView === 'stats') renderStats(true); });
 }
@@ -3254,9 +3251,9 @@ function renderPluginCat(cat) {
     bindCopyButtons();
 }
 
-// 复制按钮统一绑定（事件委托）
+// 复制按钮统一绑定（渲染后逐个绑定）：注册表视图在 mediaGrid、搜索分组在 linksGrid，两处都查
 function bindCopyButtons() {
-    mediaGrid.querySelectorAll('.copy-btn').forEach(btn => {
+    document.querySelectorAll('#mediaGrid .copy-btn, #linksGrid .copy-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const text = btn.dataset.cmd;
             try { await navigator.clipboard.writeText(text); }
@@ -3716,6 +3713,10 @@ function initSettingsModal() {
             const raw = window.SiteAppearance ? SiteAppearance.weatherCityRaw() : 'auto';
             if (raw !== lastWeatherRaw) initWeather(true);
         } else if (e.data && e.data.type === 'clear-cache') {
+            // 设置页已清空全部本站 localStorage 键，这里把由持久化状态驱动的 UI 同步回默认
+            document.body.classList.remove('no-anim');
+            document.body.classList.remove('sidebar-collapsed');
+            sidebar.classList.remove('collapsed');
             document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
             document.getElementById('todoList').innerHTML = '';
             updateTodoCount();

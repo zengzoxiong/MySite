@@ -7,6 +7,8 @@
 """
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
@@ -18,8 +20,15 @@ API = 'https://api.frankfurter.dev/v1/1999-01-01..'
 
 
 def fetch(url):
-    req = urllib.request.Request(url, headers={'User-Agent': UA})
-    return urllib.request.urlopen(req, timeout=60).read().decode('utf-8')
+    last_err = None
+    for attempt in range(3):  # ECB 接口瞬时抖动重试，跨过单次失败
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': UA})
+            return urllib.request.urlopen(req, timeout=60).read().decode('utf-8')
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_err = e
+            time.sleep(5 * (attempt + 1))
+    raise last_err
 
 
 def main():
@@ -39,7 +48,8 @@ def main():
     path = os.path.join(ROOT, 'data', 'fx.json')
     old = None
     if os.path.exists(path):
-        old = json.load(open(path, encoding='utf-8'))
+        with open(path, encoding='utf-8') as f:
+            old = json.load(f)
     if old and old.get('series') == rows and old.get('columns') == SYMBOLS:
         print(f'无新数据（最新 {rows[-1][0]}），跳过写入')
         return
@@ -54,9 +64,11 @@ def main():
         'latest': dict(zip(SYMBOLS, rows[-1][1:])),
         'series': rows,
     }
-    with open(path, 'w', encoding='utf-8') as f:
+    tmp = path + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
+    os.replace(tmp, path)
     print(f'完成：{len(rows)} 个交易日（{rows[0][0]} ~ {rows[-1][0]}），'
           f'{len(SYMBOLS)} 种货币，{os.path.getsize(path) // 1024} KB')
 

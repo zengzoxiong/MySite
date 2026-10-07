@@ -147,6 +147,7 @@
     </div>
 
     <script>
+        (function () {
         const KEY_ANIM = 'animEnabled', KEY_FOCUS = 'focusFirst';
         // 隐私模式/站点数据被禁时读写会抛异常，统一走安全通道
         const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -156,6 +157,12 @@
             try { parent.postMessage({ type }, location.origin); } catch (e) { /* 独立打开时无父页 */ }
         };
         const AP = window.SiteAppearance;
+        if (!AP) {
+            // appearance.js 加载失败：外观设置全部依赖它，早退保住刷新/Esc 两个不依赖它的能力
+            document.getElementById('settingForceRefresh').addEventListener('click', () => notify('force-refresh'));
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') notify('close-settings'); });
+            return;
+        }
 
         // 外观模式：浅色 / 深色 / 跟随系统
         const themeSelect = document.getElementById('settingThemeMode');
@@ -224,10 +231,6 @@
             });
         }
         renderAccentDots();
-        window.addEventListener('storage', (e) => {
-            if (e.key === KEY_ACCENT) renderAccentDots();
-        });
-
         // ===== 外观：界面字体 + 首页时钟风格（清单来自 assets/appearance.js） =====
         const fontSelect = document.getElementById('settingFont');
         const clockSelect = document.getElementById('settingClock');
@@ -388,14 +391,23 @@
         // 清除本地数据
         const clearBtn = document.getElementById('settingClearCache');
         clearBtn.addEventListener('click', () => {
-            ['dashboardTodos', 'sidebarSection_favorites', 'sidebarSection_tools', 'sidebarSection_media']
-                .forEach(k => lsDel(k));
+            // 本站全部自写键：外观/行为/布局/签到/播放器/批量安装勾选/快照/反向地名缓存
+            const prefixes = ['checkin:', 'sidebarSection_', 'reverseGeo:'];
+            const exact = ['theme', 'accentColor', 'fontFamily', 'clockStyle', 'weatherCity',
+                'animEnabled', 'focusFirst', 'dashboardTodos', 'sidebarCollapsed',
+                'checkinLast', 'checkinStreak', 'mpMode', 'mpVolume', 'mpMuted',
+                'wingetSel', 'weatherSnap', 'airSnap'];
+            try {
+                Object.keys(localStorage).forEach((k) => {
+                    if (exact.includes(k) || prefixes.some((p) => k.startsWith(p))) lsDel(k);
+                });
+            } catch (e) { /* 隐私模式无键可清 */ }
             notify('clear-cache');
             clearBtn.textContent = '✓';
             setTimeout(() => { clearBtn.textContent = '清除'; }, 1600);
         });
 
-        // 其他窗口修改主题时同步本页
+        // 其他窗口修改主题时同步本页（KEY_ACCENT 也在内，勿另开监听器重复渲染）
         window.addEventListener('storage', (e) => {
             if (e.key === AP.KEY_THEME) applyTheme();
             if (e.key === KEY_ANIM) applyAnim();
@@ -414,6 +426,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') notify('close-settings');
         });
+        })(); // 顶层 IIFE：让 AP 缺失时的早退 return 合法
     </script>
 </body>
 </html>

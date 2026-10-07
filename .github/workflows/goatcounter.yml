@@ -23,16 +23,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: DNS 诊断（zengzoxiong.goatcounter.com）
-        if: always()
-        run: |
-          echo "--- socket.getaddrinfo ---"
-          python -c "import socket; print(socket.getaddrinfo('zengzoxiong.goatcounter.com', 443))" || echo "解析失败"
-          echo "--- nslookup ---"
-          nslookup zengzoxiong.goatcounter.com || true
-          echo "--- curl -v count 端点 ---"
-          curl -sSv --max-time 15 "https://zengzoxiong.goatcounter.com/count" -o /dev/null 2>&1 | head -25 || true
-
       - name: 同步 GoatCounter 访问统计
         run: python scripts/sync_goatcounter.py
         env:
