@@ -1331,7 +1331,7 @@ let dailyReport = null;
 let dailyLoading = false;
 
 function renderDailyReport(animate = false) {
-    setViewHead('每日日报', 'GitHub Trending 精选 + Hacker News 首页十条 · 每日同步');
+    setViewHead('每日日报', 'GitHub Trending 精选 + Hacker News 首页十条');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1347,11 +1347,11 @@ function renderDailyReport(animate = false) {
     mediaGrid.innerHTML = `
         <div class="daily-sec">GitHub Trending · 近 7 天热门新仓库</div>
         ${t.length ? `<div class="skills-cards${anim}">${t.map(trendingCardHtml).join('')}</div>`
-            : '<div class="media-count">本板块今日拉取失败，明早同步会重试</div>'}
+            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}
         <div class="daily-sec" style="margin-top:18px">Hacker News · 首页十条</div>
         ${hn.length ? `<div class="skills-cards${anim}">${hn.map(hnCardHtml).join('')}</div>`
-            : '<div class="media-count">本板块今日拉取失败，明早同步会重试</div>'}
-        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(dailyReport.updated || '—')} · 每日 10:10 自动同步</div>`;
+            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}
+        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(dailyReport.updated || '—')}</div>`;
 }
 
 function ensureDailyReport() {
@@ -1404,7 +1404,7 @@ let statsData = null;
 let statsLoading = false;
 
 function renderStats(animate = false) {
-    setViewHead('访问统计', 'GoatCounter · 访客（UV）趋势 · 每日同步');
+    setViewHead('访问统计', 'GoatCounter · 访客（UV）趋势');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1431,7 +1431,7 @@ function renderStats(animate = false) {
         ${cards}
         <div class="daily-sec" style="margin-top:20px">近 30 天访客（UV）趋势</div>
         ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}
-        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(statsData.updated || '—')} · 每日 03:47 同步 · IP/来源等访客明细在 GoatCounter 后台查看</div>`;
+        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(statsData.updated || '—')}</div>`;
 }
 
 // 近 30 天访客单折线：720×160 SVG，y 轴按数据最大值自适应
@@ -1650,7 +1650,7 @@ function renderGhHeat() {
     const fetchedEl = document.getElementById('ghFetched');
     const days = ghActivity && ghActivity.days;
     if (!days) {
-        heat.innerHTML = '<span class="gh-empty">暂无贡献数据（工作流每日同步）</span>';
+        heat.innerHTML = '<span class="gh-empty">暂无贡献数据</span>';
         totalEl.textContent = '';
         fetchedEl.textContent = '';
         return;
@@ -1670,7 +1670,7 @@ function renderGhHeat() {
     }
     heat.innerHTML = cells.join('');
     totalEl.textContent = `近一年 ${total} 次`;
-    fetchedEl.textContent = ghActivity.fetchedAt ? `同步于 ${ghActivity.fetchedAt}` : '';
+    fetchedEl.textContent = ghActivity.fetchedAt ? `更新于 ${ghActivity.fetchedAt}` : '';
 }
 
 function toggleGhPanel(show) {
@@ -1842,7 +1842,7 @@ function renderCurrentView(animate = false) {
 
 // 渲染 GitHub Stars（工作流每日同步的星标仓库）
 function renderGhStars(animate = false) {
-    setViewHead('我的 Stars', 'GitHub 星标仓库 · 工作流每日同步');
+    setViewHead('我的 Stars', 'GitHub 星标仓库');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1871,7 +1871,7 @@ function renderGhStars(animate = false) {
                 <select id="starsSort">${sortOptions}</select>
             </label>
         </div>
-        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 最近同步 ' + escapeHtml(starsData.updated) : ''}</div>
+        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 更新于 ' + escapeHtml(starsData.updated) : ''}</div>
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
     recalcMarquee();
