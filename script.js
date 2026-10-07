@@ -1328,7 +1328,7 @@ let dailyReport = null;
 let dailyLoading = false;
 
 function renderDailyReport(animate = false) {
-    setViewHead('每日日报', 'GitHub Trending 精选 + Hacker News 首页十条');
+    setViewHead('每日日报', '', 'GitHub Trending 精选 + Hacker News 首页十条' + (dailyReport && dailyReport.updated ? ' · 更新于 ' + dailyReport.updated : ''));
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1347,8 +1347,7 @@ function renderDailyReport(animate = false) {
             : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}
         <div class="daily-sec" style="margin-top:18px">Hacker News · 首页十条</div>
         ${hn.length ? `<div class="skills-cards${anim}">${hn.map(hnCardHtml).join('')}</div>`
-            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}
-        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(dailyReport.updated || '—')}</div>`;
+            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}`;
 }
 
 function ensureDailyReport() {
@@ -1401,7 +1400,7 @@ let statsData = null;
 let statsLoading = false;
 
 function renderStats(animate = false) {
-    setViewHead('访问统计', 'GoatCounter · 访客（UV）趋势');
+    setViewHead('访问统计', '', 'GoatCounter · 访客（UV）趋势' + (statsData && statsData.updated ? ' · 更新于 ' + statsData.updated : ''));
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1427,8 +1426,7 @@ function renderStats(animate = false) {
     mediaGrid.innerHTML = `
         ${cards}
         <div class="daily-sec" style="margin-top:20px">近 30 天访客（UV）趋势</div>
-        ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}
-        <div class="media-count" style="margin-top:14px">更新于 ${escapeHtml(statsData.updated || '—')}</div>`;
+        ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}`;
 }
 
 // 近 30 天访客单折线：720×160 SVG，y 轴按数据最大值自适应
@@ -1552,7 +1550,7 @@ function tuHeatHtml(days) {
     }
     const maxV = Math.max(1, ...seq.map(c => c.day));
     const lv = v => v <= 0 ? 0 : v <= maxV * 0.1 ? 1 : v <= maxV * 0.3 ? 2 : v <= maxV * 0.6 ? 3 : 4;
-    const cw = 11, ch = 11, gap = 2;
+    const cw = 13, ch = 13, gap = 3;
     const heatW = 52 * (cw + gap), heatH = 7 * (ch + gap) - gap;
     // 月份标签：每月第一列（取该列周日的月份）
     const months = [];
@@ -1571,7 +1569,21 @@ function tuHeatHtml(days) {
         const left = Math.min(m.col * (cw + gap), heatW - 26);
         return `<span class="tu-hmon" style="left:${left}px">${m.label}</span>`;
     }).join('');
-    return `<div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>`;
+    // 右侧区间用量统计（随模型筛选联动）；峰值日用缩写防长数字折行
+    const totalSum = fd.reduce((s, d) => s + d.total, 0);
+    const active = fd.filter(d => d.total > 0);
+    const avg = active.length ? Math.round(totalSum / active.length) : 0;
+    const peak = active.reduce((p, d) => d.total > p.total ? d : p, { date: '—', total: 0 });
+    const info = [
+        [tuFmt(totalSum), '区间合计'],
+        [tuFmt(avg), '活跃日均'],
+        [peak.date === '—' ? '—' : peak.date.slice(5) + ' · ' + tuShort(peak.total), '峰值日'],
+        [active.length + ' / ' + fd.length + ' 天', '有用量天数']
+    ].map(([n, l]) => `<div class="tu-info"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
+    return `<div class="tu-heat-flex">
+        <div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>
+        <div class="tu-heat-info">${info}</div>
+    </div>`;
 }
 
 // Catmull-Rom → 三次贝塞尔平滑曲线
@@ -1719,12 +1731,12 @@ function tuPaintTrend() {
 }
 
 function renderTokenUsage(animate = false) {
-    setViewHead('Token 用量', 'API Token 消耗 · 按模型与天统计');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
     if (!tokenUsage) {
+        setViewHead('Token 用量', '', 'API Token 消耗 · 按模型与天统计');
         mediaGrid.innerHTML = '<div class="media-count">Token 用量加载中…</div>';
         ensureTokenUsage();
         return;
@@ -1732,6 +1744,7 @@ function renderTokenUsage(animate = false) {
     const days = tokenUsage.days || [];
     const modelList = tuModelList(days);
     const rows = tuRows(days);
+    setViewHead('Token 用量', '', 'API Token 消耗 · 按模型与天统计 · 共 ' + rows.length + ' 条模型-天记录' + (tokenUsage.updated ? ' · 更新于 ' + tokenUsage.updated : ''));
     const sum = tuFilteredDays(days).reduce((s, d) => ({ inCache: s.inCache + d.inCache, inFresh: s.inFresh + d.inFresh, out: s.out + d.out, total: s.total + d.total }), { inCache: 0, inFresh: 0, out: 0, total: 0 });
     // 分页边界
     const pageCount = Math.max(1, Math.ceil(rows.length / tuPageSize));
@@ -1752,24 +1765,17 @@ function renderTokenUsage(animate = false) {
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
             <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
         </div>
-        <div class="tu-duo">
-            <div class="tu-duo-left">
-                <div class="tu-sec"><span class="t">Token 活动</span></div>
-                <div class="stats-chart">${tuHeatHtml(days)}</div>
-            </div>
-            <div class="tu-duo-right">
-                <div class="tu-sec"><span class="t">每日 Token 趋势</span>
-                    <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
-                        `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
-                </div>
-                <div class="stats-chart tu-trend-flex">
-                    <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
-                    <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
-                </div>
-            </div>
+        <div class="tu-sec"><span class="t">Token 活动</span></div>
+        <div class="stats-chart">${tuHeatHtml(days)}</div>
+        <div class="tu-sec"><span class="t">每日 Token 趋势</span>
+            <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
+                `<button class="tu-tab${d === tuRangeDays ? ' active' : ''}" type="button" data-tu-range="${d}">${label}</button>`).join('')}</div>
+        </div>
+        <div class="stats-chart tu-trend-flex">
+            <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
+            <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
         </div>
         ${rows.length ? `
-        <div class="media-count" style="margin:14px 0 8px">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
         <div class="tu-table-wrap">
             <table class="tu-table">
                 <thead><tr><th>日期</th><th>模型</th><th class="num">输入（缓存命中）</th><th class="num">输入（未命中）</th><th class="num">输出</th><th class="num">总计</th></tr></thead>
@@ -2177,13 +2183,13 @@ function renderCurrentView(animate = false) {
 
 // 渲染 GitHub Stars（工作流每日同步的星标仓库）
 function renderGhStars(animate = false) {
-    setViewHead('我的 Stars', 'GitHub 星标仓库');
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
     mediaGrid.style.display = 'block';
 
     const repos = [...(starsData.repos || [])];
+    setViewHead('我的 Stars', '', 'GitHub 星标仓库 · 共 ' + repos.length + ' 个' + (starsData.updated ? ' · 更新于 ' + starsData.updated : ''));
     const byDate = (a, b) => (a.starred_at || '').localeCompare(b.starred_at || '');
     if (starsSort === 'date-asc') repos.sort(byDate);
     else if (starsSort === 'date-desc') repos.sort((a, b) => byDate(b, a));
@@ -2206,7 +2212,6 @@ function renderGhStars(animate = false) {
                 <select id="starsSort">${sortOptions}</select>
             </label>
         </div>
-        <div class="media-count" style="margin-bottom:14px">共 ${repos.length} 个星标仓库${starsData.updated ? ' · 更新于 ' + escapeHtml(starsData.updated) : ''}</div>
         <div class="skills-cards">${cards || '<p class="empty-state">还没有星标仓库</p>'}</div>
     `;
     recalcMarquee();
@@ -3580,13 +3585,15 @@ function buildMediaCard(item, i) {
 }
 
 // 渲染链接卡片
-// 视图标题条（各视图共用一个 h1）：传空标题即隐藏（首页与汇率视图用不到）
-function setViewHead(title, sub) {
+// 视图标题条（各视图共用一个 h1）：传空标题即隐藏（首页与汇率视图用不到）；
+// meta 为标题条右上角的统计信息（共 N 条 · 更新于 等，随各视图渲染刷新）
+function setViewHead(title, sub, meta) {
     const head = document.getElementById('viewHead');
     if (!head) return;
     if (title) {
         document.getElementById('viewTitle').textContent = title;
         document.getElementById('viewSub').textContent = sub || '';
+        document.getElementById('viewMeta').textContent = meta || '';
         head.hidden = false;
     } else {
         head.hidden = true;

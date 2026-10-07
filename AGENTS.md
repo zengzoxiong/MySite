@@ -150,7 +150,7 @@ MySite/
 
 - **口径**：仿 ZCode 用量统计，按「模型 × 天」聚合四类 token：输入（缓存命中）/ 输入（未命中缓存）/ 输出 / 总计（`total` 可省略，前端按前三项求和兜底）
 - **数据结构**：`{ updated, days: [{ date, models: [{ id, inCache, inFresh, out, total }] }] }`，date 升序；由 API 用量日志离线导入生成（导入脚本待日志交付后补充），**暂无定时工作流，勿手改**
-- **视图**：侧栏「数据看板 → Token 用量」（`renderTokenUsage()`，视图 id `tokens`，复用 #mediaGrid），仿 ZCode 用量统计布局：模型下拉筛选（#tuModel，选项按名称字母序，全局联动汇总卡/热力图/趋势/明细，状态 `tuCurrentModel`）→ 四张汇总卡 → 「Token 活动 + 每日 Token 趋势」**左右同一栏**（`.tu-duo`：左 `tuHeatHtml()` **固定 52 周**热力图——列=周、行=周日~周六、结束于数据最后一天且末列画满，格子固定 11px 不随容器拉伸（`.tu-heat-left svg` 覆盖 `.stats-chart svg` 的 100% 宽全局规则），着色按当日用量五档 accent 混色，超宽横向滚动；右为趋势区（右上「近 7 天/近 30 天/全部」`data-tu-range` 切换，**窗口按日历日截取、无记录日补 0**；`tuPaintTrend()` 实测容器宽画多模型平滑折线，全部模型=Top6 各一线+其余合并为「其他」，hover 竖线 + 当日各线值 tooltip；下方 `tuDonutHtml()` 模型用量环形图，环心显示窗口总量缩写、图例列各线 tokens 与百分比，数据与趋势线同源联动））→ 模型-天明细表（.tu-table）带分页（每页 10/20/50 `#tuPageSize` + 上一页/下一页，状态 `tuPage`/`tuPageSize`）；趋势折线颜色走 .tu-c0~7 八色板；已接入 renderCurrentView / 侧栏 data-token / 命令面板 / resize 重画
+- **视图**：侧栏「数据看板 → Token 用量」（`renderTokenUsage()`，视图 id `tokens`，复用 #mediaGrid）：模型下拉筛选（#tuModel，选项按名称字母序）→ 四张汇总卡 → 「Token 活动」热力图（`tuHeatHtml()`，**固定 52 周**：列=周、行=周日~周六、结束于数据最后一天且末列画满，着色按当日用量五档 accent 混色；格子固定 13px 不随容器拉伸——`.tu-heat-left svg` 覆盖 `.stats-chart svg` 的 100% 宽全局规则，超宽横向滚动）**左图右统计**（区间合计/活跃日均/峰值日缩写/活跃天数，随模型联动）→ 「每日 Token 趋势」+ 「模型用量」环形图（`.tu-trend-flex` 左右：左 `tuPaintTrend()` 实测容器宽画多模型平滑折线、右 `tuDonutHtml()` 居中总量+图例百分比，同色板联动；右上「近 7 天/近 30 天/全部」`data-tu-range`，窗口按日历日截取、无记录日补 0）→ 模型-天明细表（分页 10/20/50）。**统计类文案（共 N 条 · 更新于）统一走 `setViewHead(title, sub, meta)` 的第三个参数显示在标题条右上**（Stars/每日日报/访问统计/Token 四处均已迁入；原卡片区内的统计行已删）
 
 ## 前端架构与约定（script.js / styles.css）
 

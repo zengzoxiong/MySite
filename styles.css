@@ -3430,6 +3430,17 @@ body.no-anim .mp-lyric > div {
     color: var(--text-secondary);
 }
 
+/* 标题条右上：视图统计信息（共 N 条 · 更新于 等，setViewHead 第三参数） */
+.view-meta {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    max-width: 62%;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
 /* 视觉隐藏但保留给读屏（首页语义 h1 用） */
 .sr-only {
     position: absolute;
@@ -4366,18 +4377,32 @@ body.no-anim .mp-lyric > div {
 }
 .tu-tab.active { background: var(--accent-color); color: #fff; }
 
-/* Token 活动（热力图）+ 每日 Token 趋势：左右同一栏，窄屏自动换行堆叠 */
-.tu-duo {
+/* Token 活动热力图：列=周、行=周日~周六，五档色阶走 accent 混色（仿贡献图）；左图右统计 */
+.tu-heat-flex {
     display: flex;
-    align-items: flex-start;
-    gap: 24px;
+    align-items: center;
+    gap: 28px;
     flex-wrap: wrap;
 }
-.tu-duo-left { flex: none; width: 712px; max-width: 100%; }
-.tu-duo-right { flex: 1; min-width: 340px; }
 .tu-heat-left { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
 /* 热力图格子固定尺寸：压过 .stats-chart svg 的 width:100%/height:160px 全局规则 */
 .tu-heat-left svg { width: auto; height: auto; display: block; }
+.tu-heat-info {
+    flex: 1;
+    min-width: 260px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px 18px;
+    align-content: center;
+}
+.tu-info { display: grid; gap: 2px; }
+.tu-info .n {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    font-variant-numeric: tabular-nums;
+}
+.tu-info .l { font-size: 0.75rem; color: var(--text-secondary); }
 .tu-hcell { stroke: transparent; }
 .tu-hcell.lv0 { fill: color-mix(in srgb, var(--text-secondary) 14%, transparent); }
 .tu-hcell.lv1 { fill: color-mix(in srgb, var(--accent-color) 25%, transparent); }
