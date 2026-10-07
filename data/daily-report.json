@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-07",
+  "updated": "2026-10-08",
   "sections": {
     "trending": [
       {
-        "name": "storytold/photocraft",
-        "url": "https://github.com/storytold/photocraft",
-        "desc": "An open-source, clean-room reimplementation of Adobe Photoshop in pure Rust",
-        "stars": 6242,
-        "language": "Rust"
-      },
-      {
-        "name": "rehan-remade/universal-modder",
-        "url": "https://github.com/rehan-remade/universal-modder",
-        "desc": "Point Claude at any game. Skills, tools and the fal MCP that let Claude Code mod almost any PC game you own: recon, reverse engineering, fal-generated art/3D/au",
-        "stars": 4565,
-        "language": "Python"
+        "name": "openai/math",
+        "url": "https://github.com/openai/math",
+        "desc": "",
+        "stars": 9354,
+        "language": "Lean"
       },
       {
         "name": "QingYunA/answer-me-with-html",
         "url": "https://github.com/QingYunA/answer-me-with-html",
         "desc": "Answer me with HTML — an agent skill that answers hard questions with a one-page HTML you can actually read. 让 AI Agent 用一页 HTML 回答复杂问题。",
-        "stars": 1759,
+        "stars": 2038,
         "language": "JavaScript"
-      },
-      {
-        "name": "nanaism/yomiyasu",
-        "url": "https://github.com/nanaism/yomiyasu",
-        "desc": "AI生成の日本語を自然な日本語へ推敲するAgent Skill / Agent Skill for Refining AI-Generated Japanese into Natural Japanese",
-        "stars": 1599,
-        "language": "Python"
-      },
-      {
-        "name": "kargulstudio/sales-crm",
-        "url": "https://github.com/kargulstudio/sales-crm",
-        "desc": "",
-        "stars": 1582,
-        "language": "TypeScript"
-      },
-      {
-        "name": "storytold/filmcraft",
-        "url": "https://github.com/storytold/filmcraft",
-        "desc": "An open-source, clean-room reimplementation of Adobe Premiere Pro built in pure Rust.",
-        "stars": 1557,
-        "language": "Rust"
       },
       {
         "name": "facebookincubator/muse-gadget-sdk",
         "url": "https://github.com/facebookincubator/muse-gadget-sdk",
         "desc": "Open source SDK to build Muse gadgets",
-        "stars": 1537,
+        "stars": 1649,
         "language": "C"
+      },
+      {
+        "name": "storytold/effectcraft",
+        "url": "https://github.com/storytold/effectcraft",
+        "desc": "",
+        "stars": 1641,
+        "language": "Rust"
+      },
+      {
+        "name": "kargulstudio/sales-crm",
+        "url": "https://github.com/kargulstudio/sales-crm",
+        "desc": "",
+        "stars": 1635,
+        "language": "TypeScript"
       },
       {
         "name": "deadinside28/bloodborne_pc",
         "url": "https://github.com/deadinside28/bloodborne_pc",
         "desc": "",
-        "stars": 1222,
+        "stars": 1624,
         "language": "C++"
       },
       {
-        "name": "storytold/lightcraft",
-        "url": "https://github.com/storytold/lightcraft",
-        "desc": "An open-source, clean-room reimplementation of Adobe Lightroom in pure Rust.",
-        "stars": 1174,
+        "name": "alchaincyf/huashu-art-motion",
+        "url": "https://github.com/alchaincyf/huashu-art-motion",
+        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
+        "stars": 1590,
+        "language": "JavaScript"
+      },
+      {
+        "name": "lucasmarkes/hairline",
+        "url": "https://github.com/lucasmarkes/hairline",
+        "desc": "Six isometric line figures that answer the pointer. For React and for anything with a DOM.",
+        "stars": 1074,
+        "language": "TypeScript"
+      },
+      {
+        "name": "storytold/designcraft",
+        "url": "https://github.com/storytold/designcraft",
+        "desc": "",
+        "stars": 959,
         "language": "Rust"
       },
       {
-        "name": "CAPCOM-TD-OSS/REDox",
-        "url": "https://github.com/CAPCOM-TD-OSS/REDox",
-        "desc": "High-performance, token-based structured data engine for .NET. A core component of REX, the technology behind CAPCOM's next-generation game engine.",
-        "stars": 1119,
-        "language": "C#"
+        "name": "mizorewww/x_gift_bot",
+        "url": "https://github.com/mizorewww/x_gift_bot",
+        "desc": "X Premium gift CLI and redemption site",
+        "stars": 919,
+        "language": "Go"
       }
     ],
     "hn": [
       {
-        "id": 49984923,
-        "title": "Sharing AI Progress in Mathematics",
-        "url": "https://openai.com/index/sharing-ai-progress-in-mathematics/",
-        "hn": "https://news.ycombinator.com/item?id=49984923",
-        "score": 139,
-        "comments": 80
+        "id": 49996437,
+        "title": "Claude Haiku 5.5",
+        "url": "https://www.anthropic.com/claude-haiku-5-5",
+        "hn": "https://news.ycombinator.com/item?id=49996437",
+        "score": 616,
+        "comments": 302
       },
       {
-        "id": 49977979,
-        "title": "Mistral Large 4",
-        "url": "https://mistral.ai/news/mistral-large-4/\\",
-        "hn": "https://news.ycombinator.com/item?id=49977979",
-        "score": 1522,
-        "comments": 936
+        "id": 49998895,
+        "title": "Margaret Hamilton, who led software development for the Apollo program, has died",
+        "url": "https://news.mit.edu/2026/margaret-hamilton-computing-pioneer-dies-1007",
+        "hn": "https://news.ycombinator.com/item?id=49998895",
+        "score": 335,
+        "comments": 32
       },
       {
-        "id": 49984025,
-        "title": "Decisions API is in public beta",
-        "url": "https://developers.openai.com/api/docs/guides/decisions",
-        "hn": "https://news.ycombinator.com/item?id=49984025",
-        "score": 68,
-        "comments": 27
+        "id": 49996425,
+        "title": "GPT‑6 and Intelligent UI for everyone",
+        "url": "https://openai.com/index/gpt-6-for-everyone/",
+        "hn": "https://news.ycombinator.com/item?id=49996425",
+        "score": 453,
+        "comments": 230
       },
       {
-        "id": 49980487,
-        "title": "EmbeddingGemma 2: An open, lightweight multimodal embedding model",
-        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/",
-        "hn": "https://news.ycombinator.com/item?id=49980487",
-        "score": 177,
-        "comments": 25
+        "id": 49996259,
+        "title": "Docker Agent",
+        "url": "https://github.com/docker/docker-agent",
+        "hn": "https://news.ycombinator.com/item?id=49996259",
+        "score": 158,
+        "comments": 71
       },
       {
-        "id": 49976265,
-        "title": "Nobel Prize in Physics 2026: Francis Halzen",
-        "url": "https://www.nobelprize.org/prizes/physics/2026/",
-        "hn": "https://news.ycombinator.com/item?id=49976265",
-        "score": 499,
-        "comments": 166
+        "id": 49997073,
+        "title": "Push ifs up and fors down: The idiom, its algebra, and its limits",
+        "url": "https://debasishg.github.io/blog/push-ifs-up-fors-down/",
+        "hn": "https://news.ycombinator.com/item?id=49997073",
+        "score": 87,
+        "comments": 38
       },
       {
-        "id": 49980715,
-        "title": "OpenTPU – An open-source AI accelerator, developed by AI",
-        "url": "https://github.com/FeSens/openTPU",
-        "hn": "https://news.ycombinator.com/item?id=49980715",
-        "score": 202,
-        "comments": 266
+        "id": 49994443,
+        "title": "Show HN: Bigwords.page – Turn any screen into a sign. The URL is the app",
+        "url": "https://bigwords.page/",
+        "hn": "https://news.ycombinator.com/item?id=49994443",
+        "score": 310,
+        "comments": 102
       },
       {
-        "id": 49983703,
-        "title": "Paramount Skydance has completed its $111B merger with Warner Bros. Discovery",
-        "url": "https://arstechnica.com/tech-policy/2026/10/paramount-completes-111b-warner-merger-creating-skydance-behemoth/",
-        "hn": "https://news.ycombinator.com/item?id=49983703",
-        "score": 129,
-        "comments": 176
+        "id": 49991227,
+        "title": "Shipping JPEG XL in Chrome",
+        "url": "https://developer.chrome.com/blog/jpeg-xl-in-chrome",
+        "hn": "https://news.ycombinator.com/item?id=49991227",
+        "score": 467,
+        "comments": 301
       },
       {
-        "id": 49981905,
-        "title": "Claude Code’s suggested message feature: I think the real customer is the model",
-        "url": "https://www.zohaib.cc/blog/smartest-claude-code-feature",
-        "hn": "https://news.ycombinator.com/item?id=49981905",
-        "score": 55,
-        "comments": 29
+        "id": 49978315,
+        "title": "If somebody tries to hot-patch an already-hot-patched function",
+        "url": "https://devblogs.microsoft.com/oldnewthing/20261005-00/?p=112755/",
+        "hn": "https://news.ycombinator.com/item?id=49978315",
+        "score": 26,
+        "comments": 6
       },
       {
-        "id": 49983780,
-        "title": "Vibecoding Photoshop: Time and pressure",
-        "url": "https://andreklein.net/vibecoding-photoshop-time-and-pressure/",
-        "hn": "https://news.ycombinator.com/item?id=49983780",
-        "score": 6,
-        "comments": 1
+        "id": 49994145,
+        "title": "Navier–Stokes Lost in Translation",
+        "url": "https://arxiv.org/abs/2610.08144",
+        "hn": "https://news.ycombinator.com/item?id=49994145",
+        "score": 227,
+        "comments": 150
       },
       {
-        "id": 49983791,
-        "title": "OpenSSH 10.6",
-        "url": "https://www.openssh.org/releasenotes.html#10.6",
-        "hn": "https://news.ycombinator.com/item?id=49983791",
-        "score": 66,
-        "comments": 12
+        "id": 49980626,
+        "title": "How machines learned precision",
+        "url": "https://glinscott.github.io/how-machines-learned-precision/",
+        "hn": "https://news.ycombinator.com/item?id=49980626",
+        "score": 89,
+        "comments": 40
       }
     ]
   }
