@@ -4356,3 +4356,38 @@ body.no-anim .mp-lyric > div {
 .lg-pv { background: var(--accent-color); }
 .lg-uv { background: #34a853; }
 .stats-x-axis { margin-left: auto; }
+
+/* ===== Token 用量（数据看板 · 模型×天） ===== */
+/* 三类 token 的柱色/图例色：SVG rect 吃 fill，图例色条吃 background */
+.tu-c-cache { fill: var(--accent-color); background: var(--accent-color); }
+.tu-c-fresh { fill: #f59e0b; background: #f59e0b; }
+.tu-c-out { fill: #34a853; background: #34a853; }
+.tu-table-wrap {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 4px 14px;
+    overflow-x: auto;
+}
+.tu-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.tu-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 11px 10px 9px;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--glass-border);
+}
+.tu-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+.tu-table th.num, .tu-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tu-table .tu-model { color: var(--text-secondary); }
+.tu-table tbody tr:hover { background: color-mix(in srgb, var(--accent-color) 7%, transparent); }
+.tu-table tbody tr:last-child td { border-bottom: none; }

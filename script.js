@@ -11,7 +11,7 @@ let currentCategory = '';
 let currentToolCategory = '';
 let currentMediaType = '番剧';
 let currentSort = 'rating-desc'; // 六向排序，见 SORT_OPTIONS
-let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'daily' | 'stats' | 'search'
+let currentView = 'home'; // 'home' | 'links' | 'tools' | 'media' | 'plugin' | 'ghstars' | 'fx' | 'daily' | 'stats' | 'tokens' | 'search'
 let currentPluginCat = '';
 let currentStatusFilter = ''; // '' = 全部
 let searchFrom = 'home'; // 全域搜索前所在视图，清空搜索后恢复
@@ -1469,6 +1469,152 @@ function ensureStats() {
         .finally(() => { statsLoading = false; if (currentView === 'stats') renderStats(true); });
 }
 
+// ===== Token 用量（数据看板 · 模型×天：输入（缓存命中/未命中）/ 输出 / 总计）=====
+// 数据 data/token-usage.json 由 API 用量日志离线导入生成，结构：
+// { updated, days: [{ date, models: [{ id, inCache, inFresh, out, total }] }] }（date 升序；total 可省略，前端按三项求和兜底）
+let tokenUsage = null;
+let tokenUsageLoading = false;
+let tuCurrentModel = ''; // '' = 全部模型
+
+function tuFmt(n) {
+    return (n || 0).toLocaleString('zh-CN');
+}
+
+// y 轴 token 数缩写：1234567 → 1.2M / 12345 → 12k / 345 → 345
+function tuAxisText(v) {
+    if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'k';
+    return String(Math.round(v));
+}
+
+// 近 30 天三类堆叠柱：720×200 SVG，柱色走 .tu-c-* 类（颜色定义在 CSS，JS 不硬编色）
+function tuChartHtml(days) {
+    const data = days.map(d => {
+        let cache = 0, fresh = 0, out = 0;
+        (d.models || []).forEach(m => {
+            if (tuCurrentModel && m.id !== tuCurrentModel) return;
+            cache += m.inCache || 0;
+            fresh += m.inFresh || 0;
+            out += m.out || 0;
+        });
+        return { date: d.date, cache: cache, fresh: fresh, out: out };
+    }).filter(d => d.cache + d.fresh + d.out > 0);
+    if (!data.length) return '';
+    const w = 720, h = 200, padT = 12, padB = 26, padL = 46;
+    const innerH = h - padT - padB;
+    const maxV = Math.max(1, ...data.map(d => d.cache + d.fresh + d.out)) * 1.08;
+    const n = data.length;
+    const slot = (w - padL - 8) / n;
+    const bw = Math.min(slot * 0.62, 28);
+    const y = v => padT + innerH * (1 - v / maxV);
+    const segDefs = [['cache', 'tu-c-cache', '输入（缓存命中）'], ['fresh', 'tu-c-fresh', '输入（未命中）'], ['out', 'tu-c-out', '输出']];
+    const bars = data.map((d, i) => {
+        const x = padL + 4 + i * slot + (slot - bw) / 2;
+        let acc = 0;
+        return segDefs.map(([k, cls, label]) => {
+            const v = d[k];
+            if (v <= 0) return '';
+            const y0 = y(acc + v);
+            const hh = Math.max(y(acc) - y0, 1);
+            acc += v;
+            return `<rect class="${cls}" x="${x.toFixed(1)}" y="${y0.toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" rx="1.5"><title>${escapeHtml(d.date)} · ${label} ${tuFmt(v)}</title></rect>`;
+        }).join('');
+    }).join('');
+    const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
+        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - 4}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
+        `<text class="fx-axis" x="${padL - 6}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${tuAxisText(maxV * (1 - t))}</text>`
+    ).join('');
+    // x 轴日期抽稀（≤7 个，末位必出，相邻去重）
+    const step = Math.max(1, Math.ceil(n / 7));
+    const labels = [];
+    let lastLabel = '';
+    for (let i = 0; i < n; i += step) {
+        const label = data[i].date.slice(5);
+        if (label !== lastLabel) { labels.push({ x: padL + 4 + i * slot + slot / 2, label: label }); lastLabel = label; }
+    }
+    const lastDate = data[n - 1].date.slice(5);
+    if (lastLabel !== lastDate) labels.push({ x: padL + 4 + (n - 1) * slot + slot / 2, label: lastDate });
+    const xLabels = labels.map(l =>
+        `<text class="fx-axis" x="${l.x.toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(l.label)}</text>`
+    ).join('');
+    return `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天 Token 用量堆叠柱状图">
+            ${grid}${bars}${xLabels}
+        </svg>
+        <div class="stats-legend">
+            <span><i class="lg tu-c-cache"></i>输入（缓存命中）</span>
+            <span><i class="lg tu-c-fresh"></i>输入（未命中）</span>
+            <span><i class="lg tu-c-out"></i>输出</span>
+        </div>`;
+}
+
+function renderTokenUsage(animate = false) {
+    setViewHead('Token 用量', 'API Token 消耗 · 按模型与天统计');
+    dashboard.classList.add('hidden');
+    linksGrid.style.display = 'none';
+    emptyState.style.display = 'none';
+    mediaGrid.style.display = 'block';
+    if (!tokenUsage) {
+        mediaGrid.innerHTML = '<div class="media-count">Token 用量加载中…</div>';
+        ensureTokenUsage();
+        return;
+    }
+    const days = tokenUsage.days || [];
+    // 归纳模型清单（保持首次出现顺序）+ 汇总 + 「模型-天」明细行（日期倒序）
+    const models = [];
+    const rows = [];
+    const sum = { cache: 0, fresh: 0, out: 0, total: 0 };
+    [...days].reverse().forEach(d => {
+        (d.models || []).forEach(m => {
+            if (!models.includes(m.id)) models.push(m.id);
+            if (tuCurrentModel && m.id !== tuCurrentModel) return;
+            const total = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
+            sum.cache += m.inCache || 0;
+            sum.fresh += m.inFresh || 0;
+            sum.out += m.out || 0;
+            sum.total += total;
+            rows.push({ date: d.date, id: m.id, inCache: m.inCache || 0, inFresh: m.inFresh || 0, out: m.out || 0, total: total });
+        });
+    });
+    const chips = models.length > 1
+        ? `<div class="media-filters"><div class="media-chips">${[''].concat(models).map(m =>
+            `<button class="media-chip${m === tuCurrentModel ? ' active' : ''}" data-tu-chip="${escapeHtml(m)}">${m ? escapeHtml(m) : '全部模型'}</button>`).join('')}</div></div>`
+        : '';
+    mediaGrid.innerHTML = `
+        <div class="stats-cards">
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.cache)}</span><span class="stat-label">输入 · 缓存命中</span></div>
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.fresh)}</span><span class="stat-label">输入 · 未命中缓存</span></div>
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
+            <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
+        </div>
+        <div class="daily-sec" style="margin-top:20px">近 30 天用量构成</div>
+        ${days.length ? `<div class="stats-chart" style="margin-top:10px">${tuChartHtml(days.slice(-30))}</div>` : ''}
+        ${rows.length ? `
+        ${chips}
+        <div class="media-count" style="margin:14px 0">共 ${rows.length} 条模型-天记录${tokenUsage.updated ? ' · 更新于 ' + escapeHtml(tokenUsage.updated) : ''}</div>
+        <div class="tu-table-wrap">
+            <table class="tu-table">
+                <thead><tr><th>日期</th><th>模型</th><th class="num">输入（缓存命中）</th><th class="num">输入（未命中）</th><th class="num">输出</th><th class="num">总计</th></tr></thead>
+                <tbody>${rows.map(r =>
+                    `<tr><td>${escapeHtml(r.date)}</td><td class="tu-model">${escapeHtml(r.id)}</td><td class="num">${tuFmt(r.inCache)}</td><td class="num">${tuFmt(r.inFresh)}</td><td class="num">${tuFmt(r.out)}</td><td class="num">${tuFmt(r.total)}</td></tr>`).join('')}</tbody>
+            </table>
+        </div>` : '<div class="media-count" style="margin-top:16px">暂无用量数据，待导入 API 用量日志</div>'}
+    `;
+}
+
+function ensureTokenUsage() {
+    if (tokenUsageLoading) return;
+    tokenUsageLoading = true;
+    fetch('data/token-usage.json')
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(d => { tokenUsage = d; })
+        .catch(e => {
+            console.error('Token 用量数据加载失败:', e);
+            tokenUsage = { updated: '', days: [] }; // 占位：显示空态，重进视图可重试
+        })
+        .finally(() => { tokenUsageLoading = false; if (currentView === 'tokens') renderTokenUsage(true); });
+}
+
 async function openTalisman() {
     const modal = document.getElementById('talismanModal');
     const canvas = document.getElementById('talismanCanvas');
@@ -1837,6 +1983,7 @@ function renderCurrentView(animate = false) {
     else if (currentView === 'fx') renderFx(animate);
     else if (currentView === 'daily') renderDailyReport(animate);
     else if (currentView === 'stats') renderStats(animate);
+    else if (currentView === 'tokens') renderTokenUsage(animate);
     else renderLinks(animate);
 }
 
@@ -3675,6 +3822,9 @@ function buildCmdkCommands() {
         { icon: IC.plug, label: '数据看板：Agent MCP', run: () => {
             document.querySelector('#sidebarData [data-plugin-cat="mcps"]')?.click();
         } },
+        { icon: IC.chart, label: '数据看板：Token 用量', run: () => {
+            document.querySelector('#sidebarData [data-token]')?.click();
+        } },
         { icon: IC.wrench, label: '图片格式转换工具', run: () => { window.open('tools/image-converter/app.html', '_blank'); } }
     ];
     document.querySelectorAll('#sidebarCategories .sidebar-item').forEach(item => {
@@ -3949,6 +4099,11 @@ function initEventListeners() {
             currentView = 'stats';
             searchFrom = 'stats';
             renderStats(true);
+        } else if (item.dataset.token) {
+            // Token 用量：模型×天聚合的 API Token 消耗统计
+            currentView = 'tokens';
+            searchFrom = 'tokens';
+            renderTokenUsage(true);
         } else {
             // Agent Skills / Agent MCP：注册表视图
             currentPluginCat = item.dataset.pluginCat;
@@ -4012,6 +4167,12 @@ function initEventListeners() {
             fxRangeDays = Number(range.dataset.fxRange);
             mediaGrid.querySelectorAll('.fx-range').forEach(b => b.classList.toggle('active', b === range));
             fxPaintChart();
+            return;
+        }
+        const tuChip = e.target.closest('[data-tu-chip]');
+        if (tuChip) {
+            tuCurrentModel = tuChip.dataset.tuChip;
+            renderTokenUsage(false);
             return;
         }
         if (e.target.closest('#fxConvSwap')) fxConvSwap();

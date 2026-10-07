@@ -1,0 +1,5 @@
+{
+  "updated": "",
+  "note": "API 用量日志离线导入生成。结构：days[].date 日期升序；models[].id 模型名，inCache 输入（缓存命中），inFresh 输入（未命中缓存），out 输出，total 总计（可省略，前端按三项求和兜底）",
+  "days": []
+}

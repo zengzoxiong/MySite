@@ -30,6 +30,7 @@ MySite/
 │   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
 │   ├── daily-report.json # 数据看板「每日日报」Trending+HN（工作流每日同步，勿手改）
 │   ├── goatcounter-stats.json # 数据看板「访问统计」PV/UV（GoatCounter API 每日同步，勿手改）
+│   ├── token-usage.json  # 数据看板「Token 用量」（模型×天聚合，API 日志离线导入，勿手改）
 │   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
 │   ├── chatgpt-plus.json # ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期，见「汇率」小节）
 │   └── playlist.json     # 首页音乐播放器歌单
@@ -129,7 +130,7 @@ MySite/
 - **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布）——**页面不写「数据来源/非实时」这类注脚（用户要求删掉），但也别对外宣称实时行情**，数据本身仍是日频。
 - **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD,TRY,INR,PHP,BRL,CAD,THB,MYR], latest:{币种:值}, series:[[日期, 15 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。**汇率卡片展示 `fxData.columns` 里的全部币种**（`fxPaintCards()` 直接按列渲染，15 种一屏铺开），`FX_META` 只负责名字与展示口径——**加币种务必同时改 `SYMBOLS` 和 `FX_META`**，漏了 meta 卡片会显示成裸代码。
 - **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 18:07（北京 02:07，深夜低峰；ECB 参考价北京 23 点前后已发布）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
-- **视图**：侧栏「数据看板 → 汇率走势」进入（「数据看板」分区收纳「我的 Stars」「汇率走势」「每日日报」「Agent Skills」「Agent MCP」五项：前三者是工作流每日同步的数据视图，后两者是注册表视图，Stars 原先挂在「网站收藏」、Agent Plugin 原先独占分区，2026-09 一并移入），`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
+- **视图**：侧栏「数据看板 → 汇率走势」进入（「数据看板」分区收纳「我的 Stars」「汇率走势」「每日日报」「访问统计」「Token 用量」「Agent Skills」「Agent MCP」七项：前五项是同步/导入的数据视图，后两项是注册表视图，Stars 原先挂在「网站收藏」、Agent Plugin 原先独占分区，2026-09 一并移入），`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
 - 涨跌色是 `--up-color`（红涨）/`--down-color`（绿跌），明暗各一套；图表颜色全部走 CSS 类 + 变量，**别在 JS 里硬编颜色**。
 - 全域搜索输入币种名/代码/别名（`fxSearchHits`）会出现「汇率」分组，点击跳到汇率视图并选中该币种。
 - **换算器**：视图最下方的「汇率换算」是双向计算器（`fxConvert()` 以人民币为桥算交叉汇率，数据方向是「1 CNY = X 外币」，所以 `amount / raw[from] * raw[to]`；上栏改动算下栏、下栏改动算上栏，互换按钮只换货币并按上栏重算）。汇率行沿用日元/韩元按 100 单位报价的口径（`fxConvUnit()`）并带上数据日期；结果保留 4 位小数（`fxAmt`）、汇率行按量级保留有效位（`fxRateAmt`）。上栏是输入、下栏是结果（`.fx-conv-out` 用 `color-mix` 加一层主题色淡底做区分）。**别用 `type="number"` 的固有宽度做窄屏布局**：数字输入框 min-content ≈206px，配合下拉会把卡片撑破，`.fx-conv-row` 已加 `flex-wrap: wrap`。
@@ -144,6 +145,12 @@ MySite/
 - **同步**：`.github/workflows/goatcounter.yml` 每日 03:47（北京）跑 `scripts/sync_goatcounter.py`，从 GoatCounter API v0（stat/range，90 天分段）拉逐日 PV/UV 写 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（后台 Settings→API 生成），无变化跳过提交
 - **视图**：侧栏「数据看板 → 访问统计」（`renderStats()`，复用 #mediaGrid）：累计/近 7 天/近 30 天 PV·UV 汇总卡 + 近 30 天双折线（PV 蓝 / UV 绿），访客 IP/来源等明细只在 GoatCounter 后台网页看（API 不暴露原始 visits）
 - **隐私**：明文收集访客 IP 需谨慎（PIPL），GoatCounter 后台可关闭明文 IP 记录；接入第三方统计建议页面提供隐私说明
+
+### 8.6 Token 用量（data/token-usage.json + 数据看板视图）
+
+- **口径**：仿 ZCode 用量统计，按「模型 × 天」聚合四类 token：输入（缓存命中）/ 输入（未命中缓存）/ 输出 / 总计（`total` 可省略，前端按前三项求和兜底）
+- **数据结构**：`{ updated, days: [{ date, models: [{ id, inCache, inFresh, out, total }] }] }`，date 升序；由 API 用量日志离线导入生成（导入脚本待日志交付后补充），**暂无定时工作流，勿手改**
+- **视图**：侧栏「数据看板 → Token 用量」（`renderTokenUsage()`，视图 id `tokens`，复用 #mediaGrid）：四张汇总卡（复用 .stat-card）+ 近 30 天三类堆叠柱（`tuChartHtml()`，柱色走 `.tu-c-*` 类、网格/轴文字复用 .fx-grid/.fx-axis）+ 模型筛选 chips（复用 .media-chip，事件委托在 #mediaGrid 的 `data-tu-chip`，状态存 `tuCurrentModel`）+ 模型-天明细表（.tu-table，横向可滚）；已接入 renderCurrentView / 侧栏 data-token / 命令面板
 
 ## 前端架构与约定（script.js / styles.css）
 
