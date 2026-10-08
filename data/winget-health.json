@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-07",
+  "checkedAt": "2026-10-08",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -49,8 +49,8 @@
     },
     "OpenJS.NodeJS.LTS": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "24.19.0"
+      "checkedAt": "2026-10-08",
+      "latest": "24.20.0"
     },
     "Tencent.QQ.NT": {
       "ok": true,
@@ -64,8 +64,8 @@
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "4.1.15.13"
+      "checkedAt": "2026-10-08",
+      "latest": "4.1.15.50"
     }
   }
 }
