@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-08",
+  "updated": "2026-10-09",
   "sections": {
     "trending": [
       {
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 9354,
+        "stars": 12050,
         "language": "Lean"
+      },
+      {
+        "name": "alchaincyf/huashu-art-motion",
+        "url": "https://github.com/alchaincyf/huashu-art-motion",
+        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
+        "stars": 2422,
+        "language": "JavaScript"
       },
       {
         "name": "QingYunA/answer-me-with-html",
         "url": "https://github.com/QingYunA/answer-me-with-html",
         "desc": "Answer me with HTML — an agent skill that answers hard questions with a one-page HTML you can actually read. 让 AI Agent 用一页 HTML 回答复杂问题。",
-        "stars": 2038,
+        "stars": 2319,
         "language": "JavaScript"
       },
       {
         "name": "facebookincubator/muse-gadget-sdk",
         "url": "https://github.com/facebookincubator/muse-gadget-sdk",
         "desc": "Open source SDK to build Muse gadgets",
-        "stars": 1649,
+        "stars": 1790,
         "language": "C"
-      },
-      {
-        "name": "storytold/effectcraft",
-        "url": "https://github.com/storytold/effectcraft",
-        "desc": "",
-        "stars": 1641,
-        "language": "Rust"
       },
       {
         "name": "kargulstudio/sales-crm",
         "url": "https://github.com/kargulstudio/sales-crm",
         "desc": "",
-        "stars": 1635,
+        "stars": 1658,
         "language": "TypeScript"
-      },
-      {
-        "name": "deadinside28/bloodborne_pc",
-        "url": "https://github.com/deadinside28/bloodborne_pc",
-        "desc": "",
-        "stars": 1624,
-        "language": "C++"
-      },
-      {
-        "name": "alchaincyf/huashu-art-motion",
-        "url": "https://github.com/alchaincyf/huashu-art-motion",
-        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 1590,
-        "language": "JavaScript"
-      },
-      {
-        "name": "lucasmarkes/hairline",
-        "url": "https://github.com/lucasmarkes/hairline",
-        "desc": "Six isometric line figures that answer the pointer. For React and for anything with a DOM.",
-        "stars": 1074,
-        "language": "TypeScript"
-      },
-      {
-        "name": "storytold/designcraft",
-        "url": "https://github.com/storytold/designcraft",
-        "desc": "",
-        "stars": 959,
-        "language": "Rust"
       },
       {
         "name": "mizorewww/x_gift_bot",
         "url": "https://github.com/mizorewww/x_gift_bot",
         "desc": "X Premium gift CLI and redemption site",
-        "stars": 919,
+        "stars": 1080,
         "language": "Go"
+      },
+      {
+        "name": "Jakeschincariol/replica-skill",
+        "url": "https://github.com/Jakeschincariol/replica-skill",
+        "desc": "Eleven free Claude skills that clone any app: reverse-engineer it, rebuild it, test it for bugs, then fix what its users hate. Free, MIT.",
+        "stars": 1072,
+        "language": "Python"
+      },
+      {
+        "name": "nullmoth/nvidia-macos-driver",
+        "url": "https://github.com/nullmoth/nvidia-macos-driver",
+        "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
+        "stars": 1045,
+        "language": "Rust"
+      },
+      {
+        "name": "sganggs/Stronghold-Protocol",
+        "url": "https://github.com/sganggs/Stronghold-Protocol",
+        "desc": "明日方舟「卫戍协议：盟约」非官方同人复刻：浏览器自走棋塔防，单人或 1–4 人联机合作（非商业）",
+        "stars": 1001,
+        "language": "JavaScript"
+      },
+      {
+        "name": "alejandrobujan/tendedero",
+        "url": "https://github.com/alejandrobujan/tendedero",
+        "desc": "Screenshots, hung out to dry. A tiny native macOS app that hangs every screenshot on a line at the top of your screen.",
+        "stars": 989,
+        "language": "Swift"
       }
     ],
     "hn": [
       {
-        "id": 49996437,
-        "title": "Claude Haiku 5.5",
-        "url": "https://www.anthropic.com/claude-haiku-5-5",
-        "hn": "https://news.ycombinator.com/item?id=49996437",
-        "score": 616,
-        "comments": 302
-      },
-      {
-        "id": 49998895,
-        "title": "Margaret Hamilton, who led software development for the Apollo program, has died",
-        "url": "https://news.mit.edu/2026/margaret-hamilton-computing-pioneer-dies-1007",
-        "hn": "https://news.ycombinator.com/item?id=49998895",
-        "score": 335,
-        "comments": 32
-      },
-      {
-        "id": 49996425,
-        "title": "GPT‑6 and Intelligent UI for everyone",
-        "url": "https://openai.com/index/gpt-6-for-everyone/",
-        "hn": "https://news.ycombinator.com/item?id=49996425",
-        "score": 453,
-        "comments": 230
-      },
-      {
-        "id": 49996259,
-        "title": "Docker Agent",
-        "url": "https://github.com/docker/docker-agent",
-        "hn": "https://news.ycombinator.com/item?id=49996259",
-        "score": 158,
-        "comments": 71
-      },
-      {
-        "id": 49997073,
-        "title": "Push ifs up and fors down: The idiom, its algebra, and its limits",
-        "url": "https://debasishg.github.io/blog/push-ifs-up-fors-down/",
-        "hn": "https://news.ycombinator.com/item?id=49997073",
-        "score": 87,
-        "comments": 38
-      },
-      {
-        "id": 49994443,
-        "title": "Show HN: Bigwords.page – Turn any screen into a sign. The URL is the app",
-        "url": "https://bigwords.page/",
-        "hn": "https://news.ycombinator.com/item?id=49994443",
-        "score": 310,
-        "comments": 102
-      },
-      {
-        "id": 49991227,
-        "title": "Shipping JPEG XL in Chrome",
-        "url": "https://developer.chrome.com/blog/jpeg-xl-in-chrome",
-        "hn": "https://news.ycombinator.com/item?id=49991227",
+        "id": 50008427,
+        "title": "Whistle: Speech to Text in 16.9 MB",
+        "url": "https://cactuscompute.com/blog/whistle",
+        "hn": "https://news.ycombinator.com/item?id=50008427",
         "score": 467,
-        "comments": 301
+        "comments": 107
       },
       {
-        "id": 49978315,
-        "title": "If somebody tries to hot-patch an already-hot-patched function",
-        "url": "https://devblogs.microsoft.com/oldnewthing/20261005-00/?p=112755/",
-        "hn": "https://news.ycombinator.com/item?id=49978315",
-        "score": 26,
-        "comments": 6
+        "id": 50009295,
+        "title": "Theranos.world",
+        "url": "https://www.theranos.world/",
+        "hn": "https://news.ycombinator.com/item?id=50009295",
+        "score": 225,
+        "comments": 100
       },
       {
-        "id": 49994145,
-        "title": "Navier–Stokes Lost in Translation",
-        "url": "https://arxiv.org/abs/2610.08144",
-        "hn": "https://news.ycombinator.com/item?id=49994145",
-        "score": 227,
-        "comments": 150
+        "id": 50000488,
+        "title": "Why isn't the industry freaking out about DeepSeek 4.1 Flash?",
+        "url": "https://www.dgt.is/blog/2026-10-07-deepseek-freek-out/",
+        "hn": "https://news.ycombinator.com/item?id=50000488",
+        "score": 337,
+        "comments": 293
       },
       {
-        "id": 49980626,
-        "title": "How machines learned precision",
-        "url": "https://glinscott.github.io/how-machines-learned-precision/",
-        "hn": "https://news.ycombinator.com/item?id=49980626",
-        "score": 89,
-        "comments": 40
+        "id": 50010470,
+        "title": "The value of not getting to the point (2015)",
+        "url": "https://ken.arneson.name/2015/11/the-value-of-not-getting-to-the-point/",
+        "hn": "https://news.ycombinator.com/item?id=50010470",
+        "score": 99,
+        "comments": 33
+      },
+      {
+        "id": 49995495,
+        "title": "Man discovers his parents' coffee machine used 1TB of data in 10 days",
+        "url": "https://www.dexerto.com/entertainment/man-discovers-his-parents-coffee-machine-used-1tb-of-data-in-10-days-3416399/",
+        "hn": "https://news.ycombinator.com/item?id=49995495",
+        "score": 326,
+        "comments": 200
+      },
+      {
+        "id": 50011999,
+        "title": "AI-ready biological data: $1.8B global commitment",
+        "url": "https://biohub.org/news/virtual-biology-initiative-expansion/",
+        "hn": "https://news.ycombinator.com/item?id=50011999",
+        "score": 48,
+        "comments": 4
+      },
+      {
+        "id": 49986882,
+        "title": "I hired an illustrator to draw my house. Now it's my Home Assistant dashboard",
+        "url": "https://antonfrolov.substack.com/p/i-hired-an-illustrator-to-draw-my",
+        "hn": "https://news.ycombinator.com/item?id=49986882",
+        "score": 319,
+        "comments": 41
+      },
+      {
+        "id": 50011928,
+        "title": "ADHD as a circadian rhythm disorder: evidence and implications for chronotherapy (2025)",
+        "url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2025.1697900/full",
+        "hn": "https://news.ycombinator.com/item?id=50011928",
+        "score": 117,
+        "comments": 91
+      },
+      {
+        "id": 50003796,
+        "title": "Yes, and",
+        "url": "https://htmx.org/essays/yes-and/",
+        "hn": "https://news.ycombinator.com/item?id=50003796",
+        "score": 111,
+        "comments": 47
+      },
+      {
+        "id": 49992994,
+        "title": "ETH-68: Ethernet Audio Interface for Linux",
+        "url": "https://naturalsystems.io/eth68",
+        "hn": "https://news.ycombinator.com/item?id=49992994",
+        "score": 70,
+        "comments": 50
       }
     ]
   }
