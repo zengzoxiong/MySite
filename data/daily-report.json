@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-09",
+  "updated": "2026-10-10",
   "sections": {
     "trending": [
       {
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 12050,
+        "stars": 13045,
         "language": "Lean"
       },
       {
         "name": "alchaincyf/huashu-art-motion",
         "url": "https://github.com/alchaincyf/huashu-art-motion",
         "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 2422,
+        "stars": 2856,
         "language": "JavaScript"
       },
       {
-        "name": "QingYunA/answer-me-with-html",
-        "url": "https://github.com/QingYunA/answer-me-with-html",
-        "desc": "Answer me with HTML — an agent skill that answers hard questions with a one-page HTML you can actually read. 让 AI Agent 用一页 HTML 回答复杂问题。",
-        "stars": 2319,
-        "language": "JavaScript"
-      },
-      {
-        "name": "facebookincubator/muse-gadget-sdk",
-        "url": "https://github.com/facebookincubator/muse-gadget-sdk",
-        "desc": "Open source SDK to build Muse gadgets",
-        "stars": 1790,
-        "language": "C"
-      },
-      {
-        "name": "kargulstudio/sales-crm",
-        "url": "https://github.com/kargulstudio/sales-crm",
-        "desc": "",
-        "stars": 1658,
-        "language": "TypeScript"
-      },
-      {
-        "name": "mizorewww/x_gift_bot",
-        "url": "https://github.com/mizorewww/x_gift_bot",
-        "desc": "X Premium gift CLI and redemption site",
-        "stars": 1080,
+        "name": "mhtsec/ARTEX",
+        "url": "https://github.com/mhtsec/ARTEX",
+        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
+        "stars": 2128,
         "language": "Go"
-      },
-      {
-        "name": "Jakeschincariol/replica-skill",
-        "url": "https://github.com/Jakeschincariol/replica-skill",
-        "desc": "Eleven free Claude skills that clone any app: reverse-engineer it, rebuild it, test it for bugs, then fix what its users hate. Free, MIT.",
-        "stars": 1072,
-        "language": "Python"
       },
       {
         "name": "nullmoth/nvidia-macos-driver",
         "url": "https://github.com/nullmoth/nvidia-macos-driver",
         "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 1045,
+        "stars": 1839,
         "language": "Rust"
       },
       {
-        "name": "sganggs/Stronghold-Protocol",
-        "url": "https://github.com/sganggs/Stronghold-Protocol",
-        "desc": "明日方舟「卫戍协议：盟约」非官方同人复刻：浏览器自走棋塔防，单人或 1–4 人联机合作（非商业）",
-        "stars": 1001,
-        "language": "JavaScript"
+        "name": "storytold/wordcraft",
+        "url": "https://github.com/storytold/wordcraft",
+        "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
+        "stars": 1821,
+        "language": "Rust"
       },
       {
-        "name": "alejandrobujan/tendedero",
-        "url": "https://github.com/alejandrobujan/tendedero",
-        "desc": "Screenshots, hung out to dry. A tiny native macOS app that hangs every screenshot on a line at the top of your screen.",
-        "stars": 989,
-        "language": "Swift"
+        "name": "zhongerxin/iPhone-use",
+        "url": "https://github.com/zhongerxin/iPhone-use",
+        "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
+        "stars": 1687,
+        "language": "Python"
+      },
+      {
+        "name": "kargulstudio/sales-crm",
+        "url": "https://github.com/kargulstudio/sales-crm",
+        "desc": "",
+        "stars": 1676,
+        "language": "TypeScript"
+      },
+      {
+        "name": "LosaLosSantos/aurelio-finance",
+        "url": "https://github.com/LosaLosSantos/aurelio-finance",
+        "desc": "Open-source personal finance app with an AI financial advisor: track your net worth, investments, ETFs, cash and debts on your own computer.",
+        "stars": 1525,
+        "language": "Python"
+      },
+      {
+        "name": "Jakeschincariol/replica-skill",
+        "url": "https://github.com/Jakeschincariol/replica-skill",
+        "desc": "Eleven free Claude skills that clone any app: reverse-engineer it, rebuild it, test it for bugs, then fix what its users hate. Free, MIT.",
+        "stars": 1366,
+        "language": "Python"
+      },
+      {
+        "name": "storytold/cadcraft",
+        "url": "https://github.com/storytold/cadcraft",
+        "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
+        "stars": 1340,
+        "language": "Rust"
       }
     ],
     "hn": [
       {
-        "id": 50008427,
-        "title": "Whistle: Speech to Text in 16.9 MB",
-        "url": "https://cactuscompute.com/blog/whistle",
-        "hn": "https://news.ycombinator.com/item?id=50008427",
-        "score": 467,
-        "comments": 107
+        "id": 50019911,
+        "title": "Cloudflare acquires Deno",
+        "url": "https://deno.com/blog/cloudflare",
+        "hn": "https://news.ycombinator.com/item?id=50019911",
+        "score": 1002,
+        "comments": 520
       },
       {
-        "id": 50009295,
-        "title": "Theranos.world",
-        "url": "https://www.theranos.world/",
-        "hn": "https://news.ycombinator.com/item?id=50009295",
-        "score": 225,
+        "id": 50022292,
+        "title": "Triple-A Minesweeper",
+        "url": "https://minesweeper.mikelacher.com/",
+        "hn": "https://news.ycombinator.com/item?id=50022292",
+        "score": 474,
         "comments": 100
       },
       {
-        "id": 50000488,
-        "title": "Why isn't the industry freaking out about DeepSeek 4.1 Flash?",
-        "url": "https://www.dgt.is/blog/2026-10-07-deepseek-freek-out/",
-        "hn": "https://news.ycombinator.com/item?id=50000488",
-        "score": 337,
-        "comments": 293
+        "id": 50024499,
+        "title": "Show HN: Carrier-Explode: iPhone, Pixel and Galaxy carrier settings decoded",
+        "url": "https://carrierexplode.com/",
+        "hn": "https://news.ycombinator.com/item?id=50024499",
+        "score": 173,
+        "comments": 16
       },
       {
-        "id": 50010470,
-        "title": "The value of not getting to the point (2015)",
-        "url": "https://ken.arneson.name/2015/11/the-value-of-not-getting-to-the-point/",
-        "hn": "https://news.ycombinator.com/item?id=50010470",
-        "score": 99,
-        "comments": 33
+        "id": 50020014,
+        "title": "Our $445M Series D",
+        "url": "https://oxide.computer/blog/our-445m-series-d",
+        "hn": "https://news.ycombinator.com/item?id=50020014",
+        "score": 551,
+        "comments": 246
       },
       {
-        "id": 49995495,
-        "title": "Man discovers his parents' coffee machine used 1TB of data in 10 days",
-        "url": "https://www.dexerto.com/entertainment/man-discovers-his-parents-coffee-machine-used-1tb-of-data-in-10-days-3416399/",
-        "hn": "https://news.ycombinator.com/item?id=49995495",
-        "score": 326,
-        "comments": 200
+        "id": 50026555,
+        "title": "YouTuber Says Cops Visited Him After He Built a Flock-Style Camera to Track Cops",
+        "url": "https://gizmodo.com/youtuber-says-cops-paid-him-a-visit-after-he-built-flock-style-camera-to-track-cops-2000824306",
+        "hn": "https://news.ycombinator.com/item?id=50026555",
+        "score": 310,
+        "comments": 160
       },
       {
-        "id": 50011999,
-        "title": "AI-ready biological data: $1.8B global commitment",
-        "url": "https://biohub.org/news/virtual-biology-initiative-expansion/",
-        "hn": "https://news.ycombinator.com/item?id=50011999",
-        "score": 48,
-        "comments": 4
+        "id": 50018088,
+        "title": "Sorry, I'm in a meeting",
+        "url": "https://iminafleeting.com/",
+        "hn": "https://news.ycombinator.com/item?id=50018088",
+        "score": 711,
+        "comments": 221
       },
       {
-        "id": 49986882,
-        "title": "I hired an illustrator to draw my house. Now it's my Home Assistant dashboard",
-        "url": "https://antonfrolov.substack.com/p/i-hired-an-illustrator-to-draw-my",
-        "hn": "https://news.ycombinator.com/item?id=49986882",
-        "score": 319,
-        "comments": 41
+        "id": 50019056,
+        "title": "Pointing AI at archives found a forgotten meteorite, lost rhinos, and more",
+        "url": "https://jessewaites.com/blog/post/i-pointed-ai-at-400-years-of-archives/",
+        "hn": "https://news.ycombinator.com/item?id=50019056",
+        "score": 90,
+        "comments": 45
       },
       {
-        "id": 50011928,
-        "title": "ADHD as a circadian rhythm disorder: evidence and implications for chronotherapy (2025)",
-        "url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2025.1697900/full",
-        "hn": "https://news.ycombinator.com/item?id=50011928",
-        "score": 117,
-        "comments": 91
+        "id": 50023450,
+        "title": "Typesafe AI raises $870M at $7.5B",
+        "url": "https://typesafe.ai/blog/series-ai",
+        "hn": "https://news.ycombinator.com/item?id=50023450",
+        "score": 223,
+        "comments": 193
       },
       {
-        "id": 50003796,
-        "title": "Yes, and",
-        "url": "https://htmx.org/essays/yes-and/",
-        "hn": "https://news.ycombinator.com/item?id=50003796",
-        "score": 111,
-        "comments": 47
+        "id": 50018817,
+        "title": "Show HN: Let your AI agents paint big arrows, boxes and text on your screen",
+        "url": "https://github.com/franzenzenhofer/big-arrow-on-the-screen",
+        "hn": "https://news.ycombinator.com/item?id=50018817",
+        "score": 361,
+        "comments": 158
       },
       {
-        "id": 49992994,
-        "title": "ETH-68: Ethernet Audio Interface for Linux",
-        "url": "https://naturalsystems.io/eth68",
-        "hn": "https://news.ycombinator.com/item?id=49992994",
-        "score": 70,
-        "comments": 50
+        "id": 50027167,
+        "title": "Japan's Most Famous Tuna Buyer Says He Turned Somali Pirates into Fishermen",
+        "url": "https://www.japaninsides.com/the-sushi-king-who-went-to-somalia-how-japans-most-famous-tuna-buyer-says-he-turned-pirates-into-fishermen-55344",
+        "hn": "https://news.ycombinator.com/item?id=50027167",
+        "score": 12,
+        "comments": 3
       }
     ]
   }
