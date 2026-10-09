@@ -1593,17 +1593,9 @@ function tuHeatHtml(days) {
     </div>`;
 }
 
-// Catmull-Rom → 三次贝塞尔平滑曲线
-function tuSmoothPath(pts) {
-    if (!pts.length) return '';
-    let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
-        d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)}` +
-             ` ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)}` +
-             ` ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
-    }
-    return d;
+// 折线路径（直连，不做平滑：Catmull-Rom 类曲线会在低谷处向下过冲、越出绘图区底部）
+function tuLinePath(pts) {
+    return pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join('');
 }
 
 // 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top6 各一线 + 其余合并；
@@ -1634,7 +1626,10 @@ function tuTrendLines(days) {
     if (tuCurrentModel) {
         lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: dates.map(k => (byDate[k] || {})[tuCurrentModel] || 0) }];
     } else {
-        const top = tuModelList(days).slice(0, 6).map(m => m.id);
+        // Top6 按「当前时间窗」内的用量选：窗口内没用过的模型不进折线/图例（否则切到近 7 天会有一排 0% 死行）
+        const rangeTot = {};
+        dates.forEach(k => Object.entries(byDate[k] || {}).forEach(([id, v]) => { rangeTot[id] = (rangeTot[id] || 0) + v; }));
+        const top = Object.entries(rangeTot).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id]) => id);
         const topSet = new Set(top);
         lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: dates.map(k => (byDate[k] || {})[id] || 0) }));
         const others = dates.map(k => Object.entries(byDate[k] || {})
@@ -1707,7 +1702,7 @@ function tuPaintTrend() {
     }
     const lastDate = dates[n - 1].slice(5).replace('-', '/');
     if (lastLabel !== lastDate) xLabels.push(`<text class="fx-axis" x="${X(n - 1).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(lastDate)}</text>`);
-    const paths = lines.map(l => `<path class="tu-line ${l.cls}" d="${tuSmoothPath(l.values.map((v, i) => [X(i), Y(v)]))}"></path>`).join('');
+    const paths = lines.map(l => `<path class="tu-line ${l.cls}" d="${tuLinePath(l.values.map((v, i) => [X(i), Y(v)]))}"></path>`).join('');
     box.innerHTML = `
         <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="每日 Token 趋势图">
             ${grid}${xLabels}${paths}
@@ -1719,19 +1714,28 @@ function tuPaintTrend() {
     const svg = box.querySelector('svg');
     const tip = box.querySelector('.tu-tip');
     const cross = box.querySelector('.tu-cross');
+    let lastI = -1;
     const show = (clientX) => {
         const rect = svg.getBoundingClientRect();
         let i = step ? Math.round((clientX - rect.left - padL * (rect.width / w)) / (step * rect.width / w)) : 0;
         i = Math.max(0, Math.min(n - 1, i));
-        const px = (X(i) * rect.width / w).toFixed(1);
-        cross.setAttribute('x1', px);
-        cross.setAttribute('x2', px);
+        if (i !== lastI) {
+            lastI = i;
+            const px = (X(i) * rect.width / w).toFixed(1);
+            cross.setAttribute('x1', px);
+            cross.setAttribute('x2', px);
+            // 只列当日有量的模型；按当日用量降序；数值用百万/亿缩写（tuBig）
+            const active = lines.filter(l => l.values[i] > 0).sort((a, b) => b.values[i] - a.values[i]);
+            tip.innerHTML = `<b>${dates[i]}</b>` + (active.length
+                ? active.map(l => `<span><i class="lg ${l.cls}"></i><b>${escapeHtml(l.id)}</b> · ${tuBig(l.values[i])}</span>`).join('')
+                : '<span>当日无用量</span>');
+        }
         cross.style.display = '';
         tip.hidden = false;
-        tip.innerHTML = `<b>${dates[i]}</b>` + lines.map(l =>
-            `<span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)} · ${tuFmt(l.values[i])}</span>`).join('');
+        // 按 tooltip 实际宽度夹紧（固定 90px 假设会把贴近右缘的宽内容挤成窄柱换行）
+        const half = tip.offsetWidth / 2 + 2;
         const rel = clientX - rect.left;
-        tip.style.left = Math.min(Math.max(rel, 90), rect.width - 90) + 'px';
+        tip.style.left = Math.min(Math.max(rel, half), Math.max(half, rect.width - half)) + 'px';
     };
     const hide = () => { cross.style.display = 'none'; tip.hidden = true; };
     svg.addEventListener('mousemove', e => show(e.clientX));
@@ -3215,7 +3219,8 @@ function fxShowPoint(i) {
     tip.innerHTML = `<b>${escapeHtml(p.date)}</b><span>${escapeHtml(fxUnitText(fxCurrent))} = ${fxRateText(fxCurrent, p.v)} 人民币</span>`;
     const rect = svg.getBoundingClientRect();
     const k = rect.width / fxGeom.w || 1; // 屏幕像素 / viewBox 单位
-    tip.style.left = Math.min(Math.max(px * k, 70), rect.width - 70) + 'px';
+    const half = tip.offsetWidth / 2 + 2; // 按实测宽度夹紧，防贴近左右缘时溢出容器
+    tip.style.left = Math.min(Math.max(px * k, half), Math.max(half, rect.width - half)) + 'px';
     tip.style.top = Math.max(py * k - 6, 10) + 'px';
     const live = document.getElementById('fxA11y');
     if (live) live.textContent = text;

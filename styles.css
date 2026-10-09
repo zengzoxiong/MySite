@@ -4467,6 +4467,8 @@ body.no-anim .mp-lyric > div {
     z-index: 5;
     display: grid;
     gap: 2px;
+    width: max-content; /* 宽度交给内容，位置由 JS 按实测宽度夹紧（防贴近右缘时被挤成窄柱换行） */
+    max-width: calc(100% - 8px);
     background: var(--bg-color); /* 不透明实底：曲线穿过时数值仍清晰可读 */
     border: 1px solid var(--glass-border);
     border-radius: 8px;
@@ -4476,6 +4478,7 @@ body.no-anim .mp-lyric > div {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
 }
 .tu-tip b { margin-bottom: 2px; }
+.tu-tip b, .tu-tip span { white-space: nowrap; }
 
 /* 模型下拉行 + 明细分页 */
 .tu-toolbar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
