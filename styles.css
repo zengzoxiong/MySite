@@ -4377,7 +4377,7 @@ body.no-anim .mp-lyric > div {
 }
 .tu-tab.active { background: var(--accent-color); color: #fff; }
 
-/* Token 活动热力图：列=周、行=周日~周六，五档色阶走 accent 混色（仿贡献图）；左图右统计 */
+/* Token 活动热力图：列=周、行=周日~周六，五档色阶走 accent 混色（仿贡献图）；左图右四项统计 */
 .tu-heat-flex {
     display: flex;
     align-items: center;
@@ -4387,22 +4387,22 @@ body.no-anim .mp-lyric > div {
 .tu-heat-left { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
 /* 热力图格子固定尺寸：压过 .stats-chart svg 的 width:100%/height:160px 全局规则 */
 .tu-heat-left svg { width: auto; height: auto; display: block; }
-.tu-heat-info {
+.tu-heat-stats {
     flex: 1;
-    min-width: 260px;
+    min-width: 190px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px 18px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px 20px;
     align-content: center;
 }
-.tu-info { display: grid; gap: 2px; }
-.tu-info .n {
-    font-size: 1.05rem;
+.tu-stat { display: grid; gap: 3px; }
+.tu-stat .n {
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--accent-color);
     font-variant-numeric: tabular-nums;
 }
-.tu-info .l { font-size: 0.75rem; color: var(--text-secondary); }
+.tu-stat .l { font-size: 0.75rem; color: var(--text-secondary); }
 .tu-hcell { stroke: transparent; }
 .tu-hcell.lv0 { fill: color-mix(in srgb, var(--text-secondary) 14%, transparent); }
 .tu-hcell.lv1 { fill: color-mix(in srgb, var(--accent-color) 25%, transparent); }
@@ -4443,17 +4443,20 @@ body.no-anim .mp-lyric > div {
 /* 趋势区左右布局：左趋势图、右模型用量环形图；窄屏自动换行堆叠 */
 .tu-trend-flex { display: flex; align-items: stretch; gap: 30px; flex-wrap: wrap; }
 .tu-trend-left { flex: 1; min-width: 0; position: relative; }
+/* 趋势图 svg 按 JS 实测高度渲染（压过 .stats-chart svg 的固定 160px，让图占满卡片） */
+.tu-trend-left svg { height: auto; display: block; }
 .tu-trend-right { width: 350px; flex: none; }
 .tu-dl-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; }
-.tu-dl-flex { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+/* 环形图在上、模型列表在下（两列排布），列表项允许折行防长模型名撑破窄列 */
+.tu-dl-flex { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .tu-dl-seg { fill: none; stroke-linecap: butt; }
 .tu-dl-center { font-size: 26px; font-weight: 700; fill: var(--text-primary); }
 .tu-dl-sub { font-size: 13px; fill: var(--text-tertiary); }
-.tu-dl-list { flex: 1; min-width: 200px; display: grid; gap: 10px; align-content: center; }
-.tu-dl-row { display: flex; align-items: center; gap: 8px; }
-.tu-dl-row .lg { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.tu-dl-name { flex: 1; display: grid; line-height: 1.35; }
-.tu-dl-name b { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+.tu-dl-list { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; align-content: start; }
+.tu-dl-row { display: flex; align-items: flex-start; gap: 7px; min-width: 0; }
+.tu-dl-row .lg { width: 10px; height: 10px; border-radius: 50%; flex: none; margin-top: 4px; }
+.tu-dl-name { flex: 1; min-width: 0; display: grid; line-height: 1.35; }
+.tu-dl-name b { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); overflow-wrap: anywhere; }
 .tu-dl-name span { font-size: 0.75rem; color: var(--text-tertiary); }
 .tu-dl-pct { font-size: 0.8rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .tu-tip {
@@ -4464,7 +4467,7 @@ body.no-anim .mp-lyric > div {
     z-index: 5;
     display: grid;
     gap: 2px;
-    background: var(--card-bg);
+    background: var(--bg-color); /* 不透明实底：曲线穿过时数值仍清晰可读 */
     border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 8px 12px;
@@ -4498,6 +4501,19 @@ body.no-anim .mp-lyric > div {
 .tu-page-btn:hover:not(:disabled) { border-color: var(--accent-color); }
 .tu-page-btn:disabled { opacity: 0.4; cursor: default; }
 .tu-page-info { min-width: 72px; text-align: center; }
+.tu-page-jump { display: inline-flex; align-items: center; gap: 6px; }
+.tu-page-jump input {
+    width: 56px;
+    padding: 5px 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: inherit;
+    border-radius: 8px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
 
 .tu-table-wrap {
     background: var(--card-bg);

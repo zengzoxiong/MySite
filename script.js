@@ -1473,24 +1473,25 @@ let tuCurrentModel = ''; // '' = 全部模型
 let tuRangeDays = 30; // 趋势图时间范围：7 / 30 / 0=全部
 let tuPage = 1; // 明细表当前页（1 起）
 let tuPageSize = 20; // 每页条数：10 / 20 / 50
+let tuPageCount = 1; // 明细表总页数（渲染时刷新，供页码跳转校验）
 let tuTrendGeom = null; // 趋势图 hover 用几何信息
 
 function tuFmt(n) {
     return (n || 0).toLocaleString('zh-CN');
 }
 
-// 中文缩写（峰值日等紧凑场景）：404,856,332 → 4.05 亿 / 43,492,717 → 4,349.3 万
+// 中文缩写（环形图图例等紧凑场景）：404,856,332 → 4.05 亿 / 43,492,717 → 4,349.3 万
 function tuShort(n) {
     if (n >= 1e8) return (n / 1e8).toFixed(2) + ' 亿';
     if (n >= 1e4) return (n / 1e4).toLocaleString('zh-CN', { maximumFractionDigits: 1 }) + ' 万';
     return tuFmt(n);
 }
 
-// token 数缩写：1234567 → 1.2M / 12345 → 12k / 345 → 345
-function tuAxisText(v) {
-    if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
-    if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'k';
-    return String(Math.round(v));
+// 统计口径大数（去尾零）：2,948,126,539 → 29.48 亿 / 74,684,131 → 74.68 百万 / 以下原样
+function tuBig(n) {
+    if (n >= 1e8) return parseFloat((n / 1e8).toFixed(2)) + ' 亿';
+    if (n >= 1e6) return parseFloat((n / 1e6).toFixed(2)) + ' 百万';
+    return tuFmt(n);
 }
 
 // 按当前模型筛选 days：返回每天的合计 [{ date, inCache, inFresh, out, total }]
@@ -1530,8 +1531,18 @@ function tuModelList(days) {
     return Object.entries(tot).filter(([, t]) => t > 0).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
 }
 
+// 自定义页码跳转：越界收敛到 [1, 总页数]，非法输入清空不动
+function tuJumpPage() {
+    const input = document.getElementById('tuPageInput');
+    if (!input) return;
+    const n = parseInt(input.value, 10);
+    if (!Number.isFinite(n)) { input.value = ''; return; }
+    tuPage = Math.min(Math.max(1, n), tuPageCount);
+    renderTokenUsage(false);
+}
+
 // Token 活动热力图（GitHub 贡献图式：固定 52 列，列=周、行=周日~周六，结束于数据最后一天）。
-// 着色按当日用量五档；格子固定尺寸不拉伸（拉伸会把方格拉成胶囊）；右侧拼一栏区间用量信息
+// 着色按当日用量五档；格子固定尺寸不拉伸（拉伸会把方格拉成胶囊）；右侧拼四项口径统计（百万/亿缩写）
 function tuHeatHtml(days) {
     const fd = tuFilteredDays(days);
     if (!fd.length) return '';
@@ -1569,20 +1580,16 @@ function tuHeatHtml(days) {
         const left = Math.min(m.col * (cw + gap), heatW - 26);
         return `<span class="tu-hmon" style="left:${left}px">${m.label}</span>`;
     }).join('');
-    // 右侧区间用量统计（随模型筛选联动）；峰值日用缩写防长数字折行
-    const totalSum = fd.reduce((s, d) => s + d.total, 0);
-    const active = fd.filter(d => d.total > 0);
-    const avg = active.length ? Math.round(totalSum / active.length) : 0;
-    const peak = active.reduce((p, d) => d.total > p.total ? d : p, { date: '—', total: 0 });
-    const info = [
-        [tuFmt(totalSum), '区间合计'],
-        [tuFmt(avg), '活跃日均'],
-        [peak.date === '—' ? '—' : peak.date.slice(5) + ' · ' + tuShort(peak.total), '峰值日'],
-        [active.length + ' / ' + fd.length + ' 天', '有用量天数']
-    ].map(([n, l]) => `<div class="tu-info"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
+    // 右侧四项统计（随模型筛选联动）：输入·缓存命中 / 输入·缓存未命中 / 输出 / 总 Token
+    const stats = [
+        [tuBig(fd.reduce((s, d) => s + d.inCache, 0)), '输入 · 缓存命中'],
+        [tuBig(fd.reduce((s, d) => s + d.inFresh, 0)), '输入 · 缓存未命中'],
+        [tuBig(fd.reduce((s, d) => s + d.out, 0)), '输出'],
+        [tuBig(fd.reduce((s, d) => s + d.total, 0)), '总 Token']
+    ].map(([n, l]) => `<div class="tu-stat"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
     return `<div class="tu-heat-flex">
         <div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>
-        <div class="tu-heat-info">${info}</div>
+        <div class="tu-heat-stats">${stats}</div>
     </div>`;
 }
 
@@ -1676,17 +1683,21 @@ function tuPaintTrend() {
     const box = document.getElementById('tuTrendBox');
     if (!box || !tuTrendGeom) return;
     const { dates, lines } = tuTrendGeom;
-    const w = Math.max(box.clientWidth || 0, 320), h = 220;
-    const padL = 52, padR = 16, padT = 14, padB = 28;
+    const w = Math.max(box.clientWidth || 0, 320);
+    // 高度向右侧「模型用量」栏看齐，尽量占满卡片（减去底部折线图例行占位）
+    const rightBox = document.querySelector('.tu-trend-right');
+    const rightH = rightBox ? rightBox.clientHeight : 0;
+    const h = Math.max(280, rightH - 32);
+    const padL = 14, padR = 16, padT = 14, padB = 28;
     const innerH = h - padT - padB;
     const maxV = Math.max(1, ...lines.flatMap(l => l.values)) * 1.08;
     const n = dates.length;
     const step = n > 1 ? (w - padL - padR) / (n - 1) : 0;
     const X = i => padL + step * i;
     const Y = v => padT + innerH * (1 - v / maxV);
+    // 只保留水平网格线，纵轴数值不再标注（读数值看 hover tooltip）
     const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
-        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
-        `<text class="fx-axis" x="${padL - 8}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${tuAxisText(maxV * (1 - t))}</text>`).join('');
+        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>`).join('');
     const labelStep = Math.max(1, Math.ceil(n / 7));
     const xLabels = [];
     let lastLabel = '';
@@ -1745,10 +1756,10 @@ function renderTokenUsage(animate = false) {
     const modelList = tuModelList(days);
     const rows = tuRows(days);
     setViewHead('Token 用量', '', 'API Token 消耗' + (tokenUsage.updated ? ' · 更新于 ' + tokenUsage.updated : ''));
-    const sum = tuFilteredDays(days).reduce((s, d) => ({ inCache: s.inCache + d.inCache, inFresh: s.inFresh + d.inFresh, out: s.out + d.out, total: s.total + d.total }), { inCache: 0, inFresh: 0, out: 0, total: 0 });
     // 分页边界
     const pageCount = Math.max(1, Math.ceil(rows.length / tuPageSize));
     if (tuPage > pageCount) tuPage = pageCount;
+    tuPageCount = pageCount;
     const pageRows = rows.slice((tuPage - 1) * tuPageSize, tuPage * tuPageSize);
     tuTrendGeom = tuTrendLines(days);
     mediaGrid.innerHTML = `
@@ -1758,12 +1769,6 @@ function renderTokenUsage(animate = false) {
                     .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))).map(id =>
                     `<option value="${escapeHtml(id)}"${id === tuCurrentModel ? ' selected' : ''}>${id ? escapeHtml(id) : '全部模型'}</option>`).join('')}</select>
             </label>
-        </div>
-        <div class="stats-cards">
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.inCache)}</span><span class="stat-label">输入 · 缓存命中</span></div>
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.inFresh)}</span><span class="stat-label">输入 · 未命中缓存</span></div>
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.out)}</span><span class="stat-label">输出</span></div>
-            <div class="stat-card"><span class="stat-num">${tuFmt(sum.total)}</span><span class="stat-label">总 Token</span></div>
         </div>
         <div class="tu-sec"><span class="t">Token 活动</span></div>
         <div class="stats-chart">${tuHeatHtml(days)}</div>
@@ -1776,6 +1781,7 @@ function renderTokenUsage(animate = false) {
             <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
         </div>
         ${rows.length ? `
+        <div class="tu-sec"><span class="t">详细用量记录</span></div>
         <div class="tu-table-wrap">
             <table class="tu-table">
                 <thead><tr><th>日期</th><th>模型</th><th class="num">输入（缓存命中）</th><th class="num">输入（未命中）</th><th class="num">输出</th><th class="num">总计</th></tr></thead>
@@ -1791,6 +1797,11 @@ function renderTokenUsage(animate = false) {
             <button class="tu-page-btn" type="button" id="tuPrev"${tuPage <= 1 ? ' disabled' : ''}>上一页</button>
             <span class="tu-page-info">第 ${tuPage} / ${pageCount} 页</span>
             <button class="tu-page-btn" type="button" id="tuNext"${tuPage >= pageCount ? ' disabled' : ''}>下一页</button>
+            <span class="tu-page-jump">跳至
+                <input id="tuPageInput" type="number" min="1" max="${pageCount}" inputmode="numeric" aria-label="跳转页码" placeholder="${tuPage}">
+                页
+                <button class="tu-page-btn" type="button" id="tuGo">跳转</button>
+            </span>
         </div>` : '<div class="media-count" style="margin-top:16px">暂无用量数据，待导入 API 用量日志</div>'}
     `;
     tuPaintTrend(); // 容器已入 DOM，实测宽度画趋势图
@@ -4377,7 +4388,16 @@ function initEventListeners() {
         }
         if (e.target.closest('#tuPrev')) { tuPage = Math.max(1, tuPage - 1); renderTokenUsage(false); return; }
         if (e.target.closest('#tuNext')) { tuPage += 1; renderTokenUsage(false); return; }
+        if (e.target.closest('#tuGo')) { tuJumpPage(); return; }
         if (e.target.closest('#fxConvSwap')) fxConvSwap();
+    });
+
+    // 页码输入框回车即跳转
+    mediaGrid.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.id === 'tuPageInput') {
+            e.preventDefault();
+            tuJumpPage();
+        }
     });
 
     // 换算器输入/切换货币：任一栏输入都换算另一栏
