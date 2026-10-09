@@ -141,7 +141,7 @@ MySite/
 
 ### 8.5 访问统计（data/goatcounter-stats.json + 数据看板视图）
 
-- **数据源**：GoatCounter（goatcounter.com，个人站免费）；站点码 `zengzoxiong` 常量在 script.js（`GOATCOUNTER_CODE`），计数脚本由 script.js 在浏览器空闲时懒注入（data-goatcounter → gc.zgo.at/count.js）
+- **数据源**：GoatCounter（goatcounter.com，个人站免费）；站点码 `zengzoxiong` 常量在 script.js（`GOATCOUNTER_CODE`），计数脚本由 script.js 在浏览器空闲时懒注入——**用本地副本 `assets/vendor/goatcounter/count.js`**（上游 arp242/goatcounter `public/count.js` 的 ISC 许可快照，保留头部注释即署名），上报仍发往 `{码}.goatcounter.com/count`。**gc.zgo.at 在国内被 DNS 污染不可达（实测解析到 Facebook 段、连接超时），别改回外链**，否则统计永远收不到数据（踩过）
 - **同步**：`.github/workflows/goatcounter.yml` 每日 03:47（北京）跑 `scripts/sync_goatcounter.py`，从 GoatCounter API v0（stat/range，90 天分段）拉逐日 PV/UV 写 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（后台 Settings→API 生成），无变化跳过提交
 - **视图**：侧栏「数据看板 → 访问统计」（`renderStats()`，复用 #mediaGrid）：累计/近 7 天/近 30 天 PV·UV 汇总卡 + 近 30 天双折线（PV 蓝 / UV 绿），访客 IP/来源等明细只在 GoatCounter 后台网页看（API 不暴露原始 visits）
 - **隐私**：明文收集访客 IP 需谨慎（PIPL），GoatCounter 后台可关闭明文 IP 记录；接入第三方统计建议页面提供隐私说明

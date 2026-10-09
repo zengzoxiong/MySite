@@ -4500,7 +4500,9 @@ function initEventListeners() {
     });
 
     // 访客统计：GoatCounter 给数据看板的明细统计，右上角的数字胶囊已由其替代下线。
-    // 纯装饰第三方脚本，等首屏加载完、浏览器空闲再注入，不与关键资源抢带宽
+    // 纯装饰第三方脚本，等首屏加载完、浏览器空闲再注入，不与关键资源抢带宽。
+    // 脚本必须用本地副本（assets/vendor/goatcounter/count.js，上游 public/count.js 的 ISC 快照）：
+    // gc.zgo.at 在国内被 DNS 污染不可达，挂外链会让统计永远收不到数据；上报仍发往 {码}.goatcounter.com/count
     window.addEventListener('load', () => {
         const inject = () => {
             // GoatCounter：站点码为空（未注册/未配置）时跳过注入
@@ -4508,7 +4510,7 @@ function initEventListeners() {
                 const gc = document.createElement('script');
                 gc.async = true;
                 gc.setAttribute('data-goatcounter', `https://${GOATCOUNTER_CODE}.goatcounter.com/count`);
-                gc.src = '//gc.zgo.at/count.js';
+                gc.src = 'assets/vendor/goatcounter/count.js';
                 document.head.appendChild(gc);
             }
         };
