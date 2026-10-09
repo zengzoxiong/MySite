@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-08",
+  "checkedAt": "2026-10-09",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -9,8 +9,8 @@
     },
     "ClashVergeRev.ClashVergeRev": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "2.5.7"
+      "checkedAt": "2026-10-09",
+      "latest": "2.5.8"
     },
     "Daum.PotPlayer": {
       "ok": true,
@@ -34,8 +34,8 @@
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "1.140.0"
+      "checkedAt": "2026-10-09",
+      "latest": "1.141.0"
     },
     "NetEase.UURemote": {
       "ok": true,
