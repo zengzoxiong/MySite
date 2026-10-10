@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-10",
+  "updated": "2026-10-11",
   "sections": {
     "trending": [
       {
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 13045,
+        "stars": 13652,
         "language": "Lean"
       },
       {
         "name": "alchaincyf/huashu-art-motion",
         "url": "https://github.com/alchaincyf/huashu-art-motion",
         "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 2856,
+        "stars": 3194,
         "language": "JavaScript"
-      },
-      {
-        "name": "mhtsec/ARTEX",
-        "url": "https://github.com/mhtsec/ARTEX",
-        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 2128,
-        "language": "Go"
-      },
-      {
-        "name": "nullmoth/nvidia-macos-driver",
-        "url": "https://github.com/nullmoth/nvidia-macos-driver",
-        "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 1839,
-        "language": "Rust"
       },
       {
         "name": "storytold/wordcraft",
         "url": "https://github.com/storytold/wordcraft",
         "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
-        "stars": 1821,
+        "stars": 3105,
         "language": "Rust"
+      },
+      {
+        "name": "mhtsec/ARTEX",
+        "url": "https://github.com/mhtsec/ARTEX",
+        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
+        "stars": 2898,
+        "language": "Go"
       },
       {
         "name": "zhongerxin/iPhone-use",
         "url": "https://github.com/zhongerxin/iPhone-use",
         "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
-        "stars": 1687,
+        "stars": 2544,
         "language": "Python"
       },
       {
-        "name": "kargulstudio/sales-crm",
-        "url": "https://github.com/kargulstudio/sales-crm",
-        "desc": "",
-        "stars": 1676,
-        "language": "TypeScript"
+        "name": "nullmoth/nvidia-macos-driver",
+        "url": "https://github.com/nullmoth/nvidia-macos-driver",
+        "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
+        "stars": 2279,
+        "language": "Rust"
       },
       {
         "name": "LosaLosSantos/aurelio-finance",
         "url": "https://github.com/LosaLosSantos/aurelio-finance",
         "desc": "Open-source personal finance app with an AI financial advisor: track your net worth, investments, ETFs, cash and debts on your own computer.",
-        "stars": 1525,
-        "language": "Python"
-      },
-      {
-        "name": "Jakeschincariol/replica-skill",
-        "url": "https://github.com/Jakeschincariol/replica-skill",
-        "desc": "Eleven free Claude skills that clone any app: reverse-engineer it, rebuild it, test it for bugs, then fix what its users hate. Free, MIT.",
-        "stars": 1366,
+        "stars": 2093,
         "language": "Python"
       },
       {
         "name": "storytold/cadcraft",
         "url": "https://github.com/storytold/cadcraft",
         "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
-        "stars": 1340,
+        "stars": 1824,
         "language": "Rust"
+      },
+      {
+        "name": "storytold/gridcraft",
+        "url": "https://github.com/storytold/gridcraft",
+        "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
+        "stars": 1798,
+        "language": "Rust"
+      },
+      {
+        "name": "kargulstudio/sales-crm",
+        "url": "https://github.com/kargulstudio/sales-crm",
+        "desc": "",
+        "stars": 1688,
+        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50019911,
-        "title": "Cloudflare acquires Deno",
-        "url": "https://deno.com/blog/cloudflare",
-        "hn": "https://news.ycombinator.com/item?id=50019911",
-        "score": 1002,
-        "comments": 520
+        "id": 49991852,
+        "title": "2D Vehicles",
+        "url": "https://patkerr.co.uk/2d-vehicles/",
+        "hn": "https://news.ycombinator.com/item?id=49991852",
+        "score": 288,
+        "comments": 69
       },
       {
-        "id": 50022292,
-        "title": "Triple-A Minesweeper",
-        "url": "https://minesweeper.mikelacher.com/",
-        "hn": "https://news.ycombinator.com/item?id=50022292",
-        "score": 474,
-        "comments": 100
+        "id": 50035530,
+        "title": "Why DuckDB 2.0 is faster",
+        "url": "https://motherduck.com/blog/why-duckdb-20-is-faster/",
+        "hn": "https://news.ycombinator.com/item?id=50035530",
+        "score": 105,
+        "comments": 31
       },
       {
-        "id": 50024499,
-        "title": "Show HN: Carrier-Explode: iPhone, Pixel and Galaxy carrier settings decoded",
-        "url": "https://carrierexplode.com/",
-        "hn": "https://news.ycombinator.com/item?id=50024499",
-        "score": 173,
-        "comments": 16
+        "id": 50017247,
+        "title": "Nix wrote half of my debugger",
+        "url": "https://fzakaria.com/2026/10/07/nix-wrote-half-of-my-debugger",
+        "hn": "https://news.ycombinator.com/item?id=50017247",
+        "score": 79,
+        "comments": 6
       },
       {
-        "id": 50020014,
-        "title": "Our $445M Series D",
-        "url": "https://oxide.computer/blog/our-445m-series-d",
-        "hn": "https://news.ycombinator.com/item?id=50020014",
-        "score": 551,
-        "comments": 246
+        "id": 50036864,
+        "title": "A city-building game in which the city would prefer you didn't",
+        "url": "https://housing.over.pizza/",
+        "hn": "https://news.ycombinator.com/item?id=50036864",
+        "score": 69,
+        "comments": 27
       },
       {
-        "id": 50026555,
-        "title": "YouTuber Says Cops Visited Him After He Built a Flock-Style Camera to Track Cops",
-        "url": "https://gizmodo.com/youtuber-says-cops-paid-him-a-visit-after-he-built-flock-style-camera-to-track-cops-2000824306",
-        "hn": "https://news.ycombinator.com/item?id=50026555",
-        "score": 310,
-        "comments": 160
+        "id": 50034081,
+        "title": "Knuth reward check",
+        "url": "https://www.thomas-huehn.com/knuth-reward-check/",
+        "hn": "https://news.ycombinator.com/item?id=50034081",
+        "score": 120,
+        "comments": 47
       },
       {
-        "id": 50018088,
-        "title": "Sorry, I'm in a meeting",
-        "url": "https://iminafleeting.com/",
-        "hn": "https://news.ycombinator.com/item?id=50018088",
-        "score": 711,
-        "comments": 221
+        "id": 50029487,
+        "title": "The Lightbulb Computer",
+        "url": "https://lightbulbcomputer.com/",
+        "hn": "https://news.ycombinator.com/item?id=50029487",
+        "score": 138,
+        "comments": 36
       },
       {
-        "id": 50019056,
-        "title": "Pointing AI at archives found a forgotten meteorite, lost rhinos, and more",
-        "url": "https://jessewaites.com/blog/post/i-pointed-ai-at-400-years-of-archives/",
-        "hn": "https://news.ycombinator.com/item?id=50019056",
-        "score": 90,
-        "comments": 45
+        "id": 50031614,
+        "title": "Talorys – A self-hosted personal AI agent on Cloudflare's free tier",
+        "url": "https://github.com/rociiu/talorys",
+        "hn": "https://news.ycombinator.com/item?id=50031614",
+        "score": 225,
+        "comments": 113
       },
       {
-        "id": 50023450,
-        "title": "Typesafe AI raises $870M at $7.5B",
-        "url": "https://typesafe.ai/blog/series-ai",
-        "hn": "https://news.ycombinator.com/item?id=50023450",
-        "score": 223,
-        "comments": 193
+        "id": 50016956,
+        "title": "Mxc: Microsoft Execution Containers version 1.0.0",
+        "url": "https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/",
+        "hn": "https://news.ycombinator.com/item?id=50016956",
+        "score": 141,
+        "comments": 32
       },
       {
-        "id": 50018817,
-        "title": "Show HN: Let your AI agents paint big arrows, boxes and text on your screen",
-        "url": "https://github.com/franzenzenhofer/big-arrow-on-the-screen",
-        "hn": "https://news.ycombinator.com/item?id=50018817",
-        "score": 361,
-        "comments": 158
+        "id": 50027257,
+        "title": "Recent AI models struggled to match a human algorithmic innovation",
+        "url": "https://epoch.ai/publications/innovationeval",
+        "hn": "https://news.ycombinator.com/item?id=50027257",
+        "score": 56,
+        "comments": 48
       },
       {
-        "id": 50027167,
-        "title": "Japan's Most Famous Tuna Buyer Says He Turned Somali Pirates into Fishermen",
-        "url": "https://www.japaninsides.com/the-sushi-king-who-went-to-somalia-how-japans-most-famous-tuna-buyer-says-he-turned-pirates-into-fishermen-55344",
-        "hn": "https://news.ycombinator.com/item?id=50027167",
-        "score": 12,
-        "comments": 3
+        "id": 50028275,
+        "title": "REA Reverse – Engineer Anything",
+        "url": "https://rea.tools/",
+        "hn": "https://news.ycombinator.com/item?id=50028275",
+        "score": 666,
+        "comments": 292
       }
     ]
   }
