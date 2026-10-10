@@ -6,6 +6,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/2048/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/base-converter/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -67,6 +72,16 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/bmi-calculator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/breakout/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/bulls-cows/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -146,6 +161,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/dino-run/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/dodge/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/draw-lots/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -161,7 +186,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/flappy-bird/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/gitignore-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/gobang/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -371,7 +406,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/maze-runner/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/memory-flip/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/meta-tags-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/minesweeper/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -431,6 +481,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/reaction-test/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/regex-tester/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -461,7 +516,27 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/slide-puzzle/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/slug-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/snake/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/sokoban/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/space-shooter/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -472,6 +547,21 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/sql-minifier/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/stack-tower/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/sudoku/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/tetris-block/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -531,6 +621,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/tic-tac-toe/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/timestamp-converter/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -547,6 +642,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/tsv-to-json/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/typing-tutor/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -587,6 +687,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/uuid-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/whack-mole/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

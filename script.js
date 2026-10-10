@@ -686,8 +686,9 @@ function dayGanzhi(y, m, d) {
 }
 function yearGanzhi(ly) { return GAN[(ly - 4) % 10] + ZHI[(ly - 4) % 12]; }
 
-// 节日：农历优先，再补公历
-const LUNAR_FESTIVALS = { '1-1': '春节', '1-15': '元宵', '5-5': '端午', '7-7': '七夕', '8-15': '中秋', '9-9': '重阳', '12-8': '腊八', '12-30': '除夕' };
+// 节日：农历优先，再补公历。除夕不在表里——腊月可能只有 29 天，写死 12-30 会整年漏标，
+// 由 buildTodayFortune 按「明天是正月初一」动态判定
+const LUNAR_FESTIVALS = { '1-1': '春节', '1-15': '元宵', '5-5': '端午', '7-7': '七夕', '8-15': '中秋', '9-9': '重阳', '12-8': '腊八' };
 const SOLAR_FESTIVALS = { '1-1': '元旦', '2-14': '情人节', '5-1': '劳动节', '6-1': '儿童节', '10-1': '国庆节', '12-25': '圣诞' };
 
 // 种子随机：FNV-1a 出种子，mulberry32 出序列，同一天全球同签
@@ -731,7 +732,13 @@ function buildTodayFortune() {
     for (const [name, w] of LUCK_POOL) { if (roll < w) { luck = name; break; } roll -= w; }
     const sentence = SIGN_SENTENCES[Math.floor(rnd() * SIGN_SENTENCES.length)];
     const lunar = solarToLunar(now.getFullYear(), now.getMonth() + 1, now.getDate());
-    const festival = LUNAR_FESTIVALS[`${lunar.month}-${lunar.day}`] || SOLAR_FESTIVALS[`${now.getMonth() + 1}-${now.getDate()}`] || '';
+    let festival = LUNAR_FESTIVALS[`${lunar.month}-${lunar.day}`] || SOLAR_FESTIVALS[`${now.getMonth() + 1}-${now.getDate()}`] || '';
+    // 除夕 = 正月初一的前一天（腊月 29/30 天都覆盖）
+    if (!festival && lunar.month === 12 && lunar.day >= 29) {
+        const tm = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        const lm = solarToLunar(tm.getFullYear(), tm.getMonth() + 1, tm.getDate());
+        if (lm.month === 1 && lm.day === 1) festival = '除夕';
+    }
     return {
         key, luck, sentence, festival,
         year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate(),
@@ -1338,8 +1345,8 @@ function renderDailyReport(animate = false) {
         ensureDailyReport();
         return;
     }
-    const t = dailyReport.sections.trending || [];
-    const hn = dailyReport.sections.hn || [];
+    const t = (dailyReport.sections && dailyReport.sections.trending) || [];
+    const hn = (dailyReport.sections && dailyReport.sections.hn) || [];
     const anim = animate ? ' anim' : '';
     mediaGrid.innerHTML = `
         <div class="daily-sec">GitHub Trending · 近 7 天热门新仓库</div>
@@ -1383,10 +1390,10 @@ function hnCardHtml(r) {
     <div class="skill-card hn-card">
         <div class="skill-title-row">
             <a class="hn-title" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.title)}</a>
-            <span class="skill-stars">▲ ${r.score}</span>
+            <span class="skill-stars">▲ ${escapeHtml(String(r.score))}</span>
         </div>
         <div class="skill-meta">
-            <a class="skill-tag hn-link" href="${escapeHtml(r.hn)}" target="_blank" rel="noopener noreferrer">讨论 ${r.comments}</a>
+            <a class="skill-tag hn-link" href="${escapeHtml(r.hn)}" target="_blank" rel="noopener noreferrer">讨论 ${escapeHtml(String(r.comments))}</a>
             <span class="skill-tag">${escapeHtml(getDomain(r.url) || 'news.ycombinator.com')}</span>
         </div>
     </div>`;
@@ -2805,8 +2812,8 @@ function renderSearchResults(term) {
 function renderSidebarMedia() {
     const types = mediaData.types || [];
     sidebarMedia.innerHTML = types.map(t => `
-        <div class="sidebar-item" role="button" tabindex="0" data-media-type="${t}">
-            <span class="item-text">${t}</span>
+        <div class="sidebar-item" role="button" tabindex="0" data-media-type="${escapeHtml(t)}">
+            <span class="item-text">${escapeHtml(t)}</span>
         </div>
     `).join('');
 }
@@ -3373,10 +3380,10 @@ function fxSearchCard(code) {
         rate = `${fxUnitText(code)} = ${fxRateText(code, fxValue(code, fxData.latest[code]))} 人民币`;
     }
     return `
-    <div class="skill-card fx-hit" role="button" tabindex="0" data-fx-goto="${code}">
+    <div class="skill-card fx-hit" role="button" tabindex="0" data-fx-goto="${escapeHtml(code)}">
         <div class="skill-title-row">
             <span class="skill-name">${escapeHtml(m.name)} / 人民币</span>
-            <span class="skill-tag">${code}</span>
+            <span class="skill-tag">${escapeHtml(code)}</span>
         </div>
         <div class="skill-desc">${escapeHtml(rate || '点击查看汇率走势')}</div>
         <div class="skill-meta"><span class="skill-tag">${fxData ? '最新 ' + escapeHtml(fxData.updated) : '汇率走势'}</span></div>
@@ -3427,10 +3434,18 @@ async function loadLinks() {
         }
         renderSidebarTools();
         renderSidebarCategories(linksData.categories);
-        renderLinks();
+        // 数据晚到时用户可能已切到其他视图：renderLinks 会隐藏 #mediaGrid（fx/daily/stats
+        // 等视图的内容就渲染在里面）并覆写 viewHead，只在收藏/首页视图才能刷；搜索视图补一次重搜
+        if (currentView === 'links' || currentView === 'home') {
+            renderLinks();
+        } else if (currentView === 'search' && searchInput.value.trim()) {
+            renderSearchWithLoading(searchInput.value.trim());
+        }
     } catch (error) {
         console.error('加载数据失败:', error);
-        linksGrid.innerHTML = '<p class="empty-state">加载数据失败</p>';
+        if (currentView === 'links' || currentView === 'home') {
+            linksGrid.innerHTML = '<p class="empty-state">加载数据失败</p>';
+        }
     }
 
     // 影视记录独立加载，失败不影响收藏/工具
@@ -3582,10 +3597,12 @@ function renderSidebarCategories(categories) {
     `).join('');
 }
 
-// 从 URL 提取域名
+// 从 URL 提取域名（供 favicon 拼接与展示）。hostname 按 WHATWG 规范可合法保留
+// 引号类字符，而结果会进 img src 属性和内联 onerror 的 JS 字符串，这里只留
+// 真实主机名可能出现的字符（字母数字连点，punycode 的 xn-- 也在内），顺带防注入
 function getDomain(url) {
     try {
-        return new URL(url).hostname;
+        return new URL(url).hostname.replace(/[^\w.-]/g, '');
     } catch {
         return '';
     }
@@ -3672,7 +3689,7 @@ function buildMediaCard(item, i) {
             <div class="media-ph" style="background:${gradient}"><span class="ph-char">${phChar}</span><span class="ph-title">${title}</span></div>
             ${item.cover ? `<img src="${escapeHtml(item.cover)}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
             ${item.status ? `<span class="badge-status${statusClass}">${escapeHtml(item.status)}</span>` : ''}
-            ${item.rating ? `<span class="badge-rating">★ ${item.rating}</span>` : ''}
+            ${item.rating ? `<span class="badge-rating">★ ${escapeHtml(String(item.rating))}</span>` : ''}
             ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}
         </div>
         <div class="media-info">
@@ -3752,7 +3769,7 @@ function renderLinks(animate = false) {
     linksGrid.innerHTML = filteredLinks.map((link, i) => {
         const animClass = animate ? ' anim' : '';
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
-        return buildLinkCard(link, i, wingetMode).replace('class="link-card', `class="link-card${animClass}"${animDelay}`);
+        return buildLinkCard(link, i, wingetMode).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
     }).join('');
 
     if (wingetMode) showWingetDock();
@@ -3836,7 +3853,8 @@ function downloadWingetScript() {
     a.href = url;
     a.download = name;
     a.click();
-    URL.revokeObjectURL(url);
+    // 立即 revoke 在 Firefox 下可能取消下载，延迟回收（与 saveTalismanPng 同款兜底）
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 // 渲染工具卡片
