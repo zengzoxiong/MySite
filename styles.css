@@ -4323,31 +4323,20 @@ body.no-anim .mp-lyric > div {
     padding: 16px;
 }
 .stats-chart svg { width: 100%; height: 160px; display: block; }
-.stats-line-uv {
+/* 访客趋势图（面积渐变 + 网格 + hover tooltip）：覆盖上面的 160px 全局高度 */
+.stats-tipbox { position: relative; }
+.stats-tipbox svg { height: auto; }
+.stats-area { fill: url(#statsArea); }
+.stats-area-a { stop-color: var(--accent-color); stop-opacity: 0.26; }
+.stats-area-b { stop-color: var(--accent-color); stop-opacity: 0; }
+.stats-line {
     fill: none;
-    stroke: #34a853;
+    stroke: var(--accent-color);
     stroke-width: 2;
     stroke-linejoin: round;
     stroke-linecap: round;
 }
-.stats-legend {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 10px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-.stats-legend .lg {
-    display: inline-block;
-    width: 14px;
-    height: 3px;
-    border-radius: 2px;
-    margin-right: 5px;
-    vertical-align: middle;
-}
-.lg-uv { background: #34a853; }
-.stats-x-axis { margin-left: auto; }
+.stats-dot-last { fill: var(--accent-color); stroke: var(--card-bg); stroke-width: 2; }
 
 /* ===== Token 用量（数据看板 · 模型×天） ===== */
 /* 分区标题行：左标题右切换 tabs */

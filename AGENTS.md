@@ -143,7 +143,7 @@ MySite/
 
 - **数据源**：GoatCounter（goatcounter.com，个人站免费）；站点码 `zengzoxiong` 常量在 script.js（`GOATCOUNTER_CODE`），计数脚本由 script.js 在浏览器空闲时懒注入——**用本地副本 `assets/vendor/goatcounter/count.js`**（上游 arp242/goatcounter `public/count.js` 的 ISC 许可快照，保留头部注释即署名），上报仍发往 `{码}.goatcounter.com/count`。**gc.zgo.at 在国内被 DNS 污染不可达（实测解析到 Facebook 段、连接超时），别改回外链**，否则统计永远收不到数据（踩过）
 - **同步**：`.github/workflows/goatcounter.yml` 每日 03:47（北京）跑 `scripts/sync_goatcounter.py`，从 GoatCounter API v0（stat/range，90 天分段）拉逐日 PV/UV 写 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（后台 Settings→API 生成），无变化跳过提交
-- **视图**：侧栏「数据看板 → 访问统计」（`renderStats()`，复用 #mediaGrid）：累计/近 7 天/近 30 天 PV·UV 汇总卡 + 近 30 天双折线（PV 蓝 / UV 绿），访客 IP/来源等明细只在 GoatCounter 后台网页看（API 不暴露原始 visits）
+- **视图**：侧栏「数据看板 → 访问统计」（`renderStats()`，复用 #mediaGrid）：累计/近 7 天/近 30 天汇总卡 + 「访客（UV）趋势」图（`statsPaintChart()` 渲染后实测容器宽画：面积渐变（statsArea，accent 色）+ 网格/y 轴刻度（复用 .fx-grid/.fx-axis，缩写走 statsAxisText）+ 末点高亮 + hover/touch 十字线 tooltip；右上「近 7 天/近 30 天/全部」`data-stats-range` 切换，窗口按日历日截取、无记录日补 0）；访客 IP/来源等明细只在 GoatCounter 后台网页看（API 不暴露原始 visits）
 - **隐私**：明文收集访客 IP 需谨慎（PIPL），GoatCounter 后台可关闭明文 IP 记录；接入第三方统计建议页面提供隐私说明
 
 ### 8.6 Token 用量（data/token-usage.json + 数据看板视图）

@@ -1425,30 +1425,112 @@ function renderStats(animate = false) {
         </div>`;
     mediaGrid.innerHTML = `
         ${cards}
-        <div class="daily-sec" style="margin-top:20px">近 30 天访客（UV）趋势</div>
-        ${last30.length > 1 ? statsChartHtml(last30) : '<div class="media-count">数据还不足两天，曲线过两天再来</div>'}`;
+        <div class="tu-sec"><span class="t">访客（UV）趋势</span>
+            <div class="tu-tabs">${[[7, '近 7 天'], [30, '近 30 天'], [0, '全部']].map(([d, label]) =>
+                `<button class="tu-tab${d === statsRangeDays ? ' active' : ''}" type="button" data-stats-range="${d}">${label}</button>`).join('')}</div>
+        </div>
+        <div class="stats-chart stats-tipbox"><div id="statsChartBox"></div></div>`;
+    statsPaintChart();
 }
 
-// 近 30 天访客单折线：720×160 SVG，y 轴按数据最大值自适应
-function statsChartHtml(days) {
-    const w = 720, h = 160, pad = 10;
-    const maxV = Math.max(...days.map(d => d.visitors), 1) * 1.15;
-    const step = (w - pad * 2) / (days.length - 1);
-    const pt = (v, i) => `${(pad + i * step).toFixed(1)},${(h - pad - (v / maxV) * (h - pad * 2)).toFixed(1)}`;
-    const uvLine = days.map((d, i) => pt(d.visitors, i)).join(' ');
-    const dots = days.map((d, i) =>
-        `<circle cx="${(pad + i * step).toFixed(1)}" cy="${(h - pad - (d.visitors / maxV) * (h - pad * 2)).toFixed(1)}" r="2.4"/>`).join('');
-    return `
-    <div class="stats-chart">
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="近 30 天访客（UV）趋势折线图">
-            <polyline class="stats-line-uv" points="${uvLine}"/>
-            ${dots}
+let statsRangeDays = 30; // 趋势图时间范围：7 / 30 / 0=全部
+
+// y 轴访客数缩写：12345 → 12k / 345 → 345
+function statsAxisText(v) {
+    if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + 'k';
+    return String(Math.round(v));
+}
+
+// 按日历窗口截取（无记录日补 0，保持时间轴连续）
+function statsChartRange(days) {
+    if (!days.length) return [];
+    const endD = new Date(days[days.length - 1].date + 'T00:00:00');
+    let startD = new Date(days[0].date + 'T00:00:00');
+    if (statsRangeDays > 0) {
+        startD = new Date(endD);
+        startD.setDate(startD.getDate() - (statsRangeDays - 1));
+    }
+    const byDate = {};
+    days.forEach(d => { byDate[d.date] = d.visitors || 0; });
+    const out = [];
+    for (let t = new Date(startD); t <= endD; t.setDate(t.getDate() + 1)) {
+        const key = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+        out.push({ date: key, v: byDate[key] || 0 });
+    }
+    return out;
+}
+
+// 访客趋势图：面积渐变 + 网格刻度 + hover 十字线 tooltip（渲染后实测容器宽，免 viewBox 拉伸变形）
+function statsPaintChart() {
+    const box = document.getElementById('statsChartBox');
+    if (!box || !statsData) return;
+    const days = statsChartRange(statsData.days || []);
+    if (days.length < 2) {
+        box.innerHTML = '<div class="fx-placeholder">数据还不足两天，曲线过两天再来</div>';
+        return;
+    }
+    const w = Math.max(box.clientWidth || 0, 320), h = 220;
+    const padL = 52, padR = 16, padT = 14, padB = 28;
+    const innerH = h - padT - padB;
+    const maxV = Math.max(1, ...days.map(d => d.v)) * 1.08;
+    const n = days.length;
+    const step = (w - padL - padR) / (n - 1);
+    const X = i => padL + step * i;
+    const Y = v => padT + innerH * (1 - v / maxV);
+    const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
+        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
+        `<text class="fx-axis" x="${padL - 8}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${statsAxisText(maxV * (1 - t))}</text>`).join('');
+    const pts = days.map((d, i) => [X(i), Y(d.v)]);
+    const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+    const area = `${line} L${X(n - 1).toFixed(1)} ${(padT + innerH).toFixed(1)} L${X(0).toFixed(1)} ${(padT + innerH).toFixed(1)} Z`;
+    // x 轴日期抽稀（≤7 个，末位必出，相邻去重）
+    const labelStep = Math.max(1, Math.ceil(n / 7));
+    const xLabels = [];
+    let lastLabel = '';
+    for (let i = 0; i < n; i += labelStep) {
+        const label = days[i].date.slice(5).replace('-', '/');
+        if (label !== lastLabel) { xLabels.push(`<text class="fx-axis" x="${X(i).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(label)}</text>`); lastLabel = label; }
+    }
+    const lastDate = days[n - 1].date.slice(5).replace('-', '/');
+    if (lastLabel !== lastDate) xLabels.push(`<text class="fx-axis" x="${X(n - 1).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(lastDate)}</text>`);
+    box.innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="访客（UV）趋势折线图">
+            <defs><linearGradient id="statsArea" x1="0" y1="0" x2="0" y2="1">
+                <stop class="stats-area-a" offset="0%"></stop><stop class="stats-area-b" offset="100%"></stop>
+            </linearGradient></defs>
+            ${grid}
+            <path class="stats-area" d="${area}"></path>
+            <path class="stats-line" d="${line}"></path>
+            ${xLabels}
+            <circle class="stats-dot-last" cx="${X(n - 1).toFixed(1)}" cy="${Y(days[n - 1].v).toFixed(1)}" r="3.5"></circle>
+            <line class="tu-cross" x1="0" x2="0" y1="${padT}" y2="${padT + innerH}" style="display:none"></line>
         </svg>
-        <div class="stats-legend">
-            <span><i class="lg lg-uv"></i>访客 UV</span>
-            <span class="stats-x-axis">${escapeHtml(days[0].date.slice(5))} ~ ${escapeHtml(days[days.length - 1].date.slice(5))}</span>
-        </div>
-    </div>`;
+        <div class="tu-tip" hidden></div>`;
+    // hover：竖十字线 + 当日访客数 tooltip（鼠标/触摸共用）
+    const svg = box.querySelector('svg');
+    const tip = box.querySelector('.tu-tip');
+    const cross = box.querySelector('.tu-cross');
+    const show = (clientX) => {
+        const rect = svg.getBoundingClientRect();
+        const k = rect.width / w;
+        let i = step ? Math.round((clientX - rect.left - padL * k) / (step * k)) : 0;
+        i = Math.max(0, Math.min(n - 1, i));
+        const px = (X(i) * k).toFixed(1);
+        cross.setAttribute('x1', px);
+        cross.setAttribute('x2', px);
+        cross.style.display = '';
+        tip.hidden = false;
+        tip.innerHTML = `<b>${days[i].date}</b><span>${tuFmt(days[i].v)} 位访客</span>`;
+        const rel = clientX - rect.left;
+        tip.style.left = Math.min(Math.max(rel, 70), rect.width - 70) + 'px';
+    };
+    const hide = () => { cross.style.display = 'none'; tip.hidden = true; };
+    svg.addEventListener('mousemove', e => show(e.clientX));
+    svg.addEventListener('mouseleave', hide);
+    svg.addEventListener('touchstart', e => show(e.touches[0].clientX), { passive: true });
+    svg.addEventListener('touchmove', e => show(e.touches[0].clientX), { passive: true });
+    svg.addEventListener('touchend', hide);
 }
 
 function ensureStats() {
@@ -4391,6 +4473,12 @@ function initEventListeners() {
             renderTokenUsage(false);
             return;
         }
+        const statsRange = e.target.closest('[data-stats-range]');
+        if (statsRange) {
+            statsRangeDays = Number(statsRange.dataset.statsRange);
+            renderStats(false);
+            return;
+        }
         if (e.target.closest('#tuPrev')) { tuPage = Math.max(1, tuPage - 1); renderTokenUsage(false); return; }
         if (e.target.closest('#tuNext')) { tuPage += 1; renderTokenUsage(false); return; }
         if (e.target.closest('#tuGo')) { tuJumpPage(); return; }
@@ -4501,6 +4589,7 @@ function initEventListeners() {
             recalcMarquee();
             if (currentView === 'fx') fxPaintChart(); // 图表宽度随容器变，重画一次
             if (currentView === 'tokens') renderTokenUsage(false); // 趋势图宽度随容器变，重画一次
+            if (currentView === 'stats') renderStats(false); // 趋势图宽度随容器变，重画一次
         }, 200);
     });
 
