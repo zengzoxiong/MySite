@@ -13,7 +13,7 @@
       "type": "番剧",
       "status": "看过",
       "release": "2016-04-04",
-      "rating": 8.1,
+      "rating": 9.4,
       "url": "https://www.themoviedb.org/tv/65942/season/1",
       "cover": "assets/media/re-zero-s1.jpg",
       "comment": "死亡回归的代价一次次压在少年身上，最难受的不是怪物，是无能为力。"
@@ -62,7 +62,7 @@
       "title": "无职转生",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.4,
+      "rating": 5.0,
       "comment": "异世界穿越的天花板，作画与叙事都是顶级。",
       "cover": "assets/media/mushoku-tensei.jpg",
       "url": "https://www.themoviedb.org/tv/94664/season/1",
@@ -72,7 +72,7 @@
       "title": "间谍过家家",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.3,
+      "rating": 7.8,
       "comment": "阿尼亚太可爱了，一家三口的温馨喜剧。",
       "url": "https://www.themoviedb.org/tv/120089/season/1",
       "cover": "assets/media/spy-x-family.jpg",
@@ -106,7 +106,7 @@
       "comment": "爱是唯一可以穿越时间维度的东西。",
       "url": "https://www.themoviedb.org/movie/157336",
       "cover": "assets/media/interstellar.jpg",
-      "release": "2014-10-26"
+      "release": "2014-10-19"
     },
     {
       "title": "流浪地球2",
@@ -222,7 +222,7 @@
       "title": "魔法禁书目录",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 6.9,
       "comment": "学园都市的超能力与魔法交织的宏大开端。",
       "cover": "assets/media/magic-index-1.jpg",
       "url": "https://www.themoviedb.org/tv/30980/season/1",
@@ -272,7 +272,7 @@
       "title": "白圣女与黑牧师",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 7.4,
       "comment": "圣女与牧师的温馨日常，狗粮管饱。",
       "cover": "assets/media/saint-cecilia.png",
       "url": "https://www.themoviedb.org/tv/204148",
@@ -311,11 +311,11 @@
       "title": "青春猪头少年不会梦到怀梦美少女",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.2,
+      "rating": 7.7,
       "comment": "和花妹妹线，泪腺警告。",
       "cover": "assets/media/aobuta-movie.jpg",
       "url": "https://www.themoviedb.org/movie/1056803",
-      "release": "2019-06-15"
+      "release": "2023-06-23"
     },
     {
       "title": "刀剑神域 Alicization篇",
@@ -361,7 +361,7 @@
       "title": "鬼灭之刃",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 7.9,
       "comment": "飞碟社作画天花板，炭治郎的斩鬼之旅。",
       "cover": "assets/media/kimetsu-1.jpg",
       "url": "https://www.themoviedb.org/tv/85937/season/1",
@@ -381,37 +381,37 @@
       "title": "鬼灭之刃 游郭篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.4,
+      "rating": 8.1,
       "comment": "音柱宇髄天元，花花夜战天花板。",
       "cover": "assets/media/kimetsu-yukaku.jpg",
       "url": "https://www.themoviedb.org/tv/85937/season/3",
-      "release": "2023-02-03"
+      "release": "2021-12-05"
     },
     {
       "title": "鬼灭之刃 刀匠村篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.2,
+      "rating": 7.0,
       "comment": "霞柱时透无一郎，双子鬼的羁绊。",
       "cover": "assets/media/kimetsu-katana.png",
       "url": "https://www.themoviedb.org/tv/85937/season/4",
-      "release": "2024-05-05"
+      "release": "2023-04-09"
     },
     {
       "title": "鬼灭之刃 柱训练篇",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.2,
+      "rating": 7.6,
       "comment": "决战前的修行，无限城篇的序章。",
       "cover": "assets/media/kimetsu-hashira.png",
       "url": "https://www.themoviedb.org/tv/85937/season/5",
-      "release": "2025-06-20"
+      "release": "2024-05-12"
     },
     {
       "title": "灵能百分百 第一季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.5,
+      "rating": 7.9,
       "comment": "ONE老师的超能力成长物语，作画鬼才。",
       "cover": "assets/media/mob-psycho-1.jpg",
       "url": "https://www.themoviedb.org/tv/67075/season/1",
@@ -441,7 +441,7 @@
       "title": "刺客伍六七",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.6,
+      "rating": 8.8,
       "comment": "小鸡岛理发师，国产原创动画之光。",
       "cover": "assets/media/scissor-seven-1.jpg",
       "url": "https://www.themoviedb.org/tv/79141/season/1",
@@ -491,7 +491,7 @@
       "title": "异度侵入 ID:INVADED",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.3,
+      "rating": 7.2,
       "comment": "杀意世界的推理神作，结构精妙。",
       "cover": "assets/media/id-invaded.png",
       "url": "https://www.themoviedb.org/tv/92602",
@@ -551,7 +551,7 @@
       "title": "不时用俄语小声说真心话的邻桌艾莉同学",
       "type": "番剧",
       "status": "在看",
-      "rating": 8.0,
+      "rating": 8.1,
       "comment": "俄语真心话，艾莉同学又傲又甜。",
       "cover": "assets/media/alya.jpg",
       "url": "https://www.themoviedb.org/tv/235758",
@@ -581,17 +581,17 @@
       "title": "路人女主的养成方法",
       "type": "番剧",
       "status": "想看",
-      "rating": 6.8,
+      "rating": 6.3,
       "comment": "同人游戏制作群像，加藤惠的降临。",
       "cover": "assets/media/saekano.jpg",
       "url": "https://www.themoviedb.org/tv/69367/season/1",
-      "release": "2015-01-16"
+      "release": "2015-01-15"
     },
     {
       "title": "侦探已死",
       "type": "番剧",
       "status": "看过",
-      "rating": 5.6,
+      "rating": 5.7,
       "comment": "谢丝塔的余音，设定有趣展开一般。",
       "cover": "assets/media/detective-dead.jpg",
       "url": "https://www.themoviedb.org/tv/117061",
@@ -651,7 +651,7 @@
       "title": "凸变英雄BABA",
       "type": "番剧",
       "status": "看过",
-      "rating": 6.1,
+      "rating": 10.0,
       "release": "2016-10-05",
       "comment": "废柴老爸被吸进马桶变身英雄的荒诞喜剧。",
       "cover": "assets/media/to-be-hero-baba.jpg",
@@ -681,7 +681,7 @@
       "title": "虚构推理 第一季",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.8,
+      "rating": 7.5,
       "release": "2020-01-12",
       "comment": "小小的怪异，用谎言编织的真相。",
       "cover": "assets/media/kyokousuiri-s1.jpg",
@@ -795,13 +795,13 @@
       "cover": "assets/media/mob-reigen.png",
       "comment": "灵幻新隆才是真正的大人，这部外传把他写透了。",
       "url": "https://www.themoviedb.org/movie/1789446",
-      "rating": 7.3
+      "rating": 8.0
     },
     {
       "title": "Re:从零开始的异世界生活 Memory Snow(雪之回忆)",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 7.4,
       "release": "2018-10-06",
       "cover": "assets/media/rezero-memory-snow.jpg",
       "url": "https://www.themoviedb.org/movie/532321",
@@ -841,8 +841,8 @@
       "title": "无职转生 第三季",
       "type": "番剧",
       "status": "在看",
-      "rating": 8.4,
-      "release": "2026-07-04",
+      "rating": 5.5,
+      "release": "2026-07-03",
       "cover": "assets/media/mushoku-s3.jpg",
       "url": "https://www.themoviedb.org/tv/94664/season/3",
       "comment": "还在追，目前制作水准一点没掉。"
@@ -864,7 +864,8 @@
       "release": "2025-01-12",
       "cover": "assets/media/sentai-red.jpg",
       "url": "https://www.themoviedb.org/tv/261148",
-      "comment": "战队老大哥转生异世界，动作戏的爽感一点没打折。"
+      "comment": "战队老大哥转生异世界，动作戏的爽感一点没打折。",
+      "rating": 7.7
     },
     {
       "title": "龙王的工作",
@@ -903,7 +904,7 @@
       "release": "2017-11-11",
       "cover": "assets/media/gochiusa-dms.jpg",
       "url": "https://www.themoviedb.org/movie/486727",
-      "rating": 7.3,
+      "rating": 7.0,
       "comment": "甜点、少女和慢镜头，看完整个人被熨平了。"
     },
     {
@@ -920,7 +921,7 @@
       "title": "想要成为影之实力者 第一季",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.1,
+      "rating": 7.0,
       "release": "2022-10-05",
       "url": "https://www.themoviedb.org/tv/119495/season/1",
       "cover": "assets/media/eminence-s1.jpg",
@@ -1462,7 +1463,8 @@
       "release": "2022-09-13",
       "comment": "夜之城市的燃烧十月，义体与爱情的十年经典。",
       "cover": "assets/media/cyberpunk-s1.jpg",
-      "url": "https://www.themoviedb.org/tv/105248"
+      "url": "https://www.themoviedb.org/tv/105248",
+      "rating": 8.5
     },
     {
       "title": "赛博朋克：边缘行者 第二季",
@@ -1744,7 +1746,7 @@
       "title": "间谍过家家 第三季",
       "type": "番剧",
       "status": "想看",
-      "rating": 8.2,
+      "rating": 7.7,
       "release": "2025-10-04",
       "url": "https://www.themoviedb.org/tv/120089/season/3",
       "cover": "assets/media/spy-x-family-s3.jpg",
@@ -1754,7 +1756,7 @@
       "title": "相合之物",
       "type": "番剧",
       "status": "在看",
-      "rating": 7.4,
+      "rating": 7.6,
       "release": "2022-04-06",
       "url": "https://www.themoviedb.org/tv/123818",
       "cover": "assets/media/deaimon.png",
@@ -1764,8 +1766,8 @@
       "title": "路人女主的养成方法 ♭",
       "type": "番剧",
       "status": "想看",
-      "rating": 7.6,
-      "release": "2017-04-06",
+      "rating": 5.5,
+      "release": "2017-04-13",
       "url": "https://www.themoviedb.org/tv/69367/season/2",
       "cover": "assets/media/saekano-flat.jpg",
       "comment": "排上补番日程，看完接剧场版。"
@@ -1774,7 +1776,7 @@
       "title": "路人女主的养成方法剧场版 Fine",
       "type": "电影",
       "status": "想看",
-      "rating": 8.3,
+      "rating": 6.9,
       "release": "2019-10-26",
       "url": "https://www.themoviedb.org/movie/608826",
       "cover": "assets/media/saekano-fine.png",
@@ -1792,7 +1794,7 @@
       "title": "败犬女主太多了！",
       "type": "番剧",
       "status": "看过",
-      "rating": 8.0,
+      "rating": 8.1,
       "release": "2024-07-14",
       "url": "https://www.themoviedb.org/tv/241535",
       "cover": "assets/media/makeine.jpg",
@@ -1802,7 +1804,7 @@
       "title": "别当欧尼酱了！",
       "type": "番剧",
       "status": "看过",
-      "rating": 7.5,
+      "rating": 7.4,
       "release": "2023-01-05",
       "url": "https://www.themoviedb.org/tv/198152",
       "cover": "assets/media/onimai.png",
@@ -1815,7 +1817,8 @@
       "url": "https://www.themoviedb.org/tv/337399",
       "cover": "assets/media/mianbei-dianzha-fumie-jishi.jpg",
       "comment": "公安部与央视联合摄制的三集纪实：四大家族涉诈超 290 亿，明家、白家两案的侦办全链条与落网者自白，尽在镜头里。",
-      "release": "2026-10-05"
+      "release": "2026-10-05",
+      "rating": 10.0
     },
     {
       "title": "第一餐",
