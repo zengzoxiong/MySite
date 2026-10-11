@@ -20,23 +20,23 @@ MySite/
 ├── manifest.json         # PWA 清单
 ├── favicon.svg           # 站点图标（星芒设计，128 个工具页引用 ../../favicon.svg）
 ├── sitemap.xml/robots.txt
-├── data/                 # 全部内容数据（改 JSON 刷新即生效，无需改代码）
-│   ├── links.json        # 网站收藏（categories + links）
-│   ├── link-health.json  # 死链体检结果（工作流每周生成，勿手改）
-│   ├── winget-health.json # winget 包体检结果（工作流每日生成，勿手改）
-│   ├── tools.json        # 在线工具登记（驱动 tools/ 目录展示）
-│   ├── media.json        # 影视收藏（六大类型，详见下文规范）
-│   ├── agent-plugins.json# Agent Skills 注册表 + MCP 清单
-│   ├── stars.json        # GitHub Stars（工作流自动同步，勿手改）
-│   ├── explore.json      # 播放器「探索模式」歌单（工作流每日同步，勿手改）
-│   ├── gh-activity.json  # GitHub 贡献热力图（工作流每日同步，勿手改）
-│   ├── daily-report.json # 数据看板「每日日报」Trending+HN（工作流每日同步，勿手改）
-│   ├── goatcounter-stats.json # 数据看板「访问统计」PV/UV（GoatCounter API 每日同步，勿手改）
-│   ├── token-usage.json  # 数据看板「Token 用量」（模型×天聚合，API 日志离线导入，勿手改）
-│   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
-│   ├── chatgpt-plus.json # ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期，见「汇率」小节）
-│   ├── lyrics.json       # 歌词 LRC 原文（随探索歌单每日同步，勿手改）
-│   └── playlist.json     # 首页音乐播放器歌单
+├── data/                 # 全部内容数据（改 JSON 刷新即生效，无需改代码；条目按正文小节排序）
+│   ├── links.json        # §1 网站收藏（categories + links）
+│   ├── link-health.json  # §1 死链体检结果（工作流每周生成，勿手改）
+│   ├── winget-health.json # §1 winget 包体检结果（工作流每日生成，勿手改）
+│   ├── media.json        # §2 影视收藏（六大类型，详见下文规范）
+│   ├── tools.json        # §3 在线工具登记（驱动 tools/ 目录展示）
+│   ├── agent-plugins.json# §4 Agent Skills 注册表 + MCP 清单
+│   ├── stars.json        # §5 我的 Stars（工作流每日同步，勿手改）
+│   ├── playlist.json     # §6 首页音乐播放器歌单
+│   ├── explore.json      # §6 播放器「探索模式」歌单（工作流每日同步，勿手改）
+│   ├── lyrics.json       # §6 歌词 LRC 原文（随探索歌单每日同步，勿手改）
+│   ├── fx.json           # §8 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
+│   ├── chatgpt-plus.json # §8 ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期）
+│   ├── goatcounter-stats.json # §8.5 访问统计 PV/UV（GoatCounter API 每日同步，勿手改）
+│   ├── token-usage.json  # §8.6 Token 用量（模型×天聚合，API 日志离线导入，勿手改）
+│   ├── gh-activity.json  # 数据看板贡献热力图（工作流每日同步，勿手改）
+│   └── daily-report.json # 数据看板「每日日报」Trending+HN（工作流每日同步，勿手改）
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
 │   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked、jspdf、html2canvas）
