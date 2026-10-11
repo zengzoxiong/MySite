@@ -1,11 +1,11 @@
-/* Service Worker：PWA 离线缓存（页面骨架 stale-while-revalidate + 数据文件网络优先） */
-const CACHE = 'mysite-v18'; // v18: data/ 数据文件改为网络优先（3s 超时回退缓存），每日同步内容即时可见
+/* Service Worker：PWA 离线缓存（数据文件与页面导航网络优先，其余骨架 stale-while-revalidate） */
+const CACHE = 'mysite-v19'; // v19: 页面导航改为网络优先（3s 超时回退缓存），改版 push 后访客第一眼就是新页面
 // 运行时缓存（PRECACHE 之外的同源资源）条目上限：工具页/海报会随浏览不断
 // 进缓存，不修剪的话老访客的存储无限增长；超出按写入顺序淘汰最旧的
 const RUNTIME_MAX = 300;
-// 数据文件网络优先：media/stars/explore/fx/日报等每日同步的内容必须即时可见，
-// 网络失败或超时才回退缓存（保留离线可看）。页面骨架（HTML/CSS/JS）仍走 SWR
-const DATA_NETWORK_FIRST = /\/data\/.+/;
+// 网络优先：data/ 数据文件（每日同步内容即时可见）与页面导航（改版即达）
+// 都先敲网络，3s 超时或失败才回退缓存（保留离线可看）；CSS/JS 等其余骨架仍走 SWR
+const NETWORK_FIRST_RE = /\/data\/.+/;
 const PRECACHE = [
     './',
     './index.html',
@@ -45,12 +45,12 @@ self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
     if (e.request.method !== 'GET' || url.origin !== location.origin) return;
 
-    // 数据文件：网络优先，3s 超时/失败回退缓存；成功时顺手更新缓存
-    if (DATA_NETWORK_FIRST.test(url.pathname)) {
+    // 网络优先（数据文件 + 页面导航）：3s 超时/失败回退缓存；成功时顺手更新缓存
+    if (NETWORK_FIRST_RE.test(url.pathname) || e.request.mode === 'navigate') {
         e.respondWith((async () => {
             try {
                 const fresh = await Promise.race([
-                    fetch(e.request),
+                    fetch(e.request, { cache: 'no-cache' }),
                     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
                 ]);
                 if (fresh && fresh.status === 200) {
@@ -72,7 +72,7 @@ self.addEventListener('fetch', (e) => {
 
     e.respondWith(
         caches.match(e.request).then((cached) => {
-            const fetched = fetch(e.request)
+            const fetched = fetch(e.request, { cache: 'no-cache' })
                 .then((res) => {
                     if (res && res.status === 200) { // 206（音频 Range）等不能进 cache.put
                         const clone = res.clone();

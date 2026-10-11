@@ -16,7 +16,7 @@ MySite/
 ├── script.js             # 全部交互逻辑（约 4300 行，单文件无模块）
 ├── styles.css            # 全站样式（液态玻璃设计系统，含明暗主题）
 ├── settings.html         # 设置页（iframe 载入主站弹层，postMessage 通信）
-├── sw.js                 # PWA Service Worker（SWR 缓存，改预缓存须升版本号）
+├── sw.js                 # PWA Service Worker（导航/数据网络优先，其余 SWR，改预缓存或策略须升版本号）
 ├── manifest.json         # PWA 清单
 ├── favicon.svg           # 站点图标（星芒设计，128 个工具页引用 ../../favicon.svg）
 ├── sitemap.xml/robots.txt
@@ -215,8 +215,9 @@ MySite/
 
 ### Service Worker（sw.js）
 
-- 页面骨架（HTML/CSS/JS）走 SWR：缓存优先、后台更新；**跨域请求直连不缓存**
-- **`data/` 数据文件网络优先**（`DATA_NETWORK_FIRST`，v18 起）：每日同步的内容（media/stars/explore/fx/日报等）每次访问先拉网络，3s 超时或失败才回退缓存——保证用户隔多天回来第一眼就是最新数据，离线时仍可看缓存旧内容；命中网络时顺手更新缓存
+- **页面导航（HTML）网络优先**（v19 起，与数据文件同分支）：主页/设置页/工具页每次访问先拉网络，3s 超时或失败回退缓存——改版 push 后访客第一眼就是新页面，离线时用旧壳兜底；命中网络时顺手更新缓存
+- **其余骨架（CSS/JS）走 SWR**：缓存优先、后台更新（改版最多慢一拍，下次刷新即新）；**跨域请求直连不缓存**
+- **`data/` 数据文件网络优先**（`NETWORK_FIRST_RE`，v18 起）：每日同步的内容（media/stars/explore/fx/日报等）每次访问先拉网络，3s 超时或失败才回退缓存——保证用户隔多天回来第一眼就是最新数据，离线时仍可看缓存旧内容；命中网络时顺手更新缓存
 - **升 `CACHE` 版本的口径**：SWR 下普通资源内容改动靠后台 revalidate 自愈，**不需要**升版本；只有改 `PRECACHE` 清单、改缓存策略/语义（如修剪规则）、或要强制清掉老访客旧缓存时才升（v14→v15→…）。为改一行 CSS 去升版本会触发全量重下，别做
 - 运行时缓存（PRECACHE 之外的同源 GET，工具页/海报等）有 `RUNTIME_MAX` 上限，超出按写入顺序淘汰最旧的；PRECACHE 条目不修剪
 - 注册带特性检测 + 静默失败
