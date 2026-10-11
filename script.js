@@ -1662,7 +1662,7 @@ function tuHeatHtml(days) {
     });
     const svg = `<svg viewBox="0 0 ${heatW} ${heatH}" width="${heatW}" height="${heatH}" role="img" aria-label="Token 活动热力图（近 52 周）">` +
         seq.map(c =>
-            `<rect class="tu-hcell lv${lv(c.day)}" x="${c.col * (cw + gap)}" y="${c.row * (ch + gap)}" width="${cw}" height="${ch}" rx="3"><title>${c.date} · 当日 ${tuFmt(c.day)}</title></rect>`
+            `<rect class="tu-hcell lv${lv(c.day)}" x="${c.col * (cw + gap)}" y="${c.row * (ch + gap)}" width="${cw}" height="${ch}" rx="3"><title>${c.date} · 当日 ${tuBig(c.day)}</title></rect>`
         ).join('') + '</svg>';
     // 末尾月份标签回收到容器内（超出会连带出纵向滚动条）
     const monLabels = months.map(m => {
