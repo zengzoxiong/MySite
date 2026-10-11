@@ -44,20 +44,22 @@ def fetch_json(url, token):
         'Accept': 'application/json',
     })
     last_err = None
-    for attempt in range(3):  # runner 偶发 DNS 解析失败，重试跨过抖动
+    for attempt in range(4):  # runner 偶发 DNS 抖动 + GoatCounter 端瞬时故障，重试跨过
         try:
             return json.loads(urllib.request.urlopen(req, timeout=30).read().decode('utf-8', 'ignore'))
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', 'ignore')
-            last_err = RuntimeError(f'HTTP {e.code} {_err_text(body)}')
-            if e.code != 429 and 400 <= e.code < 500:
-                raise last_err  # token 失效/参数错等永久性错误，重试无意义
+            last_err = RuntimeError(f'{url} → HTTP {e.code} {_err_text(body)}')
+            # 只有 token 失效/参数错才立即失败；404 实测是 GoatCounter 端的瞬时故障
+            # （同一 URL 时好时坏，探活返回 401 说明路径始终存在），照常重试
+            if e.code in (400, 401, 403):
+                raise last_err
             print(f'请求失败（第 {attempt + 1} 次）：{last_err}，稍后重试')
-            time.sleep(10)
+            time.sleep(15)
         except urllib.error.URLError as e:
             last_err = e
             print(f'请求失败（第 {attempt + 1} 次）：{e}，稍后重试')
-            time.sleep(10)
+            time.sleep(15)
     raise last_err
 
 
