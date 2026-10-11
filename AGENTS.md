@@ -135,7 +135,7 @@ MySite/
 - **数据源与口径**：欧洲央行参考汇率（`https://api.frankfurter.dev`，免密钥），当前值与历史曲线**同一源**，避免两源数值打架。免密钥公开源都是**日频参考价**（ECB 每工作日约 16:00 CET 发布）——**页面不写「数据来源/非实时」这类注脚（用户要求删掉），但也别对外宣称实时行情**，数据本身仍是日频。
 - **数据结构**：`{ source, sourceName, sourceUrl, base:'CNY', updated:'YYYY-MM-DD', columns:[USD,EUR,JPY,GBP,HKD,KRW,SGD,AUD,TRY,INR,PHP,BRL,CAD,THB,MYR], latest:{币种:值}, series:[[日期, 15 个值], …] }`。`series` 是**接口原样方向**（1 人民币 = X 外币，5 位小数），前端用 `fxValue()` 取倒数换算成「per 单位外币 = ? 人民币」；`FX_META` 里的 `per`（JPY/KRW 为 100，其余 1）决定展示口径——**加币种要同时改 `scripts/sync_fx.py` 的 `SYMBOLS` 和 script.js 的 `FX_META`**，缺 meta 会按 `{name: code, per: 1}` 兜底。**汇率卡片展示 `fxData.columns` 里的全部币种**（`fxPaintCards()` 直接按列渲染，15 种一屏铺开），`FX_META` 只负责名字与展示口径——**加币种务必同时改 `SYMBOLS` 和 `FX_META`**，漏了 meta 卡片会显示成裸代码。
 - **工作流**：`.github/workflows/sync-fx.yml` 每日 UTC 18:07（北京 02:07，深夜低峰；ECB 参考价北京 23 点前后已发布）跑 `scripts/sync_fx.py`；脚本比对 `series` 未变则**不写文件**，天然避免空提交。
-- **视图**：侧栏「数据看板 → 汇率走势」进入（「数据看板」分区收纳「我的 Stars」「汇率走势」「每日日报」「访问统计」「Token 用量」「Agent Skills」「Agent MCP」七项：前五项是同步/导入的数据视图，后两项是注册表视图，Stars 原先挂在「网站收藏」、Agent Plugin 原先独占分区，2026-09 一并移入），`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
+- **视图**：侧栏「数据看板 → 汇率走势」进入（「数据看板」分区收纳「访问统计」「每日日报」「汇率走势」「我的 Stars」「Token 用量」「Agent Skills」「Agent MCP」七项，按「站点数据 → 资讯参考 → 开发者数据」性质聚簇：前五项是同步/导入的数据视图，后两项是注册表视图，Stars 原先挂在「网站收藏」、Agent Plugin 原先独占分区，2026-09 一并移入，2026-10 看板内部按性质重排），`renderFx()` 复用 `#mediaGrid` 容器（和 ghstars 同款做法，切视图时其余渲染函数会自动收起它）。内容 = 15 张币种卡片（当前值 + 较前一交易日涨跌）+ 手绘 SVG 折线图（`fxPaintChart()`，5 档区间 7/30/90/365/全部、悬停十字线 + tooltip、resize 重画）；卡片/区间按钮/搜索结果都走**事件委托**绑在 `#mediaGrid` 与 `#linksGrid` 上。
 - 涨跌色是 `--up-color`（红涨）/`--down-color`（绿跌），明暗各一套；图表颜色全部走 CSS 类 + 变量，**别在 JS 里硬编颜色**。
 - 全域搜索输入币种名/代码/别名（`fxSearchHits`）会出现「汇率」分组，点击跳到汇率视图并选中该币种。
 - **换算器**：视图最下方的「汇率换算」是双向计算器（`fxConvert()` 以人民币为桥算交叉汇率，数据方向是「1 CNY = X 外币」，所以 `amount / raw[from] * raw[to]`；上栏改动算下栏、下栏改动算上栏，互换按钮只换货币并按上栏重算）。汇率行沿用日元/韩元按 100 单位报价的口径（`fxConvUnit()`）并带上数据日期；结果保留 4 位小数（`fxAmt`）、汇率行按量级保留有效位（`fxRateAmt`）。上栏是输入、下栏是结果（`.fx-conv-out` 用 `color-mix` 加一层主题色淡底做区分）。**别用 `type="number"` 的固有宽度做窄屏布局**：数字输入框 min-content ≈206px，配合下拉会把卡片撑破，`.fx-conv-row` 已加 `flex-wrap: wrap`。
@@ -176,6 +176,7 @@ MySite/
 `currentView`：`home`（仪表盘）/ `links`（网站收藏）/ `tools`（在线工具）/ `media`（影视）/ `plugin`（Agent Plugin）/ `ghstars`（Stars）/ `fx`（汇率）/ `daily`（每日日报）/ `search`（全域搜索）。
 
 - **新增视图必须同步改**：`renderCurrentView()` 分发、`goHome()` 复位、侧栏点击处理器（含 `searchFrom` 与搜索框清空）、全域搜索 `renderSearchResults`
+- **侧栏顺序来源（2026-10 按性质聚簇重排，实用优先、娱乐殿后）**：一级分区（在线工具 → 网站收藏 → 影视收藏 → 数据看板）与看板 7 项是 index.html 静态结构；在线工具分类顺序 = `tools.json` 的 `categories` 数组（`renderSidebarTools` 直吃数组，登记新分类必须同步登记，主区网格仍按条目顺序平铺不受影响）；网站收藏分类顺序 = `links.json` 的 `categories`；影视类型顺序 = `media.json` 的 `types`。改顺序只动这三处来源，别在 JS 里另排
 - 搜索框输入即进入 `search` 视图（分组结果 + 加载过渡 + `searchSeq` 防竞态），清空后恢复 `searchFrom` 视图
 - 右上角 GitHub 卡片带展开键（`#ghExpand`）：展开 `#ghPanel` 贡献热力图（懒加载 `data/gh-activity.json`，54 列×7 行 `.gh-cell` 五档色阶走 `color-mix(in srgb, var(--accent-color) …)`，格宽 9px+间距 2px 刚好不出横向滚动条，格子 title 报日期+次数）；Esc/点面板外关闭，Esc 用 `stopImmediatePropagation` 不触发全局回首页
 

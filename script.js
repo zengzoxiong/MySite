@@ -3476,7 +3476,7 @@ async function loadLinks() {
         } catch (error) {
             console.error('winget 体检结果加载失败:', error);
         }
-        renderSidebarTools();
+        renderSidebarTools(toolsData.categories);
         renderSidebarCategories(linksData.categories);
         // 数据晚到时用户可能已切到其他视图：renderLinks 会隐藏 #mediaGrid（fx/daily/stats
         // 等视图的内容就渲染在里面）并覆写 viewHead，只在收藏/首页视图才能刷；搜索视图补一次重搜
@@ -3623,8 +3623,8 @@ function bindCopyButtons() {
 }
 
 // 渲染侧栏工具区（分类导航）
-function renderSidebarTools() {
-    const categories = [...new Set(allTools.map(t => t.category))];
+// 渲染侧栏工具分类：顺序取 tools.json 的 categories 数组（登记新分类须同步登记数组）
+function renderSidebarTools(categories) {
     sidebarTools.innerHTML = categories.map(cat => `
         <div class="sidebar-item" role="button" tabindex="0" data-tool-category="${escapeHtml(cat)}">
             <span class="item-text">${escapeHtml(cat)}</span>
