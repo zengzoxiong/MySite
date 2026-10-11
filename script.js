@@ -1335,7 +1335,7 @@ let dailyReport = null;
 let dailyLoading = false;
 
 function renderDailyReport(animate = false) {
-    setViewHead('每日日报', '', 'GitHub Trending 精选 + Hacker News 首页十条' + (dailyReport && dailyReport.updated ? ' · 更新于 ' + dailyReport.updated : ''));
+    setViewHead('每日日报', '', 'Trending / HF 模型 / HN / 微博热搜 / 历史上的今天' + (dailyReport && dailyReport.updated ? ' · 更新于 ' + dailyReport.updated : ''));
     dashboard.classList.add('hidden');
     linksGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -1345,16 +1345,21 @@ function renderDailyReport(animate = false) {
         ensureDailyReport();
         return;
     }
-    const t = (dailyReport.sections && dailyReport.sections.trending) || [];
-    const hn = (dailyReport.sections && dailyReport.sections.hn) || [];
+    const s = dailyReport.sections || {};
     const anim = animate ? ' anim' : '';
-    mediaGrid.innerHTML = `
-        <div class="daily-sec">GitHub Trending · 近 7 天热门新仓库</div>
-        ${t.length ? `<div class="skills-cards${anim}">${t.map(trendingCardHtml).join('')}</div>`
-            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}
-        <div class="daily-sec" style="margin-top:18px">Hacker News · 首页十条</div>
-        ${hn.length ? `<div class="skills-cards${anim}">${hn.map(hnCardHtml).join('')}</div>`
-            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>'}`;
+    // 历史上的今天的月/日 = 同步日（北京时间），与脚本取数日一致
+    const md = /^(\d{4})-(\d{2})-(\d{2})/.exec(dailyReport.updated || '');
+    const otdTitle = md ? `历史上的今天 · ${Number(md[2])} 月 ${Number(md[3])} 日` : '历史上的今天';
+    const block = (title, items, tpl, first) =>
+        `<div class="daily-sec"${first ? '' : ' style="margin-top:18px"'}>${title}</div>` +
+        (items.length ? `<div class="skills-cards${anim}">${items.map(tpl).join('')}</div>`
+            : '<div class="media-count">本板块今日拉取失败，明早自动恢复</div>');
+    mediaGrid.innerHTML =
+        block('GitHub Trending · 近 7 天热门新仓库', s.trending || [], trendingCardHtml, true) +
+        block('Hugging Face · 每日热门模型', s.hf_models || [], hfModelCardHtml) +
+        block('Hacker News · 首页十条', s.hn || [], hnCardHtml) +
+        block('微博 · 实时热搜', s.weibo || [], weiboCardHtml) +
+        block(otdTitle, s.onthisday || [], otdCardHtml);
 }
 
 function ensureDailyReport() {
@@ -1397,6 +1402,45 @@ function hnCardHtml(r) {
             <span class="skill-tag">${escapeHtml(getDomain(r.url) || 'news.ycombinator.com')}</span>
         </div>
     </div>`;
+}
+
+// 每日日报：Hugging Face 热门模型卡（id 即仓库名，下载/点赞走万/亿缩写）
+function hfModelCardHtml(r) {
+    return `
+    <a class="skill-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">
+        <div class="skill-title-row">
+            <span class="skill-name">${escapeHtml(r.id)}</span>
+        </div>
+        <div class="skill-meta">
+            ${r.task ? `<span class="skill-tag">${escapeHtml(r.task)}</span>` : ''}
+            <span class="skill-tag">↓ ${tuShort(r.downloads || 0)}</span>
+            <span class="skill-tag">赞 ${tuShort(r.likes || 0)}</span>
+        </div>
+    </a>`;
+}
+
+// 每日日报：微博热搜卡（i 为排名从 0 起；label 是爆/热/新/沸，没有就不出标）
+function weiboCardHtml(r, i) {
+    return `
+    <a class="skill-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">
+        <div class="skill-title-row">
+            <span class="skill-name">${String(i + 1).padStart(2, '0')} ${escapeHtml(r.word)}</span>
+            ${r.label ? `<span class="skill-stars">${escapeHtml(r.label)}</span>` : ''}
+        </div>
+        <div class="skill-meta"><span class="skill-tag">热度 ${tuShort(r.num || 0)}</span></div>
+    </a>`;
+}
+
+// 每日日报：历史上的今天卡（整卡链到相关维基词条）
+function otdCardHtml(r) {
+    return `
+    <a class="skill-card" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer">
+        <div class="skill-title-row">
+            <span class="skill-name">${r.year ? escapeHtml(String(r.year)) + ' 年' : ''}</span>
+            ${r.title ? `<span class="skill-tag">${escapeHtml(r.title)}</span>` : ''}
+        </div>
+        <div class="skill-desc">${escapeHtml(r.text)}</div>
+    </a>`;
 }
 
 // ===== 访问统计（数据看板 · GoatCounter API 每日同步） =====

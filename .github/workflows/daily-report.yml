@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: 同步 GitHub Trending 精选与 Hacker News 十条
+      - name: 同步每日日报（Trending / HF 模型 / HN / 微博热搜 / 历史上的今天）
         run: python scripts/sync_daily_report.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 提搜索限额，远超每日一次所需
@@ -34,7 +34,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/daily-report.json
-            git commit -m "chore: 定时同步每日日报（Trending + Hacker News）"
+            git commit -m "chore: 定时同步每日日报"
             git push
           else
             echo "日报内容无变化，跳过提交"

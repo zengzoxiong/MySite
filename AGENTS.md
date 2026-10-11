@@ -239,7 +239,7 @@ MySite/
 - `sync-ghactivity.yml`：每日 03:03（北京，深夜低峰）同步 GitHub 贡献到 data/gh-activity.json（配置 GH_TOKEN secret 时走 GraphQL 本人视角含私有仓库贡献，其次公开贡献日历，回退 events 近 90 天），有变化才提交
 - `sync-fx.yml`：每日 02:07（北京，深夜低峰；ECB 参考价北京 23 点前后已发布）同步人民币汇率（ECB 参考价，最新值 + 全量日线）到 data/fx.json，无新交易日数据时跳过提交
 - `goatcounter.yml`：每日 03:47（北京，深夜低峰）从 GoatCounter API 同步访问统计（PV/UV 累计与逐日）到 data/goatcounter-stats.json，**依赖仓库 secret `GOATCOUNTER_TOKEN`**（GoatCounter 后台 Settings→API 生成），无变化跳过提交
-- `daily-report.yml`：每日 03:30（北京，深夜低峰）同步数据看板「每日日报」（GitHub Trending 精选——官方 Search API 近 7 天新建仓库按星排序 + Hacker News 首页十条，官方 Firebase API）到 data/daily-report.json，无变化跳过提交
+- `daily-report.yml`：每日 03:30（北京，深夜低峰）同步数据看板「每日日报」到 data/daily-report.json，无变化跳过提交。五个板块各自尽力而为（`sections` 键：trending / hf_models / weibo / onthisday / hn），单板块拉取失败当天省略、前端显示「明早自动恢复」：GitHub Trending 精选（官方 Search API 近 7 天新建仓库按星排序）、Hugging Face 每日热门模型（官方 `/api/models?sort=trendingScore` 免鉴权）、微博实时热搜（网页版官方接口 `ajax/side/hotSearch` 免登录，过滤 is_ad 广告位，需浏览器 UA）、历史上的今天（中文维基官方 Feed `api.wikimedia.org/feed/v1/wikipedia/zh/onthisday/events/MM/DD`，按北京时间取日、年份从近到远取 6 条只收挂词条链接的）、Hacker News 首页十条（官方 Firebase API）。要提频改 cron 即可（数据不变的板块自动跳过，仅热搜会造成提交）
 - 写数据的工作流都用 Actions 的 git 身份提交——**本地 push 遇到 `[rejected] fetch first` 时先 `git pull --rebase` 再推**（就是它们的新提交）
 
 ## 维护红线

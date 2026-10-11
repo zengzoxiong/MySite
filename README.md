@@ -33,7 +33,7 @@
 |------|------|
 | 我的 Stars | GitHub 星标仓库墙（每日同步） |
 | 汇率走势 | ECB 参考价 15 币种卡片 + 走势图 + 双向换算器 + ChatGPT Plus 各区实付榜 |
-| 每日日报 | GitHub Trending 精选 + Hacker News 首页十条（每日同步） |
+| 每日日报 | GitHub Trending 精选 · HF 热门模型 · HN 十条 · 微博热搜 · 历史上的今天（每日同步） |
 | 访问统计 | GoatCounter 访客（UV）汇总与趋势图（每日同步） |
 | Token 用量 | 模型 × 天用量热力图 / 趋势折线 / 环形图 / 明细表 |
 | Agent Skills / Agent MCP | 技能与 MCP 注册表视图 |
