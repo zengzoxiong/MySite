@@ -7,153 +7,325 @@
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 13652,
+        "stars": 13747,
         "language": "Lean"
-      },
-      {
-        "name": "alchaincyf/huashu-art-motion",
-        "url": "https://github.com/alchaincyf/huashu-art-motion",
-        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 3194,
-        "language": "JavaScript"
       },
       {
         "name": "storytold/wordcraft",
         "url": "https://github.com/storytold/wordcraft",
         "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
-        "stars": 3105,
+        "stars": 3338,
         "language": "Rust"
+      },
+      {
+        "name": "alchaincyf/huashu-art-motion",
+        "url": "https://github.com/alchaincyf/huashu-art-motion",
+        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
+        "stars": 3256,
+        "language": "JavaScript"
       },
       {
         "name": "mhtsec/ARTEX",
         "url": "https://github.com/mhtsec/ARTEX",
         "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 2898,
+        "stars": 2970,
         "language": "Go"
       },
       {
         "name": "zhongerxin/iPhone-use",
         "url": "https://github.com/zhongerxin/iPhone-use",
         "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
-        "stars": 2544,
+        "stars": 2658,
         "language": "Python"
       },
       {
         "name": "nullmoth/nvidia-macos-driver",
         "url": "https://github.com/nullmoth/nvidia-macos-driver",
         "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 2279,
+        "stars": 2335,
         "language": "Rust"
       },
       {
         "name": "LosaLosSantos/aurelio-finance",
         "url": "https://github.com/LosaLosSantos/aurelio-finance",
         "desc": "Open-source personal finance app with an AI financial advisor: track your net worth, investments, ETFs, cash and debts on your own computer.",
-        "stars": 2093,
+        "stars": 2095,
         "language": "Python"
       },
       {
         "name": "storytold/cadcraft",
         "url": "https://github.com/storytold/cadcraft",
         "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
-        "stars": 1824,
+        "stars": 1950,
         "language": "Rust"
       },
       {
         "name": "storytold/gridcraft",
         "url": "https://github.com/storytold/gridcraft",
         "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
-        "stars": 1798,
+        "stars": 1937,
         "language": "Rust"
       },
       {
-        "name": "kargulstudio/sales-crm",
-        "url": "https://github.com/kargulstudio/sales-crm",
-        "desc": "",
-        "stars": 1688,
-        "language": "TypeScript"
+        "name": "noahdunnagan/fsearch",
+        "url": "https://github.com/noahdunnagan/fsearch",
+        "desc": "Whole-disk file search for macOS: fuzzy names, typo tolerance, indexed content grep. ~1 ms over 8M files.",
+        "stars": 1663,
+        "language": "Rust"
       }
     ],
     "hn": [
+      {
+        "id": 50038634,
+        "title": "WallHop – 12ft.io is gone, so I built a replacement",
+        "url": "https://wallhop.io/",
+        "hn": "https://news.ycombinator.com/item?id=50038634",
+        "score": 187,
+        "comments": 83
+      },
+      {
+        "id": 50037949,
+        "title": "Build your own decision model",
+        "url": "https://nishtahir.com/build-your-own-decision-model/",
+        "hn": "https://news.ycombinator.com/item?id=50037949",
+        "score": 180,
+        "comments": 36
+      },
+      {
+        "id": 50039504,
+        "title": "CIA World Facebook Is Dead – Here Is an Attempt at Recreation",
+        "url": "https://worldfacts.app",
+        "hn": "https://news.ycombinator.com/item?id=50039504",
+        "score": 22,
+        "comments": 25
+      },
       {
         "id": 49991852,
         "title": "2D Vehicles",
         "url": "https://patkerr.co.uk/2d-vehicles/",
         "hn": "https://news.ycombinator.com/item?id=49991852",
-        "score": 288,
-        "comments": 69
-      },
-      {
-        "id": 50035530,
-        "title": "Why DuckDB 2.0 is faster",
-        "url": "https://motherduck.com/blog/why-duckdb-20-is-faster/",
-        "hn": "https://news.ycombinator.com/item?id=50035530",
-        "score": 105,
-        "comments": 31
-      },
-      {
-        "id": 50017247,
-        "title": "Nix wrote half of my debugger",
-        "url": "https://fzakaria.com/2026/10/07/nix-wrote-half-of-my-debugger",
-        "hn": "https://news.ycombinator.com/item?id=50017247",
-        "score": 79,
-        "comments": 6
+        "score": 402,
+        "comments": 88
       },
       {
         "id": 50036864,
         "title": "A city-building game in which the city would prefer you didn't",
         "url": "https://housing.over.pizza/",
         "hn": "https://news.ycombinator.com/item?id=50036864",
-        "score": 69,
-        "comments": 27
+        "score": 248,
+        "comments": 88
       },
       {
-        "id": 50034081,
-        "title": "Knuth reward check",
-        "url": "https://www.thomas-huehn.com/knuth-reward-check/",
-        "hn": "https://news.ycombinator.com/item?id=50034081",
-        "score": 120,
-        "comments": 47
+        "id": 50038623,
+        "title": "PSPi 6 – Raspberry Pi in a PSP",
+        "url": "https://github.com/othermod/PSPi-Version-6",
+        "hn": "https://news.ycombinator.com/item?id=50038623",
+        "score": 45,
+        "comments": 5
       },
       {
         "id": 50029487,
         "title": "The Lightbulb Computer",
         "url": "https://lightbulbcomputer.com/",
         "hn": "https://news.ycombinator.com/item?id=50029487",
-        "score": 138,
-        "comments": 36
+        "score": 317,
+        "comments": 46
       },
       {
-        "id": 50031614,
-        "title": "Talorys – A self-hosted personal AI agent on Cloudflare's free tier",
-        "url": "https://github.com/rociiu/talorys",
-        "hn": "https://news.ycombinator.com/item?id=50031614",
-        "score": 225,
-        "comments": 113
+        "id": 50017247,
+        "title": "Nix wrote half of my debugger",
+        "url": "https://fzakaria.com/2026/10/07/nix-wrote-half-of-my-debugger",
+        "hn": "https://news.ycombinator.com/item?id=50017247",
+        "score": 161,
+        "comments": 30
       },
       {
-        "id": 50016956,
-        "title": "Mxc: Microsoft Execution Containers version 1.0.0",
-        "url": "https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/",
-        "hn": "https://news.ycombinator.com/item?id=50016956",
-        "score": 141,
-        "comments": 32
+        "id": 50001234,
+        "title": "Retrofitting language models to operate over bytes",
+        "url": "https://www.nature.com/articles/s41586-026-11111-4",
+        "hn": "https://news.ycombinator.com/item?id=50001234",
+        "score": 33,
+        "comments": 2
       },
       {
-        "id": 50027257,
-        "title": "Recent AI models struggled to match a human algorithmic innovation",
-        "url": "https://epoch.ai/publications/innovationeval",
-        "hn": "https://news.ycombinator.com/item?id=50027257",
-        "score": 56,
-        "comments": 48
+        "id": 50035530,
+        "title": "Why DuckDB 2.0 is faster",
+        "url": "https://motherduck.com/blog/why-duckdb-20-is-faster/",
+        "hn": "https://news.ycombinator.com/item?id=50035530",
+        "score": 173,
+        "comments": 53
+      }
+    ],
+    "hf_models": [
+      {
+        "id": "google/embeddinggemma-2",
+        "url": "https://huggingface.co/google/embeddinggemma-2",
+        "task": "feature-extraction",
+        "downloads": 45605,
+        "likes": 1536
       },
       {
-        "id": 50028275,
-        "title": "REA Reverse – Engineer Anything",
-        "url": "https://rea.tools/",
-        "hn": "https://news.ycombinator.com/item?id=50028275",
-        "score": 666,
-        "comments": 292
+        "id": "jialinyyzz/humanizer",
+        "url": "https://huggingface.co/jialinyyzz/humanizer",
+        "task": "text-generation",
+        "downloads": 33664,
+        "likes": 980
+      },
+      {
+        "id": "Cloudflare/clef",
+        "url": "https://huggingface.co/Cloudflare/clef",
+        "task": "image-text-to-text",
+        "downloads": 13579,
+        "likes": 2003
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
+        "task": "text-to-image",
+        "downloads": 2096562,
+        "likes": 3892
+      },
+      {
+        "id": "Aleph-Alpha/Kolibri-1",
+        "url": "https://huggingface.co/Aleph-Alpha/Kolibri-1",
+        "task": "text-generation",
+        "downloads": 10496,
+        "likes": 872
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 1720888,
+        "likes": 7197
+      },
+      {
+        "id": "Qwen/Qwen-Image-2.1-Turbo",
+        "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
+        "task": "text-to-image",
+        "downloads": 2138,
+        "likes": 468
+      },
+      {
+        "id": "Venastine-Research/Xing4.0-29B-A4B-GGUF",
+        "url": "https://huggingface.co/Venastine-Research/Xing4.0-29B-A4B-GGUF",
+        "task": "text-generation",
+        "downloads": 45199,
+        "likes": 686
+      },
+      {
+        "id": "Qwen/Qwen3.8-27B",
+        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+        "task": "image-text-to-text",
+        "downloads": 6768654,
+        "likes": 17443
+      },
+      {
+        "id": "Cloudflare/clef-flash",
+        "url": "https://huggingface.co/Cloudflare/clef-flash",
+        "task": "image-text-to-text",
+        "downloads": 20670,
+        "likes": 743
+      }
+    ],
+    "weibo": [
+      {
+        "word": "大二专科生称靠切片三年赚七百万",
+        "num": 1839194,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E4%BA%8C%E4%B8%93%E7%A7%91%E7%94%9F%E7%A7%B0%E9%9D%A0%E5%88%87%E7%89%87%E4%B8%89%E5%B9%B4%E8%B5%9A%E4%B8%83%E7%99%BE%E4%B8%87%23"
+      },
+      {
+        "word": "在曼谷失联摄影师已回国",
+        "num": 963964,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%9C%A8%E6%9B%BC%E8%B0%B7%E5%A4%B1%E8%81%94%E6%91%84%E5%BD%B1%E5%B8%88%E5%B7%B2%E5%9B%9E%E5%9B%BD%23"
+      },
+      {
+        "word": "每一个名字都是山河丰碑",
+        "num": 750721,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%90%8D%E5%AD%97%E9%83%BD%E6%98%AF%E5%B1%B1%E6%B2%B3%E4%B8%B0%E7%A2%91%23"
+      },
+      {
+        "word": "梅艳芳骨灰被盗",
+        "num": 661164,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97%23"
+      },
+      {
+        "word": "利雅得机场遭袭致12死309伤",
+        "num": 647384,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%88%A9%E9%9B%85%E5%BE%97%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E8%87%B412%E6%AD%BB309%E4%BC%A4%23"
+      },
+      {
+        "word": "王楚然现发4口碑反转",
+        "num": 645589,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E6%A5%9A%E7%84%B6%E7%8E%B0%E5%8F%914%E5%8F%A3%E7%A2%91%E5%8F%8D%E8%BD%AC%23"
+      },
+      {
+        "word": "汽车刹车踏板绝不应该在驾驶中断裂",
+        "num": 640970,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B1%BD%E8%BD%A6%E5%88%B9%E8%BD%A6%E8%B8%8F%E6%9D%BF%E7%BB%9D%E4%B8%8D%E5%BA%94%E8%AF%A5%E5%9C%A8%E9%A9%BE%E9%A9%B6%E4%B8%AD%E6%96%AD%E8%A3%82%23"
+      },
+      {
+        "word": "女子长期鼻塞查出患癌",
+        "num": 632944,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E9%95%BF%E6%9C%9F%E9%BC%BB%E5%A1%9E%E6%9F%A5%E5%87%BA%E6%82%A3%E7%99%8C%23"
+      },
+      {
+        "word": "山西佛光寺出头之日冰箱贴火了",
+        "num": 589566,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B1%B1%E8%A5%BF%E4%BD%9B%E5%85%89%E5%AF%BA%E5%87%BA%E5%A4%B4%E4%B9%8B%E6%97%A5%E5%86%B0%E7%AE%B1%E8%B4%B4%E7%81%AB%E4%BA%86%23"
+      },
+      {
+        "word": "中网决赛一票难求",
+        "num": 559563,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E7%BD%91%E5%86%B3%E8%B5%9B%E4%B8%80%E7%A5%A8%E9%9A%BE%E6%B1%82%23"
+      }
+    ],
+    "onthisday": [
+      {
+        "year": 2021,
+        "text": "中國河北省平山縣滹沱河大橋施工輔路發生通勤大巴士墜河事故，造成14人死亡。",
+        "title": "2021年",
+        "url": "https://zh.wikipedia.org/wiki/2021%E5%B9%B4"
+      },
+      {
+        "year": 2020,
+        "text": "泰國一輛旅遊巴士與一輛載貨火車相撞，釀成至少二十人死，三十人受傷。",
+        "title": "2020年",
+        "url": "https://zh.wikipedia.org/wiki/2020%E5%B9%B4"
+      },
+      {
+        "year": 2015,
+        "text": "世界衛生組織發起世界肥胖日。",
+        "title": "2015年",
+        "url": "https://zh.wikipedia.org/wiki/2015%E5%B9%B4"
+      },
+      {
+        "year": 2007,
+        "text": "Youtube於墨西哥正式上線。",
+        "title": "2007年",
+        "url": "https://zh.wikipedia.org/wiki/2007%E5%B9%B4"
+      },
+      {
+        "year": 2002,
+        "text": "中国国际航空公司成立。",
+        "title": "2002年",
+        "url": "https://zh.wikipedia.org/wiki/2002%E5%B9%B4"
+      },
+      {
+        "year": 2001,
+        "text": "宝丽来申请破产保护。",
+        "title": "2001年",
+        "url": "https://zh.wikipedia.org/wiki/2001%E5%B9%B4"
       }
     ]
   }
