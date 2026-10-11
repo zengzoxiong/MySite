@@ -13,7 +13,7 @@
 ```
 MySite/
 ├── index.html            # 主页：仪表盘 + 各视图容器 + 设置弹层 + 命令面板
-├── script.js             # 全部交互逻辑（约 4300 行，单文件无模块）
+├── script.js             # 全部交互逻辑（约 4680 行，单文件无模块）
 ├── styles.css            # 全站样式（液态玻璃设计系统，含明暗主题）
 ├── settings.html         # 设置页（iframe 载入主站弹层，postMessage 通信）
 ├── sw.js                 # PWA Service Worker（导航/数据网络优先，其余 SWR，改预缓存或策略须升版本号）
@@ -22,6 +22,8 @@ MySite/
 ├── sitemap.xml/robots.txt
 ├── data/                 # 全部内容数据（改 JSON 刷新即生效，无需改代码）
 │   ├── links.json        # 网站收藏（categories + links）
+│   ├── link-health.json  # 死链体检结果（工作流每周生成，勿手改）
+│   ├── winget-health.json # winget 包体检结果（工作流每日生成，勿手改）
 │   ├── tools.json        # 在线工具登记（驱动 tools/ 目录展示）
 │   ├── media.json        # 影视收藏（六大类型，详见下文规范）
 │   ├── agent-plugins.json# Agent Skills 注册表 + MCP 清单
@@ -33,14 +35,17 @@ MySite/
 │   ├── token-usage.json  # 数据看板「Token 用量」（模型×天聚合，API 日志离线导入，勿手改）
 │   ├── fx.json           # 人民币汇率：最新值 + 全量日线（工作流每日同步，勿手改）
 │   ├── chatgpt-plus.json # ChatGPT Plus 各区税率与基准价（人工维护 + 核对日期，见「汇率」小节）
+│   ├── lyrics.json       # 歌词 LRC 原文（随探索歌单每日同步，勿手改）
 │   └── playlist.json     # 首页音乐播放器歌单
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
 │   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked、jspdf、html2canvas）
 │   ├── appearance.js     # 外观偏好清单（界面字体/时钟风格），index 与 settings 共用，须在 script.js 之前加载
 │   └── icon.svg          # PWA 图标（星芒）
-├── tools/                # 130 个自建网页工具（每工具一目录 + app.html）
-├── scripts/              # 同步脚本（sync_tmdb.py / sync_stars.py / sync_explore.py）
+├── tools/                # 151 个自建网页工具（每工具一目录 + app.html，128 个另有 index.html 说明页）
+├── scripts/              # 12 个脚本：同步 8（sync_tmdb / sync_stars / sync_explore / sync_lyrics /
+│                         #   sync_ghactivity / sync_fx / sync_goatcounter / sync_daily_report）+
+│                         #   体检 3（check_links / check_winget / check_tools）+ 导入 1（import_token_usage）
 └── .github/workflows/    # 定时任务（TMDB 评分 / GitHub Stars / 探索歌单）
 ```
 
