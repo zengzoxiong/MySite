@@ -414,7 +414,7 @@
       "rating": 8.5,
       "comment": "ONE老师的超能力成长物语，作画鬼才。",
       "cover": "assets/media/mob-psycho-1.jpg",
-      "url": "https://www.themoviedb.org/tv/67075",
+      "url": "https://www.themoviedb.org/tv/67075/season/1",
       "release": "2016-07-12"
     },
     {
@@ -655,7 +655,7 @@
       "release": "2016-10-05",
       "comment": "废柴老爸被吸进马桶变身英雄的荒诞喜剧。",
       "cover": "assets/media/to-be-hero-baba.jpg",
-      "url": "https://www.themoviedb.org/tv/68135"
+      "url": "https://www.themoviedb.org/tv/68135/season/1"
     },
     {
       "title": "凸变英雄LEAF",
@@ -685,7 +685,7 @@
       "release": "2020-01-12",
       "comment": "小小的怪异，用谎言编织的真相。",
       "cover": "assets/media/kyokousuiri-s1.jpg",
-      "url": "https://www.themoviedb.org/tv/93653"
+      "url": "https://www.themoviedb.org/tv/93653/season/1"
     },
     {
       "title": "虚构推理 第二季",
@@ -880,7 +880,7 @@
       "title": "工作细胞",
       "type": "番剧",
       "status": "看过",
-      "url": "https://www.themoviedb.org/tv/80671",
+      "url": "https://www.themoviedb.org/tv/80671/season/1",
       "rating": 8.0,
       "release": "2018-07-08",
       "cover": "assets/media/cells-at-work.jpg",
@@ -922,7 +922,7 @@
       "status": "看过",
       "rating": 8.1,
       "release": "2022-10-05",
-      "url": "https://www.themoviedb.org/tv/119495",
+      "url": "https://www.themoviedb.org/tv/119495/season/1",
       "cover": "assets/media/eminence-s1.jpg",
       "comment": "中二到极致就成了一套方法论，装得理直气壮。"
     },

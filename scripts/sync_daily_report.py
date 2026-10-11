@@ -20,6 +20,7 @@
 """
 import json
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -133,8 +134,12 @@ def onthisday():
     d = fetch_json(f'https://api.wikimedia.org/feed/v1/wikipedia/zh/onthisday/events/{now.month:02d}/{now.day:02d}')
     out = []
     for ev in sorted(d.get('events') or [], key=lambda e: e.get('year') or 0, reverse=True):
-        page = next((p for p in ev.get('pages') or []
-                     if (p.get('content_urls') or {}).get('desktop', {}).get('page')), None)
+        # 词条页优先取有实义的（跳过「2021年」这类年份页），都没有就退回第一个
+        pages = ev.get('pages') or []
+        page = next((p for p in pages
+                     if re.match(r'https://zh\.wikipedia\.org/wiki/.+', (p.get('content_urls') or {}).get('desktop', {}).get('page') or '')
+                     and not re.fullmatch(r'\d{3,4}年', p.get('normalizedtitle') or p.get('title') or '')), None) \
+            or next((p for p in pages if (p.get('content_urls') or {}).get('desktop', {}).get('page')), None)
         text = (ev.get('text') or '').strip()
         if not text or not page:
             continue
