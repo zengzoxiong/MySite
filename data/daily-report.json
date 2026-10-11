@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-11",
+  "updated": "2026-10-12",
   "sections": {
     "trending": [
       {
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 13775,
+        "stars": 14055,
         "language": "Lean"
       },
       {
         "name": "storytold/wordcraft",
         "url": "https://github.com/storytold/wordcraft",
         "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
-        "stars": 3436,
+        "stars": 5761,
         "language": "Rust"
       },
       {
         "name": "alchaincyf/huashu-art-motion",
         "url": "https://github.com/alchaincyf/huashu-art-motion",
         "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 3272,
+        "stars": 3380,
+        "language": "JavaScript"
+      },
+      {
+        "name": "wheresryan22/anatomy",
+        "url": "https://github.com/wheresryan22/anatomy",
+        "desc": "A Claude Code skill that turns a technical idea into a detailed, interactive isometric figure of a real machine. It makes SVG with optional WebGL shaders and 3D",
+        "stars": 3150,
         "language": "JavaScript"
       },
       {
         "name": "mhtsec/ARTEX",
         "url": "https://github.com/mhtsec/ARTEX",
         "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 2997,
+        "stars": 3137,
         "language": "Go"
       },
       {
         "name": "zhongerxin/iPhone-use",
         "url": "https://github.com/zhongerxin/iPhone-use",
         "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
-        "stars": 2692,
+        "stars": 3021,
         "language": "Python"
+      },
+      {
+        "name": "storytold/gridcraft",
+        "url": "https://github.com/storytold/gridcraft",
+        "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
+        "stars": 2853,
+        "language": "Rust"
+      },
+      {
+        "name": "storytold/cadcraft",
+        "url": "https://github.com/storytold/cadcraft",
+        "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
+        "stars": 2607,
+        "language": "Rust"
       },
       {
         "name": "nullmoth/nvidia-macos-driver",
         "url": "https://github.com/nullmoth/nvidia-macos-driver",
         "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 2359,
+        "stars": 2524,
         "language": "Rust"
       },
       {
         "name": "LosaLosSantos/aurelio-finance",
         "url": "https://github.com/LosaLosSantos/aurelio-finance",
         "desc": "Open-source personal finance app with an AI financial advisor: track your net worth, investments, ETFs, cash and debts on your own computer.",
-        "stars": 2095,
+        "stars": 2197,
         "language": "Python"
-      },
-      {
-        "name": "storytold/cadcraft",
-        "url": "https://github.com/storytold/cadcraft",
-        "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
-        "stars": 1980,
-        "language": "Rust"
-      },
-      {
-        "name": "storytold/gridcraft",
-        "url": "https://github.com/storytold/gridcraft",
-        "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
-        "stars": 1979,
-        "language": "Rust"
-      },
-      {
-        "name": "noahdunnagan/fsearch",
-        "url": "https://github.com/noahdunnagan/fsearch",
-        "desc": "Whole-disk file search for macOS: fuzzy names, typo tolerance, indexed content grep. ~1 ms over 8M files.",
-        "stars": 1687,
-        "language": "Rust"
       }
     ],
     "hn": [
       {
-        "id": 50038634,
-        "title": "WallHop – 12ft.io is gone, so I built a replacement",
-        "url": "https://wallhop.io/",
-        "hn": "https://news.ycombinator.com/item?id=50038634",
-        "score": 226,
-        "comments": 94
+        "id": 50045984,
+        "title": "Total Annihilation, rebuilt for modern computers",
+        "url": "https://nanolathe.gg",
+        "hn": "https://news.ycombinator.com/item?id=50045984",
+        "score": 290,
+        "comments": 120
       },
       {
-        "id": 50037949,
-        "title": "Build your own decision model",
-        "url": "https://nishtahir.com/build-your-own-decision-model/",
-        "hn": "https://news.ycombinator.com/item?id=50037949",
+        "id": 50047091,
+        "title": "Cartographers of North Korea",
+        "url": "https://cartographers-nk.wonyoung.so/",
+        "hn": "https://news.ycombinator.com/item?id=50047091",
+        "score": 127,
+        "comments": 18
+      },
+      {
+        "id": 50047422,
+        "title": "The gap in shared understanding of LLM capability is widening",
+        "url": "https://twitter.com/karpathy/status/2109361546505966046",
+        "hn": "https://news.ycombinator.com/item?id=50047422",
+        "score": 122,
+        "comments": 157
+      },
+      {
+        "id": 50047055,
+        "title": "So, You’d Like To Sell Your Print Issues Of The Onion?",
+        "url": "https://theonion.com/archivehunt/",
+        "hn": "https://news.ycombinator.com/item?id=50047055",
         "score": 211,
-        "comments": 48
+        "comments": 23
       },
       {
-        "id": 49991852,
-        "title": "2D Vehicles",
-        "url": "https://patkerr.co.uk/2d-vehicles/",
-        "hn": "https://news.ycombinator.com/item?id=49991852",
-        "score": 423,
-        "comments": 93
+        "id": 50046241,
+        "title": "Chapter 1 of Ways of Seeing by John Berger",
+        "url": "https://www.ways-of-seeing.com/ch1",
+        "hn": "https://news.ycombinator.com/item?id=50046241",
+        "score": 61,
+        "comments": 9
       },
       {
-        "id": 50036864,
-        "title": "A city-building game in which the city would prefer you didn't",
-        "url": "https://housing.over.pizza/",
-        "hn": "https://news.ycombinator.com/item?id=50036864",
-        "score": 274,
-        "comments": 95
+        "id": 50044715,
+        "title": "How to Build Wealth as a Career Person",
+        "url": "https://asheradeniyi.com/2026/04/10/how-to-build-wealth-as-a-career-person/",
+        "hn": "https://news.ycombinator.com/item?id=50044715",
+        "score": 131,
+        "comments": 124
       },
       {
-        "id": 50039630,
-        "title": "AI agents in a stand-up call",
-        "url": "https://atoll92.github.io/agent-standup/",
-        "hn": "https://news.ycombinator.com/item?id=50039630",
-        "score": 19,
-        "comments": 16
+        "id": 50043026,
+        "title": "Terence Tao: Math 2.0 [pdf]",
+        "url": "https://teorth.github.io/tao-web/slides/math-2-0-caltech-2026.pdf",
+        "hn": "https://news.ycombinator.com/item?id=50043026",
+        "score": 283,
+        "comments": 344
       },
       {
-        "id": 50029487,
-        "title": "The Lightbulb Computer",
-        "url": "https://lightbulbcomputer.com/",
-        "hn": "https://news.ycombinator.com/item?id=50029487",
-        "score": 345,
-        "comments": 55
+        "id": 50047825,
+        "title": "A Remote Employee Refused 160 Webcam Photos a Day. Her Employer Fired Her",
+        "url": "https://www.inc.com/chloe-rosenberg/a-remote-employee-refused-160-webcam-photos-a-day-her-employer-fired-her/91415963",
+        "hn": "https://news.ycombinator.com/item?id=50047825",
+        "score": 82,
+        "comments": 49
       },
       {
-        "id": 50038623,
-        "title": "PSPi 6 – Raspberry Pi in a PSP",
-        "url": "https://github.com/othermod/PSPi-Version-6",
-        "hn": "https://news.ycombinator.com/item?id=50038623",
-        "score": 56,
-        "comments": 6
+        "id": 50048522,
+        "title": "Recursive self-improvement through collective intelligence",
+        "url": "https://pub.sakana.ai/mass/",
+        "hn": "https://news.ycombinator.com/item?id=50048522",
+        "score": 5,
+        "comments": 0
       },
       {
-        "id": 50017548,
-        "title": "How big is a Git commit?",
-        "url": "https://ratfactor.com/cards/git-commit-size",
-        "hn": "https://news.ycombinator.com/item?id=50017548",
-        "score": 6,
-        "comments": 1
-      },
-      {
-        "id": 50017247,
-        "title": "Nix wrote half of my debugger",
-        "url": "https://fzakaria.com/2026/10/07/nix-wrote-half-of-my-debugger",
-        "hn": "https://news.ycombinator.com/item?id=50017247",
-        "score": 171,
-        "comments": 36
-      },
-      {
-        "id": 50001234,
-        "title": "Retrofitting language models to operate over bytes",
-        "url": "https://www.nature.com/articles/s41586-026-11111-4",
-        "hn": "https://news.ycombinator.com/item?id=50001234",
-        "score": 39,
-        "comments": 3
+        "id": 50045946,
+        "title": "NYC's \"Click to Cancel\" rule is now in effect",
+        "url": "https://www.nyc.gov/main/click-to-cancel",
+        "hn": "https://news.ycombinator.com/item?id=50045946",
+        "score": 289,
+        "comments": 138
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "google/embeddinggemma-2",
         "url": "https://huggingface.co/google/embeddinggemma-2",
         "task": "feature-extraction",
-        "downloads": 45605,
-        "likes": 1536
+        "downloads": 98829,
+        "likes": 1687
       },
       {
         "id": "jialinyyzz/humanizer",
         "url": "https://huggingface.co/jialinyyzz/humanizer",
         "task": "text-generation",
-        "downloads": 33664,
-        "likes": 980
+        "downloads": 37647,
+        "likes": 1071
       },
       {
         "id": "Cloudflare/clef",
         "url": "https://huggingface.co/Cloudflare/clef",
         "task": "image-text-to-text",
-        "downloads": 13579,
-        "likes": 2003
+        "downloads": 14351,
+        "likes": 2025
       },
       {
         "id": "abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
         "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
         "task": "text-to-image",
-        "downloads": 2096562,
-        "likes": 3892
-      },
-      {
-        "id": "Aleph-Alpha/Kolibri-1",
-        "url": "https://huggingface.co/Aleph-Alpha/Kolibri-1",
-        "task": "text-generation",
-        "downloads": 10496,
-        "likes": 872
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 1720888,
-        "likes": 7197
+        "downloads": 2188658,
+        "likes": 3976
       },
       {
         "id": "Qwen/Qwen-Image-2.1-Turbo",
         "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
         "task": "text-to-image",
-        "downloads": 2138,
-        "likes": 468
+        "downloads": 4702,
+        "likes": 536
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 1726683,
+        "likes": 7310
+      },
+      {
+        "id": "Aleph-Alpha/Kolibri-1",
+        "url": "https://huggingface.co/Aleph-Alpha/Kolibri-1",
+        "task": "text-generation",
+        "downloads": 12550,
+        "likes": 887
       },
       {
         "id": "Venastine-Research/Xing4.0-29B-A4B-GGUF",
         "url": "https://huggingface.co/Venastine-Research/Xing4.0-29B-A4B-GGUF",
         "task": "text-generation",
-        "downloads": 45199,
-        "likes": 686
+        "downloads": 48389,
+        "likes": 689
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 6768654,
-        "likes": 17443
+        "downloads": 6843108,
+        "likes": 17504
       },
       {
-        "id": "Cloudflare/clef-flash",
-        "url": "https://huggingface.co/Cloudflare/clef-flash",
-        "task": "image-text-to-text",
-        "downloads": 20670,
-        "likes": 743
+        "id": "canberkkkkkk/ema-lightning",
+        "url": "https://huggingface.co/canberkkkkkk/ema-lightning",
+        "task": "text-to-speech",
+        "downloads": 18079,
+        "likes": 356
       }
     ],
     "weibo": [
       {
-        "word": "大二专科生称靠切片三年赚七百万",
-        "num": 1565929,
+        "word": "郑钦文晒图庆祝夺冠",
+        "num": 669459,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%83%91%E9%92%A6%E6%96%87%E6%99%92%E5%9B%BE%E5%BA%86%E7%A5%9D%E5%A4%BA%E5%86%A0%23"
+      },
+      {
+        "word": "霸王茶姬买一送一",
+        "num": 568593,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E4%BA%8C%E4%B8%93%E7%A7%91%E7%94%9F%E7%A7%B0%E9%9D%A0%E5%88%87%E7%89%87%E4%B8%89%E5%B9%B4%E8%B5%9A%E4%B8%83%E7%99%BE%E4%B8%87%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%9C%B8%E7%8E%8B%E8%8C%B6%E5%A7%AC%E4%B9%B0%E4%B8%80%E9%80%81%E4%B8%80%23"
       },
       {
-        "word": "被字节开除实习生创业获2亿美元估值",
-        "num": 884082,
+        "word": "本周这些数据值得关注",
+        "num": 480245,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%A2%AB%E5%AD%97%E8%8A%82%E5%BC%80%E9%99%A4%E5%AE%9E%E4%B9%A0%E7%94%9F%E5%88%9B%E4%B8%9A%E8%8E%B72%E4%BA%BF%E7%BE%8E%E5%85%83%E4%BC%B0%E5%80%BC%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%AC%E5%91%A8%E8%BF%99%E4%BA%9B%E6%95%B0%E6%8D%AE%E5%80%BC%E5%BE%97%E5%85%B3%E6%B3%A8%23"
       },
       {
-        "word": "每一个名字都是山河丰碑",
-        "num": 705084,
+        "word": "女孩去马来西亚高薪工作后失联",
+        "num": 395816,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%A9%E5%8E%BB%E9%A9%AC%E6%9D%A5%E8%A5%BF%E4%BA%9A%E9%AB%98%E8%96%AA%E5%B7%A5%E4%BD%9C%E5%90%8E%E5%A4%B1%E8%81%94%23"
+      },
+      {
+        "word": "记者暗访有偿陪伴服务",
+        "num": 365295,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B0%E8%80%85%E6%9A%97%E8%AE%BF%E6%9C%89%E5%81%BF%E9%99%AA%E4%BC%B4%E6%9C%8D%E5%8A%A1%23"
+      },
+      {
+        "word": "关晓彤回应去宋雨琦演唱会",
+        "num": 290104,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%85%B3%E6%99%93%E5%BD%A4%E5%9B%9E%E5%BA%94%E5%8E%BB%E5%AE%8B%E9%9B%A8%E7%90%A6%E6%BC%94%E5%94%B1%E4%BC%9A%23"
+      },
+      {
+        "word": "李娜 郑钦文",
+        "num": 265723,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%90%8D%E5%AD%97%E9%83%BD%E6%98%AF%E5%B1%B1%E6%B2%B3%E4%B8%B0%E7%A2%91%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%8E%E5%A8%9C%20%E9%83%91%E9%92%A6%E6%96%87%23"
       },
       {
-        "word": "王楚然现发4口碑反转",
-        "num": 458156,
+        "word": "郑钦文收获明年澳网的种子席位",
+        "num": 234138,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E6%A5%9A%E7%84%B6%E7%8E%B0%E5%8F%914%E5%8F%A3%E7%A2%91%E5%8F%8D%E8%BD%AC%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%83%91%E9%92%A6%E6%96%87%E6%94%B6%E8%8E%B7%E6%98%8E%E5%B9%B4%E6%BE%B3%E7%BD%91%E7%9A%84%E7%A7%8D%E5%AD%90%E5%B8%AD%E4%BD%8D%23"
       },
       {
-        "word": "周启豪vs松岛辉空",
-        "num": 457734,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%91%A8%E5%90%AF%E8%B1%AAvs%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA%23"
-      },
-      {
-        "word": "西门龙霆",
-        "num": 452783,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E9%97%A8%E9%BE%99%E9%9C%86%23"
-      },
-      {
-        "word": "难怪田曦薇有故人之姿",
-        "num": 381025,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%9A%BE%E6%80%AA%E7%94%B0%E6%9B%A6%E8%96%87%E6%9C%89%E6%95%85%E4%BA%BA%E4%B9%8B%E5%A7%BF%23"
-      },
-      {
-        "word": "在曼谷失联摄影师已回国",
-        "num": 344869,
+        "word": "老护士辞职后儿科投诉翻倍",
+        "num": 208401,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%9C%A8%E6%9B%BC%E8%B0%B7%E5%A4%B1%E8%81%94%E6%91%84%E5%BD%B1%E5%B8%88%E5%B7%B2%E5%9B%9E%E5%9B%BD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%80%81%E6%8A%A4%E5%A3%AB%E8%BE%9E%E8%81%8C%E5%90%8E%E5%84%BF%E7%A7%91%E6%8A%95%E8%AF%89%E7%BF%BB%E5%80%8D%23"
       },
       {
-        "word": "46岁数学家凭AI炒股登上富豪榜",
-        "num": 339919,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%2346%E5%B2%81%E6%95%B0%E5%AD%A6%E5%AE%B6%E5%87%ADAI%E7%82%92%E8%82%A1%E7%99%BB%E4%B8%8A%E5%AF%8C%E8%B1%AA%E6%A6%9C%23"
-      },
-      {
-        "word": "泰国警方称胡星宋华婷或被转移至缅甸",
-        "num": 302355,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B3%B0%E5%9B%BD%E8%AD%A6%E6%96%B9%E7%A7%B0%E8%83%A1%E6%98%9F%E5%AE%8B%E5%8D%8E%E5%A9%B7%E6%88%96%E8%A2%AB%E8%BD%AC%E7%A7%BB%E8%87%B3%E7%BC%85%E7%94%B8%23"
+        "word": "央视曝投资1.2亿项目仅建5个棚",
+        "num": 197939,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%AE%E8%A7%86%E6%9B%9D%E6%8A%95%E8%B5%841.2%E4%BA%BF%E9%A1%B9%E7%9B%AE%E4%BB%85%E5%BB%BA5%E4%B8%AA%E6%A3%9A%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2021,
-        "text": "中国河北省平山县滹沱河大桥施工辅路发生通勤大巴士坠河事故，造成14人死亡。",
-        "title": "河北省",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B2%B3%E5%8C%97%E7%9C%81"
+        "year": 2019,
+        "text": "肯亚长跑选手埃利乌德·基普乔盖在英力士1:59挑战赛中以1小时59分40.2秒完赛，成为世界上首位马拉松跑进2小时的选手。",
+        "title": "埃利乌德·基普乔盖",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9F%83%E5%88%A9%E4%B9%8C%E5%BE%B7%C2%B7%E5%9F%BA%E6%99%AE%E4%B9%94%E7%9B%96"
       },
       {
-        "year": 2020,
-        "text": "泰国一辆旅游巴士与一辆载货火车相撞，酿成至少二十人死，三十人受伤。",
-        "title": "2020年",
-        "url": "https://zh.wikipedia.org/wiki/2020%E5%B9%B4"
+        "year": 2012,
+        "text": "中国南方航空327号班机改用空中客车A380客机执飞，成为中国由该款客机执飞的首条远程定期国际航班。",
+        "title": "中国南方航空327号班机",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%8D%97%E6%96%B9%E8%88%AA%E7%A9%BA327%E5%8F%B7%E7%8F%AD%E6%9C%BA"
       },
       {
-        "year": 2015,
-        "text": "世界卫生组织发起世界肥胖日。",
-        "title": "世界卫生组织",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%96%E7%95%8C%E5%8D%AB%E7%94%9F%E7%BB%84%E7%BB%87"
+        "year": 2011,
+        "text": "利用死者遗骸中取出的物质，加拿大麦克马斯特大学主管波拿亚和德国图宾根大学克劳斯领导的研究小组成功破解黑死病致病菌鼠疫杆菌基因体遗传密码，并将报告发表于《自然》。",
+        "title": "麥馬士達大學",
+        "url": "https://zh.wikipedia.org/wiki/%E9%BA%A5%E9%A6%AC%E5%A3%AB%E9%81%94%E5%A4%A7%E5%AD%B8"
       },
       {
-        "year": 2007,
-        "text": "Youtube于墨西哥正式上线。",
-        "title": "YouTube",
-        "url": "https://zh.wikipedia.org/wiki/YouTube"
+        "year": 2005,
+        "text": "神舟六号载人飞船在酒泉卫星发射中心发射升空，成为中国第一艘执行多人多天任务的载人飞船。",
+        "title": "神舟六号",
+        "url": "https://zh.wikipedia.org/wiki/%E7%A5%9E%E8%88%9F%E5%85%AD%E5%8F%B7"
       },
       {
-        "year": 2002,
-        "text": "中国国际航空公司成立。",
-        "title": "中国国际航空",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%9B%BD%E9%99%85%E8%88%AA%E7%A9%BA"
+        "year": 2003,
+        "text": "利比里亚宣布与中华民国中断外交关系，重新与中华人民共和国建交。",
+        "title": "利比里亚",
+        "url": "https://zh.wikipedia.org/wiki/%E5%88%A9%E6%AF%94%E9%87%8C%E4%BA%9A"
       },
       {
-        "year": 2001,
-        "text": "宝丽来申请破产保护。",
-        "title": "宝丽来",
-        "url": "https://zh.wikipedia.org/wiki/%E5%AE%9D%E4%B8%BD%E6%9D%A5"
+        "year": 2003,
+        "text": "秦沈客运专线正式通车，成为中国第一条高速铁路。",
+        "title": "秦沈客运专线",
+        "url": "https://zh.wikipedia.org/wiki/%E7%A7%A6%E6%B2%88%E5%AE%A2%E8%BF%90%E4%B8%93%E7%BA%BF"
       }
     ]
   }
