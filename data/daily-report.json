@@ -7,42 +7,42 @@
         "name": "openai/math",
         "url": "https://github.com/openai/math",
         "desc": "",
-        "stars": 13747,
+        "stars": 13775,
         "language": "Lean"
       },
       {
         "name": "storytold/wordcraft",
         "url": "https://github.com/storytold/wordcraft",
         "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
-        "stars": 3338,
+        "stars": 3436,
         "language": "Rust"
       },
       {
         "name": "alchaincyf/huashu-art-motion",
         "url": "https://github.com/alchaincyf/huashu-art-motion",
         "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 3256,
+        "stars": 3272,
         "language": "JavaScript"
       },
       {
         "name": "mhtsec/ARTEX",
         "url": "https://github.com/mhtsec/ARTEX",
         "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 2970,
+        "stars": 2997,
         "language": "Go"
       },
       {
         "name": "zhongerxin/iPhone-use",
         "url": "https://github.com/zhongerxin/iPhone-use",
         "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
-        "stars": 2658,
+        "stars": 2692,
         "language": "Python"
       },
       {
         "name": "nullmoth/nvidia-macos-driver",
         "url": "https://github.com/nullmoth/nvidia-macos-driver",
         "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 2335,
+        "stars": 2359,
         "language": "Rust"
       },
       {
@@ -56,21 +56,21 @@
         "name": "storytold/cadcraft",
         "url": "https://github.com/storytold/cadcraft",
         "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
-        "stars": 1950,
+        "stars": 1980,
         "language": "Rust"
       },
       {
         "name": "storytold/gridcraft",
         "url": "https://github.com/storytold/gridcraft",
         "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
-        "stars": 1937,
+        "stars": 1979,
         "language": "Rust"
       },
       {
         "name": "noahdunnagan/fsearch",
         "url": "https://github.com/noahdunnagan/fsearch",
         "desc": "Whole-disk file search for macOS: fuzzy names, typo tolerance, indexed content grep. ~1 ms over 8M files.",
-        "stars": 1663,
+        "stars": 1687,
         "language": "Rust"
       }
     ],
@@ -80,80 +80,80 @@
         "title": "WallHop – 12ft.io is gone, so I built a replacement",
         "url": "https://wallhop.io/",
         "hn": "https://news.ycombinator.com/item?id=50038634",
-        "score": 187,
-        "comments": 83
+        "score": 226,
+        "comments": 94
       },
       {
         "id": 50037949,
         "title": "Build your own decision model",
         "url": "https://nishtahir.com/build-your-own-decision-model/",
         "hn": "https://news.ycombinator.com/item?id=50037949",
-        "score": 180,
-        "comments": 36
-      },
-      {
-        "id": 50039504,
-        "title": "CIA World Facebook Is Dead – Here Is an Attempt at Recreation",
-        "url": "https://worldfacts.app",
-        "hn": "https://news.ycombinator.com/item?id=50039504",
-        "score": 22,
-        "comments": 25
+        "score": 211,
+        "comments": 48
       },
       {
         "id": 49991852,
         "title": "2D Vehicles",
         "url": "https://patkerr.co.uk/2d-vehicles/",
         "hn": "https://news.ycombinator.com/item?id=49991852",
-        "score": 402,
-        "comments": 88
+        "score": 423,
+        "comments": 93
       },
       {
         "id": 50036864,
         "title": "A city-building game in which the city would prefer you didn't",
         "url": "https://housing.over.pizza/",
         "hn": "https://news.ycombinator.com/item?id=50036864",
-        "score": 248,
-        "comments": 88
+        "score": 274,
+        "comments": 95
       },
       {
-        "id": 50038623,
-        "title": "PSPi 6 – Raspberry Pi in a PSP",
-        "url": "https://github.com/othermod/PSPi-Version-6",
-        "hn": "https://news.ycombinator.com/item?id=50038623",
-        "score": 45,
-        "comments": 5
+        "id": 50039630,
+        "title": "AI agents in a stand-up call",
+        "url": "https://atoll92.github.io/agent-standup/",
+        "hn": "https://news.ycombinator.com/item?id=50039630",
+        "score": 19,
+        "comments": 16
       },
       {
         "id": 50029487,
         "title": "The Lightbulb Computer",
         "url": "https://lightbulbcomputer.com/",
         "hn": "https://news.ycombinator.com/item?id=50029487",
-        "score": 317,
-        "comments": 46
+        "score": 345,
+        "comments": 55
+      },
+      {
+        "id": 50038623,
+        "title": "PSPi 6 – Raspberry Pi in a PSP",
+        "url": "https://github.com/othermod/PSPi-Version-6",
+        "hn": "https://news.ycombinator.com/item?id=50038623",
+        "score": 56,
+        "comments": 6
+      },
+      {
+        "id": 50017548,
+        "title": "How big is a Git commit?",
+        "url": "https://ratfactor.com/cards/git-commit-size",
+        "hn": "https://news.ycombinator.com/item?id=50017548",
+        "score": 6,
+        "comments": 1
       },
       {
         "id": 50017247,
         "title": "Nix wrote half of my debugger",
         "url": "https://fzakaria.com/2026/10/07/nix-wrote-half-of-my-debugger",
         "hn": "https://news.ycombinator.com/item?id=50017247",
-        "score": 161,
-        "comments": 30
+        "score": 171,
+        "comments": 36
       },
       {
         "id": 50001234,
         "title": "Retrofitting language models to operate over bytes",
         "url": "https://www.nature.com/articles/s41586-026-11111-4",
         "hn": "https://news.ycombinator.com/item?id=50001234",
-        "score": 33,
-        "comments": 2
-      },
-      {
-        "id": 50035530,
-        "title": "Why DuckDB 2.0 is faster",
-        "url": "https://motherduck.com/blog/why-duckdb-20-is-faster/",
-        "hn": "https://news.ycombinator.com/item?id=50035530",
-        "score": 173,
-        "comments": 53
+        "score": 39,
+        "comments": 3
       }
     ],
     "hf_models": [
@@ -231,101 +231,101 @@
     "weibo": [
       {
         "word": "大二专科生称靠切片三年赚七百万",
-        "num": 1839194,
+        "num": 1565929,
         "label": "热",
         "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E4%BA%8C%E4%B8%93%E7%A7%91%E7%94%9F%E7%A7%B0%E9%9D%A0%E5%88%87%E7%89%87%E4%B8%89%E5%B9%B4%E8%B5%9A%E4%B8%83%E7%99%BE%E4%B8%87%23"
       },
       {
-        "word": "在曼谷失联摄影师已回国",
-        "num": 963964,
+        "word": "被字节开除实习生创业获2亿美元估值",
+        "num": 884082,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%9C%A8%E6%9B%BC%E8%B0%B7%E5%A4%B1%E8%81%94%E6%91%84%E5%BD%B1%E5%B8%88%E5%B7%B2%E5%9B%9E%E5%9B%BD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%A2%AB%E5%AD%97%E8%8A%82%E5%BC%80%E9%99%A4%E5%AE%9E%E4%B9%A0%E7%94%9F%E5%88%9B%E4%B8%9A%E8%8E%B72%E4%BA%BF%E7%BE%8E%E5%85%83%E4%BC%B0%E5%80%BC%23"
       },
       {
         "word": "每一个名字都是山河丰碑",
-        "num": 750721,
+        "num": 705084,
         "label": "",
         "url": "https://s.weibo.com/weibo?q=%23%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%90%8D%E5%AD%97%E9%83%BD%E6%98%AF%E5%B1%B1%E6%B2%B3%E4%B8%B0%E7%A2%91%23"
       },
       {
-        "word": "梅艳芳骨灰被盗",
-        "num": 661164,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97%23"
-      },
-      {
-        "word": "利雅得机场遭袭致12死309伤",
-        "num": 647384,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%88%A9%E9%9B%85%E5%BE%97%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E8%87%B412%E6%AD%BB309%E4%BC%A4%23"
-      },
-      {
         "word": "王楚然现发4口碑反转",
-        "num": 645589,
-        "label": "热",
+        "num": 458156,
+        "label": "",
         "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E6%A5%9A%E7%84%B6%E7%8E%B0%E5%8F%914%E5%8F%A3%E7%A2%91%E5%8F%8D%E8%BD%AC%23"
       },
       {
-        "word": "汽车刹车踏板绝不应该在驾驶中断裂",
-        "num": 640970,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B1%BD%E8%BD%A6%E5%88%B9%E8%BD%A6%E8%B8%8F%E6%9D%BF%E7%BB%9D%E4%B8%8D%E5%BA%94%E8%AF%A5%E5%9C%A8%E9%A9%BE%E9%A9%B6%E4%B8%AD%E6%96%AD%E8%A3%82%23"
-      },
-      {
-        "word": "女子长期鼻塞查出患癌",
-        "num": 632944,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E9%95%BF%E6%9C%9F%E9%BC%BB%E5%A1%9E%E6%9F%A5%E5%87%BA%E6%82%A3%E7%99%8C%23"
-      },
-      {
-        "word": "山西佛光寺出头之日冰箱贴火了",
-        "num": 589566,
+        "word": "周启豪vs松岛辉空",
+        "num": 457734,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B1%B1%E8%A5%BF%E4%BD%9B%E5%85%89%E5%AF%BA%E5%87%BA%E5%A4%B4%E4%B9%8B%E6%97%A5%E5%86%B0%E7%AE%B1%E8%B4%B4%E7%81%AB%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%91%A8%E5%90%AF%E8%B1%AAvs%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA%23"
       },
       {
-        "word": "中网决赛一票难求",
-        "num": 559563,
+        "word": "西门龙霆",
+        "num": 452783,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E7%BD%91%E5%86%B3%E8%B5%9B%E4%B8%80%E7%A5%A8%E9%9A%BE%E6%B1%82%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E9%97%A8%E9%BE%99%E9%9C%86%23"
+      },
+      {
+        "word": "难怪田曦薇有故人之姿",
+        "num": 381025,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%9A%BE%E6%80%AA%E7%94%B0%E6%9B%A6%E8%96%87%E6%9C%89%E6%95%85%E4%BA%BA%E4%B9%8B%E5%A7%BF%23"
+      },
+      {
+        "word": "在曼谷失联摄影师已回国",
+        "num": 344869,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%9C%A8%E6%9B%BC%E8%B0%B7%E5%A4%B1%E8%81%94%E6%91%84%E5%BD%B1%E5%B8%88%E5%B7%B2%E5%9B%9E%E5%9B%BD%23"
+      },
+      {
+        "word": "46岁数学家凭AI炒股登上富豪榜",
+        "num": 339919,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%2346%E5%B2%81%E6%95%B0%E5%AD%A6%E5%AE%B6%E5%87%ADAI%E7%82%92%E8%82%A1%E7%99%BB%E4%B8%8A%E5%AF%8C%E8%B1%AA%E6%A6%9C%23"
+      },
+      {
+        "word": "泰国警方称胡星宋华婷或被转移至缅甸",
+        "num": 302355,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B3%B0%E5%9B%BD%E8%AD%A6%E6%96%B9%E7%A7%B0%E8%83%A1%E6%98%9F%E5%AE%8B%E5%8D%8E%E5%A9%B7%E6%88%96%E8%A2%AB%E8%BD%AC%E7%A7%BB%E8%87%B3%E7%BC%85%E7%94%B8%23"
       }
     ],
     "onthisday": [
       {
         "year": 2021,
-        "text": "中國河北省平山縣滹沱河大橋施工輔路發生通勤大巴士墜河事故，造成14人死亡。",
-        "title": "2021年",
-        "url": "https://zh.wikipedia.org/wiki/2021%E5%B9%B4"
+        "text": "中国河北省平山县滹沱河大桥施工辅路发生通勤大巴士坠河事故，造成14人死亡。",
+        "title": "河北省",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B2%B3%E5%8C%97%E7%9C%81"
       },
       {
         "year": 2020,
-        "text": "泰國一輛旅遊巴士與一輛載貨火車相撞，釀成至少二十人死，三十人受傷。",
+        "text": "泰国一辆旅游巴士与一辆载货火车相撞，酿成至少二十人死，三十人受伤。",
         "title": "2020年",
         "url": "https://zh.wikipedia.org/wiki/2020%E5%B9%B4"
       },
       {
         "year": 2015,
-        "text": "世界衛生組織發起世界肥胖日。",
-        "title": "2015年",
-        "url": "https://zh.wikipedia.org/wiki/2015%E5%B9%B4"
+        "text": "世界卫生组织发起世界肥胖日。",
+        "title": "世界卫生组织",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%96%E7%95%8C%E5%8D%AB%E7%94%9F%E7%BB%84%E7%BB%87"
       },
       {
         "year": 2007,
-        "text": "Youtube於墨西哥正式上線。",
-        "title": "2007年",
-        "url": "https://zh.wikipedia.org/wiki/2007%E5%B9%B4"
+        "text": "Youtube于墨西哥正式上线。",
+        "title": "YouTube",
+        "url": "https://zh.wikipedia.org/wiki/YouTube"
       },
       {
         "year": 2002,
         "text": "中国国际航空公司成立。",
-        "title": "2002年",
-        "url": "https://zh.wikipedia.org/wiki/2002%E5%B9%B4"
+        "title": "中国国际航空",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%9B%BD%E9%99%85%E8%88%AA%E7%A9%BA"
       },
       {
         "year": 2001,
         "text": "宝丽来申请破产保护。",
-        "title": "2001年",
-        "url": "https://zh.wikipedia.org/wiki/2001%E5%B9%B4"
+        "title": "宝丽来",
+        "url": "https://zh.wikipedia.org/wiki/%E5%AE%9D%E4%B8%BD%E6%9D%A5"
       }
     ]
   }

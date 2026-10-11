@@ -12,6 +12,7 @@
             过滤广告位；海外 runner 可访问（weibo-trending-hot-search 同款做法）。
   onthisday 历史上的今天：中文维基百科官方 Feed API，按北京时间月/日取 6 条
             （年份从近到远，只收挂了词条链接的事件）。
+            接口默认吐繁体源文，须带 Accept-Language: zh-cn 让字词转换服务输出简体。
 
 板块各自尽力而为：一个板块失败不影响另一个；数据为空的板块当天省略。
 结果与上次字节一致时不写文件，工作流据此跳过提交。
@@ -131,7 +132,8 @@ def weibo_hot():
 def onthisday():
     """历史上的今天（中文维基官方 Feed，北京时间月/日）：年份 / 事件 / 词条链接，取 6 条。"""
     now = datetime.now(timezone(timedelta(hours=8)))
-    d = fetch_json(f'https://api.wikimedia.org/feed/v1/wikipedia/zh/onthisday/events/{now.month:02d}/{now.day:02d}')
+    d = fetch_json(f'https://api.wikimedia.org/feed/v1/wikipedia/zh/onthisday/events/{now.month:02d}/{now.day:02d}',
+                   headers={'Accept-Language': 'zh-cn'})
     out = []
     for ev in sorted(d.get('events') or [], key=lambda e: e.get('year') or 0, reverse=True):
         # 词条页优先取有实义的（跳过「2021年」这类年份页），都没有就退回第一个
