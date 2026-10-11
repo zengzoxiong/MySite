@@ -4409,6 +4409,7 @@ body.no-anim .mp-lyric > div {
 .tu-c3 { stroke: #ef4444; fill: #ef4444; background: #ef4444; }
 .tu-c4 { stroke: #f59e0b; fill: #f59e0b; background: #f59e0b; }
 .tu-c5 { stroke: #14b8a6; fill: #14b8a6; background: #14b8a6; }
+.tu-c6 { stroke: #ec4899; fill: #ec4899; background: #ec4899; }
 .tu-c-other { stroke: var(--text-tertiary); fill: var(--text-tertiary); background: var(--text-tertiary); }
 .tu-line { fill: none; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
 .tu-cross { stroke: var(--accent-color); stroke-width: 1; stroke-dasharray: 3 3; }

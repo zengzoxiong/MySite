@@ -1731,7 +1731,7 @@ function tuLinePath(pts) {
     return pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join('');
 }
 
-// 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top6 各一线 + 其余合并；
+// 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top7 各一线 + 其余合并；
 // 时间范围按日历窗口截取（近 7 天=末记录日往前 7 个日历日），窗口内无记录日补 0 保持时间轴连续
 function tuTrendLines(days) {
     const fd = tuFilteredDays(days);
@@ -1759,10 +1759,10 @@ function tuTrendLines(days) {
     if (tuCurrentModel) {
         lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: dates.map(k => (byDate[k] || {})[tuCurrentModel] || 0) }];
     } else {
-        // Top6 按「当前时间窗」内的用量选：窗口内没用过的模型不进折线/图例（否则切到近 7 天会有一排 0% 死行）
+        // Top7 按「当前时间窗」内的用量选：窗口内没用过的模型不进折线/图例（否则切到近 7 天会有一排 0% 死行）
         const rangeTot = {};
         dates.forEach(k => Object.entries(byDate[k] || {}).forEach(([id, v]) => { rangeTot[id] = (rangeTot[id] || 0) + v; }));
-        const top = Object.entries(rangeTot).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id]) => id);
+        const top = Object.entries(rangeTot).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 7).map(([id]) => id);
         const topSet = new Set(top);
         lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: dates.map(k => (byDate[k] || {})[id] || 0) }));
         const others = dates.map(k => Object.entries(byDate[k] || {})
