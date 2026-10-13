@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-12",
+  "updated": "2026-10-13",
   "sections": {
     "trending": [
-      {
-        "name": "openai/math",
-        "url": "https://github.com/openai/math",
-        "desc": "",
-        "stars": 14055,
-        "language": "Lean"
-      },
       {
         "name": "storytold/wordcraft",
         "url": "https://github.com/storytold/wordcraft",
         "desc": "An open-source, clean-room reimplementation of Microsoft Word in pure Rust",
-        "stars": 5761,
+        "stars": 9200,
         "language": "Rust"
-      },
-      {
-        "name": "alchaincyf/huashu-art-motion",
-        "url": "https://github.com/alchaincyf/huashu-art-motion",
-        "desc": "艺术动画skill：35种艺术风格、9种解说语法，用代码让画动起来。",
-        "stars": 3380,
-        "language": "JavaScript"
       },
       {
         "name": "wheresryan22/anatomy",
         "url": "https://github.com/wheresryan22/anatomy",
-        "desc": "A Claude Code skill that turns a technical idea into a detailed, interactive isometric figure of a real machine. It makes SVG with optional WebGL shaders and 3D",
-        "stars": 3150,
+        "desc": "An agent skill for creating detailed, interactive isometric illustrations of real-world machines and complex systems. Generates polished SVGs with optional WebG",
+        "stars": 6304,
         "language": "JavaScript"
-      },
-      {
-        "name": "mhtsec/ARTEX",
-        "url": "https://github.com/mhtsec/ARTEX",
-        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 3137,
-        "language": "Go"
-      },
-      {
-        "name": "zhongerxin/iPhone-use",
-        "url": "https://github.com/zhongerxin/iPhone-use",
-        "desc": "让 Codex 通过 USB 操作真实 iPhone：引导安装、App 自动化、实时屏幕与截图回退。",
-        "stars": 3021,
-        "language": "Python"
       },
       {
         "name": "storytold/gridcraft",
         "url": "https://github.com/storytold/gridcraft",
         "desc": "GridCraft: an open-source, clean-room spreadsheet (Microsoft Excel-style) in pure Rust. By ArtCraft.",
-        "stars": 2853,
+        "stars": 3849,
         "language": "Rust"
+      },
+      {
+        "name": "mhtsec/ARTEX",
+        "url": "https://github.com/mhtsec/ARTEX",
+        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
+        "stars": 3590,
+        "language": "Go"
       },
       {
         "name": "storytold/cadcraft",
         "url": "https://github.com/storytold/cadcraft",
         "desc": "CADCraft: computer-aided design and drafting — an open-source, clean-room AutoCAD-style app in pure Rust",
-        "stars": 2607,
+        "stars": 3498,
         "language": "Rust"
       },
       {
         "name": "nullmoth/nvidia-macos-driver",
         "url": "https://github.com/nullmoth/nvidia-macos-driver",
         "desc": "Metal driver for NVIDIA GeForce RTX cards on macOS 15 Sequoia (Intel / OpenCore). Free, source included.",
-        "stars": 2524,
+        "stars": 2748,
         "language": "Rust"
       },
       {
-        "name": "LosaLosSantos/aurelio-finance",
-        "url": "https://github.com/LosaLosSantos/aurelio-finance",
-        "desc": "Open-source personal finance app with an AI financial advisor: track your net worth, investments, ETFs, cash and debts on your own computer.",
-        "stars": 2197,
-        "language": "Python"
+        "name": "storytold/deckcraft",
+        "url": "https://github.com/storytold/deckcraft",
+        "desc": "Presentations and slide shows: an open-source, clean-room reimplementation of Microsoft PowerPoint in pure Rust. Part of the ArtCraft Crafting Apps.",
+        "stars": 2605,
+        "language": "Rust"
+      },
+      {
+        "name": "t4t5/omdrop-owl",
+        "url": "https://github.com/t4t5/omdrop-owl",
+        "desc": "airdrop for non-apple devices",
+        "stars": 2458,
+        "language": "Shell"
+      },
+      {
+        "name": "storytold/soundcraft",
+        "url": "https://github.com/storytold/soundcraft",
+        "desc": "An open-source, clean-room reimplementation of Avid Pro Tools in pure Rust",
+        "stars": 2275,
+        "language": "Rust"
+      },
+      {
+        "name": "alejandrobujan/tendedero",
+        "url": "https://github.com/alejandrobujan/tendedero",
+        "desc": "Screenshots, hung out to dry. A tiny native macOS app that hangs every screenshot on a line at the top of your screen.",
+        "stars": 2004,
+        "language": "Swift"
       }
     ],
     "hn": [
       {
-        "id": 50045984,
-        "title": "Total Annihilation, rebuilt for modern computers",
-        "url": "https://nanolathe.gg",
-        "hn": "https://news.ycombinator.com/item?id=50045984",
-        "score": 290,
-        "comments": 120
+        "id": 50064536,
+        "title": "Blood cells from 80-year-old donor become stem cells with molecular age under 20",
+        "url": "https://doi.org/10.1111/acel.70751",
+        "hn": "https://news.ycombinator.com/item?id=50064536",
+        "score": 80,
+        "comments": 38
       },
       {
-        "id": 50047091,
-        "title": "Cartographers of North Korea",
-        "url": "https://cartographers-nk.wonyoung.so/",
-        "hn": "https://news.ycombinator.com/item?id=50047091",
-        "score": 127,
-        "comments": 18
+        "id": 50064318,
+        "title": "GPT-6 Astra Helped Me Jailbreak My Kindle",
+        "url": "https://nirajrajgor.com/blog/kindle-photo-frame-with-ai",
+        "hn": "https://news.ycombinator.com/item?id=50064318",
+        "score": 88,
+        "comments": 46
       },
       {
-        "id": 50047422,
-        "title": "The gap in shared understanding of LLM capability is widening",
-        "url": "https://twitter.com/karpathy/status/2109361546505966046",
-        "hn": "https://news.ycombinator.com/item?id=50047422",
-        "score": 122,
-        "comments": 157
+        "id": 50058507,
+        "title": "GLM-Legal",
+        "url": "https://z.ai/blog/glm-legal",
+        "hn": "https://news.ycombinator.com/item?id=50058507",
+        "score": 423,
+        "comments": 247
       },
       {
-        "id": 50047055,
-        "title": "So, You’d Like To Sell Your Print Issues Of The Onion?",
-        "url": "https://theonion.com/archivehunt/",
-        "hn": "https://news.ycombinator.com/item?id=50047055",
-        "score": 211,
-        "comments": 23
-      },
-      {
-        "id": 50046241,
-        "title": "Chapter 1 of Ways of Seeing by John Berger",
-        "url": "https://www.ways-of-seeing.com/ch1",
-        "hn": "https://news.ycombinator.com/item?id=50046241",
-        "score": 61,
+        "id": 50063138,
+        "title": "Who Is Vfmaddrnd231pd?",
+        "url": "https://purplesyringa.moe/blog/who-is-vfmaddrnd231pd/",
+        "hn": "https://news.ycombinator.com/item?id=50063138",
+        "score": 109,
         "comments": 9
       },
       {
-        "id": 50044715,
-        "title": "How to Build Wealth as a Career Person",
-        "url": "https://asheradeniyi.com/2026/04/10/how-to-build-wealth-as-a-career-person/",
-        "hn": "https://news.ycombinator.com/item?id=50044715",
-        "score": 131,
-        "comments": 124
+        "id": 50058528,
+        "title": "A Modern Web App in C",
+        "url": "https://prophitt.me/writing/a-modern-web-app-in-c",
+        "hn": "https://news.ycombinator.com/item?id=50058528",
+        "score": 389,
+        "comments": 160
       },
       {
-        "id": 50043026,
-        "title": "Terence Tao: Math 2.0 [pdf]",
-        "url": "https://teorth.github.io/tao-web/slides/math-2-0-caltech-2026.pdf",
-        "hn": "https://news.ycombinator.com/item?id=50043026",
-        "score": 283,
-        "comments": 344
+        "id": 50063365,
+        "title": "Intel D270 GPU AI Accelerator–Up to 480 GB LPDDR5X",
+        "url": "https://www.intel.com/content/www/us/en/products/details/discrete-gpus/data-center-gpu/d-series.html",
+        "hn": "https://news.ycombinator.com/item?id=50063365",
+        "score": 52,
+        "comments": 19
       },
       {
-        "id": 50047825,
-        "title": "A Remote Employee Refused 160 Webcam Photos a Day. Her Employer Fired Her",
-        "url": "https://www.inc.com/chloe-rosenberg/a-remote-employee-refused-160-webcam-photos-a-day-her-employer-fired-her/91415963",
-        "hn": "https://news.ycombinator.com/item?id=50047825",
-        "score": 82,
-        "comments": 49
+        "id": 50041866,
+        "title": "The baffling intelligence of a single cell (2024)",
+        "url": "https://jsomers.net/e-coli-chemotaxis/",
+        "hn": "https://news.ycombinator.com/item?id=50041866",
+        "score": 28,
+        "comments": 1
       },
       {
-        "id": 50048522,
-        "title": "Recursive self-improvement through collective intelligence",
-        "url": "https://pub.sakana.ai/mass/",
-        "hn": "https://news.ycombinator.com/item?id=50048522",
-        "score": 5,
-        "comments": 0
+        "id": 50055304,
+        "title": "Hackers activate automatic defrosting in supermarket fridges across Europe",
+        "url": "https://www.tomshardware.com/tech-industry/cyber-security/unprecedented-cyberattack-cripples-supermarket-fridges-across-europe-as-hackers-activate-automatic-defrosting-delivery-and-store-prices-also-impacted-by-incident",
+        "hn": "https://news.ycombinator.com/item?id=50055304",
+        "score": 436,
+        "comments": 648
       },
       {
-        "id": 50045946,
-        "title": "NYC's \"Click to Cancel\" rule is now in effect",
-        "url": "https://www.nyc.gov/main/click-to-cancel",
-        "hn": "https://news.ycombinator.com/item?id=50045946",
-        "score": 289,
-        "comments": 138
+        "id": 50061791,
+        "title": "Making big downloads resumable in Firefox",
+        "url": "https://lunarwatcher.codeberg.page/til/firefox/resumable-big-downloads.html",
+        "hn": "https://news.ycombinator.com/item?id=50061791",
+        "score": 86,
+        "comments": 32
+      },
+      {
+        "id": 50063417,
+        "title": "Phreak.ing – Internet Phone Switch",
+        "url": "https://phreak.ing/",
+        "hn": "https://news.ycombinator.com/item?id=50063417",
+        "score": 68,
+        "comments": 22
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "google/embeddinggemma-2",
         "url": "https://huggingface.co/google/embeddinggemma-2",
         "task": "feature-extraction",
-        "downloads": 98829,
-        "likes": 1687
+        "downloads": 115763,
+        "likes": 1939
       },
       {
         "id": "jialinyyzz/humanizer",
         "url": "https://huggingface.co/jialinyyzz/humanizer",
         "task": "text-generation",
-        "downloads": 37647,
-        "likes": 1071
-      },
-      {
-        "id": "Cloudflare/clef",
-        "url": "https://huggingface.co/Cloudflare/clef",
-        "task": "image-text-to-text",
-        "downloads": 14351,
-        "likes": 2025
-      },
-      {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF",
-        "task": "text-to-image",
-        "downloads": 2188658,
-        "likes": 3976
+        "downloads": 46070,
+        "likes": 1324
       },
       {
         "id": "Qwen/Qwen-Image-2.1-Turbo",
         "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
         "task": "text-to-image",
-        "downloads": 4702,
-        "likes": 536
+        "downloads": 6787,
+        "likes": 636
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "task": "text-to-image",
+        "downloads": 2188658,
+        "likes": 4098
+      },
+      {
+        "id": "Cloudflare/clef",
+        "url": "https://huggingface.co/Cloudflare/clef",
+        "task": "image-text-to-text",
+        "downloads": 15064,
+        "likes": 2096
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 1726683,
-        "likes": 7310
+        "downloads": 1719766,
+        "likes": 7486
       },
       {
-        "id": "Aleph-Alpha/Kolibri-1",
-        "url": "https://huggingface.co/Aleph-Alpha/Kolibri-1",
+        "id": "ConwayResearch/Underdog-Saluki-27B-1.0",
+        "url": "https://huggingface.co/ConwayResearch/Underdog-Saluki-27B-1.0",
         "task": "text-generation",
-        "downloads": 12550,
-        "likes": 887
-      },
-      {
-        "id": "Venastine-Research/Xing4.0-29B-A4B-GGUF",
-        "url": "https://huggingface.co/Venastine-Research/Xing4.0-29B-A4B-GGUF",
-        "task": "text-generation",
-        "downloads": 48389,
-        "likes": 689
+        "downloads": 242329,
+        "likes": 371
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 6843108,
-        "likes": 17504
+        "downloads": 6895303,
+        "likes": 17579
+      },
+      {
+        "id": "LiquidAI/d1-3B",
+        "url": "https://huggingface.co/LiquidAI/d1-3B",
+        "task": "image-text-to-text",
+        "downloads": 11866,
+        "likes": 344
       },
       {
         "id": "canberkkkkkk/ema-lightning",
         "url": "https://huggingface.co/canberkkkkkk/ema-lightning",
         "task": "text-to-speech",
-        "downloads": 18079,
-        "likes": 356
+        "downloads": 20310,
+        "likes": 390
       }
     ],
     "weibo": [
       {
-        "word": "郑钦文晒图庆祝夺冠",
-        "num": 669459,
+        "word": "朋友离世后我送的同人本被卖",
+        "num": 1178123,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%83%91%E9%92%A6%E6%96%87%E6%99%92%E5%9B%BE%E5%BA%86%E7%A5%9D%E5%A4%BA%E5%86%A0%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%8B%E5%8F%8B%E7%A6%BB%E4%B8%96%E5%90%8E%E6%88%91%E9%80%81%E7%9A%84%E5%90%8C%E4%BA%BA%E6%9C%AC%E8%A2%AB%E5%8D%96%23"
       },
       {
-        "word": "霸王茶姬买一送一",
-        "num": 568593,
+        "word": "郑钦文团队一天就得花五万多块",
+        "num": 872287,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%83%91%E9%92%A6%E6%96%87%E5%9B%A2%E9%98%9F%E4%B8%80%E5%A4%A9%E5%B0%B1%E5%BE%97%E8%8A%B1%E4%BA%94%E4%B8%87%E5%A4%9A%E5%9D%97%23"
+      },
+      {
+        "word": "走再远也别忘了于都河",
+        "num": 671591,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%B5%B0%E5%86%8D%E8%BF%9C%E4%B9%9F%E5%88%AB%E5%BF%98%E4%BA%86%E4%BA%8E%E9%83%BD%E6%B2%B3%23"
+      },
+      {
+        "word": "男子目睹妻子出轨持刀刺伤第三者",
+        "num": 449000,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B7%E5%AD%90%E7%9B%AE%E7%9D%B9%E5%A6%BB%E5%AD%90%E5%87%BA%E8%BD%A8%E6%8C%81%E5%88%80%E5%88%BA%E4%BC%A4%E7%AC%AC%E4%B8%89%E8%80%85%23"
+      },
+      {
+        "word": "莫兰特回应杨瀚森13分4板4助",
+        "num": 365061,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%8E%AB%E5%85%B0%E7%89%B9%E5%9B%9E%E5%BA%94%E6%9D%A8%E7%80%9A%E6%A3%AE13%E5%88%864%E6%9D%BF4%E5%8A%A9%23"
+      },
+      {
+        "word": "绝命毒师老白儿子演员去世",
+        "num": 358537,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BB%9D%E5%91%BD%E6%AF%92%E5%B8%88%E8%80%81%E7%99%BD%E5%84%BF%E5%AD%90%E6%BC%94%E5%91%98%E5%8E%BB%E4%B8%96%23"
+      },
+      {
+        "word": "女儿送车爸爸第一反应让人鼻酸",
+        "num": 336961,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%84%BF%E9%80%81%E8%BD%A6%E7%88%B8%E7%88%B8%E7%AC%AC%E4%B8%80%E5%8F%8D%E5%BA%94%E8%AE%A9%E4%BA%BA%E9%BC%BB%E9%85%B8%23"
+      },
+      {
+        "word": "内蒙古呼伦贝尔发布鼠疫风险提示",
+        "num": 292659,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%86%85%E8%92%99%E5%8F%A4%E5%91%BC%E4%BC%A6%E8%B4%9D%E5%B0%94%E5%8F%91%E5%B8%83%E9%BC%A0%E7%96%AB%E9%A3%8E%E9%99%A9%E6%8F%90%E7%A4%BA%23"
+      },
+      {
+        "word": "董卿老公卸任上海人寿董事长",
+        "num": 292162,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%9C%B8%E7%8E%8B%E8%8C%B6%E5%A7%AC%E4%B9%B0%E4%B8%80%E9%80%81%E4%B8%80%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%91%A3%E5%8D%BF%E8%80%81%E5%85%AC%E5%8D%B8%E4%BB%BB%E4%B8%8A%E6%B5%B7%E4%BA%BA%E5%AF%BF%E8%91%A3%E4%BA%8B%E9%95%BF%23"
       },
       {
-        "word": "本周这些数据值得关注",
-        "num": 480245,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%AC%E5%91%A8%E8%BF%99%E4%BA%9B%E6%95%B0%E6%8D%AE%E5%80%BC%E5%BE%97%E5%85%B3%E6%B3%A8%23"
-      },
-      {
-        "word": "女孩去马来西亚高薪工作后失联",
-        "num": 395816,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%A9%E5%8E%BB%E9%A9%AC%E6%9D%A5%E8%A5%BF%E4%BA%9A%E9%AB%98%E8%96%AA%E5%B7%A5%E4%BD%9C%E5%90%8E%E5%A4%B1%E8%81%94%23"
-      },
-      {
-        "word": "记者暗访有偿陪伴服务",
-        "num": 365295,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B0%E8%80%85%E6%9A%97%E8%AE%BF%E6%9C%89%E5%81%BF%E9%99%AA%E4%BC%B4%E6%9C%8D%E5%8A%A1%23"
-      },
-      {
-        "word": "关晓彤回应去宋雨琦演唱会",
-        "num": 290104,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%85%B3%E6%99%93%E5%BD%A4%E5%9B%9E%E5%BA%94%E5%8E%BB%E5%AE%8B%E9%9B%A8%E7%90%A6%E6%BC%94%E5%94%B1%E4%BC%9A%23"
-      },
-      {
-        "word": "李娜 郑钦文",
-        "num": 265723,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%8E%E5%A8%9C%20%E9%83%91%E9%92%A6%E6%96%87%23"
-      },
-      {
-        "word": "郑钦文收获明年澳网的种子席位",
-        "num": 234138,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%83%91%E9%92%A6%E6%96%87%E6%94%B6%E8%8E%B7%E6%98%8E%E5%B9%B4%E6%BE%B3%E7%BD%91%E7%9A%84%E7%A7%8D%E5%AD%90%E5%B8%AD%E4%BD%8D%23"
-      },
-      {
-        "word": "老护士辞职后儿科投诉翻倍",
-        "num": 208401,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%80%81%E6%8A%A4%E5%A3%AB%E8%BE%9E%E8%81%8C%E5%90%8E%E5%84%BF%E7%A7%91%E6%8A%95%E8%AF%89%E7%BF%BB%E5%80%8D%23"
-      },
-      {
-        "word": "央视曝投资1.2亿项目仅建5个棚",
-        "num": 197939,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%AE%E8%A7%86%E6%9B%9D%E6%8A%95%E8%B5%841.2%E4%BA%BF%E9%A1%B9%E7%9B%AE%E4%BB%85%E5%BB%BA5%E4%B8%AA%E6%A3%9A%23"
+        "word": "新能源汽车出口退税率将下调",
+        "num": 230296,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%96%B0%E8%83%BD%E6%BA%90%E6%B1%BD%E8%BD%A6%E5%87%BA%E5%8F%A3%E9%80%80%E7%A8%8E%E7%8E%87%E5%B0%86%E4%B8%8B%E8%B0%83%23"
       }
     ],
     "onthisday": [
       {
+        "year": 2025,
+        "text": "美国、埃及等30余国领袖在沙姆沙伊赫举行和平峰会，讨论加沙战争停火协议后续安排。",
+        "title": "沙姆沙伊赫",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B2%99%E5%A7%86%E6%B2%99%E4%BC%8A%E8%B5%AB"
+      },
+      {
+        "year": 2022,
+        "text": "台湾中央流行疫情指挥中心宣布松绑边境防疫0+7措施，回复常态入境通关。",
+        "title": "2022年",
+        "url": "https://zh.wikipedia.org/wiki/2022%E5%B9%B4"
+      },
+      {
+        "year": 2022,
+        "text": "中共二十大前夕，北京四通桥发生抗议事件。",
+        "title": "中国共产党第二十次全国代表大会",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%85%B1%E4%BA%A7%E5%85%9A%E7%AC%AC%E4%BA%8C%E5%8D%81%E6%AC%A1%E5%85%A8%E5%9B%BD%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A"
+      },
+      {
         "year": 2019,
-        "text": "肯亚长跑选手埃利乌德·基普乔盖在英力士1:59挑战赛中以1小时59分40.2秒完赛，成为世界上首位马拉松跑进2小时的选手。",
-        "title": "埃利乌德·基普乔盖",
-        "url": "https://zh.wikipedia.org/wiki/%E5%9F%83%E5%88%A9%E4%B9%8C%E5%BE%B7%C2%B7%E5%9F%BA%E6%99%AE%E4%B9%94%E7%9B%96"
+        "text": "在芝加哥马拉松（英语：2019 Chicago Marathon）赛事中，肯尼亚跑者布里吉德·科斯盖创下女子选手参与男女混合赛事的现行马拉松世界纪录。",
+        "title": "布里吉德·科斯蓋",
+        "url": "https://zh.wikipedia.org/wiki/%E5%B8%83%E9%87%8C%E5%90%89%E5%BE%B7%C2%B7%E7%A7%91%E6%96%AF%E8%93%8B"
       },
       {
-        "year": 2012,
-        "text": "中国南方航空327号班机改用空中客车A380客机执飞，成为中国由该款客机执飞的首条远程定期国际航班。",
-        "title": "中国南方航空327号班机",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%8D%97%E6%96%B9%E8%88%AA%E7%A9%BA327%E5%8F%B7%E7%8F%AD%E6%9C%BA"
+        "year": 2016,
+        "text": "泰国历史上统治时间最长的国君普密蓬·阿杜德在曼谷西里拉医院逝世，他成为了世界史上在任时间第三长的国家元首。",
+        "title": "泰國君主",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B3%B0%E5%9C%8B%E5%90%9B%E4%B8%BB"
       },
       {
-        "year": 2011,
-        "text": "利用死者遗骸中取出的物质，加拿大麦克马斯特大学主管波拿亚和德国图宾根大学克劳斯领导的研究小组成功破解黑死病致病菌鼠疫杆菌基因体遗传密码，并将报告发表于《自然》。",
-        "title": "麥馬士達大學",
-        "url": "https://zh.wikipedia.org/wiki/%E9%BA%A5%E9%A6%AC%E5%A3%AB%E9%81%94%E5%A4%A7%E5%AD%B8"
-      },
-      {
-        "year": 2005,
-        "text": "神舟六号载人飞船在酒泉卫星发射中心发射升空，成为中国第一艘执行多人多天任务的载人飞船。",
-        "title": "神舟六号",
-        "url": "https://zh.wikipedia.org/wiki/%E7%A5%9E%E8%88%9F%E5%85%AD%E5%8F%B7"
-      },
-      {
-        "year": 2003,
-        "text": "利比里亚宣布与中华民国中断外交关系，重新与中华人民共和国建交。",
-        "title": "利比里亚",
-        "url": "https://zh.wikipedia.org/wiki/%E5%88%A9%E6%AF%94%E9%87%8C%E4%BA%9A"
-      },
-      {
-        "year": 2003,
-        "text": "秦沈客运专线正式通车，成为中国第一条高速铁路。",
-        "title": "秦沈客运专线",
-        "url": "https://zh.wikipedia.org/wiki/%E7%A7%A6%E6%B2%88%E5%AE%A2%E8%BF%90%E4%B8%93%E7%BA%BF"
+        "year": 2016,
+        "text": "马尔代夫退出英联邦。",
+        "title": "英联邦",
+        "url": "https://zh.wikipedia.org/wiki/%E8%8B%B1%E8%81%94%E9%82%A6"
       }
     ]
   }
