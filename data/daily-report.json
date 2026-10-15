@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-15",
+  "updated": "2026-10-16",
   "sections": {
     "trending": [
       {
-        "name": "wheresryan22/anatomy",
-        "url": "https://github.com/wheresryan22/anatomy",
-        "desc": "An agent skill for creating detailed, interactive isometric illustrations of real-world machines and complex systems. Generates polished SVGs with optional WebG",
-        "stars": 9928,
-        "language": "JavaScript"
-      },
-      {
-        "name": "mhtsec/ARTEX",
-        "url": "https://github.com/mhtsec/ARTEX",
-        "desc": "AI 自主渗透测试系统 | 百度“agent+”攻防挑战赛冠军项目",
-        "stars": 4071,
-        "language": "Go"
-      },
-      {
-        "name": "ARahim3/DigUp",
-        "url": "https://github.com/ARahim3/DigUp",
-        "desc": "Search your computer by what's in your files: photos, PDFs, documents, recordings, videos and code. On-device on Mac, Windows and Linux, built on Google DeepMin",
-        "stars": 3587,
-        "language": "Swift"
-      },
-      {
-        "name": "t4t5/omdrop-owl",
-        "url": "https://github.com/t4t5/omdrop-owl",
-        "desc": "airdrop for non-apple devices",
-        "stars": 2674,
-        "language": "Shell"
+        "name": "jhaizhou-ops/d2r-mobile",
+        "url": "https://github.com/jhaizhou-ops/d2r-mobile",
+        "desc": "Open-source iOS / macOS compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion. Runs your own Switch copy natively on iPhone, iP",
+        "stars": 3062,
+        "language": "C"
       },
       {
         "name": "storytold/craft-launcher",
         "url": "https://github.com/storytold/craft-launcher",
         "desc": "The Craft App Launcher",
-        "stars": 2629,
+        "stars": 2853,
         "language": "Rust"
-      },
-      {
-        "name": "liseami/CCBaga",
-        "url": "https://github.com/liseami/CCBaga",
-        "desc": "",
-        "stars": 2244,
-        "language": "Rust"
-      },
-      {
-        "name": "jhaizhou-ops/d2r-mobile",
-        "url": "https://github.com/jhaizhou-ops/d2r-mobile",
-        "desc": "Open-source iOS / macOS compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion. Runs your own Switch copy natively on iPhone, iP",
-        "stars": 2065,
-        "language": "C"
       },
       {
         "name": "onehumanbeing/esp32-iphone-agent",
         "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
         "desc": "Let an AI model use a real iPhone with a $7 ESP32: AirPlay eyes, USB HID hands, any OpenAI-compatible vision model. No Mac, no developer account, no jailbreak.",
-        "stars": 2063,
-        "language": "Python"
+        "stars": 2407,
+        "language": "C"
       },
       {
-        "name": "noahdunnagan/fsearch",
-        "url": "https://github.com/noahdunnagan/fsearch",
-        "desc": "Whole-disk file search for macOS: fuzzy names, typo tolerance, indexed content grep. ~1 ms over 8M files.",
-        "stars": 2051,
+        "name": "liseami/CCBaga",
+        "url": "https://github.com/liseami/CCBaga",
+        "desc": "",
+        "stars": 2338,
         "language": "Rust"
       },
       {
-        "name": "T-Auto/dsh-ops",
-        "url": "https://github.com/T-Auto/dsh-ops",
-        "desc": "A toolkit for low-level operations in DSH, designed to reduce token usage and task execution time / DSH 底层操作工具插件，旨在减少 Token 消耗与任务耗时",
-        "stars": 1531,
+        "name": "Arekejoker/qwen21-nsfw-pose-skill",
+        "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
+        "desc": "Qwen-Image 2.1 NSFW/姿势出图 skill：作者级提示词配方 + NSFW LoRA + 136 姿势 VNCCS 人偶控制；适用 Claude Code / Codex / Cursor / OpenClaw",
+        "stars": 1989,
+        "language": "Python"
+      },
+      {
+        "name": "storytold/figcraft",
+        "url": "https://github.com/storytold/figcraft",
+        "desc": "FigCraft: interface design and prototyping; an open-source, clean-room reimplementation of collaborative design workflows in pure Rust",
+        "stars": 1387,
+        "language": "Rust"
+      },
+      {
+        "name": "shaongitbd/doory",
+        "url": "https://github.com/shaongitbd/doory",
+        "desc": "Open source canva alternative",
+        "stars": 1305,
+        "language": "TypeScript"
+      },
+      {
+        "name": "HeyPuter/everything",
+        "url": "https://github.com/HeyPuter/everything",
+        "desc": "We're rebuilding and open-sourcing the world’s software from scratch.",
+        "stars": 1272,
         "language": "JavaScript"
+      },
+      {
+        "name": "opengeos/RustGIS",
+        "url": "https://github.com/opengeos/RustGIS",
+        "desc": "A fast, free and open-source GIS in pure Rust.",
+        "stars": 1208,
+        "language": "Rust"
+      },
+      {
+        "name": "rociiu/talorys",
+        "url": "https://github.com/rociiu/talorys",
+        "desc": "Your personal AI agent in your own Cloudflare account. Chat, memory, tasks, notes and scheduled reminders, deployed with one command: npx create-talorys@latest.",
+        "stars": 1129,
+        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50093568,
-        "title": "Things to know when you get cancer – 2026 Edition",
-        "url": "https://jjmaxwell4.com/writing/things-to-know-when-you-get-cancer/",
-        "hn": "https://news.ycombinator.com/item?id=50093568",
-        "score": 491,
-        "comments": 130
+        "id": 50107379,
+        "title": "Muse Spark Open",
+        "url": "https://research.meta.ai/blog/muse-spark-open",
+        "hn": "https://news.ycombinator.com/item?id=50107379",
+        "score": 526,
+        "comments": 298
       },
       {
-        "id": 50094994,
-        "title": "OpenCode 2.0",
-        "url": "https://anoma.ly/notes/opencode-2-0/",
-        "hn": "https://news.ycombinator.com/item?id=50094994",
-        "score": 125,
-        "comments": 42
+        "id": 50109715,
+        "title": "What I Self-Host",
+        "url": "https://viceconsole.fyi/blog/2026/10/10/what-i-self-host/",
+        "hn": "https://news.ycombinator.com/item?id=50109715",
+        "score": 111,
+        "comments": 53
       },
       {
-        "id": 50095353,
-        "title": "We’re releasing Jev 1.14.0 along with experimental features for dreamers",
-        "url": "https://typesafe.ai/blog/jev-1-14",
-        "hn": "https://news.ycombinator.com/item?id=50095353",
-        "score": 77,
-        "comments": 30
+        "id": 50105647,
+        "title": "Neural networks are clean",
+        "url": "https://already-clean.goodfire.com/",
+        "hn": "https://news.ycombinator.com/item?id=50105647",
+        "score": 427,
+        "comments": 150
       },
       {
-        "id": 50088935,
-        "title": "Passkeys are not a trap",
-        "url": "https://scotthelme.co.uk/passkeys-are-not-a-trap/",
-        "hn": "https://news.ycombinator.com/item?id=50088935",
-        "score": 364,
-        "comments": 558
+        "id": 50111112,
+        "title": "Call Center Jobs Are Declining, but 14,000 Calls Show Humans Still Outperform AI",
+        "url": "https://boldagents.co/blog/call-center-jobs-declining-14000-calls-humans-outperform-ai",
+        "hn": "https://news.ycombinator.com/item?id=50111112",
+        "score": 26,
+        "comments": 21
       },
       {
-        "id": 50050553,
-        "title": "Do dentists know what they're doing?",
-        "url": "https://mapwriting.substack.com/p/dentists",
-        "hn": "https://news.ycombinator.com/item?id=50050553",
-        "score": 267,
-        "comments": 195
+        "id": 50108872,
+        "title": "Someone on Torrent Sites Kept Fucking with My Sonarr",
+        "url": "https://thereallo.dev/blog/someone-on-torrent-sites-kept-fucking-with-my-sonarr-setup",
+        "hn": "https://news.ycombinator.com/item?id=50108872",
+        "score": 123,
+        "comments": 57
       },
       {
-        "id": 50096142,
-        "title": "Tiny Little Office",
-        "url": "https://tinylittleoffice.com/",
-        "hn": "https://news.ycombinator.com/item?id=50096142",
-        "score": 8,
-        "comments": 1
+        "id": 50103338,
+        "title": "Wayland desktop for Linux with skeuomorphic design",
+        "url": "https://github.com/fyzugx/DEsk",
+        "hn": "https://news.ycombinator.com/item?id=50103338",
+        "score": 453,
+        "comments": 179
       },
       {
-        "id": 50091788,
-        "title": "Containment and monitoring failures are to blame for AI hacking reports: experts",
-        "url": "https://www.csoonline.com/article/4234854/ai-agents-arent-going-rogue-frontier-labs-are-skipping-security-basics.html",
-        "hn": "https://news.ycombinator.com/item?id=50091788",
-        "score": 786,
-        "comments": 389
+        "id": 50105648,
+        "title": "Krea 3 – An image model built for editing at scale",
+        "url": "https://www.krea.ai/krea-3",
+        "hn": "https://news.ycombinator.com/item?id=50105648",
+        "score": 219,
+        "comments": 73
       },
       {
-        "id": 50090369,
-        "title": "Better HTTP/1 connection reuse in Go 1.27",
-        "url": "https://go.dev/blog/http-connection-reuse",
-        "hn": "https://news.ycombinator.com/item?id=50090369",
-        "score": 170,
-        "comments": 28
+        "id": 50106023,
+        "title": "Jev meets the Trolley Problem",
+        "url": "https://zachlandes.com/trolley-problem/",
+        "hn": "https://news.ycombinator.com/item?id=50106023",
+        "score": 225,
+        "comments": 103
       },
       {
-        "id": 50093612,
-        "title": "Fancy Curl Sites",
-        "url": "https://nytpu.com/gemlog/2026-03-18",
-        "hn": "https://news.ycombinator.com/item?id=50093612",
-        "score": 49,
-        "comments": 11
+        "id": 50101813,
+        "title": "AdFection: Targeted ads turned into a pipeline for zero-click mercenary spyware",
+        "url": "https://citizenlab.ca/research/how-discover-tech-turned-targeted-ads-into-a-pipeline-for-spyware/",
+        "hn": "https://news.ycombinator.com/item?id=50101813",
+        "score": 335,
+        "comments": 498
       },
       {
-        "id": 50094694,
-        "title": "Anthropic's Scion is heavily inspired by Mononoke",
-        "url": "https://sunshowers.io/posts/anthropic-mononoke/",
-        "hn": "https://news.ycombinator.com/item?id=50094694",
-        "score": 167,
-        "comments": 61
+        "id": 50108229,
+        "title": "E Ink Kaleido 4",
+        "url": "https://www.eink.com/news/detail/EInk-Launches-Latest-Version-of-Color-ePaper-Platform-E-Ink-Kaleido-4",
+        "hn": "https://news.ycombinator.com/item?id=50108229",
+        "score": 97,
+        "comments": 59
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "google/embeddinggemma-2",
         "url": "https://huggingface.co/google/embeddinggemma-2",
         "task": "feature-extraction",
-        "downloads": 135175,
-        "likes": 2250
+        "downloads": 144280,
+        "likes": 2393
       },
       {
         "id": "jialinyyzz/humanizer",
         "url": "https://huggingface.co/jialinyyzz/humanizer",
         "task": "text-generation",
-        "downloads": 65616,
-        "likes": 1625
+        "downloads": 75253,
+        "likes": 1728
       },
       {
         "id": "Qwen/Qwen-Image-2.1-Turbo",
         "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
         "task": "text-to-image",
-        "downloads": 12704,
-        "likes": 769
-      },
-      {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "task": "text-to-image",
-        "downloads": 2315771,
-        "likes": 4300
+        "downloads": 15315,
+        "likes": 873
       },
       {
         "id": "openbmb/MiniCPM-V-4.7-35B-A3B",
         "url": "https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B",
         "task": "image-text-to-text",
-        "downloads": 4157,
-        "likes": 596
+        "downloads": 9278,
+        "likes": 790
       },
       {
-        "id": "autotrust/JEV-35B",
-        "url": "https://huggingface.co/autotrust/JEV-35B",
-        "task": "text-classification",
-        "downloads": 27970,
-        "likes": 716
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "task": "text-to-image",
+        "downloads": 2415278,
+        "likes": 4378
       },
       {
-        "id": "ConwayResearch/Underdog-Saluki-27B-1.0",
-        "url": "https://huggingface.co/ConwayResearch/Underdog-Saluki-27B-1.0",
-        "task": "text-generation",
-        "downloads": 311969,
-        "likes": 457
+        "id": "fishaudio/drama-3",
+        "url": "https://huggingface.co/fishaudio/drama-3",
+        "task": "text-to-speech",
+        "downloads": 4048,
+        "likes": 467
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 1823507,
-        "likes": 7788
+        "downloads": 1866657,
+        "likes": 7941
       },
       {
         "id": "AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
         "url": "https://huggingface.co/AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
         "task": "text-to-image",
-        "downloads": 258320,
-        "likes": 451
+        "downloads": 296253,
+        "likes": 487
       },
       {
-        "id": "Qwen/Qwen3.8-27B",
-        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
-        "task": "image-text-to-text",
-        "downloads": 7221327,
-        "likes": 17692
+        "id": "LiquidAI/LFM2.5-24B-A2B",
+        "url": "https://huggingface.co/LiquidAI/LFM2.5-24B-A2B",
+        "task": "text-generation",
+        "downloads": 6286,
+        "likes": 386
+      },
+      {
+        "id": "ConwayResearch/Underdog-Saluki-27B-1.0",
+        "url": "https://huggingface.co/ConwayResearch/Underdog-Saluki-27B-1.0",
+        "task": "text-generation",
+        "downloads": 344177,
+        "likes": 496
       }
     ],
     "weibo": [
       {
-        "word": "入职第一天因截图社死",
-        "num": 427838,
+        "word": "深圳全市全天禁鸣喇叭5年",
+        "num": 457305,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%85%A5%E8%81%8C%E7%AC%AC%E4%B8%80%E5%A4%A9%E5%9B%A0%E6%88%AA%E5%9B%BE%E7%A4%BE%E6%AD%BB%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B7%B1%E5%9C%B3%E5%85%A8%E5%B8%82%E5%85%A8%E5%A4%A9%E7%A6%81%E9%B8%A3%E5%96%87%E5%8F%AD5%E5%B9%B4%23"
       },
       {
-        "word": "好一个乖乖女热度登顶",
-        "num": 314756,
+        "word": "大龄读研见老师两面就退学",
+        "num": 322469,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E9%BE%84%E8%AF%BB%E7%A0%94%E8%A7%81%E8%80%81%E5%B8%88%E4%B8%A4%E9%9D%A2%E5%B0%B1%E9%80%80%E5%AD%A6%23"
+      },
+      {
+        "word": "起初他们参加红军只为找条活路",
+        "num": 264574,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%B5%B7%E5%88%9D%E4%BB%96%E4%BB%AC%E5%8F%82%E5%8A%A0%E7%BA%A2%E5%86%9B%E5%8F%AA%E4%B8%BA%E6%89%BE%E6%9D%A1%E6%B4%BB%E8%B7%AF%23"
+      },
+      {
+        "word": "AI射雕英雄传看起来比人演的好",
+        "num": 159652,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23AI%E5%B0%84%E9%9B%95%E8%8B%B1%E9%9B%84%E4%BC%A0%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%AF%94%E4%BA%BA%E6%BC%94%E7%9A%84%E5%A5%BD%23"
+      },
+      {
+        "word": "曝李昀锐去hi6接孟子义下班",
+        "num": 159533,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E6%9D%8E%E6%98%80%E9%94%90%E5%8E%BBhi6%E6%8E%A5%E5%AD%9F%E5%AD%90%E4%B9%89%E4%B8%8B%E7%8F%AD%23"
+      },
+      {
+        "word": "黄子韬谈妻子生理期细节被质疑",
+        "num": 139643,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%BD%E4%B8%80%E4%B8%AA%E4%B9%96%E4%B9%96%E5%A5%B3%E7%83%AD%E5%BA%A6%E7%99%BB%E9%A1%B6%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E5%AD%90%E9%9F%AC%E8%B0%88%E5%A6%BB%E5%AD%90%E7%94%9F%E7%90%86%E6%9C%9F%E7%BB%86%E8%8A%82%E8%A2%AB%E8%B4%A8%E7%96%91%23"
       },
       {
-        "word": "90多年前红军的承诺生生不息",
-        "num": 239342,
+        "word": "美股",
+        "num": 114366,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%2390%E5%A4%9A%E5%B9%B4%E5%89%8D%E7%BA%A2%E5%86%9B%E7%9A%84%E6%89%BF%E8%AF%BA%E7%94%9F%E7%94%9F%E4%B8%8D%E6%81%AF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%23"
       },
       {
-        "word": "好一个乖乖女",
-        "num": 143761,
+        "word": "杨和苏公开女友",
+        "num": 109988,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%BD%E4%B8%80%E4%B8%AA%E4%B9%96%E4%B9%96%E5%A5%B3%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%A8%E5%92%8C%E8%8B%8F%E5%85%AC%E5%BC%80%E5%A5%B3%E5%8F%8B%23"
       },
       {
-        "word": "男子因经济拮据心生怨愤杀陌生女子",
-        "num": 121037,
+        "word": "为何年轻人不爱去菜市场",
+        "num": 92975,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B7%E5%AD%90%E5%9B%A0%E7%BB%8F%E6%B5%8E%E6%8B%AE%E6%8D%AE%E5%BF%83%E7%94%9F%E6%80%A8%E6%84%A4%E6%9D%80%E9%99%8C%E7%94%9F%E5%A5%B3%E5%AD%90%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%BA%E4%BD%95%E5%B9%B4%E8%BD%BB%E4%BA%BA%E4%B8%8D%E7%88%B1%E5%8E%BB%E8%8F%9C%E5%B8%82%E5%9C%BA%23"
       },
       {
-        "word": "陈小春",
-        "num": 105959,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%99%88%E5%B0%8F%E6%98%A5%23"
-      },
-      {
-        "word": "肖战这把火已经烧到天边了",
-        "num": 89941,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%82%96%E6%88%98%E8%BF%99%E6%8A%8A%E7%81%AB%E5%B7%B2%E7%BB%8F%E7%83%A7%E5%88%B0%E5%A4%A9%E8%BE%B9%E4%BA%86%23"
-      },
-      {
-        "word": "徐梦洁演技口碑",
-        "num": 72822,
+        "word": "影视飓风Tim父亲任董事长",
+        "num": 86598,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BE%90%E6%A2%A6%E6%B4%81%E6%BC%94%E6%8A%80%E5%8F%A3%E7%A2%91%23"
-      },
-      {
-        "word": "7天6夜堵截蒙古国火灾330余公里",
-        "num": 66999,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%237%E5%A4%A96%E5%A4%9C%E5%A0%B5%E6%88%AA%E8%92%99%E5%8F%A4%E5%9B%BD%E7%81%AB%E7%81%BE330%E4%BD%99%E5%85%AC%E9%87%8C%23"
-      },
-      {
-        "word": "虎跳峡观景台跳江者尚未打捞到",
-        "num": 66984,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%99%8E%E8%B7%B3%E5%B3%A1%E8%A7%82%E6%99%AF%E5%8F%B0%E8%B7%B3%E6%B1%9F%E8%80%85%E5%B0%9A%E6%9C%AA%E6%89%93%E6%8D%9E%E5%88%B0%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BD%B1%E8%A7%86%E9%A3%93%E9%A3%8ETim%E7%88%B6%E4%BA%B2%E4%BB%BB%E8%91%A3%E4%BA%8B%E9%95%BF%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2024,
-        "text": "朝鲜民主主义人民共和国炸毁连接朝鲜半岛的公路京义线及东海线。",
-        "title": "朝鲜民主主义人民共和国",
-        "url": "https://zh.wikipedia.org/wiki/%E6%9C%9D%E9%B2%9C%E6%B0%91%E4%B8%BB%E4%B8%BB%E4%B9%89%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD"
+        "year": 2021,
+        "text": "搭载中国神舟十三号载人飞船的长征二号F运载火箭在酒泉卫星发射中心发射升空，并与天宫空间站对接。",
+        "title": "长征二号F运载火箭",
+        "url": "https://zh.wikipedia.org/wiki/%E9%95%BF%E5%BE%81%E4%BA%8C%E5%8F%B7F%E8%BF%90%E8%BD%BD%E7%81%AB%E7%AE%AD"
       },
       {
-        "year": 2016,
-        "text": "台湾澎湖县举第二次博弈公投，投票结果为否决。",
-        "title": "2016年澎湖縣博弈公民投票",
-        "url": "https://zh.wikipedia.org/wiki/2016%E5%B9%B4%E6%BE%8E%E6%B9%96%E7%B8%A3%E5%8D%9A%E5%BC%88%E5%85%AC%E6%B0%91%E6%8A%95%E7%A5%A8"
+        "year": 2020,
+        "text": "法国发生萨缪尔·帕蒂谋杀案。",
+        "title": "薩繆爾·帕蒂謀殺案",
+        "url": "https://zh.wikipedia.org/wiki/%E8%96%A9%E7%B9%86%E7%88%BE%C2%B7%E5%B8%95%E8%92%82%E8%AC%80%E6%AE%BA%E6%A1%88"
       },
       {
-        "year": 2016,
-        "text": "台湾台中市台铁高架化，并废止台中市台铁平面路段，旧台中车站走入历史。",
-        "title": "臺中市",
-        "url": "https://zh.wikipedia.org/wiki/%E8%87%BA%E4%B8%AD%E5%B8%82"
+        "year": 2017,
+        "text": "马耳他记者兼反贪腐活动人士达芙妮·卡鲁阿娜·加利西亚在比德尼亚（英语：Bidnija）遭遇汽车炸弹袭击身亡。",
+        "title": "達芙妮·卡魯阿娜·加里齊亞",
+        "url": "https://zh.wikipedia.org/wiki/%E9%81%94%E8%8A%99%E5%A6%AE%C2%B7%E5%8D%A1%E9%AD%AF%E9%98%BF%E5%A8%9C%C2%B7%E5%8A%A0%E9%87%8C%E9%BD%8A%E4%BA%9E"
       },
       {
-        "year": 2007,
-        "text": "中国共产党第十七次全国代表大会开幕。",
-        "title": "中国共产党第十七次全国代表大会",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%85%B1%E4%BA%A7%E5%85%9A%E7%AC%AC%E5%8D%81%E4%B8%83%E6%AC%A1%E5%85%A8%E5%9B%BD%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A"
+        "year": 2013,
+        "text": "中国首条跨省城市轨道交通，上海轨道交通11号线江苏省昆山花桥延伸段开通。",
+        "title": "上海轨道交通11号线",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%8A%E6%B5%B7%E8%BD%A8%E9%81%93%E4%BA%A4%E9%80%9A11%E5%8F%B7%E7%BA%BF"
       },
       {
-        "year": 2005,
-        "text": "世界海拔最高的铁路青藏铁路全线贯通庆祝大会在拉萨举行。",
-        "title": "青藏铁路",
-        "url": "https://zh.wikipedia.org/wiki/%E9%9D%92%E8%97%8F%E9%93%81%E8%B7%AF"
+        "year": 2013,
+        "text": "老挝航空301号班机坠入湄公河，造成机上49人全部死亡，是老挝最致命的空难。",
+        "title": "寮國航空301號班機空難",
+        "url": "https://zh.wikipedia.org/wiki/%E5%AF%AE%E5%9C%8B%E8%88%AA%E7%A9%BA301%E8%99%9F%E7%8F%AD%E6%A9%9F%E7%A9%BA%E9%9B%A3"
       },
       {
-        "year": 2003,
-        "text": "载有杨利伟的神舟五号自酒泉卫星发射中心发射升空，为中国第一艘载人太空船。",
-        "title": "杨利伟",
-        "url": "https://zh.wikipedia.org/wiki/%E6%9D%A8%E5%88%A9%E4%BC%9F"
+        "year": 2006,
+        "text": "以俄罗斯亚美尼亚裔核物理学家尤里·奥加涅相为首的俄美合作科学家团队在位于俄罗斯杜布纳的联合核研究所首次合成制造出第118号元素Og。",
+        "title": "原子核物理学",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8E%9F%E5%AD%90%E6%A0%B8%E7%89%A9%E7%90%86%E5%AD%A6"
       }
     ]
   }
