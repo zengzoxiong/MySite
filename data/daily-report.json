@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-16",
+  "updated": "2026-10-17",
   "sections": {
     "trending": [
       {
         "name": "jhaizhou-ops/d2r-mobile",
         "url": "https://github.com/jhaizhou-ops/d2r-mobile",
         "desc": "Open-source iOS / macOS compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion. Runs your own Switch copy natively on iPhone, iP",
-        "stars": 3062,
+        "stars": 3524,
         "language": "C"
-      },
-      {
-        "name": "storytold/craft-launcher",
-        "url": "https://github.com/storytold/craft-launcher",
-        "desc": "The Craft App Launcher",
-        "stars": 2853,
-        "language": "Rust"
       },
       {
         "name": "onehumanbeing/esp32-iphone-agent",
         "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
         "desc": "Let an AI model use a real iPhone with a $7 ESP32: AirPlay eyes, USB HID hands, any OpenAI-compatible vision model. No Mac, no developer account, no jailbreak.",
-        "stars": 2407,
+        "stars": 2845,
         "language": "C"
-      },
-      {
-        "name": "liseami/CCBaga",
-        "url": "https://github.com/liseami/CCBaga",
-        "desc": "",
-        "stars": 2338,
-        "language": "Rust"
       },
       {
         "name": "Arekejoker/qwen21-nsfw-pose-skill",
         "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
         "desc": "Qwen-Image 2.1 NSFW/姿势出图 skill：作者级提示词配方 + NSFW LoRA + 136 姿势 VNCCS 人偶控制；适用 Claude Code / Codex / Cursor / OpenClaw",
-        "stars": 1989,
+        "stars": 2503,
         "language": "Python"
       },
       {
-        "name": "storytold/figcraft",
-        "url": "https://github.com/storytold/figcraft",
-        "desc": "FigCraft: interface design and prototyping; an open-source, clean-room reimplementation of collaborative design workflows in pure Rust",
-        "stars": 1387,
+        "name": "liseami/CCBaga",
+        "url": "https://github.com/liseami/CCBaga",
+        "desc": "",
+        "stars": 2401,
         "language": "Rust"
-      },
-      {
-        "name": "shaongitbd/doory",
-        "url": "https://github.com/shaongitbd/doory",
-        "desc": "Open source canva alternative",
-        "stars": 1305,
-        "language": "TypeScript"
       },
       {
         "name": "HeyPuter/everything",
         "url": "https://github.com/HeyPuter/everything",
         "desc": "We're rebuilding and open-sourcing the world’s software from scratch.",
-        "stars": 1272,
+        "stars": 1701,
         "language": "JavaScript"
+      },
+      {
+        "name": "ahwootech/BRUTAL",
+        "url": "https://github.com/ahwootech/BRUTAL",
+        "desc": "A free, open source C# framework for making games, or your own game engine. Direct access to native APIs and Vulkan, with the low-level libraries around them. T",
+        "stars": 1528,
+        "language": "C#"
+      },
+      {
+        "name": "chenglou/handwired",
+        "url": "https://github.com/chenglou/handwired",
+        "desc": "Turn your regular JavaScript code into a neural net.",
+        "stars": 1525,
+        "language": "TypeScript"
+      },
+      {
+        "name": "shaongitbd/doory",
+        "url": "https://github.com/shaongitbd/doory",
+        "desc": "Open source canva alternative",
+        "stars": 1421,
+        "language": "TypeScript"
+      },
+      {
+        "name": "deeplethe/solid-glass",
+        "url": "https://github.com/deeplethe/solid-glass",
+        "desc": "A design system for AI applications. Material, physical, tactile, technical.",
+        "stars": 1352,
+        "language": "TypeScript"
       },
       {
         "name": "opengeos/RustGIS",
         "url": "https://github.com/opengeos/RustGIS",
         "desc": "A fast, free and open-source GIS in pure Rust.",
-        "stars": 1208,
+        "stars": 1344,
         "language": "Rust"
-      },
-      {
-        "name": "rociiu/talorys",
-        "url": "https://github.com/rociiu/talorys",
-        "desc": "Your personal AI agent in your own Cloudflare account. Chat, memory, tasks, notes and scheduled reminders, deployed with one command: npx create-talorys@latest.",
-        "stars": 1129,
-        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50107379,
-        "title": "Muse Spark Open",
-        "url": "https://research.meta.ai/blog/muse-spark-open",
-        "hn": "https://news.ycombinator.com/item?id=50107379",
-        "score": 526,
-        "comments": 298
+        "id": 50112657,
+        "title": "Tesla Roadster",
+        "url": "https://www.tesla.com/roadster",
+        "hn": "https://news.ycombinator.com/item?id=50112657",
+        "score": 974,
+        "comments": 1762
       },
       {
-        "id": 50109715,
-        "title": "What I Self-Host",
-        "url": "https://viceconsole.fyi/blog/2026/10/10/what-i-self-host/",
-        "hn": "https://news.ycombinator.com/item?id=50109715",
-        "score": 111,
-        "comments": 53
+        "id": 50122800,
+        "title": "Claude reveals ECDSA curve origins",
+        "url": "https://www.anthropic.com/research/ecdsa-curve-origins",
+        "hn": "https://news.ycombinator.com/item?id=50122800",
+        "score": 483,
+        "comments": 200
       },
       {
-        "id": 50105647,
-        "title": "Neural networks are clean",
-        "url": "https://already-clean.goodfire.com/",
-        "hn": "https://news.ycombinator.com/item?id=50105647",
-        "score": 427,
-        "comments": 150
+        "id": 50122431,
+        "title": "Llama.cpp on a jailbroken PS5: run any GGUF model natively on the console",
+        "url": "https://github.com/cobanov/PS5LM",
+        "hn": "https://news.ycombinator.com/item?id=50122431",
+        "score": 127,
+        "comments": 36
       },
       {
-        "id": 50111112,
-        "title": "Call Center Jobs Are Declining, but 14,000 Calls Show Humans Still Outperform AI",
-        "url": "https://boldagents.co/blog/call-center-jobs-declining-14000-calls-humans-outperform-ai",
-        "hn": "https://news.ycombinator.com/item?id=50111112",
-        "score": 26,
-        "comments": 21
+        "id": 50123580,
+        "title": "FLUX 3 Image Klein",
+        "url": "https://bfl.ai/blog/flux-3-image-klein",
+        "hn": "https://news.ycombinator.com/item?id=50123580",
+        "score": 59,
+        "comments": 10
       },
       {
-        "id": 50108872,
-        "title": "Someone on Torrent Sites Kept Fucking with My Sonarr",
-        "url": "https://thereallo.dev/blog/someone-on-torrent-sites-kept-fucking-with-my-sonarr-setup",
-        "hn": "https://news.ycombinator.com/item?id=50108872",
-        "score": 123,
-        "comments": 57
+        "id": 50122034,
+        "title": "eBay Restricts Listings of Radio Equipment, but Exempts Ham-Band-Only Gear",
+        "url": "https://www.arrl.org/arrlletterissue?issue=2026-10-15#eBay-Restricts-Listings-of-Radio-Equipment_-But-Exempts-Ham-Band-Only-Gear",
+        "hn": "https://news.ycombinator.com/item?id=50122034",
+        "score": 121,
+        "comments": 96
       },
       {
-        "id": 50103338,
-        "title": "Wayland desktop for Linux with skeuomorphic design",
-        "url": "https://github.com/fyzugx/DEsk",
-        "hn": "https://news.ycombinator.com/item?id=50103338",
-        "score": 453,
-        "comments": 179
+        "id": 50118981,
+        "title": "Waymo in Toronto",
+        "url": "https://waymo.com/blog/2026/10/waymo-in-toronto/",
+        "hn": "https://news.ycombinator.com/item?id=50118981",
+        "score": 213,
+        "comments": 319
       },
       {
-        "id": 50105648,
-        "title": "Krea 3 – An image model built for editing at scale",
-        "url": "https://www.krea.ai/krea-3",
-        "hn": "https://news.ycombinator.com/item?id=50105648",
-        "score": 219,
-        "comments": 73
+        "id": 50121939,
+        "title": "Designing more efficient quantum circuits with Claude",
+        "url": "https://www.anthropic.com/research/designing-efficient-quantum-circuits",
+        "hn": "https://news.ycombinator.com/item?id=50121939",
+        "score": 71,
+        "comments": 12
       },
       {
-        "id": 50106023,
-        "title": "Jev meets the Trolley Problem",
-        "url": "https://zachlandes.com/trolley-problem/",
-        "hn": "https://news.ycombinator.com/item?id=50106023",
-        "score": 225,
-        "comments": 103
+        "id": 50122736,
+        "title": "C++26: The New Debugging Header",
+        "url": "https://www.sandordargo.com/blog/2026/09/30/cpp26-debugging",
+        "hn": "https://news.ycombinator.com/item?id=50122736",
+        "score": 39,
+        "comments": 1
       },
       {
-        "id": 50101813,
-        "title": "AdFection: Targeted ads turned into a pipeline for zero-click mercenary spyware",
-        "url": "https://citizenlab.ca/research/how-discover-tech-turned-targeted-ads-into-a-pipeline-for-spyware/",
-        "hn": "https://news.ycombinator.com/item?id=50101813",
-        "score": 335,
-        "comments": 498
+        "id": 50083673,
+        "title": "Wireless magnetic millirobots that deliver medicine inside the beating heart",
+        "url": "https://hub.jhu.edu/2026/10/12/magnetic-millirobots-cardiac-treatment/",
+        "hn": "https://news.ycombinator.com/item?id=50083673",
+        "score": 28,
+        "comments": 1
       },
       {
-        "id": 50108229,
-        "title": "E Ink Kaleido 4",
-        "url": "https://www.eink.com/news/detail/EInk-Launches-Latest-Version-of-Color-ePaper-Platform-E-Ink-Kaleido-4",
-        "hn": "https://news.ycombinator.com/item?id=50108229",
-        "score": 97,
-        "comments": 59
+        "id": 50122951,
+        "title": "How the Claude Code team does code review",
+        "url": "https://claude.dev/blog/solving-code-review-at-anthropic/",
+        "hn": "https://news.ycombinator.com/item?id=50122951",
+        "score": 142,
+        "comments": 138
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "google/embeddinggemma-2",
         "url": "https://huggingface.co/google/embeddinggemma-2",
         "task": "feature-extraction",
-        "downloads": 144280,
-        "likes": 2393
+        "downloads": 151258,
+        "likes": 2506
       },
       {
         "id": "jialinyyzz/humanizer",
         "url": "https://huggingface.co/jialinyyzz/humanizer",
         "task": "text-generation",
-        "downloads": 75253,
-        "likes": 1728
-      },
-      {
-        "id": "Qwen/Qwen-Image-2.1-Turbo",
-        "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
-        "task": "text-to-image",
-        "downloads": 15315,
-        "likes": 873
+        "downloads": 85612,
+        "likes": 1820
       },
       {
         "id": "openbmb/MiniCPM-V-4.7-35B-A3B",
         "url": "https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B",
         "task": "image-text-to-text",
-        "downloads": 9278,
-        "likes": 790
-      },
-      {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "task": "text-to-image",
-        "downloads": 2415278,
-        "likes": 4378
+        "downloads": 17553,
+        "likes": 843
       },
       {
         "id": "fishaudio/drama-3",
         "url": "https://huggingface.co/fishaudio/drama-3",
         "task": "text-to-speech",
-        "downloads": 4048,
-        "likes": 467
+        "downloads": 6158,
+        "likes": 551
+      },
+      {
+        "id": "Qwen/Qwen-Image-2.1-Turbo",
+        "url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
+        "task": "text-to-image",
+        "downloads": 17421,
+        "likes": 940
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "task": "text-to-image",
+        "downloads": 2477554,
+        "likes": 4435
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 1866657,
-        "likes": 7941
-      },
-      {
-        "id": "AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
-        "url": "https://huggingface.co/AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
-        "task": "text-to-image",
-        "downloads": 296253,
-        "likes": 487
+        "downloads": 1920611,
+        "likes": 8077
       },
       {
         "id": "LiquidAI/LFM2.5-24B-A2B",
         "url": "https://huggingface.co/LiquidAI/LFM2.5-24B-A2B",
         "task": "text-generation",
-        "downloads": 6286,
-        "likes": 386
+        "downloads": 9356,
+        "likes": 426
       },
       {
-        "id": "ConwayResearch/Underdog-Saluki-27B-1.0",
-        "url": "https://huggingface.co/ConwayResearch/Underdog-Saluki-27B-1.0",
-        "task": "text-generation",
-        "downloads": 344177,
-        "likes": 496
+        "id": "AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
+        "url": "https://huggingface.co/AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
+        "task": "text-to-image",
+        "downloads": 327786,
+        "likes": 513
+      },
+      {
+        "id": "meta-models/Muse-Spark-Open-816B-A42B",
+        "url": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B",
+        "task": "image-text-to-text",
+        "downloads": 815,
+        "likes": 435
       }
     ],
     "weibo": [
       {
-        "word": "深圳全市全天禁鸣喇叭5年",
-        "num": 457305,
+        "word": "母亲将大一儿子生活费从4000降至2000",
+        "num": 323771,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B7%B1%E5%9C%B3%E5%85%A8%E5%B8%82%E5%85%A8%E5%A4%A9%E7%A6%81%E9%B8%A3%E5%96%87%E5%8F%AD5%E5%B9%B4%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%AF%8D%E4%BA%B2%E5%B0%86%E5%A4%A7%E4%B8%80%E5%84%BF%E5%AD%90%E7%94%9F%E6%B4%BB%E8%B4%B9%E4%BB%8E4000%E9%99%8D%E8%87%B32000%23"
       },
       {
-        "word": "大龄读研见老师两面就退学",
-        "num": 322469,
+        "word": "特斯拉SpaceX大跌",
+        "num": 235669,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E9%BE%84%E8%AF%BB%E7%A0%94%E8%A7%81%E8%80%81%E5%B8%88%E4%B8%A4%E9%9D%A2%E5%B0%B1%E9%80%80%E5%AD%A6%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%96%AF%E6%8B%89SpaceX%E5%A4%A7%E8%B7%8C%23"
       },
       {
-        "word": "起初他们参加红军只为找条活路",
-        "num": 264574,
+        "word": "大江南北丰收正当时",
+        "num": 187469,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%B5%B7%E5%88%9D%E4%BB%96%E4%BB%AC%E5%8F%82%E5%8A%A0%E7%BA%A2%E5%86%9B%E5%8F%AA%E4%B8%BA%E6%89%BE%E6%9D%A1%E6%B4%BB%E8%B7%AF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E6%B1%9F%E5%8D%97%E5%8C%97%E4%B8%B0%E6%94%B6%E6%AD%A3%E5%BD%93%E6%97%B6%23"
       },
       {
-        "word": "AI射雕英雄传看起来比人演的好",
-        "num": 159652,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23AI%E5%B0%84%E9%9B%95%E8%8B%B1%E9%9B%84%E4%BC%A0%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%AF%94%E4%BA%BA%E6%BC%94%E7%9A%84%E5%A5%BD%23"
-      },
-      {
-        "word": "曝李昀锐去hi6接孟子义下班",
-        "num": 159533,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E6%9D%8E%E6%98%80%E9%94%90%E5%8E%BBhi6%E6%8E%A5%E5%AD%9F%E5%AD%90%E4%B9%89%E4%B8%8B%E7%8F%AD%23"
-      },
-      {
-        "word": "黄子韬谈妻子生理期细节被质疑",
-        "num": 139643,
+        "word": "田曦薇和周也上的一个表演课吗",
+        "num": 147366,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E5%AD%90%E9%9F%AC%E8%B0%88%E5%A6%BB%E5%AD%90%E7%94%9F%E7%90%86%E6%9C%9F%E7%BB%86%E8%8A%82%E8%A2%AB%E8%B4%A8%E7%96%91%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B0%E6%9B%A6%E8%96%87%E5%92%8C%E5%91%A8%E4%B9%9F%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E8%A1%A8%E6%BC%94%E8%AF%BE%E5%90%97%23"
       },
       {
-        "word": "美股",
-        "num": 114366,
+        "word": "网友真立大功查出男友婚史",
+        "num": 102877,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BD%91%E5%8F%8B%E7%9C%9F%E7%AB%8B%E5%A4%A7%E5%8A%9F%E6%9F%A5%E5%87%BA%E7%94%B7%E5%8F%8B%E5%A9%9A%E5%8F%B2%23"
       },
       {
-        "word": "杨和苏公开女友",
-        "num": 109988,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%A8%E5%92%8C%E8%8B%8F%E5%85%AC%E5%BC%80%E5%A5%B3%E5%8F%8B%23"
+        "word": "徐艺洋 孩子是我自己生的",
+        "num": 97731,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BE%90%E8%89%BA%E6%B4%8B%20%E5%AD%A9%E5%AD%90%E6%98%AF%E6%88%91%E8%87%AA%E5%B7%B1%E7%94%9F%E7%9A%84%23"
       },
       {
-        "word": "为何年轻人不爱去菜市场",
-        "num": 92975,
+        "word": "TVB红果",
+        "num": 68802,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%BA%E4%BD%95%E5%B9%B4%E8%BD%BB%E4%BA%BA%E4%B8%8D%E7%88%B1%E5%8E%BB%E8%8F%9C%E5%B8%82%E5%9C%BA%23"
+        "url": "https://s.weibo.com/weibo?q=%23TVB%E7%BA%A2%E6%9E%9C%23"
       },
       {
-        "word": "影视飓风Tim父亲任董事长",
-        "num": 86598,
+        "word": "女子回应监控取证丈夫出轨不被采用",
+        "num": 67411,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BD%B1%E8%A7%86%E9%A3%93%E9%A3%8ETim%E7%88%B6%E4%BA%B2%E4%BB%BB%E8%91%A3%E4%BA%8B%E9%95%BF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E5%9B%9E%E5%BA%94%E7%9B%91%E6%8E%A7%E5%8F%96%E8%AF%81%E4%B8%88%E5%A4%AB%E5%87%BA%E8%BD%A8%E4%B8%8D%E8%A2%AB%E9%87%87%E7%94%A8%23"
+      },
+      {
+        "word": "抖音起诉京东员工",
+        "num": 65601,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%8A%96%E9%9F%B3%E8%B5%B7%E8%AF%89%E4%BA%AC%E4%B8%9C%E5%91%98%E5%B7%A5%23"
+      },
+      {
+        "word": "老人打扑克悔牌被踹后七天离世",
+        "num": 65105,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%80%81%E4%BA%BA%E6%89%93%E6%89%91%E5%85%8B%E6%82%94%E7%89%8C%E8%A2%AB%E8%B8%B9%E5%90%8E%E4%B8%83%E5%A4%A9%E7%A6%BB%E4%B8%96%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2021,
-        "text": "搭载中国神舟十三号载人飞船的长征二号F运载火箭在酒泉卫星发射中心发射升空，并与天宫空间站对接。",
-        "title": "长征二号F运载火箭",
-        "url": "https://zh.wikipedia.org/wiki/%E9%95%BF%E5%BE%81%E4%BA%8C%E5%8F%B7F%E8%BF%90%E8%BD%BD%E7%81%AB%E7%AE%AD"
+        "year": 2024,
+        "text": "以色列军方确认哈马斯最高领导人叶海亚·辛瓦尔在加沙走廊的南部城市拉法被击杀。",
+        "title": "哈马斯",
+        "url": "https://zh.wikipedia.org/wiki/%E5%93%88%E9%A9%AC%E6%96%AF"
+      },
+      {
+        "year": 2023,
+        "text": "位于加沙地带的阿赫利阿拉伯医院发生爆炸，造成至少500人死亡。",
+        "title": "加沙地带",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8A%A0%E6%B2%99%E5%9C%B0%E5%B8%A6"
       },
       {
         "year": 2020,
-        "text": "法国发生萨缪尔·帕蒂谋杀案。",
-        "title": "薩繆爾·帕蒂謀殺案",
-        "url": "https://zh.wikipedia.org/wiki/%E8%96%A9%E7%B9%86%E7%88%BE%C2%B7%E5%B8%95%E8%92%82%E8%AC%80%E6%AE%BA%E6%A1%88"
+        "text": "美国罗彻斯特大学研究团队首次发现在室温下实现无电阻之电流流通的高温超导体。",
+        "title": "羅徹斯特大學",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BE%85%E5%BE%B9%E6%96%AF%E7%89%B9%E5%A4%A7%E5%AD%B8"
       },
       {
-        "year": 2017,
-        "text": "马耳他记者兼反贪腐活动人士达芙妮·卡鲁阿娜·加利西亚在比德尼亚（英语：Bidnija）遭遇汽车炸弹袭击身亡。",
-        "title": "達芙妮·卡魯阿娜·加里齊亞",
-        "url": "https://zh.wikipedia.org/wiki/%E9%81%94%E8%8A%99%E5%A6%AE%C2%B7%E5%8D%A1%E9%AD%AF%E9%98%BF%E5%A8%9C%C2%B7%E5%8A%A0%E9%87%8C%E9%BD%8A%E4%BA%9E"
+        "year": 2018,
+        "text": "香港天文台总部下午录得21.9度，是自1999年以来最凉的重阳节。",
+        "title": "香港天文台總部",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF%E5%A4%A9%E6%96%87%E5%8F%B0%E7%B8%BD%E9%83%A8"
       },
       {
-        "year": 2013,
-        "text": "中国首条跨省城市轨道交通，上海轨道交通11号线江苏省昆山花桥延伸段开通。",
-        "title": "上海轨道交通11号线",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%8A%E6%B5%B7%E8%BD%A8%E9%81%93%E4%BA%A4%E9%80%9A11%E5%8F%B7%E7%BA%BF"
+        "year": 2008,
+        "text": "在香港拥有62年历史的泰林无线电行在金融海啸影响下全线清盘结业。",
+        "title": "泰林無線電行",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B3%B0%E6%9E%97%E7%84%A1%E7%B7%9A%E9%9B%BB%E8%A1%8C"
       },
       {
-        "year": 2013,
-        "text": "老挝航空301号班机坠入湄公河，造成机上49人全部死亡，是老挝最致命的空难。",
-        "title": "寮國航空301號班機空難",
-        "url": "https://zh.wikipedia.org/wiki/%E5%AF%AE%E5%9C%8B%E8%88%AA%E7%A9%BA301%E8%99%9F%E7%8F%AD%E6%A9%9F%E7%A9%BA%E9%9B%A3"
-      },
-      {
-        "year": 2006,
-        "text": "以俄罗斯亚美尼亚裔核物理学家尤里·奥加涅相为首的俄美合作科学家团队在位于俄罗斯杜布纳的联合核研究所首次合成制造出第118号元素Og。",
-        "title": "原子核物理学",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8E%9F%E5%AD%90%E6%A0%B8%E7%89%A9%E7%90%86%E5%AD%A6"
+        "year": 2007,
+        "text": "香港的Youtube上线。",
+        "title": "YouTube",
+        "url": "https://zh.wikipedia.org/wiki/YouTube"
       }
     ]
   }
