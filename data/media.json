@@ -1829,6 +1829,16 @@
       "comment": "B站「逃不掉的美食纪」早餐纪录片：一集 30 分钟走一座城，从武汉热干面到三亚港门粉，把中国晨起之味拍得热气腾腾。",
       "cover": "assets/media/di-yi-can.jpg",
       "url": "https://www.themoviedb.org/tv/135161"
+    },
+    {
+      "title": "初恋这件小事",
+      "type": "电影",
+      "status": "想看",
+      "rating": 7.8,
+      "release": "2010-08-12",
+      "url": "https://www.themoviedb.org/movie/57627",
+      "cover": "assets/media/a-little-thing-called-love.jpg",
+      "comment": "小水为了阿亮学长拼命变成更好的人，暗恋这件小事拍得又傻又真。"
     }
   ]
 }
