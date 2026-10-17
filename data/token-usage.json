@@ -1,6 +1,6 @@
 {
  "updated": "2026-10-15",
- "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后有导入脚本按同结构追加。勿手改。",
+ "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加）。勿手改。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
   "CCSwitch_API用量_按天.csv",
