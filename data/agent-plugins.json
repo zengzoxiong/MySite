@@ -63,27 +63,35 @@
           },
           {
             "name": "grilling",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "grill-me",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "to-spec",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "to-tickets",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "implement-spec",
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "codebase-design",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "domain-modeling",
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "find-skills",
-            "upstream": "obra/superpowers"
+            "upstream": "vercel-labs/skills"
           }
         ]
       },
@@ -112,7 +120,7 @@
           },
           {
             "name": "ppt-master",
-            "upstream": "macrochen/ppt-master-skill"
+            "upstream": "hugohe3/ppt-master"
           },
           {
             "name": "humanizer-zh",
@@ -129,10 +137,30 @@
         "items": [
           {
             "name": "ui-ux-pro-max",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nexu-io/open-design"
           },
           {
             "name": "ponytail",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "ponytail-audit",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "ponytail-debt",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "ponytail-gain",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "ponytail-help",
+            "upstream": "DietrichGebert/ponytail"
+          },
+          {
+            "name": "ponytail-review",
             "upstream": "DietrichGebert/ponytail"
           },
           {
@@ -157,11 +185,11 @@
         "items": [
           {
             "name": "academic-search",
-            "upstream": "local-only"
+            "upstream": "claude-office-skills/skills"
           },
           {
             "name": "research",
-            "upstream": "obra/superpowers"
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "code-graph",
@@ -180,11 +208,31 @@
             "upstream": "Egonex-AI/Understand-Anything"
           },
           {
+            "name": "understand-chat",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
             "name": "understand-dashboard",
             "upstream": "Egonex-AI/Understand-Anything"
           },
           {
+            "name": "understand-diff",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
             "name": "understand-domain",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-explain",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-knowledge",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-onboard",
             "upstream": "Egonex-AI/Understand-Anything"
           }
         ]
@@ -398,6 +446,22 @@
         "env": {
           "GOOGLE_API_KEY": "<你的 Google API Key>",
           "GOOGLE_SEARCH_ENGINE_ID": "<你的搜索引擎 ID>"
+        }
+      }
+    },
+    {
+      "name": "deepseek-search",
+      "type": "stdio",
+      "desc": "DeepSeek 官方 Search/Fetch 接口，实时网页搜索与网页正文抓取（需 DeepSeek API Key）。",
+      "homepage": "https://platform.deepseek.com/",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "deepseek-websearch-mcp"
+        ],
+        "env": {
+          "DEEPSEEK_API_KEY": "<你的 DeepSeek API Key>"
         }
       }
     }
