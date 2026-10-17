@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-11",
+ "updated": "2026-10-15",
  "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的四套来源合并：ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后有导入脚本按同结构追加。勿手改。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
@@ -1296,6 +1296,44 @@
      "inFresh": 5760977,
      "out": 441487,
      "total": 131575776
+    }
+   ]
+  },
+  {
+   "date": "2026-10-12",
+   "models": [
+    {
+     "id": "GLM-5.3-Flash",
+     "inCache": 371776,
+     "inFresh": 161769,
+     "out": 1409,
+     "total": 534954
+    },
+    {
+     "id": "deepseek-v4.1-flash",
+     "inCache": 2818432,
+     "inFresh": 324595,
+     "out": 13345,
+     "total": 3156372
+    }
+   ]
+  },
+  {
+   "date": "2026-10-15",
+   "models": [
+    {
+     "id": "deepseek-flash",
+     "inCache": 46036224,
+     "inFresh": 641324,
+     "out": 268937,
+     "total": 46946485
+    },
+    {
+     "id": "deepseek-v4-pro",
+     "inCache": 0,
+     "inFresh": 24260,
+     "out": 253,
+     "total": 24513
     }
    ]
   }
