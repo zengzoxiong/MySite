@@ -270,7 +270,7 @@
       "name": "codebase-memory",
       "type": "stdio",
       "desc": "代码库索引与知识图谱，架构/调用链分析（本地自部署）。",
-      "homepage": null,
+      "homepage": "https://github.com/DeusData/codebase-memory-mcp",
       "config": {
         "command": "<本地 codebase-memory-mcp 可执行文件路径>"
       }
@@ -279,7 +279,7 @@
       "name": "context7",
       "type": "stdio",
       "desc": "第三方编程库的最新官方文档实时查询。",
-      "homepage": "https://github.com/upstash/context7-mcp",
+      "homepage": "https://github.com/upstash/context7",
       "config": {
         "command": "cmd",
         "args": [
@@ -294,7 +294,7 @@
       "name": "deepseek-search",
       "type": "stdio",
       "desc": "DeepSeek 官方 Search/Fetch 接口，实时网页搜索与网页正文抓取（需 DeepSeek API Key）。",
-      "homepage": "https://platform.deepseek.com/",
+      "homepage": "https://github.com/zengzoxiong/deepseek-search-mcp",
       "config": {
         "command": "cmd",
         "args": [
@@ -310,7 +310,7 @@
       "name": "drawio",
       "type": "stdio",
       "desc": "生成与编辑 draw.io 图表文件。",
-      "homepage": "https://www.npmjs.com/package/@drawio/mcp",
+      "homepage": "https://github.com/jgraph/drawio-mcp",
       "config": {
         "command": "cmd",
         "args": [
@@ -342,7 +342,7 @@
       "name": "git",
       "type": "stdio",
       "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。",
-      "homepage": "https://www.npmjs.com/package/mcp-git",
+      "homepage": "https://github.com/kwanLeeFrmVi/mcp-git",
       "config": {
         "command": "cmd",
         "args": [
@@ -357,7 +357,7 @@
       "name": "Github",
       "type": "stdio",
       "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
-      "homepage": "https://github.com/modelcontextprotocol/server-github",
+      "homepage": "https://github.com/github/github-mcp-server",
       "config": {
         "command": "cmd",
         "args": [
@@ -454,7 +454,7 @@
       "name": "time",
       "type": "stdio",
       "desc": "时间查询、时区换算、Unix 时间戳。",
-      "homepage": "https://www.npmjs.com/package/@mcpcentral/mcp-time",
+      "homepage": "https://github.com/mcpcentral-io/mcp-time",
       "config": {
         "command": "cmd",
         "args": [
