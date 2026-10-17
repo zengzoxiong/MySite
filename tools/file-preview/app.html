@@ -725,12 +725,24 @@
 
         function sanitize(html) {
             var doc = new DOMParser().parseFromString(html, 'text/html');
-            var kill = doc.querySelectorAll('script,iframe,frame,object,embed,link,base,form,input,button');
+            var kill = doc.querySelectorAll('script,iframe,frame,object,embed,link,base,form,input,button,style');
             Array.prototype.forEach.call(kill, function (n) { n.remove(); });
+            Array.prototype.forEach.call(doc.querySelectorAll('*'), function (n) {
+                Array.prototype.slice.call(n.attributes).forEach(function (a) {
+                    /* sandbox 挡脚本不挡网络请求：style 的 url() 也是外带通道，on* 剥掉做纵深防御 */
+                    if (/^on/i.test(a.name) || a.name === 'style') n.removeAttribute(a.name);
+                });
+            });
             Array.prototype.forEach.call(doc.querySelectorAll('img'), function (n) {
                 if (!n.getAttribute('alt')) n.setAttribute('alt', '（远程图片已屏蔽）');
                 n.removeAttribute('src');
                 n.removeAttribute('srcset');
+            });
+            /* 光清 img 不够：video/audio 等媒体元素的 src 同样会发请求，一并对齐外带基线 */
+            Array.prototype.forEach.call(doc.querySelectorAll('video,audio,source,track'), function (n) {
+                n.removeAttribute('src');
+                n.removeAttribute('srcset');
+                n.removeAttribute('poster');
             });
             return doc.body.innerHTML;
         }
@@ -879,7 +891,8 @@
         function argb(c) {
             var v = c && c.argb;
             if (!v || typeof v !== 'string' || v.length < 8) return '';
-            return '#' + v.slice(2);
+            /* 颜色来自不可信文件，只保留 hex，防分号 breakout 拼出任意 CSS */
+            return '#' + v.slice(2).replace(/[^0-9a-fA-F]/g, '');
         }
 
         function decodeRef(ref) {
@@ -910,8 +923,11 @@
                     out.push('border-' + side + ':' + (BORDER_W[b.style] || '1px') + dash + ((b.color && argb(b.color)) || '#94a3b8'));
                 });
             }
-            if (al.horizontal) out.push('text-align:' + (al.horizontal === 'centerContinuous' ? 'center' : al.horizontal));
-            if (al.vertical) out.push('vertical-align:' + (al.vertical === 'bottom' ? 'bottom' : 'middle'));
+            /* 对齐值来自不可信文件，白名单校验，防分号 breakout 拼出任意 CSS */
+            var HV = ['left', 'center', 'right', 'justify', 'distributed', 'centerContinuous'];
+            var VV = ['top', 'middle', 'bottom', 'distributed', 'justify'];
+            if (HV.indexOf(al.horizontal) >= 0) out.push('text-align:' + (al.horizontal === 'centerContinuous' ? 'center' : al.horizontal));
+            if (VV.indexOf(al.vertical) >= 0) out.push('vertical-align:' + (al.vertical === 'bottom' ? 'bottom' : 'middle'));
             out.push('white-space:' + (al.wrapText ? 'normal' : 'pre-wrap'));
             return out.join(';');
         }
@@ -1230,7 +1246,6 @@
             files = [];
             cur = null;
             token++;
-            revokeDeck();
             renderList();
             reset();
         });

@@ -1572,7 +1572,7 @@ function statsPaintChart() {
         cross.setAttribute('x2', px);
         cross.style.display = '';
         tip.hidden = false;
-        tip.innerHTML = `<b>${days[i].date}</b><span>${tuFmt(days[i].v)} 位访客</span>`;
+        tip.innerHTML = `<b>${escapeHtml(days[i].date)}</b><span>${tuFmt(days[i].v)} 位访客</span>`;
         const rel = clientX - rect.left;
         tip.style.left = Math.min(Math.max(rel, 70), rect.width - 70) + 'px';
     };
@@ -1792,7 +1792,7 @@ function tuDonutHtml(lines) {
     const rows = lines.map((l, i) => `
         <div class="tu-dl-row">
             <i class="lg ${l.cls}"></i>
-            <div class="tu-dl-name"><b>${escapeHtml(l.id)}</b><span>${tuShort(totals[i])} tokens</span></div>
+            <div class="tu-dl-name"><b title="${escapeHtml(l.id)}">${escapeHtml(l.id)}</b><span>${tuShort(totals[i])} tokens</span></div>
             <span class="tu-dl-pct">${(totals[i] / sum * 100).toFixed(1)}%</span>
         </div>`).join('');
     return `
@@ -4028,7 +4028,7 @@ function applyFontFromStorage() {
 // 搜索回车聚焦首条结果
 function focusFirstResult() {
     if (lsGet('focusFirst') === 'off') return;
-    const first = linksGrid.querySelector('.link-card') || mediaGrid.querySelector('.media-card');
+    const first = linksGrid.querySelector('.link-card, .media-card') || mediaGrid.querySelector('.media-card');
     if (first) first.focus();
 }
 
@@ -4316,6 +4316,25 @@ function closeMobileMenu() {
     sidebarOverlay.classList.remove('visible');
 }
 
+// 清空搜索恢复来源视图时重建侧栏高亮：进入搜索时全部分类高亮被清掉，
+// 恢复后按来源视图与当前选中状态把对应项点亮（含首页）
+function restoreSidebarActive() {
+    if (searchFrom === 'home') { homeNav.classList.add('active'); return; }
+    const pickers = {
+        links: () => sidebarCategories.querySelector(`[data-category="${CSS.escape(currentCategory)}"]`),
+        tools: () => sidebarTools.querySelector(`[data-tool-category="${CSS.escape(currentToolCategory)}"]`),
+        media: () => sidebarMedia.querySelector(`[data-media-type="${CSS.escape(currentMediaType)}"]`),
+        ghstars: () => sidebarData.querySelector('[data-ghstars]'),
+        daily: () => sidebarData.querySelector('[data-daily]'),
+        stats: () => sidebarData.querySelector('[data-stats]'),
+        tokens: () => sidebarData.querySelector('[data-token]'),
+        fx: () => sidebarData.querySelector('[data-fx]'),
+        plugin: () => sidebarData.querySelector(`[data-plugin-cat="${CSS.escape(currentPluginCat)}"]`)
+    };
+    const item = pickers[searchFrom] && pickers[searchFrom]();
+    if (item) item.classList.add('active');
+}
+
 // 事件监听
 function initEventListeners() {
     // 工具分类点击（事件委托绑容器一次，renderSidebarTools 重渲染不重复绑）
@@ -4338,7 +4357,7 @@ function initEventListeners() {
 
     // 搜索：全域搜索（收藏 + 工具 + 影视），清空后恢复原视图
     searchInput.addEventListener('input', () => {
-        const term = searchInput.value.toLowerCase().trim();
+        const term = searchInput.value.trim(); // 原样透传：标题条显示用户输入原文，匹配环节各自再小写
         if (term) {
             if (currentView !== 'search') {
                 searchFrom = currentView;
@@ -4356,6 +4375,7 @@ function initEventListeners() {
         }
         if (currentView === 'search') {
             currentView = searchFrom;
+            restoreSidebarActive();
             renderCurrentView();
         }
     });
