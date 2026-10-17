@@ -160,21 +160,6 @@
             "upstream": "DietrichGebert/ponytail"
           },
           {
-            "name": "static-site-launch-checklist",
-            "upstream": "zengzoxiong/skills",
-            "local": true
-          },
-          {
-            "name": "svg-architecture-diagram",
-            "upstream": "zengzoxiong/skills",
-            "local": true
-          },
-          {
-            "name": "tmdb-media-catalog",
-            "upstream": "zengzoxiong/skills",
-            "local": true
-          },
-          {
             "name": "ui-ux-pro-max",
             "upstream": "nexu-io/open-design"
           }

@@ -37,6 +37,8 @@ MySite/
 │   ├── token-usage.json  # §8.6 Token 用量（模型×天聚合，API 日志离线导入，勿手改）
 │   ├── gh-activity.json  # 数据看板贡献热力图（工作流每日同步，勿手改）
 │   └── daily-report.json # 数据看板「每日日报」Trending+HN（工作流每日同步，勿手改）
+├── docs/
+│   └── skills/           # 项目专属技能文档（自研 SKILL.md 存档，不上网页注册表）
 ├── assets/
 │   ├── media/            # 影视海报（本地存储，文件名语义化）
 │   ├── vendor/           # 工具页本地依赖副本（jsqr、qrcodejs、fontawesome 6.5.1、jszip、docx-preview、exceljs、marked、jspdf、html2canvas）
