@@ -6,27 +6,47 @@
         "group": "工作流与规划",
         "items": [
           {
-            "name": "using-superpowers",
-            "upstream": "obra/superpowers"
-          },
-          {
             "name": "brainstorming",
             "upstream": "obra/superpowers"
           },
           {
-            "name": "writing-plans",
+            "name": "codebase-design",
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "dispatching-parallel-agents",
             "upstream": "obra/superpowers"
+          },
+          {
+            "name": "domain-modeling",
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "executing-plans",
             "upstream": "obra/superpowers"
           },
           {
-            "name": "subagent-driven-development",
+            "name": "find-skills",
+            "upstream": "vercel-labs/skills"
+          },
+          {
+            "name": "finishing-a-development-branch",
             "upstream": "obra/superpowers"
           },
           {
-            "name": "dispatching-parallel-agents",
+            "name": "grill-me",
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "grilling",
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "implement-spec",
+            "upstream": "mattpocock/skills"
+          },
+          {
+            "name": "receiving-code-review",
             "upstream": "obra/superpowers"
           },
           {
@@ -34,15 +54,7 @@
             "upstream": "obra/superpowers"
           },
           {
-            "name": "receiving-code-review",
-            "upstream": "obra/superpowers"
-          },
-          {
-            "name": "verification-before-completion",
-            "upstream": "obra/superpowers"
-          },
-          {
-            "name": "test-driven-development",
+            "name": "subagent-driven-development",
             "upstream": "obra/superpowers"
           },
           {
@@ -50,24 +62,8 @@
             "upstream": "obra/superpowers"
           },
           {
-            "name": "using-git-worktrees",
+            "name": "test-driven-development",
             "upstream": "obra/superpowers"
-          },
-          {
-            "name": "finishing-a-development-branch",
-            "upstream": "obra/superpowers"
-          },
-          {
-            "name": "writing-skills",
-            "upstream": "obra/superpowers"
-          },
-          {
-            "name": "grilling",
-            "upstream": "mattpocock/skills"
-          },
-          {
-            "name": "grill-me",
-            "upstream": "mattpocock/skills"
           },
           {
             "name": "to-spec",
@@ -78,20 +74,24 @@
             "upstream": "mattpocock/skills"
           },
           {
-            "name": "implement-spec",
-            "upstream": "mattpocock/skills"
+            "name": "using-git-worktrees",
+            "upstream": "obra/superpowers"
           },
           {
-            "name": "codebase-design",
-            "upstream": "mattpocock/skills"
+            "name": "using-superpowers",
+            "upstream": "obra/superpowers"
           },
           {
-            "name": "domain-modeling",
-            "upstream": "mattpocock/skills"
+            "name": "verification-before-completion",
+            "upstream": "obra/superpowers"
           },
           {
-            "name": "find-skills",
-            "upstream": "vercel-labs/skills"
+            "name": "writing-plans",
+            "upstream": "obra/superpowers"
+          },
+          {
+            "name": "writing-skills",
+            "upstream": "obra/superpowers"
           }
         ]
       },
@@ -103,15 +103,23 @@
             "upstream": "anthropics/skills"
           },
           {
+            "name": "humanizer-zh",
+            "upstream": "op7418/Humanizer-zh"
+          },
+          {
             "name": "pdf",
             "upstream": "anthropics/skills"
           },
           {
-            "name": "pptx",
-            "upstream": "anthropics/skills"
+            "name": "planning-with-files-zh",
+            "upstream": "OthmanAdi/planning-with-files"
           },
           {
-            "name": "xlsx",
+            "name": "ppt-master",
+            "upstream": "hugohe3/ppt-master"
+          },
+          {
+            "name": "pptx",
             "upstream": "anthropics/skills"
           },
           {
@@ -119,26 +127,14 @@
             "upstream": "anthropics/skills"
           },
           {
-            "name": "ppt-master",
-            "upstream": "hugohe3/ppt-master"
-          },
-          {
-            "name": "humanizer-zh",
-            "upstream": "op7418/Humanizer-zh"
-          },
-          {
-            "name": "planning-with-files-zh",
-            "upstream": "OthmanAdi/planning-with-files"
+            "name": "xlsx",
+            "upstream": "anthropics/skills"
           }
         ]
       },
       {
         "group": "代码与设计",
         "items": [
-          {
-            "name": "ui-ux-pro-max",
-            "upstream": "nexu-io/open-design"
-          },
           {
             "name": "ponytail",
             "upstream": "DietrichGebert/ponytail"
@@ -164,6 +160,11 @@
             "upstream": "DietrichGebert/ponytail"
           },
           {
+            "name": "static-site-launch-checklist",
+            "upstream": "zengzoxiong/skills",
+            "local": true
+          },
+          {
             "name": "svg-architecture-diagram",
             "upstream": "zengzoxiong/skills",
             "local": true
@@ -174,9 +175,8 @@
             "local": true
           },
           {
-            "name": "static-site-launch-checklist",
-            "upstream": "zengzoxiong/skills",
-            "local": true
+            "name": "ui-ux-pro-max",
+            "upstream": "nexu-io/open-design"
           }
         ]
       },
@@ -188,8 +188,8 @@
             "upstream": "claude-office-skills/skills"
           },
           {
-            "name": "research",
-            "upstream": "mattpocock/skills"
+            "name": "api-documentation-generator",
+            "upstream": "local-only"
           },
           {
             "name": "code-graph",
@@ -200,8 +200,8 @@
             "upstream": "local-only"
           },
           {
-            "name": "api-documentation-generator",
-            "upstream": "local-only"
+            "name": "research",
+            "upstream": "mattpocock/skills"
           },
           {
             "name": "understand",
@@ -254,21 +254,71 @@
       }
     },
     {
-      "name": "Github",
+      "name": "chrome-devtools",
       "type": "stdio",
-      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
-      "homepage": "https://github.com/modelcontextprotocol/server-github",
+      "desc": "Chrome DevTools 协议控制浏览器与性能分析。",
+      "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "chrome-devtools-mcp"
+        ]
+      }
+    },
+    {
+      "name": "codebase-memory",
+      "type": "stdio",
+      "desc": "代码库索引与知识图谱，架构/调用链分析（本地自部署）。",
+      "homepage": null,
+      "config": {
+        "command": "<本地 codebase-memory-mcp 可执行文件路径>"
+      }
+    },
+    {
+      "name": "context7",
+      "type": "stdio",
+      "desc": "第三方编程库的最新官方文档实时查询。",
+      "homepage": "https://github.com/upstash/context7-mcp",
       "config": {
         "command": "cmd",
         "args": [
           "/c",
           "npx",
           "-y",
-          "@modelcontextprotocol/server-github"
+          "@upstash/context7-mcp"
+        ]
+      }
+    },
+    {
+      "name": "deepseek-search",
+      "type": "stdio",
+      "desc": "DeepSeek 官方 Search/Fetch 接口，实时网页搜索与网页正文抓取（需 DeepSeek API Key）。",
+      "homepage": "https://platform.deepseek.com/",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "deepseek-websearch-mcp"
         ],
         "env": {
-          "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的 GitHub PAT>"
+          "DEEPSEEK_API_KEY": "<你的 DeepSeek API Key>"
         }
+      }
+    },
+    {
+      "name": "drawio",
+      "type": "stdio",
+      "desc": "生成与编辑 draw.io 图表文件。",
+      "homepage": "https://www.npmjs.com/package/@drawio/mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@drawio/mcp"
+        ]
       }
     },
     {
@@ -304,27 +354,55 @@
       }
     },
     {
-      "name": "context7",
+      "name": "Github",
       "type": "stdio",
-      "desc": "第三方编程库的最新官方文档实时查询。",
-      "homepage": "https://github.com/upstash/context7-mcp",
+      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
+      "homepage": "https://github.com/modelcontextprotocol/server-github",
       "config": {
         "command": "cmd",
         "args": [
           "/c",
           "npx",
           "-y",
-          "@upstash/context7-mcp"
-        ]
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的 GitHub PAT>"
+        }
       }
     },
     {
-      "name": "codebase-memory",
+      "name": "google-search",
       "type": "stdio",
-      "desc": "代码库索引与知识图谱，架构/调用链分析（本地自部署）。",
-      "homepage": null,
+      "desc": "Google 网页搜索（需 Google API Key 与搜索引擎 ID）。",
+      "homepage": "https://github.com/adenot/mcp-google-search",
       "config": {
-        "command": "<本地 codebase-memory-mcp 可执行文件路径>"
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@adenot/mcp-google-search"
+        ],
+        "env": {
+          "GOOGLE_API_KEY": "<你的 Google API Key>",
+          "GOOGLE_SEARCH_ENGINE_ID": "<你的搜索引擎 ID>"
+        }
+      }
+    },
+    {
+      "name": "Markitdown",
+      "type": "stdio",
+      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。",
+      "homepage": "https://github.com/microsoft/markitdown",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "markitdown-mcp-npx"
+        ]
       }
     },
     {
@@ -339,6 +417,21 @@
           "npx",
           "-y",
           "@modelcontextprotocol/server-memory"
+        ]
+      }
+    },
+    {
+      "name": "playwright",
+      "type": "stdio",
+      "desc": "Playwright 浏览器自动化与页面测试。",
+      "homepage": "https://github.com/microsoft/playwright-mcp",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@playwright/mcp"
         ]
       }
     },
@@ -370,99 +463,6 @@
           "-y",
           "@mcpcentral/mcp-time"
         ]
-      }
-    },
-    {
-      "name": "drawio",
-      "type": "stdio",
-      "desc": "生成与编辑 draw.io 图表文件。",
-      "homepage": "https://www.npmjs.com/package/@drawio/mcp",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@drawio/mcp"
-        ]
-      }
-    },
-    {
-      "name": "Markitdown",
-      "type": "stdio",
-      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。",
-      "homepage": "https://github.com/microsoft/markitdown",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "markitdown-mcp-npx"
-        ]
-      }
-    },
-    {
-      "name": "playwright",
-      "type": "stdio",
-      "desc": "Playwright 浏览器自动化与页面测试。",
-      "homepage": "https://github.com/microsoft/playwright-mcp",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@playwright/mcp"
-        ]
-      }
-    },
-    {
-      "name": "chrome-devtools",
-      "type": "stdio",
-      "desc": "Chrome DevTools 协议控制浏览器与性能分析。",
-      "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "chrome-devtools-mcp"
-        ]
-      }
-    },
-    {
-      "name": "google-search",
-      "type": "stdio",
-      "desc": "Google 网页搜索（需 Google API Key 与搜索引擎 ID）。",
-      "homepage": "https://github.com/adenot/mcp-google-search",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@adenot/mcp-google-search"
-        ],
-        "env": {
-          "GOOGLE_API_KEY": "<你的 Google API Key>",
-          "GOOGLE_SEARCH_ENGINE_ID": "<你的搜索引擎 ID>"
-        }
-      }
-    },
-    {
-      "name": "deepseek-search",
-      "type": "stdio",
-      "desc": "DeepSeek 官方 Search/Fetch 接口，实时网页搜索与网页正文抓取（需 DeepSeek API Key）。",
-      "homepage": "https://platform.deepseek.com/",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "deepseek-websearch-mcp"
-        ],
-        "env": {
-          "DEEPSEEK_API_KEY": "<你的 DeepSeek API Key>"
-        }
       }
     }
   ]
