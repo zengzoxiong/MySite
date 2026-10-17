@@ -1,11 +1,12 @@
 {
  "updated": "2026-10-15",
- "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的四套来源合并：ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后有导入脚本按同结构追加。勿手改。",
+ "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，条目带 Qoder· 前缀以区分同名的 ZCode/CCSwitch 模型）、ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后有导入脚本按同结构追加。勿手改。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
   "CCSwitch_API用量_按天.csv",
   "amount-*.csv（deepseek 系平台）",
-  "usage_data_*.xlsx（mimo 系平台）"
+  "usage_data_*.xlsx（mimo 系平台）",
+  "Qoder客户端旧库_按天导出.csv（Qwen3.8-Max / GLM-5.3-Flash，2026-09-14~09-25）"
  ],
  "days": [
   {
@@ -934,6 +935,13 @@
      "total": 141651768
     },
     {
+     "id": "Qoder·GLM-5.3-Flash",
+     "inCache": 14775232,
+     "inFresh": 2011569,
+     "out": 193599,
+     "total": 16980400
+    },
+    {
      "id": "mimo-v2.5-pro",
      "inCache": 0,
      "inFresh": 116220,
@@ -946,6 +954,13 @@
    "date": "2026-09-15",
    "models": [
     {
+     "id": "GLM-5.3",
+     "inCache": 2603904,
+     "inFresh": 442711,
+     "out": 14597,
+     "total": 3061212
+    },
+    {
      "id": "GLM-5.3-Flash",
      "inCache": 71628544,
      "inFresh": 1383213,
@@ -953,17 +968,24 @@
      "total": 73212560
     },
     {
-     "id": "GLM-5.3",
-     "inCache": 2603904,
-     "inFresh": 442711,
-     "out": 14597,
-     "total": 3061212
+     "id": "Qoder·GLM-5.3-Flash",
+     "inCache": 2246144,
+     "inFresh": 1839570,
+     "out": 73083,
+     "total": 4158797
     }
    ]
   },
   {
    "date": "2026-09-16",
    "models": [
+    {
+     "id": "GLM-5.3",
+     "inCache": 1501440,
+     "inFresh": 363489,
+     "out": 854,
+     "total": 1865783
+    },
     {
      "id": "GLM-5.3-Flash",
      "inCache": 83207104,
@@ -972,11 +994,11 @@
      "total": 85165020
     },
     {
-     "id": "GLM-5.3",
-     "inCache": 1501440,
-     "inFresh": 363489,
-     "out": 854,
-     "total": 1865783
+     "id": "Qoder·GLM-5.3-Flash",
+     "inCache": 3966784,
+     "inFresh": 1143520,
+     "out": 65035,
+     "total": 5175339
     }
    ]
   },
@@ -1003,11 +1025,25 @@
    "date": "2026-09-18",
    "models": [
     {
+     "id": "GLM-5.3",
+     "inCache": 284288,
+     "inFresh": 83096,
+     "out": 3080,
+     "total": 370464
+    },
+    {
      "id": "GLM-5.3-Flash",
      "inCache": 16528960,
      "inFresh": 892946,
      "out": 21402,
      "total": 17443308
+    },
+    {
+     "id": "Qoder·GLM-5.3-Flash",
+     "inCache": 1558976,
+     "inFresh": 72956,
+     "out": 7957,
+     "total": 1639889
     },
     {
      "id": "deepseek-flash",
@@ -1022,13 +1058,6 @@
      "inFresh": 109833,
      "out": 4068,
      "total": 900461
-    },
-    {
-     "id": "GLM-5.3",
-     "inCache": 284288,
-     "inFresh": 83096,
-     "out": 3080,
-     "total": 370464
     }
    ]
   },
@@ -1053,6 +1082,66 @@
      "inFresh": 890599,
      "out": 6378,
      "total": 10574417
+    }
+   ]
+  },
+  {
+   "date": "2026-09-21",
+   "models": [
+    {
+     "id": "Qoder·Qwen3.8-Max",
+     "inCache": 99920319,
+     "inFresh": 6191569,
+     "out": 928750,
+     "total": 107040638
+    }
+   ]
+  },
+  {
+   "date": "2026-09-22",
+   "models": [
+    {
+     "id": "Qoder·Qwen3.8-Max",
+     "inCache": 174468378,
+     "inFresh": 6787881,
+     "out": 1229246,
+     "total": 182485505
+    }
+   ]
+  },
+  {
+   "date": "2026-09-23",
+   "models": [
+    {
+     "id": "Qoder·Qwen3.8-Max",
+     "inCache": 57672666,
+     "inFresh": 4441007,
+     "out": 404691,
+     "total": 62518364
+    }
+   ]
+  },
+  {
+   "date": "2026-09-24",
+   "models": [
+    {
+     "id": "Qoder·Qwen3.8-Max",
+     "inCache": 82870369,
+     "inFresh": 1843718,
+     "out": 321451,
+     "total": 85035538
+    }
+   ]
+  },
+  {
+   "date": "2026-09-25",
+   "models": [
+    {
+     "id": "Qoder·Qwen3.8-Max",
+     "inCache": 146088896,
+     "inFresh": 4575358,
+     "out": 245266,
+     "total": 150909520
     }
    ]
   },
