@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（数据文件与页面导航网络优先，其余骨架 stale-while-revalidate） */
-const CACHE = 'mysite-v19'; // v19: 页面导航改为网络优先（3s 超时回退缓存），改版 push 后访客第一眼就是新页面
+const CACHE = 'mysite-v20'; // v20: styles.css 改版（背景底色与环境光斑随主题色联动），bump 让访客拿到新样式
 // 运行时缓存（PRECACHE 之外的同源资源）条目上限：工具页/海报会随浏览不断
 // 进缓存，不修剪的话老访客的存储无限增长；超出按写入顺序淘汰最旧的
 const RUNTIME_MAX = 300;

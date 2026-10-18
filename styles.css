@@ -1,7 +1,8 @@
 /* ===== CSS 变量 - 亮色主题（液态玻璃） ===== */
 :root {
     color-scheme: light;
-    --bg-color: #eef2f9;
+    /* 底色混入 4% 主题色：换主题色时页面底色跟着带色调（默认与纯 #eef2f9 几乎无差） */
+    --bg-color: color-mix(in srgb, var(--accent-color) 4%, #eef2f9);
     --sidebar-bg: rgba(255, 255, 255, 0.55);
     --card-bg: rgba(255, 255, 255, 0.6);
     --glass-border: rgba(255, 255, 255, 0.65);
@@ -18,6 +19,12 @@
     --border-color: #eaeaea;
     --accent-color: #2563eb;
     --accent-2: #8b5cf6;
+    /* 环境光斑色：跟随主题色（主色/副色各两档强度），换主题色时背景光斑联动变色；
+       变量在 body::before 引用，暗色下自动取暗色默认主题色或 inline 覆写值 */
+    --glow-1: color-mix(in srgb, var(--accent-color) 22%, transparent);
+    --glow-2: color-mix(in srgb, var(--accent-2) 20%, transparent);
+    --glow-3: color-mix(in srgb, var(--accent-color) 14%, transparent);
+    --glow-4: color-mix(in srgb, var(--accent-2) 14%, transparent);
     --hover-bg: #f3f4f6;
     --active-bg: #f3f4f6;
     --search-bg: #f9fafb;
@@ -50,6 +57,8 @@
     --border-color: #222222;
     --accent-color: #60a5fa;
     --accent-2: #a78bfa;
+    /* 底色混入 6% 主题色：暗底黑得极深，比例稍高才看得出色调 */
+    --bg-color: color-mix(in srgb, var(--accent-color) 6%, #07090f);
     --hover-bg: #1a1a1a;
     --active-bg: #1a1a1a;
     --search-bg: #1a1a1a;
@@ -87,26 +96,23 @@ body {
     position: relative;
 }
 
-/* 环境光斑：液态玻璃背后的色彩源 */
+/* 环境光斑：液态玻璃背后的色彩源，颜色取主题色（换主题色即联动变色） */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: -1;
     background:
-        radial-gradient(42rem 42rem at 12% 8%, rgba(99, 102, 241, 0.22), transparent 65%),
-        radial-gradient(38rem 38rem at 88% 18%, rgba(14, 165, 233, 0.20), transparent 65%),
-        radial-gradient(40rem 40rem at 78% 88%, rgba(236, 72, 153, 0.14), transparent 65%),
-        radial-gradient(30rem 30rem at 22% 92%, rgba(16, 185, 129, 0.14), transparent 65%);
+        radial-gradient(42rem 42rem at 12% 8%, var(--glow-1), transparent 65%),
+        radial-gradient(38rem 38rem at 88% 18%, var(--glow-2), transparent 65%),
+        radial-gradient(40rem 40rem at 78% 88%, var(--glow-3), transparent 65%),
+        radial-gradient(30rem 30rem at 22% 92%, var(--glow-4), transparent 65%);
     pointer-events: none;
 }
 
+/* 暗色光斑整体降一档亮度（等效原四色各自降低透明度） */
 [data-theme="dark"] body::before {
-    background:
-        radial-gradient(42rem 42rem at 12% 8%, rgba(99, 102, 241, 0.16), transparent 65%),
-        radial-gradient(38rem 38rem at 88% 18%, rgba(14, 165, 233, 0.13), transparent 65%),
-        radial-gradient(40rem 40rem at 78% 88%, rgba(236, 72, 153, 0.10), transparent 65%),
-        radial-gradient(30rem 30rem at 22% 92%, rgba(16, 185, 129, 0.10), transparent 65%);
+    opacity: 0.72;
 }
 
 /* ===== 侧栏 ===== */
