@@ -1,6 +1,6 @@
 {
- "updated": "2026-10-15",
- "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode 平台按天汇总、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加）。勿手改。",
+ "updated": "2026-10-18",
+ "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode（早期为平台按天导出，2026-10-19 起改从 ZCode 本地会话库按天统计）、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加；2026-10-19 同步时模型名统一小写（GLM/Qwen），deepseek-v4.1-flash 与 DeepSeek-Flash 并入 deepseek-flash）。勿手改。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
   "CCSwitch_API用量_按天.csv",
@@ -816,7 +816,7 @@
    "date": "2026-08-27",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 22711616,
      "inFresh": 476287,
      "out": 113810,
@@ -835,7 +835,7 @@
    "date": "2026-08-30",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 11801664,
      "inFresh": 630356,
      "out": 40465,
@@ -916,7 +916,7 @@
    "date": "2026-09-13",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 11197440,
      "inFresh": 320777,
      "out": 126859,
@@ -928,7 +928,7 @@
    "date": "2026-09-14",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 152826368,
      "inFresh": 4979173,
      "out": 826627,
@@ -947,18 +947,18 @@
    "date": "2026-09-15",
    "models": [
     {
-     "id": "GLM-5.3",
-     "inCache": 2603904,
-     "inFresh": 442711,
-     "out": 14597,
-     "total": 3061212
-    },
-    {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 73874688,
      "inFresh": 3222783,
      "out": 273886,
      "total": 77371357
+    },
+    {
+     "id": "glm-5.3",
+     "inCache": 2603904,
+     "inFresh": 442711,
+     "out": 14597,
+     "total": 3061212
     }
    ]
   },
@@ -966,18 +966,18 @@
    "date": "2026-09-16",
    "models": [
     {
-     "id": "GLM-5.3",
-     "inCache": 1501440,
-     "inFresh": 363489,
-     "out": 854,
-     "total": 1865783
-    },
-    {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 87173888,
      "inFresh": 2948436,
      "out": 218035,
      "total": 90340359
+    },
+    {
+     "id": "glm-5.3",
+     "inCache": 1501440,
+     "inFresh": 363489,
+     "out": 854,
+     "total": 1865783
     }
    ]
   },
@@ -985,7 +985,7 @@
    "date": "2026-09-17",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 34345152,
      "inFresh": 2031245,
      "out": 67582,
@@ -1004,14 +1004,7 @@
    "date": "2026-09-18",
    "models": [
     {
-     "id": "GLM-5.3",
-     "inCache": 284288,
-     "inFresh": 83096,
-     "out": 3080,
-     "total": 370464
-    },
-    {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 18087936,
      "inFresh": 965902,
      "out": 29359,
@@ -1030,6 +1023,13 @@
      "inFresh": 109833,
      "out": 4068,
      "total": 900461
+    },
+    {
+     "id": "glm-5.3",
+     "inCache": 284288,
+     "inFresh": 83096,
+     "out": 3080,
+     "total": 370464
     }
    ]
   },
@@ -1037,7 +1037,7 @@
    "date": "2026-09-19",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 237126272,
      "inFresh": 3396802,
      "out": 212652,
@@ -1049,7 +1049,7 @@
    "date": "2026-09-20",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 9677440,
      "inFresh": 890599,
      "out": 6378,
@@ -1061,7 +1061,7 @@
    "date": "2026-09-21",
    "models": [
     {
-     "id": "Qwen3.8-Max",
+     "id": "qwen3.8-max",
      "inCache": 99920319,
      "inFresh": 6191569,
      "out": 928750,
@@ -1073,7 +1073,7 @@
    "date": "2026-09-22",
    "models": [
     {
-     "id": "Qwen3.8-Max",
+     "id": "qwen3.8-max",
      "inCache": 174468378,
      "inFresh": 6787881,
      "out": 1229246,
@@ -1085,7 +1085,7 @@
    "date": "2026-09-23",
    "models": [
     {
-     "id": "Qwen3.8-Max",
+     "id": "qwen3.8-max",
      "inCache": 57672666,
      "inFresh": 4441007,
      "out": 404691,
@@ -1097,7 +1097,7 @@
    "date": "2026-09-24",
    "models": [
     {
-     "id": "Qwen3.8-Max",
+     "id": "qwen3.8-max",
      "inCache": 82870369,
      "inFresh": 1843718,
      "out": 321451,
@@ -1109,7 +1109,7 @@
    "date": "2026-09-25",
    "models": [
     {
-     "id": "Qwen3.8-Max",
+     "id": "qwen3.8-max",
      "inCache": 146088896,
      "inFresh": 4575358,
      "out": 245266,
@@ -1121,7 +1121,7 @@
    "date": "2026-09-26",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 13271360,
      "inFresh": 1753017,
      "out": 8144,
@@ -1140,7 +1140,7 @@
    "date": "2026-09-27",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 230633408,
      "inFresh": 4610918,
      "out": 912293,
@@ -1185,7 +1185,7 @@
    "date": "2026-09-30",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 36047936,
      "inFresh": 1028638,
      "out": 168732,
@@ -1204,7 +1204,7 @@
    "date": "2026-10-01",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 47165824,
      "inFresh": 1567737,
      "out": 160930,
@@ -1216,7 +1216,7 @@
    "date": "2026-10-02",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 17005952,
      "inFresh": 979692,
      "out": 27849,
@@ -1228,7 +1228,7 @@
    "date": "2026-10-03",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 5132352,
      "inFresh": 930397,
      "out": 11140,
@@ -1247,7 +1247,7 @@
    "date": "2026-10-04",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 35251200,
      "inFresh": 2245964,
      "out": 44652,
@@ -1266,7 +1266,7 @@
    "date": "2026-10-05",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 3195648,
      "inFresh": 780211,
      "out": 14671,
@@ -1278,7 +1278,7 @@
    "date": "2026-10-06",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 93362112,
      "inFresh": 4149920,
      "out": 128884,
@@ -1290,14 +1290,14 @@
    "date": "2026-10-07",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 97422016,
      "inFresh": 2505422,
      "out": 351040,
      "total": 100278478
     },
     {
-     "id": "deepseek-v4.1-flash",
+     "id": "deepseek-flash",
      "inCache": 16004480,
      "inFresh": 391133,
      "out": 10371,
@@ -1328,7 +1328,7 @@
    "date": "2026-10-09",
    "models": [
     {
-     "id": "deepseek-v4.1-flash",
+     "id": "deepseek-flash",
      "inCache": 406016,
      "inFresh": 206825,
      "out": 5710,
@@ -1340,7 +1340,7 @@
    "date": "2026-10-10",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 19665408,
      "inFresh": 638646,
      "out": 29165,
@@ -1352,7 +1352,7 @@
    "date": "2026-10-11",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
+     "id": "glm-5.3-flash",
      "inCache": 125373312,
      "inFresh": 5760977,
      "out": 441487,
@@ -1364,18 +1364,18 @@
    "date": "2026-10-12",
    "models": [
     {
-     "id": "GLM-5.3-Flash",
-     "inCache": 371776,
-     "inFresh": 161769,
-     "out": 1409,
-     "total": 534954
-    },
-    {
-     "id": "deepseek-v4.1-flash",
+     "id": "deepseek-flash",
      "inCache": 2818432,
      "inFresh": 324595,
      "out": 13345,
      "total": 3156372
+    },
+    {
+     "id": "glm-5.3-flash",
+     "inCache": 371776,
+     "inFresh": 161769,
+     "out": 1409,
+     "total": 534954
     }
    ]
   },
@@ -1395,6 +1395,37 @@
      "inFresh": 24260,
      "out": 253,
      "total": 24513
+    }
+   ]
+  },
+  {
+   "date": "2026-10-17",
+   "models": [
+    {
+     "id": "glm-5.3-flash",
+     "inCache": 240080832,
+     "inFresh": 10221056,
+     "out": 1010474,
+     "total": 251312362
+    }
+   ]
+  },
+  {
+   "date": "2026-10-18",
+   "models": [
+    {
+     "id": "glm-5.3-flash",
+     "inCache": 135827840,
+     "inFresh": 3434724,
+     "out": 609510,
+     "total": 139872074
+    },
+    {
+     "id": "deepseek-flash",
+     "inCache": 28465792,
+     "inFresh": 906494,
+     "out": 343923,
+     "total": 29716209
     }
    ]
   }
