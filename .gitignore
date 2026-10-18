@@ -20,8 +20,10 @@ logs/
 *.tmp
 *.temp
 
-# ---- Claude 中间文件 ----
-.claude/.claude_temp/
+# ---- Agent 本地配置与中间目录 ----
+.claude/
+.Codex/
+.zcodeignore
 
 __pycache__/
 *.pyc

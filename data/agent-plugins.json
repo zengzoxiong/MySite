@@ -54,6 +54,10 @@
             "upstream": "obra/superpowers"
           },
           {
+            "name": "review-agent",
+            "upstream": "local-only"
+          },
+          {
             "name": "subagent-driven-development",
             "upstream": "obra/superpowers"
           },
@@ -107,6 +111,10 @@
             "upstream": "op7418/Humanizer-zh"
           },
           {
+            "name": "imagegen",
+            "upstream": "openai/skills"
+          },
+          {
             "name": "pdf",
             "upstream": "anthropics/skills"
           },
@@ -127,6 +135,10 @@
             "upstream": "anthropics/skills"
           },
           {
+            "name": "skill-installer",
+            "upstream": "openai/skills"
+          },
+          {
             "name": "xlsx",
             "upstream": "anthropics/skills"
           }
@@ -135,6 +147,22 @@
       {
         "group": "代码与设计",
         "items": [
+          {
+            "name": "banner-design",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
+            "name": "brand",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
+            "name": "design",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
+            "name": "design-system",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
           {
             "name": "ponytail",
             "upstream": "DietrichGebert/ponytail"
@@ -160,8 +188,16 @@
             "upstream": "DietrichGebert/ponytail"
           },
           {
+            "name": "slides",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
+            "name": "ui-styling",
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+          },
+          {
             "name": "ui-ux-pro-max",
-            "upstream": "nexu-io/open-design"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
           }
         ]
       },
@@ -174,15 +210,19 @@
           },
           {
             "name": "api-documentation-generator",
-            "upstream": "local-only"
+            "upstream": "sickn33/agentic-awesome-skills"
           },
           {
             "name": "code-graph",
-            "upstream": "local-only"
+            "upstream": "alinaqi/maggy"
           },
           {
             "name": "drawio",
-            "upstream": "local-only"
+            "upstream": "jgraph/drawio-mcp"
+          },
+          {
+            "name": "openai-docs",
+            "upstream": "openai/skills"
           },
           {
             "name": "research",
@@ -210,6 +250,10 @@
           },
           {
             "name": "understand-explain",
+            "upstream": "Egonex-AI/Understand-Anything"
+          },
+          {
+            "name": "understand-figma",
             "upstream": "Egonex-AI/Understand-Anything"
           },
           {
@@ -448,6 +492,22 @@
           "-y",
           "@mcpcentral/mcp-time"
         ]
+      }
+    },
+    {
+      "name": "windows-mcp",
+      "type": "stdio",
+      "desc": "Windows 桌面自动化：UIA 元素树感知 + 键鼠操作，20 工具含文件/注册表/进程，AI 操作时用户可随时接管（要求 Python 3.14+，uvx 自动托管运行时）。",
+      "homepage": "https://github.com/CursorTouch/Windows-MCP",
+      "config": {
+        "command": "uvx",
+        "args": [
+          "windows-mcp",
+          "serve"
+        ],
+        "env": {
+          "ANONYMIZED_TELEMETRY": "false"
+        }
       }
     }
   ]

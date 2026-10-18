@@ -191,6 +191,14 @@
       "winget": "Microsoft.PowerShell"
     },
     {
+      "title": "uv（uvx）",
+      "url": "https://docs.astral.sh/uv/getting-started/installation/",
+      "description": "Astral 用 Rust 编写的极速 Python 包与环境管理器，自带 uvx 命令可直接运行 PyPI 上的命令行工具，无需预先安装。",
+      "category": "常用软件下载",
+      "icon": "⚡",
+      "winget": "astral-sh.uv"
+    },
+    {
       "title": "Watt Toolkit",
       "url": "https://steampp.net/",
       "description": "Steam++ 瓦特工具箱，Steam 辅助工具，支持网络加速、账号切换、库存管理等。",
