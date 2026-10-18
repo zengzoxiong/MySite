@@ -351,23 +351,6 @@
       }
     },
     {
-      "name": "filesystem",
-      "type": "stdio",
-      "desc": "本地文件系统读写与目录管理。",
-      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@modelcontextprotocol/server-filesystem",
-          "<允许访问的目录1>",
-          "<允许访问的目录2>"
-        ]
-      }
-    },
-    {
       "name": "git",
       "type": "stdio",
       "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。",
