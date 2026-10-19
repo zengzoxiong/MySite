@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-16",
+  "checkedAt": "2026-10-18",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -66,6 +66,11 @@
       "ok": true,
       "checkedAt": "2026-10-13",
       "latest": "4.1.15.53"
+    },
+    "astral-sh.uv": {
+      "ok": true,
+      "checkedAt": "2026-10-18",
+      "latest": "0.13.1"
     }
   }
 }

@@ -1,331 +1,331 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-18",
+  "updated": "2026-10-19",
   "sections": {
     "trending": [
       {
         "name": "jhaizhou-ops/d2r-mobile",
         "url": "https://github.com/jhaizhou-ops/d2r-mobile",
         "desc": "Open-source iOS / macOS compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion. Runs your own Switch copy natively on iPhone, iP",
-        "stars": 3701,
-        "language": "C"
-      },
-      {
-        "name": "onehumanbeing/esp32-iphone-agent",
-        "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
-        "desc": "Let an AI model use a real iPhone with a $7 ESP32: AirPlay eyes, USB HID hands, any OpenAI-compatible vision model. No Mac, no developer account, no jailbreak.",
-        "stars": 2986,
+        "stars": 3825,
         "language": "C"
       },
       {
         "name": "Arekejoker/qwen21-nsfw-pose-skill",
         "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
         "desc": "Qwen-Image 2.1 NSFW/姿势出图 skill：作者级提示词配方 + NSFW LoRA + 136 姿势 VNCCS 人偶控制；适用 Claude Code / Codex / Cursor / OpenClaw",
-        "stars": 2629,
+        "stars": 2729,
         "language": "Python"
-      },
-      {
-        "name": "liseami/CCBaga",
-        "url": "https://github.com/liseami/CCBaga",
-        "desc": "",
-        "stars": 2566,
-        "language": "Rust"
       },
       {
         "name": "HeyPuter/everything",
         "url": "https://github.com/HeyPuter/everything",
         "desc": "We're rebuilding and open-sourcing the world’s software from scratch.",
-        "stars": 2022,
+        "stars": 2200,
         "language": "JavaScript"
-      },
-      {
-        "name": "ahwootech/BRUTAL",
-        "url": "https://github.com/ahwootech/BRUTAL",
-        "desc": "A free, open source C# framework for making games, or your own game engine. Direct access to native APIs and Vulkan, with the low-level libraries around them. T",
-        "stars": 1778,
-        "language": "C#"
       },
       {
         "name": "deeplethe/solid-glass",
         "url": "https://github.com/deeplethe/solid-glass",
         "desc": "A design system for AI applications. Material, physical, tactile, technical.",
-        "stars": 1687,
+        "stars": 2014,
         "language": "TypeScript"
       },
       {
-        "name": "chenglou/handwired",
-        "url": "https://github.com/chenglou/handwired",
-        "desc": "Turn your regular JavaScript code into a neural net.",
-        "stars": 1672,
-        "language": "TypeScript"
-      },
-      {
-        "name": "Supermedo/uncharted_pc",
-        "url": "https://github.com/Supermedo/uncharted_pc",
-        "desc": "Uncharted: The Nathan Drake Collection running natively on Windows - by SuperMedo",
-        "stars": 1235,
-        "language": "C++"
+        "name": "ahwootech/BRUTAL",
+        "url": "https://github.com/ahwootech/BRUTAL",
+        "desc": "A free, open source C# framework for making games, or your own game engine. Direct access to native APIs and Vulkan, with the low-level libraries around them. T",
+        "stars": 1891,
+        "language": "C#"
       },
       {
         "name": "feder-cr/git-ai",
         "url": "https://github.com/feder-cr/git-ai",
         "desc": "Git designed for AI agents.",
-        "stars": 1129,
+        "stars": 1802,
         "language": "Go"
+      },
+      {
+        "name": "chenglou/handwired",
+        "url": "https://github.com/chenglou/handwired",
+        "desc": "Turn your regular JavaScript code into a neural net.",
+        "stars": 1725,
+        "language": "TypeScript"
+      },
+      {
+        "name": "Gathin23/tv-vibehack",
+        "url": "https://github.com/Gathin23/tv-vibehack",
+        "desc": "Your TV, minus the ads. Debloat any Android TV over ADB and give it a clean, tvOS-inspired launcher. Built in an afternoon with Claude Code.",
+        "stars": 1710,
+        "language": "Java"
+      },
+      {
+        "name": "Supermedo/uncharted_pc",
+        "url": "https://github.com/Supermedo/uncharted_pc",
+        "desc": "Uncharted: The Nathan Drake Collection running natively on Windows - by SuperMedo",
+        "stars": 1435,
+        "language": "C++"
+      },
+      {
+        "name": "Caho1/open-claude-ui",
+        "url": "https://github.com/Caho1/open-claude-ui",
+        "desc": "基于 REA 深度拆解并高保真还原 Claude 官方桌面端 UI。还原 30 个独立 React 组件与 8 项硬核交互物理算法，附带 3000+ 行逆向分析手册。",
+        "stars": 1206,
+        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50126253,
-        "title": "Bleached corals thrive within days when touching healthy neighbour",
-        "url": "https://www.nature.com/articles/d41586-026-03266-x",
-        "hn": "https://news.ycombinator.com/item?id=50126253",
-        "score": 183,
-        "comments": 26
+        "id": 50145337,
+        "title": "Hybrid Reasoning Agents: LLM agents that think in latent space, act through text",
+        "url": "https://arxiv.org/abs/2610.18861",
+        "hn": "https://news.ycombinator.com/item?id=50145337",
+        "score": 34,
+        "comments": 7
       },
       {
-        "id": 50134617,
-        "title": "Chrome and Edge are removing XSLT: what breaks and what does not",
-        "url": "https://doctor-seo.net/en/blog/news/chrome-edge-removing-xslt/",
-        "hn": "https://news.ycombinator.com/item?id=50134617",
-        "score": 37,
-        "comments": 26
+        "id": 50142573,
+        "title": "Someone behind the software",
+        "url": "https://karrisaarinen.com/posts/someone-behind-the-software/",
+        "hn": "https://news.ycombinator.com/item?id=50142573",
+        "score": 233,
+        "comments": 89
       },
       {
-        "id": 50126312,
-        "title": "Dam removals are bringing fish back across the northeastern United States",
-        "url": "https://www.smithsonianmag.com/science-nature/dam-removals-are-bringing-fish-back-across-the-northeastern-united-states-striking-down-one-tiny-barrier-at-a-time-180989679/",
-        "hn": "https://news.ycombinator.com/item?id=50126312",
-        "score": 89,
-        "comments": 21
+        "id": 50144066,
+        "title": "Free Pascal compiler now supports dynamic packages",
+        "url": "https://www.getlazarus.org/dynamic/",
+        "hn": "https://news.ycombinator.com/item?id=50144066",
+        "score": 68,
+        "comments": 13
       },
       {
-        "id": 50100994,
-        "title": "Furifont, a Japanese font that shows furigana",
-        "url": "https://furifont.antfu.me/",
-        "hn": "https://news.ycombinator.com/item?id=50100994",
-        "score": 193,
-        "comments": 42
+        "id": 50141076,
+        "title": "RepRapMicron",
+        "url": "https://github.com/VikOlliver/RepRapMicron/wiki",
+        "hn": "https://news.ycombinator.com/item?id=50141076",
+        "score": 294,
+        "comments": 46
       },
       {
-        "id": 50100366,
-        "title": "The Commodore 64 hardware simulator: break chips and pins, see the results",
-        "url": "https://github.com/antirez/c64-hw-simulator",
-        "hn": "https://news.ycombinator.com/item?id=50100366",
-        "score": 98,
-        "comments": 18
-      },
-      {
-        "id": 50131213,
-        "title": "Making chicken transparent using Dorito dust",
-        "url": "https://chillphysicsenjoyer.substack.com/p/making-chicken-transparent-using",
-        "hn": "https://news.ycombinator.com/item?id=50131213",
-        "score": 221,
-        "comments": 60
-      },
-      {
-        "id": 50129045,
-        "title": "DeepSeek-v4.1-Flash-1017",
-        "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
-        "hn": "https://news.ycombinator.com/item?id=50129045",
-        "score": 596,
-        "comments": 527
-      },
-      {
-        "id": 50133830,
-        "title": "Microsoft and CMU Team Up to Train Early Career Software Engineers",
-        "url": "https://www.cs.cmu.edu/news/2026/microsoft-cmu-praise",
-        "hn": "https://news.ycombinator.com/item?id=50133830",
-        "score": 28,
-        "comments": 21
-      },
-      {
-        "id": 50132193,
-        "title": "Pele – Mermaid diagrams as themeable SVG",
-        "url": "https://pele.run/",
-        "hn": "https://news.ycombinator.com/item?id=50132193",
-        "score": 120,
+        "id": 50143536,
+        "title": "PalmOS Lemmings",
+        "url": "https://github.com/ardiri/palmos-lemmings",
+        "hn": "https://news.ycombinator.com/item?id=50143536",
+        "score": 60,
         "comments": 14
       },
       {
-        "id": 50127586,
-        "title": "Source code of the Estonian online voting system",
-        "url": "https://github.com/valimised/ivxv",
-        "hn": "https://news.ycombinator.com/item?id=50127586",
-        "score": 108,
-        "comments": 87
+        "id": 50136150,
+        "title": "There's never been a better time to go into math (by: 3blue1brown) [video]",
+        "url": "https://www.youtube.com/watch?v=LKrwhjOI8Nc",
+        "hn": "https://news.ycombinator.com/item?id=50136150",
+        "score": 34,
+        "comments": 1
+      },
+      {
+        "id": 50136979,
+        "title": "Dogs seem to agree with humans that 'bouba' is round and 'kiki' is spiky",
+        "url": "https://www.sciencealert.com/dogs-seem-to-agree-with-humans-that-bouba-is-round-and-kiki-is-spiky",
+        "hn": "https://news.ycombinator.com/item?id=50136979",
+        "score": 56,
+        "comments": 36
+      },
+      {
+        "id": 50138531,
+        "title": "DeepSeek search and fetch – $0.75 per 1000 successful requests",
+        "url": "https://api-docs.deepseek.com/guides/search/",
+        "hn": "https://news.ycombinator.com/item?id=50138531",
+        "score": 503,
+        "comments": 246
+      },
+      {
+        "id": 50141579,
+        "title": "Java sealed classes and exhaustive pattern matching",
+        "url": "https://neilmadden.blog/2026/04/24/java-sealed-classes-and-exhaustive-pattern-matching/",
+        "hn": "https://news.ycombinator.com/item?id=50141579",
+        "score": 115,
+        "comments": 85
+      },
+      {
+        "id": 50096110,
+        "title": "SIGSALY: Churchill's top secret hotline to the president",
+        "url": "https://www.iwm.org.uk/history/iwm/cwr/telephone",
+        "hn": "https://news.ycombinator.com/item?id=50096110",
+        "score": 89,
+        "comments": 24
       }
     ],
     "hf_models": [
       {
-        "id": "google/embeddinggemma-2",
-        "url": "https://huggingface.co/google/embeddinggemma-2",
-        "task": "feature-extraction",
-        "downloads": 158490,
-        "likes": 2586
-      },
-      {
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 0,
-        "likes": 887
-      },
-      {
-        "id": "jialinyyzz/humanizer",
-        "url": "https://huggingface.co/jialinyyzz/humanizer",
-        "task": "text-generation",
-        "downloads": 95870,
-        "likes": 1893
+        "downloads": 10233,
+        "likes": 1310
       },
       {
         "id": "openbmb/MiniCPM-V-4.7-35B-A3B",
         "url": "https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B",
         "task": "image-text-to-text",
-        "downloads": 36252,
-        "likes": 895
+        "downloads": 57935,
+        "likes": 1003
+      },
+      {
+        "id": "google/embeddinggemma-2",
+        "url": "https://huggingface.co/google/embeddinggemma-2",
+        "task": "feature-extraction",
+        "downloads": 164339,
+        "likes": 2656
+      },
+      {
+        "id": "jialinyyzz/humanizer",
+        "url": "https://huggingface.co/jialinyyzz/humanizer",
+        "task": "text-generation",
+        "downloads": 103709,
+        "likes": 1940
       },
       {
         "id": "fishaudio/drama-3",
         "url": "https://huggingface.co/fishaudio/drama-3",
         "task": "text-to-speech",
-        "downloads": 8193,
-        "likes": 616
+        "downloads": 9620,
+        "likes": 684
       },
       {
         "id": "black-forest-labs/flux-3-image-klein-comfy",
         "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
         "task": "image-to-image",
-        "downloads": 224108,
-        "likes": 636
+        "downloads": 338036,
+        "likes": 794
       },
       {
         "id": "meta-models/Muse-Spark-Open-816B-A42B",
         "url": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B",
         "task": "image-text-to-text",
-        "downloads": 1600,
-        "likes": 500
+        "downloads": 1809,
+        "likes": 539
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 1993003,
-        "likes": 8206
+        "downloads": 2012496,
+        "likes": 8363
       },
       {
         "id": "LiquidAI/LFM2.5-24B-A2B",
         "url": "https://huggingface.co/LiquidAI/LFM2.5-24B-A2B",
         "task": "text-generation",
-        "downloads": 11926,
-        "likes": 446
+        "downloads": 13007,
+        "likes": 465
       },
       {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "task": "text-to-image",
-        "downloads": 2571722,
-        "likes": 4491
+        "id": "black-forest-labs/flux-3-image-klein",
+        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein",
+        "task": "image-to-image",
+        "downloads": 52315,
+        "likes": 479
       }
     ],
     "weibo": [
       {
-        "word": "店员称有碘伏顾客磕响头",
-        "num": 178097,
+        "word": "日本出现取消吃饭现象",
+        "num": 184651,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BA%97%E5%91%98%E7%A7%B0%E6%9C%89%E7%A2%98%E4%BC%8F%E9%A1%BE%E5%AE%A2%E7%A3%95%E5%93%8D%E5%A4%B4%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%97%A5%E6%9C%AC%E5%87%BA%E7%8E%B0%E5%8F%96%E6%B6%88%E5%90%83%E9%A5%AD%E7%8E%B0%E8%B1%A1%23"
       },
       {
-        "word": "特斯拉飞行汽车被质疑是噱头",
-        "num": 128177,
+        "word": "恐惧冷漠精致利己的尖子生",
+        "num": 136768,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%96%AF%E6%8B%89%E9%A3%9E%E8%A1%8C%E6%B1%BD%E8%BD%A6%E8%A2%AB%E8%B4%A8%E7%96%91%E6%98%AF%E5%99%B1%E5%A4%B4%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%81%90%E6%83%A7%E5%86%B7%E6%BC%A0%E7%B2%BE%E8%87%B4%E5%88%A9%E5%B7%B1%E7%9A%84%E5%B0%96%E5%AD%90%E7%94%9F%23"
       },
       {
-        "word": "广交会真的太全面了",
-        "num": 99104,
+        "word": "多措并举推动银发经济提质升级",
+        "num": 105602,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B9%BF%E4%BA%A4%E4%BC%9A%E7%9C%9F%E7%9A%84%E5%A4%AA%E5%85%A8%E9%9D%A2%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%9A%E6%8E%AA%E5%B9%B6%E4%B8%BE%E6%8E%A8%E5%8A%A8%E9%93%B6%E5%8F%91%E7%BB%8F%E6%B5%8E%E6%8F%90%E8%B4%A8%E5%8D%87%E7%BA%A7%23"
       },
       {
-        "word": "嫁金钗这是奔着破纪录去的",
-        "num": 82934,
+        "word": "怕被闻到躲楼道吃芒果",
+        "num": 91862,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%AB%81%E9%87%91%E9%92%97%E8%BF%99%E6%98%AF%E5%A5%94%E7%9D%80%E7%A0%B4%E7%BA%AA%E5%BD%95%E5%8E%BB%E7%9A%84%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%80%95%E8%A2%AB%E9%97%BB%E5%88%B0%E8%BA%B2%E6%A5%BC%E9%81%93%E5%90%83%E8%8A%92%E6%9E%9C%23"
       },
       {
-        "word": "小沈阳气得咬牙切齿",
-        "num": 57074,
+        "word": "法国马赛市区抗议中遭洗劫",
+        "num": 56840,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B3%95%E5%9B%BD%E9%A9%AC%E8%B5%9B%E5%B8%82%E5%8C%BA%E6%8A%97%E8%AE%AE%E4%B8%AD%E9%81%AD%E6%B4%97%E5%8A%AB%23"
+      },
+      {
+        "word": "盛艾敬哭了",
+        "num": 56022,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E6%B2%88%E9%98%B3%E6%B0%94%E5%BE%97%E5%92%AC%E7%89%99%E5%88%87%E9%BD%BF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%9B%9B%E8%89%BE%E6%95%AC%E5%93%AD%E4%BA%86%23"
       },
       {
-        "word": "徐艺洋弟弟发文",
-        "num": 56911,
+        "word": "曝白宇疑似当爸爸了",
+        "num": 54158,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BE%90%E8%89%BA%E6%B4%8B%E5%BC%9F%E5%BC%9F%E5%8F%91%E6%96%87%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E7%99%BD%E5%AE%87%E7%96%91%E4%BC%BC%E5%BD%93%E7%88%B8%E7%88%B8%E4%BA%86%23"
       },
       {
-        "word": "现役男女演员TOP",
-        "num": 56562,
+        "word": "难怪我拿不到像徐艺洋这样的大结果",
+        "num": 53503,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%B0%E5%BD%B9%E7%94%B7%E5%A5%B3%E6%BC%94%E5%91%98TOP%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%9A%BE%E6%80%AA%E6%88%91%E6%8B%BF%E4%B8%8D%E5%88%B0%E5%83%8F%E5%BE%90%E8%89%BA%E6%B4%8B%E8%BF%99%E6%A0%B7%E7%9A%84%E5%A4%A7%E7%BB%93%E6%9E%9C%23"
       },
       {
-        "word": "曾辉淘汰王赫野碎了",
-        "num": 56014,
+        "word": "原来这样的家庭真的存在啊",
+        "num": 51759,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%BE%E8%BE%89%E6%B7%98%E6%B1%B0%E7%8E%8B%E8%B5%AB%E9%87%8E%E7%A2%8E%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8E%9F%E6%9D%A5%E8%BF%99%E6%A0%B7%E7%9A%84%E5%AE%B6%E5%BA%AD%E7%9C%9F%E7%9A%84%E5%AD%98%E5%9C%A8%E5%95%8A%23"
       },
       {
-        "word": "马斯克飞行汽车遭踢馆",
-        "num": 44682,
+        "word": "莫大披旭日旗留学生早有劣迹",
+        "num": 50789,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%A9%AC%E6%96%AF%E5%85%8B%E9%A3%9E%E8%A1%8C%E6%B1%BD%E8%BD%A6%E9%81%AD%E8%B8%A2%E9%A6%86%23"
-      },
-      {
-        "word": "特斯拉市值蒸发超6200亿",
-        "num": 40298,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%96%AF%E6%8B%89%E5%B8%82%E5%80%BC%E8%92%B8%E5%8F%91%E8%B6%856200%E4%BA%BF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%8E%AB%E5%A4%A7%E6%8A%AB%E6%97%AD%E6%97%A5%E6%97%97%E7%95%99%E5%AD%A6%E7%94%9F%E6%97%A9%E6%9C%89%E5%8A%A3%E8%BF%B9%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2019,
-        "text": "智利圣地亚哥的抗议活动在持续11天后升级为与智利卡宾枪骑兵的公开冲突，迫使总统塞瓦斯蒂安·皮涅拉宣布进入紧急状态。",
-        "title": "圣地亚哥 (智利)",
-        "url": "https://zh.wikipedia.org/wiki/%E5%9C%A3%E5%9C%B0%E4%BA%9A%E5%93%A5_(%E6%99%BA%E5%88%A9)"
+        "year": 2020,
+        "text": "国家运输安全调查委员会公布普悠玛事故最终调查报告:提出含司机员操作、调度员及检查员协助等50项肇事因素及向交通部、交通部台铁局、交通部铁道局及普悠玛列车供应商日商住友商事株式会社等政府和公司共27项组织管理改善建议。",
+        "title": "國家運輸安全調查委員會",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9C%8B%E5%AE%B6%E9%81%8B%E8%BC%B8%E5%AE%89%E5%85%A8%E8%AA%BF%E6%9F%A5%E5%A7%94%E5%93%A1%E6%9C%83"
       },
       {
-        "year": 2015,
-        "text": "Windows 8主流支援到期。",
-        "title": "Windows 8",
-        "url": "https://zh.wikipedia.org/wiki/Windows_8"
+        "year": 2006,
+        "text": "一名蒙古女郎阿尔丹杜雅·沙丽布在马来西亚靠近首都吉隆坡的莎阿南区偏僻处，遭人使用C4炸药杀害，或先被杀害后再用C4炸药毁尸灭迹。",
+        "title": "蒙古国",
+        "url": "https://zh.wikipedia.org/wiki/%E8%92%99%E5%8F%A4%E5%9B%BD"
       },
       {
-        "year": 2012,
-        "text": "Lamigo桃猿在中华职棒23年总冠军赛击败统一7-ELEVEn狮，获得年度总冠军，并将代表中华职棒参加在韩国釜山展开的第六届亚洲职棒大赛。",
-        "title": "樂天桃猿",
-        "url": "https://zh.wikipedia.org/wiki/%E6%A8%82%E5%A4%A9%E6%A1%83%E7%8C%BF"
+        "year": 2005,
+        "text": "飓风威尔玛测得最低气压纪录882毫巴（百帕）而成为威力最强的北大西洋热带气旋之一。",
+        "title": "飓风威尔玛",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A3%93%E9%A3%8E%E5%A8%81%E5%B0%94%E7%8E%9B"
       },
       {
-        "year": 2007,
-        "text": "Youtube正式在台湾上线。",
-        "title": "YouTube",
-        "url": "https://zh.wikipedia.org/wiki/YouTube"
-      },
-      {
-        "year": 2003,
-        "text": "兄弟象在中华职棒14年总冠军赛击败兴农牛，获得年度总冠军，缔造队史第二次三连霸。",
-        "title": "中信兄弟",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E4%BF%A1%E5%85%84%E5%BC%9F"
+        "year": 2004,
+        "text": "缅甸国家和平与发展委员会（军政府）任命和发会第一秘书长梭温中将为缅甸新总理。",
+        "title": "缅甸",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BC%85%E7%94%B8"
       },
       {
         "year": 1993,
-        "text": "波兰农民党主席瓦尔德马·帕夫拉克出任波兰总理。",
-        "title": "瓦尔德马·帕夫拉克",
-        "url": "https://zh.wikipedia.org/wiki/%E7%93%A6%E5%B0%94%E5%BE%B7%E9%A9%AC%C2%B7%E5%B8%95%E5%A4%AB%E6%8B%89%E5%85%8B"
+        "text": "巴基斯坦人民党领导人贝娜齐尔·布托再任总理，1996年辞职下台。于1988－1990年首次出任。",
+        "title": "巴基斯坦人民党",
+        "url": "https://zh.wikipedia.org/wiki/%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E4%BA%BA%E6%B0%91%E5%85%9A"
+      },
+      {
+        "year": 1987,
+        "text": "美国道琼斯工业平均指数在黑色星期一中下跌22.6%，创下历史上单日最大的百分比跌幅。同日香港爆发八七股灾。",
+        "title": "道琼斯工业平均指数",
+        "url": "https://zh.wikipedia.org/wiki/%E9%81%93%E7%90%BC%E6%96%AF%E5%B7%A5%E4%B8%9A%E5%B9%B3%E5%9D%87%E6%8C%87%E6%95%B0"
       }
     ]
   }
