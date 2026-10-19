@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-18",
+  "checkedAt": "2026-10-19",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -64,8 +64,8 @@
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
-      "checkedAt": "2026-10-13",
-      "latest": "4.1.15.53"
+      "checkedAt": "2026-10-19",
+      "latest": "4.1.15.56"
     },
     "astral-sh.uv": {
       "ok": true,
