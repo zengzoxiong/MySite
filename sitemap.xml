@@ -171,6 +171,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/dotsboxes/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/draw-lots/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -191,6 +196,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/game24/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/gitignore-generator/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -202,6 +212,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/gradient-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/hanoi/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -247,6 +262,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/http-status/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/idiom-chain/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -371,6 +391,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/klotski/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/lightsout/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/line-ending-converter/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -402,6 +432,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/markdown-to-wechat/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/match3/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -442,6 +477,21 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/nanoid-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/nonogram/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/onestroke/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/othello/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -507,6 +557,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/salary-calculator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/simon/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -697,6 +752,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/word-counter/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/wordle-zh/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -1067,6 +1067,90 @@
       "description": "经典数独，入门 / 中等 / 困难三档，填满每一行、列、宫的 1-9",
       "icon": "🔢",
       "category": "小游戏"
+    },
+    {
+      "name": "消消乐",
+      "path": "match3/app.html",
+      "description": "交换相邻方块凑三连消除，连锁触发连击加成，限时或限步冲击高分",
+      "icon": "🍬",
+      "category": "小游戏"
+    },
+    {
+      "name": "黑白棋",
+      "path": "othello/app.html",
+      "description": "8×8 棋盘与内置 AI 对战，夹住对方棋子即可翻转，终局数子定胜负",
+      "icon": "⚪",
+      "category": "小游戏"
+    },
+    {
+      "name": "数织",
+      "path": "nonogram/app.html",
+      "description": "按行列数字提示填涂方格还原隐藏像素画，5×5 与 10×10 两档难度",
+      "icon": "🖼️",
+      "category": "小游戏"
+    },
+    {
+      "name": "24点",
+      "path": "game24/app.html",
+      "description": "用加减乘除和括号把 4 张牌算成 24，限时挑战越快越高分",
+      "icon": "🃏",
+      "category": "小游戏"
+    },
+    {
+      "name": "华容道",
+      "path": "klotski/app.html",
+      "description": "拖动棋子滑入空位，把曹操送出底部出口，经典横刀立马等六关",
+      "icon": "🏯",
+      "category": "小游戏"
+    },
+    {
+      "name": "点灯谜题",
+      "path": "lightsout/app.html",
+      "description": "点击一盏灯翻转它与相邻灯的亮灭，把 5×5 灯阵全部熄灭即通关",
+      "icon": "💡",
+      "category": "小游戏"
+    },
+    {
+      "name": "一笔画",
+      "path": "onestroke/app.html",
+      "description": "一笔画过图形所有线条且不重复，支持撤销与提示，30 个关卡",
+      "icon": "✍️",
+      "category": "小游戏"
+    },
+    {
+      "name": "点格棋",
+      "path": "dotsboxes/app.html",
+      "description": "点阵间轮流连线抢占格子，补齐第四边得格再走，数格定胜负",
+      "icon": "🔲",
+      "category": "小游戏"
+    },
+    {
+      "name": "汉诺塔",
+      "path": "hanoi/app.html",
+      "description": "3~8 层盘子三柱搬运大盘不压小盘，步数对比理论最优 2^n-1",
+      "icon": "🗼",
+      "category": "小游戏"
+    },
+    {
+      "name": "成语接龙",
+      "path": "idiom-chain/app.html",
+      "description": "用上个成语的末字或同音字接新成语，内置成语库带释义",
+      "icon": "📖",
+      "category": "小游戏"
+    },
+    {
+      "name": "记忆序列",
+      "path": "simon/app.html",
+      "description": "四色按键随机点亮发声，凭记忆按原顺序复现，每轮加长一位",
+      "icon": "🎵",
+      "category": "小游戏"
+    },
+    {
+      "name": "成语猜猜",
+      "path": "wordle-zh/app.html",
+      "description": "猜四字成语逐字给绿黄灰反馈，6 次机会，含每日一题与释义",
+      "icon": "🀄",
+      "category": "小游戏"
     }
   ]
 }
