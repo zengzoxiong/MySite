@@ -127,6 +127,23 @@
         .foot { text-align: center; font-size: 12px; color: var(--muted); }
         .foot a { color: var(--brand); text-decoration: none; }
 
+        .ai-row { display: flex; justify-content: center; }
+        .btn-ai {
+            border: none; background: #1a73e8; color: #fff;
+            font-family: inherit; font-size: 15px; font-weight: 600;
+            padding: 11px 32px; border-radius: 11px; cursor: pointer;
+            box-shadow: 0 2px 10px rgba(26, 115, 232, .35);
+        }
+        .btn-ai:active { transform: scale(.96); }
+        .btn-ai.ai-on { background: #d93025; box-shadow: 0 2px 10px rgba(217, 48, 37, .35); }
+        .ai-badge {
+            position: absolute; top: 10px; right: 12px; z-index: 5;
+            background: rgba(26, 115, 232, .92); color: #fff;
+            font-size: 12px; font-weight: 600; padding: 4px 12px;
+            border-radius: 999px; letter-spacing: 1px; pointer-events: none;
+            box-shadow: 0 2px 8px rgba(26, 115, 232, .35);
+        }
+
         @media (max-width: 560px) {
             .stage { flex-direction: column; align-items: center; }
             .side { flex-direction: row; width: auto; order: -1; align-items: stretch; }
@@ -277,6 +294,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="ai-badge" id="aiBadge" hidden>AI 代玩中 · 不计最高分</div>
             </div>
             <aside class="side">
                 <div class="next-box">
@@ -290,6 +308,10 @@
                     <p><kbd>P</kbd> 暂停 / 继续</p>
                 </div>
             </aside>
+        </div>
+
+        <div class="ai-row">
+            <button id="aiBtn" class="btn-ai" type="button" aria-pressed="false">AI 代玩</button>
         </div>
 
         <div class="touch">
@@ -317,26 +339,248 @@
     (function () {
         'use strict';
 
+        /* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+        /* 纯函数核心：棋盘为 ROWS×COLS 数组（null 为空），单步推进 / 局面评估 / AI 决策
+           全部与渲染无关，可直接在 node 模拟器中复用 */
+        function aiCoreTetris() {
+            'use strict';
+            var COLS = 10, ROWS = 20;
+            // 七种方块的出生形态（矩阵）
+            var SHAPES = {
+                I: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+                O: [[1, 1], [1, 1]],
+                T: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+                S: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+                Z: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+                J: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+                L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]]
+            };
+            // 简化墙踢：旋转被挡时依次尝试的偏移 [dx, dy]
+            var KICKS = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1], [-2, 0], [2, 0]];
+            // 消行得分（1/2/3/4 行），结算时再乘当前等级
+            var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
+
+            function emptyGrid() {
+                var g = [];
+                for (var y = 0; y < ROWS; y++) g.push(new Array(COLS).fill(null));
+                return g;
+            }
+
+            function cloneGrid(g) {
+                var out = [];
+                for (var y = 0; y < ROWS; y++) out.push(g[y].slice());
+                return out;
+            }
+
+            // 碰撞检测：gy<0 视为棋盘上方缓冲区，允许存在
+            function collide(g, m, px, py) {
+                for (var y = 0; y < m.length; y++) {
+                    for (var x = 0; x < m[y].length; x++) {
+                        if (!m[y][x]) continue;
+                        var gx = px + x, gy = py + y;
+                        if (gx < 0 || gx >= COLS || gy >= ROWS) return true;
+                        if (gy >= 0 && g[gy][gx]) return true;
+                    }
+                }
+                return false;
+            }
+
+            // 矩阵旋转：dir>0 顺时针，dir<0 逆时针
+            function rotated(m, dir) {
+                var N = m.length;
+                var r = [];
+                for (var y = 0; y < N; y++) r.push(new Array(N).fill(0));
+                for (var yy = 0; yy < N; yy++)
+                    for (var xx = 0; xx < N; xx++) {
+                        if (dir > 0) r[xx][N - 1 - yy] = m[yy][xx];
+                        else r[N - 1 - xx][yy] = m[yy][xx];
+                    }
+                return r;
+            }
+
+            // 消行：不改入参，返回 { grid, n }
+            function clearRows(g) {
+                var out = [], n = 0;
+                for (var y = 0; y < ROWS; y++) {
+                    var full = true;
+                    for (var x = 0; x < COLS; x++) if (!g[y][x]) { full = false; break; }
+                    if (full) n++;
+                    else out.push(g[y].slice());
+                }
+                while (out.length < ROWS) out.unshift(new Array(COLS).fill(null));
+                return { grid: out, n: n };
+            }
+
+            /* 单步推进：把矩阵 m 放到 (px,py) 锁定并消行，gy<0 的格子视为顶出。
+               返回 { grid, n, toppedOut } */
+            function lockInto(g, m, px, py, type) {
+                var out = cloneGrid(g), toppedOut = false;
+                for (var y = 0; y < m.length; y++) {
+                    for (var x = 0; x < m[y].length; x++) {
+                        if (!m[y][x]) continue;
+                        var gy = py + y, gx = px + x;
+                        if (gy < 0) { toppedOut = true; continue; }
+                        out[gy][gx] = type;
+                    }
+                }
+                if (toppedOut) return { grid: out, n: 0, toppedOut: true };
+                var r = clearRows(out);
+                return { grid: r.grid, n: r.n, toppedOut: false };
+            }
+
+            // 从出生高度（原点 y=0）硬降的落点原点 y；y=0 处已碰撞返回 -1
+            function landY(g, m, px) {
+                if (collide(g, m, px, 0)) return -1;
+                var y = 0;
+                while (!collide(g, m, px, y + 1)) y++;
+                return y;
+            }
+
+            // 顺时针旋转 rot 次后的矩阵（rot ∈ 0..3）
+            function matrixFor(type, rot) {
+                var m = SHAPES[type].map(function (r) { return r.slice(); });
+                for (var i = 0; i < rot; i++) m = rotated(m, 1);
+                return m;
+            }
+
+            // 一种方块去重后的旋转形态：{ m, rot, minX, maxX }（按类型缓存）
+            var rvCache = {};
+            function rotVariants(type) {
+                if (rvCache[type]) return rvCache[type];
+                var vs = [], seen = {};
+                for (var rot = 0; rot < 4; rot++) {
+                    var m = matrixFor(type, rot);
+                    var key = JSON.stringify(m);
+                    if (seen[key]) continue;
+                    seen[key] = 1;
+                    var minX = 99, maxX = -1;
+                    for (var y = 0; y < m.length; y++)
+                        for (var x = 0; x < m[y].length; x++)
+                            if (m[y][x]) {
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                            }
+                    vs.push({ m: m, rot: rot, minX: minX, maxX: maxX });
+                }
+                rvCache[type] = vs;
+                return vs;
+            }
+
+            // 全部可行落点（出生高度横移到位后硬降）：{ m, rot, x, y }
+            function placements(g, type) {
+                var vs = rotVariants(type), list = [];
+                for (var i = 0; i < vs.length; i++) {
+                    var v = vs[i];
+                    for (var x = -v.minX; x <= COLS - 1 - v.maxX; x++) {
+                        var y = landY(g, v.m, x);
+                        if (y < 0) continue;
+                        list.push({ m: v.m, rot: v.rot, x: x, y: y });
+                    }
+                }
+                return list;
+            }
+
+            /* 启发式评估（与渲染无关）：高度、空洞数、平整度（bumpiness）、井深，
+               另加消行奖励。主项权重取经典遗传算法结果，井深项为补充 */
+            function evaluate(g, cleared) {
+                var heights = new Array(COLS), agg = 0, holes = 0, bump = 0, wells = 0;
+                for (var x = 0; x < COLS; x++) {
+                    var h = 0, solid = false;
+                    for (var y = 0; y < ROWS; y++) {
+                        if (g[y][x]) {
+                            if (!h) h = ROWS - y;
+                            solid = true;
+                        } else if (solid) holes++;
+                    }
+                    heights[x] = h; agg += h;
+                }
+                for (var x2 = 0; x2 < COLS - 1; x2++) bump += Math.abs(heights[x2] - heights[x2 + 1]);
+                // 井深：左右两侧（或墙）都更高的下沉深度之和
+                for (var x3 = 0; x3 < COLS; x3++) {
+                    var left = x3 === 0 ? ROWS : heights[x3 - 1];
+                    var right = x3 === COLS - 1 ? ROWS : heights[x3 + 1];
+                    var d = Math.min(left, right) - heights[x3];
+                    if (d > 0) wells += d;
+                }
+                return 0.760666 * cleared - 0.510066 * agg - 0.35663 * holes - 0.184483 * bump - 0.12 * wells;
+            }
+
+            /* AI 决策：枚举当前块所有旋转与落点做启发式评估，再配合下一块做
+               2 层搜索（下一块取最优响应），返回最优落点 { m, rot, x, y, score }；
+               无可行落点返回 null */
+            function bestPlacement(g, type, nextType) {
+                var ps = placements(g, type);
+                var vs2 = nextType ? rotVariants(nextType) : null;
+                var best = null, bestScore = -Infinity;
+                for (var i = 0; i < ps.length; i++) {
+                    var p = ps[i];
+                    var r1 = lockInto(g, p.m, p.x, p.y, type);
+                    if (r1.toppedOut) continue;
+                    var sc;
+                    if (vs2) {
+                        var best2 = -Infinity;
+                        for (var j = 0; j < vs2.length; j++) {
+                            var v = vs2[j];
+                            for (var x = -v.minX; x <= COLS - 1 - v.maxX; x++) {
+                                var y = landY(r1.grid, v.m, x);
+                                if (y < 0) continue;
+                                var r2 = lockInto(r1.grid, v.m, x, y, nextType);
+                                if (r2.toppedOut) continue;
+                                var val = evaluate(r2.grid, r1.n + r2.n);
+                                if (val > best2) best2 = val;
+                            }
+                        }
+                        sc = best2 > -Infinity ? best2 : evaluate(r1.grid, r1.n);
+                    } else {
+                        sc = evaluate(r1.grid, r1.n);
+                    }
+                    if (sc > bestScore) {
+                        bestScore = sc;
+                        best = { m: p.m, rot: p.rot, x: p.x, y: p.y, score: sc };
+                    }
+                }
+                return best;
+            }
+
+            // 七袋随机：newBag().take() 依次取出打乱的 7 种方块
+            function newBag() {
+                var bag = [];
+                function refill() {
+                    var t = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+                    for (var i = t.length - 1; i > 0; i--) {
+                        var j = (Math.random() * (i + 1)) | 0;
+                        var tmp = t[i]; t[i] = t[j]; t[j] = tmp;
+                    }
+                    bag = bag.concat(t);
+                }
+                return {
+                    take: function () {
+                        if (!bag.length) refill();
+                        return bag.shift();
+                    }
+                };
+            }
+
+            return {
+                COLS: COLS, ROWS: ROWS, SHAPES: SHAPES, KICKS: KICKS, LINE_SCORES: LINE_SCORES,
+                emptyGrid: emptyGrid, cloneGrid: cloneGrid, collide: collide, rotated: rotated,
+                clearRows: clearRows, lockInto: lockInto, landY: landY, matrixFor: matrixFor,
+                placements: placements, evaluate: evaluate, bestPlacement: bestPlacement, newBag: newBag
+            };
+        }
+        /* ===== AI_CORE_END ===== */
+
         /* ================= 基础配置 ================= */
-        var COLS = 10, ROWS = 20, CELL = 30;
-        // 七种四格方块的配色
+        var core = aiCoreTetris();   // 主线程实例：玩法与 AI 共用同一份纯函数
+        var COLS = core.COLS, ROWS = core.ROWS;
+        var SHAPES = core.SHAPES, KICKS = core.KICKS, LINE_SCORES = core.LINE_SCORES;
+        var CELL = 30;
+        // 七种四格方块的配色（仅渲染用）
         var COLORS = { I: '#31c3e8', O: '#f2b636', T: '#a05fd6', S: '#4fbf5e', Z: '#e05656', J: '#4a7bf7', L: '#ef8f3c' };
-        // 七种方块的出生形态（矩阵）
-        var SHAPES = {
-            I: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-            O: [[1, 1], [1, 1]],
-            T: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
-            S: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
-            Z: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
-            J: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
-            L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]]
-        };
-        // 简化墙踢：旋转被挡时依次尝试的偏移 [dx, dy]
-        var KICKS = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1], [-2, 0], [2, 0]];
-        // 消行得分（1/2/3/4 行），结算时再乘当前等级
-        var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
         // 手感参数：长按延迟 / 连移间隔 / 软降间隔 / 锁定延迟 / 锁定重置上限
         var DAS = 170, ARR = 45, SOFT = 50, LOCK_DELAY = 500, MAX_RESETS = 15;
+        // AI 代玩节奏：每个动作（旋转 / 横移 / 硬降）的间隔
+        var AI_STEP_MS = 55;
 
         /* ================= DOM 与画布 ================= */
         var boardCv = document.getElementById('board');
@@ -353,6 +597,8 @@
         var bestEl = document.getElementById('best');
         var levelEl = document.getElementById('level');
         var linesEl = document.getElementById('lines');
+        var aiBtn = document.getElementById('aiBtn');
+        var aiBadge = document.getElementById('aiBadge');
 
         // 画布按设备像素比放大，保证高分屏清晰
         function setupCanvas(cv, w, h) {
@@ -368,7 +614,7 @@
         var nctx = setupCanvas(nextCv, 88, 88);
 
         /* ================= 游戏状态 ================= */
-        var grid, cur, nextT, bag = [];
+        var grid, cur, nextT, bag = null;
         var score = 0, best = loadBest(), lines = 0, level = 1;
         var state = 'start'; // start | playing | paused | over
         var dropTimer = 0, lockTimer = 0, lockResets = 0;
@@ -385,38 +631,20 @@
             try { localStorage.setItem('tetrisBest', String(v)); } catch (e) { }
         }
 
-        /* ================= 七袋随机 ================= */
-        function refillBag() {
-            var t = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
-            for (var i = t.length - 1; i > 0; i--) {
-                var j = (Math.random() * (i + 1)) | 0;
-                var tmp = t[i]; t[i] = t[j]; t[j] = tmp;
-            }
-            bag = bag.concat(t);
-        }
+        /* ================= 七袋随机（核心纯函数提供，与模拟脚本一致） ================= */
         function takeFromBag() {
-            if (!bag.length) refillBag();
-            return bag.shift();
+            if (!bag) bag = core.newBag();
+            return bag.take();
         }
 
-        /* ================= 核心逻辑 ================= */
+        /* ================= 核心逻辑（全部委托纯函数核心） ================= */
         function emptyGrid() {
-            var g = [];
-            for (var y = 0; y < ROWS; y++) g.push(new Array(COLS).fill(null));
-            return g;
+            return core.emptyGrid();
         }
 
         // 碰撞检测：gy<0 视为棋盘上方缓冲区，允许存在
         function collide(m, px, py) {
-            for (var y = 0; y < m.length; y++) {
-                for (var x = 0; x < m[y].length; x++) {
-                    if (!m[y][x]) continue;
-                    var gx = px + x, gy = py + y;
-                    if (gx < 0 || gx >= COLS || gy >= ROWS) return true;
-                    if (gy >= 0 && grid[gy][gx]) return true;
-                }
-            }
-            return false;
+            return core.collide(grid, m, px, py);
         }
 
         function eachCell(m, fn) {
@@ -448,15 +676,7 @@
 
         // 矩阵旋转：dir>0 顺时针，dir<0 逆时针
         function rotated(m, dir) {
-            var N = m.length;
-            var r = [];
-            for (var y = 0; y < N; y++) r.push(new Array(N).fill(0));
-            for (var yy = 0; yy < N; yy++)
-                for (var xx = 0; xx < N; xx++) {
-                    if (dir > 0) r[xx][N - 1 - yy] = m[yy][xx];
-                    else r[N - 1 - xx][yy] = m[yy][xx];
-                }
-            return r;
+            return core.rotated(m, dir);
         }
 
         // SRS 式旋转 + 简化墙踢
@@ -498,20 +718,13 @@
             lockPiece();
         }
 
+        // 单步推进：当前块落到 (cur.x, cur.y) 锁定、消行、结算并生成下一块
         function lockPiece() {
-            var toppedOut = false;
-            var m = cur.m;
-            for (var y = 0; y < m.length; y++) {
-                for (var x = 0; x < m[y].length; x++) {
-                    if (!m[y][x]) continue;
-                    var gy = cur.y + y, gx = cur.x + x;
-                    if (gy < 0) { toppedOut = true; continue; }
-                    grid[gy][gx] = cur.type;
-                }
-            }
+            var res = core.lockInto(grid, cur.m, cur.x, cur.y, cur.type);
+            grid = res.grid;
             cur = null;
-            if (toppedOut) { gameOver(); return; }
-            var n = clearLines();
+            if (res.toppedOut) { gameOver(); return; }
+            var n = res.n;
             if (n > 0) {
                 lines += n;
                 addScore((LINE_SCORES[n] || 1200) * level);
@@ -519,21 +732,6 @@
                 updateHud();   // 行数 / 等级变化即时上屏
             }
             spawn();
-        }
-
-        // 消行：从底向上检查，删掉整行后统一在顶部补空行（上方方块整体下落）
-        function clearLines() {
-            var n = 0;
-            for (var y = ROWS - 1; y >= 0; y--) {
-                var full = true;
-                for (var x = 0; x < COLS; x++) if (!grid[y][x]) { full = false; break; }
-                if (full) {
-                    grid.splice(y, 1);
-                    n++;
-                }
-            }
-            for (var i = 0; i < n; i++) grid.unshift(new Array(COLS).fill(null));
-            return n;
         }
 
         function addScore(n) {
@@ -548,6 +746,12 @@
 
         /* ================= 每帧更新 ================= */
         function update(dt) {
+            // AI 代玩：关闭重力与锁定计时，按固定节奏逐步执行落点计划
+            if (aiOn) {
+                aiTimer += dt;
+                if (aiTimer >= AI_STEP_MS) { aiTimer = 0; aiStep(); }
+                return;
+            }
             // 左右长按连移（DAS/ARR 简化版）
             if (dasDir !== 0) {
                 dasTimer += dt;
@@ -673,8 +877,10 @@
                 ovDesc.textContent = '按 P 或点击按钮继续';
                 ovBtn.textContent = '继续游戏';
             } else {
-                ovTitle.textContent = '游戏结束';
-                ovDesc.textContent = '本局得分 ' + score + ' · 历史最高 ' + best + (newRecord ? ' · 新纪录！' : '');
+                ovTitle.textContent = aiOn ? 'AI 本局结束' : '游戏结束';
+                ovDesc.textContent = aiOn
+                    ? 'AI 代玩 · 本局得分 ' + score + '（不计最高分）'
+                    : '本局得分 ' + score + ' · 历史最高 ' + best + (newRecord ? ' · 新纪录！' : '');
                 ovBtn.textContent = '再来一局';
             }
             overlayEl.classList.add('open');
@@ -686,11 +892,12 @@
 
         function startGame() {
             grid = emptyGrid();
-            bag = [];
+            bag = core.newBag();
             score = 0; lines = 0; level = 1;
             softHeld = false; dasDir = 0; dasCharged = false;
             keys.left = false; keys.right = false;
             newRecord = false;
+            aiPlan = null; aiPlanFor = null; aiTimer = 0;
             scoreEl.textContent = '0';
             nextT = takeFromBag();
             state = 'playing';
@@ -713,12 +920,73 @@
 
         function gameOver() {
             state = 'over';
-            newRecord = score > best && score > 0;
+            // AI 代玩成绩不计入最高纪录
+            newRecord = !aiOn && score > best && score > 0;
             if (newRecord) { best = score; saveBest(best); }
             softHeld = false; dasDir = 0;
             showOverlay('over');
             updateHud();
+            // AI 代玩中：稍候自动开下一局
+            if (aiOn) {
+                window.setTimeout(function () {
+                    if (aiOn && state === 'over') startGame();
+                }, 1200);
+            }
         }
+
+        /* ================= AI 代玩 ================= */
+        /* 决策与渲染无关：core.bestPlacement 是纯计算（启发式评估所有旋转与落点，
+           高度 / 空洞 / 平整度 / 井深 + 下一块 2 层搜索）；此处只把计划翻译成动作。
+           AI 模式下重力关闭，按 AI_STEP_MS 节奏逐个动作：旋转 → 横移 → 硬降 */
+        var aiOn = false;
+        var aiPlan = null, aiPlanFor = null, aiRotTries = 0, aiStuck = 0, aiTimer = 0;
+
+        function sameMatrix(a, b) {
+            if (!a || !b || a.length !== b.length) return false;
+            for (var y = 0; y < a.length; y++)
+                for (var x = 0; x < a[y].length; x++)
+                    if (a[y][x] !== b[y][x]) return false;
+            return true;
+        }
+
+        // 每个动作步执行一步计划；计划受阻时直接硬降兜底
+        function aiStep() {
+            if (state !== 'playing' || !cur) return;
+            if (aiPlanFor !== cur || !aiPlan) {
+                aiPlan = core.bestPlacement(grid, cur.type, nextT);
+                aiPlanFor = cur;
+                aiRotTries = 0; aiStuck = 0;
+                if (!aiPlan) { hardDrop(); return; }
+            }
+            var p = aiPlan;
+            if (!sameMatrix(cur.m, p.m)) {
+                if (aiRotTries >= 3) { hardDrop(); aiPlan = null; return; }
+                aiRotTries++;
+                rotate(1);
+                return;
+            }
+            if (cur.x < p.x) {
+                if (!shift(1)) aiStuck++;
+            } else if (cur.x > p.x) {
+                if (!shift(-1)) aiStuck++;
+            } else {
+                hardDrop();
+                aiPlan = null;
+                return;
+            }
+            if (aiStuck > 6) { hardDrop(); aiPlan = null; }
+        }
+
+        function setAi(on) {
+            aiOn = on;
+            aiPlan = null; aiPlanFor = null; aiTimer = 0;
+            aiBtn.textContent = on ? '停止代玩' : 'AI 代玩';
+            aiBtn.classList.toggle('ai-on', on);
+            aiBtn.setAttribute('aria-pressed', String(on));
+            aiBadge.hidden = !on;
+            if (on && (state === 'start' || state === 'over')) startGame();
+        }
+        aiBtn.addEventListener('click', function () { setAi(!aiOn); });
 
         /* ================= 输入：键盘 ================= */
         document.addEventListener('keydown', function (e) {
@@ -841,6 +1109,7 @@
         <li>移动旋转下落的方块，填满一行即消除得分</li>
         <li>一次消 1 / 2 / 3 / 4 行分别得 100 / 300 / 500 / 800 分（×等级）</li>
         <li>每消 10 行升 1 级，下落越来越快；堆到顶即结束</li>
+        <li>「AI 代玩」由 AI 自动落块，可随时停止；AI 成绩不计最高分</li>
       </ul>
       <h3>操作</h3>
       <ul>

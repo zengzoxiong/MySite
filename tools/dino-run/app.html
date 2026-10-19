@@ -19,6 +19,9 @@ h1{font-size:19px;font-weight:700}
 button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
 button:active{transform:scale(.96)}
 .btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
+.btn-ai{background:#1a73e8;color:#fff;padding:7px 14px;font-weight:600}
+.btn-ai.ai-on{background:#d93025}
+.ai-badge{position:absolute;top:10px;right:12px;z-index:5;background:rgba(26,115,232,.92);color:#fff;font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;letter-spacing:1px;pointer-events:none;box-shadow:0 2px 8px rgba(26,115,232,.35)}
 .stage{position:relative}
 canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
 .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
@@ -149,10 +152,12 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
       <span>分数 <b id="score">0</b></span>
       <span>最高 <b id="best">0</b></span>
       <button id="dayBtn" class="btn-plain" type="button">夜间</button>
+      <button id="aiBtn" class="btn-ai" type="button" aria-pressed="false">AI 代玩</button>
     </div>
   </header>
   <div class="stage">
     <canvas id="cv" width="900" height="260"></canvas>
+    <div class="ai-badge" id="aiBadge" hidden>AI 代玩中 · 不计最高分</div>
     <div class="overlay" id="ovStart">
       <div>
         <h2>恐龙快跑</h2>
@@ -184,14 +189,117 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
 <script>
 (() => {
 'use strict';
-// ---------- 画布与常量（逻辑分辨率固定 900x260，CSS 缩放适配） ----------
-const W=900, H=260, GROUND=222, DINO_X=62;
-const GRAVITY=0.55, JUMP_V=-12, SPEED0=6, SPEED_MAX=13;
+// ---------- 画布与 DOM（逻辑分辨率固定 900x260，CSS 缩放适配） ----------
 const $=id=>document.getElementById(id);
 const cv=$('cv'), ctx=cv.getContext('2d');
 const scoreEl=$('score'), bestEl=$('best'), dayBtn=$('dayBtn');
 const ovStart=$('ovStart'), ovOver=$('ovOver'), ovPause=$('ovPause');
 const overTitle=$('overTitle'), overInfo=$('overInfo');
+
+// ===== DINO_CORE_START =====
+// 与渲染无关的纯逻辑核心：游戏状态、单步推进、AI 决策。
+// ai-sim.mjs 会提取本标记段在 node 中运行，
+// 因此本段内禁止引用 DOM / Canvas / window 等浏览器对象。
+function createDinoCore(rand){
+  const W=900, H=260, GROUND=222, DINO_X=62;        // 逻辑分辨率、地平线、恐龙横坐标
+  const GRAVITY=0.55, JUMP_V=-12, SPEED0=6, SPEED_MAX=13;
+  const T_CACTUS=16, T_BIRD=16;                     // AI 起跳提前量（单位：帧）
+  const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+  function dinoBox(d){
+    return d.duck?{x:DINO_X+8,y:GROUND-27,w:48,h:24}:{x:DINO_X+6,y:d.y+6,w:32,h:40};
+  }
+  function obsBox(o){
+    return o.type==='bird'?{x:o.x+4,y:o.top+3,w:32,h:14}:{x:o.x+2,y:GROUND-o.h+2,w:o.w-4,h:o.h-2};
+  }
+  function spawn(st){
+    if(st.score>240&&st.speed>7&&rand()<0.32){      // 速度起来后才出现翼龙
+      const tops=[180,158,130];                     // 三条航线：高档跑过、中档下蹲、低档必须跳
+      st.obs.push({type:'bird',x:W+30,top:tops[rand()*3|0],w:40,h:20,sp:.4+rand()*.6});
+    }else{
+      const big=rand()<0.4, n=1+(rand()*3|0), cw=big?16:12;
+      st.obs.push({type:'cactus',x:W+30,w:n*cw+(n-1)*6,h:big?50:34,cw:cw,n:n,sp:0});
+    }
+    st.distNext=300+st.speed*22+rand()*280;         // 间隔随速度拉大，保证可跳
+  }
+  function createState(){
+    return {dino:{y:GROUND-48,vy:0,onGround:true,duck:false,fastFall:false},
+            obs:[],speed:SPEED0,dist:0,score:0,distNext:420,
+            downHeld:false,over:false,overBy:null};
+  }
+  // 单步推进：input={jump:本帧是否按下跳跃, down:下蹲键是否按住}
+  // 就地更新并返回 st；发生碰撞时置 st.over=true 并记录 st.overBy
+  function step(st,input,k){
+    if(st.over)return st;
+    k=k||1;
+    st.speed=Math.min(SPEED_MAX,SPEED0+st.dist*0.00058);  // 速度渐进加快
+    st.dist+=st.speed*k; st.score=st.dist*0.032;
+    const d=st.dino;
+    if(input.jump&&d.onGround){d.vy=JUMP_V;d.onGround=false;d.duck=false;d.fastFall=false;}
+    const wasHeld=st.downHeld; st.downHeld=!!input.down;
+    if(st.downHeld&&!wasHeld){if(d.onGround)d.duck=true;else d.fastFall=true;}  // 新按下
+    else if(!st.downHeld&&wasHeld){d.duck=false;d.fastFall=false;}              // 松开
+    if(!d.onGround){
+      d.vy+=GRAVITY*(d.fastFall?2.6:1)*k;
+      d.y+=d.vy*k;
+      if(d.y>=GROUND-48){d.y=GROUND-48;d.vy=0;d.onGround=true;d.fastFall=false;d.duck=st.downHeld;}
+    }
+    st.distNext-=st.speed*k;
+    if(st.distNext<=0)spawn(st);
+    for(let i=st.obs.length-1;i>=0;i--){const o=st.obs[i];o.x-=(st.speed+o.sp)*k;if(o.x+o.w<-40)st.obs.splice(i,1);}
+    const db=dinoBox(d);
+    for(const o of st.obs){if(hit(db,obsBox(o))){st.over=true;st.overBy=o.type;break;}}
+    return st;
+  }
+  // ---------- AI 决策（与渲染无关）----------
+  // 思路：按最近障碍物的距离阈值决定跳跃或下蹲——
+  //   仙人掌 / 低空翼龙进入约 16 帧提前量即起跳；
+  //   中高空翼龙站立即可通过，不做动作；
+  //   下落阶段若前方障碍尚远则按住下蹲加速落地，为连续障碍预留起跳余量。
+  function nearestAhead(st){
+    let t=null;
+    for(const o of st.obs){if(o.x+o.w-2>DINO_X+6&&(!t||o.x<t.x))t=o;}
+    return t;
+  }
+  function decide(st){
+    const d=st.dino, input={jump:false,down:false};
+    if(st.over)return input;
+    const t=nearestAhead(st);
+    if(d.onGround){
+      if(!t)return input;
+      if(t.type==='bird'){
+        if(t.top>=170){                             // 低空翼龙：下蹲躲不开，必须跳
+          const ttc=(t.x+4-(DINO_X+38))/(st.speed+t.sp);
+          if(ttc<=T_BIRD)input.jump=true;
+        }                                           // 中高档翼龙：站立即可通过
+      }else{
+        const ttc=(t.x+2-(DINO_X+38))/st.speed;     // 距仙人掌的剩余帧数
+        if(ttc<=T_CACTUS)input.jump=true;
+      }
+    }else if(d.vy>0){                               // 下落段：评估提前落地
+      const db=dinoBox(d);
+      let overlapping=false;                        // 有障碍正贴身时不加速落，防止砸上
+      for(const o of st.obs){const b=obsBox(o);if(b.x<db.x+db.w&&b.x+b.w>db.x){overlapping=true;break;}}
+      if(!overlapping&&t){
+        const closing=t.type==='bird'?(st.speed+t.sp):st.speed;
+        const ttc=(t.type==='bird'?(t.x+4-(DINO_X+38)):(t.x+2-(DINO_X+38)))/closing;
+        const h0=(GROUND-48)-d.y;                   // 距地高度
+        if(h0>0){
+          const gf=GRAVITY*2.6;                     // 加速下落时的等效重力
+          const fLand=(-d.vy+Math.sqrt(d.vy*d.vy+2*gf*h0))/gf;
+          if(ttc>=fLand+6)input.down=true;          // 落地后仍来得及应对才加速落
+        }
+      }
+    }
+    return input;
+  }
+  return {W,H,GROUND,DINO_X,GRAVITY,JUMP_V,SPEED0,SPEED_MAX,T_CACTUS,T_BIRD,
+          createState,step,decide,dinoBox,obsBox,hit};
+}
+// ===== DINO_CORE_END =====
+
+// 页面侧核心实例：物理 / 生成 / 碰撞 / AI 决策全部来自纯逻辑核心
+const core=createDinoCore(Math.random);
+const W=core.W, H=core.H, GROUND=core.GROUND, DINO_X=core.DINO_X;
 
 // ---------- 昼夜两套配色（rgb 数组，便于插值过渡） ----------
 const DAY={bg:[247,248,250],ink:[86,90,96],cloud:[203,208,216],ground:[128,133,141]};
@@ -281,16 +389,16 @@ const BIRD_DOWN=[
 
 // ---------- 状态 ----------
 let state='ready';   // ready / playing / paused / over
-let dino, obs, clouds, speed, dist, score, distNext;
-let nightAmt=0, groundOff=0, runT=0, flapT=0, overAt=0;
-let manualNight=null, lastAuto=false, shownScore=-1, downHeld=false, fastFall=false;
+let G;               // 核心游戏状态（恐龙/障碍/速度/分数），由纯逻辑核心推进
+let clouds, nightAmt=0, groundOff=0, runT=0, flapT=0, overAt=0;
+let manualNight=null, lastAuto=false, shownScore=-1, pendingJump=false, downHeld=false;
+let aiOn=false, aiTimer=null;
 let best=loadBest(); bestEl.textContent=best;
 function loadBest(){try{return +localStorage.getItem('dinoRunBest')||0}catch(e){return 0}}
 function saveBest(){try{localStorage.setItem('dinoRunBest',best)}catch(e){}}
 
 function reset(){
-  dino={y:GROUND-48,vy:0,onGround:true,duck:false};
-  obs=[]; speed=SPEED0; dist=0; score=0; distNext=420; shownScore=-1;
+  G=core.createState(); shownScore=-1;
   clouds=[{x:140,y:58,v:.5},{x:430,y:34,v:.9},{x:700,y:76,v:.3}];
 }
 function setPanel(){ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';}
@@ -299,68 +407,43 @@ function pause(){if(state!=='playing')return;state='paused';setPanel();}
 function resume(){if(state!=='paused')return;state='playing';setPanel();}
 function gameOver(){
   state='over';overAt=performance.now();
-  const s=Math.floor(score), isNew=s>best&&s>0;
+  const s=Math.floor(G.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计入最高纪录
   if(isNew){best=s;saveBest();bestEl.textContent=best;}
   overTitle.textContent=isNew?'新纪录！':'游戏结束';
-  overInfo.textContent='本局得分 '+s+' · 历史最高 '+best;
+  overInfo.textContent=aiOn?('AI 代玩 · 本局得分 '+s+'（不计最高分）'):('本局得分 '+s+' · 历史最高 '+best);
   setPanel();
-}
-
-// ---------- 障碍生成 ----------
-function spawn(){
-  if(score>240&&speed>7&&Math.random()<0.32){   // 速度起来后才出现翼龙
-    const tops=[180,158,130];                   // 三条航线：高档跑过、中档下蹲、低档必须跳
-    obs.push({type:'bird',x:W+30,top:tops[Math.random()*3|0],w:40,h:20,sp:.4+Math.random()*.6});
-  }else{
-    const big=Math.random()<0.4, n=1+(Math.random()*3|0), cw=big?16:12;
-    obs.push({type:'cactus',x:W+30,w:n*cw+(n-1)*6,h:big?50:34,cw:cw,n:n,sp:0});
+  if(aiOn){                                            // AI 代玩：稍候自动开下一局
+    aiTimer=setTimeout(()=>{aiTimer=null;if(aiOn&&state==='over')start();},900);
   }
-  distNext=300+speed*22+Math.random()*280;      // 间隔随速度拉大，保证可跳
 }
 
-// ---------- 碰撞 ----------
-const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-function dinoBox(){
-  return dino.duck?{x:DINO_X+8,y:GROUND-27,w:48,h:24}:{x:DINO_X+6,y:dino.y+6,w:32,h:40};
-}
-function obsBox(o){
-  return o.type==='bird'?{x:o.x+4,y:o.top+3,w:32,h:14}:{x:o.x+2,y:GROUND-o.h+2,w:o.w-4,h:o.h-2};
-}
+// 障碍生成与碰撞判定已移入上方纯逻辑核心（createDinoCore），渲染层只读状态
 
 // ---------- 逻辑更新（k 为相对 60fps 的时间系数） ----------
 function update(k){
-  speed=Math.min(SPEED_MAX,SPEED0+dist*0.00058);   // 速度渐进加快
-  dist+=speed*k; score=dist*0.032;
-  const si=Math.floor(score);
+  // 输入：AI 代玩时由纯逻辑决策函数给出，否则取人工输入（jump 为本帧一次性意图）
+  const input=aiOn?core.decide(G):{jump:pendingJump,down:downHeld};
+  pendingJump=false;
+  core.step(G,input,k);                             // 物理/生成/碰撞全部在核心内完成
+  if(G.over){gameOver();return;}
+  const si=Math.floor(G.score);
   if(si!==shownScore){                              // 每满 100 分闪烁提示
     if(si>0&&Math.floor(si/100)>Math.floor(shownScore/100)){scoreEl.classList.remove('flash');void scoreEl.offsetWidth;scoreEl.classList.add('flash');}
     shownScore=si; scoreEl.textContent=si;
   }
   // 昼夜：每 400 分自动交替，按钮可手动切换
-  const auto=Math.floor(score/400)%2===1;
+  const auto=Math.floor(G.score/400)%2===1;
   if(auto!==lastAuto){lastAuto=auto;if(manualNight!==null)manualNight=auto;}
   const target=manualNight===null?auto:manualNight;
   nightAmt+=(target-nightAmt)*Math.min(1,.05*k);
   if(Math.abs(target-nightAmt)<.002)nightAmt=target;
   const want=nightAmt>.5?'白昼':'夜间';
   if(dayBtn.textContent!==want)dayBtn.textContent=want;
-  // 恐龙物理
-  if(!dino.onGround){
-    dino.vy+=GRAVITY*(fastFall?2.6:1)*k;
-    dino.y+=dino.vy*k;
-    if(dino.y>=GROUND-48){dino.y=GROUND-48;dino.vy=0;dino.onGround=true;if(downHeld)dino.duck=true;fastFall=false;}
-  }
-  if(dino.onGround)runT+=k;
-  // 云与地面滚动
-  for(const c of clouds){c.x-=(speed*.16+c.v)*k;if(c.x<-60){c.x=W+Math.random()*140;c.y=26+Math.random()*58;}}
-  groundOff=(groundOff+speed*k)%28;
-  // 障碍推进与生成
-  distNext-=speed*k;
-  if(distNext<=0)spawn();
+  if(G.dino.onGround)runT+=k;                       // 跑步动画计时
+  // 云与地面滚动（纯表现，不影响玩法）
+  for(const c of clouds){c.x-=(G.speed*.16+c.v)*k;if(c.x<-60){c.x=W+Math.random()*140;c.y=26+Math.random()*58;}}
+  groundOff=(groundOff+G.speed*k)%28;
   flapT+=k;
-  for(let i=obs.length-1;i>=0;i--){const o=obs[i];o.x-=(speed+o.sp)*k;if(o.x+o.w<-40)obs.splice(i,1);}
-  const db=dinoBox();
-  for(const o of obs){if(hit(db,obsBox(o))){gameOver();return;}}
 }
 
 // ---------- 绘制 ----------
@@ -392,31 +475,30 @@ function draw(){
   ctx.fillStyle=col.ground;
   ctx.fillRect(0,GROUND,W,2);
   for(let x=-groundOff;x<W;x+=28)ctx.fillRect(x,GROUND+9,14,3);
-  for(const o of obs){
+  for(const o of G.obs){
     if(o.type==='cactus')drawCactus(o,col.ink);
     else drawSprite((flapT/10|0)%2?BIRD_DOWN:BIRD_UP,o.x,o.top,2,col.ink);
   }
   let g;
   if(state==='over')g=FRAME.dead;
-  else if(dino.duck)g=(runT/8|0)%2?DUCK2:DUCK1;
-  else if(!dino.onGround)g=FRAME.stand;
+  else if(G.dino.duck)g=(runT/8|0)%2?DUCK2:DUCK1;
+  else if(!G.dino.onGround)g=FRAME.stand;
   else g=(runT/6|0)%2?FRAME.run2:FRAME.run1;
-  drawSprite(g,DINO_X,dino.duck?GROUND-30:dino.y,2,col.ink);
+  drawSprite(g,DINO_X,G.dino.duck?GROUND-30:G.dino.y,2,col.ink);
 }
 
 // ---------- 输入 ----------
 function primary(){          // 空格 / 点击的统一行为：开始、跳跃、重开、继续
   if(state==='ready')start();
-  else if(state==='playing'&&dino.onGround){dino.vy=JUMP_V;dino.onGround=false;dino.duck=false;fastFall=false;}
+  else if(state==='playing'&&!aiOn)pendingJump=true;   // 跳跃意图交给核心本帧处理
   else if(state==='over'&&performance.now()-overAt>500)start();
   else if(state==='paused')resume();
 }
-function pressDown(){        // 下蹲按下：地面变蹲，空中加速落
-  if(state!=='playing')return;
+function pressDown(){        // 下蹲按下：按住状态交给核心（地面变蹲，空中加速落）
+  if(state!=='playing'||aiOn)return;
   downHeld=true;
-  if(dino.onGround)dino.duck=true;else fastFall=true;
 }
-function releaseDown(){downHeld=false;dino.duck=false;fastFall=false;}
+function releaseDown(){downHeld=false;}
 addEventListener('keydown',e=>{
   if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();primary();}
   else if(e.code==='ArrowDown'){e.preventDefault();pressDown();}
@@ -431,6 +513,22 @@ $('btnStart').addEventListener('click',start);
 $('btnRestart').addEventListener('click',start);
 $('btnResume').addEventListener('click',resume);
 dayBtn.addEventListener('click',()=>{manualNight=nightAmt>.5?0:1;});
+
+// ---------- AI 代玩 ----------
+const aiBtn=$('aiBtn'), aiBadge=$('aiBadge');
+function setAi(on){
+  aiOn=on;
+  aiBtn.textContent=on?'停止 AI':'AI 代玩';
+  aiBtn.classList.toggle('ai-on',on);
+  aiBtn.setAttribute('aria-pressed',String(on));
+  aiBadge.hidden=!on;
+  if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}
+  if(on){
+    if(state==='ready'||state==='over')start();      // 待机/结束状态直接开新局
+    else if(state==='paused')resume();               // 暂停中则继续
+  }
+}
+aiBtn.addEventListener('click',()=>setAi(!aiOn));
 // 触屏：画面点按跳，另给两颗大按钮（仅触屏设备显示）
 const btnJump=$('btnJump'), btnDuck=$('btnDuck');
 if('ontouchstart' in window||navigator.maxTouchPoints>0)$('touchBtns').style.display='flex';

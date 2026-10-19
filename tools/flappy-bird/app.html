@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>跳跳鸟 - 拾光集</title>
-<meta name="description" content="跳跳鸟：点击或按空格扇翅上升，穿过成对管道缝隙得分，难度渐进，纯本地运行的网页小游戏。">
+<meta name="description" content="跳跳鸟：点击或按空格扇翅上升，穿过成对管道缝隙得分，难度渐进，支持 AI 代玩，纯本地运行的网页小游戏。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/flappy-bird/app.html">
 <style>
@@ -17,6 +17,10 @@ h1{font-size:19px;font-weight:700}
 .hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
 button{font:inherit;border:0;border-radius:10px;padding:9px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
 button:active{transform:scale(.96)}
+/* AI 代玩按钮与状态标签 */
+.ai-btn{background:#188038;padding:9px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 2px 8px rgba(24,128,56,.30)}
+.ai-btn.ai-on{background:#d93025;box-shadow:0 2px 8px rgba(217,48,37,.30)}
+.ai-tag{color:#188038;font-weight:600}
 .stage{position:relative;max-width:480px;margin:0 auto;border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
 canvas{display:block;width:100%;height:auto;aspect-ratio:360/560;touch-action:none}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.84);text-align:center;cursor:pointer;padding:16px}
@@ -143,7 +147,12 @@ footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
 <div class="card">
   <header>
     <h1>跳跳鸟</h1>
-    <div class="hud"><span>得分 <b id="score">0</b></span><span>最高 <b id="best">0</b></span></div>
+    <div class="hud">
+      <span>得分 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最高分</span>
+    </div>
+    <button type="button" id="aiBtn" class="ai-btn" aria-pressed="false">AI 代玩</button>
   </header>
   <div class="stage" id="stage">
     <canvas id="cv" width="360" height="560"></canvas>
@@ -173,6 +182,8 @@ var stage = document.getElementById('stage');
 var ov = document.getElementById('ov');
 var elScore = document.getElementById('score');
 var elBest = document.getElementById('best');
+var aiBtn = document.getElementById('aiBtn');
+var aiTag = document.getElementById('aiTag');
 
 /* 高分屏适配：物理像素放大，绘制坐标仍按逻辑分辨率 */
 (function fit() {
@@ -187,15 +198,17 @@ var BEST_KEY = 'flappy-bird_best';
 var best = 0;
 try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
 
-/* ================= 游戏状态 ================= */
+/* ================= 界面状态（渲染层） ================= */
 var state = 'ready';   // ready | playing | dying | over | paused
-var score = 0;
-var bird = { y: H * 0.42, vy: 0, rot: 0, wing: 0, boost: 0 };
-var pipes = [];        // { x, gapY, gap, scored }
 var clouds = [];
 var groundOff = 0;     // 地面花纹滚动偏移
 var dieT = 0;          // 死亡坠落计时
 var overGuard = 0;     // 结束界面输入保护期，防手滑立刻重开
+var aiOn = false;      // AI 代玩开关
+
+/* ================= 游戏核心状态 G =================
+   玩法数据全部收在 G 里，由下方纯函数读写；渲染层只读不写。 */
+var G = null;
 
 function newCloud(x) {
   return { x: x, y: 26 + Math.random() * 150, s: 0.7 + Math.random() * 0.9, v: 12 + Math.random() * 14 };
@@ -205,30 +218,260 @@ function resetClouds() {
   for (var i = 0; i < 4; i++) clouds.push(newCloud(Math.random() * W));
 }
 
-/* 难度曲线：分数越高缝隙越窄、速度越快 */
-function gapNow() { return Math.max(GAP_MIN, GAP_START - score * 1.8); }
-function speedNow() { return Math.min(SPEED_MAX, SPEED_START + score * 3.2); }
+/* ================= 难度曲线（纯函数） ================= */
+/* 分数越高缝隙越窄、速度越快 */
+function gapNow(score) { return Math.max(GAP_MIN, GAP_START - score * 1.8); }
+function speedNow(score) { return Math.min(SPEED_MAX, SPEED_START + score * 3.2); }
 
-function spawnPipe(x) {
-  var gap = gapNow();
-  var lastY = pipes.length ? pipes[pipes.length - 1].gapY : H * 0.45;
+/* ================= 纯函数核心（渲染无关；与 ai-sim.mjs 同名实现保持一致） =================
+   约定：不读写任何 DOM；随机源 rng 由调用方注入（页面传 Math.random，模拟脚本传种子随机）。
+   G 结构：
+   { bird: { y, vy, rot/wing/boost 纯装饰 }, pipes: [{ x, gapY, gap, scored }], score } */
+function spawnPipeCore(c, x, rng) {
+  var gap = gapNow(c.score);
+  var lastY = c.pipes.length ? c.pipes[c.pipes.length - 1].gapY : H * 0.45;
   var minY = gap / 2 + 56, maxY = GROUND_Y - gap / 2 - 40;
   /* 缝隙中心相对上一根随机偏移，限制幅度避免出现够不着的跳变 */
-  var gy = lastY + (Math.random() * 2 - 1) * 120;
+  var gy = lastY + (rng() * 2 - 1) * 120;
   gy = Math.max(minY, Math.min(maxY, gy));
-  pipes.push({ x: x, gapY: gy, gap: gap, scored: false });
+  c.pipes.push({ x: x, gapY: gy, gap: gap, scored: false });
 }
 
-function resetGame() {
-  bird.y = H * 0.42; bird.vy = 0; bird.rot = 0; bird.boost = 0;
-  pipes = [];
-  score = 0;
-  spawnPipe(W + 90);
-  syncHud();
+function freshCore(rng) {
+  var c = {
+    bird: {
+      y: H * 0.42, vy: 0,
+      /* ↓ 以下为纯装饰字段，不影响玩法（模拟脚本省略） */
+      rot: 0, wing: 0, boost: 0
+    },
+    pipes: [],
+    score: 0
+  };
+  spawnPipeCore(c, W + 90, rng);
+  return c;
+}
+
+/* 扇翅：瞬间给向上速度 */
+function flapCore(c) { c.bird.vy = FLAP_VY; }
+
+/* 圆与矩形相交（小鸟碰撞体略微缩小，手感更宽容） */
+function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+  var nx = Math.max(rx, Math.min(cx, rx + rw));
+  var ny = Math.max(ry, Math.min(cy, ry + rh));
+  var dx = cx - nx, dy = cy - ny;
+  return dx * dx + dy * dy < cr * cr;
+}
+
+function hitPipeCore(c) {
+  var r = BIRD_R - 2;
+  for (var i = 0; i < c.pipes.length; i++) {
+    var p = c.pipes[i];
+    if (p.x > BIRD_X + r || p.x + PIPE_W < BIRD_X - r) continue;
+    var topH = p.gapY - p.gap / 2;
+    var botY = p.gapY + p.gap / 2;
+    if (circleRect(BIRD_X, c.bird.y, r, p.x, 0, PIPE_W, topH)) return true;
+    if (circleRect(BIRD_X, c.bird.y, r, p.x, botY, PIPE_W, GROUND_Y - botY)) return true;
+  }
+  return false;
+}
+
+/* 核心单步推进：改写 c 并返回 { died, scored } */
+function stepCore(c, dt, rng) {
+  var res = { died: false, scored: 0 };
+  var b = c.bird;
+
+  /* 小鸟物理 */
+  b.vy = Math.min(MAX_FALL, b.vy + GRAVITY * dt);
+  b.y += b.vy * dt;
+  if (b.y < BIRD_R + 2) { b.y = BIRD_R + 2; b.vy = Math.max(b.vy, 0); } /* 撞顶不死，贴顶滑行 */
+
+  /* 管道推进、生成、计分与清理 */
+  var sp = speedNow(c.score);
+  for (var j = 0; j < c.pipes.length; j++) c.pipes[j].x -= sp * dt;
+  if (c.pipes[c.pipes.length - 1].x < W - SPACING) {
+    spawnPipeCore(c, c.pipes[c.pipes.length - 1].x + SPACING, rng);
+  }
+  for (var k = 0; k < c.pipes.length; k++) {
+    var p = c.pipes[k];
+    if (!p.scored && p.x + PIPE_W < BIRD_X - BIRD_R) { p.scored = true; c.score++; res.scored++; }
+  }
+  while (c.pipes.length && c.pipes[0].x + PIPE_W < -80) c.pipes.shift();
+
+  /* 碰撞检测 */
+  if (b.y + BIRD_R >= GROUND_Y) { b.y = GROUND_Y - BIRD_R; res.died = true; }
+  else if (hitPipeCore(c)) res.died = true;
+  return res;
+}
+
+/* ================= AI 决策（纯函数；与 ai-sim.mjs 同名实现保持一致） =================
+   思路（束搜索轨迹规划）：每 replan 秒滚动规划一次——以 1/60 秒为步，
+   对「下一管道窗口 + 再下一管入场」逐帧推演「扇 / 不扇」两条分支：
+   撞管、落地、或到下一窗口入场时赶不进安全带的分支提前判死（死得越晚
+   代价越低）；可行分支按管道窗口内偏离缺口中心、扇翅次数计代价，取
+   代价最小者执行其首个扇翅时刻。换管必须的俯冲/急升瞬态发生在两管
+   之间的开放空域，该处不计偏离代价，避免物理上必要的轨迹被线性目标
+   误剪；赶不上入场的谱系用「连扇 ≈448px/s 爬升 / 自由落体」可达包络
+   提前剪除，防止死路在平价排序里挤占束位。 */
+var AI_CFG = {
+  step: 1 / 60,      // 推演步长（秒）
+  beam: 32,          // 束宽（并行保留的轨迹数）
+  horizon: 1.5,      // 推演总时长上限（秒）
+  qAhead: 0.25,      // 新管道入场后继续推演的时长（秒）
+  wFlap: 1.2,        // 每次扇翅的固定代价
+  wDev: 0.03,        // 管道窗口内每步每像素偏离缺口中心的代价
+  wVy: 0.02,         // 终端竖直速度代价
+  wEnd: 0.06,        // 终端高度偏离代价
+  margin: 2,         // 安全带收缩（px，容忍时序抖动）
+  edge: 14,          // 目标点距安全带边缘的最小距离（px）
+  replan: 0.2,       // 重规划周期（秒）
+  cruise: 0.42       // 无管道时的巡航高度系数（×H）
+};
+
+/* 下一根需要穿过的管道（尚未完全越过小鸟的那根） */
+function aiNextPipe(c) {
+  for (var i = 0; i < c.pipes.length; i++) {
+    var p = c.pipes[i];
+    if (p.x + PIPE_W > BIRD_X - BIRD_R) return p;
+  }
+  return null;
+}
+
+/* 束搜索规划：返回 { t0, flaps（相对 t0 的扇翅时刻表，秒）, nextReplan } */
+function aiPlan(c) {
+  var p = aiNextPipe(c);
+  var sp = speedNow(c.score);
+  var r = BIRD_R - 2;
+  var ceilY = BIRD_R + 2, floorY = GROUND_Y - BIRD_R;
+  var step = AI_CFG.step;
+  var tInP = 0, tOutP = -1, tInQ = Infinity, tOutQ = Infinity, q = null;
+  var pLo = 0, pHi = 0, qLo = 0, qHi = 0;
+  if (p) {
+    tInP = Math.max(0, (p.x - BIRD_X - r) / sp);
+    tOutP = (p.x + PIPE_W - BIRD_X + r) / sp;
+    pLo = p.gapY - p.gap / 2 + r + AI_CFG.margin;
+    pHi = p.gapY + p.gap / 2 - r - AI_CFG.margin;
+    var idx = c.pipes.indexOf(p);
+    if (idx + 1 < c.pipes.length) {
+      q = c.pipes[idx + 1];
+      tInQ = (q.x - BIRD_X - r) / sp;
+      tOutQ = (q.x + PIPE_W - BIRD_X + r) / sp;
+      qLo = q.gapY - q.gap / 2 + r + AI_CFG.margin;
+      qHi = q.gapY + q.gap / 2 - r - AI_CFG.margin;
+    }
+  }
+  var tEnd = Math.min(AI_CFG.horizon, isFinite(tInQ) ? tInQ + AI_CFG.qAhead : Math.max(tOutP, 0) + 0.6);
+  var nSteps = Math.max(1, Math.ceil(tEnd / step - 1e-9));
+
+  /* 每步安全带与目标高度：数组按步末时刻索引，与帧末碰撞检测对齐；
+     目标沿「p 中心 → q 中心」斜坡过渡并钳在安全带内距边缘 edge 处 */
+  var qG = q ? q.gapY : (p ? p.gapY : H * AI_CFG.cruise);
+  var cruiseY = H * AI_CFG.cruise;
+  var lo = new Float64Array(nSteps), hi = new Float64Array(nSteps), ctr = new Float64Array(nSteps), soft = new Float64Array(nSteps);
+  for (var k = 0; k < nSteps; k++) {
+    var t = (k + 1) * step;
+    var bandLo = ceilY, bandHi = floorY, inWin = false;
+    if (p && t >= tInP && t < tOutP) {
+      bandLo = pLo; bandHi = pHi; inWin = true;
+    } else if (q && t >= tInQ && t < tOutQ) {
+      bandLo = qLo; bandHi = qHi; inWin = true;
+    }
+    lo[k] = bandLo; hi[k] = bandHi;
+    /* 偏离代价只在管道窗口内生效：换管必须的俯冲/急升瞬态不罚 */
+    soft[k] = inWin ? 1 : 0;
+    var aimFrom = p ? p.gapY : cruiseY;
+    var aimTo = q ? qG : cruiseY;
+    var s = 0;
+    if (q && isFinite(tInQ)) s = Math.max(0, Math.min(1, (t - tInP) / (tInQ - tInP)));
+    else if (!p) s = 1;
+    else if (t > tInP) s = Math.min(1, (t - tInP) / ((tOutP - tInP) + 0.6));
+    var ramp = aimFrom + (aimTo - aimFrom) * s;
+    var pad = Math.min(AI_CFG.edge, Math.max(0, (bandHi - bandLo) / 2));
+    ctr[k] = Math.max(bandLo + pad, Math.min(bandHi - pad, ramp));
+  }
+
+  /* 下一窗口入场信息（可达性剪枝用） */
+  function nextWin(t) {
+    if (p && t < tInP) return { T: tInP - t, lo: pLo, hi: pHi };
+    if (q && isFinite(tInQ) && t < tInQ) return { T: tInQ - t, lo: qLo, hi: qHi };
+    return null;
+  }
+  /* 从 (y, vy) 出发 T 秒后能否进入 [lo, hi]：连扇 ≈448px/s 爬升与自由落体的可达包络 */
+  function reachOk(y, vy, T, w) {
+    var yBot;
+    if (vy + GRAVITY * T <= MAX_FALL) yBot = y + vy * T + 0.5 * GRAVITY * T * T;
+    else {
+      var tc = (MAX_FALL - vy) / GRAVITY;
+      yBot = y + vy * tc + 0.5 * GRAVITY * tc * tc + MAX_FALL * (T - tc);
+    }
+    var yTop = Math.max(ceilY, y - 448 * T);
+    return yTop <= w.hi + 1 && yBot >= w.lo - 1;
+  }
+
+  var DEATH = 1e6, DEATH_SLOPE = 500;
+  /* 状态用父指针串起扇翅历史，搜索期间不拼数组，结束后回溯 */
+  var beam = [{ y: c.bird.y, vy: c.bird.vy, cost: 0, dead: false, prev: null, flapT: -1 }];
+  var next = new Array(2 * AI_CFG.beam);
+  for (var k2 = 0; k2 < nSteps; k2++) {
+    var n = 0;
+    for (var bi = 0; bi < beam.length; bi++) {
+      var st = beam[bi];
+      for (var a = 0; a < 2; a++) {
+        if (st.dead && a) continue;
+        var y = st.y, vy = a ? FLAP_VY : st.vy;
+        var cost = st.cost + (a ? AI_CFG.wFlap : 0);
+        var dead = st.dead;
+        if (!dead) {
+          vy = Math.min(MAX_FALL, vy + GRAVITY * step);
+          y += vy * step;
+          if (y < ceilY) { y = ceilY; vy = Math.max(vy, 0); }
+          if (y >= floorY || y < lo[k2] || y > hi[k2]) {
+            dead = true;
+            cost += DEATH + (nSteps - k2 - 1) * DEATH_SLOPE;
+          } else {
+            cost += AI_CFG.wDev * soft[k2] * Math.abs(y - ctr[k2]);
+            /* 可达性剪枝：到下一窗口入场时赶不进安全带的谱系提前判死 */
+            var w = nextWin((k2 + 1) * step);
+            if (w && w.T > step && !reachOk(y, vy, w.T, w)) {
+              dead = true;
+              cost += DEATH + (nSteps - k2 - 1) * DEATH_SLOPE;
+            }
+          }
+        }
+        next[n++] = { y: y, vy: vy, cost: cost, dead: dead, prev: st, flapT: a ? k2 * step : -1 };
+      }
+    }
+    if (!n) break;
+    next.length = n;
+    next.sort(function (x, z) { return x.cost - z.cost; });
+    beam = next.slice(0, AI_CFG.beam);
+  }
+  /* 终端代价：贴近下一目标中心、速度温和 */
+  for (var i2 = 0; i2 < beam.length; i2++) {
+    var st2 = beam[i2];
+    if (!st2.dead) st2.cost += AI_CFG.wEnd * Math.abs(st2.y - ctr[nSteps - 1]) + AI_CFG.wVy * Math.abs(st2.vy);
+  }
+  beam.sort(function (x, z) { return x.cost - z.cost; });
+  /* 回溯最优轨迹的扇翅时刻表 */
+  var flaps = [];
+  for (var st3 = beam[0]; st3; st3 = st3.prev) if (st3.flapT >= 0) flaps.unshift(st3.flapT);
+  return { t0: c.aiT, flaps: flaps, nextReplan: c.aiT + AI_CFG.replan };
+}
+
+/* 每帧决策：到期就取计划里的下一个扇翅时刻；到重规划周期就滚动重规划 */
+function aiShouldFlap(c, dt) {
+  if (c.aiT === undefined) { c.aiT = 0; c.aiPlan = null; }
+  c.aiT += dt;
+  if (!c.aiPlan || c.aiT >= c.aiPlan.nextReplan) c.aiPlan = aiPlan(c);
+  var pl = c.aiPlan;
+  if (pl.flaps.length && c.aiT >= pl.t0 + pl.flaps[0] - 1e-9) {
+    pl.flaps.shift();
+    return true;
+  }
+  return false;
 }
 
 /* ================= HUD 与覆盖层 ================= */
-function syncHud() { elScore.textContent = score; elBest.textContent = best; }
+function syncHud() { elScore.textContent = G.score; elBest.textContent = best; }
 function showOverlay(html) { ov.innerHTML = html; ov.hidden = false; }
 function hideOverlay() { ov.hidden = true; }
 
@@ -237,7 +480,7 @@ function showStart() {
     '<h2>跳跳鸟</h2>' +
     '<p>穿过成对管道缝隙得分<br>撞上管道或落地即结束</p>' +
     '<button type="button">开始游戏</button>' +
-    '<p>点击画面 / 空格键 扇翅</p>'
+    '<p>点击画面 / 空格键 扇翅<br>也可点击右上角「AI 代玩」由 AI 自动游玩</p>'
   );
 }
 function showPause() {
@@ -246,16 +489,17 @@ function showPause() {
 function showOver() {
   state = 'over';
   overGuard = 0.6;
-  var isNew = score > best;
+  var isNew = !aiOn && G.score > best;   // AI 代玩成绩不计入最高纪录
   if (isNew) {
-    best = score;
+    best = G.score;
     try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
   }
   syncHud();
   showOverlay(
-    '<h2>' + (isNew ? '新纪录！' : '游戏结束') + '</h2>' +
-    '<div class="big">' + score + '</div>' +
+    '<h2>' + (isNew ? '新纪录！' : (aiOn ? 'AI 本局结束' : '游戏结束')) + '</h2>' +
+    '<div class="big">' + G.score + '</div>' +
     '<p>最高纪录 ' + best + '</p>' +
+    (aiOn ? '<p>AI 代玩中，即将自动开始下一局（成绩不计入纪录）</p>' : '') +
     '<button type="button">再来一局</button>'
   );
 }
@@ -273,87 +517,81 @@ function resumeGame() {
 function die() {
   state = 'dying';
   dieT = 0;
-  bird.vy = Math.min(bird.vy, -150); /* 撞击瞬间轻微上弹再坠落 */
+  G.bird.vy = Math.min(G.bird.vy, -150); /* 撞击瞬间轻微上弹再坠落 */
   if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
 }
 function flap() {
-  bird.vy = FLAP_VY;
-  bird.boost = 0.28; /* 加速扇翅的时间窗 */
+  flapCore(G);
+  G.bird.boost = 0.28; /* 加速扇翅的时间窗（纯装饰） */
 }
 function act() {
+  if (aiOn) return;   // AI 全权接管，忽略手动输入
   if (state === 'ready') startGame();
   else if (state === 'playing') flap();
   else if (state === 'paused') resumeGame();
   else if (state === 'over' && overGuard <= 0) startGame();
 }
+function resetGame() {
+  G = freshCore(Math.random);
+  syncHud();
+}
+
+/* ================= AI 代玩控制 ================= */
+/* 每帧调用：衔接界面状态（自动开局/续局/恢复），并在 playing 时逐帧决策是否扇翅 */
+function aiTick(dt) {
+  if (!aiOn) return;
+  if (state === 'ready') { startGame(); return; }
+  if (state === 'paused') { resumeGame(); return; }
+  if (state === 'over') { if (overGuard <= 0) startGame(); return; }
+  if (state !== 'playing') return;
+  if (aiShouldFlap(G, dt)) flap();
+}
+function setAi(on) {
+  aiOn = on;
+  aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
+  aiBtn.classList.toggle('ai-on', aiOn);
+  aiBtn.setAttribute('aria-pressed', String(aiOn));
+  aiTag.hidden = !aiOn;
+  if (aiOn) {
+    if (state === 'ready') startGame();
+    else if (state === 'paused') resumeGame();
+    else if (state === 'over' && overGuard <= 0) startGame();
+  }
+}
+aiBtn.addEventListener('click', function () { setAi(!aiOn); });
 
 /* ================= 更新 ================= */
 function update(dt) {
   /* 背景元素在任何状态下都保持轻微活动 */
-  groundOff = (groundOff + (state === 'playing' ? speedNow() : SPEED_START * 0.4) * dt) % 24;
+  groundOff = (groundOff + (state === 'playing' ? speedNow(G.score) : SPEED_START * 0.4) * dt) % 24;
   for (var i = 0; i < clouds.length; i++) {
     var c = clouds[i];
-    c.x -= (c.v + (state === 'playing' ? speedNow() * 0.12 : 0)) * dt;
+    c.x -= (c.v + (state === 'playing' ? speedNow(G.score) * 0.12 : 0)) * dt;
     if (c.x < -70) clouds[i] = newCloud(W + 70);
   }
   if (state === 'playing' || state === 'ready') {
-    bird.wing += dt * (bird.boost > 0 ? 30 : 10);
+    G.bird.wing += dt * (G.bird.boost > 0 ? 30 : 10);
   }
 
   if (state === 'playing') {
-    /* 小鸟物理 */
-    bird.vy = Math.min(MAX_FALL, bird.vy + GRAVITY * dt);
-    bird.y += bird.vy * dt;
-    bird.boost = Math.max(0, bird.boost - dt);
-    if (bird.y < BIRD_R + 2) { bird.y = BIRD_R + 2; bird.vy = Math.max(bird.vy, 0); } /* 撞顶不死，贴顶滑行 */
-
-    /* 管道推进、生成、计分与清理 */
-    var sp = speedNow();
-    for (var j = 0; j < pipes.length; j++) pipes[j].x -= sp * dt;
-    if (pipes[pipes.length - 1].x < W - SPACING) spawnPipe(pipes[pipes.length - 1].x + SPACING);
-    for (var k = 0; k < pipes.length; k++) {
-      var p = pipes[k];
-      if (!p.scored && p.x + PIPE_W < BIRD_X - BIRD_R) { p.scored = true; score++; syncHud(); }
-    }
-    while (pipes.length && pipes[0].x + PIPE_W < -80) pipes.shift();
-
-    /* 碰撞检测 */
-    if (bird.y + BIRD_R >= GROUND_Y) { bird.y = GROUND_Y - BIRD_R; die(); }
-    else if (hitPipe()) die();
-
-    /* 姿态：上升抬头，下降低头 */
-    bird.rot = Math.max(-0.42, Math.min(1.25, bird.vy / 520));
+    /* 玩法推进交给纯函数核心 */
+    var ev = stepCore(G, dt, Math.random);
+    G.bird.boost = Math.max(0, G.bird.boost - dt);
+    /* 姿态：上升抬头，下降低头（纯表现） */
+    G.bird.rot = Math.max(-0.42, Math.min(1.25, G.bird.vy / 520));
+    if (ev.scored) syncHud();
+    if (ev.died) { die(); return; }
   } else if (state === 'dying') {
-    /* 死亡坠落：管道停止，小鸟落到地面后展示结算 */
-    bird.vy = Math.min(MAX_FALL, bird.vy + GRAVITY * dt);
-    bird.y += bird.vy * dt;
-    bird.rot = Math.min(1.5, bird.rot + dt * 5);
-    if (bird.y + BIRD_R >= GROUND_Y) {
-      bird.y = GROUND_Y - BIRD_R;
+    /* 死亡坠落：管道停止，小鸟落到地面后展示结算（纯表现） */
+    G.bird.vy = Math.min(MAX_FALL, G.bird.vy + GRAVITY * dt);
+    G.bird.y += G.bird.vy * dt;
+    G.bird.rot = Math.min(1.5, G.bird.rot + dt * 5);
+    if (G.bird.y + BIRD_R >= GROUND_Y) {
+      G.bird.y = GROUND_Y - BIRD_R;
       dieT += dt;
       if (dieT > 0.55) showOver();
     }
   }
-}
-
-/* 圆与矩形相交（小鸟碰撞体略微缩小，手感更宽容） */
-function hitPipe() {
-  var r = BIRD_R - 2;
-  for (var i = 0; i < pipes.length; i++) {
-    var p = pipes[i];
-    if (p.x > BIRD_X + r || p.x + PIPE_W < BIRD_X - r) continue;
-    var topH = p.gapY - p.gap / 2;
-    var botY = p.gapY + p.gap / 2;
-    if (circleRect(BIRD_X, bird.y, r, p.x, 0, PIPE_W, topH)) return true;
-    if (circleRect(BIRD_X, bird.y, r, p.x, botY, PIPE_W, GROUND_Y - botY)) return true;
-  }
-  return false;
-}
-function circleRect(cx, cy, cr, rx, ry, rw, rh) {
-  var nx = Math.max(rx, Math.min(cx, rx + rw));
-  var ny = Math.max(ry, Math.min(cy, ry + rh));
-  var dx = cx - nx, dy = cy - ny;
-  return dx * dx + dy * dy < cr * cr;
 }
 
 /* ================= 绘制 ================= */
@@ -394,8 +632,8 @@ function hill(cx, baseY, w, h) {
   ctx.fill();
 }
 function drawPipes() {
-  for (var i = 0; i < pipes.length; i++) {
-    var p = pipes[i];
+  for (var i = 0; i < G.pipes.length; i++) {
+    var p = G.pipes[i];
     var topH = p.gapY - p.gap / 2;
     var botY = p.gapY + p.gap / 2;
     drawPipe(p.x, 0, topH, true);
@@ -444,6 +682,7 @@ function drawGround() {
 }
 /* 小鸟：几何图形拼装（椭圆身体 + 扇动翅膀 + 眼睛 + 喙 + 尾羽） */
 function drawBird() {
+  var bird = G.bird;
   ctx.save();
   ctx.translate(BIRD_X, bird.y);
   ctx.rotate(bird.rot);
@@ -511,6 +750,7 @@ function loop(now) {
   var dt = Math.min((now - lastFrame) / 1000, 0.05);
   lastFrame = now;
   if (overGuard > 0) overGuard -= dt;
+  aiTick(dt);
   update(dt);
   draw();
   requestAnimationFrame(loop);
@@ -562,6 +802,11 @@ requestAnimationFrame(loop);
       <h3>操作</h3>
       <ul>
         <li>点击 / 轻触 / 空格 / ↑ / 回车：扇翅</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点击「AI 代玩」按钮，AI 自动判断扇翅时机穿管道并自动续局</li>
+        <li>随时再点一次按钮即可停止；AI 成绩不计入最高纪录</li>
       </ul>
     </div>
   </aside>

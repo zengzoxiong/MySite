@@ -71,6 +71,12 @@ body {
 .btn.primary { background:var(--primary); color:#fff; }
 .btn.primary:active { transform:scale(.97); }
 .tip { color:#9aa3af; font-size:12.5px; margin-top:12px; text-align:center; }
+/* AI 代玩按钮与状态徽标 */
+.ai-btn { background:var(--primary); color:#fff; border:0; border-radius:10px; padding:8px 16px; font-size:14px; cursor:pointer; }
+.ai-btn.ai-on { background:#d93025; }
+.ai-badge { position:absolute; top:10px; right:12px; z-index:6; background:rgba(47,158,68,.92); color:#fff;
+  font-size:12px; font-weight:600; padding:4px 12px; border-radius:999px; letter-spacing:1px;
+  pointer-events:none; box-shadow:0 2px 8px rgba(47,158,68,.35); }
 /* 敲击锤子：pointerdown 处冒出，快速砸下并淡出 */
 .hammer { position:absolute; width:64px; height:64px; pointer-events:none; z-index:8;
   transform-origin:46px 52px; animation:whack .24s ease-out forwards; }
@@ -208,9 +214,11 @@ body {
       <span>连击 <b id="hudCombo">0</b></span>
       <span>时间 <b id="hudTime">30</b></span>
       <span>最高分 <b id="hudBest">0</b></span>
+      <button id="aiBtn" class="ai-btn" type="button" aria-pressed="false">AI 代玩</button>
     </div>
     <div id="stage" class="stage">
       <div id="holes" class="holes"></div>
+      <div id="aiBadge" class="ai-badge" hidden>AI 代玩中 · 不计最高分</div>
       <div id="overlay" class="overlay">
         <div id="startView">
           <h2>准备好了吗</h2>
@@ -223,6 +231,7 @@ body {
           <p id="endNew" class="ov-new" hidden>新纪录！</p>
           <p class="ov-score">本局得分 <b id="endScore">0</b></p>
           <p class="ov-best">最高分 <b id="endBest">0</b></p>
+          <p id="endAiNote" class="ov-best" hidden>AI 代玩中 · 成绩不计入最高分，稍后自动开下一局</p>
           <button id="btnAgain" class="btn primary" type="button">再来一局</button>
         </div>
       </div>
@@ -284,16 +293,12 @@ const ovBestStart = document.getElementById('ovBestStart');
 const endScore = document.getElementById('endScore');
 const endBest = document.getElementById('endBest');
 const endNew = document.getElementById('endNew');
+const endAiNote = document.getElementById('endAiNote');
+const aiBtn = document.getElementById('aiBtn');
+const aiBadge = document.getElementById('aiBadge');
 
-/* ================= 游戏状态 ================= */
-const TOTAL_TIME = 30;   // 一局时长（秒）
-const BOMB_RATE = 0.15;  // 炸弹出现概率
-let holes = [];
-let score = 0, combo = 0, timeLeft = TOTAL_TIME, playing = false;
-let bestScore = 0;
-let spawnTimer = null, countdownTimer = null;
-
-/* ================= 生成 9 个地洞 ================= */
+/* ================= 生成 9 个地洞（渲染层只读核心状态，逐帧同步） ================= */
+const holeEls = [], actorEls = [];
 for (let i = 0; i < 9; i++) {
   const el = document.createElement('div');
   el.className = 'hole';
@@ -301,16 +306,14 @@ for (let i = 0; i < 9; i++) {
   el.setAttribute('aria-label', '地洞');
   el.innerHTML = '<span class="mound"></span><span class="actor"></span>';
   holesEl.appendChild(el);
-  holes.push({
-    el: el,
-    actor: el.querySelector('.actor'),
-    busy: false,   // 该洞是否被占用（冒头 + 收回清理中）
-    up: false,     // 地鼠 / 炸弹是否处于冒头状态
-    hit: false,    // 本轮是否已被点中，防重复计分
-    hideTimer: null,
-    cleanTimer: null
-  });
+  holeEls.push(el);
+  actorEls.push(el.querySelector('.actor'));
 }
+
+/* ================= 页面状态（玩法状态在下方纯逻辑核心内） ================= */
+let bestScore = 0;
+let phase = 'ready';   // ready / playing / over
+let G = null;          // 核心游戏状态（洞 / 得分 / 连击 / 计时），由纯逻辑核心推进
 
 /* ================= 轻量音效（WebAudio 本地生成，失败静默） ================= */
 let actx = null;
@@ -329,48 +332,136 @@ function beep(freq, dur, type) {
   } catch (e) { /* 音频不可用时静默 */ }
 }
 
-/* ================= 难度曲线：分数越高，地鼠停留越短、刷新越密 ================= */
-function popDuration() { return Math.max(520, 1050 - score * 12); }
-function gapDuration() { return Math.max(280, 560 - score * 8) + Math.random() * 220; }
+/* ================= 纯逻辑核心：游戏状态、单步推进、命中结算、AI 决策 =================
+   createWhackCore 是纯函数工厂：状态为 9 洞 + 得分/连击/计时的普通对象，
+   推进、命中、AI 决策全部不碰 DOM。同一份函数源码两处复用——页面主循环、
+   ai-sim.mjs（按 WHACK_CORE_START / WHACK_CORE_END 标记提取后跑批量模拟），
+   天然保持一致。AI 算法：定时扫描（每 AI_TICK_MS 一次），只敲冒头且未敲过的
+   地鼠，多只同时冒头时优先敲快收回的，炸弹一律不碰。 */
+/* ===== WHACK_CORE_START（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+function createWhackCore(rand) {
+  'use strict';
+  const TOTAL_TIME = 30;    // 一局时长（秒）
+  const BOMB_RATE = 0.15;   // 刷出炸弹的概率
+  const CLEAN_MS = 180;     // 收回到洞口彻底空闲的清理时长（毫秒）
+  const AI_TICK_MS = 60;    // AI 扫描决策节拍（毫秒，页面与模拟共用）
+  /* 难度曲线：分数越高，地鼠停留越短、刷新越密 */
+  function popDuration(score) { return Math.max(520, 1050 - score * 12); }
+  function gapDuration(score) { return Math.max(280, 560 - score * 8) + rand() * 220; }
 
-/* ================= 冒头 / 收回 ================= */
-function popHole(h) {
-  h.busy = true; h.up = true; h.hit = false;
-  const isBomb = Math.random() < BOMB_RATE;
-  h.actor.innerHTML = isBomb ? BOMB_SVG : MOLE_SVG;
-  h.actor.classList.add(isBomb ? 'bomb' : 'mole');
-  h.el.classList.add('up');
-  h.hideTimer = setTimeout(() => hideHole(h), popDuration());
-}
-function hideHole(h) {
-  if (!h.up) return;
-  h.up = false;
-  clearTimeout(h.hideTimer);
-  h.el.classList.remove('up');
-  if (h.cleanTimer) return;   // 已在清理阶段，避免重复安排导致状态卡死
-  h.cleanTimer = setTimeout(() => {
-    h.cleanTimer = null;
-    h.actor.innerHTML = '';
-    h.actor.classList.remove('mole', 'bomb');
-    h.busy = false; h.hit = false;
-  }, 180);
-}
-/* 结束时彻底复位某个洞 */
-function resetHole(h) {
-  clearTimeout(h.hideTimer); clearTimeout(h.cleanTimer);
-  h.hideTimer = null; h.cleanTimer = null;
-  h.busy = false; h.up = false; h.hit = false;
-  h.actor.innerHTML = '';
-  h.actor.classList.remove('mole', 'bomb');
-  h.el.classList.remove('up');
-}
+  /* 状态：holes[i] = { busy, up, kind(0 空 / 1 地鼠 / 2 炸弹), hit, hideIn, cleanIn }，
+     hideIn / cleanIn 为剩余毫秒数；elapsedMs 为本局已用毫秒 */
+  function createState() {
+    const holes = [];
+    for (let i = 0; i < 9; i++) {
+      holes.push({ busy: false, up: false, kind: 0, hit: false, hideIn: 0, cleanIn: 0 });
+    }
+    return { holes: holes, score: 0, combo: 0, elapsedMs: 0, spawnIn: 500, playing: true };
+  }
 
-/* ================= 刷怪循环：只在空闲洞冒头 ================= */
-function spawnLoop() {
-  if (!playing) return;
-  const idle = holes.filter(h => !h.busy);
-  if (idle.length) popHole(idle[Math.floor(Math.random() * idle.length)]);
-  spawnTimer = setTimeout(spawnLoop, gapDuration());
+  /* 单步推进 dt 毫秒：计时、自动收回、清理、刷怪，就地更新并返回 st */
+  function step(st, dt) {
+    if (!st.playing) return st;
+    st.elapsedMs += dt;
+    if (st.elapsedMs >= TOTAL_TIME * 1000) {   // 时间到：收尾复位所有洞
+      st.elapsedMs = TOTAL_TIME * 1000;
+      st.playing = false;
+      for (let i = 0; i < st.holes.length; i++) {
+        const h = st.holes[i];
+        h.busy = false; h.up = false; h.hit = false; h.kind = 0; h.hideIn = 0; h.cleanIn = 0;
+      }
+      return st;
+    }
+    for (let i = 0; i < st.holes.length; i++) {
+      const h = st.holes[i];
+      if (h.up) {
+        h.hideIn -= dt;
+        if (h.hideIn <= 0) { h.up = false; h.hideIn = 0; h.cleanIn = CLEAN_MS; }
+      } else if (h.cleanIn > 0) {
+        h.cleanIn -= dt;
+        if (h.cleanIn <= 0) { h.cleanIn = 0; h.busy = false; h.hit = false; h.kind = 0; }
+      }
+    }
+    /* 刷怪：按节奏在随机空闲洞冒头，无空闲洞则顺延下一拍 */
+    st.spawnIn -= dt;
+    while (st.spawnIn <= 0) {
+      const idle = [];
+      for (let i = 0; i < st.holes.length; i++) if (!st.holes[i].busy) idle.push(i);
+      if (idle.length) {
+        const h = st.holes[idle[Math.floor(rand() * idle.length)]];
+        h.busy = true; h.up = true; h.hit = false;
+        h.kind = rand() < BOMB_RATE ? 2 : 1;
+        h.hideIn = popDuration(st.score);
+        h.cleanIn = 0;
+      }
+      st.spawnIn += gapDuration(st.score);
+    }
+    return st;
+  }
+
+  /* 命中第 i 洞：地鼠按连击加分（每连 +2、加成最高 +20）、炸弹扣 20 分清连击；返回 { bomb, gain }，
+     未冒头 / 已敲过 / 不在局中返回 null */
+  function hit(st, i) {
+    const h = st.holes[i];
+    if (!st.playing || !h || !h.up || h.hit) return null;
+    h.hit = true; h.up = false; h.hideIn = 0; h.cleanIn = CLEAN_MS;
+    if (h.kind === 2) {
+      st.score = Math.max(0, st.score - 20);
+      st.combo = 0;
+      return { bomb: true, gain: -20 };
+    }
+    const gain = 10 + Math.min(st.combo, 10) * 2;
+    st.combo++;
+    st.score += gain;
+    return { bomb: false, gain: gain };
+  }
+
+  /* AI 决策：返回应敲击的洞下标，无目标返回 -1。
+     定时扫描冒头地鼠即敲，多只同冒头优先敲剩余停留时间最短的；炸弹不碰 */
+  function decide(st) {
+    if (!st.playing) return -1;
+    let best = -1, bestHideIn = Infinity;
+    for (let i = 0; i < st.holes.length; i++) {
+      const h = st.holes[i];
+      if (h.up && !h.hit && h.kind === 1 && h.hideIn < bestHideIn) { best = i; bestHideIn = h.hideIn; }
+    }
+    return best;
+  }
+
+  /* HUD 用剩余秒数 */
+  function timeLeft(st) {
+    return Math.max(0, TOTAL_TIME - Math.floor(st.elapsedMs / 1000));
+  }
+
+  return {
+    TOTAL_TIME: TOTAL_TIME, BOMB_RATE: BOMB_RATE, CLEAN_MS: CLEAN_MS, AI_TICK_MS: AI_TICK_MS,
+    popDuration: popDuration, gapDuration: gapDuration,
+    createState: createState, step: step, hit: hit, decide: decide, timeLeft: timeLeft
+  };
+}
+/* ===== WHACK_CORE_END ===== */
+
+const core = createWhackCore(Math.random);   // 页面实例：推进 / 判定 / AI 全部来自纯逻辑核心
+
+/* 渲染层同步：把核心状态映射到洞口 DOM（升 / 降 / 清理三态） */
+function syncHoles() {
+  for (let i = 0; i < 9; i++) {
+    const h = G.holes[i], el = holeEls[i], act = actorEls[i];
+    el.classList.toggle('up', h.up);
+    if (h.busy) {
+      const kind = h.kind === 2 ? 'bomb' : 'mole';
+      if (act.dataset.kind !== kind) {
+        act.dataset.kind = kind;
+        act.innerHTML = kind === 'bomb' ? BOMB_SVG : MOLE_SVG;
+        act.classList.toggle('bomb', kind === 'bomb');
+        act.classList.toggle('mole', kind === 'mole');
+      }
+    } else if (act.dataset.kind) {
+      delete act.dataset.kind;
+      act.innerHTML = '';
+      act.classList.remove('mole', 'bomb');
+    }
+  }
 }
 
 /* ================= 敲击锤子：pointerdown 处砸一下（纯视觉，结算仍由 click 处理） ================= */
@@ -382,112 +473,159 @@ const HAMMER_SVG =
       '<rect x="34" y="4" width="28" height="8" rx="4" fill="#795548"/>' +
     '</g>' +
   '</svg>';
-stage.addEventListener('pointerdown', (e) => {
-  if (!playing) return;
-  const rect = stage.getBoundingClientRect();
+/* 在舞台坐标 (x, y) 处砸一下锤子（纯视觉，结算仍由命中处理） */
+function showHammer(x, y) {
   const h = document.createElement('div');
   h.className = 'hammer';
   h.innerHTML = HAMMER_SVG;
-  h.style.left = (e.clientX - rect.left - 46) + 'px';  // 让锤头（右上区域）对准落点
-  h.style.top = (e.clientY - rect.top - 14) + 'px';
+  h.style.left = (x - 46) + 'px';  // 让锤头（右上区域）对准落点
+  h.style.top = (y - 14) + 'px';
   stage.appendChild(h);
   setTimeout(() => h.remove(), 280);
+}
+stage.addEventListener('pointerdown', (e) => {
+  if (phase !== 'playing') return;
+  const rect = stage.getBoundingClientRect();
+  showHammer(e.clientX - rect.left, e.clientY - rect.top);
 });
 
-/* ================= 命中判定（事件委托，只有冒头状态可命中） ================= */
-holesEl.addEventListener('click', (e) => {
-  if (!playing) return;
-  const holeEl = e.target.closest('.hole');
-  if (!holeEl) return;
-  const h = holes[Number(holeEl.dataset.i)];
-  if (!h.up || h.hit) return;
-  if (!e.target.closest('.actor svg')) return; // 洞口空白处不算命中，必须敲在地鼠/炸弹身上
-  h.hit = true;
-  if (h.actor.classList.contains('bomb')) {
+/* ================= 命中处理（人工点击与 AI 共用，判定在核心内） ================= */
+function doHit(i, fromAi) {
+  const res = core.hit(G, i);
+  if (!res) return;
+  if (fromAi) {
+    /* AI 敲击：锤子落在该洞地鼠身上 */
+    const r = actorEls[i].getBoundingClientRect();
+    const sr = stage.getBoundingClientRect();
+    showHammer(r.left + r.width / 2 - sr.left, r.top + r.height * 0.45 - sr.top);
+  }
+  if (res.bomb) {
     /* 点中炸弹：扣分并清空连击，舞台抖动 */
-    score = Math.max(0, score - 20);
-    combo = 0;
     beep(140, 0.3, 'sawtooth');
-    floatText(h, '-20', '#dc2626');
+    floatText(holeEls[i], '-20', '#dc2626');
     stage.classList.remove('shake');
     void stage.offsetWidth;   // 强制回流，保证抖动动画可重播
     stage.classList.add('shake');
     setTimeout(() => stage.classList.remove('shake'), 350);
   } else {
-    /* 点中地鼠：连击加成（先按当前连击算加成，再自增） */
-    const gain = 10 + Math.min(combo, 5) * 2;
-    combo++;
-    score += gain;
+    /* 点中地鼠：连击加成由核心结算 */
     beep(880, 0.09);
-    floatText(h, '+' + gain, '#2f9e44');
+    floatText(holeEls[i], '+' + res.gain, '#2f9e44');
   }
   renderHud();
-  hideHole(h);
+  syncHoles();
+}
+
+/* 命中判定（事件委托，只有冒头状态可命中） */
+holesEl.addEventListener('click', (e) => {
+  if (phase !== 'playing') return;
+  const holeEl = e.target.closest('.hole');
+  if (!holeEl) return;
+  if (!e.target.closest('.actor svg')) return; // 洞口空白处不算命中，必须敲在地鼠/炸弹身上
+  doHit(Number(holeEl.dataset.i), false);
 });
 
 /* 命中处飘分文字，750ms 后兜底移除（不依赖 animationend） */
-function floatText(h, text, color) {
+function floatText(holeEl, text, color) {
   const s = document.createElement('span');
   s.className = 'float-txt';
   s.textContent = text;
   s.style.color = color;
-  h.el.appendChild(s);
+  holeEl.appendChild(s);
   setTimeout(() => s.remove(), 750);
 }
 
 /* ================= HUD ================= */
 function renderHud() {
-  hudScore.textContent = score;
-  hudCombo.textContent = combo;
-  hudTime.textContent = timeLeft;
-  hudTime.classList.toggle('warn', playing && timeLeft <= 10);
+  hudScore.textContent = G.score;
+  hudCombo.textContent = G.combo;
+  hudTime.textContent = core.timeLeft(G);
+  hudTime.classList.toggle('warn', phase === 'playing' && core.timeLeft(G) <= 10);
   hudBest.textContent = bestScore;
 }
 
 /* ================= 开局 / 结束 ================= */
 function startGame() {
-  stopTimers();
-  holes.forEach(resetHole);
-  score = 0; combo = 0; timeLeft = TOTAL_TIME;
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  G = core.createState();
   bestScore = loadNum(BEST_KEY);
-  playing = true;
-  renderHud();
+  phase = 'playing';
   overlay.hidden = true;
-  spawnTimer = setTimeout(spawnLoop, 500);
-  countdownTimer = setInterval(() => {
-    timeLeft--;
-    renderHud();
-    if (timeLeft <= 0) endGame();
-  }, 1000);
+  syncHoles();
+  renderHud();
 }
 function endGame() {
-  playing = false;
-  stopTimers();
-  holes.forEach(resetHole);
-  /* 结算最高分 */
-  const isNew = score > bestScore;
-  if (isNew) { bestScore = score; saveNum(BEST_KEY, score); }
-  endScore.textContent = score;
+  phase = 'over';
+  const s = G.score;
+  /* 结算最高分（AI 代玩成绩不计入最高纪录） */
+  const isNew = !aiOn && s > bestScore;
+  if (isNew) { bestScore = s; saveNum(BEST_KEY, s); }
+  endScore.textContent = s;
   endBest.textContent = bestScore;
   endNew.hidden = !isNew;
+  endAiNote.hidden = !aiOn;
   startView.hidden = true;
   endView.hidden = false;
   overlay.hidden = false;
+  syncHoles();
   renderHud();
   beep(523, 0.25, 'triangle');
-}
-function stopTimers() {
-  if (spawnTimer) { clearTimeout(spawnTimer); spawnTimer = null; }
-  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  if (aiOn) {   // AI 代玩：稍候自动开下一局
+    aiTimer = setTimeout(() => {
+      aiTimer = null;
+      if (aiOn && phase === 'over') startGame();
+    }, 1200);
+  }
 }
 
 btnStart.addEventListener('click', startGame);
 btnAgain.addEventListener('click', startGame);
 
+/* ================= AI 代玩控制 =================
+   开关由按钮切换；开启后每 AI_TICK_MS 扫描决策一次（决策在纯逻辑核心内），
+   随时可停止，停止后人工操作无缝接手；AI 成绩不计入最高分 */
+let aiOn = false;
+let aiTimer = null;
+
+function aiPass() {
+  if (!aiOn || phase !== 'playing') return;
+  const i = core.decide(G);
+  if (i >= 0) doHit(i, true);
+}
+window.setInterval(aiPass, core.AI_TICK_MS);
+
+function setAi(on) {
+  aiOn = on;
+  aiBtn.textContent = on ? '停止代玩' : 'AI 代玩';
+  aiBtn.classList.toggle('ai-on', on);
+  aiBtn.setAttribute('aria-pressed', String(on));
+  aiBadge.hidden = !on;
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  if (on && phase !== 'playing') startGame();   // 待机 / 结算状态直接开新局
+}
+aiBtn.addEventListener('click', () => setAi(!aiOn));
+
+/* ================= 主循环：核心按真实时间推进，渲染层逐帧同步 ================= */
+let lastT = 0;
+function frame(t) {
+  if (!lastT) lastT = t;
+  const dt = Math.min(t - lastT, 100);   // 切后台回来不跳帧推进
+  lastT = t;
+  if (phase === 'playing') {
+    core.step(G, dt);
+    syncHoles();
+    renderHud();
+    if (!G.playing) endGame();
+  }
+  requestAnimationFrame(frame);
+}
+
 /* 初始化：展示历史最高分 */
+G = core.createState();
 bestScore = loadNum(BEST_KEY);
 ovBestStart.textContent = bestScore;
-hudBest.textContent = bestScore;
+renderHud();
+requestAnimationFrame(frame);
 </script>
   <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
     <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
@@ -503,6 +641,7 @@ hudBest.textContent = bestScore;
       <h3>操作</h3>
       <ul>
         <li>点击 / 触屏点按：敲中冒头的地鼠（必须敲在它身上）</li>
+        <li>「AI 代玩」：AI 定时扫描自动敲地鼠（不碰炸弹），随时可停止，成绩不计最高分</li>
       </ul>
     </div>
   </aside>

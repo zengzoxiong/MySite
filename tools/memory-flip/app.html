@@ -33,6 +33,9 @@ body {
 .btn.primary { background:var(--primary); color:#fff; }
 .btn.primary:active { transform:scale(.97); }
 .btn.ghost { background:#eef1f5; color:var(--ink); }
+/* AI 代玩主按钮：醒目蓝色，运行中切换为红色停止态 */
+.btn.ai { background:#1a73e8; color:#fff; font-weight:600; box-shadow:0 2px 10px rgba(26,115,232,.35); }
+.btn.ai.stop { background:#e5484d; box-shadow:0 2px 10px rgba(229,72,77,.35); }
 /* 卡牌区：perspective 提供 3D 翻转景深 */
 .board { display:grid; gap:8px; perspective:1000px; }
 .board.cols-4 { grid-template-columns:repeat(4,1fr); }
@@ -197,9 +200,11 @@ body {
         <span>用时 <b id="stTime">0:00</b></span>
         <span>最佳 <b id="stBest">--</b></span>
       </div>
+      <button id="aiBtn" class="btn ai" type="button">AI 代玩</button>
       <button id="btnRestart" class="btn ghost" type="button">重新开始</button>
     </div>
     <div id="board" class="board cols-4" aria-label="卡牌区"></div>
+    <p class="tip" id="aiTip" hidden></p>
   </section>
   <footer class="foot">拾光集 · 在线小游戏</footer>
 </main>
@@ -266,19 +271,11 @@ const winTime = document.getElementById('winTime');
 const winBest = document.getElementById('winBest');
 const btnAgain = document.getElementById('btnAgain');
 const btnClose = document.getElementById('btnClose');
+const aiBtn = document.getElementById('aiBtn');
+const aiTip = document.getElementById('aiTip');
 
-/* ================= 游戏状态 ================= */
-let size = 4;            // 边长：4 或 6
-let pairs = 8;           // 对数：边长的平方除以二
-let firstCard = null;    // 当前已翻开待配对的第一张
-let lock = false;        // 配对失败翻回期间锁板，防连点第三张
-let matchedCount = 0;    // 已配对成功的对数
-let moves = 0;           // 步数（每翻开两张记一步）
-let seconds = 0;         // 用时（秒）
-let started = false;     // 是否已翻开第一张（计时起点）
-let timerId = null;
+/* ================= 纯函数核心（与渲染无关；ai-sim.mjs 内为同一份实现，改动需两处同步） ================= */
 
-/* ================= 工具函数 ================= */
 /* Fisher-Yates 就地洗牌，返回原数组方便链式使用 */
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -287,15 +284,116 @@ function shuffle(arr) {
   }
   return arr;
 }
+
+/* 创建一局的完整状态（渲染无关）：
+   deck[i] 为牌位 i 的图形下标；known/matched 与 deck 等长；
+   first 为本轮已翻第一张的下标（-1 表示本轮还没翻）；moves 每翻两张记一步 */
+function createGame(size) {
+  const pairs = (size * size) / 2;
+  /* 随机抽取 pairs 种图形，各复制两份后洗牌 */
+  const pool = shuffle(SHAPES.map((_, i) => i)).slice(0, pairs);
+  const deck = shuffle(pool.concat(pool));
+  return {
+    size: size,
+    pairs: pairs,
+    deck: deck,
+    known: deck.map(() => false),
+    matched: deck.map(() => false),
+    first: -1,
+    moves: 0,
+    matchedPairs: 0,
+    started: false,
+    over: false
+  };
+}
+
+/* 翻一张牌的单步推进（纯函数）：idx 为牌位下标，返回 { state, event }
+   event.type：'first' 翻开本轮第一张 / 'match' 配对成功 / 'miss' 配对失败 / 'win' 最后一对 */
+function stepFlip(prev, idx) {
+  const st = {
+    size: prev.size, pairs: prev.pairs, deck: prev.deck,
+    known: prev.known.slice(), matched: prev.matched.slice(),
+    first: prev.first, moves: prev.moves, matchedPairs: prev.matchedPairs,
+    started: prev.started, over: prev.over
+  };
+  st.known[idx] = true;
+  if (st.first < 0) {
+    st.first = idx;
+    st.started = true;
+    return { state: st, event: { type: 'first', idx: idx, shape: st.deck[idx] } };
+  }
+  const a = st.first, b = idx;
+  st.first = -1;
+  st.moves++;                                  // 本轮第二张：计一步
+  if (st.deck[a] === st.deck[b]) {
+    st.matched[a] = true;
+    st.matched[b] = true;
+    st.matchedPairs++;
+    if (st.matchedPairs === st.pairs) {
+      st.over = true;
+      return { state: st, event: { type: 'win', a: a, b: b } };
+    }
+    return { state: st, event: { type: 'match', a: a, b: b } };
+  }
+  return { state: st, event: { type: 'miss', a: a, b: b } };
+}
+
+/* ---------- AI 决策（同样与渲染无关） ----------
+   记忆翻牌 AI：记住所有翻过的牌面位置——
+   1) 有已知对子就优先配对；
+   2) 没有对子时系统性探索没翻过的新牌，翻到的牌若对子已知则立刻配对。
+   该策略经信息状态 DP 推导即最优（期望步数下界），无需额外启发式。 */
+function aiNextFlip(st) {
+  const knownList = [];     // 已翻过且未配对的位置
+  const unknownList = [];   // 从未翻过的位置
+  for (let i = 0; i < st.deck.length; i++) {
+    if (st.matched[i]) continue;
+    if (st.known[i]) knownList.push(i); else unknownList.push(i);
+  }
+  if (st.first >= 0) {
+    /* 本轮第二张：优先翻第一张的同面牌（必然配对） */
+    const s = st.deck[st.first];
+    for (let k = 0; k < knownList.length; k++) {
+      const i = knownList[k];
+      if (i !== st.first && st.deck[i] === s) return i;
+    }
+    /* 没有已知同面牌：探索没翻过的新牌 */
+    if (unknownList.length) return unknownList[0];
+    /* 兜底：任意另一张已知牌（仅数据异常时出现） */
+    for (let k = 0; k < knownList.length; k++) {
+      if (knownList[k] !== st.first) return knownList[k];
+    }
+    return st.first;
+  }
+  /* 本轮第一张：先配已知对子 */
+  const seen = new Map();
+  for (let k = 0; k < knownList.length; k++) {
+    const i = knownList[k];
+    const s = st.deck[i];
+    if (seen.has(s)) return seen.get(s);   // 发现第二张同面牌 → 从第一张开始配对
+    seen.set(s, i);
+  }
+  /* 系统性探索：按下标从小到大翻没翻过的新牌 */
+  if (unknownList.length) return unknownList[0];
+  return knownList[0];   // 兜底（仅数据异常时出现）
+}
+
+/* ================= UI 状态与工具函数 ================= */
+let size = 4;            // 边长：4 或 6
+let state = createGame(4);
+let lock = false;        // 配对失败翻回期间锁板，防连点第三张
+let seconds = 0;         // 用时（秒）
+let timerId = null;
 /* 秒数格式化为 分:秒 */
 function fmtTime(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
 /* ================= 渲染 ================= */
 /* 生成一张卡片：外层 button 负责点击与状态类，内层 card-inner 做 3D 翻转 */
-function buildCard(shapeIdx) {
+function buildCard(idx, shapeIdx) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'card';
+  btn.dataset.idx = String(idx);
   btn.dataset.shape = String(shapeIdx);
   btn.setAttribute('aria-label', '未翻开的卡片');
   btn.innerHTML =
@@ -307,7 +405,7 @@ function buildCard(shapeIdx) {
 }
 function flip(card) { card.classList.add('flipped'); card.setAttribute('aria-label', '已翻开的卡片'); }
 function unflip(card) { card.classList.remove('flipped'); card.setAttribute('aria-label', '未翻开的卡片'); }
-function renderHud() { stMoves.textContent = moves; stTime.textContent = fmtTime(seconds); }
+function renderHud() { stMoves.textContent = state.moves; stTime.textContent = fmtTime(seconds); }
 function renderBest() {
   const best = loadJSON(BEST_KEY + size);
   stBest.textContent = best ? best.moves + ' 步 / ' + fmtTime(best.time) : '--';
@@ -321,61 +419,69 @@ function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } 
 
 /* ================= 开局 ================= */
 function startGame() {
-  firstCard = null; lock = false; matchedCount = 0; moves = 0; seconds = 0; started = false;
+  state = createGame(size);
+  lock = false; seconds = 0;
   stopTimer(); renderHud(); renderBest();
-  /* 随机抽取 pairs 种图形，各复制两份后洗牌 */
-  const pool = shuffle(SHAPES.map((_, i) => i)).slice(0, pairs);
-  const deck = shuffle(pool.concat(pool));
   board.innerHTML = '';
   board.className = 'board cols-' + size;
-  deck.forEach(i => board.appendChild(buildCard(i)));
+  state.deck.forEach((shapeIdx, idx) => board.appendChild(buildCard(idx, shapeIdx)));
   hideModal();
+}
+
+/* ================= 翻牌推进（UI 驱动：调用纯函数 stepFlip，再做动画） ================= */
+function applyFlip(idx) {
+  if (lock || state.over) return;
+  const card = board.children[idx];
+  if (!card || card.disabled) return;
+  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  const justStarted = !state.started;
+  const r = stepFlip(state, idx);          // 纯函数推进状态
+  state = r.state;
+  if (justStarted) startTimer();           // 第一次翻牌才开始计时
+  flip(card);
+  if (r.event.type === 'first') return;    // 第一张：等待第二张
+
+  renderHud();
+  const ca = board.children[r.event.a], cb = board.children[r.event.b];
+  if (r.event.type === 'miss') {
+    /* 配对失败：标记红色边框，锁板后翻回 */
+    lock = true;
+    ca.classList.add('miss'); cb.classList.add('miss');
+    setTimeout(() => {
+      unflip(ca); unflip(cb);
+      ca.classList.remove('miss'); cb.classList.remove('miss');
+      lock = false;
+    }, 750);
+    return;
+  }
+  /* 配对成功：保持正面，短暂停留后消隐 */
+  ca.classList.add('matched'); cb.classList.add('matched');
+  ca.disabled = true; cb.disabled = true;
+  if (r.event.type === 'win') { stopTimer(); setTimeout(showWin, 550); }
 }
 
 /* ================= 点击判定（事件委托） ================= */
 board.addEventListener('click', (e) => {
+  if (aiRunning) return;                       // AI 代玩期间屏蔽手动操作
   const card = e.target.closest('.card');
   if (!card || lock || card.disabled) return;
-  if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
-  if (!started) { started = true; startTimer(); }   // 第一次翻牌才开始计时
-  flip(card);
-  if (!firstCard) { firstCard = card; return; }      // 第一张：等待第二张
-
-  /* 第二张：计步并判定 */
-  moves++; renderHud();
-  const a = firstCard, b = card;
-  firstCard = null;
-  if (a.dataset.shape === b.dataset.shape) {
-    /* 配对成功：保持正面，短暂停留后消隐 */
-    matchedCount++;
-    a.classList.add('matched'); b.classList.add('matched');
-    a.disabled = true; b.disabled = true;
-    if (matchedCount === pairs) { stopTimer(); setTimeout(showWin, 550); }
-  } else {
-    /* 配对失败：标记红色边框，锁板后翻回 */
-    lock = true;
-    a.classList.add('miss'); b.classList.add('miss');
-    setTimeout(() => {
-      unflip(a); unflip(b);
-      a.classList.remove('miss'); b.classList.remove('miss');
-      lock = false;
-    }, 750);
-  }
+  applyFlip(Number(card.dataset.idx));
 });
 
 /* ================= 胜利结算与最佳纪录 ================= */
 function showWin() {
+  if (!state.over) return;   // 期间已重开新局则不再弹结算
   const key = BEST_KEY + size;
   const best = loadJSON(key);
-  /* 新纪录判定：步数更少，或步数相同且用时更短 */
-  const isNew = !best || moves < best.moves || (moves === best.moves && seconds < best.time);
-  if (isNew) saveJSON(key, { moves: moves, time: seconds });
-  const cur = isNew ? { moves: moves, time: seconds } : best;
-  winTitle.textContent = '全部配对完成！';
+  /* 新纪录判定：步数更少，或步数相同且用时更短；AI 代玩是自动演示，不计入纪录 */
+  const isNew = !aiRunning && (!best || state.moves < best.moves || (state.moves === best.moves && seconds < best.time));
+  if (isNew) saveJSON(key, { moves: state.moves, time: seconds });
+  const cur = isNew ? { moves: state.moves, time: seconds } : best;
+  winTitle.textContent = aiRunning ? '全部配对完成！（AI 代玩）' : '全部配对完成！';
   winNew.hidden = !isNew;
-  winMoves.textContent = moves + ' 步';
+  winMoves.textContent = state.moves + ' 步';
   winTime.textContent = fmtTime(seconds);
-  winBest.textContent = cur.moves + ' 步 / ' + fmtTime(cur.time);
+  winBest.textContent = cur ? cur.moves + ' 步 / ' + fmtTime(cur.time) : '--';
   renderBest();
   openModal();
 }
@@ -385,18 +491,73 @@ function hideModal() { winModal.hidden = true; }
 /* ================= 难度与按钮 ================= */
 function setDifficulty(n) {
   size = n;
-  pairs = (n * n) / 2;
   btn4.classList.toggle('active', n === 4);
   btn6.classList.toggle('active', n === 6);
+  stopAi();
   startGame();
 }
 btn4.addEventListener('click', () => setDifficulty(4));
 btn6.addEventListener('click', () => setDifficulty(6));
-btnRestart.addEventListener('click', startGame);
-btnAgain.addEventListener('click', startGame);
+btnRestart.addEventListener('click', () => { stopAi(); startGame(); });   // 重开会先停掉 AI
+btnAgain.addEventListener('click', startGame);   // AI 运行时点它则顺势开下一局，AI 继续代玩
 btnClose.addEventListener('click', hideModal);
 winModal.addEventListener('click', (e) => { if (e.target === winModal) hideModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !winModal.hidden) hideModal(); });
+
+/* ================= AI 代玩（自动演示） =================
+   决策走上方纯函数 aiNextFlip，翻牌走 applyFlip（与手动同一链路），界面所见即所得 */
+let aiRunning = false;   // AI 是否正在代玩
+let aiTimer = 0;         // AI 步进定时器句柄
+const AI_THINK_MS = 620;  // 每次翻牌前的停顿，模拟真人节奏
+const AI_MISS_MS = 980;   // 配对失败：等翻回动画结束再行动
+const AI_WIN_MS = 1600;   // 通关弹层停留时间，之后自动开下一局连续演示
+
+function setTip(msg) { aiTip.textContent = msg || ''; aiTip.hidden = !msg; }
+
+// 停止 AI：恢复按钮与提示，残局留给用户手动继续
+function stopAi(msg) {
+  if (!aiRunning) return;
+  aiRunning = false;
+  clearTimeout(aiTimer);
+  aiBtn.textContent = 'AI 代玩';
+  aiBtn.classList.remove('stop');
+  setTip(msg || 'AI 已停止，可继续手动游玩');
+}
+
+// AI 步进：翻一张 → 按结果停顿 → 下一次翻牌或开新局
+function aiTick() {
+  if (!aiRunning) return;
+  if (state.over) {
+    /* 通关弹层停留片刻后自动开下一局，继续连续演示 */
+    aiTimer = setTimeout(() => {
+      if (!aiRunning) return;
+      if (state.over) { hideModal(); startGame(); }
+      aiTimer = setTimeout(aiTick, AI_THINK_MS);
+    }, AI_WIN_MS);
+    return;
+  }
+  if (lock) { aiTimer = setTimeout(aiTick, 120); return; }   // 等翻回动画结束
+  const idx = aiNextFlip(state);
+  applyFlip(idx);
+  setTip('AI 翻开了「' + SHAPES[state.deck[idx]].name + '」　已配对 ' + state.matchedPairs + '/' + state.pairs + ' 对');
+  if (state.first === idx) {
+    aiTimer = setTimeout(aiTick, AI_THINK_MS);   // 刚翻的是本轮第一张，稍后翻第二张
+  } else if (lock) {
+    aiTimer = setTimeout(aiTick, AI_MISS_MS);    // 配对失败，等翻回
+  } else {
+    aiTimer = setTimeout(aiTick, AI_THINK_MS);   // 配对成功或通关，继续
+  }
+}
+
+aiBtn.addEventListener('click', () => {
+  if (aiRunning) { stopAi(); return; }
+  if (state.over) { hideModal(); startGame(); }
+  aiRunning = true;
+  aiBtn.textContent = '停止 AI';
+  aiBtn.classList.add('stop');
+  setTip('AI 已接管，点击「停止 AI」可随时停下');
+  aiTick();
+});
 
 /* 初始化：默认 4 × 4 */
 startGame();
@@ -415,6 +576,7 @@ startGame();
       <h3>操作</h3>
       <ul>
         <li>点击卡片翻开；顶部按钮切换难度与重开</li>
+        <li>点「AI 代玩」自动演示记忆翻牌，随时可停；演示局不计入最佳纪录</li>
       </ul>
     </div>
   </aside>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>叠叠高 - 拾光集</title>
-<meta name="description" content="叠叠高：方块左右往返移动，点击或按空格放下，对齐部分保留、悬空部分切掉，完全对齐回涨宽度，纯本地运行的网页小游戏。">
+<meta name="description" content="叠叠高：方块左右往返移动，点击或按空格放下，对齐部分保留、悬空部分切掉，完全对齐回涨宽度，支持 AI 代玩，纯本地运行的网页小游戏。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/stack-tower/app.html">
 <style>
@@ -17,6 +17,10 @@ h1{font-size:19px;font-weight:700}
 .hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
 button{font:inherit;border:0;border-radius:10px;padding:9px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
 button:active{transform:scale(.96)}
+/* AI 代玩按钮与状态角标 */
+.btn-ai{background:#1a73e8;color:#fff;padding:7px 14px;font-weight:600}
+.btn-ai.ai-on{background:#d93025}
+.ai-badge{position:absolute;top:10px;right:12px;z-index:5;background:rgba(26,115,232,.92);color:#fff;font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;letter-spacing:1px;pointer-events:none;box-shadow:0 2px 8px rgba(26,115,232,.35)}
 .stage{position:relative;max-width:480px;margin:0 auto;border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
 canvas{display:block;width:100%;height:auto;aspect-ratio:420/640;touch-action:none}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.84);text-align:center;cursor:pointer;padding:16px}
@@ -147,10 +151,12 @@ footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
       <span>分数 <b id="score">0</b></span>
       <span>层数 <b id="layer">0</b></span>
       <span>最高 <b id="best">0</b></span>
+      <button id="aiBtn" class="btn-ai" type="button" aria-pressed="false">AI 代玩</button>
     </div>
   </header>
   <div class="stage" id="stage">
     <canvas id="cv" width="420" height="640"></canvas>
+    <div class="ai-badge" id="aiBadge" hidden>AI 代玩中 · 不计最高分</div>
     <div class="overlay" id="ov" hidden></div>
   </div>
   <footer>拾光集 · 在线小游戏</footer>
@@ -159,14 +165,6 @@ footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
 (function () {
 'use strict';
 
-/* ================= 基本常量 ================= */
-var W = 420, H = 640;        // 逻辑分辨率
-var BH = 26;                 // 单块高度
-var INIT_W = 150;            // 初始方块宽度
-var BASE_Y = 560;            // 基座顶面纵坐标
-var PERFECT_TOL = 6;         // 完全对齐的判定容差（像素）
-var REGROW = 12;             // 完全对齐时宽度回涨量
-
 var cv = document.getElementById('cv');
 var ctx = cv.getContext('2d');
 var stage = document.getElementById('stage');
@@ -174,6 +172,136 @@ var ov = document.getElementById('ov');
 var elScore = document.getElementById('score');
 var elLayer = document.getElementById('layer');
 var elBest = document.getElementById('best');
+var aiBtn = document.getElementById('aiBtn');
+var aiBadge = document.getElementById('aiBadge');
+
+// ===== TOWER_CORE_START =====
+// 与渲染无关的纯逻辑核心：游戏状态、单步推进、放置判定、AI 决策。
+// ai-sim.mjs 会提取本标记段在 node 中运行，
+// 因此本段内禁止引用 DOM / Canvas / window 等浏览器对象。
+function createTowerCore(rand) {
+  var W = 420;             // 逻辑宽度（移动块边界判定用）
+  var BH = 26;             // 单块高度
+  var INIT_W = 150;        // 初始方块宽度
+  var BASE_Y = 560;        // 基座顶面纵坐标
+  var PERFECT_TOL = 6;     // 完全对齐的判定容差（像素）
+  var REGROW = 12;         // 完全对齐时宽度回涨量
+
+  /* 生成下一块移动块：从屏幕一侧外进入，宽度继承塔顶 */
+  function spawnMoving(st) {
+    var top = st.stack[st.stack.length - 1];
+    var li = st.stack.length;   // 本块作为第 li 个玩家层
+    var dir = rand() < 0.5 ? 1 : -1;
+    st.moving = {
+      x: dir === 1 ? -top.w - 10 : W + 10,   // 从屏幕一侧外进入
+      w: top.w,                              // 宽度继承塔顶
+      dir: dir,
+      hue: (205 + li * 14) % 360,            // 逐层轮换色相
+      y: BASE_Y - (st.stack.length + 1) * BH
+    };
+  }
+
+  /* 新建一局核心状态（第 0 块为基块，不计玩家层数） */
+  function createState() {
+    var st = {
+      stack: [{ x: (W - INIT_W) / 2, w: INIT_W, hue: 205 }],
+      moving: null,
+      score: 0,
+      combo: 0,
+      bonus: 0,
+      over: false
+    };
+    spawnMoving(st);
+    return st;
+  }
+
+  /* 塔越高移动越快 */
+  function speedFor(st) {
+    return Math.min(430, 185 + (st.stack.length - 1) * 6.5);
+  }
+
+  /* 单步推进：移动块往返平移，触边折返（与页面逐帧更新一致） */
+  function step(st, dt) {
+    if (st.over || !st.moving) return st;
+    var mv = st.moving;
+    mv.x += mv.dir * speedFor(st) * dt;
+    var l = -26, r = W - mv.w + 26;
+    if (mv.x < l) { mv.x = l; mv.dir = 1; }
+    if (mv.x > r) { mv.x = r; mv.dir = -1; }
+    return st;
+  }
+
+  /* 放下移动块：规则判定全部在此，返回事件供渲染层生成碎片 / 飘字 */
+  function drop(st) {
+    if (st.over || !st.moving) return null;
+    var top = st.stack[st.stack.length - 1];
+    var mv = st.moving;
+    var left = Math.max(mv.x, top.x);
+    var right = Math.min(mv.x + mv.w, top.x + top.w);
+    var overlap = right - left;
+    var ev = { missed: false, perfect: false, combo: 0, x: mv.x, w: mv.w, y: mv.y, hue: mv.hue, dir: mv.dir, cuts: [] };
+
+    if (overlap <= 2) {
+      /* 完全悬空：整块坠落，游戏结束 */
+      ev.missed = true;
+      st.moving = null;
+      st.over = true;
+      return ev;
+    }
+
+    var perfect = Math.abs(mv.x - top.x) <= PERFECT_TOL && Math.abs(mv.w - top.w) <= PERFECT_TOL;
+    if (perfect) {
+      /* 完全对齐：宽度回涨一点并加分（连击越多奖励越高） */
+      st.combo += 1;
+      st.bonus += st.combo;
+      var newW = Math.min(INIT_W, top.w + REGROW);
+      var newX = top.x + top.w / 2 - newW / 2;   // 以塔顶中心对称回涨
+      st.stack.push({ x: newX, w: newW, hue: mv.hue });
+      ev.perfect = true;
+      ev.combo = st.combo;
+    } else {
+      st.combo = 0;
+      st.stack.push({ x: left, w: overlap, hue: mv.hue });
+      /* 悬空部分标记为坠落碎片事件 */
+      if (mv.x < left - 0.5) ev.cuts.push({ x: mv.x, w: left - mv.x, vx: -70 });
+      if (mv.x + mv.w > right + 0.5) ev.cuts.push({ x: right, w: mv.x + mv.w - right, vx: 70 });
+    }
+
+    st.score = st.stack.length - 1 + st.bonus;   // 层数 + 完美奖励
+    spawnMoving(st);
+    return ev;
+  }
+
+  /* ---------- AI 决策（与渲染无关） ----------
+     思路：按当前移动块与塔顶的水平偏差计算对准时机——
+     预测本帧移动后的新偏差，若「立即放下」比「再走一帧」更接近
+     对齐位则点击；误差不超过半帧位移，可稳定打出完美对齐回涨宽度。 */
+  function decide(st, dt) {
+    if (st.over || !st.moving) return false;
+    var top = st.stack[st.stack.length - 1];
+    var mv = st.moving;
+    var nextX = mv.x + mv.dir * speedFor(st) * dt;
+    var l = -26, r = W - mv.w + 26;
+    if (nextX < l) nextX = l;
+    if (nextX > r) nextX = r;
+    return Math.abs(mv.x - top.x) <= Math.abs(nextX - top.x);
+  }
+
+  return {
+    W: W, BH: BH, INIT_W: INIT_W, BASE_Y: BASE_Y, PERFECT_TOL: PERFECT_TOL, REGROW: REGROW,
+    createState: createState, spawnMoving: spawnMoving, speedFor: speedFor,
+    step: step, drop: drop, decide: decide
+  };
+}
+// ===== TOWER_CORE_END =====
+
+/* 页面侧核心实例：状态 / 推进 / 放置 / AI 决策全部来自纯逻辑核心 */
+var core = createTowerCore(Math.random);
+var W = core.W;            // 逻辑分辨率
+var H = 640;
+var BH = core.BH;
+var INIT_W = core.INIT_W;
+var BASE_Y = core.BASE_Y;
 
 /* 高分屏适配 */
 (function fit() {
@@ -188,44 +316,27 @@ var BEST_KEY = 'stack-tower_best';
 var best = 0;
 try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
 
-/* ================= 游戏状态 ================= */
+/* ================= 游戏流程状态（渲染层） ================= */
 var state = 'ready';   // ready | playing | dying | over | paused
-var stack = [];        // 塔身 { x, w, hue }（第 0 块为基块，不计玩家层数）
-var moving = null;     // 当前移动块 { x, w, dir, hue, y }
+var G = null;          // 核心游戏状态（塔身 / 移动块 / 分数 / 连击），由纯逻辑核心推进
 var debris = [];       // 被切掉的坠落碎片
 var texts = [];        // 飘字提示
 var cam = 0;           // 相机下移量（塔高时视野跟随）
-var combo = 0;         // 完美连击数
-var bonus = 0;         // 完美奖励累计分
-var score = 0;
 var dieT = 0, overGuard = 0;
+var aiOn = false, aiTimer = null;   // AI 代玩开关与自动续局定时器
 
 function resetGame() {
-  stack = [{ x: (W - INIT_W) / 2, w: INIT_W, hue: 205 }];
+  G = core.createState();
   debris = []; texts = [];
-  cam = 0; combo = 0; bonus = 0; score = 0;
+  cam = 0;
   dieT = 0;
-  spawnMoving();
   syncHud();
-}
-
-function spawnMoving() {
-  var top = stack[stack.length - 1];
-  var li = stack.length;   // 本块作为第 li 个玩家层
-  var dir = Math.random() < 0.5 ? 1 : -1;
-  moving = {
-    x: dir === 1 ? -top.w - 10 : W + 10,   // 从屏幕一侧外进入
-    w: top.w,                              // 宽度继承塔顶
-    dir: dir,
-    hue: (205 + li * 14) % 360,            // 逐层轮换色相
-    y: BASE_Y - (stack.length + 1) * BH
-  };
 }
 
 /* ================= HUD 与覆盖层 ================= */
 function syncHud() {
-  elScore.textContent = score;
-  elLayer.textContent = stack.length - 1;
+  elScore.textContent = G.score;
+  elLayer.textContent = G.stack.length - 1;
   elBest.textContent = best;
 }
 function showOverlay(html) { ov.innerHTML = html; ov.hidden = false; }
@@ -236,7 +347,7 @@ function showStart() {
     '<h2>叠叠高</h2>' +
     '<p>方块左右往返移动，点击或按空格放下<br>对齐部分保留、悬空部分切掉<br>完全对齐可回涨宽度并获得连击加分</p>' +
     '<button type="button">开始游戏</button>' +
-    '<p>点击画面 / 空格键 放下方块</p>'
+    '<p>点击画面 / 空格键 放下方块<br>也可点击「AI 代玩」由 AI 自动对准堆叠</p>'
   );
 }
 function showPause() {
@@ -245,18 +356,25 @@ function showPause() {
 function showOver() {
   state = 'over';
   overGuard = 0.6;
-  var isNew = score > best;
+  var isNew = !aiOn && G.score > best;   // AI 代玩成绩不计入最高纪录
   if (isNew) {
-    best = score;
+    best = G.score;
     try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
   }
   syncHud();
   showOverlay(
     '<h2>' + (isNew ? '新纪录！' : '游戏结束') + '</h2>' +
-    '<div class="big">' + score + '</div>' +
-    '<p>共叠 ' + (stack.length - 1) + ' 层 · 完美奖励 ' + bonus + ' 分 · 最高纪录 ' + best + '</p>' +
+    '<div class="big">' + G.score + '</div>' +
+    '<p>共叠 ' + (G.stack.length - 1) + ' 层 · 完美奖励 ' + G.bonus + ' 分 · 最高纪录 ' + best + '</p>' +
+    (aiOn ? '<p>AI 代玩中，即将自动开始下一局（成绩不计入纪录）</p>' : '') +
     '<button type="button">再来一局</button>'
   );
+  if (aiOn) {
+    aiTimer = setTimeout(function () {
+      aiTimer = null;
+      if (aiOn && state === 'over') startGame();
+    }, 900);
+  }
 }
 
 /* ================= 流程控制 ================= */
@@ -269,46 +387,30 @@ function resumeGame() {
   state = 'playing';
   hideOverlay();
 }
-function drop() {
-  var top = stack[stack.length - 1];
-  var mv = moving;
-  var left = Math.max(mv.x, top.x);
-  var right = Math.min(mv.x + mv.w, top.x + top.w);
-  var overlap = right - left;
-
-  if (overlap <= 2) {
-    /* 完全悬空：整块坠落，游戏结束 */
-    debris.push({ x: mv.x, w: mv.w, y: mv.y, vx: mv.dir * 40, vy: -60, hue: mv.hue });
-    moving = null;
+function doDrop() {
+  if (state !== 'playing' || !G.moving) return;
+  var ev = core.drop(G);
+  if (!ev) return;
+  if (ev.missed) {
+    /* 完全悬空：整块坠落，进入结束动画 */
+    debris.push({ x: ev.x, w: ev.w, y: ev.y, vx: ev.dir * 40, vy: -60, hue: ev.hue });
     state = 'dying';
     dieT = 0;
     return;
   }
-
-  var perfect = Math.abs(mv.x - top.x) <= PERFECT_TOL && Math.abs(mv.w - top.w) <= PERFECT_TOL;
-  if (perfect) {
-    /* 完全对齐：宽度回涨一点并加分（连击越多奖励越高） */
-    combo += 1;
-    bonus += combo;
-    var newW = Math.min(INIT_W, top.w + REGROW);
-    var newX = top.x + top.w / 2 - newW / 2;   // 以塔顶中心对称回涨
-    stack.push({ x: newX, w: newW, hue: mv.hue });
-    texts.push({ s: '完美 +' + combo, x: newX + newW / 2, y: mv.y - 8, life: 1.1, max: 1.1 });
+  if (ev.perfect) {
+    var top = G.stack[G.stack.length - 1];
+    texts.push({ s: '完美 +' + ev.combo, x: top.x + top.w / 2, y: ev.y - 8, life: 1.1, max: 1.1 });
   } else {
-    combo = 0;
-    stack.push({ x: left, w: overlap, hue: mv.hue });
-    /* 切掉悬空部分，生成坠落碎片 */
-    if (mv.x < left - 0.5) debris.push({ x: mv.x, w: left - mv.x, y: mv.y, vx: -70, vy: -40, hue: mv.hue });
-    if (mv.x + mv.w > right + 0.5) debris.push({ x: right, w: mv.x + mv.w - right, y: mv.y, vx: 70, vy: -40, hue: mv.hue });
+    for (var i = 0; i < ev.cuts.length; i++) {
+      debris.push({ x: ev.cuts[i].x, w: ev.cuts[i].w, y: ev.y, vx: ev.cuts[i].vx, vy: -40, hue: ev.hue });
+    }
   }
-
-  score = stack.length - 1 + bonus;   // 层数 + 完美奖励
   syncHud();
-  spawnMoving();
 }
 function act() {
   if (state === 'ready') startGame();
-  else if (state === 'playing') drop();
+  else if (state === 'playing') { if (!aiOn) doDrop(); }   // AI 代玩时不抢控制权
   else if (state === 'paused') resumeGame();
   else if (state === 'over' && overGuard <= 0) startGame();
 }
@@ -331,17 +433,13 @@ function update(dt) {
     if (tx.life <= 0) texts.splice(ti, 1);
   }
   /* 相机跟随：工作区（下一块放置位）不高于期望线 */
-  var workY = BASE_Y - (stack.length + 1) * BH;
+  var workY = BASE_Y - (G.stack.length + 1) * BH;
   var targetCam = Math.max(0, 210 - workY);
   cam += (targetCam - cam) * Math.min(1, dt * 6);
 
   if (state === 'playing') {
-    /* 塔越高移动越快 */
-    var sp = Math.min(430, 185 + (stack.length - 1) * 6.5);
-    moving.x += moving.dir * sp * dt;
-    var l = -26, r = W - moving.w + 26;
-    if (moving.x < l) { moving.x = l; moving.dir = 1; }
-    if (moving.x > r) { moving.x = r; moving.dir = -1; }
+    if (aiOn && core.decide(G, dt)) doDrop();   // AI 决策：到对准时机即放下
+    else core.step(G, dt);
   } else if (state === 'dying') {
     dieT += dt;
     if (dieT > 0.75) showOver();
@@ -402,8 +500,8 @@ function draw() {
   /* 基座（向下延伸出画面） */
   drawBlock((W - INIT_W) / 2, BASE_Y, INIT_W, H - BASE_Y + 20, 210, true);
   /* 塔身（只画可视范围内的层） */
-  for (var i = 0; i < stack.length; i++) {
-    var b = stack[i];
+  for (var i = 0; i < G.stack.length; i++) {
+    var b = G.stack[i];
     var y = BASE_Y - (i + 1) * BH;
     if (y + BH < -40 || y > H + 40) continue;
     drawBlock(b.x, y, b.w, BH, b.hue, false);
@@ -413,8 +511,8 @@ function draw() {
     drawBlock(debris[d].x, debris[d].y, debris[d].w, BH, debris[d].hue, false);
   }
   /* 当前移动块 */
-  if (moving && (state === 'playing' || state === 'paused' || state === 'ready')) {
-    drawBlock(moving.x, moving.y, moving.w, BH, moving.hue, false);
+  if (G.moving && (state === 'playing' || state === 'paused' || state === 'ready')) {
+    drawBlock(G.moving.x, G.moving.y, G.moving.w, BH, G.moving.hue, false);
   }
   /* 飘字 */
   ctx.textAlign = 'center';
@@ -455,12 +553,28 @@ window.addEventListener('keydown', function (e) {
   }
 });
 
+/* ================= AI 代玩控制（随时可停，成绩不计最高分） ================= */
+function setAi(on) {
+  aiOn = on;
+  aiBtn.textContent = on ? '停止 AI' : 'AI 代玩';
+  aiBtn.classList.toggle('ai-on', on);
+  aiBtn.setAttribute('aria-pressed', String(on));
+  aiBadge.hidden = !on;
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  if (on) {
+    if (state === 'ready' || state === 'over') startGame();   // 待机 / 结束状态直接开新局
+    else if (state === 'paused') resumeGame();                // 暂停中则继续
+  }
+}
+aiBtn.addEventListener('click', function () { setAi(!aiOn); });
+
 /* 切后台自动暂停；回到前台重置时间基准，避免 delta 时间跳变 */
 document.addEventListener('visibilitychange', function () {
   if (document.hidden) {
     if (state === 'playing') { state = 'paused'; showPause(); }
   } else {
     lastFrame = performance.now();
+    if (aiOn && state === 'paused') resumeGame();   // AI 代玩：回前台自动继续
   }
 });
 
@@ -474,7 +588,7 @@ requestAnimationFrame(loop);
     <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
     <div class="rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>方块左右往返移动，看准时机放下，与下方对齐的部分保留</li>
@@ -484,6 +598,11 @@ requestAnimationFrame(loop);
       <h3>操作</h3>
       <ul>
         <li>点击 / 空格 / ↑ / 回车：放下方块</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点击「AI 代玩」按钮，AI 按对准时机自动放下方块并自动续局</li>
+        <li>再次点击随时停止；AI 成绩不计入最高纪录</li>
       </ul>
     </div>
   </aside>

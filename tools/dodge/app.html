@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>陨石闪避 - 拾光集</title>
-<meta name="description" content="陨石闪避：操控小飞船躲开不断坠落的陨石，存活越久得分越高，护盾道具提供短暂无敌，纯本地运行的网页小游戏。">
+<meta name="description" content="陨石闪避：操控小飞船躲开不断坠落的陨石，存活越久得分越高，护盾道具提供短暂无敌，支持 AI 代玩，纯本地运行的网页小游戏。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dodge/app.html">
 <style>
@@ -29,6 +29,10 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:420/640;touch-action:no
 .overlay button{margin-top:12px}
 .tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
 footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
+/* AI 代玩按钮与状态标签 */
+.ai-btn{background:#188038;padding:9px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 2px 8px rgba(24,128,56,.30)}
+.ai-btn.ai-on{background:#d93025;box-shadow:0 2px 8px rgba(217,48,37,.30)}
+.ai-tag{color:#188038;font-weight:600}
 </style>
     <style>
     /* 返回主页按钮（fixed 定位不挤占各页布局） */
@@ -149,7 +153,9 @@ footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
       <span>得分 <b id="score">0</b></span>
       <span>最高 <b id="best">0</b></span>
       <span class="shield-tag" id="shieldBox" hidden>护盾 <b id="shieldT">0</b> 秒</span>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最高分</span>
     </div>
+    <button type="button" id="aiBtn" class="ai-btn" aria-pressed="false">AI 代玩</button>
   </header>
   <div class="stage" id="stage">
     <canvas id="cv" width="420" height="640"></canvas>
@@ -175,6 +181,8 @@ var elScore = document.getElementById('score');
 var elBest = document.getElementById('best');
 var elShield = document.getElementById('shieldBox');
 var elShieldT = document.getElementById('shieldT');
+var aiBtn = document.getElementById('aiBtn');
+var aiTag = document.getElementById('aiTag');
 
 /* 高分屏适配 */
 (function fit() {
@@ -189,57 +197,285 @@ var BEST_KEY = 'dodge_best';
 var best = 0;
 try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
 
-/* ================= 游戏状态 ================= */
+/* ================= 界面状态（渲染层） ================= */
 var state = 'ready';   // ready | playing | dying | over | paused
-var t = 0;             // 本局存活时间（秒）
-var score = 0, shownScore = -1;
-var ship = { x: W / 2, tx: null };  // tx：指针目标横坐标
-var keys = { left: false, right: false };
-var meteors = [];      // 陨石
-var pickups = [];      // 护盾道具
+var shownScore = -1;
+var dieT = 0, overGuard = 0;
 var parts = [];        // 粒子
 var stars = [];        // 背景星空
-var spawnT = 0;        // 陨石生成倒计时
-var nextPickup = 0;    // 下一次护盾道具出现时刻
-var shieldLeft = 0;    // 护盾剩余秒数
-var dieT = 0, overGuard = 0;
+var aiOn = false;      // AI 代玩开关
+var aiClock = 0;       // AI 决策间隔计时
 
-/* 难度曲线：存活越久陨石越快越密 */
-function mul() { return Math.min(2.2, 1 + t / 70); }
-function interval() { return Math.max(0.34, 1.05 - t * 0.011); }
+/* ================= 游戏核心状态 G =================
+   玩法数据全部收在 G 里，由下方纯函数读写；渲染层只读不写。 */
+var G = null;
 
-function initStars() {
-  stars = [];
-  for (var i = 0; i < 70; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      s: Math.random() < 0.8 ? 1.5 : 2.5,
-      v: 14 + Math.random() * 34,
-      a: 0.25 + Math.random() * 0.6
-    });
-  }
+/* ================= 难度曲线（纯函数） ================= */
+function mulFor(t) { return Math.min(2.2, 1 + t / 70); }
+function intervalFor(t) { return Math.max(0.34, 1.05 - t * 0.011); }
+
+/* ================= 纯函数核心（渲染无关；与 ai-sim.mjs 同名实现保持一致） =================
+   约定：不读写任何 DOM；随机源 rng 由调用方注入（页面传 Math.random，模拟脚本传种子随机）。
+   G 结构：
+   { t 存活秒, score, shipX 飞船横坐标, tx 目标横坐标, keys {left,right},
+     meteors [], pickups [], spawnT 陨石生成倒计时, nextPickup 下次道具时刻, shieldLeft 护盾剩余秒 } */
+function freshCore(rng) {
+  return {
+    t: 0, score: 0,
+    shipX: W / 2, tx: null,
+    keys: { left: false, right: false },
+    meteors: [],
+    pickups: [],
+    spawnT: 0.9,                       // 开局稍等再落第一颗
+    nextPickup: 8 + rng() * 5,
+    shieldLeft: 0
+  };
 }
 
-function resetGame() {
-  t = 0; score = 0; shownScore = -1;
-  ship.x = W / 2; ship.tx = null;
-  keys.left = false; keys.right = false;
-  meteors = []; pickups = []; parts = [];
-  spawnT = 0.9;                       // 开局稍等再落第一颗
-  nextPickup = 8 + Math.random() * 5;
-  shieldLeft = 0;
-  dieT = 0;
-  syncHud();
-  syncShield();
+/* 生成陨石：x/y/vx/vy/r 为玩法字段，其余仅供绘制 */
+function spawnMeteorCore(c, rng) {
+  var r = 13 + rng() * 27;
+  c.meteors.push({
+    x: r + rng() * (W - 2 * r),
+    y: -r - 12,
+    vx: (rng() * 2 - 1) * 46 * mulFor(c.t),
+    vy: (95 + rng() * 115) * mulFor(c.t),
+    r: r,
+    /* ↓ 以下为纯装饰字段，不影响玩法（模拟脚本省略） */
+    rot: rng() * Math.PI * 2,
+    vr: (rng() * 2 - 1) * 2.6,
+    verts: (function () {
+      var n = 6 + (rng() * 4 | 0), vs = [];
+      for (var i = 0; i < n; i++) vs.push(0.72 + rng() * 0.42);
+      return vs;
+    })(),
+    craters: (function () {
+      var cn = 2 + (rng() * 2 | 0), cs = [];
+      for (var j = 0; j < cn; j++) {
+        var a = rng() * Math.PI * 2, d = rng() * r * 0.45;
+        cs.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, r: r * (0.12 + rng() * 0.16) });
+      }
+      return cs;
+    })(),
+    hue: 16 + rng() * 24
+  });
+}
+
+function spawnPickupCore(c, rng) {
+  c.pickups.push({ x: 30 + rng() * (W - 60), y: -24, vy: 105, ph: rng() * Math.PI * 2 });
+}
+
+/* 飞船移动：键盘恒速 / 指针与 AI 目标点平滑跟随 */
+function moveShipCore(c, dt) {
+  var kb = (c.keys.right ? 1 : 0) - (c.keys.left ? 1 : 0);
+  if (kb !== 0) {
+    c.shipX += kb * 430 * dt;   // 键盘：恒速移动
+    c.tx = null;
+  } else if (c.tx !== null) {
+    c.shipX += (c.tx - c.shipX) * Math.min(1, dt * 14);   // 指针：平滑跟随
+  }
+  c.shipX = Math.max(22, Math.min(W - 22, c.shipX));
+}
+
+/* 核心单步推进：改写 c 并返回 {died, smashed, gotPickup} */
+function stepCore(c, dt, rng) {
+  var res = { died: false, smashed: 0, gotPickup: false };
+  c.t += dt;
+  c.score = Math.floor(c.t * 10);   // 每秒 +10
+  if (c.shieldLeft > 0) {
+    c.shieldLeft = Math.max(0, c.shieldLeft - dt);
+  }
+  moveShipCore(c, dt);
+
+  /* 陨石生成 */
+  c.spawnT -= dt;
+  if (c.spawnT <= 0) { spawnMeteorCore(c, rng); c.spawnT = intervalFor(c.t); }
+
+  /* 护盾道具生成 */
+  if (c.t >= c.nextPickup) {
+    spawnPickupCore(c, rng);
+    c.nextPickup = c.t + 11 + rng() * 8;
+  }
+
+  /* 陨石更新与碰撞 */
+  for (var mi = c.meteors.length - 1; mi >= 0; mi--) {
+    var m = c.meteors[mi];
+    m.x += m.vx * dt;
+    m.y += m.vy * dt;
+    if ((m.x < m.r && m.vx < 0) || (m.x > W - m.r && m.vx > 0)) m.vx = -m.vx;   // 左右反弹
+    if (m.y > H + m.r + 40) { c.meteors.splice(mi, 1); continue; }
+    var rr = m.r * 0.82 + SHIP_R;   // 判定圆略缩小，手感更宽容
+    var dx = m.x - c.shipX, dy = m.y - SHIP_Y;
+    if (dx * dx + dy * dy < rr * rr) {
+      if (c.shieldLeft > 0) {
+        res.smashed++;              // 无敌期间撞碎陨石
+        c.meteors.splice(mi, 1);
+      } else {
+        res.died = true;
+        return res;
+      }
+    }
+  }
+
+  /* 道具下落与拾取 */
+  for (var qi = c.pickups.length - 1; qi >= 0; qi--) {
+    var q = c.pickups[qi];
+    q.y += q.vy * dt;
+    var qy = q.y + Math.sin(c.t * 3 + q.ph) * 4;   // 上下浮动
+    var ddx = q.x - c.shipX, ddy = qy - SHIP_Y;
+    if (ddx * ddx + ddy * ddy < 35 * 35) {
+      c.pickups.splice(qi, 1);
+      c.shieldLeft = SHIELD_DUR;
+      res.gotPickup = true;
+    } else if (q.y > H + 40) {
+      c.pickups.splice(qi, 1);
+    }
+  }
+  return res;
+}
+
+/* ================= AI 决策（纯函数；与 ai-sim.mjs 同名实现保持一致） =================
+   v2 轨迹预采样评分：
+   1) 每次决策把各陨石在前瞻窗口内的位置（含左右墙反弹）按 step 预采样；
+   2) 每个候选目标点用闭式跟随轨迹逐采样点比对 2D 距离（比仅看横向带更准）；
+   3) 窗口内一旦判定撞击，用「首次撞击越晚越好」的悬崖项主导排序，
+      未撞击时由近距危险度、护盾道具/清场收益与移动代价决胜。 */
+var AI_CFG = {
+  look: 0.5,       // 前瞻秒数（实测 0.5 最优：短视窗反应式闪避 + 高频拾盾）
+  step: 0.01,      // 预测采样步长（秒）；越细越不易漏判擦碰，实测 0.01 最优
+  follow: 14,      // 指针跟随系数（与 moveShipCore 一致）
+  band: 1.2,       // 判定半径放宽系数（2D 精算余量）
+  wNear: 1.2,      // 近距危险权重
+  hitW: 100,       // 首次撞击悬崖惩罚（每晚一个采样点加 hitW）
+  softCap: 4,      // 近距危险度封顶（保证悬崖项主导排序）
+  moveCost: 0.02,  // 每移动 100px 的代价（抑制抖动）
+  pickLook: 4.5,   // 护盾道具考虑窗口（秒）
+  pickW: 1.5,      // 护盾道具吸引力上限
+  pickNeed: 500,   // 估计奔赴道具的速度（px/s）
+  smashW: 0.5,     // 护盾期清场加分上限（每颗陨石）
+  smashR: 26       // 清场判定横向吸附半径（px）
+};
+
+/* 预采样缓冲（每次决策复用，避免频繁分配） */
+var PRED_MAX_M = 64;                    // 陨石数上限
+var PRED_MAX_K = 256;                   // 单陨石采样点上限
+var predMx = new Float64Array(PRED_MAX_M * PRED_MAX_K);
+var predMy = new Float64Array(PRED_MAX_M * PRED_MAX_K);
+var predRr2 = new Float64Array(PRED_MAX_M);
+var predEff2 = new Float64Array(PRED_MAX_M);
+var predEnd = new Int32Array(PRED_MAX_M);
+var shipE = new Float64Array(PRED_MAX_K);
+var predN = 0;
+
+/* 匀速直线 + 左右墙反弹：求 τ 秒后陨石横坐标 */
+function foldX(xn, r) {
+  var lo = r, hi = W - r, span = hi - lo;
+  if (span <= 0) return lo;
+  var k = (xn - lo) % (2 * span);
+  if (k < 0) k += 2 * span;
+  return lo + (k <= span ? k : 2 * span - k);
+}
+
+/* 护盾道具对候选点的吸引力（返回要减去的分数） */
+function pickupGain(c, xT) {
+  var gain = 0;
+  for (var i = 0; i < c.pickups.length; i++) {
+    var q = c.pickups[i];
+    var tau = (SHIP_Y - q.y) / q.vy;    // 道具落到飞船高度的时间
+    if (tau < 0.35 || tau > AI_CFG.pickLook) continue;
+    if (Math.abs(q.x - c.shipX) / AI_CFG.pickNeed > tau - 0.15) continue;   // 来不及
+    var off = Math.abs(xT - q.x);
+    if (off > 70) continue;
+    var g = AI_CFG.pickW * (1 - tau / AI_CFG.pickLook) * (1 - off / 70);
+    if (g > gain) gain = g;
+  }
+  return gain;
+}
+
+/* 护盾充裕时顺路撞碎陨石清场（返回要减去的分数） */
+function smashGain(c, xT) {
+  if (c.shieldLeft < AI_CFG.look) return 0;
+  var g = 0;
+  for (var i = 0; i < c.meteors.length; i++) {
+    var m = c.meteors[i];
+    var rr = m.r * 0.82 + SHIP_R;
+    if (m.y > SHIP_Y + rr) continue;                 // 已飞过飞船高度带
+    var tHit = (SHIP_Y - m.y) / m.vy;                // 到达飞船高度带中心时刻
+    if (tHit < 0 || tHit > AI_CFG.look) continue;
+    if (c.shieldLeft <= tHit) continue;              // 到达时护盾已过期 → 不去撞
+    var off = Math.abs(xT - foldX(m.x + m.vx * tHit, m.r));
+    var rr2 = rr + AI_CFG.smashR;
+    if (off < rr2) g += AI_CFG.smashW * (1 - off / rr2);
+  }
+  return g;
+}
+
+/* 单个候选目标点的评分（越低越好） */
+function evalX(c, xT, K) {
+  var x0 = c.shipX;
+  var dt = AI_CFG.step;
+  var soft = 0, hitK = 0;
+  for (var k = 1; k <= K; k++) {
+    var xs = xT + (x0 - xT) * shipE[k];
+    if (xs < 22) xs = 22; else if (xs > W - 22) xs = W - 22;
+    var shielded = c.shieldLeft > k * dt;
+    for (var i = 0; i < predN; i++) {
+      if (k > predEnd[i]) continue;
+      var e = i * PRED_MAX_K + k;
+      var dx = predMx[e] - xs, dy = predMy[e] - SHIP_Y;
+      var d2 = dx * dx + dy * dy;
+      if (d2 >= predEff2[i]) continue;
+      if (shielded) continue;
+      if (hitK === 0 && d2 < predRr2[i]) hitK = k;
+      soft += AI_CFG.wNear / (1 + k * dt) * (1 - d2 / predEff2[i]);
+    }
+    if (hitK !== 0) break;
+  }
+  if (soft > AI_CFG.softCap) soft = AI_CFG.softCap;
+  var danger = hitK !== 0 ? AI_CFG.hitW * (K + 1 - hitK) : 0;
+  return danger + soft - pickupGain(c, xT) - smashGain(c, xT);
+}
+
+/* 每步决策：预采样陨石轨迹后横向细扫候选点，返回最优目标横坐标 */
+function aiPickTarget(c) {
+  var dt = AI_CFG.step;
+  var K = Math.max(1, Math.min(PRED_MAX_K - 1, Math.ceil(AI_CFG.look / dt)));
+  for (var k = 1; k <= K; k++) shipE[k] = Math.exp(-AI_CFG.follow * k * dt);
+  /* 陨石预采样：仅保留前瞻窗口内会进入判定带的陨石 */
+  var n = 0;
+  for (var i = 0; i < c.meteors.length && n < PRED_MAX_M; i++) {
+    var m = c.meteors[i];
+    var rr = m.r * 0.82 + SHIP_R;
+    var eff = rr * AI_CFG.band;
+    if (m.y > SHIP_Y + eff) continue;
+    var tOut = Math.min(AI_CFG.look, (SHIP_Y + eff - m.y) / m.vy);
+    var kk = Math.max(1, Math.min(K, Math.floor(tOut / dt)));
+    var base = n * PRED_MAX_K;
+    for (var k2 = 1; k2 <= kk; k2++) {
+      var tau = k2 * dt;
+      predMx[base + k2] = foldX(m.x + m.vx * tau, m.r);
+      predMy[base + k2] = m.y + m.vy * tau;
+    }
+    predRr2[n] = rr * rr;
+    predEff2[n] = eff * eff;
+    predEnd[n] = kk;
+    n++;
+  }
+  predN = n;
+  var bestX = c.shipX, bestS = Infinity;
+  for (var x = 22; x <= W - 22 + 1e-9; x += 8) {
+    var s = evalX(c, x, K) + AI_CFG.moveCost * Math.abs(x - c.shipX) / 100;
+    if (s < bestS) { bestS = s; bestX = x; }
+  }
+  return bestX;
 }
 
 /* ================= HUD 与覆盖层 ================= */
-function syncHud() { elScore.textContent = score; elBest.textContent = best; }
+function syncHud() { elScore.textContent = G.score; elBest.textContent = best; }
 function syncShield() {
-  if (shieldLeft > 0) {
+  if (G.shieldLeft > 0) {
     elShield.hidden = false;
-    elShieldT.textContent = shieldLeft.toFixed(1);
+    elShieldT.textContent = G.shieldLeft.toFixed(1);
   } else {
     elShield.hidden = true;
   }
@@ -252,7 +488,7 @@ function showStart() {
     '<h2>陨石闪避</h2>' +
     '<p>驾驶小飞船躲开不断坠落的陨石<br>存活越久得分越高（每秒 10 分）<br>护盾道具可提供 10 秒无敌，无敌期间可撞碎陨石</p>' +
     '<button type="button">开始游戏</button>' +
-    '<p>移动鼠标 / 手指拖动 / 方向键 控制飞船</p>'
+    '<p>移动鼠标 / 手指拖动 / 方向键 控制飞船<br>也可点击右上角「AI 代玩」由 AI 自动游玩</p>'
   );
 }
 function showPause() {
@@ -261,16 +497,17 @@ function showPause() {
 function showOver() {
   state = 'over';
   overGuard = 0.6;
-  var isNew = score > best;
+  var isNew = !aiOn && G.score > best;   // AI 代玩成绩不计入最高纪录
   if (isNew) {
-    best = score;
+    best = G.score;
     try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
   }
   syncHud();
   showOverlay(
-    '<h2>' + (isNew ? '新纪录！' : '游戏结束') + '</h2>' +
-    '<div class="big">' + score + '</div>' +
-    '<p>存活 ' + t.toFixed(1) + ' 秒 · 最高纪录 ' + best + '</p>' +
+    '<h2>' + (isNew ? '新纪录！' : (aiOn ? 'AI 本局结束' : '游戏结束')) + '</h2>' +
+    '<div class="big">' + G.score + '</div>' +
+    '<p>存活 ' + G.t.toFixed(1) + ' 秒 · 最高纪录 ' + best + '</p>' +
+    (aiOn ? '<p>AI 代玩中，即将自动开始下一局（成绩不计入纪录）</p>' : '') +
     '<button type="button">再来一局</button>'
   );
 }
@@ -288,10 +525,10 @@ function resumeGame() {
 function die() {
   state = 'dying';
   dieT = 0;
-  shieldLeft = 0;
+  G.shieldLeft = 0;
   syncShield();
-  burst(ship.x, SHIP_Y, 35, 26);    // 橙色火焰碎片
-  burst(ship.x, SHIP_Y, 205, 14);   // 蓝白火花
+  burst(G.shipX, SHIP_Y, 35, 26);    // 橙色火焰碎片
+  burst(G.shipX, SHIP_Y, 205, 14);   // 蓝白火花
   if (navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
 }
 function act() {
@@ -300,36 +537,42 @@ function act() {
   else if (state === 'over' && overGuard <= 0) startGame();
   /* playing 状态下点击不做动作，移动交给指针与键盘 */
 }
+function resetGame() {
+  G = freshCore(Math.random);
+  shownScore = -1;
+  syncHud();
+  syncShield();
+}
 
-/* ================= 生成 ================= */
-function spawnMeteor() {
-  var r = 13 + Math.random() * 27;
-  var n = 6 + (Math.random() * 4 | 0);
-  var verts = [];
-  for (var i = 0; i < n; i++) verts.push(0.72 + Math.random() * 0.42); // 顶点半径系数
-  var craters = [];
-  var cn = 2 + (Math.random() * 2 | 0);
-  for (var j = 0; j < cn; j++) {
-    var a = Math.random() * Math.PI * 2, d = Math.random() * r * 0.45;
-    craters.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, r: r * (0.12 + Math.random() * 0.16) });
+/* ================= AI 代玩控制 ================= */
+/* 每帧调用：衔接界面状态（自动开局/续局/恢复），并在 playing 时周期性决策 */
+function aiTick(dt) {
+  if (!aiOn) return;
+  if (state === 'ready') { startGame(); return; }
+  if (state === 'paused') { resumeGame(); return; }
+  if (state === 'over') { if (overGuard <= 0) startGame(); return; }
+  if (state !== 'playing') return;
+  G.keys.left = false; G.keys.right = false;   // AI 全权接管，忽略物理按键
+  aiClock -= dt;
+  if (aiClock > 0) return;
+  aiClock = 0.1;
+  G.tx = aiPickTarget(G);
+}
+function setAi(on) {
+  aiOn = on;
+  aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
+  aiBtn.classList.toggle('ai-on', aiOn);
+  aiBtn.setAttribute('aria-pressed', String(aiOn));
+  aiTag.hidden = !aiOn;
+  if (aiOn) {
+    if (state === 'ready') startGame();
+    else if (state === 'paused') resumeGame();
+    else if (state === 'over' && overGuard <= 0) startGame();
   }
-  meteors.push({
-    x: r + Math.random() * (W - 2 * r),
-    y: -r - 12,
-    vx: (Math.random() * 2 - 1) * 46 * mul(),
-    vy: (95 + Math.random() * 115) * mul(),
-    r: r,
-    rot: Math.random() * Math.PI * 2,
-    vr: (Math.random() * 2 - 1) * 2.6,   // 自转角速度各不相同
-    verts: verts,
-    craters: craters,
-    hue: 16 + Math.random() * 24          // 岩石棕灰色系
-  });
 }
-function spawnPickup() {
-  pickups.push({ x: 30 + Math.random() * (W - 60), y: -24, vy: 105, ph: Math.random() * Math.PI * 2 });
-}
-/* 爆裂粒子 */
+aiBtn.addEventListener('click', function () { setAi(!aiOn); });
+
+/* ================= 爆裂粒子 ================= */
 function burst(x, y, hue, n) {
   for (var i = 0; i < n; i++) {
     var a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 220;
@@ -345,17 +588,6 @@ function burst(x, y, hue, n) {
 }
 
 /* ================= 更新 ================= */
-function moveShip(dt) {
-  var kb = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-  if (kb !== 0) {
-    ship.x += kb * 430 * dt;   // 键盘：恒速移动
-    ship.tx = null;
-  } else if (ship.tx !== null) {
-    ship.x += (ship.tx - ship.x) * Math.min(1, dt * 14);   // 指针：平滑跟随
-  }
-  ship.x = Math.max(22, Math.min(W - 22, ship.x));
-}
-
 function update(dt) {
   /* 星空缓慢下移，营造飞行感 */
   for (var si = 0; si < stars.length; si++) {
@@ -374,66 +606,14 @@ function update(dt) {
   }
 
   if (state === 'playing') {
-    t += dt;
-    score = Math.floor(t * 10);   // 每秒 +10
-    if (score !== shownScore) { shownScore = score; elScore.textContent = score; }
-
-    if (shieldLeft > 0) {
-      shieldLeft = Math.max(0, shieldLeft - dt);
-    }
+    var ev = stepCore(G, dt, Math.random);
+    if (G.score !== shownScore) { shownScore = G.score; elScore.textContent = G.score; }
     syncShield();
-
-    moveShip(dt);
-
-    /* 陨石生成 */
-    spawnT -= dt;
-    if (spawnT <= 0) { spawnMeteor(); spawnT = interval(); }
-
-    /* 护盾道具生成 */
-    if (t >= nextPickup) {
-      spawnPickup();
-      nextPickup = t + 11 + Math.random() * 8;
-    }
-
-    /* 陨石更新与碰撞 */
-    for (var mi = meteors.length - 1; mi >= 0; mi--) {
-      var m = meteors[mi];
-      m.x += m.vx * dt;
-      m.y += m.vy * dt;
-      m.rot += m.vr * dt;
-      if ((m.x < m.r && m.vx < 0) || (m.x > W - m.r && m.vx > 0)) m.vx = -m.vx;   // 左右反弹
-      if (m.y > H + m.r + 40) { meteors.splice(mi, 1); continue; }
-      var rr = m.r * 0.82 + SHIP_R;   // 判定圆略缩小，手感更宽容
-      var dx = m.x - ship.x, dy = m.y - SHIP_Y;
-      if (dx * dx + dy * dy < rr * rr) {
-        if (shieldLeft > 0) {
-          burst(m.x, m.y, m.hue, 12);   // 无敌期间撞碎陨石
-          meteors.splice(mi, 1);
-        } else {
-          die();
-          return;
-        }
-      }
-    }
-
-    /* 道具下落与拾取 */
-    for (var qi = pickups.length - 1; qi >= 0; qi--) {
-      var q = pickups[qi];
-      q.y += q.vy * dt;
-      var qy = q.y + Math.sin(t * 3 + q.ph) * 4;   // 上下浮动
-      var ddx = q.x - ship.x, ddy = qy - SHIP_Y;
-      if (ddx * ddx + ddy * ddy < 35 * 35) {
-        pickups.splice(qi, 1);
-        shieldLeft = SHIELD_DUR;
-        burst(q.x, qy, 200, 10);
-      } else if (q.y > H + 40) {
-        pickups.splice(qi, 1);
-      }
-    }
+    if (ev.died) { die(); return; }
   } else if (state === 'dying') {
     /* 陨石继续飘落，短暂延迟后展示结算 */
-    for (var di = 0; di < meteors.length; di++) {
-      var md = meteors[di];
+    for (var di = 0; di < G.meteors.length; di++) {
+      var md = G.meteors[di];
       md.x += md.vx * dt;
       md.y += md.vy * dt;
       md.rot += md.vr * dt;
@@ -467,8 +647,8 @@ function draw() {
 }
 /* 多边形陨石：随机顶点半径 + 陨石坑 + 自转 */
 function drawMeteors() {
-  for (var i = 0; i < meteors.length; i++) {
-    var m = meteors[i];
+  for (var i = 0; i < G.meteors.length; i++) {
+    var m = G.meteors[i];
     ctx.save();
     ctx.translate(m.x, m.y);
     ctx.rotate(m.rot);
@@ -496,12 +676,12 @@ function drawMeteors() {
 }
 /* 护盾道具：光晕 + 圆环 + 盾形徽记 */
 function drawPickups() {
-  for (var i = 0; i < pickups.length; i++) {
-    var q = pickups[i];
-    var y = q.y + Math.sin(t * 3 + q.ph) * 4;
+  for (var i = 0; i < G.pickups.length; i++) {
+    var q = G.pickups[i];
+    var y = q.y + Math.sin(G.t * 3 + q.ph) * 4;
     ctx.fillStyle = 'rgba(41,182,246,.18)';
     ctx.beginPath();
-    ctx.arc(q.x, y, 20 + Math.sin(t * 5 + q.ph) * 2, 0, Math.PI * 2);
+    ctx.arc(q.x, y, 20 + Math.sin(G.t * 5 + q.ph) * 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#29b6f6';
     ctx.lineWidth = 2.5;
@@ -523,7 +703,7 @@ function drawPickups() {
 /* 小飞船：几何拼装（机身 + 机翼 + 舷窗 + 尾焰） */
 function drawShip() {
   ctx.save();
-  ctx.translate(ship.x, SHIP_Y);
+  ctx.translate(G.shipX, SHIP_Y);
   /* 尾焰（随机抖动） */
   var fl = 8 + Math.random() * 7;
   var grd = ctx.createLinearGradient(0, 12, 0, 20 + fl);
@@ -571,17 +751,17 @@ function drawShip() {
 }
 /* 护盾光环（剩 3 秒内闪烁警示） */
 function drawShieldRing() {
-  if (shieldLeft <= 0 || state === 'dying' || state === 'over') return;
-  var pulse = 26 + Math.sin(t * 6) * 2;
-  var blink = shieldLeft < 3 ? (Math.sin(t * 16) > 0 ? 0.85 : 0.25) : 0.8;
+  if (G.shieldLeft <= 0 || state === 'dying' || state === 'over') return;
+  var pulse = 26 + Math.sin(G.t * 6) * 2;
+  var blink = G.shieldLeft < 3 ? (Math.sin(G.t * 16) > 0 ? 0.85 : 0.25) : 0.8;
   ctx.strokeStyle = 'rgba(41,182,246,' + blink + ')';
   ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.arc(ship.x, SHIP_Y, pulse, 0, Math.PI * 2);
+  ctx.arc(G.shipX, SHIP_Y, pulse, 0, Math.PI * 2);
   ctx.stroke();
   ctx.strokeStyle = 'rgba(41,182,246,' + (blink * 0.35) + ')';
   ctx.beginPath();
-  ctx.arc(ship.x, SHIP_Y, pulse + 5, 0, Math.PI * 2);
+  ctx.arc(G.shipX, SHIP_Y, pulse + 5, 0, Math.PI * 2);
   ctx.stroke();
 }
 function drawParts() {
@@ -602,6 +782,7 @@ function loop(now) {
   var dt = Math.min((now - lastFrame) / 1000, 0.05);
   lastFrame = now;
   if (overGuard > 0) overGuard -= dt;
+  aiTick(dt);
   update(dt);
   draw();
   requestAnimationFrame(loop);
@@ -610,7 +791,7 @@ function loop(now) {
 /* ================= 输入（指针 + 键盘，兼容无 PointerEvent 的环境） ================= */
 function setPointer(e) {
   var rect = cv.getBoundingClientRect();
-  ship.tx = (e.clientX - rect.left) / rect.width * W;
+  G.tx = (e.clientX - rect.left) / rect.width * W;
 }
 function onTap(el, fn) {
   if (window.PointerEvent) el.addEventListener('pointerdown', fn);
@@ -634,16 +815,16 @@ onMove(stage, function (e) {
   if (state === 'playing') setPointer(e);
 });
 window.addEventListener('keydown', function (e) {
-  if (e.code === 'ArrowLeft' || e.code === 'KeyA') { keys.left = true; e.preventDefault(); }
-  else if (e.code === 'ArrowRight' || e.code === 'KeyD') { keys.right = true; e.preventDefault(); }
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') { G.keys.left = true; e.preventDefault(); }
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') { G.keys.right = true; e.preventDefault(); }
   else if (e.code === 'Space' || e.code === 'Enter') {
     e.preventDefault();
     if (!e.repeat) act();
   }
 });
 window.addEventListener('keyup', function (e) {
-  if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
-  else if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') G.keys.left = false;
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') G.keys.right = false;
 });
 
 /* 切后台自动暂停；回到前台重置时间基准，避免 delta 时间跳变 */
@@ -656,6 +837,18 @@ document.addEventListener('visibilitychange', function () {
 });
 
 /* ================= 启动 ================= */
+function initStars() {
+  stars = [];
+  for (var i = 0; i < 70; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      s: Math.random() < 0.8 ? 1.5 : 2.5,
+      v: 14 + Math.random() * 34,
+      a: 0.25 + Math.random() * 0.6
+    });
+  }
+}
 initStars();
 resetGame();
 showStart();
@@ -666,7 +859,7 @@ requestAnimationFrame(loop);
     <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
     <div class="rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>操控小飞船左右闪避坠落的陨石，存活越久分越高</li>
@@ -677,6 +870,11 @@ requestAnimationFrame(loop);
       <ul>
         <li>鼠标移动 / 触屏拖动 / ← → / A D：移动飞船</li>
         <li>空格：开始 / 重开</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点击「AI 代玩」按钮，AI 自动操控飞船闪避陨石并自动续局</li>
+        <li>随时再点一次按钮即可停止；AI 成绩不计入最高纪录</li>
       </ul>
     </div>
   </aside>

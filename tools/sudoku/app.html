@@ -156,6 +156,17 @@
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #3f9d6d; }
     .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+    /* AI 代玩按钮与状态标签：运行中变红提示可点击停止 */
+    .btn.ai-btn { background: #5b67c9; flex: 1 1 100%; box-shadow: 0 2px 10px rgba(91, 103, 201, .35); }
+    .btn.ai-btn.ai-on { background: #d93025; box-shadow: 0 2px 10px rgba(217, 48, 37, .30); }
+    .ai-tag {
+      margin: -4px 0 12px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #2f8b52;
+    }
     /* 题号栏即输入框：点数字直接改，回车 / 失焦跳转 */
     .no-wrap { display: flex; align-items: center; justify-content: center; gap: 1px; }
     .no-wrap b { font-weight: 700; }
@@ -400,12 +411,14 @@
 
     <!-- 功能按钮 -->
     <div class="controls">
+      <button class="btn ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
       <button class="btn" id="checkBtn" type="button">检查</button>
       <button class="btn primary" id="hintBtn" type="button">提示（剩 3 次）</button>
       <button class="btn ghost" id="eraseBtn" type="button">擦除</button>
       <button class="btn ghost" id="restartBtn" type="button">重开本题</button>
       <button class="btn ghost" id="nextBtn" type="button">随机抽题</button>
     </div>
+    <div class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最佳用时</div>
 
     <!-- 状态消息 -->
     <div class="msg-bar" id="msgBar">点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。</div>
@@ -434,6 +447,10 @@
        题号 -> 种子 -> 现场生成完整解再挖空（挖空全程校验唯一解）：
        同编号同难度恒定生成同一题，可把「第 N 题」分享给朋友互相挑战；
        题面零存储，加载开销与题库规模无关。 */
+
+    /* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）=====
+       以下全部为与渲染无关的纯函数：题库生成、状态构建、单步推进、
+       冲突检测、MRV 回溯求解。页面与 node 模拟器共用同一份实现。 */
 
     /* mulberry32 伪随机数发生器——同一题号永远复现同一道题的关键 */
     function mulberry32(a) {
@@ -555,6 +572,157 @@
       };
     }
 
+    /* ---------- 纯函数：解析题面 -> 游戏状态（81 格值 + 是否预设） ---------- */
+    function parsePuzzle(p) {
+      const grid = [], given = [];
+      for (let i = 0; i < 81; i++) {
+        const ch = p.q[i];
+        const v = ch === '.' ? 0 : parseInt(ch, 10);
+        grid.push(v);
+        given.push(v !== 0);
+      }
+      return { grid: grid, given: given };
+    }
+
+    /* ---------- 纯函数：单步推进（填数 / 擦除），不碰 DOM ----------
+       state = { grid, given }，value=0 表示擦除。
+       返回 { ok, reason, grid }：reason 为 given / same / invalid / 空，
+       grid 为执行后的新状态数组（未改变时沿用原数组） */
+    function stepFill(state, idx, value) {
+      if (!(idx >= 0 && idx < 81)) return { ok: false, reason: 'invalid', grid: state.grid };
+      if (state.given[idx]) return { ok: false, reason: 'given', grid: state.grid };
+      if (state.grid[idx] === value) return { ok: true, reason: 'same', grid: state.grid };
+      const g = state.grid.slice();
+      g[idx] = value;
+      return { ok: true, reason: '', grid: g };
+    }
+
+    /* ---------- 纯函数：冲突检测（行 / 列 / 宫），返回冲突格下标集合 ---------- */
+    function computeConflicts(g) {
+      const bad = new Set();
+      const mark = function (idxList) {
+        const seen = new Map();
+        for (const idx of idxList) {
+          const v = g[idx];
+          if (!v) continue;
+          if (seen.has(v)) { bad.add(idx); bad.add(seen.get(v)); }
+          else seen.set(v, idx);
+        }
+      };
+      for (let r = 0; r < 9; r++) {
+        const list = [];
+        for (let c = 0; c < 9; c++) list.push(r * 9 + c);
+        mark(list);
+      }
+      for (let c = 0; c < 9; c++) {
+        const list = [];
+        for (let r = 0; r < 9; r++) list.push(r * 9 + c);
+        mark(list);
+      }
+      for (let br = 0; br < 3; br++) {
+        for (let bc = 0; bc < 3; bc++) {
+          const list = [];
+          for (let dr = 0; dr < 3; dr++) {
+            for (let dc = 0; dc < 3; dc++) list.push((br * 3 + dr) * 9 + (bc * 3 + dc));
+          }
+          mark(list);
+        }
+      }
+      return bad;
+    }
+
+    /* ---------- AI 求解核心：MRV 启发回溯状态机，与渲染完全无关 ----------
+       状态 = 工作盘 + 尝试栈 + 回溯待试格；单步推进每次恰好产出一个动作
+       （place 填数 / erase 擦除 / done 收尾），页面与模拟器都按动作逐格演示。 */
+    function aiCoreSudoku() {
+      'use strict';
+      /* idx 格的合法数字位掩码（bit 1-9，bit v 置位表示数字 v 可填） */
+      function candMask(grid, idx) {
+        const r = Math.floor(idx / 9), c = idx % 9;
+        let used = 0;
+        for (let k = 0; k < 9; k++) {
+          used |= 1 << grid[r * 9 + k];
+          used |= 1 << grid[k * 9 + c];
+        }
+        const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+        for (let dr = 0; dr < 3; dr++) {
+          for (let dc = 0; dc < 3; dc++) used |= 1 << grid[(br + dr) * 9 + (bc + dc)];
+        }
+        return ~used & 0x3FE;
+      }
+      function lowestBit(mask) {
+        for (let v = 1; v <= 9; v++) if (mask & (1 << v)) return v;
+        return 0;
+      }
+      /* 解题会话：work 为工作盘（0 为空），stack 记录每格的尝试历史，
+         pending 为回溯后待重试的格，forced 表示回溯中途必须继续撤销 */
+      function newSession(grid) {
+        return { work: grid.slice(), stack: [], pending: null, forced: false };
+      }
+      /* 回溯一步：撤销最近一次尝试；该格还有更大候选则留待下一步重试，
+         候选已试完则置 forced，下一步继续回溯上游（否则 MRV 会原地死循环） */
+      function backtrack(s) {
+        while (s.stack.length) {
+          const f = s.stack.pop();
+          s.work[f.idx] = 0;
+          const rest = f.mask & ~((1 << (f.v + 1)) - 1);   // 保留大于已试值的候选位
+          if (rest) {
+            s.pending = { idx: f.idx, mask: f.mask, value: lowestBit(rest) };
+            s.forced = false;
+          } else {
+            s.forced = true;
+          }
+          return { type: 'erase', idx: f.idx };
+        }
+        s.forced = false;
+        return { type: 'done', solved: false };   // 题库保证唯一解，正常走不到这里
+      }
+      /* 单步推进：MRV 选候选最少的空格填入最小合法值；遇死路回溯一步 */
+      function nextStep(s) {
+        if (s.pending) {
+          const p = s.pending;
+          s.pending = null;
+          s.work[p.idx] = p.value;
+          s.stack.push({ idx: p.idx, mask: p.mask, v: p.value });
+          return { type: 'place', idx: p.idx, value: p.value };
+        }
+        if (s.forced) return backtrack(s);   // 回溯中途：继续撤销，不重新 MRV
+        let best = -1, bestMask = 0, bestCnt = 10;
+        for (let i = 0; i < 81; i++) {
+          if (s.work[i]) continue;
+          const mask = candMask(s.work, i);
+          let cnt = 0;
+          for (let m = mask; m; m &= m - 1) cnt++;
+          if (cnt === 0) return backtrack(s);   // 死路：回溯
+          if (cnt < bestCnt) { bestCnt = cnt; bestMask = mask; best = i; if (cnt === 1) break; }
+        }
+        if (best === -1) return { type: 'done', solved: true };   // 盘面填满：解出
+        const v = lowestBit(bestMask);
+        s.work[best] = v;
+        s.stack.push({ idx: best, mask: bestMask, v: v });
+        return { type: 'place', idx: best, value: v };
+      }
+      /* 一口气解到底（模拟器 / 快速求解用），返回动作统计 */
+      function runToEnd(s) {
+        let places = 0, erases = 0;
+        for (;;) {
+          const act = nextStep(s);
+          if (act.type === 'done') {
+            return { solved: act.solved, places: places, erases: erases, steps: places + erases };
+          }
+          if (act.type === 'place') places++;
+          else erases++;
+        }
+      }
+      return {
+        candMask: candMask,
+        newSession: newSession,
+        nextStep: nextStep,
+        runToEnd: runToEnd
+      };
+    }
+    /* ===== AI_CORE_END ===== */
+
     // 难度 -> 最佳用时存储键（带 slug 前缀）
     const BEST_KEY = { '入门': 'sudoku_best_easy', '中等': 'sudoku_best_medium', '困难': 'sudoku_best_hard' };
 
@@ -567,6 +735,10 @@
     let selected = -1;         // 选中格索引
     let hintsLeft = 3;
     let startTime = 0, timerId = null, finished = false;
+    let aiOn = false;        // AI 代玩开关
+    let aiSession = null;    // 回溯求解会话（见 aiCoreSudoku）
+    let aiTimer = null;      // 代玩步进定时器
+    let aiStepCount = 0;     // 本局 AI 已执行动作数（含回溯擦除）
 
     const boardEl = document.getElementById('board');
     const msgBar = document.getElementById('msgBar');
@@ -600,36 +772,9 @@
       if (timerId) { clearInterval(timerId); timerId = null; }
     }
 
-    /* ---------- 冲突检测：行 / 列 / 宫 ---------- */
-    function computeConflicts() {
-      const bad = new Set();
-      const i = (r, c) => r * 9 + c;
-      const mark = function (idxList) {
-        const seen = new Map();
-        for (const idx of idxList) {
-          const v = grid[idx];
-          if (!v) continue;
-          if (seen.has(v)) { bad.add(idx); bad.add(seen.get(v)); }
-          else seen.set(v, idx);
-        }
-      };
-      for (let r = 0; r < 9; r++) mark([0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (c) { return i(r, c); }));
-      for (let c = 0; c < 9; c++) mark([0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (r) { return i(r, c); }));
-      for (let br = 0; br < 3; br++) {
-        for (let bc = 0; bc < 3; bc++) {
-          const list = [];
-          for (let dr = 0; dr < 3; dr++) {
-            for (let dc = 0; dc < 3; dc++) list.push(i(br * 3 + dr, bc * 3 + dc));
-          }
-          mark(list);
-        }
-      }
-      return bad;
-    }
-
     /* ---------- 渲染 ---------- */
     function render() {
-      const conflicts = computeConflicts();
+      const conflicts = computeConflicts(grid);
       let html = '';
       for (let idx = 0; idx < 81; idx++) {
         const r = Math.floor(idx / 9), c = idx % 9;
@@ -654,27 +799,29 @@
       msgBar.className = 'msg-bar' + (type ? ' ' + type : '');
     }
 
-    /* ---------- 填数 / 擦除 ---------- */
+    /* ---------- 填数 / 擦除（状态变更走纯函数 stepFill） ---------- */
     function placeNumber(num) {
-      if (finished || selected < 0) return;
-      if (given[selected]) {
+      if (aiOn || finished || selected < 0) return;
+      const res = stepFill({ grid: grid, given: given }, selected, num);
+      if (!res.ok) {
         setMsg('灰底数字是题面预设，不能修改。', 'err');
         return;
       }
-      if (grid[selected] === num) return;
+      if (res.reason === 'same') return;
       startTimer();
-      grid[selected] = num;
+      grid = res.grid;
       render();
       checkComplete();
     }
     function eraseCell() {
-      if (finished || selected < 0) return;
-      if (given[selected]) {
+      if (aiOn || finished || selected < 0) return;
+      const res = stepFill({ grid: grid, given: given }, selected, 0);
+      if (!res.ok) {
         setMsg('灰底数字是题面预设，不能修改。', 'err');
         return;
       }
-      if (!grid[selected]) return;
-      grid[selected] = 0;
+      if (res.reason === 'same') return;
+      grid = res.grid;
       render();
       setMsg('已擦除该格。', '');
     }
@@ -693,7 +840,7 @@
       else setMsg('全部正确。', 'ok');
     }
     function useHint() {
-      if (finished) return;
+      if (aiOn || finished) return;
       if (hintsLeft <= 0) {
         setMsg('本题提示次数已用完。', 'err');
         return;
@@ -719,8 +866,8 @@
       checkComplete();
     }
 
-    /* ---------- 完成判定与庆祝 ---------- */
-    function checkComplete() {
+    /* ---------- 完成判定与庆祝（byAi=true 为 AI 代玩完成，不计最佳用时） ---------- */
+    function checkComplete(byAi) {
       for (let i = 0; i < 81; i++) {
         if (grid[i] !== parseInt(puzzle.a[i], 10)) return;
       }
@@ -728,12 +875,13 @@
       stopTimer();
       const sec = elapsed();
       const prev = loadBest(curDiff);
-      const isNew = prev === null || sec < prev;
+      const isNew = !byAi && (prev === null || sec < prev);
       if (isNew) saveBest(curDiff, sec);
       updateBest();
 
       let msg = '题号 <b>#' + curNo + '</b> · 难度 <b>' + curDiff + '</b>，用时 <b>' + fmtTime(sec) + '</b> 完成。<br>';
-      if (isNew) msg += '刷新本难度最佳用时。';
+      if (byAi) msg += '由 AI 代玩完成，不计最佳用时。';
+      else if (isNew) msg += '刷新本难度最佳用时。';
       else msg += '本难度最佳用时：' + fmtTime(prev) + '。';
       document.getElementById('winMsg').innerHTML = msg;
       winModal.hidden = false;
@@ -745,15 +893,11 @@
       document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
     }
     function loadPuzzle() {
+      stopAi(true);   // 换题 / 重开时静默停止代玩
       puzzle = generatePuzzle(curNo, curDiff);
-      grid = [];
-      given = [];
-      for (let i = 0; i < 81; i++) {
-        const ch = puzzle.q[i];
-        const v = ch === '.' ? 0 : parseInt(ch, 10);
-        grid.push(v);
-        given.push(v !== 0);
-      }
+      const st = parsePuzzle(puzzle);
+      grid = st.grid;
+      given = st.given;
       selected = -1;
       hintsLeft = 3;
       finished = false;
@@ -788,6 +932,63 @@
       loadPuzzle();
     }
 
+    /* ---------- AI 代玩：MRV 回溯求解器逐步演示，可随时停止 ----------
+       决策走 aiCoreSudoku 纯函数状态机（见 AI_CORE 标记区），与渲染无关；
+       页面只负责把每步动作（填数 / 擦除）同步到棋盘并渲染。 */
+    function aiBtnState(running) {
+      const btn = document.getElementById('aiBtn');
+      btn.textContent = running ? '停止代玩' : 'AI 代玩';
+      btn.classList.toggle('ai-on', running);
+      btn.setAttribute('aria-pressed', running ? 'true' : 'false');
+      document.getElementById('aiTag').hidden = !running;
+    }
+    function stopAi(silent) {
+      if (aiTimer) { clearInterval(aiTimer); aiTimer = null; }
+      const wasOn = aiOn;
+      aiOn = false;
+      aiSession = null;
+      aiBtnState(false);
+      if (wasOn && !silent) setMsg('已停止 AI 代玩，可继续手动游玩。', '');
+    }
+    function startAi() {
+      if (finished) {
+        setMsg('本题已完成，点「重开本题」或「随机抽题」后再让 AI 代玩。', 'err');
+        return;
+      }
+      // AI 从题面接手：清空手动填入，保证求解演示完整
+      const st = parsePuzzle(puzzle);
+      grid = st.grid;
+      selected = -1;
+      aiStepCount = 0;
+      aiSession = aiCore.newSession(grid);
+      aiOn = true;
+      aiBtnState(true);
+      startTimer();
+      render();
+      setMsg('AI 已接手（MRV 回溯求解），点「停止代玩」可随时交还手动。', '');
+      aiTimer = setInterval(aiTick, 150);
+    }
+    function aiTick() {
+      if (!aiOn || !aiSession || finished) return;
+      const act = aiCore.nextStep(aiSession);
+      if (act.type === 'done') {
+        stopAi(true);
+        if (act.solved) {
+          render();
+          checkComplete(true);
+        } else {
+          setMsg('AI 未能解出本题（题面异常），可点「随机抽题」换一题。', 'err');
+        }
+        return;
+      }
+      grid = aiSession.work.slice();
+      selected = act.idx;
+      aiStepCount++;
+      render();
+      setMsg('AI 解题中 · 第 ' + aiStepCount + ' 步' +
+        (act.type === 'erase' ? '（回溯擦除，换一条路）' : '（填入 ' + act.value + '）') + '…', '');
+    }
+
     /* ---------- 事件绑定 ---------- */
     // 难度档位
     document.getElementById('diffSeg').addEventListener('click', function (e) {
@@ -817,6 +1018,10 @@
     });
 
     // 功能按钮
+    document.getElementById('aiBtn').addEventListener('click', function () {
+      if (aiOn) stopAi(false);
+      else startAi();
+    });
     document.getElementById('checkBtn').addEventListener('click', checkBoard);
     document.getElementById('hintBtn').addEventListener('click', useHint);
     document.getElementById('eraseBtn').addEventListener('click', eraseCell);
@@ -862,6 +1067,7 @@
     });
 
     /* ---------- 启动 ---------- */
+    const aiCore = aiCoreSudoku();   // 求解核心纯函数实例：AI 代玩与手动玩法共用
     loadPuzzle();
   </script>
   <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
@@ -879,6 +1085,12 @@
       <ul>
         <li>点格子后用数字键盘或键盘 1-9 填数，0 / Backspace 擦除</li>
         <li>点顶部题号可输入编号跳转，「随机抽题」抽新题</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点「AI 代玩」由 AI 自动演示解题：候选最少的格子优先填，走不通就回溯重试</li>
+        <li>点「停止代玩」随时交还手动，换题 / 重开会自动停止</li>
+        <li>AI 代玩完成不计最佳用时</li>
       </ul>
     </div>
   </aside>

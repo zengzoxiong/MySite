@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>迷宫寻宝 - 拾光集</title>
-  <meta name="description" content="拾光集在线小游戏：迷宫寻宝，递归回溯随机生成迷宫，三档难度，收集星星赢取三星评级，纯本地运行。">
+  <meta name="description" content="拾光集在线小游戏：迷宫寻宝，递归回溯随机生成迷宫，三档难度，收集星星赢取三星评级，支持 AI 代玩，纯本地运行。">
   <link rel="icon" href="../../favicon.svg">
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/maze-runner/app.html">
   <style>
@@ -131,6 +131,17 @@
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #3f9d6d; }
     .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+
+    /* AI 代玩按钮与状态标签 */
+    .ai-btn { background: #188038; box-shadow: 0 2px 10px rgba(24, 128, 56, .35); }
+    .ai-btn.ai-on { background: #d93025; box-shadow: 0 2px 10px rgba(217, 48, 37, .35); }
+    .ai-tag {
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #188038;
+      margin: -2px 0 12px;
+    }
 
     /* 屏幕方向按钮（手机端） */
     .dpad {
@@ -371,7 +382,9 @@
     <div class="controls">
       <button class="btn primary" id="newBtn" type="button">换一局（新迷宫）</button>
       <button class="btn ghost" id="retryBtn" type="button">重走本局</button>
+      <button class="btn ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
     </div>
+    <div class="ai-tag" id="aiTag" hidden>AI 代玩中 · 自动寻路演示，成绩不计入最佳用时</div>
 
     <!-- 手机端方向按钮 -->
     <div class="dpad" aria-label="方向控制">
@@ -442,18 +455,15 @@
   <script>
     /* ================= 迷宫寻宝 · 游戏逻辑 =================
        迷宫生成：递归回溯（深度优先 + 随机邻居），格子四壁用位集合表示
-       星星位置：取解路径 25% / 50% / 75% 处的格子，保证“路上”一定收集得到 */
+       星星位置：取解路径 25% / 50% / 75% 处的格子，保证“路上”一定收集得到
+       分层结构：
+         1）纯函数核心 core* / aiNextMove：只读写对局状态对象，与渲染无关，
+            与 tools/maze-runner/ai-sim.mjs 保持一致，调规则请两处同步；
+         2）渲染与交互层：读写 DOM、计时与 AI 代玩节奏。 */
 
     const SIZES = [11, 17, 25];
     const PAR_TIME = { 11: 60, 17: 150, 25: 300 };   // 各难度目标时间（秒）
-
-    let n = 11;                 // 迷宫边长（格数）
-    let walls = [];             // walls[r][c] = {n,e,s,w}，true 表示有墙
-    let visited = [];
-    let stars = [];             // 3 颗星星坐标
-    let player = { r: 0, c: 0 };
-    let steps = 0, collected = 0;
-    let startTime = 0, timerId = null, finished = false;
+    const AI_STEP_MS = 110;                          // AI 代玩每步间隔（毫秒）
 
     const gridEl = document.getElementById('grid');
     const boardEl = document.getElementById('board');
@@ -464,6 +474,8 @@
       document.getElementById('starPiece1'),
       document.getElementById('starPiece2')
     ];
+    const aiBtn = document.getElementById('aiBtn');
+    const aiTag = document.getElementById('aiTag');
 
     /* ---------- localStorage 读写（带 slug 前缀，包 try/catch） ---------- */
     function bestKey(size) { return 'mazeRunner_best_' + size; }
@@ -477,11 +489,14 @@
       try { localStorage.setItem(bestKey(size), String(seconds)); } catch (e) { /* 隐私模式下忽略 */ }
     }
 
-    /* ---------- 迷宫生成：递归回溯 ---------- */
-    function generateMaze(size) {
-      n = size;
-      walls = [];
-      visited = [];
+    /* ================= 纯函数核心（与渲染无关） ================= */
+
+    /* ---------- 迷宫生成：递归回溯，返回 { n, walls } ---------- */
+    function coreGenerateMaze(size, rng) {
+      const n = size;
+      const walls = [];
+      const visited = [];
+      const rand = rng || Math.random;
       for (let r = 0; r < n; r++) {
         walls.push([]);
         visited.push([]);
@@ -513,7 +528,7 @@
           stack.pop();
           continue;
         }
-        const pick = cands[Math.floor(Math.random() * cands.length)];
+        const pick = cands[Math.floor(rand() * cands.length)];
         walls[cur.r][cur.c][pick.d.a] = false;
         walls[pick.nr][pick.nc][pick.d.b] = false;
         visited[pick.nr][pick.nc] = true;
@@ -522,20 +537,23 @@
       // 入口开在左上、出口开在右下
       walls[0][0].w = false;
       walls[n - 1][n - 1].e = false;
+      return { n: n, walls: walls };
     }
 
-    /* ---------- 求解路径（BFS），用于在“路上”放星星 ---------- */
-    function solvePath() {
+    /* ---------- BFS 求最短路（返回 [{r,c},...]，含起终点；不可达返回 []） ---------- */
+    function coreFindPath(walls, n, from, to) {
+      if (from.r === to.r && from.c === to.c) return [{ r: from.r, c: from.c }];
       const prev = [];
       for (let r = 0; r < n; r++) {
         prev.push([]);
         for (let c = 0; c < n; c++) prev[r].push(null);
       }
-      const q = [{ r: 0, c: 0 }];
-      const seen = new Set(['0,0']);
+      const q = [{ r: from.r, c: from.c }];
+      const seen = new Set([from.r + ',' + from.c]);
+      let found = false;
       while (q.length > 0) {
         const cur = q.shift();
-        if (cur.r === n - 1 && cur.c === n - 1) break;
+        if (cur.r === to.r && cur.c === to.c) { found = true; break; }
         const w = walls[cur.r][cur.c];
         const moves = [
           { dr: -1, dc: 0, open: !w.n },
@@ -553,9 +571,10 @@
           q.push({ r: nr, c: nc });
         }
       }
+      if (!found) return [];
       // 回溯出完整路径
       const path = [];
-      let cur = { r: n - 1, c: n - 1 };
+      let cur = { r: to.r, c: to.c };
       while (cur) {
         path.unshift(cur);
         cur = prev[cur.r][cur.c];
@@ -563,8 +582,125 @@
       return path;
     }
 
+    /* ---------- 开局状态（纯函数）：迷宫 + 沿解路径放星星 ---------- */
+    function coreNewGame(size, rng) {
+      const g = coreGenerateMaze(size, rng);
+      const n = g.n, walls = g.walls;
+      const path = coreFindPath(walls, n, { r: 0, c: 0 }, { r: n - 1, c: n - 1 });
+      // 星星放在解路径 25% / 50% / 75% 处
+      const stars = [];
+      const usedIdx = new Set();
+      const fracs = [0.25, 0.5, 0.75];
+      for (const f of fracs) {
+        let idx = Math.min(path.length - 2, Math.max(1, Math.round(path.length * f)));
+        // 防止两颗星星落在同一格：必要时沿路径顺移
+        while (usedIdx.has(idx) && idx < path.length - 2) idx++;
+        while (usedIdx.has(idx) && idx > 1) idx--;
+        usedIdx.add(idx);
+        stars.push({ r: path[idx].r, c: path[idx].c, got: false });
+      }
+      return {
+        n: n,
+        walls: walls,
+        stars: stars,
+        player: { r: 0, c: 0 },
+        steps: 0,
+        collected: 0,
+        finished: false
+      };
+    }
+
+    /* ---------- 单步推进（纯函数）：改状态对象，返回 { moved, gotStar, won } ---------- */
+    function coreMove(state, dr, dc) {
+      const ev = { moved: false, gotStar: false, won: false };
+      if (state.finished) return ev;
+      const w = state.walls[state.player.r][state.player.c];
+      if (dr === -1 && w.n) return ev;
+      if (dr === 1 && w.s) return ev;
+      if (dc === -1 && w.w) return ev;
+      if (dc === 1 && w.e) return ev;
+      const nr = state.player.r + dr, nc = state.player.c + dc;
+      if (nr < 0 || nr >= state.n || nc < 0 || nc >= state.n) return ev;
+      state.player = { r: nr, c: nc };
+      state.steps++;
+      // 拾取星星
+      for (const st of state.stars) {
+        if (!st.got && st.r === nr && st.c === nc) {
+          st.got = true;
+          state.collected++;
+          ev.gotStar = true;
+        }
+      }
+      ev.moved = true;
+      if (nr === state.n - 1 && nc === state.n - 1) {
+        state.finished = true;
+        ev.won = true;
+      }
+      return ev;
+    }
+
+    /* ---------- AI 决策（与渲染无关）：BFS 最短路逐格移动 ----------
+       目标：优先奔向 BFS 距离最近的未收集星星，集齐后直奔出口。
+       星星取自解路径 25%/50%/75% 处且迷宫通路构成树，故该贪心即最优路线。 */
+    function aiNextMove(state) {
+      const n = state.n, walls = state.walls;
+      const from = state.player;
+      // BFS 记录距离与前驱，一次搜索即可得到到任意目标的最短路
+      const prev = [], dist = [];
+      for (let r = 0; r < n; r++) {
+        prev.push([]);
+        dist.push([]);
+        for (let c = 0; c < n; c++) {
+          prev[r].push(null);
+          dist[r].push(-1);
+        }
+      }
+      dist[from.r][from.c] = 0;
+      const q = [from];
+      let head = 0;
+      while (head < q.length) {
+        const cur = q[head++];
+        const w = walls[cur.r][cur.c];
+        const moves = [
+          { dr: -1, dc: 0, open: !w.n },
+          { dr: 1, dc: 0, open: !w.s },
+          { dr: 0, dc: -1, open: !w.w },
+          { dr: 0, dc: 1, open: !w.e }
+        ];
+        for (const m of moves) {
+          if (!m.open) continue;
+          const nr = cur.r + m.dr, nc = cur.c + m.dc;
+          if (nr < 0 || nr >= n || nc < 0 || nc >= n || dist[nr][nc] >= 0) continue;
+          dist[nr][nc] = dist[cur.r][cur.c] + 1;
+          prev[nr][nc] = cur;
+          q.push({ r: nr, c: nc });
+        }
+      }
+      // 选目标：最近的未收集星星，否则出口
+      let target = null, bestD = Infinity;
+      for (const st of state.stars) {
+        if (st.got) continue;
+        const d = dist[st.r][st.c];
+        if (d > 0 && d < bestD) { bestD = d; target = { r: st.r, c: st.c }; }
+      }
+      if (!target) target = { r: n - 1, c: n - 1 };
+      const td = dist[target.r][target.c];
+      if (td <= 0) return null;      // 已在目标格或目标不可达
+      // 沿前驱回溯出玩家的下一格
+      let cur = target;
+      while (prev[cur.r][cur.c] &&
+        !(prev[cur.r][cur.c].r === from.r && prev[cur.r][cur.c].c === from.c)) {
+        cur = prev[cur.r][cur.c];
+      }
+      return { dr: cur.r - from.r, dc: cur.c - from.c };
+    }
+
+    /* ================= 渲染与交互层 ================= */
+    let G = coreNewGame(11, Math.random);   // 当前对局状态（纯函数核心产出）
+    let startTime = 0, timerId = null;
+
     /* ---------- 渲染 ---------- */
-    function cellSizePct() { return 100 / n; }
+    function cellSizePct() { return 100 / G.n; }
     function placePiece(el, r, c) {
       const s = cellSizePct();
       el.style.width = s + '%';
@@ -582,6 +718,7 @@
       '<path d="M6 4h12l-3 4 3 4H6z" fill="#d9534f"/></svg>';
 
     function renderMaze() {
+      const n = G.n, walls = G.walls;
       gridEl.style.gridTemplateColumns = 'repeat(' + n + ', 1fr)';
       gridEl.style.gridTemplateRows = 'repeat(' + n + ', 1fr)';
       let html = '';
@@ -605,12 +742,12 @@
     function renderPieces() {
       playerPiece.innerHTML = PLAYER_SVG;
       flagPiece.innerHTML = FLAG_SVG;
-      placePiece(playerPiece, player.r, player.c);
-      placePiece(flagPiece, n - 1, n - 1);
+      placePiece(playerPiece, G.player.r, G.player.c);
+      placePiece(flagPiece, G.n - 1, G.n - 1);
       for (let i = 0; i < 3; i++) {
-        if (stars[i] && !stars[i].got) {
+        if (G.stars[i] && !G.stars[i].got) {
           starPieces[i].innerHTML = STAR_SVG;
-          placePiece(starPieces[i], stars[i].r, stars[i].c);
+          placePiece(starPieces[i], G.stars[i].r, G.stars[i].c);
         } else {
           starPieces[i].innerHTML = '';
         }
@@ -630,7 +767,7 @@
       document.getElementById('timeVal').textContent = fmtTime(elapsed());
     }
     function startTimer() {
-      if (startTime || finished) return;
+      if (startTime || G.finished) return;
       startTime = Date.now();
       timerId = setInterval(tick, 250);
     }
@@ -638,30 +775,16 @@
       if (timerId) { clearInterval(timerId); timerId = null; }
     }
 
-    /* ---------- 移动 ---------- */
-    function move(dr, dc) {
-      if (finished) return;
-      const w = walls[player.r][player.c];
-      if (dr === -1 && w.n) return;
-      if (dr === 1 && w.s) return;
-      if (dc === -1 && w.w) return;
-      if (dc === 1 && w.e) return;
-      const nr = player.r + dr, nc = player.c + dc;
-      if (nr < 0 || nr >= n || nc < 0 || nc >= n) return;
-      startTimer();
-      player = { r: nr, c: nc };
-      steps++;
-      // 拾取星星
-      for (const st of stars) {
-        if (!st.got && st.r === nr && st.c === nc) {
-          st.got = true;
-          collected++;
-        }
-      }
+    /* ---------- 移动（渲染层薄封装：纯函数推进 + 刷新界面） ---------- */
+    function move(dr, dc, fromAi) {
+      if (aiOn && !fromAi) return;   // AI 代玩中由 AI 全权接管
+      const ev = coreMove(G, dr, dc);
+      if (!ev.moved) return;
+      if (!ev.won) startTimer();
       renderPieces();
-      document.getElementById('stepsVal').textContent = steps;
-      document.getElementById('starVal').textContent = collected + ' / 3';
-      if (nr === n - 1 && nc === n - 1) finish();
+      document.getElementById('stepsVal').textContent = G.steps;
+      document.getElementById('starVal').textContent = G.collected + ' / 3';
+      if (ev.won) finish();
     }
 
     /* ---------- 完成与评级 ---------- */
@@ -671,58 +794,53 @@
         'fill="' + (filled ? '#e0a92e' : '#ffffff') + '" stroke="#d9a441" stroke-width="1.2"/></svg>';
     }
     function finish() {
-      finished = true;
       stopTimer();
       const sec = elapsed();
-      const timeOK = sec <= PAR_TIME[n];
-      const starsOK = collected === 3;
+      const timeOK = sec <= PAR_TIME[G.n];
+      const starsOK = G.collected === 3;
       // 评级：完成 1 星；时间达标或星星集齐 2 星；两者兼得 3 星
       let rate = 1;
       if (timeOK || starsOK) rate = 2;
       if (timeOK && starsOK) rate = 3;
 
-      const prev = loadBest(n);
-      const isNew = prev === null || sec < prev;
-      if (isNew) saveBest(n, sec);
-      updateBest();
+      // AI 代玩属演示模式，成绩不计入最佳用时
+      let prev = null, isNew = false;
+      if (!aiOn) {
+        prev = loadBest(G.n);
+        isNew = prev === null || sec < prev;
+        if (isNew) saveBest(G.n, sec);
+        updateBest();
+      }
 
       document.getElementById('rateBox').innerHTML =
         starSvg(rate >= 1) + starSvg(rate >= 2) + starSvg(rate >= 3);
-      let msg = '用时 <b>' + fmtTime(sec) + '</b>，步数 <b>' + steps + '</b>，收集星星 <b>' +
-        collected + ' / 3</b>，获得 <b>' + rate + '</b> 星评价。<br>';
-      if (isNew) msg += '刷新本难度最佳用时。';
+      let msg = '用时 <b>' + fmtTime(sec) + '</b>，步数 <b>' + G.steps + '</b>，收集星星 <b>' +
+        G.collected + ' / 3</b>，获得 <b>' + rate + '</b> 星评价。<br>';
+      if (aiOn) msg += 'AI 代玩中，成绩不计入最佳用时，即将自动开始下一局。';
+      else if (isNew) msg += '刷新本难度最佳用时。';
       else msg += '本难度最佳用时：' + fmtTime(prev) + '。';
       if (!timeOK && !starsOK) msg += '<br>再快一些或把星星找齐，就能升到更高评价。';
       document.getElementById('winMsg').innerHTML = msg;
       document.getElementById('winModal').hidden = false;
+      if (aiOn) {
+        aiNextTimer = setTimeout(function () {
+          aiNextTimer = null;
+          if (!aiOn) return;
+          document.getElementById('winModal').hidden = true;
+          newGame();
+        }, 1600);
+      }
     }
 
     /* ---------- 开局 / 重开 ---------- */
     function updateBest() {
-      const best = loadBest(n);
+      const best = loadBest(G.n);
       document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
     }
-    function newGame() {
+    function newGame(size) {
       stopTimer();
-      generateMaze(n);
-      // 星星放在解路径 25% / 50% / 75% 处
-      const path = solvePath();
-      stars = [];
-      const usedIdx = new Set();
-      const fracs = [0.25, 0.5, 0.75];
-      for (const f of fracs) {
-        let idx = Math.min(path.length - 2, Math.max(1, Math.round(path.length * f)));
-        // 防止两颗星星落在同一格：必要时沿路径顺移
-        while (usedIdx.has(idx) && idx < path.length - 2) idx++;
-        while (usedIdx.has(idx) && idx > 1) idx--;
-        usedIdx.add(idx);
-        stars.push({ r: path[idx].r, c: path[idx].c, got: false });
-      }
-      player = { r: 0, c: 0 };
-      steps = 0;
-      collected = 0;
+      G = coreNewGame(size || G.n, Math.random);
       startTime = 0;
-      finished = false;
       document.getElementById('stepsVal').textContent = '0';
       document.getElementById('starVal').textContent = '0 / 3';
       document.getElementById('timeVal').textContent = '00:00';
@@ -734,20 +852,47 @@
 
     /* 重走本局：保留当前迷宫，只重置小人、星星与计时 */
     function retryGame() {
-      if (!walls.length) { newGame(); return; }
+      if (!G.walls.length) { newGame(); return; }
       stopTimer();
-      player = { r: 0, c: 0 };
-      steps = 0;
-      collected = 0;
+      G.player = { r: 0, c: 0 };
+      G.steps = 0;
+      G.collected = 0;
+      G.finished = false;
+      G.stars.forEach(function (s) { s.got = false; });
       startTime = 0;
-      finished = false;
-      stars.forEach(function (s) { s.got = false; });
       document.getElementById('stepsVal').textContent = '0';
       document.getElementById('starVal').textContent = '0 / 3';
       document.getElementById('timeVal').textContent = '00:00';
       renderPieces();
       document.getElementById('winModal').hidden = true;
     }
+
+    /* ================= AI 代玩控制 =================
+       每步调用 aiNextMove 决策再走一格；通关后自动开新局持续演示 */
+    let aiOn = false;          // AI 代玩开关
+    let aiTimer = null;        // 逐格推进定时器
+    let aiNextTimer = null;    // 通关后自动续局定时器
+
+    function aiTick() {
+      if (!aiOn || G.finished) return;
+      const d = aiNextMove(G);
+      if (!d) return;
+      move(d.dr, d.dc, true);
+    }
+    function setAi(on) {
+      aiOn = on;
+      aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
+      aiBtn.classList.toggle('ai-on', aiOn);
+      aiBtn.setAttribute('aria-pressed', String(aiOn));
+      aiTag.hidden = !aiOn;
+      if (aiTimer) { clearInterval(aiTimer); aiTimer = null; }
+      if (aiNextTimer) { clearTimeout(aiNextTimer); aiNextTimer = null; }
+      if (aiOn) {
+        if (G.finished) newGame();   // 接管时若本局已结束，直接开新局
+        aiTimer = setInterval(aiTick, AI_STEP_MS);
+      }
+    }
+    aiBtn.addEventListener('click', function () { setAi(!aiOn); });
 
     /* ---------- 事件绑定 ---------- */
     // 难度档位
@@ -756,8 +901,7 @@
       if (!btn) return;
       document.querySelectorAll('#diffSeg button').forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      n = parseInt(btn.dataset.size, 10);
-      newGame();
+      newGame(parseInt(btn.dataset.size, 10));
     });
 
     // 键盘：方向键 / WASD
@@ -803,9 +947,9 @@
       else move(dy > 0 ? 1 : -1, 0);
     });
 
-    document.getElementById('newBtn').addEventListener('click', newGame);
+    document.getElementById('newBtn').addEventListener('click', function () { newGame(); });
     document.getElementById('retryBtn').addEventListener('click', retryGame);
-    document.getElementById('winNewBtn').addEventListener('click', newGame);
+    document.getElementById('winNewBtn').addEventListener('click', function () { newGame(); });
     document.getElementById('winCloseBtn').addEventListener('click', function () {
       document.getElementById('winModal').hidden = true;
     });
@@ -828,6 +972,7 @@
       <ul>
         <li>方向键 / WASD / 触屏滑动 / 屏幕方向按钮：移动</li>
         <li>换一局：生成新迷宫　重走本局：保留迷宫重置进度</li>
+        <li>AI 代玩：AI 按最短路自动寻路并收集星星，可随时停止</li>
       </ul>
     </div>
   </aside>

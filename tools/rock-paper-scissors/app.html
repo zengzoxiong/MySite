@@ -212,6 +212,58 @@
             background: #475569;
         }
 
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            margin: 20px 0 0;
+        }
+
+        .btn-row .reset-btn {
+            margin: 0;
+        }
+
+        /* AI 代玩按钮与状态标签 */
+        .ai-btn {
+            padding: 12px 24px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .ai-btn:hover {
+            background: #15803d;
+        }
+
+        .ai-btn.ai-on {
+            background: #dc2626;
+        }
+
+        .ai-btn.ai-on:hover {
+            background: #b91c1c;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .ai-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: #16a34a;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         .muted {
             color: var(--text-muted);
             font-size: 13px;
@@ -300,6 +352,7 @@
         <div class="header">
             <h1>✌️ 石头剪刀布</h1>
             <p>经典猜拳游戏，看看谁更厉害</p>
+            <p class="ai-tag" id="aiTag" hidden>🤖 AI 代玩中 · 自动出招</p>
         </div>
         <div class="card">
             <div class="scoreboard">
@@ -337,7 +390,10 @@
                 <button class="choice-btn" data-choice="paper" title="布">✋</button>
             </div>
 
-            <button class="reset-btn" id="resetBtn">🔄 重新开始</button>
+            <div class="btn-row">
+                <button class="ai-btn" id="aiBtn" aria-pressed="false">🤖 AI 代玩</button>
+                <button class="reset-btn" id="resetBtn">🔄 重新开始</button>
+            </div>
 
             <div class="history" id="history" style="display: none;">
                 <h3>对战记录</h3>
@@ -353,16 +409,127 @@
             paper: { emoji: '✋', name: '布' }
         };
 
+        /* ================= 纯函数核心（与渲染无关，与 ai-sim.mjs 保持一致） ================= */
+        const CHOICE_KEYS = ['rock', 'scissors', 'paper'];
         const winRules = {
             rock: 'scissors',
             scissors: 'paper',
             paper: 'rock'
         };
 
-        let playerScore = 0;
-        let computerScore = 0;
-        let drawScore = 0;
-        let history = [];
+        // 判定单手胜负：win 玩家胜 / lose 玩家负 / draw 平局
+        function judgeRound(player, computer) {
+            if (player === computer) return 'draw';
+            return winRules[player] === computer ? 'win' : 'lose';
+        }
+
+        // 新建对局状态
+        function createState() {
+            return { playerScore: 0, computerScore: 0, drawScore: 0, rounds: [] };
+        }
+
+        // 单步推进：记录一手对战并累计比分，返回本手结果
+        function applyRound(state, player, computer) {
+            const result = judgeRound(player, computer);
+            if (result === 'win') state.playerScore++;
+            else if (result === 'lose') state.computerScore++;
+            else state.drawScore++;
+            state.rounds.push({ player: player, computer: computer, result: result });
+            return result;
+        }
+
+        // 重置对局状态
+        function resetState(state) {
+            state.playerScore = 0;
+            state.computerScore = 0;
+            state.drawScore = 0;
+            state.rounds = [];
+        }
+
+        // 均匀随机出招（rng 为 [0,1) 随机源）；电脑出招即用此函数
+        function randomChoice(rng) {
+            return CHOICE_KEYS[Math.floor(rng() * CHOICE_KEYS.length)];
+        }
+
+        /* ================= AI 决策（与渲染无关，与 ai-sim.mjs 保持一致） =================
+         * 六种对手模式在线比拼预测准确率，取胜率最高的模式并出其最优响应；
+         * 各模式都预测不准（对手近似随机）时随机出招 */
+        const AI_CFG = {
+            decay: 0.97,  // 预测得分的历史衰减，越近的对战越重要
+            minRounds: 1, // 少于此手数不做预测，随机出招
+            gate: 0.42    // 最佳模式的预测准确率下限，低于则判定对手无规律、随机出招
+        };
+
+        // 克制 move 的出招（beaterOf('rock') === 'paper'）
+        function beaterOf(move) {
+            for (const k of CHOICE_KEYS) if (winRules[k] === move) return k;
+            return CHOICE_KEYS[0];
+        }
+
+        // 被 move 克制的出招（loserOf('rock') === 'scissors'）
+        function loserOf(move) {
+            return winRules[move];
+        }
+
+        // AI 决策：六种对手模式在线比拼预测准确率，取胜率最高的模式并出其最优响应。
+        // 模式：维持（重复自己上一手）/ 左旋（接自己上一手的败手）/ 右旋（接自己上一手的胜手）
+        //      / 反制（克制我方上一手）/ 镜像（模仿我方上一手）/ 频率（边际众数）；
+        // 各模式都预测不准（对手近似随机）时随机出招。
+        function aiChoose(rounds, rng) {
+            const n = rounds.length;
+            if (n < AI_CFG.minRounds) return randomChoice(rng);
+
+            // 各模式对「对手下一手」的衰减预测正确量；freq 同时是衰减边际频率
+            const scores = { stay: 0, rotL: 0, rotW: 0, beatM: 0, mirror: 0, freq: 0 };
+            const freq = { rock: 0, scissors: 0, paper: 0 };
+            let total = 0;
+            for (let i = 0; i < n; i++) {
+                if (i > 0) {
+                    // 用 0..i-1 的历史给第 i 手打分，越近的对战权重越高
+                    const w = Math.pow(AI_CFG.decay, n - 1 - i);
+                    total += w;
+                    const oppPrev = rounds[i - 1].computer;
+                    const myPrev = rounds[i - 1].player;
+                    const actual = rounds[i].computer;
+                    if (actual === oppPrev) scores.stay += w;
+                    if (actual === loserOf(oppPrev)) scores.rotL += w;
+                    if (actual === beaterOf(oppPrev)) scores.rotW += w;
+                    if (actual === beaterOf(myPrev)) scores.beatM += w;
+                    if (actual === myPrev) scores.mirror += w;
+                    let mode = CHOICE_KEYS[0];
+                    for (const k of CHOICE_KEYS) if (freq[k] > freq[mode]) mode = k;
+                    if (actual === mode) scores.freq += w;
+                }
+                // 衰减推进边际频率，保证 freq 始终是「第 i 手之前」的加权频率
+                for (const k of CHOICE_KEYS) freq[k] *= AI_CFG.decay;
+                freq[rounds[i].computer] += 1;
+            }
+
+            const last = rounds[n - 1];
+            let freqMode = CHOICE_KEYS[0];
+            for (const k of CHOICE_KEYS) if (freq[k] > freq[freqMode]) freqMode = k;
+            // 各模式对「对手下一手」的预测
+            const preds = {
+                stay: last.computer,
+                rotL: loserOf(last.computer),
+                rotW: beaterOf(last.computer),
+                beatM: beaterOf(last.player),
+                mirror: last.player,
+                freq: freqMode
+            };
+
+            let best = 'stay';
+            for (const k of Object.keys(scores)) if (scores[k] > scores[best]) best = k;
+            // 各模式准确率都不如随机 ⇒ 对手无规律，随机出招
+            if (total > 0 && scores[best] / total < AI_CFG.gate) return randomChoice(rng);
+            return beaterOf(preds[best]);
+        }
+
+        /* ================= 渲染层（DOM 操作） ================= */
+        let state = createState();
+        let roundBusy = false;   // 是否有对战动画进行中
+        let aiOn = false;        // AI 代玩开关
+        let aiTimer = null;      // AI 续局定时器
 
         const playerDisplay = document.getElementById('playerDisplay');
         const computerDisplay = document.getElementById('computerDisplay');
@@ -371,22 +538,22 @@
         const computerScoreEl = document.getElementById('computerScore');
         const drawScoreEl = document.getElementById('drawScore');
         const resetBtn = document.getElementById('resetBtn');
+        const aiBtn = document.getElementById('aiBtn');
+        const aiTag = document.getElementById('aiTag');
         const choiceBtns = document.querySelectorAll('.choice-btn');
         const historyEl = document.getElementById('history');
         const historyList = document.getElementById('historyList');
 
-        function getComputerChoice() {
-            const choiceKeys = Object.keys(choices);
-            return choiceKeys[Math.floor(Math.random() * choiceKeys.length)];
-        }
-
-        function determineWinner(player, computer) {
-            if (player === computer) return 'draw';
-            if (winRules[player] === computer) return 'win';
-            return 'lose';
+        function renderScores() {
+            playerScoreEl.textContent = state.playerScore;
+            computerScoreEl.textContent = state.computerScore;
+            drawScoreEl.textContent = state.drawScore;
         }
 
         function play(playerChoice) {
+            if (roundBusy) return;
+            roundBusy = true;
+
             // 清除之前的结果
             resultMessage.classList.remove('show');
 
@@ -400,8 +567,8 @@
             choiceBtns.forEach(btn => btn.disabled = true);
 
             setTimeout(() => {
-                const computerChoice = getComputerChoice();
-                const result = determineWinner(playerChoice, computerChoice);
+                const computerChoice = randomChoice(Math.random);
+                const result = applyRound(state, playerChoice, computerChoice);
 
                 // 停止摇晃
                 playerDisplay.classList.remove('shaking');
@@ -411,75 +578,86 @@
                 playerDisplay.textContent = choices[playerChoice].emoji;
                 computerDisplay.textContent = choices[computerChoice].emoji;
 
-                // 更新分数
+                // 更新结果提示
                 if (result === 'win') {
-                    playerScore++;
                     resultMessage.textContent = '🎉 你赢了！';
                     resultMessage.className = 'result-message win show';
                 } else if (result === 'lose') {
-                    computerScore++;
                     resultMessage.textContent = '😢 你输了！';
                     resultMessage.className = 'result-message lose show';
                 } else {
-                    drawScore++;
                     resultMessage.textContent = '🤝 平局！';
                     resultMessage.className = 'result-message draw show';
                 }
 
-                playerScoreEl.textContent = playerScore;
-                computerScoreEl.textContent = computerScore;
-                drawScoreEl.textContent = drawScore;
-
-                // 添加历史记录
-                history.unshift({
-                    player: playerChoice,
-                    computer: computerChoice,
-                    result: result
-                });
-                if (history.length > 10) history.pop();
+                renderScores();
                 updateHistory();
 
-                // 启用按钮
-                choiceBtns.forEach(btn => btn.disabled = false);
+                // 恢复按钮；AI 代玩中则自动续局
+                roundBusy = false;
+                if (!aiOn) choiceBtns.forEach(btn => btn.disabled = false);
+                if (aiOn) scheduleAiRound();
             }, 1000);
         }
 
         function updateHistory() {
-            if (history.length === 0) {
+            const recent = state.rounds.slice(-10).reverse();
+            if (recent.length === 0) {
                 historyEl.style.display = 'none';
                 return;
             }
 
             historyEl.style.display = 'block';
-            historyList.innerHTML = history.map(item => {
+            historyList.innerHTML = recent.map(item => {
                 const resultText = item.result === 'win' ? '胜' : item.result === 'lose' ? '负' : '平';
                 return `<span class="history-item ${item.result}">${choices[item.player].emoji} vs ${choices[item.computer].emoji} = ${resultText}</span>`;
             }).join('');
         }
 
         function reset() {
-            playerScore = 0;
-            computerScore = 0;
-            drawScore = 0;
-            history = [];
-
-            playerScoreEl.textContent = '0';
-            computerScoreEl.textContent = '0';
-            drawScoreEl.textContent = '0';
+            resetState(state);
+            renderScores();
 
             playerDisplay.textContent = '❓';
             computerDisplay.textContent = '❓';
             resultMessage.classList.remove('show');
-            historyEl.style.display = 'none';
+            updateHistory();
+            if (aiOn) scheduleAiRound();
+        }
+
+        /* ================= AI 代玩控制 ================= */
+        function scheduleAiRound() {
+            if (!aiOn || aiTimer !== null || roundBusy) return;
+            aiTimer = setTimeout(() => {
+                aiTimer = null;
+                if (aiOn && !roundBusy) play(aiChoose(state.rounds, Math.random));
+            }, 650);
+        }
+
+        function setAi(on) {
+            aiOn = on;
+            aiBtn.textContent = aiOn ? '🛑 停止 AI 代玩' : '🤖 AI 代玩';
+            aiBtn.classList.toggle('ai-on', aiOn);
+            aiBtn.setAttribute('aria-pressed', String(aiOn));
+            aiTag.hidden = !aiOn;
+            choiceBtns.forEach(btn => btn.disabled = aiOn || roundBusy);
+            if (aiOn) {
+                scheduleAiRound();
+            } else if (aiTimer !== null) {
+                clearTimeout(aiTimer);
+                aiTimer = null;
+            }
         }
 
         choiceBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                if (aiOn) return;
                 play(btn.dataset.choice);
             });
         });
 
         resetBtn.addEventListener('click', reset);
+        aiBtn.addEventListener('click', () => setAi(!aiOn));
     </script>
 </body>
 </html>

@@ -25,6 +25,8 @@ button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a7
 button:active{transform:scale(.96)}
 button:disabled{opacity:.45;cursor:default;transform:none}
 .btn-plain{background:#f1f3f4;color:#3c4043;padding:9px 18px;font-weight:500}
+.btn-ai{background:#1a73e8;color:#fff;padding:9px 20px;font-weight:600;box-shadow:0 2px 10px rgba(26,115,232,.35)}
+.btn-ai.stop{background:#e5484d;box-shadow:0 2px 10px rgba(229,72,77,.35)}
 .tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
 footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
 </style>
@@ -155,6 +157,7 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
   </div>
   <div class="actions">
     <button id="undoBtn" class="btn-plain" type="button">悔棋</button>
+    <button id="aiBtn" class="btn-ai" type="button">AI 代玩</button>
     <button id="restartBtn" type="button">重新开局</button>
   </div>
   <footer>拾光集 · 在线小游戏</footer>
@@ -204,6 +207,257 @@ function updateHud() {
 }
 updateHud();
 
+// ================= 对局核心：纯函数（与渲染无关） =================
+/* 游戏规则与 AI 决策全部收敛在 aiCoreGobang 工厂内：状态是纯数据棋盘，
+   单步推进 step() 不触碰 DOM；同一份源码三处复用——页面主线程（落子/判定）、
+   Web Worker（AI 决策，源码经 toString 注入）、ai-sim.mjs（按
+   AI_CORE_BEGIN / AI_CORE_END 标记提取后跑批量模拟），天然保持一致。 */
+/* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+function aiCoreGobang() {
+  'use strict';
+  const N = 15;                 // 棋盘路数
+  const FIVE = 10000000;        // 五连分值（胜利）
+  const DEF = 1.15;             // 防守加权：对方的窗口威胁略放大
+  // 长度 5 的窗口内含 i 颗同色子（且无对方子）时的分值；
+  // 重叠窗口的多重计数天然区分活/眠形状（活三比眠三覆盖更多窗口）
+  const W = [0, 2, 30, 300, 30000, FIVE];
+  const DIRS = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+  function inBoard(x, y) { return x >= 0 && x < N && y >= 0 && y < N; }
+
+  function createBoard() {
+    return Array.from({ length: N }, () => new Array(N).fill(0));
+  }
+  function cloneBoard(b) {
+    return b.map((r) => r.slice());
+  }
+
+  // 返回获胜的连续五子坐标（不足五子返回 null），起点终点在首尾便于画线
+  function checkWin(b, x, y, p) {
+    for (const [dx, dy] of DIRS) {
+      const head = [{ x, y }], tail = [];
+      let nx = x + dx, ny = y + dy;
+      while (inBoard(nx, ny) && b[ny][nx] === p) {
+        head.push({ x: nx, y: ny });
+        nx += dx; ny += dy;
+      }
+      nx = x - dx; ny = y - dy;
+      while (inBoard(nx, ny) && b[ny][nx] === p) {
+        tail.push({ x: nx, y: ny });
+        nx -= dx; ny -= dy;
+      }
+      const line = tail.reverse().concat(head);
+      if (line.length >= 5) return line;
+    }
+    return null;
+  }
+
+  // 只判是否成五（搜索热路径用，省去坐标收集）
+  function isFive(b, x, y, p) {
+    for (const [dx, dy] of DIRS) {
+      let n = 1;
+      for (let s = 1; s < 5; s++) {
+        const nx = x + dx * s, ny = y + dy * s;
+        if (!inBoard(nx, ny) || b[ny][nx] !== p) break;
+        n++;
+      }
+      for (let s = 1; s < 5; s++) {
+        const nx = x - dx * s, ny = y - dy * s;
+        if (!inBoard(nx, ny) || b[ny][nx] !== p) break;
+        n++;
+      }
+      if (n >= 5) return true;
+    }
+    return false;
+  }
+
+  function isFull(b) {
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) if (!b[y][x]) return false;
+    }
+    return true;
+  }
+
+  // 单步推进（纯函数）：在 (x,y) 落 p 子，返回新棋盘与结果，不修改传入棋盘
+  function step(b, x, y, p) {
+    const nb = cloneBoard(b);
+    nb[y][x] = p;
+    const win = checkWin(nb, x, y, p);
+    return { board: nb, win: win, full: !win && isFull(nb) };
+  }
+
+  /* ---------- 评估：长度 5 窗口计数（活三冲四启发） ---------- */
+  const WINDOWS = [];                    // 全部长度 5 的直线窗口
+  const WINDOWS_BY_CELL = new Array(N * N);  // 每个交叉点覆盖的窗口下标
+  (function () {
+    for (let i = 0; i < N * N; i++) WINDOWS_BY_CELL[i] = [];
+    for (const [dx, dy] of DIRS) {
+      for (let y = 0; y < N; y++) {
+        for (let x = 0; x < N; x++) {
+          if (!inBoard(x + dx * 4, y + dy * 4)) continue;
+          const cells = [];
+          for (let k = 0; k < 5; k++) cells.push((y + dy * k) * N + (x + dx * k));
+          const wi = WINDOWS.length;
+          WINDOWS.push(cells);
+          for (const id of cells) WINDOWS_BY_CELL[id].push(wi);
+        }
+      }
+    }
+  })();
+
+  // 局面评估：p 的窗口总分减去对方（防守加权）的窗口总分
+  function evaluate(b, p) {
+    const q = 3 - p;
+    let sc = 0;
+    for (const cells of WINDOWS) {
+      let mine = 0, opp = 0;
+      for (const id of cells) {
+        const v = b[(id / N) | 0][id % N];
+        if (v === p) mine++;
+        else if (v === q) opp++;
+      }
+      if (opp === 0) sc += W[mine];
+      else if (mine === 0) sc -= W[opp] * DEF;
+    }
+    return sc;
+  }
+
+  // 落子增益：假设在 (x,y) 落 p，通过该点的窗口分值增量（候选排序用）
+  function cellGain(b, x, y, p) {
+    const q = 3 - p;
+    let g = 0;
+    for (const wi of WINDOWS_BY_CELL[y * N + x]) {
+      let mine = 0, opp = 0;
+      for (const id of WINDOWS[wi]) {
+        const v = b[(id / N) | 0][id % N];
+        if (v === p) mine++;
+        else if (v === q) opp++;
+      }
+      if (opp === 0) g += W[mine + 1] - W[mine];
+    }
+    return g;
+  }
+
+  // 候选点：已有棋子周围 2 邻域内的空位；空枰返回天元
+  function genCandidates(b) {
+    let any = false;
+    const seen = new Uint8Array(N * N);
+    const list = [];
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        if (!b[y][x]) continue;
+        any = true;
+        for (let dy = -2; dy <= 2; dy++) {
+          const ny = y + dy;
+          if (ny < 0 || ny >= N) continue;
+          for (let dx = -2; dx <= 2; dx++) {
+            const nx = x + dx;
+            if (nx < 0 || nx >= N) continue;
+            const id = ny * N + nx;
+            if (b[ny][nx] || seen[id]) continue;
+            seen[id] = 1;
+            list.push({ x: nx, y: ny });
+          }
+        }
+      }
+    }
+    return any ? list : [{ x: 7, y: 7 }];
+  }
+
+  // 候选排序：己方落子收益 + 对手在此落子的收益（防守略优先）
+  function orderedCandidates(b, p) {
+    const list = genCandidates(b);
+    for (const c of list) {
+      c.s = cellGain(b, c.x, c.y, p) + cellGain(b, c.x, c.y, 3 - p) * 1.1;
+    }
+    list.sort((a, c) => c.s - a.s);
+    return list;
+  }
+
+  /* ---------- αβ 剪枝极小极大（negamax 形式） ---------- */
+  // 返回 side 行棋视角的分值；depth 为剩余搜索层数（含当前层）
+  function search(b, side, depth, alpha, beta, ply) {
+    const list = orderedCandidates(b, side);
+    const limit = Math.min(list.length, 12);   // 只搜排序后的头部候选，控制宽度
+    let best = -Infinity;
+    for (let i = 0; i < limit; i++) {
+      const c = list[i];
+      b[c.y][c.x] = side;
+      let sc;
+      if (isFive(b, c.x, c.y, side)) {
+        sc = FIVE - ply;                        // 越早成五越好
+      } else if (depth <= 1) {
+        sc = evaluate(b, side);
+      } else {
+        sc = -search(b, 3 - side, depth - 1, -beta, -alpha, ply + 1);
+      }
+      b[c.y][c.x] = 0;
+      if (sc > best) best = sc;
+      if (best > alpha) alpha = best;
+      if (alpha >= beta) break;                 // αβ 剪枝
+    }
+    return best === -Infinity ? evaluate(b, side) : best;
+  }
+
+  /* AI 决策入口：返回 {x,y} 或 null。depthOverride 供模拟脚本固定深度，
+     默认深度 3（候选不多时加深到 4）；同分候选随机取一，演示对局不重复 */
+  function bestMove(b, p, depthOverride) {
+    const q = 3 - p;
+    const list = orderedCandidates(b, p);
+    if (!list.length) return null;
+
+    // 1) 一步成五 → 直接下
+    for (const c of list) {
+      b[c.y][c.x] = p;
+      const w = isFive(b, c.x, c.y, p);
+      b[c.y][c.x] = 0;
+      if (w) return c;
+    }
+    // 2) 对方一步成五 → 必须挡
+    for (const c of list) {
+      b[c.y][c.x] = q;
+      const w = isFive(b, c.x, c.y, q);
+      b[c.y][c.x] = 0;
+      if (w) return c;
+    }
+
+    const depth = depthOverride || (list.length <= 8 ? 4 : 3);
+    const limit = Math.min(list.length, 12);
+    let bestScore = -Infinity, alpha = -Infinity;
+    const picks = [];
+    for (let i = 0; i < limit; i++) {
+      const c = list[i];
+      b[c.y][c.x] = p;
+      const sc = -search(b, q, depth - 1, -Infinity, -alpha, 2);
+      b[c.y][c.x] = 0;
+      if (sc > bestScore) {
+        bestScore = sc;
+        picks.length = 0;
+        picks.push(c);
+        if (bestScore > alpha) alpha = bestScore;
+      } else if (sc === bestScore) {
+        picks.push(c);
+      }
+    }
+    return picks[Math.floor(Math.random() * picks.length)] || list[0];
+  }
+
+  return {
+    N: N,
+    createBoard: createBoard,
+    cloneBoard: cloneBoard,
+    checkWin: checkWin,
+    isFive: isFive,
+    isFull: isFull,
+    step: step,
+    evaluate: evaluate,
+    genCandidates: genCandidates,
+    bestMove: bestMove
+  };
+}
+/* ===== AI_CORE_END ===== */
+const core = aiCoreGobang();   // 主线程实例：落子判定与 AI 共用同一份纯函数
+
 // ================= 对局状态 =================
 let board = [];      // 0 空 / 1 黑 / 2 白
 let moves = [];      // 落子顺序 [{x,y,p}]
@@ -214,7 +468,7 @@ let winRecorded = false; // 本局胜负是否已计分（悔棋时要退还）
 let hover = null;    // 鼠标悬停的空位（半透明预览）
 
 function reset() {
-  board = Array.from({ length: N }, () => new Array(N).fill(0));
+  board = core.createBoard();   // 纯函数创建初始状态
   moves = [];
   current = 1;
   over = false;
@@ -330,44 +584,26 @@ function drawStone(x, y, p, alpha, isLast, isWin) {
 // ================= 胜负判定（横竖两种斜向，共四向） =================
 function inBoard(x, y) { return x >= 0 && x < N && y >= 0 && y < N; }
 
-// 返回获胜的连续五子坐标（不足五子返回 null），起点终点在首尾便于画线
-function checkWin(x, y, p) {
-  const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
-  for (const [dx, dy] of dirs) {
-    const head = [{ x, y }], tail = [];
-    let nx = x + dx, ny = y + dy;
-    while (inBoard(nx, ny) && board[ny][nx] === p) {
-      head.push({ x: nx, y: ny });
-      nx += dx; ny += dy;
-    }
-    nx = x - dx; ny = y - dy;
-    while (inBoard(nx, ny) && board[ny][nx] === p) {
-      tail.push({ x: nx, y: ny });
-      nx -= dx; ny -= dy;
-    }
-    const line = tail.reverse().concat(head);
-    if (line.length >= 5) return line;
-  }
-  return null;
-}
+// 返回获胜的连续五子坐标（不足五子返回 null），判定逻辑收敛在纯函数核心里
+function checkWin(x, y, p) { return core.checkWin(board, x, y, p); }
 
 // ================= 落子 / 悔棋 =================
 function place(x, y) {
   if (over || board[y][x] !== 0) return;
-  board[y][x] = current;
+  const res = core.step(board, x, y, current);   // 纯函数单步推进
+  board = res.board;
   moves.push({ x, y, p: current });
   hover = null;
 
-  const win = checkWin(x, y, current);
-  if (win) {
-    winCells = win;
+  if (res.win) {
+    winCells = res.win;
     over = true;
     winRecorded = true;
     if (current === 1) score.black += 1; else score.white += 1;
     saveScore();
     updateHud();
     statusText.textContent = (current === 1 ? '黑棋' : '白棋') + '五子连珠，本局获胜';
-  } else if (moves.length === N * N) {
+  } else if (res.full) {
     over = true;
     statusText.textContent = '棋盘落满，本局和棋';
   } else {
@@ -414,11 +650,13 @@ function pointToCell(clientX, clientY) {
 }
 
 cv.addEventListener('click', (e) => {
+  if (aiRunning) return;                       // AI 代玩期间屏蔽手动落子
   const cell = pointToCell(e.clientX, e.clientY);
   if (cell) place(cell.x, cell.y);
 });
 
 cv.addEventListener('mousemove', (e) => {
+  if (aiRunning) return;
   const cell = pointToCell(e.clientX, e.clientY);
   const next = (cell && board[cell.y][cell.x] === 0 && !over) ? cell : null;
   if (JSON.stringify(next) !== JSON.stringify(hover)) {
@@ -430,8 +668,93 @@ cv.addEventListener('mouseleave', () => {
   if (hover) { hover = null; draw(); }
 });
 
-undoBtn.addEventListener('click', undo);
-restartBtn.addEventListener('click', reset);
+// ================= AI 代玩：αβ 剪枝极小极大自动对弈演示 =================
+/* AI 先后接管黑白双方自动落子，随时可停；决策与渲染完全无关，
+   热路径放在 Web Worker 里算，个别禁用 Worker 的环境降级为主线程计算 */
+const aiBtn = document.getElementById('aiBtn');
+let aiRunning = false;
+let aiTimer = 0;
+let aiReqId = 0;
+let aiBusy = false;
+const AI_MOVE_MS = 620;      // 每步落子间隔，方便观看
+const AI_ROUND_MS = 1500;    // 一局结束后的停留，再自动开下一局
+
+const AI_WORKER_SRC =
+  'const core = (' + aiCoreGobang.toString() + ')();\n' +
+  'onmessage = function (e) {\n' +
+  '  postMessage({ id: e.data.id, mv: core.bestMove(e.data.board, e.data.p) });\n' +
+  '};';
+let aiWorker = null;
+try {
+  aiWorker = new Worker(URL.createObjectURL(new Blob([AI_WORKER_SRC], { type: 'application/javascript' })));
+} catch (e) { /* 个别环境禁用 Worker：降级为主线程计算（见 requestAiMove） */ }
+
+if (aiWorker) {
+  aiWorker.onmessage = (e) => {
+    aiBusy = false;
+    if (!aiRunning || e.data.id !== aiReqId) return;   // 过期回答直接丢弃
+    if (e.data.mv) place(e.data.mv.x, e.data.mv.y);
+    aiTimer = setTimeout(aiTick, AI_MOVE_MS);
+  };
+}
+
+function requestAiMove() {
+  if (aiBusy) return;
+  aiBusy = true;
+  if (!aiWorker) {
+    setTimeout(() => {
+      aiBusy = false;
+      if (!aiRunning || over) return;
+      const mv = core.bestMove(core.cloneBoard(board), current);
+      if (mv) place(mv.x, mv.y);
+      aiTimer = setTimeout(aiTick, AI_MOVE_MS);
+    }, 30);
+    return;
+  }
+  aiReqId++;
+  aiWorker.postMessage({ id: aiReqId, board: core.cloneBoard(board), p: current });
+}
+
+// AI 步进状态机：思考落子 → 停顿 → 下一回合；终局停留片刻自动开下一局
+function aiTick() {
+  if (!aiRunning) return;
+  if (over) {
+    aiTimer = setTimeout(() => {
+      if (!aiRunning) return;
+      if (over) reset();                    // 期间被手动开局则顺势继续
+      aiTimer = setTimeout(aiTick, 400);
+    }, AI_ROUND_MS);
+    return;
+  }
+  requestAiMove();
+}
+
+function stopAi(msg) {
+  if (!aiRunning) return;
+  aiRunning = false;
+  clearTimeout(aiTimer);
+  aiReqId++;                                // 作废在途的 Worker 结果
+  aiBusy = false;
+  aiBtn.textContent = 'AI 代玩';
+  aiBtn.classList.remove('stop');
+  statusText.textContent = msg || 'AI 已停止，可继续手动游玩';
+}
+
+aiBtn.addEventListener('click', () => {
+  if (aiRunning) { stopAi(); return; }
+  if (over) reset();
+  aiRunning = true;
+  aiBtn.textContent = '停止 AI';
+  aiBtn.classList.add('stop');
+  statusText.textContent = 'AI 自动对弈中，点击「停止 AI」可随时停下';
+  aiTick();
+});
+
+undoBtn.addEventListener('click', () => {
+  if (aiRunning) return;                     // AI 代玩期间屏蔽悔棋
+  undo();
+});
+restartBtn.addEventListener('click', () => { stopAi(); reset(); });   // 重新开局会先停掉 AI
 
 // ================= 启动 =================
 reset();
@@ -452,6 +775,7 @@ reset();
       <ul>
         <li>点击 / 触屏点按交叉点落子</li>
         <li>悔棋：退一步　重新开局：清空棋盘</li>
+        <li>点「AI 代玩」可自动对弈演示（AI 托管黑白双方），随时可停</li>
       </ul>
     </div>
   </aside>

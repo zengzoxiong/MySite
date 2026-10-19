@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>推箱子 - 拾光集</title>
-  <meta name="description" content="拾光集在线小游戏：推箱子（Sokoban），内置 5 个渐进关卡，支持撤销、步数统计与最佳记录，纯本地运行。">
+  <meta name="description" content="拾光集在线小游戏：推箱子（Sokoban），内置 5 个渐进关卡，支持撤销、步数统计、最佳记录与 AI 代玩，纯本地运行。">
   <link rel="icon" href="../../favicon.svg">
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/sokoban/app.html">
   <style>
@@ -165,6 +165,22 @@
     .btn:active { transform: translateY(1px); }
     .btn.primary { background: #3f9d6d; }
     .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
+
+    /* AI 代玩按钮与状态标签 */
+    .btn.ai { background: #3f9d6d; box-shadow: 0 2px 10px rgba(63, 157, 109, .35); }
+    .btn.ai.ai-on { background: #c85a4e; box-shadow: 0 2px 10px rgba(200, 90, 78, .35); }
+    .ai-tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 12px;
+      border-radius: 999px;
+      background: #e7f4ec;
+      color: #2f8b52;
+      border: 1px solid #bfe3cd;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
 
     /* 屏幕方向按钮（手机端） */
     .dpad {
@@ -378,7 +394,8 @@
   <div class="wrap">
     <header>
       <h1>推箱子</h1>
-      <p class="sub">把所有木箱推到目标点即可过关。箱子只能推、不能拉，推到墙角可就动不了了。内置 5 个渐进关卡，支持撤销与最佳步数记录。</p>
+      <p class="sub">把所有木箱推到目标点即可过关。箱子只能推、不能拉，推到墙角可就动不了了。内置 5 个渐进关卡，支持撤销、最佳步数记录与 AI 代玩。</p>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最佳记录</span>
     </header>
 
     <!-- 统计 -->
@@ -400,6 +417,7 @@
     <div class="controls">
       <button class="btn ghost" id="undoBtn" type="button">撤销一步（U）</button>
       <button class="btn ghost" id="restartBtn" type="button">重玩本关（R）</button>
+      <button class="btn ai" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
     </div>
 
     <!-- 手机端方向按钮 -->
@@ -459,7 +477,10 @@
     /* ================= 推箱子 · 游戏逻辑 =================
        地图字符：# 墙、$ 箱子、. 目标点、@ 小人、* 箱子在目标上、& 小人在目标上、空格 地板 */
 
-    // 五个渐进关卡（最小步数经求解器验证：2 / 12 / 16 / 24 / 42）
+    /* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）=====
+       核心为与渲染无关的纯函数：关卡数据、状态解析、单步推进、胜负判定、A* 求解。
+       页面手动与 AI 代玩、node 模拟器（ai-sim.mjs 按标记提取）三处共用同一份代码。 */
+    // 五个渐进关卡（最少步数经 AI 求解验证：3 / 12 / 16 / 24 / 42）
     const LEVELS = [
       {
         name: "第 1 关 · 教学",
@@ -525,16 +546,385 @@
       }
     ];
 
-    // 当前关卡状态
+    /* aiCoreSokoban：纯逻辑工厂（经闭包引用上面的 LEVELS），返回与渲染无关的游戏核心。
+       状态结构：{ rows, cols, walls:Set<格子下标>, goals:Set<格子下标>, boxes:[下标...],
+                  player:下标, moves, pushes, won }，格子下标 = 行 * cols + 列 */
+    function aiCoreSokoban() {
+      'use strict';
+      // 四向移动：0 上、1 下、2 左、3 右
+      const DIRS = [
+        { dr: -1, dc: 0 },
+        { dr: 1, dc: 0 },
+        { dr: 0, dc: -1 },
+        { dr: 0, dc: 1 }
+      ];
+
+      /* 胜负判定（纯函数） */
+      function isWinBoxes(boxes, goals) {
+        for (let i = 0; i < boxes.length; i++) {
+          if (!goals.has(boxes[i])) return false;
+        }
+        return true;
+      }
+      function isWin(st) { return isWinBoxes(st.boxes, st.goals); }
+
+      /* 关卡解析 → 纯状态对象 */
+      function parseMap(map) {
+        const rows = map.length;
+        let cols = 0;
+        for (let i = 0; i < map.length; i++) cols = Math.max(cols, map[i].length);
+        const walls = new Set(), goals = new Set();
+        const boxes = [];
+        let player = -1;
+        for (let r = 0; r < rows; r++) {
+          const line = map[r];
+          for (let c = 0; c < cols; c++) {
+            const ch = line[c] || ' ';
+            const idx = r * cols + c;
+            if (ch === '#') walls.add(idx);
+            else if (ch === '.') goals.add(idx);
+            else if (ch === '$') boxes.push(idx);
+            else if (ch === '*') { boxes.push(idx); goals.add(idx); }
+            else if (ch === '@') player = idx;
+            else if (ch === '&') { player = idx; goals.add(idx); }
+          }
+        }
+        boxes.sort(function (a, b) { return a - b; });
+        return {
+          rows: rows, cols: cols, walls: walls, goals: goals,
+          boxes: boxes, player: player, moves: 0, pushes: 0,
+          won: isWinBoxes(boxes, goals)
+        };
+      }
+
+      /* 箱子下标定位 */
+      function boxIndex(boxes, idx) {
+        for (let i = 0; i < boxes.length; i++) if (boxes[i] === idx) return i;
+        return -1;
+      }
+
+      /* 单步推进（纯函数）：dir ∈ 0..3；返回新状态，撞墙或箱子推不动时返回 null */
+      function step(st, dir) {
+        const d = DIRS[dir];
+        const pr = Math.floor(st.player / st.cols), pc = st.player % st.cols;
+        const nr = pr + d.dr, nc = pc + d.dc;
+        if (nr < 0 || nr >= st.rows || nc < 0 || nc >= st.cols) return null;
+        const nIdx = nr * st.cols + nc;
+        if (st.walls.has(nIdx)) return null;
+        const bi = boxIndex(st.boxes, nIdx);
+        if (bi < 0) {
+          return {
+            rows: st.rows, cols: st.cols, walls: st.walls, goals: st.goals,
+            boxes: st.boxes.slice(), player: nIdx,
+            moves: st.moves + 1, pushes: st.pushes, won: st.won
+          };
+        }
+        const br = nr + d.dr, bc = nc + d.dc;
+        if (br < 0 || br >= st.rows || bc < 0 || bc >= st.cols) return null;
+        const bIdx = br * st.cols + bc;
+        if (st.walls.has(bIdx) || boxIndex(st.boxes, bIdx) >= 0) return null;
+        const boxes = st.boxes.slice();
+        boxes[bi] = bIdx;
+        boxes.sort(function (x, y) { return x - y; });
+        return {
+          rows: st.rows, cols: st.cols, walls: st.walls, goals: st.goals,
+          boxes: boxes, player: nIdx,
+          moves: st.moves + 1, pushes: st.pushes + 1,
+          won: isWinBoxes(boxes, st.goals)
+        };
+      }
+
+      /* 死格预计算：从目标点反向推演箱子可达位置，其余地板即死格（箱子推上去就永远无解） */
+      function deadCells(st) {
+        const alive = new Set(st.goals);
+        const queue = [];
+        st.goals.forEach(function (g) { queue.push(g); });
+        while (queue.length) {
+          const b = queue.pop();
+          const br = Math.floor(b / st.cols), bc = b % st.cols;
+          for (let k = 0; k < 4; k++) {
+            const d = DIRS[k];
+            // 反向推演：箱子被推向 b 的来向 from = b - d，人需站在 from - d
+            const fr = br - d.dr, fc = bc - d.dc;
+            const rr = fr - d.dr, rc = fc - d.dc;
+            if (fr < 0 || fr >= st.rows || fc < 0 || fc >= st.cols) continue;
+            if (rr < 0 || rr >= st.rows || rc < 0 || rc >= st.cols) continue;
+            const f = fr * st.cols + fc, s = rr * st.cols + rc;
+            if (st.walls.has(f) || st.walls.has(s)) continue;
+            if (!alive.has(f)) { alive.add(f); queue.push(f); }
+          }
+        }
+        const dead = new Set();
+        for (let r = 0; r < st.rows; r++) {
+          for (let c = 0; c < st.cols; c++) {
+            const idx = r * st.cols + c;
+            if (!st.walls.has(idx) && !alive.has(idx)) dead.add(idx);
+          }
+        }
+        return dead;
+      }
+
+      /* 二进制位计数 */
+      function popcount(x) {
+        let n = 0;
+        while (x) { x &= x - 1; n++; }
+        return n;
+      }
+
+      /* 启发式估计器：箱子→目标点的最小曼哈顿指派距离（可容许且一致，保证最少步数解）。
+         内部 DP 缓冲复用，避免搜索中反复分配 */
+      function makeEstimator(goalArr, cols) {
+        const m = goalArr.length;
+        const goalR = new Int32Array(m), goalC = new Int32Array(m);
+        for (let g = 0; g < m; g++) {
+          goalR[g] = (goalArr[g] / cols) | 0;
+          goalC[g] = goalArr[g] % cols;
+        }
+        const size = 1 << m;
+        let dp = new Float64Array(size), nd = new Float64Array(size);
+        return function (boxes) {
+          const n = boxes.length;
+          if (m === 0 || n === 0) return 0;
+          if (m > 12) { // 目标点很多时退化为贪心（本作关卡远小于此）
+            let sum = 0;
+            const used = new Uint8Array(m);
+            for (let i = 0; i < n; i++) {
+              const br = (boxes[i] / cols) | 0, bc = boxes[i] % cols;
+              let bi = -1, bv = Infinity;
+              for (let g = 0; g < m; g++) {
+                if (used[g]) continue;
+                const v = Math.abs(br - goalR[g]) + Math.abs(bc - goalC[g]);
+                if (v < bv) { bv = v; bi = g; }
+              }
+              used[bi] = 1;
+              sum += bv;
+            }
+            return sum;
+          }
+          // 状压 DP：dp[mask] = 已占用目标集合 mask 的最小指派代价
+          dp.fill(Infinity);
+          dp[0] = 0;
+          for (let i = 0; i < n; i++) {
+            const br = (boxes[i] / cols) | 0, bc = boxes[i] % cols;
+            nd.fill(Infinity);
+            for (let mask = 0; mask < size; mask++) {
+              const base = dp[mask];
+              if (base === Infinity) continue;
+              for (let g = 0; g < m; g++) {
+                const bit = 1 << g;
+                if (mask & bit) continue;
+                const v = base + Math.abs(br - goalR[g]) + Math.abs(bc - goalC[g]);
+                const nmask = mask | bit;
+                if (v < nd[nmask]) nd[nmask] = v;
+              }
+            }
+            const t = dp; dp = nd; nd = t;
+          }
+          let ans = Infinity;
+          for (let mask = 0; mask < size; mask++) {
+            if (popcount(mask) === n && dp[mask] < ans) ans = dp[mask];
+          }
+          return ans === Infinity ? 0 : ans;
+        };
+      }
+
+      /* 行走 BFS：从 from 出发、避开墙与箱子的最短路（供宏步推箱走位用）。
+         dist/prev/prevDir/queue 由调用方提供复用缓冲，避免搜索中反复分配 */
+      function walkBfs(st, from, dist, prev, prevDir, queue) {
+        const n = st.rows * st.cols;
+        dist.fill(-1, 0, n);
+        prev.fill(-1, 0, n);
+        prevDir.fill(-1, 0, n);
+        let qh = 0, qt = 0;
+        dist[from] = 0;
+        queue[qt++] = from;
+        while (qh < qt) {
+          const cur = queue[qh++];
+          const cr = (cur / st.cols) | 0, cc = cur % st.cols;
+          for (let k = 0; k < 4; k++) {
+            const d = DIRS[k];
+            const nr = cr + d.dr, nc = cc + d.dc;
+            if (nr < 0 || nr >= st.rows || nc < 0 || nc >= st.cols) continue;
+            const ni = nr * st.cols + nc;
+            if (dist[ni] >= 0) continue;
+            if (st.walls.has(ni) || boxIndex(st.boxes, ni) >= 0) continue;
+            dist[ni] = dist[cur] + 1;
+            prev[ni] = cur;
+            prevDir[ni] = k;
+            queue[qt++] = ni;
+          }
+        }
+      }
+
+      /* AI 求解（纯函数）：宏步 A* —— 一次扩展 = 走到箱后推一下（走位与推动均按
+         逐格代价计），配合死格剪枝搜最少步数解；由于宏步代价即真实步数，
+         求得的解与逐格搜索同为精确最少步数解，但搜索规模远小。
+         返回 { path: [dir...], expanded: 节点扩展数 }；无解或超出上限返回 null */
+      function solve(st, maxExpand) {
+        if (isWin(st)) return { path: [], expanded: 0 };
+        const dead = deadCells(st);
+        for (let i = 0; i < st.boxes.length; i++) {
+          if (dead.has(st.boxes[i])) return null;
+        }
+        const goalArr = [];
+        st.goals.forEach(function (g) { goalArr.push(g); });
+        const h = makeEstimator(goalArr, st.cols);
+        const limit = maxExpand || 400000;
+        const nCells = st.rows * st.cols;
+        const dist = new Int32Array(nCells);
+        const prev = new Int32Array(nCells);
+        const prevDir = new Int8Array(nCells);
+        const queue = new Int32Array(nCells);
+        const heap = [];
+        let seq = 0;
+        function less(a, b) {
+          if (a.f !== b.f) return a.f < b.f;
+          return a.g > b.g;              // 同代价时优先深挖，减少浅层重复扩展
+        }
+        function heapPush(node) {
+          heap.push(node);
+          let i = heap.length - 1;
+          while (i > 0) {
+            const p = (i - 1) >> 1;
+            if (less(heap[p], heap[i])) break;
+            const t = heap[p]; heap[p] = heap[i]; heap[i] = t;
+            i = p;
+          }
+        }
+        function heapPop() {
+          const top = heap[0];
+          const last = heap.pop();
+          if (heap.length > 0) {
+            heap[0] = last;
+            let i = 0;
+            for (;;) {
+              const l = i * 2 + 1, r = l + 1;
+              let m = i;
+              if (l < heap.length && less(heap[l], heap[m])) m = l;
+              if (r < heap.length && less(heap[r], heap[m])) m = r;
+              if (m === i) break;
+              const t = heap[m]; heap[m] = heap[i]; heap[i] = t;
+              i = m;
+            }
+          }
+          return top;
+        }
+        function stateKey(s) { return s.player + '|' + s.boxes.join(','); }
+
+        /* 综合启发式：箱子→目标最小指派距离 + 走到任一可推位的曼哈顿下界。
+           两项各自可容许且取自最优路径的第一推，故和仍可容许；同时剪掉
+           无合法推动且未通关的死局（返回 Infinity）。 */
+        function heuristicOf(s) {
+          if (isWinBoxes(s.boxes, s.goals)) return 0;   // 终局代价必须为 0，否则 A* 会按错误次序返回终点
+          const base = h(s.boxes);
+          let minWalk = Infinity;
+          const pr = (s.player / s.cols) | 0, pc = s.player % s.cols;
+          for (let i = 0; i < s.boxes.length; i++) {
+            const bpos = s.boxes[i];
+            const br = (bpos / s.cols) | 0, bc = bpos % s.cols;
+            for (let d = 0; d < 4; d++) {
+              const dv = DIRS[d];
+              const tr = br + dv.dr, tc = bc + dv.dc;
+              if (tr < 0 || tr >= s.rows || tc < 0 || tc >= s.cols) continue;
+              const tIdx = tr * s.cols + tc;
+              if (s.walls.has(tIdx) || boxIndex(s.boxes, tIdx) >= 0) continue;
+              if (dead.has(tIdx)) continue;
+              const sr = br - dv.dr, sc = bc - dv.dc;
+              if (sr < 0 || sr >= s.rows || sc < 0 || sc >= s.cols) continue;
+              const sIdx = sr * s.cols + sc;
+              if (s.walls.has(sIdx) || boxIndex(s.boxes, sIdx) >= 0) continue;
+              const mw = Math.abs(pr - sr) + Math.abs(pc - sc);
+              if (mw < minWalk) minWalk = mw;
+            }
+          }
+          return minWalk === Infinity ? Infinity : base + minWalk;
+        }
+
+        const startH = heuristicOf(st);
+        if (startH === Infinity) return null;
+        heapPush({ f: startH, g: 0, seq: seq++, st: st, parent: null, steps: null });
+        const best = new Map();
+        best.set(stateKey(st), 0);
+        let expanded = 0;
+        while (heap.length) {
+          const node = heapPop();
+          const k = stateKey(node.st);
+          if (best.get(k) < node.g) continue;      // 已有更优路径到达该状态
+          if (isWin(node.st)) {
+            // 沿父链回溯，还原逐格方向序列
+            const path = [];
+            let cur = node;
+            while (cur && cur.steps) {
+              for (let i = cur.steps.length - 1; i >= 0; i--) path.push(cur.steps[i]);
+              cur = cur.parent;
+            }
+            path.reverse();
+            return { path: path, expanded: expanded, cost: node.g };
+          }
+          expanded++;
+          if (expanded > limit) return null;
+          walkBfs(node.st, node.st.player, dist, prev, prevDir, queue);
+          for (let i = 0; i < node.st.boxes.length; i++) {
+            const bpos = node.st.boxes[i];
+            const br = (bpos / node.st.cols) | 0, bc = bpos % node.st.cols;
+            for (let d = 0; d < 4; d++) {
+              const dv = DIRS[d];
+              const tr = br + dv.dr, tc = bc + dv.dc;
+              if (tr < 0 || tr >= node.st.rows || tc < 0 || tc >= node.st.cols) continue;
+              const tIdx = tr * node.st.cols + tc;
+              if (node.st.walls.has(tIdx) || boxIndex(node.st.boxes, tIdx) >= 0) continue;
+              if (dead.has(tIdx)) continue;        // 推箱后死格剪枝
+              const sr = br - dv.dr, sc = bc - dv.dc;
+              if (sr < 0 || sr >= node.st.rows || sc < 0 || sc >= node.st.cols) continue;
+              const sIdx = sr * node.st.cols + sc;
+              const walk = dist[sIdx];
+              if (walk < 0) continue;              // 走不到箱后
+              const boxes = node.st.boxes.slice();
+              boxes[i] = tIdx;
+              boxes.sort(function (x, y) { return x - y; });
+              const nx = {
+                rows: node.st.rows, cols: node.st.cols,
+                walls: node.st.walls, goals: node.st.goals,
+                boxes: boxes, player: bpos,
+                moves: node.st.moves + walk + 1,
+                pushes: node.st.pushes + 1,
+                won: isWinBoxes(boxes, node.st.goals)
+              };
+              const g2 = node.g + walk + 1;
+              const k2 = stateKey(nx);
+              const prevG = best.get(k2);
+              if (prevG !== undefined && prevG <= g2) continue;
+              const hv = heuristicOf(nx);
+              if (hv === Infinity) continue;       // 推完即死局：剪枝
+              best.set(k2, g2);
+              // 本宏步的逐格方向序列：走位到箱后 + 推一下
+              const steps = new Array(walk + 1);
+              let cur = sIdx;
+              for (let w = walk - 1; w >= 0; w--) {
+                steps[w] = prevDir[cur];
+                cur = prev[cur];
+              }
+              steps[walk] = d;
+              heapPush({ f: g2 + hv, g: g2, seq: seq++, st: nx, parent: node, steps: steps });
+            }
+          }
+        }
+        return null;
+      }
+
+      return {
+        LEVELS: LEVELS, DIRS: DIRS, parseMap: parseMap,
+        step: step, isWin: isWin, solve: solve
+      };
+    }
+    /* ===== AI_CORE_END ===== */
+
+    const core = aiCoreSokoban();
+
+    // 当前关卡状态（core.parseMap 产出的纯状态），撤销栈保存历史状态快照
     let levelIdx = 0;
-    let rows = 0, cols = 0;
-    let walls = new Set();      // 墙坐标集合
-    let goals = new Set();      // 目标点坐标集合
-    let boxes = [];             // 箱子坐标数组
-    let player = { r: 0, c: 0 };
-    let moves = 0, pushes = 0;
+    let state = null;
     let undoStack = [];
-    let won = false;
 
     const boardEl = document.getElementById('board');
     const movesVal = document.getElementById('movesVal');
@@ -542,6 +932,8 @@
     const bestVal = document.getElementById('bestVal');
     const levelBar = document.getElementById('levelBar');
     const winModal = document.getElementById('winModal');
+    const aiBtn = document.getElementById('aiBtn');
+    const aiTag = document.getElementById('aiTag');
 
     /* ---------- localStorage 读写（带 slug 前缀，包 try/catch） ---------- */
     function bestKey(n) { return 'sokoban_best_' + n; }
@@ -555,32 +947,7 @@
       try { localStorage.setItem(bestKey(n), String(val)); } catch (e) { /* 隐私模式下忽略 */ }
     }
 
-    /* ---------- 关卡解析 ---------- */
-    function key(r, c) { return r + ',' + c; }
-    function parseLevel(idx) {
-      const map = LEVELS[idx].map;
-      rows = map.length;
-      cols = Math.max.apply(null, map.map(function (s) { return s.length; }));
-      walls = new Set();
-      goals = new Set();
-      boxes = [];
-      for (let r = 0; r < rows; r++) {
-        const line = map[r];
-        for (let c = 0; c < cols; c++) {
-          const ch = line[c] || ' ';
-          if (ch === '#') walls.add(key(r, c));
-          else if (ch === '.') goals.add(key(r, c));
-          else if (ch === '$') boxes.push({ r: r, c: c });
-          else if (ch === '*') { boxes.push({ r: r, c: c }); goals.add(key(r, c)); }
-          else if (ch === '@') player = { r: r, c: c };
-          else if (ch === '&') { player = { r: r, c: c }; goals.add(key(r, c)); }
-        }
-      }
-      moves = 0;
-      pushes = 0;
-      undoStack = [];
-      won = false;
-    }
+    /* ---------- 关卡解析：见纯核心 core.parseMap ---------- */
 
     /* ---------- 渲染（CSS 网格 + 内联 SVG / 纯 CSS 图形） ---------- */
     function playerSvg() {
@@ -589,28 +956,27 @@
         '<path d="M8 34c0-6.6 5.4-12 12-12s12 5.4 12 12z" fill="#4f7ea8"/></svg>';
     }
     function render() {
-      boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-      boardEl.style.maxWidth = 'calc(' + cols + ' * 52px)';
-      const boxMap = new Map();
-      boxes.forEach(function (b) { boxMap.set(key(b.r, b.c), true); });
+      boardEl.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
+      boardEl.style.maxWidth = 'calc(' + state.cols + ' * 52px)';
+      const boxSet = new Set(state.boxes);
       let html = '';
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const k = key(r, c);
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const idx = r * state.cols + c;
           let cls = 'cell';
-          if (walls.has(k)) cls += ' wall';
-          if (goals.has(k)) cls += ' goal';
-          const hasBox = boxMap.has(k);
-          if (hasBox && goals.has(k)) cls += ' done';
+          if (state.walls.has(idx)) cls += ' wall';
+          if (state.goals.has(idx)) cls += ' goal';
+          const hasBox = boxSet.has(idx);
+          if (hasBox && state.goals.has(idx)) cls += ' done';
           html += '<div class="' + cls + '">';
           if (hasBox) html += '<div class="piece"><div class="box-face"></div></div>';
-          else if (player.r === r && player.c === c) html += playerSvg();
+          else if (state.player === idx) html += playerSvg();
           html += '</div>';
         }
       }
       boardEl.innerHTML = html;
-      movesVal.textContent = moves;
-      pushesVal.textContent = pushes;
+      movesVal.textContent = state.moves;
+      pushesVal.textContent = state.pushes;
       const best = loadBest(levelIdx + 1);
       bestVal.textContent = best === null ? '--' : best;
     }
@@ -629,72 +995,48 @@
     levelBar.addEventListener('click', function (e) {
       const btn = e.target.closest('.lv-btn');
       if (!btn) return;
+      stopAi();
       loadLevel(parseInt(btn.dataset.lv, 10));
     });
 
-    /* ---------- 移动与撤销 ---------- */
-    function isWall(r, c) { return walls.has(key(r, c)); }
-    function boxIndexAt(r, c) {
-      for (let i = 0; i < boxes.length; i++) {
-        if (boxes[i].r === r && boxes[i].c === c) return i;
-      }
-      return -1;
-    }
-    function move(dr, dc) {
-      if (won) return;
-      const nr = player.r + dr, nc = player.c + dc;
-      if (isWall(nr, nc)) return;
-      const bi = boxIndexAt(nr, nc);
-      let willPush = false;
-      if (bi >= 0) {
-        const br = nr + dr, bc = nc + dc;
-        if (isWall(br, bc) || boxIndexAt(br, bc) >= 0) return;
-        willPush = true;
-      }
-      // 快照入撤销栈
-      undoStack.push({
-        player: { r: player.r, c: player.c },
-        boxes: boxes.map(function (b) { return { r: b.r, c: b.c }; }),
-        moves: moves,
-        pushes: pushes
-      });
+    /* ---------- 移动与撤销（状态推进走纯核心 core.step） ---------- */
+    function applyDir(dir) {
+      if (state.won) return false;
+      const next = core.step(state, dir);
+      if (!next) return false;
+      undoStack.push(state);
       if (undoStack.length > 500) undoStack.shift();
-      if (willPush) {
-        boxes[bi] = { r: nr + dr, c: nc + dc };
-        pushes++;
-      }
-      player = { r: nr, c: nc };
-      moves++;
+      state = next;
       render();
-      checkWin();
+      if (state.won) onWin();
+      return true;
     }
     function undo() {
-      if (won || undoStack.length === 0) return;
-      const st = undoStack.pop();
-      player = st.player;
-      boxes = st.boxes;
-      moves = st.moves;
-      pushes = st.pushes;
+      if (state.won || undoStack.length === 0) return;
+      state = undoStack.pop();
       render();
     }
 
     /* ---------- 胜负判定与庆祝 ---------- */
-    function checkWin() {
-      for (let i = 0; i < boxes.length; i++) {
-        if (!goals.has(key(boxes[i].r, boxes[i].c))) return;
-      }
-      won = true;
+    function onWin() {
       const levelNo = levelIdx + 1;
-      const prev = loadBest(levelNo);
-      const isNew = prev === null || moves < prev;
-      if (isNew) saveBest(levelNo, moves);
+      let isNew = false;
+      if (!aiOn) {                      // AI 代玩成绩不计入最佳记录
+        const prev = loadBest(levelNo);
+        isNew = prev === null || state.moves < prev;
+        if (isNew) saveBest(levelNo, state.moves);
+      }
       renderLevelBar();
-
+      if (aiOn) return;                 // AI 演示中不弹结算，由 aiLoop 自动续关
+      showWinModal(isNew, false);
+    }
+    function showWinModal(isNew, fromAi) {
       document.getElementById('winTitle').textContent =
         levelIdx === LEVELS.length - 1 ? '全部通关' : '通关啦';
-      let msg = '本关用 <b>' + moves + '</b> 步、推动 <b>' + pushes + '</b> 次完成。<br>';
-      if (isNew) msg += '刷新最佳记录：' + moves + ' 步。';
-      else msg += '历史最佳：' + prev + ' 步，再接再厉。';
+      let msg = '本关用 <b>' + state.moves + '</b> 步、推动 <b>' + state.pushes + '</b> 次完成。<br>';
+      if (fromAi) msg += '由 AI 代玩完成，不计入最佳记录。';
+      else if (isNew) msg += '刷新最佳记录：' + state.moves + ' 步。';
+      else msg += '历史最佳：' + loadBest(levelIdx + 1) + ' 步，再接再厉。';
       if (levelIdx === LEVELS.length - 1) {
         msg += '<br>五个关卡全部通过，你已经掌握推箱子的精髓。';
       }
@@ -708,30 +1050,91 @@
     /* ---------- 载入关卡 ---------- */
     function loadLevel(idx) {
       levelIdx = idx;
-      parseLevel(idx);
+      state = core.parseMap(LEVELS[idx].map);
+      undoStack = [];
       renderLevelBar();
       render();
       closeWin();
     }
+
+    /* ================= AI 代玩控制 =================
+       决策与渲染无关：core.solve 对当前纯状态做宏步 A*（走位与推动逐格计代价，
+       启发式为箱子→目标最小曼哈顿指派距离）+ 死格剪枝，返回最少步数方向序列；
+       页面只按节奏回放。
+       代玩成绩不计入最佳记录；AI 自动连续演示各关，点按钮或任意手动操作即停止。 */
+    let aiOn = false;
+    let aiTimer = null;
+    let aiPlan = [];
+
+    function aiEnsurePlan() {
+      let res = core.solve(state);
+      if (!res) {                       // 当前局面已成死局：重置本关再解
+        loadLevel(levelIdx);
+        res = core.solve(state);
+      }
+      aiPlan = res ? res.path : [];
+    }
+
+    function aiLoop() {
+      if (!aiOn) return;
+      if (state.won) {
+        if (levelIdx < LEVELS.length - 1) {
+          aiTimer = setTimeout(function () {
+            if (!aiOn) return;
+            loadLevel(levelIdx + 1);
+            aiEnsurePlan();
+            aiLoop();
+          }, 650);
+          return;
+        }
+        setAi(false);
+        showWinModal(false, true);      // 最终关演示完成，展示结算
+        return;
+      }
+      if (aiPlan.length === 0) aiEnsurePlan();
+      if (aiPlan.length === 0) { setAi(false); return; }
+      applyDir(aiPlan.shift());
+      aiTimer = setTimeout(aiLoop, 130);
+    }
+
+    function setAi(on) {
+      aiOn = on;
+      aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
+      aiBtn.classList.toggle('ai-on', aiOn);
+      aiBtn.setAttribute('aria-pressed', String(aiOn));
+      aiTag.hidden = !aiOn;
+      if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+      if (aiOn) {
+        closeWin();
+        if (state.won) loadLevel(levelIdx < LEVELS.length - 1 ? levelIdx + 1 : levelIdx);
+        aiEnsurePlan();
+        aiLoop();
+      }
+    }
+    function stopAi() { if (aiOn) setAi(false); }
+    aiBtn.addEventListener('click', function () { setAi(!aiOn); });
 
     /* ---------- 事件绑定 ---------- */
     // 键盘：方向键 / WASD 移动，U 撤销，R 重玩
     window.addEventListener('keydown', function (e) {
       const k = e.key.toLowerCase();
       const dirs = {
-        arrowup: [-1, 0], w: [-1, 0],
-        arrowdown: [1, 0], s: [1, 0],
-        arrowleft: [0, -1], a: [0, -1],
-        arrowright: [0, 1], d: [0, 1]
+        arrowup: 0, w: 0,
+        arrowdown: 1, s: 1,
+        arrowleft: 2, a: 2,
+        arrowright: 3, d: 3
       };
-      if (dirs[k]) {
+      if (dirs[k] !== undefined) {
         e.preventDefault();
-        move(dirs[k][0], dirs[k][1]);
+        stopAi();
+        applyDir(dirs[k]);
       } else if (k === 'u') {
         e.preventDefault();
+        stopAi();
         undo();
       } else if (k === 'r') {
         e.preventDefault();
+        stopAi();
         loadLevel(levelIdx);
       } else if (k === 'escape') {
         closeWin();
@@ -741,18 +1144,19 @@
     // 屏幕方向按钮
     document.querySelectorAll('.dpad .btn-d[data-dir]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const map = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
-        const d = map[btn.dataset.dir];
-        move(d[0], d[1]);
+        stopAi();
+        const map = { up: 0, down: 1, left: 2, right: 3 };
+        applyDir(map[btn.dataset.dir]);
       });
     });
 
-    document.getElementById('undoBtn').addEventListener('click', undo);
-    document.getElementById('restartBtn').addEventListener('click', function () { loadLevel(levelIdx); });
+    document.getElementById('undoBtn').addEventListener('click', function () { stopAi(); undo(); });
+    document.getElementById('restartBtn').addEventListener('click', function () { stopAi(); loadLevel(levelIdx); });
     document.getElementById('winNextBtn').addEventListener('click', function () {
+      stopAi();
       if (levelIdx < LEVELS.length - 1) loadLevel(levelIdx + 1);
     });
-    document.getElementById('winRetryBtn').addEventListener('click', function () { loadLevel(levelIdx); });
+    document.getElementById('winRetryBtn').addEventListener('click', function () { stopAi(); loadLevel(levelIdx); });
     document.getElementById('winCloseBtn').addEventListener('click', closeWin);
 
     /* ---------- 启动 ---------- */
@@ -773,6 +1177,11 @@
       <ul>
         <li>方向键 / WASD：移动　U：撤销一步　R：重玩本关</li>
         <li>手机端用屏幕方向按钮</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点击「AI 代玩」按钮，AI 自动求解并逐步演示通关，可随时停止</li>
+        <li>AI 代玩不计入最佳步数记录</li>
       </ul>
     </div>
   </aside>

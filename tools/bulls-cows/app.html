@@ -52,6 +52,10 @@ h1{font-size:19px;font-weight:700}
 .actions{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .btn-plain{font:inherit;border:0;border-radius:10px;padding:9px 18px;background:#f1f3f4;color:#3c4043;font-weight:500;cursor:pointer}
 .btn-plain:active{transform:scale(.96)}
+/* AI 代玩主按钮：醒目蓝色，运行中切换为红色停止态 */
+.btn-ai{font:inherit;border:0;border-radius:10px;padding:9px 20px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(26,115,232,.35)}
+.btn-ai:active{transform:scale(.96)}
+.btn-ai.stop{background:#e5484d;box-shadow:0 2px 10px rgba(229,72,77,.35)}
 .tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
 footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
 </style>
@@ -198,6 +202,7 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
     <ol id="historyList"><li class="empty">还没有猜过，输入 4 位数字后点提交</li></ol>
   </div>
   <div class="actions">
+    <button class="btn-ai" id="aiBtn" type="button">AI 代玩</button>
     <button class="btn-plain" id="restartBtn" type="button">重新开局</button>
   </div>
   <footer>拾光集 · 在线小游戏</footer>
@@ -233,6 +238,189 @@ const resultBtn = document.getElementById('resultBtn');
 
 const MAX_TRIES = 8;   // 总机会次数
 
+// ============ 纯函数核心（与渲染无关；ai-sim.mjs 内为同一份实现，改动需两处同步） ============
+
+// 判分：A=数字与位置都对，B=数字对但位置不对
+function judgeSecret(guess, secret) {
+  let a = 0, b = 0;
+  for (let i = 0; i < 4; i++) {
+    if (guess[i] === secret[i]) a++;
+    else if (secret.indexOf(guess[i]) >= 0) b++;
+  }
+  return { a, b };
+}
+
+// 单步推进：给定对局状态与一次猜测，返回新历史与判定结果，不触碰任何界面状态
+function stepGame(state, guess) {
+  const { a, b } = judgeSecret(guess, state.secret);
+  const history = state.history.concat([{ guess, a, b }]);
+  const win = a === 4;
+  const over = win || history.length >= MAX_TRIES;
+  const score = win ? MAX_TRIES - history.length : 0;   // 越早猜中分越高
+  return { history, a, b, win, over, score };
+}
+
+// 生成 4 位不重复数字（0-9 洗牌取前 4，允许 0 开头）
+function makeSecret() {
+  const pool = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+  }
+  return pool.slice(0, 4).join('');
+}
+
+// 全部可能猜测：0-9 中取 4 个不重复数字的排列，共 5040 个（允许 0 开头）
+function buildAllGuesses() {
+  const out = [];
+  (function rec(s, used) {
+    if (s.length === 4) { out.push(s); return; }
+    for (let d = 0; d <= 9; d++) {
+      if (used & (1 << d)) continue;
+      rec(s + d, used | (1 << d));
+    }
+  })('', 0);
+  return out;
+}
+
+// 候选过滤：保留与全部历史反馈一致的候选（把候选当假想答案来判分）
+function filterCandidates(cands, history) {
+  return cands.filter(c => history.every(h => {
+    const r = judgeSecret(h.guess, c);
+    return r.a === h.a && r.b === h.b;
+  }));
+}
+
+// ---------- AI 决策（同样与渲染无关） ----------
+let AI_TABLES = null;   // 懒加载：5040 个猜测的扁平数字表与索引
+
+function aiEnsureTables() {
+  if (AI_TABLES) return AI_TABLES;
+  const list = buildAllGuesses();
+  const flat = new Uint8Array(list.length * 4);
+  const index = new Map();
+  for (let i = 0; i < list.length; i++) {
+    index.set(list[i], i);
+    for (let k = 0; k < 4; k++) flat[i * 4 + k] = list[i].charCodeAt(k) - 48;
+  }
+  const pop = new Uint8Array(1024);              // 10 位掩码中 1 的个数
+  for (let m = 1; m < 1024; m++) pop[m] = pop[m >> 1] + (m & 1);
+  const lg = new Float64Array(list.length + 2);  // 预计算 log2(i)，代价计算会用到 log2(c+1)
+  for (let i = 2; i <= list.length + 1; i++) lg[i] = Math.log2(i);
+  AI_TABLES = { list, flat, index, pop, lg };
+  return AI_TABLES;
+}
+
+const AI_BEAM = 30;   // 两层前瞻的波束宽度：一层最优的前 30 个猜测进入二层精评
+
+// 反馈分桶：把候选按「猜 gi 会得到的反馈」计数（反馈码 a*5+b，20 即 4A0B）
+function aiBucketCounts(T, gi, ci, n, buckets) {
+  buckets.fill(0);
+  const p = gi * 4;
+  const g0 = T.flat[p], g1 = T.flat[p + 1], g2 = T.flat[p + 2], g3 = T.flat[p + 3];
+  const gm = (1 << g0) | (1 << g1) | (1 << g2) | (1 << g3);
+  for (let k = 0; k < n; k++) {
+    const q = ci[k] * 4;
+    const c0 = T.flat[q], c1 = T.flat[q + 1], c2 = T.flat[q + 2], c3 = T.flat[q + 3];
+    let a = 0;
+    if (c0 === g0) a++;
+    if (c1 === g1) a++;
+    if (c2 === g2) a++;
+    if (c3 === g3) a++;
+    const inter = gm & ((1 << c0) | (1 << c1) | (1 << c2) | (1 << c3));
+    buckets[a * 5 + (T.pop[inter] - a)]++;       // B = 数字交集数 - A
+  }
+}
+
+// log1p 期望代价：Σ c·log2(1+c)/n（4A0B 桶是已猜中，不计后续），越小分支越均匀
+function aiLog1pCost(T, buckets, n) {
+  let s = 0;
+  for (let t = 0; t < 25; t++) {
+    if (t === 20) continue;
+    const c = buckets[t];
+    if (c) s += c * T.lg[c + 1];
+  }
+  return s / n;
+}
+
+// 在候选集上挑期望总代价最小的猜测（log1p 分桶 + 两层前瞻）：
+// 一层对全部 5040 个猜测打分取前 AI_BEAM 个；二层对每个猜测的每个反馈分支再求最佳下一击，
+// 取 1 + Σ(分支占比 × 分支内最小代价) 最小者。同分时优先选本身仍是候选的猜测，微弱加分 1e-6。
+function aiChooseGuess(cands) {
+  const T = aiEnsureTables();
+  const n = cands.length;
+  if (n === 1) return cands[0];
+  const ci = new Int32Array(n);
+  const inC = new Uint8Array(T.list.length);
+  for (let k = 0; k < n; k++) {
+    ci[k] = T.index.get(cands[k]);
+    inC[ci[k]] = 1;
+  }
+  const buckets = new Int32Array(25);            // 反馈共 5×5 种，按 a*5+b 编码
+  const topCost = new Float64Array(AI_BEAM).fill(Infinity);
+  const topGi = new Int32Array(AI_BEAM).fill(-1);
+  for (let gi = 0; gi < T.list.length; gi++) {   // 一层：log1p 代价选波束
+    aiBucketCounts(T, gi, ci, n, buckets);
+    const cost = aiLog1pCost(T, buckets, n) - (inC[gi] ? 1e-6 : 0);
+    if (cost >= topCost[AI_BEAM - 1]) continue;
+    let pos = AI_BEAM - 1;
+    while (pos > 0 && topCost[pos - 1] > cost) {
+      topCost[pos] = topCost[pos - 1];
+      topGi[pos] = topGi[pos - 1];
+      pos--;
+    }
+    topCost[pos] = cost;
+    topGi[pos] = gi;
+  }
+  const members = [];
+  for (let t = 0; t < 25; t++) members.push([]);
+  const inner = new Int32Array(25);
+  let bestVal = Infinity, bestGi = topGi[0];
+  for (let b = 0; b < AI_BEAM && topGi[b] >= 0; b++) {   // 二层：波束内两层前瞻
+    const gi = topGi[b];
+    for (let t = 0; t < 25; t++) members[t].length = 0;
+    const p = gi * 4;
+    const g0 = T.flat[p], g1 = T.flat[p + 1], g2 = T.flat[p + 2], g3 = T.flat[p + 3];
+    const gm = (1 << g0) | (1 << g1) | (1 << g2) | (1 << g3);
+    for (let k = 0; k < n; k++) {
+      const q = ci[k] * 4;
+      const c0 = T.flat[q], c1 = T.flat[q + 1], c2 = T.flat[q + 2], c3 = T.flat[q + 3];
+      let a = 0;
+      if (c0 === g0) a++;
+      if (c1 === g1) a++;
+      if (c2 === g2) a++;
+      if (c3 === g3) a++;
+      const inter = gm & ((1 << c0) | (1 << c1) | (1 << c2) | (1 << c3));
+      const code = a * 5 + (T.pop[inter] - a);
+      if (code !== 20) members[code].push(ci[k]);   // 4A0B 即猜中，无后续分支
+    }
+    let s = 0;
+    for (let t = 0; t < 25; t++) {
+      const m = members[t];
+      const c = m.length;
+      if (c < 2) continue;                          // 0 或 1 个候选：无代价或下一猜即中
+      const sub = new Int32Array(m);
+      let bestInner = Infinity;
+      for (let x = 0; x < c; x++) {
+        aiBucketCounts(T, sub[x], sub, c, inner);
+        const v2 = aiLog1pCost(T, inner, c);
+        if (v2 < bestInner) bestInner = v2;
+      }
+      s += c * bestInner;
+    }
+    const val = 1 + s / n - (inC[gi] ? 1e-6 : 0);
+    if (val < bestVal) { bestVal = val; bestGi = gi; }
+  }
+  return T.list[bestGi];
+}
+
+// AI 单步决策入口：按历史过滤候选，再按期望总代价（两层前瞻）挑猜测
+function aiNextGuess(history) {
+  if (!history.length) return '0123';   // 首猜在数字对称性下彼此等价，固定一个即可
+  const cands = filterCandidates(buildAllGuesses(), history);
+  return cands.length ? aiChooseGuess(cands) : '0123';   // 候选为空仅数据异常时兜底
+}
+
 // ================= 纪录存取（localStorage，带 slug 前缀） =================
 let record = { total: 0, wins: 0 };
 try {
@@ -257,26 +445,6 @@ let secret = '';     // 4 位不重复数字字符串
 let input = '';      // 当前输入
 let history = [];    // [{guess, a, b}]
 let over = false;
-
-// 生成 4 位不重复数字（0-9 洗牌取前 4，允许 0 开头）
-function makeSecret() {
-  const pool = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
-  }
-  return pool.slice(0, 4).join('');
-}
-
-// 计算 nA mB：A 数字与位置都对，B 数字对位置不对
-function judge(guess) {
-  let a = 0, b = 0;
-  for (let i = 0; i < 4; i++) {
-    if (guess[i] === secret[i]) a++;
-    else if (secret.indexOf(guess[i]) >= 0) b++;
-  }
-  return { a, b };
-}
 
 // ================= 渲染 =================
 function renderSlots() {
@@ -341,32 +509,29 @@ function submit() {
     setStatus('需要 4 位互不相同的数字才能提交', true);
     return;
   }
-  const { a, b } = judge(input);
-  history.push({ guess: input, a, b });
+  const step = stepGame({ secret, history }, input);   // 单步推进交给纯函数
+  history = step.history;
   renderHistory();
   input = '';
   renderSlots();
 
-  if (a === 4) {
-    // 猜中：按剩余次数计分
-    const remain = MAX_TRIES - history.length;
-    record.wins += 1;
-    record.total += remain;
-    saveRecord();
-    updateHud();
+  if (step.over) {
     over = true;
     renderSlots();
-    showResult(true, remain);
-    return;
-  }
-  if (history.length >= MAX_TRIES) {
-    over = true;
-    renderSlots();
-    showResult(false, 0);
+    if (step.win) {
+      // 猜中：按剩余次数计分
+      record.wins += 1;
+      record.total += step.score;
+      saveRecord();
+      updateHud();
+      showResult(true, step.score);
+    } else {
+      showResult(false, 0);
+    }
     return;
   }
   const left = MAX_TRIES - history.length;
-  setStatus('结果是 ' + a + 'A' + b + 'B，还剩 ' + left + ' 次机会');
+  setStatus('结果是 ' + step.a + 'A' + step.b + 'B，还剩 ' + left + ' 次机会');
 }
 
 // 结果弹层：胜利显示得分，失败显示答案
@@ -391,8 +556,63 @@ function newGame() {
   setStatus('电脑已想好 4 位不重复数字，开始猜测吧');
 }
 
+// ================= AI 代玩 =================
+const aiBtn = document.getElementById('aiBtn');
+let aiRunning = false;   // AI 是否正在代玩
+let aiTimer = 0;         // AI 步进定时器句柄
+let aiPlan = '';         // AI 本轮计划猜测的 4 位数
+const AI_TYPE_MS = 130;      // 逐位“键入”间隔，模拟真人输入节奏
+const AI_STEP_MS = 620;      // 每次提交后的停顿
+const AI_RESULT_MS = 1800;   // 结算弹层停留时间
+
+// 停止 AI：恢复按钮与提示，未完成的输入留给用户手动处理
+function stopAi(msg) {
+  if (!aiRunning) return;
+  aiRunning = false;
+  clearTimeout(aiTimer);
+  aiBtn.textContent = 'AI 代玩';
+  aiBtn.classList.remove('stop');
+  setStatus(msg || 'AI 已停止，可继续手动游玩');
+}
+
+// AI 步进状态机：规划 → 逐位键入 → 提交 → 本局结束后停留片刻自动开下一局
+function aiTick() {
+  if (!aiRunning) return;
+  if (over) {
+    aiTimer = setTimeout(() => {
+      if (!aiRunning) return;
+      if (over) newGame();                     // 期间被用户手动开局则顺势继续
+      aiTimer = setTimeout(aiTick, AI_STEP_MS);
+    }, AI_RESULT_MS);
+    return;
+  }
+  if (!input.length) {
+    aiPlan = aiNextGuess(history);
+    setStatus('AI 第 ' + (history.length + 1) + ' 次猜测：' + aiPlan);
+  }
+  if (input.length < 4) {
+    input += aiPlan.charAt(input.length);
+    renderSlots();
+    aiTimer = setTimeout(aiTick, AI_TYPE_MS);
+    return;
+  }
+  submit();                                    // 走原有判定与计分链路，界面所见即所得
+  aiTimer = setTimeout(aiTick, AI_STEP_MS);
+}
+
+aiBtn.addEventListener('click', () => {
+  if (aiRunning) { stopAi(); return; }
+  if (over) newGame();
+  aiRunning = true;
+  aiBtn.textContent = '停止 AI';
+  aiBtn.classList.add('stop');
+  setStatus('AI 已接管，点击「停止 AI」可随时停下');
+  aiTick();
+});
+
 // ================= 事件 =================
 pad.addEventListener('click', (e) => {
+  if (aiRunning) return;                       // AI 代玩期间屏蔽手动操作
   const btn = e.target.closest('button');
   if (!btn || btn.disabled) return;
   if (btn === backBtn) { backspace(); return; }
@@ -402,6 +622,7 @@ pad.addEventListener('click', (e) => {
 
 // 实体键盘同步支持：数字键输入、退格删除、回车提交
 document.addEventListener('keydown', (e) => {
+  if (aiRunning) return;                       // AI 代玩期间屏蔽键盘输入
   if (!overlay.hidden) {
     if (e.key === 'Enter') newGame();
     return;
@@ -411,8 +632,8 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter') submit();
 });
 
-restartBtn.addEventListener('click', newGame);
-resultBtn.addEventListener('click', newGame);
+restartBtn.addEventListener('click', () => { stopAi(); newGame(); });   // 重新开局会先停掉 AI
+resultBtn.addEventListener('click', newGame);                           // AI 运行时点它则顺势开下一局，AI 继续代玩
 
 // ================= 启动 =================
 newGame();
@@ -432,6 +653,7 @@ newGame();
       <h3>操作</h3>
       <ul>
         <li>屏幕数字键盘输入，退格可修改；重复数字会被拒绝</li>
+        <li>点「AI 代玩」可自动连续猜数并计分，随时可停</li>
       </ul>
     </div>
   </aside>

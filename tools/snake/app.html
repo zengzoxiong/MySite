@@ -17,6 +17,10 @@ h1{font-size:19px;font-weight:700}
 button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
 button:active{transform:scale(.96)}
 .btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
+/* AI 代玩按钮与状态标签 */
+.ai-btn{background:#188038;padding:9px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 2px 8px rgba(24,128,56,.30)}
+.ai-btn.ai-on{background:#d93025;box-shadow:0 2px 8px rgba(217,48,37,.30)}
+.ai-tag{color:#188038;font-weight:600;font-size:13px}
 .stage{position:relative}
 canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
 .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
@@ -144,7 +148,9 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
     <div class="hud">
       <span>分数 <b id="score">0</b></span>
       <span>最高 <b id="best">0</b></span>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最高分</span>
       <button id="pauseBtn" class="btn-plain" type="button">暂停</button>
+      <button id="aiBtn" class="ai-btn" type="button">AI 代玩</button>
     </div>
   </header>
   <div class="stage">
@@ -182,6 +188,7 @@ const cv=$('cv'), ctx=cv.getContext('2d');
 const scoreEl=$('score'), bestEl=$('best'), pauseBtn=$('pauseBtn');
 const ovStart=$('ovStart'), ovOver=$('ovOver'), ovPause=$('ovPause');
 const overTitle=$('overTitle'), overInfo=$('overInfo');
+const aiBtn=$('aiBtn'), aiTag=$('aiTag');
 
 // ---------- 最高分存取 ----------
 let best=0;
@@ -189,20 +196,180 @@ try{best=+localStorage.getItem('snakeBest')||0}catch(e){}
 function saveBest(v){try{localStorage.setItem('snakeBest',v)}catch(e){}}
 bestEl.textContent=best;
 
+// ---------- 核心纯函数（状态 / 单步推进 / AI 决策，与渲染完全无关） ----------
+/* aiCoreSnake 是纯函数工厂：状态为纯数据对象
+   { snake:[{x,y}…](0 为头), dir:{x,y}, food:{x,y}|null, eaten, score, cause }，
+   初始化、单步推进、BFS 寻路、安全模拟、AI 决策全部不碰 DOM。
+   同一份函数源码多处复用——页面手动与代玩共用推进逻辑，ai-sim.mjs 按
+   AI_CORE_BEGIN / AI_CORE_END 标记提取后跑批量模拟，天然保持一致。
+   AI 思路：BFS 找食物最短路，行动前模拟吃完仍能追上自己尾巴才走；
+   有困死风险就转跟尾巴走，优先选生存空间最大的合法步。 */
+/* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+function aiCoreSnake() {
+  'use strict';
+  const N = 24;                                       // 网格边长
+  const DIRS = [{x:0,y:-1},{x:-1,y:0},{x:0,y:1},{x:1,y:0}];   // 上左下右
+
+  /* 随机放置食物：落在随机空格；无空格返回 null（蛇占满全场即通关） */
+  function placeFood(st, rng) {
+    const occ = new Set(st.snake.map(s => s.x + '_' + s.y));
+    const free = [];
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!occ.has(x + '_' + y)) free.push({x: x, y: y});
+    st.food = free.length ? free[Math.floor(rng() * free.length)] : null;
+  }
+
+  /* 初始状态：蛇身 3 节居中朝右，食物随机 */
+  function initState(rng) {
+    const st = {
+      snake: [{x:11,y:12},{x:10,y:12},{x:9,y:12}],
+      dir: {x:1,y:0},
+      food: null, eaten: 0, score: 0, cause: ''
+    };
+    placeFood(st, rng);
+    return st;
+  }
+
+  /* 单步推进：可选转向 turn（原地掉头不认），返回
+     'move' 直行 / 'eat' 吃到食物 / 'dead' 死亡 / 'win' 吃满全场 */
+  function advance(st, turn, rng) {
+    if (turn && (turn.x !== -st.dir.x || turn.y !== -st.dir.y)) st.dir = {x: turn.x, y: turn.y};
+    const h = {x: st.snake[0].x + st.dir.x, y: st.snake[0].y + st.dir.y};
+    const eat = !!st.food && h.x === st.food.x && h.y === st.food.y;
+    const body = eat ? st.snake : st.snake.slice(0, -1);   // 不吃时尾巴让位，追尾尖不算死
+    if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N) { st.cause = 'wall'; return 'dead'; }
+    for (let i = 0; i < body.length; i++) if (body[i].x === h.x && body[i].y === h.y) { st.cause = 'self'; return 'dead'; }
+    st.snake.unshift(h);
+    if (eat) {
+      st.eaten++; st.score += 10;
+      placeFood(st, rng);
+      return st.food ? 'eat' : 'win';
+    }
+    st.snake.pop();
+    return 'move';
+  }
+
+  /* BFS 求蛇头到目标格的最短路，返回方向序列；蛇身阻挡、尾格可走（下一口尾会移开）。
+     不可达返回 null */
+  function pathTo(st, tx, ty) {
+    const snake = st.snake, n = snake.length;
+    const si = snake[0].y * N + snake[0].x, ti = ty * N + tx;
+    if (si === ti) return [];
+    const blocked = new Uint8Array(N * N);
+    for (let i = 1; i < n - 1; i++) blocked[snake[i].y * N + snake[i].x] = 1;
+    const prev = new Int32Array(N * N).fill(-2);   // -2 未访问，-1 起点
+    const q = new Int32Array(N * N);
+    let qh = 0, qt = 0;
+    q[qt++] = si; prev[si] = -1;
+    while (qh < qt) {
+      const cur = q[qh++];
+      if (cur === ti) break;
+      const cx = cur % N, cy = (cur / N) | 0;
+      for (let k = 0; k < 4; k++) {
+        const nx = cx + DIRS[k].x, ny = cy + DIRS[k].y;
+        if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+        const ni = ny * N + nx;
+        if (prev[ni] !== -2 || blocked[ni]) continue;
+        prev[ni] = cur; q[qt++] = ni;
+      }
+    }
+    if (prev[ti] === -2) return null;
+    const path = [];                                // 从目标回溯到起点得方向序列
+    let cur = ti;
+    while (prev[cur] !== -1) {
+      const p = prev[cur];
+      path.push({x: (cur % N) - (p % N), y: ((cur / N) | 0) - ((p / N) | 0)});
+      cur = p;
+    }
+    path.reverse();
+    return path;
+  }
+
+  /* 沿方向序列模拟走子（移动规则与 advance 一致），返回走完后的蛇身与朝向；
+     途中撞墙或咬到自己返回 null */
+  function walk(st, dirs) {
+    const snake = st.snake.map(s => ({x: s.x, y: s.y}));
+    let dir = {x: st.dir.x, y: st.dir.y};
+    for (let k = 0; k < dirs.length; k++) {
+      const d = dirs[k];
+      if (d.x === -dir.x && d.y === -dir.y) return null;
+      dir = d;
+      const h = {x: snake[0].x + d.x, y: snake[0].y + d.y};
+      const eat = !!st.food && h.x === st.food.x && h.y === st.food.y;
+      const body = eat ? snake : snake.slice(0, -1);
+      if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N) return null;
+      for (let i = 0; i < body.length; i++) if (body[i].x === h.x && body[i].y === h.y) return null;
+      snake.unshift(h);
+      if (!eat) snake.pop();
+    }
+    return {snake: snake, dir: dir};
+  }
+
+  /* 从蛇头泛洪：返回可达空格数 area（不含头部）与能否抵达自己尾尖 reachesTail */
+  function flood(snake) {
+    const n = snake.length;
+    const blocked = new Uint8Array(N * N);
+    for (let i = 1; i < n - 1; i++) blocked[snake[i].y * N + snake[i].x] = 1;
+    const seen = new Uint8Array(N * N);
+    const q = new Int32Array(N * N);
+    let qh = 0, qt = 0;
+    const hi = snake[0].y * N + snake[0].x;
+    q[qt++] = hi; seen[hi] = 1;
+    while (qh < qt) {
+      const cur = q[qh++];
+      const cx = cur % N, cy = (cur / N) | 0;
+      if (cx > 0 && !seen[cur - 1] && !blocked[cur - 1]) { seen[cur - 1] = 1; q[qt++] = cur - 1; }
+      if (cx < N - 1 && !seen[cur + 1] && !blocked[cur + 1]) { seen[cur + 1] = 1; q[qt++] = cur + 1; }
+      if (cy > 0 && !seen[cur - N] && !blocked[cur - N]) { seen[cur - N] = 1; q[qt++] = cur - N; }
+      if (cy < N - 1 && !seen[cur + N] && !blocked[cur + N]) { seen[cur + N] = 1; q[qt++] = cur + N; }
+    }
+    let area = 0;
+    for (let i = 0; i < N * N; i++) if (seen[i] && !blocked[i]) area++;
+    const ti = snake[n - 1].y * N + snake[n - 1].x;
+    return {area: area - 1, reachesTail: !!seen[ti]};
+  }
+
+  /* AI 决策入口：先走「吃完仍能追上尾巴」的最短食物路；有困死风险就
+     转跟尾巴走——在不会立刻撞死的走法里选能追上尾、生存空间最大的一步。
+     三向全死时返回 null（直行赴死，结局不可避免） */
+  function bestDir(st) {
+    const food = st.food;
+    if (food) {
+      const path = pathTo(st, food.x, food.y);
+      if (path && path.length) {
+        const end = walk(st, path);                 // 行动前模拟到吃完
+        if (end) {
+          const f = flood(end.snake);
+          if (f.reachesTail && f.area >= end.snake.length) return path[0];   // 不会困死才吃
+        }
+      }
+    }
+    let bestD = null, bestScore = -Infinity;        // 兜底：跟尾巴走
+    for (let k = 0; k < 4; k++) {
+      const d = DIRS[k];
+      if (d.x === -st.dir.x && d.y === -st.dir.y) continue;
+      const end = walk(st, [d]);
+      if (!end) continue;
+      const f = flood(end.snake);
+      const sc = f.area * 4 + (f.reachesTail ? 5000 : 0) + (d.x === st.dir.x && d.y === st.dir.y ? 0.5 : 0);
+      if (sc > bestScore) { bestScore = sc; bestD = d; }
+    }
+    return bestD;
+  }
+
+  return { N: N, initState: initState, placeFood: placeFood, advance: advance, bestDir: bestDir };
+}
+/* ===== AI_CORE_END ===== */
+const core = aiCoreSnake();
+
 // ---------- 状态 ----------
 let state='ready';   // ready / playing / paused / over
-let snake, dir, queue, food, eaten, score, stepMs, acc;
+let G=core.initState(Math.random);   // 游戏数据由核心纯函数管理，渲染只读
+let queue=[], stepMs=160, acc=0;
 let floats=[], overAt=0;   // 得分浮字与死亡时刻（撞击红闪用）
 function reset(){
-  snake=[{x:11,y:12},{x:10,y:12},{x:9,y:12}];
-  dir={x:1,y:0}; queue=[]; eaten=0; score=0; stepMs=160; acc=0;
-  floats=[];
-  placeFood(); scoreEl.textContent='0';
-}
-function placeFood(){
-  const occ=new Set(snake.map(s=>s.x+'_'+s.y)), free=[];
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!occ.has(x+'_'+y))free.push({x,y});
-  food=free.length?free[Math.random()*free.length|0]:null;   // null 表示蛇占满全场
+  G=core.initState(Math.random);
+  queue=[];stepMs=160;acc=0;floats=[];
+  scoreEl.textContent='0';
 }
 function setPanel(){
   ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';
@@ -213,32 +380,29 @@ function pause(){if(state!=='playing')return;state='paused';setPanel();}
 function resume(){if(state!=='paused')return;state='playing';setPanel();}
 function gameOver(win){
   state='over';overAt=performance.now();
-  const s=Math.floor(score), isNew=s>best&&s>0;
+  const s=Math.floor(G.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计最高纪录
   if(isNew){best=s;saveBest(s);bestEl.textContent=best;}
   overTitle.textContent=win?'通关了！':'游戏结束';
-  overInfo.textContent='本局得分 '+s+' · '+(isNew?'新纪录！':(win?'吃满全场':'历史最高 '+best));
+  overInfo.textContent='本局得分 '+s+' · '+(aiOn?'AI 代玩中，即将自动续局':(isNew?'新纪录！':(win?'吃满全场':'历史最高 '+best)));
   setPanel();
 }
 
 // ---------- 步进 ----------
 function step(){
-  while(queue.length){                        // 取第一个合法转向（原地掉头不认）
+  let turn=null;
+  if(aiOn) turn=core.bestDir(G);          // AI 代玩：核心纯函数决策
+  else while(queue.length){               // 手动：取第一个合法转向（原地掉头不认）
     const d=queue.shift();
-    if(d.x!==-dir.x||d.y!==-dir.y){dir=d;break;}
+    if(d.x!==-G.dir.x||d.y!==-G.dir.y){turn=d;break;}
   }
-  const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-  const eat=food&&h.x===food.x&&h.y===food.y;
-  const body=eat?snake:snake.slice(0,-1);     // 不吃时尾巴让位，追尾尖不算死
-  if(h.x<0||h.y<0||h.x>=N||h.y>=N||body.some(s=>s.x===h.x&&s.y===h.y)){gameOver(false);return;}
-  snake.unshift(h);
-  if(eat){
-    eaten++;score+=10;
-    scoreEl.textContent=score;                 // 同步 HUD 分数
-    floats.push({x:h.x*CELL+10,y:h.y*CELL+10,t:40});   // 得分浮字
-    stepMs=Math.max(70,160-eaten*4);          // 速度随长度渐进加快
-    placeFood();
-    if(!food){gameOver(true);return;}
-  }else snake.pop();
+  const ev=core.advance(G,turn,Math.random);
+  if(ev==='dead'){gameOver(false);return;}
+  if(ev==='eat'){
+    scoreEl.textContent=G.score;          // 同步 HUD 分数
+    floats.push({x:G.snake[0].x*CELL+10,y:G.snake[0].y*CELL+10,t:40});   // 得分浮字
+    stepMs=Math.max(70,160-G.eaten*4);    // 速度随长度渐进加快
+  }
+  if(ev==='win'){gameOver(true);return;}
 }
 
 // ---------- 绘制 ----------
@@ -254,28 +418,28 @@ function draw(t){
   }
   ctx.strokeStyle='#dde1e6';ctx.lineWidth=2;  // 边框提示撞墙即死
   ctx.strokeRect(1,1,W-2,H-2);
-  if(food){
+  if(G.food){
     const r=6+Math.sin(t/220)*1.4;            // 食物呼吸脉动
     ctx.fillStyle='#e03131';
-    ctx.beginPath();ctx.arc(food.x*CELL+10,food.y*CELL+10,r,0,6.3);ctx.fill();
+    ctx.beginPath();ctx.arc(G.food.x*CELL+10,G.food.y*CELL+10,r,0,6.3);ctx.fill();
   }
-  const n=snake.length;
+  const n=G.snake.length;
   for(let i=n-1;i>=0;i--){                    // 从尾到头画，尾部渐淡
-    const s=snake[i];
+    const s=G.snake[i];
     ctx.globalAlpha=i===0?1:.45+.55*(1-i/n);
     ctx.fillStyle=i===0?'#2b8a3e':'#37b24d';
     roundRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2,5);
   }
   ctx.globalAlpha=1;
-  const h=snake[0],cx=h.x*CELL+10,cy=h.y*CELL+10;   // 头部眼睛随朝向偏移
-  const px=-dir.y,py=dir.x;
+  const h=G.snake[0],cx=h.x*CELL+10,cy=h.y*CELL+10;   // 头部眼睛随朝向偏移
+  const px=-G.dir.y,py=G.dir.x;
   ctx.fillStyle='#fff';ctx.beginPath();
-  ctx.arc(cx+dir.x*4+px*4,cy+dir.y*4+py*4,2.2,0,6.3);
-  ctx.arc(cx+dir.x*4-px*4,cy+dir.y*4-py*4,2.2,0,6.3);
+  ctx.arc(cx+G.dir.x*4+px*4,cy+G.dir.y*4+py*4,2.2,0,6.3);
+  ctx.arc(cx+G.dir.x*4-px*4,cy+G.dir.y*4-py*4,2.2,0,6.3);
   ctx.fill();
   ctx.fillStyle='#1b4326';ctx.beginPath();   // 瞳孔
-  ctx.arc(cx+dir.x*5+px*4,cy+dir.y*5+py*4,1,0,6.3);
-  ctx.arc(cx+dir.x*5-px*4,cy+dir.y*5-py*4,1,0,6.3);
+  ctx.arc(cx+G.dir.x*5+px*4,cy+G.dir.y*5+py*4,1,0,6.3);
+  ctx.arc(cx+G.dir.x*5-px*4,cy+G.dir.y*5-py*4,1,0,6.3);
   ctx.fill();
   // 得分浮字（+10 上飘渐隐）
   for(let i=floats.length-1;i>=0;i--){
@@ -343,10 +507,35 @@ document.addEventListener('visibilitychange',()=>{   // 切后台自动暂停
   if(document.hidden&&state==='playing')pause();
 });
 
+// ---------- AI 代玩 ----------
+let aiOn=false;
+function setAi(on){
+  aiOn=on;
+  aiBtn.textContent=aiOn?'停止代玩':'AI 代玩';
+  aiBtn.classList.toggle('ai-on',aiOn);
+  aiBtn.setAttribute('aria-pressed',String(aiOn));
+  aiTag.hidden=!aiOn;
+  queue=[];                       // 切换接管时清掉遗留手动输入
+  if(aiOn){
+    if(state==='ready')start();
+    else if(state==='paused')resume();
+    else if(state==='over')start();
+  }
+}
+aiBtn.addEventListener('click',()=>setAi(!aiOn));
+/* 每帧驱动：AI 托管期间自动开局、续局、死后自动重开（停止代玩即交还手动） */
+function aiDrive(){
+  if(!aiOn)return;
+  if(state==='ready'){start();return;}
+  if(state==='paused'){resume();return;}
+  if(state==='over'&&performance.now()-overAt>800){start();return;}
+}
+
 // ---------- 主循环（固定步长推进，渲染每帧） ----------
 let last=performance.now();
 function loop(t){
   const dt=Math.min(t-last,50);last=t;   // 钳制大间隔，防跳帧暴走
+  aiDrive();
   if(state==='playing'){
     acc+=dt;
     while(acc>=stepMs&&state==='playing'){acc-=stepMs;step();}
@@ -368,11 +557,13 @@ requestAnimationFrame(loop);
         <li>方向键或 WASD 控制蛇转向，吃掉红色食物得分变长</li>
         <li>蛇越长爬得越快，撞墙或咬到自己就结束</li>
         <li>触屏在棋盘上滑动即可转向</li>
+        <li>「AI 代玩」由 AI 自动寻路吃食，成绩不计最高分</li>
       </ul>
       <h3>操作</h3>
       <ul>
         <li>方向键 / WASD：转向</li>
         <li>空格 / P / Esc：暂停或继续</li>
+        <li>AI 代玩：AI 接手，停止代玩交还手动</li>
       </ul>
     </div>
   </aside>

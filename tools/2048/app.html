@@ -265,7 +265,7 @@
       <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
       <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
       <button class="btn" id="newBtn" type="button">新游戏</button>
-      <button class="btn" id="autoBtn" type="button">自动模式</button>
+      <button class="btn primary" id="autoBtn" type="button">AI 代玩</button>
     </section>
 
     <div class="board" id="board">
@@ -308,7 +308,8 @@
   const ovContinue = document.getElementById('ovContinue');
   const ovRestart = document.getElementById('ovRestart');
 
-  let grid = [];           // grid[行][列] = 方块对象 或 null
+  let mat = [];            // 权威棋盘状态：mat[行*4+列] = 数值（0 为空），纯数据与渲染无关
+  const tiles = new Array(16).fill(null);  // 渲染缓存：tiles[i] 是 mat[i] 格上的方块对象
   let score = 0;
   let best = loadBest();
   let won = false;         // 是否已合成过 2048（避免重复弹胜利窗）
@@ -344,88 +345,58 @@
     el.textContent = v;
     const t = { r: r, c: c, v: v, el: el, merging: false };
     setPos(t);            // 先定位再入 DOM，避免从默认位置产生过渡
-    grid[r][c] = t;
     board.appendChild(el);
     return t;
   }
-  function emptyGrid() {
-    return Array.from({ length: SIZE }, function () { return Array(SIZE).fill(null); });
-  }
-  function randomEmptyCell() {
-    const list = [];
-    for (let r = 0; r < SIZE; r++) {
-      for (let c = 0; c < SIZE; c++) if (!grid[r][c]) list.push([r, c]);
-    }
-    return list.length ? list[Math.floor(Math.random() * list.length)] : null;
-  }
-  function spawnTile() {
-    const p = randomEmptyCell();
-    if (p) createTile(p[0], p[1], Math.random() < 0.9 ? 2 : 4, true);
+  // 生成新块：位置与数值由核心纯函数 pickSpawn 决定（0.9 概率 2、0.1 概率 4）
+  function spawnAt() {
+    const s = core.pickSpawn(mat);
+    if (!s) return;
+    mat[s[0]] = s[1];
+    tiles[s[0]] = createTile(s[0] >> 2, s[0] & 3, s[1], true);
   }
 
-  /* ---------- 移动与合并 ---------- */
-  const VEC = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
-
+  /* ---------- 移动与合并（状态推进交给核心纯函数，DOM 只负责表现） ---------- */
   function move(dir) {
     if (lock || over || paused) return;
-    const dr = VEC[dir][0], dc = VEC[dir][1];
-    const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
-    if (dr === 1) rows.reverse();     // 从靠边一侧开始遍历，保证合并次序正确
-    if (dc === 1) cols.reverse();
+    const trace = [];                     // 记录每块滑动轨迹供动画使用
+    const res = core.simMove(mat, dir, trace);
+    if (!res.moved) return;
 
-    let moved = false;
-    const merges = [];                // [滑入的块, 被合入的块]
-    for (const r of rows) {
-      for (const c of cols) {
-        const t = grid[r][c];
-        if (!t) continue;
-        t.merging = false;
-        // 一路滑到最远的空格
-        let nr = r, nc = c;
-        while (true) {
-          const ar = nr + dr, ac = nc + dc;
-          if (ar < 0 || ar >= SIZE || ac < 0 || ac >= SIZE || grid[ar][ac]) break;
-          nr = ar; nc = ac;
-        }
-        const ar = nr + dr, ac = nc + dc;
-        const target = (ar >= 0 && ar < SIZE && ac >= 0 && ac < SIZE) ? grid[ar][ac] : null;
-        if (target && target.v === t.v && !target.merging) {
-          // 可合并：t 滑到 target 上，动画结束后二合一
-          grid[r][c] = null;
-          t.r = ar; t.c = ac;
-          setPos(t);
-          target.merging = true;
-          merges.push([t, target]);
-          moved = true;
-        } else if (nr !== r || nc !== c) {
-          // 仅滑动
-          grid[r][c] = null;
-          grid[nr][nc] = t;
-          t.r = nr; t.c = nc;
-          setPos(t);
-          moved = true;
-        }
+    // 按 trace 驱动滑动动画：滑块移位，待合并的对子先标记
+    const merges = [];                    // [滑入的块, 被合入的块]
+    for (const step of trace) {
+      const t = tiles[step.from];
+      tiles[step.from] = null;
+      t.r = step.to >> 2; t.c = step.to & 3;
+      setPos(t);
+      if (step.merge >= 0) {
+        const stay = tiles[step.merge];
+        stay.merging = true;
+        merges.push([t, stay]);
+      } else {
+        tiles[step.to] = t;
       }
     }
-    if (!moved) return;
+    mat = res.mat;                        // 先提交状态，动画随后跟上
 
     lock = true;
     window.setTimeout(function () {
       // 应用合并结果：移除被吞的块，留下的一方翻倍并弹一下
       for (const pair of merges) {
-        const gone = pair[0], stay = pair[1];
-        gone.el.remove();
+        pair[0].el.remove();
+        const stay = pair[1];
         stay.v *= 2;
         stay.el.className = tileClass(stay.v, 'pop');
         stay.el.textContent = stay.v;
-        addScore(stay.v);
-        if (stay.v >= WIN_VALUE && !won) {
-          won = true;
-          paused = true;
-          showOverlay('win');
-        }
       }
-      spawnTile();
+      addScore(res.gained);
+      if (core.maxOf(mat) >= WIN_VALUE && !won) {
+        won = true;
+        paused = true;
+        showOverlay('win');
+      }
+      spawnAt();
       lock = false;
       checkOver();
     }, MOVE_MS);
@@ -445,14 +416,7 @@
   }
 
   function checkOver() {
-    for (let r = 0; r < SIZE; r++) {
-      for (let c = 0; c < SIZE; c++) {
-        const t = grid[r][c];
-        if (!t) return;                                                          // 还有空格
-        if (c < SIZE - 1 && grid[r][c + 1] && grid[r][c + 1].v === t.v) return;  // 横向可合
-        if (r < SIZE - 1 && grid[r + 1][c] && grid[r + 1][c].v === t.v) return;  // 纵向可合
-      }
-    }
+    if (core.hasMoves(mat)) return;   // 核心纯函数判定：还有空格或相邻同值即未结束
     over = true;
     showOverlay('lose');
   }
@@ -482,7 +446,8 @@
   /* ---------- 开局 ---------- */
   function newGame() {
     board.querySelectorAll('.tile').forEach(function (el) { el.remove(); });
-    grid = emptyGrid();
+    tiles.fill(null);
+    mat = new Array(16).fill(0);
     score = 0;
     scoreEl.textContent = '0';
     won = false;
@@ -490,8 +455,8 @@
     paused = false;
     lock = false;
     hideOverlay();
-    spawnTile();
-    spawnTile();
+    spawnAt();
+    spawnAt();
   }
 
   /* ---------- 输入：键盘 ---------- */
@@ -534,22 +499,26 @@
     hideOverlay();
   });
 
-  /* ---------- 自动模式：AI 托管（expectimax 跑在 Web Worker 里） ----------
-     深搜每步几十万次评估，主线程跑会卡成幻灯片；搬进 Worker 后页面
-     照常渲染、AI 照常深算。深度恒定 3 层（残局 4 层），稳定冲击 4096。
+  /* ---------- AI 代玩：expectimax 搜索，核心逻辑与渲染完全无关 ----------
+     aiCore2048 是纯函数工厂：状态为 16 格数值矩阵，单步推进、局面评估、
+     方向搜索全部不碰 DOM。同一份函数源码三处复用——主线程（生成/判定）、
+     Web Worker（AI 决策，源码经 toString 注入）、ai-sim.mjs（按
+     AI_CORE_BEGIN / AI_CORE_END 标记提取后跑批量模拟），天然保持一致。
+     深度自适应：空位充足时 2 层足够稳，空位紧张或大数成型时加深到 3 层。
      死亡停在结算面板，玩家点「再来一局」后 AI 接着走 */
-  let autoOn = false;
-  let aiBusy = false;   // 上一手还没算完时不重复下发
-
-  const AI_WORKER_SRC = `
+  /* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+  function aiCore2048() {
     'use strict';
+    // 16 格数值矩阵（行优先，下标 = 行*4+列），所有函数只操作矩阵，不碰 DOM
     const LOG2 = { 0: 0 };
     for (let v = 2; v <= 65536; v *= 2) LOG2[v] = Math.log2(v);
     const lg = function (v) { return LOG2[v] || 0; };
+    const DIRS = ['up', 'left', 'down', 'right'];
     const VEC = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
+    // 各方向的遍历次序：从靠边一侧开始，保证合并次序正确
     const TRAV = {};
     (function () {
-      for (const dir of ['up', 'left', 'down', 'right']) {
+      for (const dir of DIRS) {
         const dr = VEC[dir][0], dc = VEC[dir][1];
         const rows = [0, 1, 2, 3], cols = [0, 1, 2, 3];
         if (dr === 1) rows.reverse();
@@ -559,7 +528,10 @@
         TRAV[dir] = order;
       }
     })();
-    function simMove(m, dir) {
+
+    /* 单步推进：沿 dir 滑动并合并。trace 传数组时逐块记录
+       { from, to, merge }（merge=-1 为纯滑动，否则滑到 merge 格合并），供页面动画 */
+    function simMove(m, dir, trace) {
       const out = m.slice();
       const order = TRAV[dir];
       const dr = VEC[dir][0], dc = VEC[dir][1];
@@ -579,17 +551,46 @@
         if (ti >= 0 && out[ti] === v && !merged[ti]) {
           out[i] = 0; out[ti] = v * 2; merged[ti] = 1;
           gained += v * 2; moved = true;
+          if (trace) trace.push({ from: i, to: ti, merge: ti });
         } else if (ni !== i) {
           out[i] = 0; out[ni] = v; moved = true;
+          if (trace) trace.push({ from: i, to: ni, merge: -1 });
         }
       }
       return { mat: out, moved: moved, gained: gained };
     }
+
     function maxOf(m) {
       let x = 0;
       for (let i = 0; i < 16; i++) if (m[i] > x) x = m[i];
       return x;
     }
+    function countEmpty(m) {
+      let n = 0;
+      for (let i = 0; i < 16; i++) if (!m[i]) n++;
+      return n;
+    }
+    /* 是否还有合法动作：有空格，或存在相邻同值块 */
+    function hasMoves(m) {
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const v = m[r * 4 + c];
+          if (!v) return true;
+          if (c < 3 && m[r * 4 + c + 1] === v) return true;
+          if (r < 3 && m[(r + 1) * 4 + c] === v) return true;
+        }
+      }
+      return false;
+    }
+    /* 随机生成块：0.9 概率 2、0.1 概率 4，落在随机空格；返回 [下标, 值] 或 null */
+    function pickSpawn(m) {
+      const empties = [];
+      for (let i = 0; i < 16; i++) if (!m[i]) empties.push(i);
+      if (!empties.length) return null;
+      const i = empties[Math.floor(Math.random() * empties.length)];
+      return [i, Math.random() < 0.9 ? 2 : 4];
+    }
+
     function evaluate(m) {
       let empty = 0, smooth = 0, maxV = 0;
       let monoLR = 0, monoRL = 0, monoUD = 0, monoDU = 0;
@@ -609,12 +610,12 @@
         }
       }
       const mono = Math.max(monoLR, monoRL) + Math.max(monoUD, monoDU);
-      // 最大数钉角有奖励、漂移重罚——4096 失败多是大数漂移导致棋盘碎裂
+      // 最大数钉角有奖励、漂移重罚——高分局失败多是大数漂移导致棋盘碎裂
       const inCorner = m[0] === maxV || m[3] === maxV || m[12] === maxV || m[15] === maxV;
       const corner = inCorner ? lg(maxV) * 270 : -lg(maxV) * 60;
       return empty * 270 + mono * 47 + corner + lg(maxV) * 36 - smooth * 3;
     }
-    /* 随机层：全展开每个空位（不算 4 块会系统性高估局面） */
+    /* 随机层：全展开每个空位的 2/4 两种可能（只算 2 会系统性高估局面） */
     function expectNode(m, depth) {
       let exp = 0, n = 0;
       for (let i = 0; i < 16; i++) {
@@ -632,7 +633,7 @@
     function maxNode(m, depth) {
       if (depth <= 0) return evaluate(m);
       let best = -Infinity;
-      for (const dir of ['up', 'left', 'down', 'right']) {
+      for (const dir of DIRS) {
         const sim = simMove(m, dir);
         if (!sim.moved) continue;
         const sc = sim.gained + expectNode(sim.mat, depth - 1);
@@ -640,14 +641,12 @@
       }
       return best === -Infinity ? -1e6 - lg(maxOf(m)) * 1000 : best;
     }
-    function bestDir(m) {
-      let empties = 0;
-      for (let i = 0; i < 16; i++) if (!m[i]) empties++;
-      // 全程 3 层是实测最优（多局 33k-36.9k 分）；4 层全期望开局要数亿
-      // 次评估直接卡死，降开局深度又会伤布局质量，两头不讨好
-      const depth = 3;
+    /* AI 决策入口：返回最优方向，四向皆不可动时返回 null。
+       depthOverride 供模拟脚本实验固定深度；页面默认按空位数自适应 */
+    function bestDir(m, depthOverride) {
+      const depth = depthOverride || (countEmpty(m) <= 6 ? 3 : 2);
       let best = null, bestScore = -Infinity;
-      for (const dir of ['up', 'left', 'down', 'right']) {
+      for (const dir of DIRS) {
         const sim = simMove(m, dir);
         if (!sim.moved) continue;
         const sc = sim.gained + expectNode(sim.mat, depth - 1);
@@ -655,35 +654,55 @@
       }
       return best;
     }
-    onmessage = function (e) {
-      const dir = bestDir(e.data.mat);
-      postMessage({ id: e.data.id, dir: dir });
-    };
-  `;
-  const aiWorker = new Worker(URL.createObjectURL(new Blob([AI_WORKER_SRC], { type: 'application/javascript' })));
-  let aiReqId = 0;
-  aiWorker.onmessage = function (e) {
-    aiBusy = false;
-    if (!autoOn || e.data.id !== aiReqId) return;   // 过期的回答直接丢弃
-    if (e.data.dir) move(e.data.dir);
-  };
 
-  function gridValues() {
-    const m = new Float64Array(16);
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) { const t = grid[r][c]; if (t) m[r * 4 + c] = t.v; }
-    return m;
+    return { simMove: simMove, maxOf: maxOf, countEmpty: countEmpty, hasMoves: hasMoves, pickSpawn: pickSpawn, evaluate: evaluate, bestDir: bestDir };
+  }
+  /* ===== AI_CORE_END ===== */
+
+  const core = aiCore2048();   // 主线程实例：生成与判定复用核心纯函数
+
+  let autoOn = false;
+  let aiBusy = false;   // 上一手还没算完时不重复下发
+  let aiReqId = 0;
+
+  /* AI 决策跑在 Web Worker 里，源码直接复用上面的工厂函数，与主线程严格同一份实现 */
+  const AI_WORKER_SRC =
+    'const core = (' + aiCore2048.toString() + ')();\n' +
+    'onmessage = function (e) {\n' +
+    '  postMessage({ id: e.data.id, dir: core.bestDir(e.data.mat) });\n' +
+    '};';
+  let aiWorker = null;
+  try {
+    aiWorker = new Worker(URL.createObjectURL(new Blob([AI_WORKER_SRC], { type: 'application/javascript' })));
+  } catch (e) { /* 个别环境禁用 Worker：降级为主线程计算（见 requestAiMove） */ }
+
+  if (aiWorker) {
+    aiWorker.onmessage = function (e) {
+      aiBusy = false;
+      if (!autoOn || e.data.id !== aiReqId) return;   // 过期的回答直接丢弃
+      if (e.data.dir) move(e.data.dir);
+    };
   }
 
   function requestAiMove() {
     if (aiBusy) return;
     aiBusy = true;
+    if (!aiWorker) {   // 无 Worker 兜底：主线程算（每步几十毫秒，仍可正常代玩）
+      window.setTimeout(function () {
+        aiBusy = false;
+        if (!autoOn || lock || over || paused) return;
+        const dir = core.bestDir(mat.slice());
+        if (dir) move(dir);
+      }, 30);
+      return;
+    }
     aiReqId++;
-    aiWorker.postMessage({ id: aiReqId, mat: Array.from(gridValues()) });
+    aiWorker.postMessage({ id: aiReqId, mat: mat.slice() });
   }
 
   document.getElementById('autoBtn').addEventListener('click', function () {
     autoOn = !autoOn;
-    this.textContent = autoOn ? '停止自动' : '自动模式';
+    this.textContent = autoOn ? '停止代玩' : 'AI 代玩';
     this.classList.toggle('auto-on', autoOn);
     if (autoOn && !lock) requestAiMove();
   });
@@ -718,12 +737,12 @@
       <ul>
         <li>滑动合并相同数字，每次合并得分翻倍</li>
         <li>合成 2048 即胜利，可继续冲击更高分</li>
-        <li>棋盘填满且无可合并时结束；「自动模式」由 AI 托管走棋</li>
+        <li>棋盘填满且无可合并时结束；「AI 代玩」由 AI 托管走棋</li>
       </ul>
       <h3>操作</h3>
       <ul>
         <li>方向键 / WASD / 触屏滑动：推动方块</li>
-        <li>新游戏：重开　自动模式：AI 接手</li>
+        <li>新游戏：重开　AI 代玩：AI 接手</li>
       </ul>
     </div>
   </aside>

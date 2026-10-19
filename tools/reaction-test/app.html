@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>手速反应测试 - 拾光集</title>
-<meta name="description" content="手速反应测试：等待面板变绿后尽快点击测出毫秒级反应时间，另有瞄准测试模式，5 次平均与历史最佳保存在本地。">
+<meta name="description" content="手速反应测试：等待面板变绿后尽快点击测出毫秒级反应时间，另有瞄准测试模式，5 次平均与历史最佳保存在本地，支持 AI 代玩自动演示。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/reaction-test/app.html">
 <style>
@@ -52,6 +52,11 @@ body {
 .row-actions { display:flex; justify-content:center; margin-top:12px; }
 .btn { border:0; border-radius:10px; padding:8px 18px; font-size:13.5px; cursor:pointer; }
 .btn.ghost { background:#eef1f5; color:var(--ink); }
+/* AI 代玩按钮：醒目蓝色，运行中切换为红色停止态 */
+.btn.ai-btn { background:var(--primary); color:#fff; padding:10px 26px; font-size:14.5px; font-weight:600; letter-spacing:1px; box-shadow:0 2px 10px rgba(37,99,235,.32); }
+.btn.ai-btn.ai-on { background:var(--danger); box-shadow:0 2px 10px rgba(201,42,42,.32); }
+.ai-row { display:flex; justify-content:center; align-items:center; gap:12px; margin:2px 0 12px; }
+.ai-tag { color:#188038; font-size:13px; font-weight:600; }
 .foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
 @media (max-width:420px) { .head h1 { font-size:22px; } .pad-main { font-size:22px; } }
 </style>
@@ -178,6 +183,11 @@ body {
       <button id="tabAim" class="tab" type="button" role="tab" aria-selected="false">瞄准测试</button>
     </div>
 
+    <div class="ai-row">
+      <button id="aiBtn" class="btn ai-btn" type="button" aria-pressed="false">AI 代玩</button>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计历史最佳</span>
+    </div>
+
     <!-- 模式一：经典反应 -->
     <div id="reactBox">
       <div id="reactPad" class="pad idle" role="button" tabindex="0" aria-label="反应测试面板，点击或按回车开始">
@@ -250,145 +260,276 @@ const aimResetBtn = document.getElementById('aimReset');
 
 /* ================= 公共工具 ================= */
 function renderChips(box, arr) { box.innerHTML = arr.map(v => '<span class="chip">' + v + '</span>').join(''); }
+
+/* ================= 纯函数核心（渲染无关；与 ai-sim.mjs 内为同一份实现，改动需两处同步） =================
+   phase 语义（两模式通用）：idle 待点击 / waiting 等待信号 / ready|targeting 信号在场待点击 /
+   fail 抢跳（仅经典反应）/ done 整组完成。所有函数只读写状态对象，不触碰界面。 */
 function avgOf(arr) { return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length); }
 
-/* ================= 模式一：经典反应 ================= */
-/* phase: idle 待点击 / waiting 等待变绿 / ready 变绿待点击 / fail 抢跳 / done 整组完成 */
-const react = { phase: 'idle', t0: 0, waitTimer: null, results: [], coolUntil: 0 };
+/* ---- 经典反应核心 ---- */
+function freshReactCore() { return { phase: 'idle', results: [], greenAt: 0, t0: 0, coolUntil: 0 }; }
+function reactWaitMs(rng) { return 1000 + rng() * 4000; }          // 信号随机 1 至 5 秒后出现
+function reactStartCore(s, now, rng) { s.phase = 'waiting'; s.greenAt = now + reactWaitMs(rng); }
+function reactAdvanceCore(s, now) {                                 // 等待期结束 → 变绿
+  if (s.phase === 'waiting' && now >= s.greenAt) { s.phase = 'ready'; s.t0 = now; }
+}
+/* 面板点击单步：返回 'ignore' 冷却中 / 'start' 开新一轮 / 'fail' 抢跳 / 'hit' 命中一轮 / 'done' 整组完成 */
+function reactClickCore(s, now, rng) {
+  if (now < s.coolUntil) return 'ignore';
+  if (s.phase === 'idle' || s.phase === 'done' || s.phase === 'fail') { reactStartCore(s, now, rng); return 'start'; }
+  if (s.phase === 'waiting') { s.phase = 'fail'; s.coolUntil = now + 600; return 'fail'; }
+  if (s.phase === 'ready') {
+    s.results.push(Math.round(now - s.t0));
+    if (s.results.length >= ROUNDS) { s.phase = 'done'; return 'done'; }
+    s.phase = 'idle';
+    s.coolUntil = now + 350;
+    return 'hit';
+  }
+  return 'ignore';
+}
+
+/* ---- 瞄准测试核心 ---- */
+function freshAimCore() { return { phase: 'idle', results: [], showAt: 0, t0: 0, coolUntil: 0 }; }
+function aimWaitMs(rng) { return 400 + rng() * 600; }               // 目标出现前随机 0.4 至 1 秒
+function aimStartCore(s, now, rng) { s.phase = 'waiting'; s.showAt = now + aimWaitMs(rng); }
+/* 目标生成：面板内随机位置，留 10 像素边距，尺寸 44 至 64 像素 */
+function spawnTargetCore(rng, padW, padH) {
+  const size = 44 + rng() * 20;
+  const margin = 10;
+  return {
+    size: size,
+    x: margin + rng() * Math.max(1, padW - size - margin * 2),
+    y: margin + rng() * Math.max(1, padH - size - margin * 2)
+  };
+}
+/* 时间推进：等待期结束则目标出现，返回目标几何参数（未出现返回 null） */
+function aimAdvanceCore(s, now, rng, padW, padH) {
+  if (s.phase !== 'waiting' || now < s.showAt) return null;
+  s.phase = 'targeting';
+  s.t0 = now;
+  return spawnTargetCore(rng, padW, padH);
+}
+/* 命中目标单步：返回 'ignore' / 'hit' / 'done' */
+function aimHitCore(s, now) {
+  if (s.phase !== 'targeting') return 'ignore';
+  s.results.push(Math.round(now - s.t0));
+  if (s.results.length >= ROUNDS) { s.phase = 'done'; return 'done'; }
+  s.phase = 'idle';
+  s.coolUntil = now + 350;
+  return 'hit';
+}
+/* 面板点击单步：等待 / 目标在场时点空不惩罚，故只处理 idle / done 的开局 */
+function aimPadClickCore(s, now, rng) {
+  if (now < s.coolUntil) return 'ignore';
+  if (s.phase === 'idle' || s.phase === 'done') { aimStartCore(s, now, rng); return 'start'; }
+  return 'ignore';
+}
+
+/* ================= AI 决策（纯函数；与 ai-sim.mjs 内为同一份实现，改动需两处同步） =================
+   思路：监听信号自动触发点击——信号未现绝不点击（防抢跳），信号在场后按模拟人类的反应延迟点击。 */
+const AI_CFG = {
+  reactMin: 175, reactMax: 265,   // 经典反应：变绿后的反应延迟区间（毫秒）
+  aimMin: 165, aimMax: 255        // 瞄准测试：目标出现后的反应延迟区间（毫秒）
+};
+function aiReactDelayMs(rng) { return AI_CFG.reactMin + rng() * (AI_CFG.reactMax - AI_CFG.reactMin); }
+function aiAimDelayMs(rng) { return AI_CFG.aimMin + rng() * (AI_CFG.aimMax - AI_CFG.aimMin); }
+/* 决策（只读纯状态）：'tap' 开始/续一轮，'fire' 信号在场可点击，'wait' 继续守信号 */
+function aiReactAction(s) {
+  if (s.phase === 'idle' || s.phase === 'done' || s.phase === 'fail') return 'tap';
+  if (s.phase === 'ready') return 'fire';
+  return 'wait';   // waiting：守着信号，绝不抢跳
+}
+function aiAimAction(s) {
+  if (s.phase === 'idle' || s.phase === 'done') return 'tap';
+  if (s.phase === 'targeting') return 'fire';
+  return 'wait';
+}
+/* 控制器单步：观测到信号的瞬间定好点击时刻（信号时刻 + 反应延迟），到点才触发 */
+function aiTickCore(ctrl, action, now, rng, delayFn) {
+  if (action !== 'fire') { ctrl.fireAt = null; return action; }
+  if (ctrl.fireAt === null) ctrl.fireAt = now + delayFn(rng);
+  if (now >= ctrl.fireAt) { ctrl.fireAt = null; return 'fire'; }
+  return 'wait';
+}
+
+/* ================= 模式一：经典反应（渲染胶水） ================= */
+let react = freshReactCore();
+let reactTimer = null;      // 信号出现的定时器句柄（纯核心用 greenAt 记录时刻）
+let reactDoneInfo = null;   // 整组完成时的展示信息 { avg, best, isNew }
 
 function setReactPad(cls, main, sub) {
   reactPad.className = 'pad ' + cls;
   reactMain.textContent = main;
   reactSub.textContent = sub;
 }
-/* 一轮开始：随机 1 至 5 秒后变绿 */
-function startReactRound() {
-  react.phase = 'waiting';
-  setReactPad('wait', '等待变绿…', '变绿的瞬间点击，提前点击判负');
-  react.waitTimer = setTimeout(() => {
-    react.phase = 'ready';
-    react.t0 = performance.now();
-    setReactPad('ready', '点！', '');
-  }, 1000 + Math.random() * 4000);
+function doneSubText(isNew, best) {
+  return aiOn ? 'AI 代玩中，成绩不计入历史最佳，点击面板再来一组'
+    : (isNew ? '新纪录！点击面板再来一组' : '历史最佳 ' + best + ' ms，点击面板再来一组');
 }
-/* 整组完成：算平均并更新最佳纪录 */
+function renderReact() {
+  const n = react.results.length;
+  if (react.phase === 'idle') {
+    setReactPad('idle', n ? react.results[n - 1] + ' ms' : '点击开始',
+      n ? '点击面板继续第 ' + (n + 1) + ' 轮' : '面板变绿后立刻点击，共 ' + ROUNDS + ' 轮');
+  } else if (react.phase === 'waiting') {
+    setReactPad('wait', '等待变绿…', '变绿的瞬间点击，提前点击判负');
+  } else if (react.phase === 'ready') {
+    setReactPad('ready', '点！', '');
+  } else if (react.phase === 'fail') {
+    setReactPad('fail', '抢跳啦', '本轮作废，点击面板重新等待信号');
+  } else if (react.phase === 'done') {
+    setReactPad('done', '平均 ' + reactDoneInfo.avg + ' ms', doneSubText(reactDoneInfo.isNew, reactDoneInfo.best));
+  }
+}
+/* 定时到点后推进核心状态（时间源与核心解耦：浏览器用真实时钟，模拟用虚拟时钟） */
+function scheduleReactGreen() {
+  clearTimeout(reactTimer);
+  reactTimer = setTimeout(() => {
+    reactAdvanceCore(react, performance.now());
+    renderReact();
+  }, Math.max(0, react.greenAt - performance.now()));
+}
+/* 整组完成：算平均并更新最佳纪录（AI 代玩成绩不计入纪录） */
 function finishReact() {
   const avg = avgOf(react.results);
-  reactAvg.textContent = avg + ' ms';
   const best = loadNum(BEST_REACT_KEY);
-  const isNew = !best || avg < best;
+  const isNew = !aiOn && (!best || avg < best);
   if (isNew) saveNum(BEST_REACT_KEY, avg);
-  reactBest.textContent = (isNew ? avg : best) + ' ms';
-  react.phase = 'done';
-  setReactPad('done', '平均 ' + avg + ' ms', isNew ? '新纪录！点击面板再来一组' : '历史最佳 ' + best + ' ms，点击面板再来一组');
+  reactDoneInfo = { avg: avg, best: best, isNew: isNew };
+  reactAvg.textContent = avg + ' ms';
+  const shown = isNew ? avg : best;
+  reactBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onReactPad() {
-  const now = performance.now();
-  if (now < react.coolUntil) return;   // 防连点：结果刚出或刚判负时的冷却期
-  if (react.phase === 'idle' || react.phase === 'done') { startReactRound(); return; }
-  if (react.phase === 'fail') { startReactRound(); return; }
-  if (react.phase === 'waiting') {
-    /* 抢跳判负：本轮作废，重新等待 */
-    clearTimeout(react.waitTimer);
-    react.phase = 'fail';
-    react.coolUntil = now + 600;
-    setReactPad('fail', '抢跳啦', '本轮作废，点击面板重新等待信号');
-    return;
-  }
-  if (react.phase === 'ready') {
-    /* 正式命中：记录毫秒数 */
-    const ms = Math.round(performance.now() - react.t0);
-    react.results.push(ms);
-    renderChips(reactChips, react.results);
-    if (react.results.length >= ROUNDS) { finishReact(); return; }
-    react.phase = 'idle';
-    react.coolUntil = now + 350;
-    setReactPad('idle', ms + ' ms', '点击面板继续第 ' + (react.results.length + 1) + ' 轮');
-  }
+  const ev = reactClickCore(react, performance.now(), Math.random);
+  if (ev === 'ignore') return;
+  clearTimeout(reactTimer);
+  if (ev === 'start') scheduleReactGreen();
+  if (ev === 'done') { finishReact(); if (aiOn) aiPauseUntil = performance.now() + 1200; }
+  renderChips(reactChips, react.results);
+  renderReact();
 }
 function resetReact() {
-  clearTimeout(react.waitTimer);
-  react.phase = 'idle';
-  react.results = [];
+  clearTimeout(reactTimer);
+  react = freshReactCore();
+  reactDoneInfo = null;
   reactChips.innerHTML = '';
   reactAvg.textContent = '--';
-  setReactPad('idle', '点击开始', '面板变绿后立刻点击，共 ' + ROUNDS + ' 轮');
+  renderReact();
 }
 
-/* ================= 模式二：瞄准测试 ================= */
-/* phase: idle 待点击 / waiting 目标即将出现 / targeting 目标在场 / done 整组完成 */
-const aim = { phase: 'idle', t0: 0, timer: null, results: [], coolUntil: 0 };
+/* ================= 模式二：瞄准测试（渲染胶水） ================= */
+let aim = freshAimCore();
+let aimTimer = null;        // 目标出现的定时器句柄（纯核心用 showAt 记录时刻）
+let aimDoneInfo = null;     // 整组完成时的展示信息 { avg, best, isNew }
 
 function setAimText(main, sub) { aimMain.textContent = main; aimSub.textContent = sub; }
-function startAimRound() {
-  aim.phase = 'waiting';
-  setAimText('盯紧面板…', '目标随时出现');
-  aim.timer = setTimeout(spawnTarget, 400 + Math.random() * 600);
+function renderAim() {
+  const n = aim.results.length;
+  const targeting = aim.phase === 'targeting';
+  aimTarget.hidden = !targeting;
+  aimMain.hidden = targeting;
+  aimSub.hidden = targeting;
+  if (targeting) return;
+  if (aim.phase === 'idle') {
+    aimPad.className = 'pad idle aim';
+    setAimText(n ? aim.results[n - 1] + ' ms' : '点击开始',
+      n ? '点击面板继续第 ' + (n + 1) + ' 轮' : '目标随机出现后尽快点中它，共 ' + ROUNDS + ' 轮');
+  } else if (aim.phase === 'waiting') {
+    setAimText('盯紧面板…', '目标随时出现');
+  } else if (aim.phase === 'done') {
+    aimPad.className = 'pad done aim';
+    setAimText('平均 ' + aimDoneInfo.avg + ' ms', doneSubText(aimDoneInfo.isNew, aimDoneInfo.best));
+  }
 }
-/* 目标随机出现在面板内（留边距，尺寸 44 至 64 像素） */
-function spawnTarget() {
-  const rect = aimPad.getBoundingClientRect();
-  const s = 44 + Math.random() * 20;
-  const margin = 10;
-  const x = margin + Math.random() * Math.max(1, rect.width - s - margin * 2);
-  const y = margin + Math.random() * Math.max(1, rect.height - s - margin * 2);
-  aimTarget.style.width = s + 'px';
-  aimTarget.style.height = s + 'px';
-  aimTarget.style.left = x + 'px';
-  aimTarget.style.top = y + 'px';
-  aimTarget.hidden = false;
-  aimMain.hidden = true;
-  aimSub.hidden = true;
-  aim.t0 = performance.now();
-  aim.phase = 'targeting';
+/* 定时到点后推进核心状态：目标出现则按核心返回的几何参数定位 */
+function scheduleAimTarget() {
+  clearTimeout(aimTimer);
+  aimTimer = setTimeout(() => {
+    const rect = aimPad.getBoundingClientRect();
+    const t = aimAdvanceCore(aim, performance.now(), Math.random, rect.width, rect.height);
+    if (t) {
+      aimTarget.style.width = t.size + 'px';
+      aimTarget.style.height = t.size + 'px';
+      aimTarget.style.left = t.x + 'px';
+      aimTarget.style.top = t.y + 'px';
+    }
+    renderAim();
+  }, Math.max(0, aim.showAt - performance.now()));
 }
+/* 整组完成：算平均并更新最佳纪录（AI 代玩成绩不计入纪录） */
 function finishAim() {
   const avg = avgOf(aim.results);
-  aimAvg.textContent = avg + ' ms';
   const best = loadNum(BEST_AIM_KEY);
-  const isNew = !best || avg < best;
+  const isNew = !aiOn && (!best || avg < best);
   if (isNew) saveNum(BEST_AIM_KEY, avg);
-  aimBest.textContent = (isNew ? avg : best) + ' ms';
-  aim.phase = 'done';
-  aimPad.className = 'pad done aim';
-  aimMain.hidden = false;
-  aimSub.hidden = false;
-  setAimText('平均 ' + avg + ' ms', isNew ? '新纪录！点击面板再来一组' : '历史最佳 ' + best + ' ms，点击面板再来一组');
+  aimDoneInfo = { avg: avg, best: best, isNew: isNew };
+  aimAvg.textContent = avg + ' ms';
+  const shown = isNew ? avg : best;
+  aimBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onAimPad() {
-  if (performance.now() < aim.coolUntil) return;
-  if (aim.phase === 'idle' || aim.phase === 'done') startAimRound();
-  /* waiting / targeting 阶段点空不做惩罚：点空本身就会拉高平均用时 */
+  const ev = aimPadClickCore(aim, performance.now(), Math.random);
+  if (ev === 'ignore') return;
+  clearTimeout(aimTimer);
+  if (ev === 'start') scheduleAimTarget();
+  renderAim();
+}
+function onAimTargetHit() {
+  const ev = aimHitCore(aim, performance.now());
+  if (ev === 'ignore') return;
+  if (ev === 'done') { finishAim(); if (aiOn) aiPauseUntil = performance.now() + 1200; }
+  renderChips(aimChips, aim.results);
+  renderAim();
 }
 function resetAim() {
-  clearTimeout(aim.timer);
-  aimTarget.hidden = true;
-  aimMain.hidden = false;
-  aimSub.hidden = false;
-  aim.phase = 'idle';
-  aim.results = [];
+  clearTimeout(aimTimer);
+  aim = freshAimCore();
+  aimDoneInfo = null;
   aimChips.innerHTML = '';
   aimAvg.textContent = '--';
-  aimPad.className = 'pad idle aim';
-  setAimText('点击开始', '目标随机出现后尽快点中它，共 ' + ROUNDS + ' 轮');
+  renderAim();
 }
 
 /* 目标命中（阻止冒泡，避免触发面板的点击逻辑） */
-aimTarget.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (aim.phase !== 'targeting') return;
-  const ms = Math.round(performance.now() - aim.t0);
-  aimTarget.hidden = true;
-  aimMain.hidden = false;
-  aimSub.hidden = false;
-  aim.results.push(ms);
-  renderChips(aimChips, aim.results);
-  if (aim.results.length >= ROUNDS) { finishAim(); return; }
-  aim.phase = 'idle';
-  aim.coolUntil = performance.now() + 350;   // 防连点误触下一轮
-  aimPad.className = 'pad idle aim';
-  setAimText(ms + ' ms', '点击面板继续第 ' + (aim.results.length + 1) + ' 轮');
-});
+aimTarget.addEventListener('click', (e) => { e.stopPropagation(); onAimTargetHit(); });
+
+/* ================= AI 代玩控制（监听信号自动触发点击，可随时停止） ================= */
+const aiBtn = document.getElementById('aiBtn');
+const aiTag = document.getElementById('aiTag');
+let aiOn = false;           // AI 代玩开关
+let aiTimer = 0;            // 监听轮询定时器句柄
+let aiPauseUntil = 0;       // 整组结束后的展示停顿，方便看清成绩
+const aiCtrl = { fireAt: null };
+const AI_POLL_MS = 12;      // 信号监听轮询间隔
+
+function aiFrame() {
+  if (!aiOn) return;
+  const now = performance.now();
+  if (now >= aiPauseUntil) {
+    if (mode === 'react') {
+      const act = aiTickCore(aiCtrl, aiReactAction(react), now, Math.random, aiReactDelayMs);
+      if (act === 'tap' || act === 'fire') onReactPad();
+    } else {
+      const act = aiTickCore(aiCtrl, aiAimAction(aim), now, Math.random, aiAimDelayMs);
+      if (act === 'tap') onAimPad();
+      else if (act === 'fire') onAimTargetHit();
+    }
+  }
+  aiTimer = setTimeout(aiFrame, AI_POLL_MS);
+}
+function setAi(on) {
+  if (on === aiOn) return;
+  aiOn = on;
+  aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
+  aiBtn.classList.toggle('ai-on', aiOn);
+  aiBtn.setAttribute('aria-pressed', String(aiOn));
+  aiTag.hidden = !aiOn;
+  aiCtrl.fireAt = null;
+  if (aiOn) aiTimer = setTimeout(aiFrame, AI_POLL_MS);
+  else clearTimeout(aiTimer);
+}
+aiBtn.addEventListener('click', () => setAi(!aiOn));
 
 /* ================= 面板事件（点击 + 键盘） ================= */
 reactPad.addEventListener('click', onReactPad);
@@ -422,11 +563,13 @@ tabAim.addEventListener('click', () => switchMode('aim'));
 reactResetBtn.addEventListener('click', resetReact);
 aimResetBtn.addEventListener('click', resetAim);
 
-/* ================= 初始化：渲染历史最佳 ================= */
+/* ================= 初始化：渲染历史最佳与初始面板 ================= */
 const rb = loadNum(BEST_REACT_KEY);
 reactBest.textContent = rb ? rb + ' ms' : '--';
 const ab = loadNum(BEST_AIM_KEY);
 aimBest.textContent = ab ? ab + ' ms' : '--';
+renderReact();
+renderAim();
 </script>
   <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
     <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
@@ -443,6 +586,12 @@ aimBest.textContent = ab ? ab + ' ms' : '--';
       <ul>
         <li>点击面板开始 / 触发；顶部标签切换双模式</li>
         <li>Enter / 空格也可触发</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点「AI 代玩」由 AI 监听信号自动点击，连续多组自动演示</li>
+        <li>AI 只在信号出现后按人类延迟点击，绝不抢跳；随时可停</li>
+        <li>AI 成绩不计入历史最佳</li>
       </ul>
     </div>
   </aside>

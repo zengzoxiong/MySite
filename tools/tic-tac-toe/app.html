@@ -41,6 +41,9 @@ h1{font-size:19px;font-weight:700}
 button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
 button:active{transform:scale(.96)}
 .btn-plain{background:#f1f3f4;color:#3c4043;padding:9px 18px;font-weight:500}
+/* AI 代玩主按钮：醒目蓝色光晕，运行中切换为红色停止态 */
+.btn-ai{box-shadow:0 2px 10px rgba(26,115,232,.35)}
+.btn-ai.stop{background:#e5484d;box-shadow:0 2px 10px rgba(229,72,77,.35)}
 .tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
 footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
 </style>
@@ -188,6 +191,7 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
   </div>
   <div class="actions">
     <button id="newBtn" type="button">重新开局</button>
+    <button class="btn-ai" id="aiBtn" type="button">AI 代玩</button>
   </div>
   <footer>拾光集 · 在线小游戏</footer>
 </main>
@@ -225,83 +229,125 @@ function updateHud() {
 }
 updateHud();
 
-// ================= 对局状态 =================
-const WINS = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],  // 三行
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],  // 三列
-  [0, 4, 8], [2, 4, 6]              // 两斜
-];
-let board = new Array(9).fill('');   // '' / 'X' / 'O'
-let turn = 'X';                      // 当前行棋方
+// ================= 对局状态（纯函数核心，与渲染无关） =================
+/* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+function aiCoreTicTacToe() {
+  'use strict';
+  // 8 条胜利线：三行、三列、两斜
+  const WINS = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],  // 三行
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],  // 三列
+    [0, 4, 8], [2, 4, 6]              // 两斜
+  ];
+
+  // 判定胜负：返回胜者标记，平局返回 'D'，未结束返回 ''
+  function winnerOf(b) {
+    for (const [a, c, d] of WINS) {
+      if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+    }
+    return b.every(Boolean) ? 'D' : '';
+  }
+
+  // 新局状态：9 格棋盘（'' / 'X' / 'O'）+ 当前行棋方，纯数据
+  function freshGame(firstMark) {
+    return { board: new Array(9).fill(''), turn: firstMark === 'O' ? 'O' : 'X' };
+  }
+
+  // 单步推进：在 i 位落当前行棋方的子，返回新状态（不修改原状态）
+  function stepGame(state, i) {
+    const board = state.board.slice();
+    if (i < 0 || i > 8 || board[i]) return { board, turn: state.turn, winner: winnerOf(board) };
+    board[i] = state.turn;
+    return { board, turn: state.turn === 'X' ? 'O' : 'X', winner: winnerOf(board) };
+  }
+
+  // minimax 全搜索（3x3 全展开，保证不败）：
+  // 返回分值：aiMark 赢为正（越快赢分越高），对手赢为负（越慢输分越高），平局 0
+  function minimax(b, side, depth, aiMark, oppMark) {
+    const w = winnerOf(b);
+    if (w === aiMark) return 10 - depth;
+    if (w === oppMark) return depth - 10;
+    if (w === 'D') return 0;
+    let best = side === aiMark ? -Infinity : Infinity;
+    for (let i = 0; i < 9; i++) {
+      if (b[i]) continue;
+      b[i] = side;
+      const s = minimax(b, side === aiMark ? oppMark : aiMark, depth + 1, aiMark, oppMark);
+      b[i] = '';
+      best = side === aiMark ? Math.max(best, s) : Math.min(best, s);
+    }
+    return best;
+  }
+
+  // 完美选点：返回 aiMark 的最佳落子位（保证不败），棋盘已满返回 -1
+  function bestMove(b, aiMark, oppMark) {
+    let best = -Infinity, move = -1;
+    for (let i = 0; i < 9; i++) {
+      if (b[i]) continue;
+      b[i] = aiMark;
+      const s = minimax(b, oppMark, 1, aiMark, oppMark);
+      b[i] = '';
+      if (s > best) { best = s; move = i; }
+    }
+    return move;
+  }
+
+  return { WINS, winnerOf, freshGame, stepGame, minimax, bestMove };
+}
+/* ===== AI_CORE_END ===== */
+const core = aiCoreTicTacToe();   // 主线程实例：状态推进与胜负判定复用核心纯函数
+
+// 页面对局状态镜像：每次落子经 core.stepGame 推进，渲染只读不写
+let state = core.freshGame('X'); // { board, turn }
 let playerMark = 'X';                // 玩家执子（先手时 X，电脑先手时 O）
 let aiMark = 'O';
 let diff = 'hard';                   // easy / hard
 let over = false;
 let aiTimer = null;
 
-// 判定胜负：返回胜者标记，平局返回 'D'，未结束返回 ''
-function winnerOf(b) {
-  for (const [a, c, d] of WINS) {
-    if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
-  }
-  return b.every(Boolean) ? 'D' : '';
-}
-
-// ================= minimax（3x3 全搜索，几乎不败） =================
-// 返回分值：aiMark 赢为正（越快赢分越高），玩家赢为负（越慢输分越高），平局 0
-function minimax(b, side, depth) {
-  const w = winnerOf(b);
-  if (w === aiMark) return 10 - depth;
-  if (w === playerMark) return depth - 10;
-  if (w === 'D') return 0;
-  let best = side === aiMark ? -Infinity : Infinity;
-  for (let i = 0; i < 9; i++) {
-    if (b[i]) continue;
-    b[i] = side;
-    const s = minimax(b, side === aiMark ? playerMark : aiMark, depth + 1);
-    b[i] = '';
-    best = side === aiMark ? Math.max(best, s) : Math.min(best, s);
-  }
-  return best;
-}
-
 // 电脑选点：困难档取最优；简单档 30% 概率随机落子
 function pickMove() {
+  const b = state.board;
   const empties = [];
-  for (let i = 0; i < 9; i++) if (!board[i]) empties.push(i);
+  for (let i = 0; i < 9; i++) if (!b[i]) empties.push(i);
   if (!empties.length) return -1;
   if (diff === 'easy' && empties.length > 1 && Math.random() < 0.3) {
     return empties[Math.floor(Math.random() * empties.length)];
   }
-  let best = -Infinity, move = empties[0];
-  for (const i of empties) {
-    board[i] = aiMark;
-    const s = minimax(board, playerMark, 1);
-    board[i] = '';
-    if (s > best) { best = s; move = i; }
-  }
-  return move;
+  return core.bestMove(b, aiMark, playerMark);
+}
+
+// 落一子并推进对局（点击、对方 AI、AI 代玩共用），返回胜负结果（'' 为未结束）
+function applyMove(i) {
+  state = core.stepGame(state, i);
+  render();
+  return state.winner;
 }
 
 // ================= 渲染与流程 =================
 function render() {
+  const b = state.board;
   for (let i = 0; i < 9; i++) {
     const cell = cells[i];
-    cell.classList.toggle('x', board[i] === 'X');
-    cell.classList.toggle('o', board[i] === 'O');
-    if (!board[i]) cell.innerHTML = '';
+    cell.classList.toggle('x', b[i] === 'X');
+    cell.classList.toggle('o', b[i] === 'O');
+    if (!b[i]) cell.innerHTML = '';
     else if (!cell.firstChild) cell.innerHTML = '<span class="mark"></span>';
   }
 }
 
 function setBusy(busy) {
-  for (const cell of cells) cell.disabled = busy || over || !!board[cell.dataset.i];
+  for (const cell of cells) cell.disabled = busy || over || !!state.board[cell.dataset.i];
 }
 
 function endGame(w) {
   over = true;
   setBusy(true);
-  if (w === 'D') {
+  if (aiRunning) {
+    // AI 代玩局只做演示，不计胜平负比分
+    statusText.textContent = w === 'D' ? 'AI 对弈平局，即将自动开新局'
+      : (w === playerMark ? 'AI 托管方获胜，即将自动开新局' : '电脑获胜，即将自动开新局');
+  } else if (w === 'D') {
     score.draw += 1;
     statusText.textContent = '棋逢对手，本局平局';
   } else if (w === playerMark) {
@@ -311,11 +357,10 @@ function endGame(w) {
     score.lose += 1;
     statusText.textContent = '电脑获胜，再接再厉';
   }
-  saveScore();
-  updateHud();
+  if (!aiRunning) { saveScore(); updateHud(); }
   if (w !== 'D') {
     // 画出胜利连线并播放生长动画
-    const line = WINS.find(([a, c, d]) => board[a] === w && board[a] === board[c] && board[a] === board[d]);
+    const line = core.WINS.find(([a, c, d]) => state.board[a] === w && state.board[a] === state.board[c] && state.board[a] === state.board[d]);
     for (const i of line) cells[i].classList.add('win');
     drawWinLine(line);
   }
@@ -353,44 +398,93 @@ function aiMove() {
   if (over) return;
   const i = pickMove();
   if (i < 0) return;
-  board[i] = aiMark;
-  render();
-  const w = winnerOf(board);
+  const w = applyMove(i);
   if (w) { endGame(w); return; }
-  turn = playerMark;
-  statusText.textContent = '轮到你了（执 ' + playerMark + '）';
-  setBusy(false);
+  if (aiRunning) {
+    statusText.textContent = 'AI 托管中，即将落子';
+    setBusy(true);
+  } else {
+    statusText.textContent = '轮到你了（执 ' + playerMark + '）';
+    setBusy(false);
+  }
 }
 
 function newGame() {
   if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
-  board = new Array(9).fill('');
+  state = core.freshGame('X');   // 新局：X 先手
   over = false;
-  turn = 'X';
   winLine.classList.remove('show');
   for (const cell of cells) cell.classList.remove('win');
   render();
   if (playerMark === 'X') {
-    statusText.textContent = '你执 X，点击格子落子';
-    setBusy(false);
+    statusText.textContent = aiRunning ? 'AI 托管中，自动对局进行中' : '你执 X，点击格子落子';
+    setBusy(aiRunning);
   } else {
     // 电脑先手：AI 执 X 立即落子
-    statusText.textContent = '电脑执 X 先手，思考中';
+    statusText.textContent = aiRunning ? 'AI 托管中，电脑执 X 先手' : '电脑执 X 先手，思考中';
     setBusy(true);
     aiTimer = setTimeout(aiMove, 350);
   }
 }
 
+// ================= AI 代玩：托管玩家方落子，自动续局 =================
+const aiBtn = document.getElementById('aiBtn');
+let aiRunning = false;   // AI 代玩开关
+let aiDemoTimer = 0;     // 代玩步进定时器句柄
+
+// 停止代玩：恢复按钮与提示，玩家可继续手动游玩
+function stopAi(msg) {
+  if (!aiRunning) return;
+  aiRunning = false;
+  clearTimeout(aiDemoTimer);
+  aiBtn.textContent = 'AI 代玩';
+  aiBtn.classList.remove('stop');
+  if (!over) setBusy(false);
+  statusText.textContent = msg || 'AI 已停止，可继续手动游玩';
+}
+
+// 代玩步进：轮到玩家方时用完美 minimax 落子，局末自动开下一局
+function aiDemoTick() {
+  if (!aiRunning) return;
+  if (over) {
+    aiDemoTimer = setTimeout(() => {
+      if (!aiRunning) return;
+      if (over) newGame();   // 期间被用户手动开局则顺势继续
+      aiDemoTimer = setTimeout(aiDemoTick, 400);
+    }, 1600);
+    return;
+  }
+  if (state.turn === playerMark && !aiTimer) {
+    const i = core.bestMove(state.board, playerMark, aiMark);
+    if (i >= 0) {
+      const w = applyMove(i);
+      if (w) { endGame(w); aiDemoTimer = setTimeout(aiDemoTick, 400); return; }
+      statusText.textContent = 'AI 托管落子，电脑思考中';
+      setBusy(true);
+      aiTimer = setTimeout(aiMove, 320);
+    }
+  }
+  aiDemoTimer = setTimeout(aiDemoTick, 380);   // 对方行棋期间轮询等待
+}
+
+aiBtn.addEventListener('click', () => {
+  if (aiRunning) { stopAi(); return; }
+  if (over) newGame();
+  aiRunning = true;
+  aiBtn.textContent = '停止代玩';
+  aiBtn.classList.add('stop');
+  statusText.textContent = 'AI 托管中，点击「停止代玩」可随时停下';
+  setBusy(true);
+  aiDemoTick();
+});
+
 // ================= 事件 =================
 for (const cell of cells) {
   cell.addEventListener('click', () => {
     const i = Number(cell.dataset.i);
-    if (over || turn !== playerMark || board[i]) return;
-    board[i] = playerMark;
-    render();
-    const w = winnerOf(board);
+    if (over || aiRunning || state.turn !== playerMark || state.board[i]) return;
+    const w = applyMove(i);
     if (w) { endGame(w); return; }
-    turn = aiMark;
     statusText.textContent = '电脑思考中';
     setBusy(true);
     aiTimer = setTimeout(aiMove, 300);
@@ -419,7 +513,7 @@ firstSeg.addEventListener('click', (e) => {
   newGame();
 });
 
-newBtn.addEventListener('click', newGame);
+newBtn.addEventListener('click', () => { stopAi(); newGame(); });   // 重新开局会先停掉 AI
 
 // ================= 启动 =================
 newGame();
@@ -439,6 +533,7 @@ newGame();
       <h3>操作</h3>
       <ul>
         <li>点击格子落子；顶部按钮切换难度、先后手</li>
+        <li>点「AI 代玩」由 AI 托管你的落子并自动续局，随时可停（不计比分）</li>
       </ul>
     </div>
   </aside>

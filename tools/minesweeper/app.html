@@ -82,6 +82,18 @@
     }
     .seg button.active { background: #5f8f6e; border-color: #5f8f6e; color: #fff; }
 
+    /* AI 代玩按钮与状态标签 */
+    .ai-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn-ai {
+      font: inherit; border: 0; border-radius: 10px; padding: 9px 22px;
+      background: #1a73e8; color: #fff; font-weight: 600; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(26, 115, 232, .35);
+      touch-action: manipulation;
+    }
+    .btn-ai:active { transform: translateY(1px); }
+    .btn-ai.stop { background: #e5484d; box-shadow: 0 2px 10px rgba(229, 72, 77, .35); }
+    .ai-tag { font-size: 12.5px; color: #8a9a8e; }
+
     /* 雷区：窄屏放不下时允许横向滚动（高级 30 列） */
     .board-scroll { position: relative; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
     .board {
@@ -291,6 +303,11 @@
       <button type="button" data-level="2">高级</button>
     </div>
 
+    <div class="ai-bar">
+      <button class="btn-ai" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
+      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最佳纪录</span>
+    </div>
+
     <div class="board-scroll" id="scroll">
       <div class="board" id="board"></div>
       <div class="overlay" id="overlay" hidden>
@@ -307,11 +324,488 @@
   <script>
   'use strict';
   /* ================= 扫雷主逻辑（零依赖，纯本地运行） ================= */
-  const LEVELS = [
-    { id: 'beginner', label: '初级', rows: 9,  cols: 9,  mines: 10 },
-    { id: 'middle',   label: '中级', rows: 16, cols: 16, mines: 40 },
-    { id: 'expert',   label: '高级', rows: 16, cols: 30, mines: 99 }
-  ];
+
+  /* ---------- AI 代玩：核心逻辑与渲染完全无关 ----------
+     minesweeperCore 是纯函数工厂：游戏状态与单步推进（布雷 / 翻开 / 插旗）
+     以及 AI 决策（约束传播 + 概率推理）全部不碰 DOM。同一份函数源码三处
+     复用——页面主线程、Web Worker（AI 决策，源码经 toString 注入）、
+     ai-sim.mjs（按 AI_CORE_BEGIN / AI_CORE_END 标记提取后跑批量模拟）。
+     AI 只读可观测信息（格子状态 + 已翻格的邻雷数），不读雷的真实位置。 */
+  /* ===== AI_CORE_BEGIN（ai-sim.mjs 依赖此标记提取同一份逻辑，两端必须同步修改）===== */
+  function minesweeperCore() {
+    'use strict';
+    /* 三档难度（页面档位与模拟器共用同一份定义） */
+    const LEVELS = [
+      { id: 'beginner', label: '初级', rows: 9,  cols: 9,  mines: 10 },
+      { id: 'middle',   label: '中级', rows: 16, cols: 16, mines: 40 },
+      { id: 'expert',   label: '高级', rows: 16, cols: 30, mines: 99 }
+    ];
+
+    /* ---------- 游戏核心：纯数据状态 + 单步推进 ----------
+       state = { rows, cols, mines, placed, over, result, flags, revealed,
+                 cells: [{ mine, adj, state }] }，格 state：0 未翻 / 1 已翻 / 2 插旗 */
+    function createState(rows, cols, mines) {
+      const n = rows * cols;
+      const cells = new Array(n);
+      for (let i = 0; i < n; i++) cells[i] = { mine: false, adj: 0, state: 0 };
+      return { rows: rows, cols: cols, mines: mines, placed: false, over: false,
+               result: null, flags: 0, revealed: 0, cells: cells };
+    }
+
+    /* 8 邻域下标列表 */
+    function neighbors(rows, cols, i) {
+      const out = [];
+      const r = (i / cols) | 0, c = i % cols;
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc);
+        }
+      }
+      return out;
+    }
+
+    /* 首点安全布雷：首点及其 3×3 邻域不布雷，其余洗牌取 mines 个，顺带算邻雷数 */
+    function placeMines(g, safe) {
+      const excluded = new Set([safe]);
+      const nb = neighbors(g.rows, g.cols, safe);
+      for (let t = 0; t < nb.length; t++) excluded.add(nb[t]);
+      let pool = [];
+      for (let i = 0; i < g.cells.length; i++) if (!excluded.has(i)) pool.push(i);
+      if (pool.length < g.mines) {
+        // 兜底：可布格数不足时退化为仅排除首点（本项目三档不会触发）
+        pool = [];
+        for (let i = 0; i < g.cells.length; i++) if (i !== safe) pool.push(i);
+      }
+      for (let k = 0; k < g.mines; k++) {
+        const j = k + Math.floor(Math.random() * (pool.length - k));
+        const tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp;
+        g.cells[pool[k]].mine = true;
+      }
+      for (let i = 0; i < g.cells.length; i++) {
+        let cnt = 0;
+        const ns = neighbors(g.rows, g.cols, i);
+        for (let t = 0; t < ns.length; t++) if (g.cells[ns[t]].mine) cnt++;
+        g.cells[i].adj = cnt;
+      }
+      g.placed = true;
+    }
+
+    /* 单步推进·翻开：首翻布雷，0 格级联展开；踩雷 result='lose'，
+       清完全部安全格 result='win' 并给剩余雷自动插旗。
+       返回 { started, hit, win, changed }，changed 为本次发生视觉变化的格 */
+    function reveal(g, i) {
+      const res = { started: false, hit: false, win: false, changed: [] };
+      if (g.over) return res;
+      const c = g.cells[i];
+      if (c.state !== 0) return res;            // 已翻开或已插旗的格不动
+      if (!g.placed) { placeMines(g, i); res.started = true; }
+      if (c.mine) {
+        g.over = true; g.result = 'lose'; res.hit = true;
+        return res;
+      }
+      const stack = [i];
+      while (stack.length) {
+        const k = stack.pop();
+        const cell = g.cells[k];
+        if (cell.state !== 0 || cell.mine) continue;
+        cell.state = 1;
+        g.revealed++;
+        res.changed.push(k);
+        if (cell.adj === 0) {
+          const ns = neighbors(g.rows, g.cols, k);
+          for (let t = 0; t < ns.length; t++) if (g.cells[ns[t]].state === 0) stack.push(ns[t]);
+        }
+      }
+      if (g.revealed === g.rows * g.cols - g.mines) {
+        g.over = true; g.result = 'win'; res.win = true;
+        for (let k = 0; k < g.cells.length; k++) {
+          if (g.cells[k].mine && g.cells[k].state !== 2) {
+            g.cells[k].state = 2; g.flags++; res.changed.push(k);
+          }
+        }
+      }
+      return res;
+    }
+
+    /* 单步推进·插旗：0 ↔ 2 切换；返回 { changed } 或 null（不可操作） */
+    function toggleFlag(g, i) {
+      if (g.over) return null;
+      const c = g.cells[i];
+      if (c.state === 1) return null;
+      c.state = (c.state === 2) ? 0 : 2;
+      g.flags += (c.state === 2) ? 1 : -1;
+      return { changed: [i] };
+    }
+
+    /* ---------- AI 决策（只读可观测信息） ----------
+       obs = { rows, cols, mines, flags, state: [...], adj: [...] }，
+       state[i]：0 未翻 / 1 已翻 / 2 插旗，adj[i] 仅已翻格有意义 */
+    function observe(g) {
+      const n = g.cells.length;
+      const st = new Array(n), adj = new Array(n);
+      for (let i = 0; i < n; i++) {
+        st[i] = g.cells[i].state;
+        adj[i] = g.cells[i].state === 1 ? g.cells[i].adj : 0;
+      }
+      return { rows: g.rows, cols: g.cols, mines: g.mines, flags: g.flags, state: st, adj: adj };
+    }
+
+    /* 构造约束：每个已翻数字格一条 —— 其未翻未插旗邻居里恰有 rem 颗雷 */
+    function buildConstraints(obs) {
+      const cons = [];
+      for (let i = 0; i < obs.state.length; i++) {
+        if (obs.state[i] !== 1 || obs.adj[i] <= 0) continue;
+        const dom = [];
+        let flagged = 0;
+        const nb = neighbors(obs.rows, obs.cols, i);
+        for (let t = 0; t < nb.length; t++) {
+          const j = nb[t];
+          if (obs.state[j] === 0) dom.push(j);
+          else if (obs.state[j] === 2) flagged++;
+        }
+        if (!dom.length) continue;
+        let rem = obs.adj[i] - flagged;
+        if (rem < 0) rem = 0;                    // 手动误插旗时的容错钳制
+        if (rem > dom.length) rem = dom.length;
+        cons.push({ dom: dom, rem: rem });
+      }
+      return cons;
+    }
+
+    /* 约束传播：单格约束 + 子集化简，反复迭代到不动点，得出确定安全格 / 确定雷格 */
+    function deduce(cons) {
+      const safe = new Set(), mine = new Set();
+      for (let round = 0; round < 6; round++) {
+        let progress = false;
+        // 按已知结论归一化约束
+        const list = [];
+        for (let t = 0; t < cons.length; t++) {
+          let rem = cons[t].rem;
+          const dom = [];
+          const dom0 = cons[t].dom;
+          for (let u = 0; u < dom0.length; u++) {
+            const v = dom0[u];
+            if (mine.has(v)) rem--;
+            else if (!safe.has(v)) dom.push(v);
+          }
+          if (!dom.length) continue;
+          if (rem < 0 || rem > dom.length) continue;
+          list.push({ dom: dom, rem: rem });
+        }
+        // 单格约束：rem==0 全安全，rem==域长全雷
+        for (let t = 0; t < list.length; t++) {
+          const cs = list[t];
+          if (cs.rem === 0) {
+            for (let u = 0; u < cs.dom.length; u++) {
+              const v = cs.dom[u];
+              if (!safe.has(v)) { safe.add(v); progress = true; }
+            }
+          } else if (cs.rem === cs.dom.length) {
+            for (let u = 0; u < cs.dom.length; u++) {
+              const v = cs.dom[u];
+              if (!mine.has(v)) { mine.add(v); progress = true; }
+            }
+          }
+        }
+        if (progress) continue;
+        // 子集化简：A.dom ⊆ B.dom ⇒ B\A 恰含 B.rem-A.rem 颗雷
+        for (let a = 0; a < list.length; a++) {
+          const A = list[a];
+          for (let b = 0; b < list.length; b++) {
+            if (a === b) continue;
+            const B = list[b];
+            if (B.dom.length <= A.dom.length) continue;
+            const setA = new Set(A.dom);
+            let isSub = true;
+            for (let u = 0; u < A.dom.length; u++) {
+              if (B.dom.indexOf(A.dom[u]) < 0) { isSub = false; break; }
+            }
+            if (!isSub) continue;
+            const rest = [], restOfB = B.dom;
+            for (let u = 0; u < restOfB.length; u++) {
+              if (!setA.has(restOfB[u])) rest.push(restOfB[u]);
+            }
+            const need = B.rem - A.rem;
+            if (need === 0) {
+              for (let u = 0; u < rest.length; u++) {
+                if (!safe.has(rest[u])) { safe.add(rest[u]); progress = true; }
+              }
+            } else if (need === rest.length) {
+              for (let u = 0; u < rest.length; u++) {
+                if (!mine.has(rest[u])) { mine.add(rest[u]); progress = true; }
+              }
+            }
+          }
+        }
+        if (!progress) break;
+      }
+      return { safe: safe, mine: mine };
+    }
+
+    /* 概率推理：约束分量内枚举一致布雷方案，得每格雷概率；
+       区外格按剩余雷均匀分摊。返回 { probs: Map, exact }，exact=false 表示
+       枚举被预算截断（此时概率只是估计，不能当作确定结论） */
+    function mineProbabilities(obs, cons) {
+      const n = obs.state.length;
+      const cellOf = [], vid = new Map();
+      for (let t = 0; t < cons.length; t++) {
+        const dom = cons[t].dom;
+        for (let u = 0; u < dom.length; u++) {
+          const v = dom[u];
+          if (!vid.has(v)) { vid.set(v, cellOf.length); cellOf.push(v); }
+        }
+      }
+      const out = new Map();
+      const remTotal = Math.max(0, obs.mines - obs.flags);
+      let hidden = 0;
+      for (let i = 0; i < n; i++) if (obs.state[i] === 0) hidden++;
+      const pFallback = hidden > 0 ? Math.min(0.999, remTotal / hidden) : 0.999;
+
+      if (cellOf.length === 0) {
+        for (let i = 0; i < n; i++) if (obs.state[i] === 0) out.set(i, pFallback);
+        return { probs: out, exact: true };
+      }
+
+      // 并查集按约束共域关系切分连通分量，分量间独立枚举
+      const V = cellOf.length;
+      const uf = new Array(V);
+      for (let i = 0; i < V; i++) uf[i] = i;
+      function find(x) {
+        while (uf[x] !== x) { uf[x] = uf[uf[x]]; x = uf[x]; }
+        return x;
+      }
+      for (let t = 0; t < cons.length; t++) {
+        const dom = cons[t].dom;
+        const a0 = find(vid.get(dom[0]));
+        for (let u = 1; u < dom.length; u++) {
+          const b = find(vid.get(dom[u]));
+          if (b !== a0) uf[b] = a0;
+        }
+      }
+      const compVars = new Map(), compCons = new Map();
+      for (let v = 0; v < V; v++) {
+        const r = find(v);
+        if (!compVars.has(r)) { compVars.set(r, []); compCons.set(r, []); }
+        compVars.get(r).push(v);
+      }
+      for (let t = 0; t < cons.length; t++) {
+        compCons.get(find(vid.get(cons[t].dom[0]))).push(cons[t]);
+      }
+
+      const budget = { n: 120000 };   // 枚举预算：防止极端局面组合爆炸
+      const comps = [];
+      compVars.forEach(function (vars, r) {
+        comps.push(enumComponent(vars, compCons.get(r)));
+      });
+      let complete = budget.n > 0;
+
+      // 区外格数量与二项式权重表 C(outside, j)
+      let outside = 0;
+      for (let i = 0; i < n; i++) if (obs.state[i] === 0 && !vid.has(i)) outside++;
+      const binom = new Float64Array(outside + 1);
+      binom[0] = 1;
+      for (let j = 1; j <= outside; j++) binom[j] = binom[j - 1] * (outside - j + 1) / j;
+      const bin = function (j) { return (j >= 0 && j <= outside) ? binom[j] : 0; };
+
+      // 各分量雷数直方图卷积 + 区外二项式权重，得全局一致方案的权重分布
+      let convAll = new Float64Array(1);
+      convAll[0] = 1;
+      for (let ci = 0; ci < comps.length; ci++) {
+        if (comps[ci].total <= 0) complete = false;
+        convAll = conv(convAll, comps[ci].hist);
+      }
+      let denom = 0;
+      for (let s = 0; s < convAll.length; s++) if (convAll[s]) denom += convAll[s] * bin(remTotal - s);
+
+      if (!complete || denom <= 0) {
+        // 回退（枚举被截断或局面不一致）：分量内近似概率 + 区外均摊
+        let expFrontier = 0;
+        for (let ci = 0; ci < comps.length; ci++) {
+          const cp = comps[ci];
+          for (let t = 0; t < cp.vars.length; t++) {
+            let s = 0;
+            for (let k = 0; k < cp.cellMine[t].length; k++) s += cp.cellMine[t][k];
+            const p = cp.total > 0 ? s / cp.total : pFallback;
+            out.set(cellOf[cp.vars[t]], p);
+            expFrontier += p;
+          }
+        }
+        if (outside > 0) {
+          const pOut = Math.max(0, Math.min(0.999, (remTotal - expFrontier) / outside));
+          for (let i = 0; i < n; i++) if (obs.state[i] === 0 && !vid.has(i)) out.set(i, pOut);
+        }
+        return { probs: out, exact: false };
+      }
+
+      // 精确边缘概率：p(v) = 全局一致方案中 v 为雷的权重占比
+      for (let ci = 0; ci < comps.length; ci++) {
+        const cp = comps[ci];
+        let convOthers = new Float64Array(1);
+        convOthers[0] = 1;
+        for (let cj = 0; cj < comps.length; cj++) {
+          if (cj !== ci) convOthers = conv(convOthers, comps[cj].hist);
+        }
+        for (let t = 0; t < cp.vars.length; t++) {
+          let num = 0;
+          const cm = cp.cellMine[t];
+          for (let k = 0; k < cm.length; k++) {
+            if (!cm[k]) continue;
+            let w = 0;
+            for (let a = 0; a < convOthers.length; a++) {
+              if (convOthers[a]) w += convOthers[a] * bin(remTotal - k - a);
+            }
+            num += cm[k] * w;
+          }
+          out.set(cellOf[cp.vars[t]], num / denom);
+        }
+      }
+      if (outside > 0) {
+        let expF = 0;
+        for (let s = 0; s < convAll.length; s++) if (convAll[s]) expF += s * convAll[s] * bin(remTotal - s);
+        expF /= denom;
+        const pOut = Math.max(0, Math.min(0.999, (remTotal - expF) / outside));
+        for (let i = 0; i < n; i++) if (obs.state[i] === 0 && !vid.has(i)) out.set(i, pOut);
+      }
+      return { probs: out, exact: true };
+
+      function conv(a, b) {
+        const nc = new Float64Array(a.length + b.length - 1);
+        for (let i = 0; i < a.length; i++) {
+          if (!a[i]) continue;
+          for (let j = 0; j < b.length; j++) if (b[j]) nc[i + j] += a[i] * b[j];
+        }
+        return nc;
+      }
+
+      /* 单分量枚举：回溯 + 前向检查，统计一致方案的雷数直方图与每格为雷的方案数 */
+      function enumComponent(vars, clist) {
+        const loc = new Map();
+        for (let t = 0; t < vars.length; t++) loc.set(vars[t], t);
+        const m = vars.length;
+        const consOf = [];
+        for (let t = 0; t < m; t++) consOf.push([]);
+        const rem = [], free = [];
+        for (let t = 0; t < clist.length; t++) {
+          const dl = [];
+          const dom = clist[t].dom;
+          for (let u = 0; u < dom.length; u++) dl.push(loc.get(vid.get(dom[u])));
+          rem.push(clist[t].rem);
+          free.push(dl.length);
+          for (let u = 0; u < dl.length; u++) consOf[dl[u]].push(t);
+          clist[t].dom = dl;                    // 约束域转局部下标（就地替换）
+        }
+        const hist = new Float64Array(m + 1);
+        const cellMine = [];
+        for (let t = 0; t < m; t++) cellMine.push(new Float64Array(m + 1));
+        let solutions = 0;
+        const order = [];
+        for (let t = 0; t < m; t++) order.push(t);
+        order.sort(function (a, b) { return consOf[b].length - consOf[a].length; });
+        const stack1 = [];
+        rec(0, 0);
+        return { vars: vars, hist: hist, cellMine: cellMine, total: solutions };
+
+        function rec(k, used) {
+          if (budget.n-- <= 0) return;
+          if (k === m) {
+            solutions++;
+            hist[used]++;
+            for (let t = 0; t < stack1.length; t++) cellMine[stack1[t]][used]++;
+            return;
+          }
+          const v = order[k];
+          for (let b = 0; b <= 1; b++) {
+            const touched = [];
+            let ok = true;
+            const cs = consOf[v];
+            for (let t = 0; t < cs.length; t++) {
+              const c = cs[t];
+              rem[c] -= b; free[c] -= 1;
+              touched.push(c);
+              if (rem[c] < 0 || rem[c] > free[c]) ok = false;
+            }
+            if (ok) {
+              if (b === 1) stack1.push(v);
+              rec(k + 1, used + b);
+              if (b === 1) stack1.pop();
+            }
+            for (let t = 0; t < touched.length; t++) {
+              const c = touched[t];
+              rem[c] += b; free[c] += 1;
+            }
+          }
+        }
+      }
+    }
+
+    /* 每步决策：
+       1. 约束传播（单格 + 子集）确定安全格 / 雷格；
+       2. 否则分量枚举算雷概率，p=0 / p=1 视为确定结论；
+       3. 必要时点概率最小的随机格，并列时偏向开窗潜力更大的格。 */
+    function decide(obs) {
+      const rows = obs.rows, cols = obs.cols, n = rows * cols;
+      let hidden = 0, anyRev = false;
+      for (let i = 0; i < n; i++) {
+        if (obs.state[i] === 0) hidden++;
+        else if (obs.state[i] === 1) anyRev = true;
+      }
+      if (hidden === 0) return null;
+      // 开局第一击：首点规则保证起点与 3×3 邻域安全，取棋盘中心
+      if (!anyRev) {
+        return { action: 'reveal', idxs: [((rows >> 1) * cols) + (cols >> 1)] };
+      }
+
+      const cons = buildConstraints(obs);
+      const d = deduce(cons);
+      if (d.safe.size) return { action: 'reveal', idxs: Array.from(d.safe) };
+      if (d.mine.size) return { action: 'flag', idxs: Array.from(d.mine) };
+
+      const pr = mineProbabilities(obs, cons);
+      const probs = pr.probs;
+      const safes = [], mines = [];
+      if (pr.exact) {
+        for (let i = 0; i < n; i++) {
+          if (obs.state[i] !== 0) continue;
+          const p = probs.get(i);
+          if (p <= 1e-9) safes.push(i);
+          else if (p >= 1 - 1e-9) mines.push(i);
+        }
+        if (safes.length) return { action: 'reveal', idxs: safes };
+        if (mines.length) return { action: 'flag', idxs: mines };
+      }
+
+      // 猜测：取雷概率最小的格；并列时取隐藏邻居更多（开窗潜力更大）的格
+      let best = Infinity;
+      let cand = [];
+      for (let i = 0; i < n; i++) {
+        if (obs.state[i] !== 0) continue;
+        const p = probs.get(i);
+        if (p < best - 1e-12) { best = p; cand = [i]; }
+        else if (Math.abs(p - best) <= 1e-12) cand.push(i);
+      }
+      let bestNb = -1;
+      const cand2 = [];
+      for (let t = 0; t < cand.length; t++) {
+        const v = cand[t];
+        let cnt = 0;
+        const nb = neighbors(rows, cols, v);
+        for (let u = 0; u < nb.length; u++) if (obs.state[nb[u]] === 0) cnt++;
+        if (cnt > bestNb) { bestNb = cnt; cand2.length = 0; cand2.push(v); }
+        else if (cnt === bestNb) cand2.push(v);
+      }
+      return { action: 'reveal', idxs: [cand2[(Math.random() * cand2.length) | 0]] };
+    }
+
+    return { LEVELS: LEVELS, createState: createState, neighbors: neighbors,
+             placeMines: placeMines, reveal: reveal, toggleFlag: toggleFlag,
+             observe: observe, decide: decide };
+  }
+  /* ===== AI_CORE_END ===== */
+
+  const core = minesweeperCore();
+  const LEVELS = core.LEVELS;
 
   /* 经典数字配色：1 蓝 2 绿 3 红 4 藏青 5 暗红 6 青 7 黑 8 灰 */
   const NUM_COLORS = ['', '#0000cc', '#008000', '#cc0000', '#00007a', '#7a0000', '#008080', '#000000', '#7a7a7a'];
@@ -335,12 +829,8 @@
   const ovSub = document.getElementById('ovSub');
 
   let level = LEVELS[0];
-  let cells = [];        // cells[i] = { mine, adj, state }，state：0 未翻 / 1 已翻 / 2 插旗
+  let game = null;       // 权威局面：core.createState 的纯数据状态（cells/placed/over/flags/revealed 均在其内）
   let cellEls = [];
-  let placed = false;    // 是否已布雷（首次翻开之后）
-  let over = false;
-  let flags = 0;
-  let revealed = 0;
   let seconds = 0;
   let timerId = null;
 
@@ -373,7 +863,7 @@
     if (timerId) { window.clearInterval(timerId); timerId = null; }
   }
   function updateMineCounter() {
-    const left = level.mines - flags;
+    const left = game.mines - game.flags;
     mineLeftEl.textContent = left < 0
       ? '-' + String(Math.min(99, Math.abs(left))).padStart(2, '0')
       : String(left).padStart(3, '0');
@@ -404,11 +894,10 @@
   }
   function reset() {
     stopTimer();
-    seconds = 0; flags = 0; revealed = 0; placed = false; over = false;
+    if (aiRestartTimer) { window.clearTimeout(aiRestartTimer); aiRestartTimer = null; }
+    seconds = 0;
+    game = core.createState(level.rows, level.cols, level.mines);
     timeEl.textContent = '000';
-    cells = Array.from({ length: level.rows * level.cols }, function () {
-      return { mine: false, adj: 0, state: 0 };
-    });
     setFace(FACE_OK);
     updateMineCounter();
     updateBestLine();
@@ -417,43 +906,11 @@
     buildDom();
   }
 
-  /* ---------- 邻居与布雷 ---------- */
-  function forEachNeighbor(i, fn) {
-    const r = Math.floor(i / level.cols), c = i % level.cols;
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        if (dr === 0 && dc === 0) continue;
-        const nr = r + dr, nc = c + dc;
-        if (nr >= 0 && nr < level.rows && nc >= 0 && nc < level.cols) fn(nr * level.cols + nc);
-      }
-    }
-  }
-  // 首点安全：首次点击及其周边 9 格都不布雷
-  function placeMines(safe) {
-    const excluded = new Set([safe]);
-    forEachNeighbor(safe, function (j) { excluded.add(j); });
-    let pool = [];
-    for (let i = 0; i < cells.length; i++) if (!excluded.has(i)) pool.push(i);
-    if (pool.length < level.mines) {
-      // 兜底：可布格数不足时退化为仅排除首点（本项目三档不会触发）
-      pool = [];
-      for (let i = 0; i < cells.length; i++) if (i !== safe) pool.push(i);
-    }
-    for (let k = 0; k < level.mines; k++) {
-      const j = k + Math.floor(Math.random() * (pool.length - k));
-      const tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp;
-      cells[pool[k]].mine = true;
-    }
-    for (let i = 0; i < cells.length; i++) {
-      let cnt = 0;
-      forEachNeighbor(i, function (j) { if (cells[j].mine) cnt++; });
-      cells[i].adj = cnt;
-    }
-  }
+  /* ---------- 邻居与布雷已并入 minesweeperCore（纯函数核心，见 AI_CORE 标记区） ---------- */
 
-  /* ---------- 翻开 / 插旗 ---------- */
+  /* ---------- 翻开 / 插旗（渲染层：状态推进见 minesweeperCore 的纯函数） ---------- */
   function paintCell(i) {
-    const c = cells[i], el = cellEls[i];
+    const c = game.cells[i], el = cellEls[i];
     el.style.color = '';
     el.className = 'cell' + (c.state === 1 ? ' open' : '');
     if (c.state === 1) {
@@ -466,47 +923,32 @@
       el.innerHTML = '';
     }
   }
-  function reveal(i) {
-    if (over) return;
-    const c = cells[i];
-    if (c.state !== 0) return;               // 已翻开或已插旗的格不动
-    if (!placed) { placeMines(i); placed = true; startTimer(); }   // 首翻才布雷并计时
-    if (c.mine) { lose(i); return; }
-    const stack = [i];
-    while (stack.length) {
-      const k = stack.pop();
-      const cell = cells[k];
-      if (cell.state !== 0 || cell.mine) continue;
-      cell.state = 1;
-      revealed++;
-      paintCell(k);
-      if (cell.adj === 0) {
-        forEachNeighbor(k, function (j) { if (cells[j].state === 0) stack.push(j); });
-      }
-    }
-    checkWin();
+  function paintCells(list) {
+    for (let t = 0; t < list.length; t++) paintCell(list[t]);
   }
-  function toggleFlag(i) {
-    if (over) return;
-    const c = cells[i];
-    if (c.state === 1) return;
-    c.state = (c.state === 2) ? 0 : 2;
-    flags += (c.state === 2) ? 1 : -1;
-    paintCell(i);
+  function doReveal(i) {
+    const res = core.reveal(game, i);
+    paintCells(res.changed);
+    if (res.started) startTimer();
+    if (res.hit) { lose(i); return; }
+    if (res.win) checkWin();
+  }
+  function doToggleFlag(i) {
+    const res = core.toggleFlag(game, i);
+    if (!res) return;
+    paintCells(res.changed);
     updateMineCounter();
   }
 
-  /* ---------- 胜负 ---------- */
+  /* ---------- 胜负（纯 UI 收尾：终局判定在 minesweeperCore 的 reveal 内完成） ---------- */
   function checkWin() {
-    if (revealed !== level.rows * level.cols - level.mines) return;
-    over = true;
     stopTimer();
-    flags = level.mines;                     // 剩余的雷自动插旗
-    updateMineCounter();
-    for (let i = 0; i < cells.length; i++) {
-      if (cells[i].mine && cells[i].state !== 2) { cells[i].state = 2; paintCell(i); }
-    }
+    updateMineCounter();                     // 剩余的雷已在核心里自动插旗
     setFace(FACE_COOL);
+    if (aiOn) {                              // AI 代玩成绩不计最佳纪录
+      showOverlay(true, '用时 ' + seconds + ' 秒 · AI 代玩不计纪录');
+      return;
+    }
     const old = loadBest();
     let record = false;
     if (old == null || seconds < old) { record = true; saveBest(seconds); }
@@ -514,10 +956,9 @@
     showOverlay(true, '用时 ' + seconds + ' 秒' + (record ? ' · 新纪录！' : ''));
   }
   function lose(hit) {
-    over = true;
     stopTimer();
-    for (let i = 0; i < cells.length; i++) {
-      const c = cells[i], el = cellEls[i];
+    for (let i = 0; i < game.cells.length; i++) {
+      const c = game.cells[i], el = cellEls[i];
       if (c.mine && c.state !== 2) {         // 亮出所有雷，踩中的那颗标红
         el.className = 'cell open' + (i === hit ? ' boom' : '');
         el.innerHTML = SVG_MINE;
@@ -547,23 +988,25 @@
 
   board.addEventListener('click', function (e) {
     if (suppressClick) { suppressClick = false; return; }
+    if (aiOn) return;                        // AI 代玩期间屏蔽手动操作
     const cell = e.target.closest('.cell');
-    if (cell) reveal(+cell.dataset.i);
+    if (cell) doReveal(+cell.dataset.i);
   });
   board.addEventListener('contextmenu', function (e) {
     e.preventDefault();                      // 桌面右键插旗；同时吞掉安卓长按的系统菜单
     if (longFired) { longFired = false; return; }
+    if (aiOn) return;
     const cell = e.target.closest('.cell');
-    if (cell) toggleFlag(+cell.dataset.i);
+    if (cell) doToggleFlag(+cell.dataset.i);
   });
   board.addEventListener('touchstart', function (e) {
     longFired = false;
     const cell = e.target.closest('.cell');
-    if (!cell || over) return;
+    if (!cell || game.over || aiOn) return;
     pressTimer = window.setTimeout(function () {
       longFired = true;
       suppressClick = true;
-      toggleFlag(+cell.dataset.i);
+      doToggleFlag(+cell.dataset.i);
       if (navigator.vibrate) { try { navigator.vibrate(30); } catch (err) { /* 忽略 */ } }
     }, 380);
   }, { passive: true });
@@ -583,6 +1026,87 @@
   document.getElementById('againBtn').addEventListener('click', reset);
   window.addEventListener('resize', fitBoard);
 
+  /* ---------- AI 代玩：自动推理扫雷，可随时停止 ----------
+     决策跑在 Web Worker 里，源码直接复用 minesweeperCore 工厂，与主线程
+     严格同一份实现；个别环境禁用 Worker 时降级到主线程计算。
+     AI 期间成绩不计最佳纪录；每局结束后自动开下一局（自动演示模式）。 */
+  const aiBtn = document.getElementById('aiBtn');
+  const aiTag = document.getElementById('aiTag');
+  let aiOn = false;
+  let aiBusy = false;       // 上一步还没算完时不重复下发
+  let aiReqId = 0;
+  let aiRestartTimer = null;
+
+  const AI_WORKER_SRC =
+    'const core = (' + minesweeperCore.toString() + ')();\n' +
+    'onmessage = function (e) {\n' +
+    '  postMessage({ id: e.data.id, act: core.decide(e.data.obs) });\n' +
+    '};';
+  let aiWorker = null;
+  try {
+    aiWorker = new Worker(URL.createObjectURL(new Blob([AI_WORKER_SRC], { type: 'application/javascript' })));
+  } catch (e) { /* 无 Worker 兜底：主线程算（见 requestAiAction） */ }
+  if (aiWorker) {
+    aiWorker.onmessage = function (e) {
+      aiBusy = false;
+      if (!aiOn || game.over || e.data.id !== aiReqId) return;   // 过期回答直接丢弃
+      applyAiAction(e.data.act);
+    };
+  }
+
+  function applyAiAction(act) {
+    if (!act) return;
+    if (act.action === 'flag') {
+      for (let t = 0; t < act.idxs.length; t++) doToggleFlag(act.idxs[t]);
+      return;
+    }
+    for (let t = 0; t < act.idxs.length; t++) {
+      doReveal(act.idxs[t]);
+      if (game.over) break;
+    }
+  }
+
+  function requestAiAction() {
+    if (aiBusy || game.over) return;
+    aiBusy = true;
+    const obs = core.observe(game);
+    if (!aiWorker) {
+      window.setTimeout(function () {
+        aiBusy = false;
+        if (!aiOn || game.over) return;
+        applyAiAction(core.decide(obs));
+      }, 20);
+      return;
+    }
+    aiReqId++;
+    aiWorker.postMessage({ id: aiReqId, obs: obs });
+  }
+
+  function setAi(on) {
+    aiOn = on;
+    aiBtn.textContent = on ? '停止 AI' : 'AI 代玩';
+    aiBtn.classList.toggle('stop', on);
+    aiBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    aiTag.hidden = !on;
+    if (on && !game.over) requestAiAction();
+  }
+  aiBtn.addEventListener('click', function () { setAi(!aiOn); });
+
+  /* 驱动：定时要下一步；终局短暂停留后自动开下一局，点「停止 AI」随时退出 */
+  window.setInterval(function () {
+    if (!aiOn) return;
+    if (game.over) {
+      if (!aiRestartTimer) {
+        aiRestartTimer = window.setTimeout(function () {
+          aiRestartTimer = null;
+          if (aiOn) reset();
+        }, 1400);
+      }
+      return;
+    }
+    requestAiAction();
+  }, 260);
+
   /* ---------- 启动 ---------- */
   reset();
   </script>
@@ -596,11 +1120,12 @@
         <li>翻开所有安全格即胜，踩到地雷就输了</li>
         <li>数字表示周围 8 格里的地雷数量</li>
         <li>首次点击及其周边保证安全；剩余雷数见顶栏，计时与最佳用时同栏</li>
+        <li>点「AI 代玩」由 AI 自动推理扫雷，随时可停；AI 成绩不计最佳纪录</li>
       </ul>
       <h3>操作</h3>
       <ul>
         <li>左键：翻开　右键：插旗 / 取消（手机长按插旗）</li>
-        <li>顶栏表情按钮：重开本局</li>
+        <li>顶栏表情按钮：重开本局　AI 代玩：AI 接手并自动续局</li>
       </ul>
     </div>
   </aside>
