@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一笔画 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：一笔画，从合适的起点出发，一笔画过图形中所有线条且不重复，支持撤销、提示与 30 个关卡，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/onestroke/app.html">
+<style>
+/* ===== 一笔画 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#0d9488;--primary-dark:#0b7f74;--danger:#dc2626;--amber:#f59e0b;--ink:#1f2430;--muted:#6b7280;--line:#d7e2e0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#edf3f2;color:#3c4650;min-height:100vh;display:flex;justify-content:center;padding:22px 14px 40px;-webkit-tap-highlight-color:transparent}
+.wrap{width:100%;max-width:560px}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:24px;font-weight:800;color:#17343a;letter-spacing:2px}
+.sub{margin-top:4px;font-size:12.5px;color:#8a97a0}
+.chips{display:flex;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:#44565c;font-family:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
+.chip b{color:var(--primary);font-variant-numeric:tabular-nums}
+.chip.plain{cursor:default;color:#7c8a93}
+.chip:hover{background:#f2faf8;border-color:#b7dcd5}
+.chip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.board-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:10px 10px 12px;user-select:none;-webkit-user-select:none}
+#board{display:block;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#board.shake{animation:shake .3s ease}
+@keyframes shake{25%{transform:translateX(-5px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
+.progress{height:6px;border-radius:3px;background:#e8eef0;margin:10px 4px 6px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--primary);border-radius:3px;transition:width .18s ease}
+.status{min-height:20px;text-align:center;font-size:13px;color:#7c8a93;margin:0 4px;font-variant-numeric:tabular-nums}
+
+.ctrl{display:flex;gap:10px;margin-top:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:600;color:#31424a;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px rgba(60,90,80,.08)}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn:hover{border-color:#a9d4cc;color:var(--primary-dark)}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn:disabled:hover{border-color:var(--line);color:#31424a}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-dark);color:#fff}
+.btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+footer{margin-top:24px;text-align:center;font-size:12px;color:#b0bcb9}
+
+/* ===== 胜利 / 选关弹层（挂 body 直接子级，避免 transform 劫持 fixed） ===== */
+.overlay{position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(31,36,48,.38);opacity:0;transition:opacity .2s ease}
+.overlay.open{opacity:1}
+.ov-card{width:100%;max-width:340px;background:#fff;border-radius:16px;padding:22px 20px;box-shadow:0 18px 50px rgba(31,36,48,.28);text-align:center;transform:translateY(10px);transition:transform .2s ease}
+.ov-card.wide{max-width:400px}
+.overlay.open .ov-card{transform:translateY(0)}
+.ov-card h2{font-size:20px;color:var(--ink);margin-bottom:6px}
+.ov-sub{font-size:13.5px;color:var(--muted)}
+.ov-stars{display:flex;justify-content:center;gap:6px;margin-bottom:10px}
+.star{width:30px;height:30px;fill:#dde3e8}
+.star.on{fill:var(--amber)}
+.ov-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+
+/* 选关网格 */
+.lv-info{font-size:12.5px;color:#8a97a0;margin-top:2px}
+.lv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 4px}
+.lv{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;background:#f3f8f7;border:1px solid #dce8e6;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;color:#2f4a4f;cursor:pointer;touch-action:manipulation}
+.lv:hover{border-color:var(--primary)}
+.lv.cur{border-color:var(--primary);box-shadow:0 0 0 2px rgba(13,148,136,.18)}
+.lv.done{background:#e8f6f3;border-color:#bfe3dc}
+.lv.locked{opacity:.42}
+.lv.locked:hover{border-color:#dce8e6}
+.lv-stars{display:flex;gap:1px}
+.lv-stars .star{width:9px;height:9px}
+.lv-num{font-variant-numeric:tabular-nums}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="wrap" id="wrap">
+  <header class="top">
+    <div>
+      <h1>一笔画</h1>
+      <p class="sub">一笔画过所有线条，不能重复</p>
+    </div>
+    <div class="chips">
+      <button class="chip" id="btnLevels" type="button" aria-label="选择关卡"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>第 <b id="levelNo">1</b> / 30 关</button>
+      <span class="chip plain" id="timeChip">00:00</span>
+    </div>
+  </header>
+
+  <section class="board-card" id="boardCard">
+    <canvas id="board" width="320" height="240" role="img" aria-label="一笔画棋盘"></canvas>
+    <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+    <p class="status" id="status">点击或拖动圆点起笔</p>
+  </section>
+
+  <div class="ctrl">
+    <button class="btn" id="btnUndo" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>撤销</button>
+    <button class="btn" id="btnRestart" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/></svg>重开</button>
+    <button class="btn" id="btnHint" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.3-1.2 2.2h-4.8c-.1-.9-.5-1.7-1.2-2.2A6 6 0 0 1 12 3z"/></svg>提示</button>
+    <button class="btn" id="btnOdd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>奇点</button>
+  </div>
+
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+
+<div class="overlay" id="ovWin" hidden>
+  <div class="ov-card">
+    <div class="ov-stars" id="winStars" aria-hidden="true"></div>
+    <h2 id="winTitle">过关！</h2>
+    <p class="ov-sub" id="winInfo"></p>
+    <div class="ov-btns">
+      <button class="btn" id="btnReplay" type="button">重玩本关</button>
+      <button class="btn" id="btnPick" type="button">选关</button>
+      <button class="btn primary" id="btnNext" type="button">下一关</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovLevels" hidden>
+  <div class="ov-card wide">
+    <h2>选择关卡</h2>
+    <p class="lv-info" id="lvInfo"></p>
+    <div class="lv-grid" id="lvGrid"></div>
+    <div class="ov-btns">
+      <button class="btn" id="btnLvClose" type="button">返回</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ================= 一笔画 · 拾光集自建小游戏（零依赖，纯本地运行） ================= */
+
+// ---------- DOM 引用 ----------
+const $ = id => document.getElementById(id);
+const cv = $('board'), ctx = cv.getContext('2d');
+const wrap = $('wrap'), boardCard = $('boardCard');
+const levelNo = $('levelNo'), timeChip = $('timeChip');
+const statusEl = $('status'), progressFill = $('progressFill');
+const btnUndo = $('btnUndo'), btnRestart = $('btnRestart'), btnHint = $('btnHint'), btnOdd = $('btnOdd'), btnLevels = $('btnLevels');
+const ovWin = $('ovWin'), ovLevels = $('ovLevels');
+const winStarsEl = $('winStars'), winTitle = $('winTitle'), winInfo = $('winInfo');
+const btnNext = $('btnNext'), btnReplay = $('btnReplay'), btnPick = $('btnPick');
+const lvGrid = $('lvGrid'), lvInfo = $('lvInfo'), btnLvClose = $('btnLvClose');
+
+// ---------- 常量 ----------
+const TAU = Math.PI * 2;
+const PAD_IN = 22;                       // 画布内边距（圆点离画布边缘的距离）
+const COL = { primary: '#0d9488', edge: '#ccd7dc', dot: '#9fb0b8', odd: '#f59e0b', bad: '#dc2626' };
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== 关卡数据与生成 [gen-begin] ===== */
+// 每关配置：[列数, 行数, 目标线段数]；种子固定，同一关在所有设备上生成完全相同的图形
+const LEVELS = [
+  [3, 3, 5], [3, 3, 6], [3, 3, 7], [3, 3, 8],           // 1-4  入门 3×3
+  [4, 3, 9], [4, 3, 10], [4, 3, 11], [4, 3, 12],        // 5-8
+  [4, 4, 13], [4, 4, 15], [4, 4, 16], [4, 4, 18],       // 9-12
+  [5, 4, 18], [5, 4, 20], [5, 4, 22], [5, 4, 24],       // 13-16
+  [5, 5, 24], [5, 5, 26], [5, 5, 28], [5, 5, 30],       // 17-20
+  [6, 5, 31], [6, 5, 33], [6, 5, 35], [6, 5, 38],       // 21-24
+  [6, 6, 38], [6, 6, 41], [6, 6, 43], [6, 6, 46], [6, 6, 48], [6, 6, 50]  // 25-30
+];
+
+// mulberry32 伪随机数：种子固定则序列固定，保证关卡可复现
+function mulberry32(seed){
+  let t = seed >>> 0;
+  return function(){
+    t = (t + 0x6D2B79F5) >>> 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// 构建网格图：cols×rows 个圆点，横向纵向相邻点之间连边
+function buildGrid(cols, rows){
+  const edges = [], adj = [];
+  for (let i = 0; i < cols * rows; i++) adj.push([]);
+  const addEdge = (a, b) => {
+    const e = edges.length;
+    edges.push([a, b]);
+    adj[a].push({ v: b, e: e });
+    adj[b].push({ v: a, e: e });
+  };
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++){
+    const id = y * cols + x;
+    if (x + 1 < cols) addEdge(id, id + 1);
+    if (y + 1 < rows) addEdge(id, id + cols);
+  }
+  return { edges: edges, adj: adj };
+}
+
+// 随机化 DFS：找一条恰好 target 条边、边不重复的轨迹（带预算防卡死，返回最长尝试结果兜底）
+function findTrail(graph, target, rng){
+  const adj = graph.adj, edges = graph.edges;
+  const used = new Uint8Array(edges.length);
+  const path = [(rng() * adj.length) | 0];
+  const pathE = [];                        // pathE[i] = 进入 path[i+1] 所用的边，回溯时成对出栈
+  let best = path.slice();
+  const stack = [];
+  const pushFrame = v => {
+    const opts = [];
+    for (let i = 0; i < adj[v].length; i++) if (!used[adj[v][i].e]) opts.push(adj[v][i].e);
+    for (let j = opts.length - 1; j > 0; j--){
+      const k = (rng() * (j + 1)) | 0, tmp = opts[j];
+      opts[j] = opts[k]; opts[k] = tmp;
+    }
+    stack.push({ opts: opts, i: 0 });
+  };
+  pushFrame(path[0]);
+  let budget = 40000;
+  while (stack.length){
+    if (path.length - 1 >= target) return path.slice();
+    const fr = stack[stack.length - 1];
+    if (fr.i >= fr.opts.length || budget-- <= 0){
+      stack.pop();
+      if (!stack.length) break;
+      used[pathE.pop()] = 0;               // 回退进入该点的边（注意是边下标，不是顶点下标）
+      path.pop();
+      continue;
+    }
+    const ei = fr.opts[fr.i++];
+    used[ei] = 1;
+    pathE.push(ei);
+    const last = path[path.length - 1];
+    path.push(edges[ei][0] === last ? edges[ei][1] : edges[ei][0]);
+    if (path.length > best.length) best = path.slice();
+    pushFrame(path[path.length - 1]);
+  }
+  return best;
+}
+
+// 生成第 idx 关：以固定种子反复尝试，用满足长度要求的轨迹作为谜题图形（轨迹本身即解）
+function generateLevel(idx){
+  const cfg = LEVELS[idx];
+  const cols = cfg[0], rows = cfg[1], target = cfg[2];
+  const graph = buildGrid(cols, rows);
+  let trail = null;
+  for (let attempt = 0; attempt < 48; attempt++){
+    const rng = mulberry32((idx + 1) * 7919 + attempt * 104729 + 12345);
+    const t = findTrail(graph, target, rng);
+    const len = t.length - 1;
+    if (len >= target){ trail = t; break; }
+    const relax = attempt >= 24 ? 4 : (attempt >= 12 ? 2 : 0);   // 尝试越多越宽容
+    if (len >= target - relax && len >= 4){ trail = t; break; }
+  }
+  if (!trail){                                                   // 理论兜底：首行折线
+    trail = [];
+    for (let x = 0; x < cols; x++) trail.push(x);
+  }
+  const pzEdges = [];
+  for (let i = 0; i + 1 < trail.length; i++){
+    const a = trail[i], b = trail[i + 1];
+    pzEdges.push(a < b ? [a, b] : [b, a]);
+  }
+  return { cols: cols, rows: rows, edges: pzEdges };
+}
+
+const puzzleCache = new Array(LEVELS.length);
+function getPuzzle(idx){
+  if (!puzzleCache[idx]) puzzleCache[idx] = generateLevel(idx);
+  return puzzleCache[idx];
+}
+/* ===== [gen-end] ===== */
+
+// ---------- 进度存档（读写都兜底，隐私模式不报错） ----------
+const KEY_BEST = 'oneStrokeBest';      // 最高到达关卡（1 起）
+const KEY_STARS = 'oneStrokeStars';    // 每关星级的 JSON 记录
+let unlocked = 1;
+let bestStars = {};
+try { unlocked = Math.min(LEVELS.length, Math.max(1, parseInt(localStorage.getItem(KEY_BEST), 10) || 1)); } catch (e) {}
+try { bestStars = JSON.parse(localStorage.getItem(KEY_STARS) || '{}') || {}; } catch (e) { bestStars = {}; }
+function saveProgress(){
+  try { localStorage.setItem(KEY_BEST, String(unlocked)); } catch (e) {}
+  try { localStorage.setItem(KEY_STARS, JSON.stringify(bestStars)); } catch (e) {}
+}
+
+// ---------- 运行状态 ----------
+let P = null;              // 当前关：cols / rows / nV / edges / adj / deg
+let path = [];             // 当前笔迹（圆点序号序列）
+let used = null;           // 每条边是否已画
+let onPath = null;         // 圆点是否在笔迹上
+let usedN = 0;             // 已画边数
+let undoCount = 0;         // 本关（自上次重开起）撤销步数
+let mode = 'play';         // play / won
+let curLevel = 0;
+let oddDots = [];          // 全图奇点（连线条数为奇数的圆点）
+let showOdd = false;
+let hintEdge = -1, hintDot = -1, hintUntil = 0;
+let flashDot = -1, flashUntil = 0;
+let winEarned = 0;
+let W = 0, H = 0, SPACING = 40, hitR = 16, pathW = 6, edgeW = 3, dotR = 5;
+
+// ---------- 计时 ----------
+let timerOn = false, timerBase = 0, timerStamp = 0;
+function timerStart(){ if (!timerOn){ timerOn = true; timerStamp = performance.now(); } }
+function timerPause(){ if (timerOn){ timerBase += performance.now() - timerStamp; timerOn = false; } }
+function timerReset(){ timerOn = false; timerBase = 0; timerStamp = 0; }
+function elapsedMs(){ return timerBase + (timerOn ? performance.now() - timerStamp : 0); }
+function fmt(ms){
+  const s = Math.floor(ms / 1000);
+  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+
+// ---------- 状态提示 ----------
+let transientMsg = null, statusTimer = 0, lastTimeStr = '';
+function defaultStatus(){
+  if (mode === 'won') return '本关完成！';
+  return path.length ? '已画 ' + usedN + ' / ' + P.edges.length + ' 段' : '点击或拖动圆点起笔';
+}
+function setStatus(msg){
+  transientMsg = msg;
+  statusEl.textContent = msg;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(function(){ transientMsg = null; statusEl.textContent = defaultStatus(); }, 2600);
+}
+
+// ---------- 关卡装载 ----------
+function loadLevel(idx){
+  curLevel = idx;
+  const pz = getPuzzle(idx);
+  const nV = pz.cols * pz.rows;
+  P = { cols: pz.cols, rows: pz.rows, nV: nV, edges: pz.edges, adj: [], deg: new Array(nV).fill(0) };
+  for (let v = 0; v < nV; v++) P.adj.push([]);
+  pz.edges.forEach(function(ed, e){
+    P.adj[ed[0]].push({ v: ed[1], e: e });
+    P.adj[ed[1]].push({ v: ed[0], e: e });
+    P.deg[ed[0]]++; P.deg[ed[1]]++;
+  });
+  oddDots = [];
+  for (let v = 0; v < nV; v++) if (P.deg[v] % 2) oddDots.push(v);
+  path = [];
+  used = new Uint8Array(P.edges.length);
+  onPath = new Uint8Array(nV);
+  usedN = 0;
+  undoCount = 0;
+  mode = 'play';
+  hintEdge = -1; hintDot = -1; hintUntil = 0;
+  flashDot = -1; flashUntil = 0;
+  timerReset();
+  hideOv(ovWin); hideOv(ovLevels);
+  layout();
+  updateHud();
+}
+
+// ---------- 棋盘几何 ----------
+function layout(){
+  if (!P) return;
+  const availW = Math.max(200, boardCard.clientWidth - 20);
+  const availH = Math.max(225, Math.min(520, window.innerHeight - 260));
+  let spacing = Math.floor(Math.min((availW - PAD_IN * 2) / (P.cols - 1), (availH - PAD_IN * 2) / (P.rows - 1)));
+  spacing = Math.max(24, Math.min(spacing, 76));
+  SPACING = spacing;
+  W = spacing * (P.cols - 1) + PAD_IN * 2;
+  H = spacing * (P.rows - 1) + PAD_IN * 2;
+  const dpr = window.devicePixelRatio || 1;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  hitR = Math.max(15, spacing * 0.28);
+  pathW = Math.max(4.5, spacing * 0.115);
+  edgeW = Math.max(2.2, spacing * 0.05);
+  dotR = Math.max(4, spacing * 0.07);
+}
+function px(v){ return PAD_IN + (v % P.cols) * SPACING; }
+function py(v){ return PAD_IN + ((v / P.cols) | 0) * SPACING; }
+
+// ---------- HUD ----------
+function updateHud(){
+  levelNo.textContent = String(curLevel + 1);
+  progressFill.style.width = (P.edges.length ? (usedN / P.edges.length) * 100 : 0) + '%';
+  btnUndo.disabled = (mode !== 'play' || path.length < 2);
+  if (!transientMsg) statusEl.textContent = defaultStatus();
+}
+function afterChange(){
+  updateHud();
+  if (mode === 'play' && usedN === P.edges.length) winLevel();
+}
+
+// ---------- 笔迹操作 ----------
+function edgeBetween(a, b){
+  const list = P.adj[a];
+  for (let i = 0; i < list.length; i++) if (list[i].v === b) return list[i].e;
+  return -1;
+}
+function pushPath(v){
+  if (path.length){
+    used[edgeBetween(path[path.length - 1], v)] = 1;
+    usedN++;
+  }
+  path.push(v);
+  onPath[v] = 1;
+  timerStart();
+  afterChange();
+}
+function popPath(){
+  if (path.length < 2) return;
+  const v = path.pop();
+  onPath[v] = 0;
+  usedN--;
+  used[edgeBetween(path[path.length - 1], v)] = 0;
+  undoCount++;
+  afterChange();
+}
+function retractTo(v){
+  while (path.length > 1 && path[path.length - 1] !== v) popPath();
+}
+
+// ---------- 欧拉路径判定：剩余线条能否从 start 一笔画完 ----------
+// 只依据 used[] 现场统计剩余图，不看 usedN：doHint 试探只翻转 used[]，判定必须与试探方式一致
+function canFinish(start){
+  const remDeg = new Array(P.nV).fill(0);
+  const remAdj = [];
+  let remN = 0;                                                 // 剩余线段数
+  for (let v = 0; v < P.nV; v++) remAdj.push([]);
+  for (let e = 0; e < P.edges.length; e++){
+    if (used[e]) continue;
+    remN++;
+    const a = P.edges[e][0], b = P.edges[e][1];
+    remDeg[a]++; remDeg[b]++;
+    remAdj[a].push(b); remAdj[b].push(a);
+  }
+  if (remN === 0) return true;                                  // 剩余为空：当前走法再走一步即通关
+  if (remDeg[start] === 0) return false;                        // 起点已无线可走但还有剩余
+  let odd = 0;
+  for (let v = 0; v < P.nV; v++) if (remDeg[v] % 2) odd++;
+  if (odd > 2) return false;                                    // 奇点超过 2 个必然无解
+  if (odd === 2 && remDeg[start] % 2 === 0) return false;       // 有奇点时必须从奇点出发
+  const seen = new Array(P.nV).fill(false);                     // 连通性：剩余边都要能走到
+  const st = [start];
+  seen[start] = true;
+  while (st.length){
+    const u = st.pop();
+    for (let i = 0; i < remAdj[u].length; i++){
+      const w = remAdj[u][i];
+      if (!seen[w]){ seen[w] = true; st.push(w); }
+    }
+  }
+  for (let v = 0; v < P.nV; v++) if (remDeg[v] > 0 && !seen[v]) return false;
+  return true;
+}
+
+// ---------- 提示 ----------
+function doHint(){
+  if (mode !== 'play' || usedN >= P.edges.length) return;
+  const now = performance.now();
+  if (!path.length){
+    const v = oddDots.length ? oddDots[0] : 0;
+    hintDot = v;
+    hintUntil = now + 1600;
+    setStatus(oddDots.length ? '存在奇点：从高亮的圆点起笔' : '从任意圆点起笔都可以');
+    return;
+  }
+  const last = path[path.length - 1];
+  const cands = [];
+  for (let i = 0; i < P.adj[last].length; i++) if (!used[P.adj[last][i].e]) cands.push(P.adj[last][i]);
+  for (let j = cands.length - 1; j > 0; j--){
+    const k = (Math.random() * (j + 1)) | 0, tmp = cands[j];
+    cands[j] = cands[k]; cands[k] = tmp;
+  }
+  let found = null;
+  for (let i = 0; i < cands.length; i++){
+    used[cands[i].e] = 1; usedN++;                              // 试探：走这步后还有没有解（usedN 同步增减，保持状态一致）
+    const ok = canFinish(cands[i].v);
+    used[cands[i].e] = 0; usedN--;
+    if (ok){ found = cands[i]; break; }
+  }
+  if (found){
+    hintEdge = found.e;
+    hintDot = found.v;
+    hintUntil = now + 1600;
+    setStatus('沿高亮的线走一步');
+  } else {
+    hintEdge = -1;
+    setStatus('当前走法已无解：撤销几步或重开本关');
+  }
+}
+
+// ---------- 过关结算 ----------
+function winLevel(){
+  mode = 'won';
+  timerPause();
+  winEarned = undoCount === 0 ? 3 : (undoCount <= 3 ? 2 : 1);   // 星级：不撤销 3 星，撤销 3 步内 2 星
+  const key = String(curLevel + 1);
+  if (winEarned > (bestStars[key] || 0)) bestStars[key] = winEarned;
+  if (curLevel + 2 > unlocked) unlocked = Math.min(LEVELS.length, curLevel + 2);
+  saveProgress();
+  setStatus('本关完成！');
+  updateHud();
+  setTimeout(function(){
+    if (mode !== 'won') return;                                 // 期间可能已重开或换关
+    showWinOverlay();
+  }, 650);
+}
+function starSvg(on){
+  return '<svg viewBox="0 0 24 24" class="star' + (on ? ' on' : '') + '" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+}
+function showWinOverlay(){
+  winStarsEl.innerHTML = starSvg(winEarned >= 1) + starSvg(winEarned >= 2) + starSvg(winEarned >= 3);
+  winTitle.textContent = curLevel >= LEVELS.length - 1 ? '全部通关！' : '第 ' + (curLevel + 1) + ' 关完成';
+  winInfo.textContent = '用时 ' + fmt(elapsedMs()) + ' · 撤销 ' + undoCount + ' 步';
+  btnNext.hidden = curLevel >= LEVELS.length - 1;
+  showOv(ovWin);
+}
+
+// ---------- 弹层 ----------
+function showOv(el){ el.hidden = false; void el.offsetWidth; el.classList.add('open'); }
+function hideOv(el){ el.classList.remove('open'); el.hidden = true; }
+
+// ---------- 选关 ----------
+function openLevels(){
+  let cleared = 0, starSum = 0;
+  lvGrid.innerHTML = '';
+  for (let i = 0; i < LEVELS.length; i++){
+    const stars = bestStars[String(i + 1)] || 0;
+    if (stars) cleared++;
+    starSum += stars;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'lv' + (unlocked >= i + 1 ? '' : ' locked') + (stars ? ' done' : '') + (i === curLevel ? ' cur' : '');
+    b.innerHTML = '<span class="lv-num">' + (i + 1) + '</span><span class="lv-stars">' + starSvg(stars >= 1) + starSvg(stars >= 2) + starSvg(stars >= 3) + '</span>';
+    if (unlocked < i + 1){
+      b.setAttribute('aria-disabled', 'true');
+      b.addEventListener('click', function(){ lvInfo.textContent = '先通过第 ' + unlocked + ' 关再来挑战'; });
+    } else {
+      b.addEventListener('click', function(){ loadLevel(i); });
+    }
+    lvGrid.appendChild(b);
+  }
+  lvInfo.textContent = '已通关 ' + cleared + ' / ' + LEVELS.length + ' 关 · 已获 ' + starSum + ' 星';
+  showOv(ovLevels);
+}
+
+// ---------- 画布绘制 ----------
+function seg(e){
+  const a = P.edges[e][0], b = P.edges[e][1];
+  ctx.beginPath();
+  ctx.moveTo(px(a), py(a));
+  ctx.lineTo(px(b), py(b));
+}
+function draw(now){
+  ctx.clearRect(0, 0, W, H);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  // 未画的线
+  ctx.strokeStyle = COL.edge;
+  ctx.lineWidth = edgeW;
+  for (let e = 0; e < P.edges.length; e++){
+    if (used[e]) continue;
+    seg(e); ctx.stroke();
+  }
+  // 提示边（琥珀色脉冲）
+  if (hintEdge >= 0){
+    if (now < hintUntil){
+      ctx.globalAlpha = 0.4 + 0.4 * Math.abs(Math.sin(now / 140));
+      ctx.strokeStyle = COL.odd;
+      ctx.lineWidth = edgeW + 2.5;
+      seg(hintEdge); ctx.stroke();
+      ctx.globalAlpha = 1;
+    } else hintEdge = -1;
+  }
+  // 已画笔迹
+  if (path.length > 1){
+    ctx.strokeStyle = COL.primary;
+    ctx.lineWidth = pathW;
+    ctx.beginPath();
+    ctx.moveTo(px(path[0]), py(path[0]));
+    for (let i = 1; i < path.length; i++) ctx.lineTo(px(path[i]), py(path[i]));
+    ctx.stroke();
+  }
+  // 奇点提示环
+  if (showOdd){
+    ctx.strokeStyle = COL.odd;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([4, 4]);
+    for (let i = 0; i < oddDots.length; i++){
+      ctx.beginPath();
+      ctx.arc(px(oddDots[i]), py(oddDots[i]), dotR + 6, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+  // 圆点（笔迹上的点染成主色）
+  for (let v = 0; v < P.nV; v++){
+    ctx.fillStyle = onPath[v] ? COL.primary : COL.dot;
+    ctx.beginPath();
+    ctx.arc(px(v), py(v), dotR, 0, TAU);
+    ctx.fill();
+  }
+  // 起点标记
+  if (path.length){
+    ctx.strokeStyle = COL.primary;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(px(path[0]), py(path[0]), dotR + 4.5, 0, TAU);
+    ctx.stroke();
+  }
+  // 当前位置（脉冲光圈）
+  if (path.length){
+    const cur = path[path.length - 1];
+    const pulse = REDUCED ? 0 : Math.sin(now / 280) * 1.5;
+    ctx.fillStyle = COL.primary;
+    ctx.beginPath();
+    ctx.arc(px(cur), py(cur), dotR + 2.5, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(13,148,136,.45)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(px(cur), py(cur), dotR + 6 + pulse, 0, TAU);
+    ctx.stroke();
+  }
+  // 提示圆点脉冲
+  if (hintDot >= 0){
+    if (now < hintUntil){
+      ctx.strokeStyle = COL.odd;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(px(hintDot), py(hintDot), dotR + 6 + Math.sin(now / 120) * 2, 0, TAU);
+      ctx.stroke();
+    } else hintDot = -1;
+  }
+  // 无效点击红闪
+  if (flashDot >= 0){
+    if (now < flashUntil){
+      const k = 1 - (flashUntil - now) / 350;
+      ctx.strokeStyle = 'rgba(220,38,38,' + (1 - k).toFixed(3) + ')';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(px(flashDot), py(flashDot), dotR + 4 + k * 10, 0, TAU);
+      ctx.stroke();
+    } else flashDot = -1;
+  }
+}
+
+// ---------- 输入：点按 + 拖动（Pointer Events 统一鼠标与触屏） ----------
+let dragging = false, activeId = null;
+function localPos(e){
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+}
+function nearestDot(x, y){
+  let bd = hitR * hitR, best = -1;
+  for (let v = 0; v < P.nV; v++){
+    const dx = x - px(v), dy = y - py(v), d = dx * dx + dy * dy;
+    if (d <= bd){ bd = d; best = v; }
+  }
+  return best;
+}
+function handleTap(v){
+  if (!path.length){ pushPath(v); return; }
+  const last = path[path.length - 1];
+  if (v === last) return;
+  if (path.length > 1 && v === path[path.length - 2]){ popPath(); return; }
+  const ei = edgeBetween(last, v);
+  if (ei >= 0 && !used[ei]){ pushPath(v); return; }
+  if (path.indexOf(v) >= 0){ retractTo(v); return; }
+  invalidFeedback(v);
+}
+function dragStep(v){
+  if (!path.length) return;
+  const last = path[path.length - 1];
+  if (v === last) return;
+  if (path.length > 1 && v === path[path.length - 2]){ popPath(); return; }
+  const ei = edgeBetween(last, v);
+  if (ei >= 0 && !used[ei]) pushPath(v);
+}
+function invalidFeedback(v){
+  flashDot = v;
+  flashUntil = performance.now() + 350;
+  if (!REDUCED){
+    cv.classList.remove('shake');
+    void cv.offsetWidth;
+    cv.classList.add('shake');
+  }
+  setStatus('这里走不过去');
+}
+cv.addEventListener('pointerdown', function(e){
+  if (mode !== 'play' || activeId !== null) return;
+  const p = localPos(e);
+  const v = nearestDot(p.x, p.y);
+  if (v < 0) return;
+  e.preventDefault();
+  activeId = e.pointerId;
+  dragging = true;
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  handleTap(v);
+});
+cv.addEventListener('pointermove', function(e){
+  if (!dragging || mode !== 'play' || e.pointerId !== activeId) return;
+  const p = localPos(e);
+  const v = nearestDot(p.x, p.y);
+  if (v >= 0) dragStep(v);
+});
+function endDrag(e){
+  if (e && e.pointerId !== undefined && e.pointerId !== activeId) return;
+  dragging = false;
+  activeId = null;
+}
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+// ---------- 按钮与快捷键 ----------
+function doUndo(){
+  if (mode !== 'play') return;
+  if (path.length < 2){ setStatus('还没有可以撤销的笔画'); return; }
+  popPath();
+}
+function doRestart(){
+  loadLevel(curLevel);
+  setStatus('本关已重开');
+}
+function doOdd(){
+  showOdd = !showOdd;
+  btnOdd.classList.toggle('on', showOdd);
+  btnOdd.setAttribute('aria-pressed', showOdd ? 'true' : 'false');
+  setStatus(showOdd ? '已标出奇点：连线条数为奇数的圆点' : '已关闭奇点提示');
+}
+btnUndo.addEventListener('click', doUndo);
+btnRestart.addEventListener('click', doRestart);
+btnHint.addEventListener('click', doHint);
+btnOdd.addEventListener('click', doOdd);
+btnLevels.addEventListener('click', openLevels);
+btnLvClose.addEventListener('click', function(){ hideOv(ovLevels); });
+btnNext.addEventListener('click', function(){ hideOv(ovWin); loadLevel(curLevel + 1); });
+btnReplay.addEventListener('click', function(){ hideOv(ovWin); loadLevel(curLevel); });
+btnPick.addEventListener('click', function(){ hideOv(ovWin); openLevels(); });
+ovWin.addEventListener('click', function(e){ if (e.target === ovWin) hideOv(ovWin); });
+ovLevels.addEventListener('click', function(e){ if (e.target === ovLevels) hideOv(ovLevels); });
+
+addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){
+    if (!ovWin.hidden) hideOv(ovWin);
+    else if (!ovLevels.hidden) hideOv(ovLevels);
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!ovWin.hidden || !ovLevels.hidden) return;
+  const k = e.key.toLowerCase();
+  if (k === 'z'){ e.preventDefault(); doUndo(); }
+  else if (k === 'r'){ e.preventDefault(); doRestart(); }
+  else if (k === 'h'){ e.preventDefault(); doHint(); }
+  else if (k === 'o'){ doOdd(); }
+});
+
+// ---------- 切后台暂停计时 ----------
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) timerPause();
+  else if (mode === 'play' && path.length) timerStart();
+});
+
+// ---------- 主循环（逐帧重绘小画布，开销极低） ----------
+function tickTime(){
+  const s = fmt(elapsedMs());
+  if (s !== lastTimeStr){ lastTimeStr = s; timeChip.textContent = s; }
+}
+function loop(){
+  draw(performance.now());
+  tickTime();
+  requestAnimationFrame(loop);
+}
+
+// ---------- 初始化 ----------
+window.addEventListener('resize', layout);
+loadLevel(Math.min(unlocked, LEVELS.length) - 1);
+requestAnimationFrame(loop);
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>沿网格线从圆点走到圆点，画过的线不能重复</li>
+        <li>一笔画过图形中所有线条即过关</li>
+        <li>「奇点」会标出连线条数为奇数的圆点：若存在奇点，必须从奇点起笔、在另一个奇点收笔</li>
+        <li>评星：不撤销得 3 星，撤销 3 步内得 2 星，其余 1 星</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>手机：按住圆点拖动连续画线，也可逐点点按</li>
+        <li>电脑：点按或按住拖动；快捷键 Z 撤销、R 重开、H 提示、O 奇点</li>
+        <li>点按或拖回路径上靠后的圆点，可回退到该点</li>
+        <li>「提示」会标出下一步；无解时会提醒撤销或重开</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

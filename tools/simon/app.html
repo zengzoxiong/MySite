@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记忆序列 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：记忆序列，四色按键随机点亮并发出对应音调，凭记忆按原顺序复现，每轮加长一位，看你能记多长。纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/simon/app.html">
+<style>
+[hidden]{display:none!important}
+/* ===== 记忆序列 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#7c3aed;--ink:#1f2430;--muted:#6b7280;--line:#e5e7eb}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f2f4f7;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px 16px 40px;-webkit-tap-highlight-color:transparent}
+.card{width:100%;max-width:460px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+h1{font-size:20px;font-weight:800;letter-spacing:1px}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation}
+.icon-btn:hover{background:#f0f6fc}
+.icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hud{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
+.stat .lab{display:block;font-size:12px;color:var(--muted);letter-spacing:3px}
+.stat .val{display:block;margin-top:2px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat.bump{animation:bump .25s ease}
+@keyframes bump{50%{transform:scale(1.08)}}
+.board-wrap{position:relative}
+.board{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;background:#eef1f6;border-radius:20px;padding:12px;aspect-ratio:1/1;user-select:none;-webkit-user-select:none}
+.pad{border:0;padding:0;cursor:pointer;background:var(--c);filter:saturate(.5) brightness(.88);transition:filter .14s ease,box-shadow .14s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:16px}
+/* 四色按键：外角大圆弧拼成整圆观感；点亮时提亮 + 同色光晕 */
+.pad-tl{--c:#34a06b;--cl:#4ce08e;--glow:rgba(76,224,142,.5);border-radius:100% 16px 16px 16px}
+.pad-tr{--c:#d64545;--cl:#ff7a6e;--glow:rgba(255,122,110,.5);border-radius:16px 100% 16px 16px}
+.pad-bl{--c:#dba32e;--cl:#ffd54d;--glow:rgba(255,213,77,.5);border-radius:16px 16px 16px 100%}
+.pad-br{--c:#3f6fd8;--cl:#7da4ff;--glow:rgba(125,164,255,.5);border-radius:16px 16px 100% 16px}
+.pad.lit{filter:none;background:var(--cl);box-shadow:0 0 18px var(--glow),0 0 44px var(--glow)}
+/* 中心圆盘：显示轮数与阶段提示，不拦截按键点击 */
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:31%;aspect-ratio:1/1;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 4px 18px rgba(60,64,67,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;z-index:2}
+.hub-num{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.hub-hint{font-size:11px;color:var(--muted);letter-spacing:1px}
+.overlay{position:absolute;inset:0;z-index:5;border-radius:20px;background:rgba(248,249,252,.9);backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;opacity:0;transition:opacity .2s ease}
+.overlay.open{opacity:1}
+.overlay h2{font-size:24px;font-weight:800}
+.overlay p{font-size:13.5px;color:var(--muted);line-height:1.9;max-width:300px}
+.btn{border:0;border-radius:12px;padding:11px 28px;background:var(--primary);color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.3);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:translateY(1px)}
+.tips{margin-top:12px;text-align:center;font-size:12.5px;color:#9aa0a6;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+.pad:focus-visible,.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+@media (max-width:560px){.card{padding:14px 12px 12px}.stat .val{font-size:20px}.hub-num{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="card">
+  <header>
+    <h1>记忆序列</h1>
+    <button class="icon-btn" id="soundBtn" type="button" aria-label="关闭音效">
+      <svg id="icoOn" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>
+      <svg id="icoOff" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>
+    </button>
+  </header>
+
+  <section class="hud">
+    <div class="stat" id="roundStat"><span class="lab">本轮</span><span class="val" id="hudRound">0</span></div>
+    <div class="stat" id="bestStat"><span class="lab">最长纪录</span><span class="val" id="hudBest">0</span></div>
+  </section>
+
+  <div class="board-wrap">
+    <div class="board">
+      <button class="pad pad-tl" type="button" aria-label="绿色按键"></button>
+      <button class="pad pad-tr" type="button" aria-label="红色按键"></button>
+      <button class="pad pad-bl" type="button" aria-label="黄色按键"></button>
+      <button class="pad pad-br" type="button" aria-label="蓝色按键"></button>
+      <div class="hub"><span class="hub-num" id="hubNum">—</span><span class="hub-hint" id="hubHint">准备就绪</span></div>
+    </div>
+    <div class="overlay" id="overlay" hidden>
+      <h2 id="ovTitle">记忆序列</h2>
+      <p id="ovText">四色按键将随机点亮并发出对应音调，凭记忆按原顺序复现；每通过一轮，序列加长一位、节奏更快。</p>
+      <button class="btn" id="ovBtn" type="button">开始游戏</button>
+    </div>
+  </div>
+
+  <p class="tips">点错任何一位即结束 · 电脑可用数字键 1-4 或 Q W A S</p>
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+<script>
+(() => {
+'use strict';
+/* ================= 记忆序列 · 四色记忆游戏（零依赖，纯本地运行） ================= */
+
+// ---------- DOM 引用 ----------
+const $ = id => document.getElementById(id);
+const pads = Array.from(document.querySelectorAll('.pad'));   // 顺序：左上/右上/左下/右下
+const hudRound = $('hudRound'), hudBest = $('hudBest');
+const roundStat = $('roundStat'), bestStat = $('bestStat');
+const hubNum = $('hubNum'), hubHint = $('hubHint');
+const overlay = $('overlay'), ovTitle = $('ovTitle'), ovText = $('ovText'), ovBtn = $('ovBtn');
+const soundBtn = $('soundBtn'), icoOn = $('icoOn'), icoOff = $('icoOff');
+
+// 四色对应音高（Hz），近似经典记忆游戏机的下行音列
+const FREQS = [329.63, 277.18, 220, 164.81];   // 绿 / 红 / 黄 / 蓝
+
+// ---------- 静音开关（偏好存 simonSound，'0' 为静音） ----------
+let muted = false;
+try { muted = localStorage.getItem('simonSound') === '0'; } catch (e) {}
+function applySoundBtn() {
+  icoOn.hidden = muted;
+  icoOff.hidden = !muted;
+  soundBtn.setAttribute('aria-label', muted ? '开启音效' : '关闭音效');
+}
+soundBtn.addEventListener('click', () => {
+  muted = !muted;
+  try { localStorage.setItem('simonSound', muted ? '0' : '1'); } catch (e) {}
+  applySoundBtn();
+  if (!muted) ensureAudio();   // 重新开启时顺带解锁音频上下文
+});
+
+// ---------- WebAudio 蜂鸣：首次用户手势时才创建上下文 ----------
+let audioCtx = null;
+function ensureAudio() {
+  if (muted) return null;
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq, dur, type, vol) {
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol || 0.2, t + 0.012);   // 快速起音
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);    // 指数衰减收尾
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+}
+
+// ---------- 最高纪录（键名全站唯一：simonBest，读写均兜底） ----------
+let best = 0;
+try { best = +localStorage.getItem('simonBest') || 0; } catch (e) {}
+function saveBest(v) { try { localStorage.setItem('simonBest', v); } catch (e) {} }
+hudBest.textContent = best;
+
+// ---------- 状态机 ----------
+let state = 'ready';    // ready / show / input / wait / paused / over
+let seq = [];           // 本局序列（存按键下标 0-3）
+let round = 0;          // 当前轮数（等于序列长度）
+let inputPos = 0;       // 已正确复现的步数
+let newRecord = false;  // 本局是否刷新过纪录
+
+// 所有 setTimeout 统一登记，暂停/结束时一次清空，防止残留回调点亮按键
+const timers = new Set();
+function later(fn, ms) {
+  const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
+  timers.add(id);
+  return id;
+}
+function clearTimers() {
+  for (const id of timers) clearTimeout(id);
+  timers.clear();
+}
+function padsOff() { pads.forEach(p => p.classList.remove('lit')); }
+
+// ---------- HUD 与弹层 ----------
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;   // 强制回流，重新触发动画
+  el.classList.add('bump');
+}
+function setHub(num, hint) {
+  hubNum.textContent = num;
+  hubHint.textContent = hint;
+}
+function showOverlay() {
+  overlay.hidden = false;
+  void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+  overlay.classList.add('open');
+}
+function hideOverlay() {
+  overlay.classList.remove('open');
+  overlay.hidden = true;
+}
+
+// ---------- 流程 ----------
+function stepMs() { return Math.max(280, 650 - (round - 1) * 35); }   // 轮数越高节奏越快
+
+function lightPad(i, ms, vol) {
+  pads[i].classList.add('lit');
+  beep(FREQS[i], ms / 1000, 'sine', vol);
+  later(() => pads[i].classList.remove('lit'), ms);
+}
+
+// 播放当前序列，播完进入复现阶段；暂停恢复也从这里从头重放
+function playSequence() {
+  state = 'show';
+  setHub(String(round), '观看');
+  const step = stepMs(), on = Math.round(step * 0.6);
+  let t = 420;   // 开头留白，给玩家反应时间
+  seq.forEach(i => { later(() => lightPad(i, on, 0.2), t); t += step; });
+  later(() => {
+    state = 'input';
+    inputPos = 0;
+    setHub(String(round), '复现 0/' + seq.length);
+  }, t + 140);
+}
+
+function nextRound() {
+  round++;
+  seq.push(Math.floor(Math.random() * 4));   // 序列加长一位
+  hudRound.textContent = round;
+  bump(roundStat);
+  playSequence();
+}
+
+function start() {
+  seq = []; round = 0; inputPos = 0; newRecord = false;
+  clearTimers(); padsOff();
+  hudRound.textContent = '0';
+  hideOverlay();
+  ensureAudio();   // 在用户手势内解锁音频
+  nextRound();
+}
+
+function press(i) {
+  if (state !== 'input') return;   // 播放与过场期间不响应
+  lightPad(i, 260, 0.22);
+  if (seq[inputPos] !== i) { fail(); return; }
+  inputPos++;
+  if (inputPos >= seq.length) {   // 本轮全部复现正确
+    if (round > best) {           // 通过即计成绩，完成到第几轮就是几轮
+      best = round; saveBest(best);
+      hudBest.textContent = best; bump(bestStat);
+      newRecord = true;
+    }
+    bump(roundStat);
+    state = 'wait';
+    setHub(String(round), '通过');
+    beep(659.26, 0.12, 'sine', 0.14);            // 通关小音阶
+    later(() => beep(880, 0.18, 'sine', 0.14), 110);
+    later(nextRound, 620);
+  } else {
+    setHub(String(round), '复现 ' + inputPos + '/' + seq.length);
+  }
+}
+
+function fail() {
+  state = 'over';
+  clearTimers(); padsOff();
+  setHub(String(round), '出错了');
+  beep(96, 0.55, 'square', 0.16);   // 失败低鸣
+  const done = round - 1;
+  ovTitle.textContent = '游戏结束';
+  ovText.textContent = done > 0
+    ? '本局完成 ' + done + ' 轮 · ' + (newRecord ? '新纪录！最长 ' + best + ' 轮' : '最长纪录 ' + best + ' 轮')
+    : '第 1 轮就记错了 · 最长纪录 ' + best + ' 轮';
+  ovBtn.textContent = '再来一局';
+  later(showOverlay, 420);   // 稍等失败音播片刻再弹结算
+}
+
+function pause() {
+  if (state !== 'show' && state !== 'input' && state !== 'wait') return;
+  clearTimers(); padsOff();
+  state = 'paused';
+  ovTitle.textContent = '已暂停';
+  ovText.textContent = '继续后将从头重放第 ' + round + ' 轮序列';
+  ovBtn.textContent = '继续游戏';
+  showOverlay();
+}
+
+function resume() {
+  if (state !== 'paused') return;
+  hideOverlay();
+  playSequence();
+}
+
+// ---------- 输入：点按四色键 ----------
+pads.forEach((pad, i) => { pad.addEventListener('click', () => press(i)); });
+
+// ---------- 输入：键盘 1-4 / Q W A S，回车或空格确认弹层 ----------
+const KEYMAP = { '1': 0, '2': 1, '3': 2, '4': 3, q: 0, w: 1, a: 2, s: 3 };
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const i = KEYMAP[e.key.toLowerCase()];
+  if (i !== undefined) {
+    if (e.repeat) return;
+    e.preventDefault();
+    press(i);
+    return;
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && !overlay.hidden) {
+    e.preventDefault();
+    ovBtn.click();
+  }
+});
+
+// ---------- 弹层按钮：暂停态走恢复，其余（就绪/结束）开新局 ----------
+ovBtn.addEventListener('click', () => {
+  if (state === 'paused') resume();
+  else start();
+});
+
+// 切后台自动暂停
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pause();
+});
+
+// ---------- 初始化：显示就绪弹层，同步静音按钮状态 ----------
+applySoundBtn();
+showOverlay();
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>四色按键随机点亮并发出对应音调，记住整段顺序</li>
+        <li>按原顺序点按复现，全部正确即通过本轮</li>
+        <li>每通过一轮序列加长一位，播放节奏也逐渐加快</li>
+        <li>点错任何一位即结束，成绩按完成的轮数记录</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>手机直接点按四色按键</li>
+        <li>电脑：鼠标点击，或数字键 1-4 / Q W A S 对应左上、右上、左下、右下</li>
+        <li>右上角喇叭可静音；切出页面自动暂停，继续后重放当前轮</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

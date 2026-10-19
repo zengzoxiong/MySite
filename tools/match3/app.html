@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>消消乐 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：消消乐，交换相邻方块凑三连消除，连锁触发连击加成，限时或限步冲击高分，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/match3/app.html">
+<style>
+  /* ===== 消消乐 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #f7f4f8;
+    color: #5c5464;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 54px 14px 40px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { width: 100%; max-width: 500px; }
+
+  header { margin-bottom: 14px; }
+  h1 { font-size: 32px; line-height: 1.15; color: #a61e4d; letter-spacing: 2px; }
+  .sub { margin-top: 6px; font-size: 13px; color: #a296ad; }
+
+  .hud { display: flex; gap: 10px; margin-bottom: 14px; }
+  .stat {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #ecdfef;
+    border-radius: 12px;
+    padding: 8px 6px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(150, 110, 140, .10);
+    min-width: 0;
+  }
+  .stat .lab { display: block; font-size: 12px; color: #b3a3bd; letter-spacing: 3px; }
+  .stat .val { display: block; margin-top: 2px; font-size: 21px; font-weight: 700; color: #6d4267; font-variant-numeric: tabular-nums; }
+  .stat.danger .val { color: #c0392b; animation: pulse 1s ease infinite; }
+  @keyframes pulse { 50% { opacity: .55; } }
+  .stat.bump { animation: bump .18s ease; }
+  @keyframes bump { 50% { transform: scale(1.07); } }
+
+  .btns { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .btn {
+    border: 0;
+    background: #8b7f96;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 11px;
+    padding: 9px 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(120, 100, 130, .30);
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: #c2255c; box-shadow: 0 2px 10px rgba(194, 37, 92, .35); }
+  .btn.sm { font-size: 13px; padding: 6px 12px; box-shadow: 0 2px 8px rgba(120, 100, 130, .25); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn:disabled:active { transform: none; }
+  .btn:focus-visible { outline: 2px solid #c2255c; outline-offset: 2px; }
+
+  /* 棋盘：64 个底格 + 绝对定位方块，坐标全走 --x/--y 变量经 calc 换算，天然响应式 */
+  .board {
+    --gap: 7px;
+    --dur: 180ms;   /* 方块位移过渡时长，JS 在交换/下落阶段动态调整 */
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #e9e2f0;
+    border-radius: 14px;
+    box-shadow: inset 0 2px 8px rgba(120, 100, 140, .12);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .cellbg, .tile {
+    --tw: calc((100% - 7 * var(--gap)) / 8);
+    position: absolute;
+    width: var(--tw);
+    height: var(--tw);
+    border-radius: 22%;
+    left: calc(var(--gap) + var(--x) * (var(--tw) + var(--gap)));
+    top:  calc(var(--gap) + var(--y) * (var(--tw) + var(--gap)));
+  }
+  .cellbg { background: rgba(255, 255, 255, .34); }
+  .cellbg.alt { background: rgba(255, 255, 255, .58); }
+
+  .tile {
+    z-index: 1;
+    cursor: pointer;
+    transition: left var(--dur) ease, top var(--dur) ease;
+  }
+  .shape {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  /* 糖果高光：白色小圆斑被形状裁剪，自然贴合轮廓 */
+  .shape::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    top: 10%;
+    width: 28%;
+    height: 28%;
+    background: rgba(255, 255, 255, .42);
+    border-radius: 50%;
+  }
+  /* 六种糖果：一色一形，颜色之外还能靠形状区分 */
+  .s0 { background: #e03131; border-radius: 50%; }
+  .s1 { background: #e8590c; border-radius: 24%; }
+  .s2 { background: #e6a800; clip-path: polygon(50% 4%, 94% 94%, 6% 94%); }
+  .s3 { background: #2f9e44; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+  .s4 { background: #1971c2; clip-path: polygon(25% 3%, 75% 3%, 98% 50%, 75% 97%, 25% 97%, 2% 50%); }
+  .s5 { background: #9c36b5; clip-path: polygon(50% 2%, 63% 36%, 98% 36%, 70% 58%, 81% 92%, 50% 71%, 19% 92%, 30% 58%, 2% 36%, 37% 36%); }
+
+  /* 键盘光标（虚线外框）与点选高亮（白色光圈） */
+  .tile.cursor { outline: 2px dashed rgba(130, 115, 145, .85); outline-offset: 1px; }
+  .tile.selected { z-index: 2; }
+  .tile.selected .shape { transform: scale(1.08); filter: brightness(1.12); }
+  .tile.selected::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2.5px solid #fff;
+    border-radius: 26%;
+    box-shadow: 0 0 0 2px rgba(194, 37, 92, .55), 0 3px 10px rgba(194, 37, 92, .35);
+  }
+
+  .tile.appear { animation: appearA .22s ease backwards; }
+  @keyframes appearA { from { transform: scale(0); opacity: 0; } }
+  .tile.clear { z-index: 3; pointer-events: none; animation: clearA .22s ease forwards; }
+  @keyframes clearA { 0% { transform: scale(1); } 35% { transform: scale(1.18); } 100% { transform: scale(0); opacity: 0; } }
+  .tile.deny { animation: denyA .28s ease; }
+  @keyframes denyA { 25% { transform: translateX(-4px); } 70% { transform: translateX(4px); } }
+
+  /* 得分浮字 */
+  .float {
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    font-size: 17px;
+    font-weight: 800;
+    color: #e8590c;
+    text-shadow: 0 1px 0 #fff, 0 0 8px rgba(255, 255, 255, .9);
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+    animation: floatA .9s ease forwards;
+  }
+  .float .combo { display: block; font-size: 12.5px; color: #c2255c; }
+  @keyframes floatA {
+    0% { opacity: 0; transform: translate(-50%, -30%) scale(.7); }
+    18% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -160%) scale(1); }
+  }
+
+  /* 胜负弹层（hidden + 同步回流 + open，保证过渡生效） */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: 14px;
+    background: rgba(250, 247, 251, .90);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity .2s ease;
+    padding: 0 14px;
+  }
+  .overlay.open { opacity: 1; }
+  .ov-title { font-size: 30px; font-weight: 800; color: #a61e4d; }
+  .ov-sub { font-size: 13.5px; color: #8d8195; line-height: 1.9; }
+  .ov-btns { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+  .ov-btns .btn { padding: 10px 18px; font-size: 15px; }
+
+  .hint { margin-top: 14px; text-align: center; font-size: 12.5px; color: #a89dae; line-height: 1.9; }
+  footer { margin-top: 22px; text-align: center; font-size: 12px; color: #c5bccb; }
+
+  @media (max-width: 560px) {
+    body { padding-top: 50px; }
+    h1 { font-size: 26px; }
+    .stat .val { font-size: 18px; }
+    .stat .lab { letter-spacing: 2px; }
+    .ov-title { font-size: 26px; }
+  }
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+  <main class="wrap">
+    <header>
+      <h1>消消乐</h1>
+      <p class="sub">交换相邻方块凑三连，连锁越多分越高</p>
+    </header>
+
+    <section class="hud">
+      <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
+      <div class="stat" id="limitStat"><span class="lab" id="limitLab">时间</span><span class="val" id="limitVal">60</span></div>
+      <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
+      <div class="btns">
+        <button class="btn sm" id="pauseBtn" type="button" disabled>暂停</button>
+        <button class="btn sm" id="restartBtn" type="button" disabled>重开</button>
+      </div>
+    </section>
+
+    <div class="board" id="board">
+      <div class="overlay open" id="ovStart">
+        <p class="ov-title">消消乐</p>
+        <p class="ov-sub">点击或拖动交换相邻方块，凑齐横竖三连即消除<br>连锁消除叠加连击倍率，选择一种玩法开始</p>
+        <div class="ov-btns">
+          <button class="btn primary" id="btnTimed" type="button">限时 60 秒</button>
+          <button class="btn" id="btnMoves" type="button">限步 30 步</button>
+        </div>
+      </div>
+      <div class="overlay" id="ovPause" hidden>
+        <p class="ov-title">已暂停</p>
+        <div class="ov-btns"><button class="btn primary" id="btnResume" type="button">继续游戏</button></div>
+      </div>
+      <div class="overlay" id="ovOver" hidden>
+        <p class="ov-title" id="ovTitle"></p>
+        <p class="ov-sub" id="ovSub"></p>
+        <div class="ov-btns">
+          <button class="btn primary" id="btnAgain" type="button">再来一局</button>
+          <button class="btn" id="btnSwitch" type="button">换个玩法</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint">点击两枚相邻方块交换，或按住一枚拖向相邻方向<br>键盘：方向键移动光标，空格选中后再按方向键交换</p>
+    <footer>拾光集 · 在线小游戏</footer>
+  </main>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 消消乐主逻辑（零依赖，纯本地运行） ================= */
+  const SIZE = 8;            // 棋盘 8×8
+  const COLORS = 6;          // 六种糖果
+  const SWAP_MS = 140;       // 交换动画时长
+  const CLEAR_MS = 220;      // 消除动画时长
+  const FALL_MS = 250;       // 下落动画时长
+  const TIME_LIMIT = 60;     // 限时模式秒数
+  const MOVE_LIMIT = 30;     // 限步模式步数
+  const KEY_TIME = 'match3Best';        // 限时模式最高分
+  const KEY_MOVES = 'match3StepsBest';  // 限步模式最高分
+
+  const $ = id => document.getElementById(id);
+  const board = $('board');
+  const scoreEl = $('score'), bestEl = $('best');
+  const scoreStat = $('scoreStat'), limitStat = $('limitStat');
+  const limitLab = $('limitLab'), limitVal = $('limitVal');
+  const pauseBtn = $('pauseBtn'), restartBtn = $('restartBtn');
+  const ovStart = $('ovStart'), ovPause = $('ovPause'), ovOver = $('ovOver');
+  const ovTitle = $('ovTitle'), ovSub = $('ovSub');
+
+  /* ---------- 最高分存取（读写都兜底，隐私模式不报错） ---------- */
+  let bestTime = 0, bestMoves = 0;
+  try {
+    bestTime = +localStorage.getItem(KEY_TIME) || 0;
+    bestMoves = +localStorage.getItem(KEY_MOVES) || 0;
+  } catch (e) { }
+  function saveBest() {
+    try { localStorage.setItem(mode === 'time' ? KEY_TIME : KEY_MOVES, String(best)); } catch (e) { }
+  }
+
+  /* ---------- 状态 ---------- */
+  let grid = [];             // grid[行][列] = 方块对象 或 null
+  let state = 'ready';       // ready / playing / paused / over
+  let mode = 'time';         // time 限时 / moves 限步
+  let score = 0, best = bestTime;
+  let newRecord = false;     // 本局是否刷新过纪录
+  let movesLeft = 0;         // 限步模式剩余步数
+  let endTime = 0;           // 限时模式截止时刻
+  let pausedAt = 0;          // 暂停时刻（恢复时补偿倒计时）
+  let timeUp = false;        // 时间已到（等连锁收尾再结算）
+  let lock = false;          // 交换与连锁动画期间锁输入
+  let pendingPause = false;  // 连锁进行中收到的暂停请求
+  let shuffleStreak = 0;     // 连续洗牌次数（极端死局兜底）
+  let sel = null;            // 点选/键盘选中的格子 {r,c}
+  let cur = null;            // 键盘光标 {r,c}
+  let press = null;          // 指针按下状态
+  let pressId = null;
+  bestEl.textContent = best;
+
+  /* ---------- 方块构建与定位 ---------- */
+  function setPos(t) {
+    t.el.style.setProperty('--x', t.c);
+    t.el.style.setProperty('--y', t.r);
+  }
+  function tileClass(extra) {
+    return extra ? 'tile ' + extra : 'tile';
+  }
+  function createTile(r, c, color, appear) {
+    const el = document.createElement('div');
+    el.className = tileClass(appear ? 'appear' : '');
+    const sh = document.createElement('div');
+    sh.className = 'shape s' + color;
+    el.appendChild(sh);
+    const t = { color: color, r: r, c: c, el: el };
+    setPos(t);            // 先定位再入 DOM，避免从默认位置产生过渡
+    grid[r][c] = t;
+    board.appendChild(el);
+    return t;
+  }
+  function setDur(ms) { board.style.setProperty('--dur', ms + 'ms'); }
+
+  /* ---------- 生成：逐格避开三连，并保证开局有步可走 ---------- */
+  function pickColor(r, c) {
+    const banned = new Set();
+    // 与左边两格或上面两格同色会直接成三连，禁止选中该色
+    if (c >= 2 && grid[r][c - 1].color === grid[r][c - 2].color) banned.add(grid[r][c - 1].color);
+    if (r >= 2 && grid[r - 1][c].color === grid[r - 2][c].color) banned.add(grid[r - 1][c].color);
+    let col;
+    do { col = Math.random() * COLORS | 0; } while (banned.has(col));
+    return col;
+  }
+  function newBoard() {
+    board.querySelectorAll('.tile,.float').forEach(function (el) { el.remove(); });
+    grid = Array.from({ length: SIZE }, function () { return Array(SIZE).fill(null); });
+    let guard = 0;
+    do {
+      if (guard > 0) {   // 重试：清掉上一轮再摆
+        board.querySelectorAll('.tile').forEach(function (el) { el.remove(); });
+        for (let r = 0; r < SIZE; r++) grid[r].fill(null);
+      }
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) createTile(r, c, pickColor(r, c), true);
+      }
+    } while (!hasMove() && ++guard < 100);
+  }
+
+  /* ---------- 匹配检测：返回待消除格子的下标集合（r*SIZE+c） ---------- */
+  function findMatches() {
+    const marks = new Set();
+    for (let r = 0; r < SIZE; r++) {          // 横向扫
+      let run = 1;
+      for (let c = 1; c <= SIZE; c++) {
+        const same = c < SIZE && grid[r][c] && grid[r][c - 1] && grid[r][c].color === grid[r][c - 1].color;
+        if (same) { run++; continue; }
+        if (run >= 3) for (let k = c - run; k < c; k++) marks.add(r * SIZE + k);
+        run = 1;
+      }
+    }
+    for (let c = 0; c < SIZE; c++) {          // 纵向扫
+      let run = 1;
+      for (let r = 1; r <= SIZE; r++) {
+        const same = r < SIZE && grid[r][c] && grid[r - 1][c] && grid[r][c].color === grid[r - 1][c].color;
+        if (same) { run++; continue; }
+        if (run >= 3) for (let k = r - run; k < r; k++) marks.add(k * SIZE + c);
+        run = 1;
+      }
+    }
+    return marks;
+  }
+
+  /* ---------- 可行步检测：任一相邻对交换后能出现三连即可 ---------- */
+  function swapCreates(r1, c1, r2, c2) {
+    const a = grid[r1][c1], b = grid[r2][c2];
+    if (!a || !b) return false;
+    grid[r1][c1] = b; grid[r2][c2] = a;   // 只换数据不换 DOM，测完还原
+    const ok = findMatches().size > 0;
+    grid[r1][c1] = a; grid[r2][c2] = b;
+    return ok;
+  }
+  function hasMove() {
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (c + 1 < SIZE && swapCreates(r, c, r, c + 1)) return true;
+        if (r + 1 < SIZE && swapCreates(r, c, r + 1, c)) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ---------- 得分与浮字 ---------- */
+  function addScore(n) {
+    score += n;
+    scoreEl.textContent = score;
+    scoreStat.classList.remove('bump');
+    void scoreStat.offsetWidth;
+    scoreStat.classList.add('bump');
+    if (score > best) {
+      best = score;
+      newRecord = true;
+      if (mode === 'time') bestTime = score; else bestMoves = score;
+      bestEl.textContent = best;
+      saveBest();
+    }
+  }
+  function showFloat(x, y, main, sub) {
+    const f = document.createElement('div');
+    f.className = 'float';
+    f.style.left = x + '%';
+    f.style.top = y + '%';
+    f.textContent = main;
+    if (sub) {
+      const s = document.createElement('span');
+      s.className = 'combo';
+      s.textContent = sub;
+      f.appendChild(s);
+    }
+    board.appendChild(f);
+    setTimeout(function () { f.remove(); }, 950);   // 固定时长清理，不依赖 animationend
+  }
+  function centerOf(marks) {
+    let sr = 0, sc = 0, n = 0;
+    marks.forEach(function (idx) { sr += (idx / SIZE) | 0; sc += idx % SIZE; n++; });
+    return { x: (sc / n + .5) / SIZE * 100, y: (sr / n + .5) / SIZE * 100 };
+  }
+
+  /* ---------- 交换主流程 ---------- */
+  function applySwap(a, b) {
+    const ta = grid[a.r][a.c], tb = grid[b.r][b.c];
+    grid[a.r][a.c] = tb; grid[b.r][b.c] = ta;
+    ta.r = b.r; ta.c = b.c;   // ta 已换到 b 位，坐标随之落到 b
+    tb.r = a.r; tb.c = a.c;   // tb 同理落到 a 位，画面与内部棋盘保持一致
+    setPos(ta); setPos(tb);
+  }
+  function trySwap(a, b) {
+    if (state !== 'playing' || lock || !a || !b) return;
+    if (Math.abs(a.r - b.r) + Math.abs(a.c - b.c) !== 1) return;   // 只允许相邻交换
+    if (timeUp) return;                                            // 时间已到，不再受理新交换
+    if (mode === 'moves' && movesLeft <= 0) return;
+    const ta = grid[a.r][a.c], tb = grid[b.r][b.c];
+    if (!ta || !tb) return;
+    lock = true;
+    setDur(SWAP_MS);
+    applySwap(a, b);
+    setTimeout(function () {
+      if (state !== 'playing') { lock = false; return; }
+      if (findMatches().size === 0) {
+        // 无效交换：原路换回并抖动提示，不扣步数
+        applySwap(a, b);
+        ta.el.classList.add('deny'); tb.el.classList.add('deny');
+        setTimeout(function () {
+          ta.el.classList.remove('deny'); tb.el.classList.remove('deny');
+          lock = false;
+        }, 300);
+      } else {
+        shuffleStreak = 0;
+        if (mode === 'moves') { movesLeft--; paintHUD(); }
+        resolveChain(1);
+      }
+    }, SWAP_MS + 30);
+  }
+
+  /* ---------- 连锁结算：消除 → 下落补位 → 检测新匹配，循环到无匹配 ---------- */
+  function resolveChain(combo) {
+    if (state === 'over') { lock = false; return; }
+    const marks = findMatches();
+    if (marks.size === 0) { finishTurn(); return; }
+    const n = marks.size;
+    // 基础分 = 方块数×10，四连以上每多一个加 20，再乘连击波数倍率
+    const gained = (n * 10 + (n >= 4 ? (n - 3) * 20 : 0)) * combo;
+    addScore(gained);
+    const pos = centerOf(marks);
+    if (combo >= 2) showFloat(pos.x, pos.y, '+' + gained, '连击 ×' + combo);
+    else showFloat(pos.x, pos.y, '+' + gained);
+    const cleared = [];
+    marks.forEach(function (idx) {
+      const r = (idx / SIZE) | 0, c = idx % SIZE;
+      const t = grid[r][c];
+      if (!t) return;
+      t.el.classList.add('clear');
+      cleared.push(t);
+      grid[r][c] = null;
+    });
+    if (!cleared.length) { finishTurn(); return; }   // 理论不会发生，防御死循环
+    setTimeout(function () {
+      if (state === 'over') { lock = false; return; }
+      cleared.forEach(function (t) { t.el.remove(); });
+      setDur(FALL_MS);
+      collapse();
+      setTimeout(function () { resolveChain(combo + 1); }, FALL_MS + 40);
+    }, CLEAR_MS);
+  }
+
+  /* ---------- 下落补位：实心块下坠，顶部按缺口数补新块 ---------- */
+  function collapse() {
+    const fresh = [];
+    for (let c = 0; c < SIZE; c++) {
+      let write = SIZE - 1;
+      for (let r = SIZE - 1; r >= 0; r--) {
+        const t = grid[r][c];
+        if (!t) continue;
+        if (write !== r) {
+          grid[write][c] = t;
+          grid[r][c] = null;
+          t.r = write;
+          setPos(t);
+        }
+        write--;
+      }
+      const holes = write + 1;   // 该列缺口数
+      for (let r = write; r >= 0; r--) {
+        const t = createTile(r, c, Math.random() * COLORS | 0, false);
+        // createTile 先落在目标位，这里立刻改摆到棋盘上沿之外（同一帧内不触发过渡）
+        t.el.style.setProperty('--y', r - holes);
+        fresh.push(t);
+      }
+    }
+    if (fresh.length) {
+      void board.offsetWidth;      // 强制回流，锁定起始位置
+      fresh.forEach(setPos);       // 统一落到目标位，触发下落过渡
+    }
+  }
+
+  /* ---------- 每轮连锁结束：结算条件与死局处理 ---------- */
+  function finishTurn() {
+    if (state !== 'playing') { lock = false; return; }
+    if (mode === 'time' && timeUp) { gameOver(); return; }
+    if (mode === 'moves' && movesLeft <= 0) { gameOver(); return; }
+    if (!hasMove()) { reshuffle(); return; }   // 无步可走：自动洗牌
+    lock = false;
+    if (pendingPause) { pendingPause = false; pauseGame(); }
+  }
+
+  /* ---------- 自动洗牌：打乱现有糖果，直到必然有步可走 ---------- */
+  function reshuffle() {
+    if (++shuffleStreak >= 6) {   // 连续多次死局的极端兜底：整盘重新生成
+      newBoard();
+      shuffleStreak = 0;
+    } else {
+      const tiles = [];
+      for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) tiles.push(grid[r][c]);
+      let guard = 0;
+      do {
+        for (let i = tiles.length - 1; i > 0; i--) {   // Fisher-Yates 打乱颜色
+          const j = Math.random() * (i + 1) | 0;
+          const ci = tiles[i].color; tiles[i].color = tiles[j].color; tiles[j].color = ci;
+        }
+      } while (!hasMove() && ++guard < 100);
+      if (!hasMove()) {   // 100 次仍未洗出可行步（极小概率）：整盘重新生成
+        newBoard();
+      } else {
+        tiles.forEach(function (t) {
+          t.el.className = tileClass('appear');
+          t.el.firstChild.className = 'shape s' + t.color;
+        });
+      }
+    }
+    clearSelection();
+    paintCursor();
+    showFloat(50, 50, '自动洗牌');
+    setTimeout(function () { resolveChain(1); }, 380);
+  }
+
+  /* ---------- 结算 ---------- */
+  function gameOver() {
+    state = 'over';
+    lock = false;
+    ovTitle.textContent = mode === 'time' ? '时间到' : '步数用完';
+    ovSub.textContent = '本局得分 ' + score + (newRecord ? ' · 新纪录！' : (best > 0 ? ' · 历史最高 ' + best : ''));
+    showOverlay(ovOver);
+    pauseBtn.disabled = true;
+    restartBtn.disabled = false;
+  }
+
+  /* ---------- 弹层 ---------- */
+  function showOverlay(ov) {
+    ov.hidden = false;
+    void ov.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+    ov.classList.add('open');
+  }
+  function hideOverlay(ov) {
+    ov.classList.remove('open');
+    ov.hidden = true;
+  }
+
+  /* ---------- 开局与模式切换 ---------- */
+  function startGame(m) {
+    mode = m;
+    state = 'playing';
+    score = 0; newRecord = false; timeUp = false;
+    movesLeft = MOVE_LIMIT;
+    lock = false; pendingPause = false; shuffleStreak = 0;
+    sel = null; cur = null; press = null;
+    best = m === 'time' ? bestTime : bestMoves;
+    bestEl.textContent = best;
+    scoreEl.textContent = '0';
+    limitLab.textContent = m === 'time' ? '时间' : '步数';
+    limitVal.textContent = m === 'time' ? TIME_LIMIT : MOVE_LIMIT;
+    limitStat.classList.remove('danger');
+    if (m === 'time') endTime = Date.now() + TIME_LIMIT * 1000;
+    hideOverlay(ovStart); hideOverlay(ovPause); hideOverlay(ovOver);
+    pauseBtn.textContent = '暂停';
+    pauseBtn.disabled = false;
+    restartBtn.disabled = false;
+    newBoard();
+  }
+  function toReady() {   // 回到模式选择界面
+    state = 'ready';
+    pendingPause = false;
+    hideOverlay(ovOver);
+    showOverlay(ovStart);
+    pauseBtn.disabled = true;
+    restartBtn.disabled = true;
+  }
+
+  /* ---------- 暂停 / 继续 ---------- */
+  function pauseGame() {
+    if (state !== 'playing') return;
+    if (lock) { pendingPause = true; return; }   // 连锁收尾后再真正暂停
+    state = 'paused';
+    pausedAt = Date.now();
+    showOverlay(ovPause);
+    pauseBtn.textContent = '继续';
+  }
+  function resumeGame() {
+    if (state !== 'paused') return;
+    if (mode === 'time') endTime += Date.now() - pausedAt;   // 暂停时长不计入倒计时
+    state = 'playing';
+    hideOverlay(ovPause);
+    pauseBtn.textContent = '暂停';
+  }
+  function togglePause() {
+    if (state === 'playing') pauseGame();
+    else if (state === 'paused') resumeGame();
+  }
+
+  /* ---------- HUD ---------- */
+  function paintHUD() {
+    if (mode === 'moves') {
+      limitVal.textContent = movesLeft;
+      limitStat.classList.toggle('danger', movesLeft <= 5);
+    }
+  }
+
+  /* ---------- 选择与键盘光标 ---------- */
+  function setSelection(cell) {
+    clearSelection();
+    sel = cell;
+    const t = grid[cell.r][cell.c];
+    if (t) t.el.classList.add('selected');
+  }
+  function clearSelection() {
+    if (sel) {
+      const row = grid[sel.r];
+      if (row && row[sel.c]) row[sel.c].el.classList.remove('selected');
+    }
+    sel = null;
+    paintCursor();
+  }
+  function paintCursor() {
+    board.querySelectorAll('.tile.cursor').forEach(function (el) { el.classList.remove('cursor'); });
+    if (cur && state === 'playing') {
+      const row = grid[cur.r];
+      if (row && row[cur.c]) row[cur.c].el.classList.add('cursor');
+    }
+  }
+
+  /* ---------- 指针交互：点击选择 + 拖动交换（Pointer Events 统一鼠标与触屏） ---------- */
+  function cellAt(x, y) {
+    const rect = board.getBoundingClientRect();
+    const c = Math.floor((x - rect.left) / rect.width * SIZE);
+    const r = Math.floor((y - rect.top) / rect.height * SIZE);
+    if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return null;
+    return { r: r, c: c };
+  }
+  board.addEventListener('pointerdown', function (e) {
+    if (press || state !== 'playing' || lock) return;
+    const cell = cellAt(e.clientX, e.clientY);
+    if (!cell) return;
+    press = { r: cell.r, c: cell.c, x: e.clientX, y: e.clientY, moved: false };
+    pressId = e.pointerId;
+    e.preventDefault();
+  });
+  board.addEventListener('pointermove', function (e) {
+    if (!press || e.pointerId !== pressId || press.moved) return;
+    const rect = board.getBoundingClientRect();
+    const th = rect.width / SIZE * 0.4;   // 位移超过约半格才算拖动
+    const dx = e.clientX - press.x, dy = e.clientY - press.y;
+    if (Math.abs(dx) < th && Math.abs(dy) < th) return;
+    press.moved = true;
+    const from = { r: press.r, c: press.c };
+    const to = Math.abs(dx) > Math.abs(dy)
+      ? { r: from.r, c: from.c + (dx > 0 ? 1 : -1) }
+      : { r: from.r + (dy > 0 ? 1 : -1), c: from.c };
+    clearSelection();
+    trySwap(from, to);
+  });
+  board.addEventListener('pointerup', function (e) {
+    if (!press || e.pointerId !== pressId) return;
+    const p = press;
+    press = null;
+    if (p.moved || state !== 'playing' || lock) return;
+    const cell = cellAt(e.clientX, e.clientY) || p;   // 手指略移出棋盘时仍按按下位置算
+    handleTap(cell);
+  });
+  board.addEventListener('pointercancel', function () { press = null; });
+
+  function handleTap(cell) {
+    if (sel && sel.r === cell.r && sel.c === cell.c) { clearSelection(); return; }   // 再点一次取消选中
+    if (sel && Math.abs(sel.r - cell.r) + Math.abs(sel.c - cell.c) === 1) {          // 点相邻格：直接交换
+      const a = sel;
+      clearSelection();
+      trySwap(a, cell);
+      return;
+    }
+    setSelection(cell);   // 选中，或改选另一枚
+  }
+
+  /* ---------- 键盘操作 ---------- */
+  const DIRKEYS = {
+    ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
+    w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1],
+    W: [-1, 0], S: [1, 0], A: [0, -1], D: [0, 1]
+  };
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = DIRKEYS[e.key];
+    if (k) {
+      e.preventDefault();   // 阻止方向键滚动页面
+      onDir(k[0], k[1]);
+      return;
+    }
+    if (e.key === ' ' || e.key === 'Enter') {
+      if (state === 'playing') { e.preventDefault(); onSelect(); }
+      return;   // 非进行中放行，弹层按钮的键盘激活不受影响
+    }
+    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+      if (state === 'playing' || state === 'paused') { e.preventDefault(); togglePause(); }
+    }
+  });
+  function onDir(dr, dc) {
+    if (state !== 'playing') return;
+    if (sel) {   // 已选中：与该方向的邻居交换
+      const tr = sel.r + dr, tc = sel.c + dc;
+      if (tr >= 0 && tr < SIZE && tc >= 0 && tc < SIZE) {
+        const a = sel;
+        clearSelection();
+        trySwap(a, { r: tr, c: tc });
+      }
+      return;
+    }
+    if (!cur) cur = { r: SIZE >> 1, c: SIZE >> 1 };   // 首次按键光标出现在棋盘中心
+    else {
+      cur.r = Math.min(SIZE - 1, Math.max(0, cur.r + dr));
+      cur.c = Math.min(SIZE - 1, Math.max(0, cur.c + dc));
+    }
+    paintCursor();
+  }
+  function onSelect() {
+    if (lock) return;
+    if (!cur) { cur = { r: SIZE >> 1, c: SIZE >> 1 }; paintCursor(); return; }
+    if (sel) clearSelection();
+    else setSelection({ r: cur.r, c: cur.c });
+  }
+
+  /* ---------- 按钮 ---------- */
+  $('btnTimed').addEventListener('click', function () { startGame('time'); this.blur(); });
+  $('btnMoves').addEventListener('click', function () { startGame('moves'); this.blur(); });
+  $('btnResume').addEventListener('click', function () { resumeGame(); this.blur(); });
+  $('btnAgain').addEventListener('click', function () { startGame(mode); this.blur(); });
+  $('btnSwitch').addEventListener('click', function () { toReady(); this.blur(); });
+  pauseBtn.addEventListener('click', function () { togglePause(); this.blur(); });
+  restartBtn.addEventListener('click', function () { if (state !== 'ready') startGame(mode); this.blur(); });
+
+  /* ---------- 限时模式倒计时（常驻轮询，按状态过滤） ---------- */
+  setInterval(function () {
+    if (state !== 'playing' || mode !== 'time') return;
+    const remain = endTime - Date.now();
+    limitVal.textContent = Math.max(0, Math.ceil(remain / 1000));
+    if (remain <= 10000) limitStat.classList.add('danger');
+    if (remain <= 0) {
+      timeUp = true;
+      if (!lock) gameOver();   // 连锁进行中等收尾，finishTurn 里结算
+    }
+  }, 100);
+
+  /* ---------- 切后台自动暂停 ---------- */
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === 'playing') pauseGame();
+  });
+
+  /* ---------- 初始化：铺 64 个底格 → 摆好棋盘 → 停在开始界面 ---------- */
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const bg = document.createElement('div');
+      bg.className = 'cellbg' + ((r + c) % 2 ? ' alt' : '');
+      bg.style.setProperty('--x', c);
+      bg.style.setProperty('--y', r);
+      board.appendChild(bg);
+    }
+  }
+  newBoard();
+  })();
+  </script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>点击两枚相邻方块交换位置，或按住一枚拖向相邻方向</li>
+        <li>凑成横行或竖列三枚同色即消除，上方方块下落补位</li>
+        <li>连锁消除叠加连击倍率，四连五连还有额外奖励</li>
+        <li>限时模式 60 秒内冲高分；限步模式 30 步每步都要精打细算</li>
+        <li>棋盘无步可走时自动洗牌，无效交换不扣步数</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>鼠标 / 触屏：点选相邻两枚交换，或直接拖动</li>
+        <li>方向键移动光标，空格或回车选中，再按方向键与相邻交换</li>
+        <li>P / Esc：暂停或继续</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成语接龙 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：成语接龙，用上一个成语的末字（或同音字）开头接新成语，内置常用成语库与释义展示，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/idiom-chain/app.html">
+<style>
+/* ===== 成语接龙 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） =====
+   宣纸浅米底 + 青碧强调 + 朱砂点缀（末字提示 / 谐音徽标 / 超时告警） */
+[hidden]{display:none!important}
+:root{
+  --primary:#0f766e;
+  --danger:#c0392b;
+  --ink:#33302b;
+  --muted:#8a8478;
+  --line:#e6e2d6;
+  --bg:#f1efe7;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height:100vh;display:flex;justify-content:center;
+  padding:20px 14px 44px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{width:100%;max-width:560px}
+
+header{text-align:center;margin-bottom:14px}
+h1{font-size:22px;font-weight:800;letter-spacing:2px}
+.sub{margin-top:4px;font-size:12.5px;color:var(--muted)}
+
+/* HUD：分数 / 最高分 / 暂停 / 新一局 */
+.hud{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.stat{
+  flex:1;min-width:88px;background:#fff;border:1px solid var(--line);
+  border-radius:12px;padding:7px 8px;text-align:center;
+  box-shadow:0 2px 10px rgba(90,84,68,.08);
+}
+.stat .lab{display:block;font-size:11.5px;color:var(--muted);letter-spacing:2px}
+.stat .val{display:block;margin-top:2px;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.bump{animation:bump .2s ease}
+@keyframes bump{50%{transform:scale(1.07)}}
+
+button{font:inherit;touch-action:manipulation}
+.btn{
+  border:0;border-radius:12px;padding:0 16px;height:44px;
+  background:var(--primary);color:#fff;font-size:14.5px;font-weight:600;
+  cursor:pointer;box-shadow:0 2px 10px rgba(15,118,110,.28);
+}
+.btn:active{transform:translateY(1px)}
+.btn.plain{background:#edeade;color:var(--ink);font-weight:500;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default;box-shadow:none}
+.hud .btn{align-self:stretch}
+
+/* 倒计时条 */
+.timer-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.timer{flex:1;height:9px;background:#e7e3d6;border-radius:6px;overflow:hidden}
+.timer-bar{height:100%;width:100%;background:var(--primary);border-radius:6px}
+.timer.danger .timer-bar{background:var(--danger);animation:pulse .55s ease infinite}
+@keyframes pulse{50%{opacity:.5}}
+.timer-num{width:38px;text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timer-row.danger .timer-num{color:var(--danger);font-weight:700}
+
+/* 舞台：当前成语卡 + 接龙轨迹，弹层覆盖其上 */
+.stage{position:relative}
+.panel{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 32px rgba(90,84,68,.10);
+}
+.cur-card{padding:16px 16px 14px}
+.char-row{display:flex;justify-content:center;gap:9px;min-height:76px;align-items:stretch}
+.char{
+  width:66px;background:#fbfaf6;border:1px solid var(--line);border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:6px 0;
+}
+.char .cp{font-size:11px;color:var(--muted)}
+.char .cg{font-size:33px;font-weight:700;line-height:1.15}
+/* 末字：下一个成语的开头，用朱砂虚线框标出 */
+.char.last{border:2px dashed var(--danger);background:#fdf6f4}
+.char.last .cg{color:var(--danger)}
+.cur-card.bump{animation:bump .25s ease}
+.cur-mean{margin-top:11px;font-size:13.5px;line-height:1.75;color:#57534a;text-align:center}
+.cur-ask{margin-top:7px;font-size:13px;color:var(--primary);text-align:center}
+.cur-ask b{color:var(--danger)}
+
+.chain-wrap{margin-top:10px;padding:12px 14px 10px}
+.chain-title{font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
+.chain{max-height:216px;overflow-y:auto;overscroll-behavior:contain}
+.chain-empty{font-size:12.5px;color:#b5afa1;text-align:center;padding:14px 0 10px}
+.chain-item{
+  position:relative;margin-left:7px;padding:5px 8px 6px 16px;
+  border-left:2px solid var(--line);
+}
+.chain-item::before{
+  content:"";position:absolute;left:-6px;top:12px;width:8px;height:8px;
+  border-radius:50%;background:#fff;border:2px solid var(--primary);
+}
+.chain-item.start::before{border-color:var(--danger)}
+.chain-item .cw{font-size:16px;font-weight:700;display:inline-block;margin-right:8px}
+.chain-item .cp{font-size:11.5px;color:var(--muted)}
+.chain-item .tags{display:inline-block;margin-left:8px;vertical-align:1px}
+.tag{
+  display:inline-block;font-size:10.5px;line-height:1.5;padding:0 5px;margin-right:4px;
+  border:1px solid #b45309;color:#b45309;border-radius:4px;
+}
+.tag.start{border-color:var(--danger);color:var(--danger)}
+
+/* 弹层（hidden + 同步回流 + open，保证过渡生效） */
+.overlay{
+  position:absolute;inset:0;z-index:5;border-radius:14px;
+  background:rgba(252,251,246,.94);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:18px;opacity:0;transition:opacity .2s ease;
+}
+.overlay.open{opacity:1}
+.ov-title{font-size:26px;font-weight:800;margin-bottom:10px}
+.ov-sub{font-size:14px;color:#57534a;line-height:1.9;margin:4px 0}
+.ov-sub b{font-variant-numeric:tabular-nums;font-size:18px}
+.ov-sub em{font-style:normal;color:var(--danger);font-weight:700}
+.ov-btns{display:flex;gap:10px;margin-top:12px}
+.ov-btns .btn{height:42px}
+/* 结算复盘：本局全部成语 + 拼音 + 释义 */
+.review{width:100%;max-height:34vh;overflow-y:auto;text-align:left;margin-top:10px;padding:0 4px;overscroll-behavior:contain}
+.review li{list-style:none;padding:7px 2px;border-top:1px dashed var(--line)}
+.review li:first-child{border-top:0}
+.review .rw{font-size:15.5px;font-weight:700;margin-right:8px}
+.review .rp{font-size:11px;color:var(--muted)}
+.review .rm{font-size:12.5px;color:#6b665b;line-height:1.6;margin-top:1px}
+.review .tag{margin-left:8px;margin-right:0}
+
+/* 输入行与反馈 */
+.input-row{display:flex;gap:8px;margin-top:12px}
+.input-row input{
+  flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:12px;
+  padding:0 12px;font:16px/1.2 inherit;color:var(--ink);background:#fff;outline:none;
+}
+.input-row input:focus{border-color:var(--primary)}
+.input-row input:disabled{background:#f3f1e9;color:#b5afa1}
+.input-row.shake{animation:shake .32s ease}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.feedback{min-height:20px;margin-top:9px;font-size:13.5px;text-align:center;color:var(--primary);opacity:0;transition:opacity .25s}
+.feedback.err{color:var(--danger)}
+.feedback.show{opacity:1}
+
+.tips{margin-top:10px;font-size:12px;color:#a49e90;text-align:center;line-height:1.8}
+footer{text-align:center;color:#b8b2a3;font-size:12px;margin-top:14px}
+
+/* 窄屏竖屏：字牌与轨迹收窄 */
+@media (max-width:420px){
+  .char{width:58px}
+  .char .cg{font-size:28px}
+  .chain{max-height:170px}
+  .review{max-height:30vh}
+}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="wrap">
+  <header>
+    <h1>成语接龙</h1>
+    <p class="sub">用末字接新成语，同音也算，看你能接多长</p>
+  </header>
+
+  <section class="hud">
+    <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
+    <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
+    <button class="btn plain" id="pauseBtn" type="button">暂停</button>
+    <button class="btn plain" id="newBtn" type="button">新一局</button>
+  </section>
+
+  <div class="timer-row" id="timerRow">
+    <div class="timer"><div class="timer-bar" id="timerBar"></div></div>
+    <span class="timer-num" id="timerNum">30s</span>
+  </div>
+
+  <div class="stage">
+    <section class="panel cur-card" id="curCard">
+      <div class="char-row" id="curChars"></div>
+      <p class="cur-mean" id="curMean">点「开始挑战」后，这里会展示成语的释义</p>
+      <p class="cur-ask" id="curAsk">用上一个成语的末字（或同音字）开头接龙</p>
+    </section>
+    <section class="panel chain-wrap">
+      <p class="chain-title">接龙轨迹</p>
+      <div class="chain" id="chainBox"></div>
+      <p class="chain-empty" id="chainEmpty">还没有接龙记录</p>
+    </section>
+
+    <div class="overlay" id="ovStart" hidden>
+      <p class="ov-title">成语接龙</p>
+      <p class="ov-sub">系统给出起始成语，你用它的末字（或同音字）<br>开头接一个词库里的新成语<br>内置 <b id="libCount">0</b> 条常用成语，每回合限时 30 秒<br>接不上或超时即结束，答得越快加分越多</p>
+      <div class="ov-btns">
+        <button class="btn" id="btnStart" type="button">开始挑战</button>
+      </div>
+    </div>
+    <div class="overlay" id="ovOver" hidden>
+      <p class="ov-title" id="overTitle">游戏结束</p>
+      <p class="ov-sub" id="overSub"></p>
+      <div class="ov-btns">
+        <button class="btn" id="btnRestart" type="button">再来一局</button>
+      </div>
+      <ul class="review" id="reviewList"></ul>
+    </div>
+    <div class="overlay" id="ovPause" hidden>
+      <p class="ov-title">已暂停</p>
+      <p class="ov-sub">倒计时已冻结，随时继续</p>
+      <div class="ov-btns">
+        <button class="btn" id="btnResume" type="button">继续游戏</button>
+      </div>
+    </div>
+  </div>
+
+  <form class="input-row" id="form" autocomplete="off">
+    <input id="word" type="text" maxlength="4" aria-label="接龙成语，输入四个字"
+           placeholder="输入四字成语" enterkeyhint="go" disabled>
+    <button class="btn" id="submitBtn" type="submit">接上</button>
+    <button class="btn plain" id="hintBtn" type="button" disabled>提示 ×3</button>
+  </form>
+  <p class="feedback" id="feedback" role="status"></p>
+  <p class="tips">成语须在词库内；首字与上一个末字同字或同音即可接上<br>暂停：Esc 或「暂停」按钮 · 切到后台自动暂停</p>
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+/* ================= 成语接龙 · 主逻辑（零依赖，纯本地运行） =================
+   玩法：系统给起始成语 → 玩家用其末字（或同音字）开头输入库内成语 →
+   接对加分并换当前成语；每回合限时，超时或词库接不上则结束。 */
+
+// ---------- 词库拼音表：字 -> 无声调拼音（生成器注入） ----------
+// 供谐音容错与拼音展示使用，只收录词库用字；多音字取成语中的读法。
+const PINYIN = {
+  "一":"yi","鸣":"ming","惊":"jing","人":"ren","帆":"fan","风":"feng","顺":"shun","见":"jian",
+  "如":"ru","故":"gu","往":"wang","无":"wu","前":"qian","举":"ju","两":"liang","得":"de",
+  "目":"mu","了":"liao","然":"ran","丝":"si","不":"bu","苟":"gou","言":"yan","为":"wei",
+  "定":"ding","马":"ma","当":"dang","先":"xian","飞":"fei","冲":"chong","天":"tian","尘":"chen",
+  "染":"ran","诺":"nuo","千":"qian","金":"jin","才":"cai","辈":"bei","出":"chu","山":"shan",
+  "海":"hai","胜":"sheng","杰":"jie","地":"di","灵":"ling","声":"sheng","鼎":"ding","沸":"fei",
+  "入":"ru","木":"mu","三":"san","分":"fen","力":"li","挽":"wan","狂":"kuang","澜":"lan",
+  "争":"zheng","上":"shang","游":"you","十":"shi","全":"quan","美":"mei","方":"fang","百":"bai",
+  "计":"ji","军":"jun","万":"wan","载":"zai","难":"nan","逢":"feng","钧":"jun","发":"fa",
+  "变":"bian","化":"hua","真":"zhen","确":"que","大":"da","公":"gong","私":"si","器":"qi",
+  "晚":"wan","成":"cheng","显":"xian","身":"shen","手":"shou","智":"zhi","若":"ruo","愚":"yu",
+  "同":"tong","小":"xiao","异":"yi","快":"kuai","心":"xin","功":"gong","告":"gao","捞":"lao",
+  "针":"zhen","清":"qing","水":"shui","秀":"xiu","穷":"qiong","尽":"jin","长":"chang","久":"jiu",
+  "涯":"ya","角":"jiao","衣":"yi","缝":"feng","高":"gao","厚":"hou","花":"hua","乱":"luan",
+  "坠":"zhui","经":"jing","义":"yi","翻":"fan","覆":"fu","开":"kai","门":"men","源":"yuan",
+  "节":"jie","流":"liu","诚":"cheng","布":"bu","井":"jing","有":"you","条":"tiao","已":"yi",
+  "舟":"zhou","到":"dao","渠":"qu","落":"luo","石":"shi","滴":"di","穿":"chuan","火":"huo",
+  "中":"zhong","取":"qu","栗":"li","怒":"nu","放":"fang","旷":"kuang","神":"shen","怡":"yi",
+  "平":"ping","气":"qi","和":"he","巧":"qiao","满":"man","意":"yi","足":"zu","领":"ling",
+  "会":"hui","照":"zhao","宣":"xuan","直":"zhi","口":"kou","生":"sheng","微":"wei","至":"zhi",
+  "独":"du","偶":"ou","能":"neng","忧":"you","虑":"lv","五":"wu","湖":"hu","四":"si",
+  "光":"guang","色":"se","日":"ri","积":"ji","月":"yue","累":"lei","新":"xin","砥":"di",
+  "柱":"zhu","从":"cong","容":"rong","迫":"po","今":"jin","非":"fei","昔":"xi","比":"bi",
+  "丽":"li","浪":"lang","静":"jing","吹":"chui","草":"cao","动":"dong","起":"qi","云":"yun",
+  "涌":"yong","雨":"yu","调":"tiao","乌":"wu","兔":"tu","走":"zou","凤":"feng","毛":"mao",
+  "麟":"lin","头":"tou","奇":"qi","制":"zhi","类":"lei","拔":"ba","萃":"cui","死":"si",
+  "料":"liao","半":"ban","途":"tu","而":"er","废":"fei","信":"xin","疑":"yi","古":"gu",
+  "来":"lai","香":"xiang","叶":"ye","好":"hao","龙":"long","只":"zhi","朝":"zhao","夕":"xi",
+  "史":"shi","例":"li","面":"mian","八":"ba","家":"jia","活":"huo","虎":"hu","机":"ji",
+  "勃":"bo","息":"xi","失":"shi","之":"zhi","交":"jiao","臂":"bi","仗":"zhang","执":"zhi",
+  "白":"bai","驹":"ju","过":"guo","隙":"xi","乐":"le","于":"yu","助":"zhu","极":"ji",
+  "悲":"bei","宁":"ning","致":"zhi","远":"yuan","路":"lu","立":"li","竿":"gan","影":"ying",
+  "是":"shi","道":"dao","重":"zhong","脚":"jiao","轻":"qing","屈":"qu","礼":"li","尚":"shang",
+  "必":"bi","可":"ke","少":"shao","对":"dui","答":"da","老":"lao","益":"yi","壮":"zhuang",
+  "识":"shi","皆":"jie","碑":"bei","共":"gong","睹":"du","备":"bei","患":"huan","始":"shi",
+  "终":"zhong","的":"di","矢":"shi","折":"zhe","挠":"nao","齐":"qi","读":"du","厌":"yan",
+  "竹":"zhu","在":"zai","胸":"xiong","业":"ye","扬":"yang","避":"bi","短":"duan","眉":"mei",
+  "吐":"tu","阴":"yin","似":"si","箭":"jian","明":"ming","磊":"lei","彩":"cai","夺":"duo",
+  "愧":"kui","断":"duan","济":"ji","协":"xie","甘":"gan","苦":"ku","因":"yin","材":"cai",
+  "施":"shi","教":"jiao","宜":"yi","回":"hui","味":"wei","转":"zhuan","年":"nian","富":"fu",
+  "强":"qiang","任":"ren","劳":"lao","怨":"yuan","以":"yi","赴":"fu","贯":"guan","注":"zhu",
+  "名":"ming","列":"lie","茅":"mao","副":"fu","其":"qi","实":"shi","孙":"sun","各":"ge",
+  "抒":"shu","己":"ji","行":"hang","志":"zhi","凌":"ling","锋":"feng","陷":"xian","阵":"zhen",
+  "汗":"han","浃":"jia","背":"bei","江":"jiang","画":"hua","守":"shou","株":"zhu","待":"dai",
+  "安":"an","居":"ju","恙":"yang","未":"wei","酬":"chou","添":"tian","翼":"yi","鱼":"yu",
+  "事":"shi","多":"duo","磨":"mo","欢":"huan","喜":"xi","聚":"ju","堂":"tang","严":"yan",
+  "律":"lv","弄":"nong","假":"jia","观":"guan","合":"he","东":"dong","击":"ji","西":"xi",
+  "语":"yu","圆":"yuan","杞":"qi","求":"qiu","坚":"jian","韧":"ren","摧":"cui","时":"shi",
+  "运":"yun","里":"li","应":"ying","外":"wai","疵":"ci","围":"wei","魏":"wei","救":"jiu",
+  "赵":"zhao","别":"bie","裁":"cai","具":"ju","格":"ge","呆":"dai","鸡":"ji","含":"han",
+  "辛":"xin","茹":"ru","饮":"yin","思":"si","简":"jian","赅":"gai","寝":"qin","忘":"wang",
+  "食":"shi","沧":"cang","桑":"sang","田":"tian","粟":"su","沉":"chen","雁":"yan","完":"wan",
+  "缺":"que","词":"ci","达":"da","忍":"ren","辱":"ru","负":"fu","妙":"miao","笔":"bi",
+  "春":"chun","蛋":"dan","打":"da","青":"qing","蓝":"lan","点":"dian","睛":"jing","蛇":"she",
+  "倍":"bei","与":"yu","愿":"yuan","违":"wei","势":"shi","破":"po","卧":"wo","薪":"xin",
+  "尝":"chang","胆":"dan","奋":"fen","顾":"gu","图":"tu","察":"cha","秋":"qiu","毫":"hao",
+  "张":"zhang","昂":"ang","首":"shou","挺":"ting","固":"gu","汤":"tang","忠":"zhong","逆":"ni",
+  "耳":"er","知":"zhi","彼":"bi","进":"jin","颜":"yan","悦":"yue","蔼":"ai","亲":"qin",
+  "玉":"yu","良":"liang","碧":"bi","辉":"hui","煌":"huang","受":"shou","匪":"fei","浅":"qian",
+  "狐":"hu","威":"wei","庞":"pang","物":"wu","端":"duan","幻":"huan","莫":"mo","测":"ce",
+  "归":"gui","郑":"zheng","卷":"juan","土":"tu","单":"dan","枪":"qiang","匹":"pi","学":"xue",
+  "用":"yong","诗":"shi","情":"qing","视":"shi","艰":"jian","斗":"dou","卓":"zhuo","绝":"jue",
+  "细":"xi","暖":"nuan","瞻":"zhan","瞩":"zhu","枕":"zhen","阔":"kuo","空":"kong","浩":"hao",
+  "烟":"yan","深":"shen","熟":"shu","砖":"zhuan","加":"jia","瓦":"wa","寡":"gua","欲":"yu",
+  "粗":"cu","茶":"cha","淡":"dan","饭":"fan","焕":"huan","慢":"man","斯":"si","理":"li",
+  "精":"jing","旗":"qi","兢":"jing","算":"suan","所":"suo","锲":"qie","舍":"she","潜":"qian",
+  "移":"yi","默":"mo","德":"de","望":"wang","鞠":"ju","躬":"gong","瘁":"cui","豁":"huo",
+  "朗":"lang","鹏":"peng","程":"cheng","涨":"zhang","船":"chuan","釜":"fu"
+};
+
+// ---------- 成语库：[成语, 释义]（生成器注入） ----------
+const LIB = [
+  ["一鸣惊人", "比喻平时没有突出表现，一下子做出惊人的成绩"],
+  ["一帆风顺", "比喻非常顺利，没有任何阻碍"],
+  ["一见如故", "初次见面就像老朋友一样合得来"],
+  ["一往无前", "一直向前，无所畏惧"],
+  ["一举两得", "做一件事得到两方面的好处"],
+  ["一目了然", "一眼就看得清清楚楚"],
+  ["一丝不苟", "做事认真细致，一点儿不马虎"],
+  ["一言为定", "一句话说定了，不再更改"],
+  ["一马当先", "作战或做事走在前面，形容带头领先"],
+  ["一飞冲天", "比喻一下子取得惊人的成就"],
+  ["一尘不染", "形容清正廉洁，也形容非常干净"],
+  ["一诺千金", "许下的诺言价值千金，形容说话算数"],
+  ["人才辈出", "有才能的人一批批地不断涌现"],
+  ["人山人海", "形容聚集的人极多"],
+  ["人定胜天", "人力能够战胜自然"],
+  ["人杰地灵", "杰出人物出生或到过的地方成为名胜之地"],
+  ["人声鼎沸", "人群喧闹如锅水沸腾，形容嘈杂热闹"],
+  ["入木三分", "比喻分析问题深刻有力，也形容书法有力"],
+  ["力挽狂澜", "比喻尽力挽回险恶的局势"],
+  ["力争上游", "努力争取先进"],
+  ["十全十美", "各方面都非常完美，毫无缺陷"],
+  ["千方百计", "想尽一切办法，用尽各种计谋"],
+  ["千军万马", "形容队伍雄壮，声势浩大"],
+  ["千载难逢", "一千年也难碰到一次，形容机会极其难得"],
+  ["千钧一发", "一根头发吊着千钧重物，比喻情况万分危急"],
+  ["千变万化", "形容变化极多"],
+  ["千真万确", "形容情况非常确实"],
+  ["大公无私", "一心为公，毫无私心"],
+  ["大器晚成", "大才能的人成就往往比较晚"],
+  ["大显身手", "充分显示出自己的本领"],
+  ["大智若愚", "极有智慧的人表面看上去好像愚笨"],
+  ["大同小异", "大部分相同，只有小部分不同"],
+  ["大快人心", "坏人坏事受到惩罚，大家非常痛快"],
+  ["大功告成", "重大任务或工程宣告完成"],
+  ["大海捞针", "在大海里捞针，比喻极难找到"],
+  ["山清水秀", "形容风景优美"],
+  ["山穷水尽", "山和水都到了尽头，比喻陷入绝境"],
+  ["天长地久", "像天地那样永远存在，形容时间悠久"],
+  ["天涯海角", "形容极远的地方"],
+  ["天衣无缝", "比喻事物周密完善，找不出破绽"],
+  ["天高地厚", "形容恩情深厚，也指事物的复杂艰巨"],
+  ["天花乱坠", "形容说话动听却不切实际"],
+  ["天经地义", "指理所当然、不可改变的道理"],
+  ["天翻地覆", "形容变化巨大，也形容闹得很凶"],
+  ["开门见山", "说话写文章一开始就点明主题"],
+  ["开源节流", "增加收入，节省开支"],
+  ["开诚布公", "诚意待人，坦白无私"],
+  ["井井有条", "形容条理分明，整齐不乱"],
+  ["木已成舟", "比喻事情已成定局，无法改变"],
+  ["水到渠成", "条件成熟，事情自然成功"],
+  ["水落石出", "水落下去石头露出来，比喻真相大白"],
+  ["水滴石穿", "水不断滴可以把石头滴穿，比喻坚持就能成功"],
+  ["火中取栗", "比喻替别人冒险吃苦，自己却一无所得"],
+  ["心花怒放", "心里高兴得像花儿盛开一样"],
+  ["心旷神怡", "心境开阔，精神愉快"],
+  ["心平气和", "心情平静，态度温和"],
+  ["心灵手巧", "心思灵敏，手艺精巧"],
+  ["心满意足", "心里非常满足"],
+  ["心领神会", "不用明说就领悟明白"],
+  ["心照不宣", "彼此心里明白，不必明说"],
+  ["心直口快", "性情直爽，有话就说"],
+  ["无中生有", "凭空捏造"],
+  ["无微不至", "细微之处都关照到，形容关怀备至"],
+  ["无穷无尽", "没有止境，没有尽头"],
+  ["无独有偶", "不只一个，还有一个可以配对"],
+  ["无能为力", "用不上力量，没有能力或力量够不到"],
+  ["无忧无虑", "没有一点忧愁和顾虑"],
+  ["五湖四海", "泛指全国各地"],
+  ["五光十色", "色彩鲜艳，样式繁多"],
+  ["日积月累", "长时间地不断积累"],
+  ["日新月异", "每天每月都有新的变化，形容进步很快"],
+  ["日久天长", "时间长，日子久"],
+  ["中流砥柱", "比喻能在艰难环境中起支柱作用的人"],
+  ["从容不迫", "不慌不忙，沉着镇定"],
+  ["今非昔比", "现在不是过去所能比得上的"],
+  ["风和日丽", "微风和暖，阳光明媚"],
+  ["风平浪静", "没有风浪，比喻平静无事"],
+  ["风吹草动", "风稍一吹草就摇动，比喻轻微的变故"],
+  ["风起云涌", "比喻新事物相继兴起，声势浩大"],
+  ["风雨同舟", "同船共渡风雨，比喻共同度过难关"],
+  ["风调雨顺", "风雨适合农时，形容年景好"],
+  ["乌飞兔走", "乌飞兔跑，形容光阴迅速流逝"],
+  ["凤毛麟角", "凤凰的毛麒麟的角，比喻珍贵稀少的人或物"],
+  ["出人头地", "超出一般人，高人一等"],
+  ["出神入化", "形容技艺高超到了绝妙的境界"],
+  ["出奇制胜", "用奇兵奇计战胜对手"],
+  ["出类拔萃", "才能远远超出同辈"],
+  ["出生入死", "形容冒着生命危险"],
+  ["出人意料", "超出人们的意料"],
+  ["半途而废", "做事没做完就停止下来"],
+  ["半信半疑", "有点相信，又有点怀疑"],
+  ["古往今来", "从古代到现在"],
+  ["古色古香", "形容器物书画等富有古雅的色彩情调"],
+  ["叶公好龙", "比喻表面上爱好某事物，其实并不真爱好"],
+  ["只争朝夕", "抓紧时间，力争在最短时间内达到目的"],
+  ["史无前例", "历史上从来没有过"],
+  ["四面八方", "泛指周围各个方面"],
+  ["四海为家", "志在四方，到处都可以安家"],
+  ["生龙活虎", "形容活泼矫健，富有生气"],
+  ["生机勃勃", "形容充满旺盛的生命力"],
+  ["生生不息", "不断地生长繁殖，永不停止"],
+  ["失之交臂", "当面错过好机会"],
+  ["仗义执言", "为了正义说公道话"],
+  ["白手起家", "在没有基础的条件下创立起事业"],
+  ["白驹过隙", "白马跑过缝隙，比喻时间过得飞快"],
+  ["乐于助人", "以帮助别人为快乐"],
+  ["乐极生悲", "高兴到极点时反而发生悲伤的事"],
+  ["宁静致远", "保持宁静的心态才能实现远大目标"],
+  ["半路出家", "比喻中途改行从事另一项工作"],
+  ["立竿见影", "把竿立在阳光下立刻看到影子，比喻立见功效"],
+  ["立足之地", "站脚的地方，比喻容身的处所"],
+  ["头头是道", "形容说话做事有条有理"],
+  ["头重脚轻", "上面重下面轻，比喻基础不稳固"],
+  ["宁死不屈", "宁愿死去也不屈服"],
+  ["礼尚往来", "在礼节上注重有来有往"],
+  ["必不可少", "绝对需要的，无法缺少的"],
+  ["对答如流", "回答问话像流水一样流畅"],
+  ["老当益壮", "年纪虽老，志气反而更旺盛"],
+  ["老马识途", "老马认识道路，比喻有经验的人熟悉情况"],
+  ["有口皆碑", "所有人的嘴都是记功碑，形容人人称赞"],
+  ["有目共睹", "大家的眼睛都看得见"],
+  ["有备无患", "事先有准备就可以免除后患"],
+  ["有始有终", "做事有头有尾，能坚持到底"],
+  ["有的放矢", "对准靶子射箭，比喻说话做事有针对性"],
+  ["百发百中", "每次都命中目标，比喻做事有充分把握"],
+  ["百折不挠", "无论受多少挫折都不退缩"],
+  ["百花齐放", "比喻各种艺术风格自由发展"],
+  ["百家争鸣", "比喻学术上不同流派自由争论"],
+  ["百读不厌", "读多少遍也不感到厌倦"],
+  ["成千上万", "形容数量很多"],
+  ["成竹在胸", "画竹前心中已有竹的形象，比喻事先有通盘考虑"],
+  ["成家立业", "结婚并建立起自己的事业"],
+  ["扬长避短", "发扬长处，避开短处"],
+  ["扬眉吐气", "形容摆脱压抑后的得意畅快"],
+  ["至高无上", "再没有比它更高的"],
+  ["光阴似箭", "时间像箭一样飞逝"],
+  ["光明磊落", "胸怀坦白，正大光明"],
+  ["光彩夺目", "色彩鲜艳耀眼"],
+  ["当之无愧", "当得起某种称号，毫不惭愧"],
+  ["当机立断", "在关键时刻果断做出决断"],
+  ["同舟共济", "同船渡河，比喻同心协力共渡难关"],
+  ["同心协力", "团结一致，共同努力"],
+  ["同甘共苦", "共同享受幸福，共同承担艰苦"],
+  ["因材施教", "针对学习者的具体情况采取不同的教学方法"],
+  ["因地制宜", "根据不同地区的实际情况规定适当办法"],
+  ["因小失大", "为了小的利益造成重大损失"],
+  ["回味无穷", "事后越想越觉得意味深长"],
+  ["回心转意", "改变原来的态度和主张"],
+  ["年富力强", "年纪轻，精力旺盛"],
+  ["任重道远", "担子重，路程远，比喻责任重大"],
+  ["任劳任怨", "做事不辞劳苦，不怕别人埋怨"],
+  ["似是而非", "看来是对的，其实不对"],
+  ["全力以赴", "把全部力量都投入进去"],
+  ["全神贯注", "全副精神集中在一点上"],
+  ["名列前茅", "名次排在前面"],
+  ["名副其实", "名声或名义与实际相符合"],
+  ["名落孙山", "考试或选拔中未被录取"],
+  ["各抒己见", "各人充分表达自己的见解"],
+  ["各行各业", "泛指各种职业、各个领域"],
+  ["壮志凌云", "豪壮的志向直上云霄"],
+  ["冲锋陷阵", "作战勇猛，冲在前面"],
+  ["汗马功劳", "指战功，也泛指在工作中做出的重大贡献"],
+  ["汗流浃背", "汗水流遍脊背，形容出汗很多或极度惶恐"],
+  ["江山如画", "自然风景像图画一样美丽"],
+  ["守株待兔", "比喻死守狭隘经验，不知变通"],
+  ["安居乐业", "安定地生活，愉快地劳动"],
+  ["安然无恙", "平安无事，没有受到损害"],
+  ["壮志未酬", "远大的志愿没有实现"],
+  ["如虎添翼", "像老虎添了翅膀，比喻强大的得到援助后更加强大"],
+  ["如鱼得水", "比喻得到与自己十分投合的人或环境"],
+  ["好事多磨", "好事情在成功前往往要经历波折"],
+  ["欢天喜地", "形容非常高兴"],
+  ["欢聚一堂", "快乐地聚集在一起"],
+  ["严阵以待", "摆好严整的阵势等待敌人"],
+  ["严于律己", "严格地要求自己"],
+  ["弄假成真", "本来是假装的，结果却成了真事"],
+  ["走马观花", "骑马看花，比喻粗略地观察事物"],
+  ["志同道合", "志向相同，意见相合"],
+  ["声东击西", "表面声张攻打东边，其实攻打西边"],
+  ["花言巧语", "虚假而动听的话"],
+  ["花好月圆", "花儿正开月亮正圆，比喻美好圆满的生活"],
+  ["杞人忧天", "比喻不必要的或无根据的忧虑"],
+  ["求之不得", "想找都找不到，形容急切盼望得到"],
+  ["坚韧不拔", "形容意志坚定，不可动摇"],
+  ["坚不可摧", "非常坚固，摧毁不了"],
+  ["时来运转", "时机来了，运气好转"],
+  ["里应外合", "外面攻打，里面接应"],
+  ["吹毛求疵", "吹开皮上的毛找疤痕，比喻故意挑剔毛病"],
+  ["围魏救赵", "比喻避实就虚、借以取胜的策略"],
+  ["助人为乐", "把帮助别人当作快乐"],
+  ["别开生面", "另外开创新的形式或局面"],
+  ["别出心裁", "构思独特，与众不同"],
+  ["别具一格", "另有一种独特的风格"],
+  ["呆若木鸡", "呆得像木头鸡一样，形容因恐惧或惊讶发愣"],
+  ["含辛茹苦", "忍受种种辛苦"],
+  ["饮水思源", "喝水的时候想到水的来源，比喻不忘本"],
+  ["言而有信", "说话算数，讲信用"],
+  ["言简意赅", "言辞简练而意思完备"],
+  ["应对如流", "答话像流水一样流畅"],
+  ["废寝忘食", "顾不得睡觉忘记吃饭，形容专心努力"],
+  ["沧海桑田", "大海变成农田，比喻世事变化巨大"],
+  ["沧海一粟", "大海里的一粒谷子，比喻非常渺小"],
+  ["沉鱼落雁", "形容女子容貌极其美丽"],
+  ["完美无缺", "完善美好，没有缺点"],
+  ["词不达意", "词句不能确切地表达意思"],
+  ["灵机一动", "急忙中忽然想出好办法"],
+  ["忍辱负重", "忍受屈辱，承担重任"],
+  ["忍无可忍", "再也忍受不下去了"],
+  ["妙笔生花", "比喻杰出的写作才能"],
+  ["妙手回春", "形容医术高明，能治好重病"],
+  ["鸡飞蛋打", "鸡飞走了蛋也打破了，比喻两头落空"],
+  ["青出于蓝", "靛青从蓝草中提炼出来，比喻学生胜过老师"],
+  ["画龙点睛", "比喻在关键处着墨点明主旨"],
+  ["画蛇添足", "比喻多此一举，反而弄巧成拙"],
+  ["事半功倍", "费力小而收效大"],
+  ["事倍功半", "费力大而收效小"],
+  ["事与愿违", "事情的发展与愿望相反"],
+  ["势如破竹", "形势像劈竹子一样，比喻节节胜利毫无阻碍"],
+  ["卧薪尝胆", "睡在柴草上尝苦胆，形容刻苦自励发愤图强"],
+  ["奋不顾身", "奋勇向前，不顾个人安危"],
+  ["奋发图强", "振作精神，努力谋求强盛"],
+  ["明察秋毫", "目光敏锐，连极细小的事物也看得清"],
+  ["明目张胆", "公开大胆地做坏事，毫无顾忌"],
+  ["昂首挺胸", "仰起头挺起胸，形容精神振奋"],
+  ["固若金汤", "像金属造的城、滚烫的池水，形容工事极其坚固"],
+  ["忠言逆耳", "正直的劝告听起来往往不舒服"],
+  ["知己知彼", "对自己和对方的情况都很了解"],
+  ["知难而进", "明知困难仍然勇往直前"],
+  ["和颜悦色", "形容态度和蔼可亲"],
+  ["和蔼可亲", "态度温和，使人容易接近"],
+  ["金玉良言", "像金玉一样宝贵的劝告"],
+  ["金碧辉煌", "形容建筑物装饰华丽"],
+  ["受益匪浅", "受到的好处或教益很多"],
+  ["狐假虎威", "狐狸借老虎的威风，比喻倚仗别人的势力欺压人"],
+  ["鱼贯而入", "像游鱼一样一个接一个地进去"],
+  ["庞然大物", "形容体积庞大笨重的东西"],
+  ["变化多端", "变化极多，没有规律"],
+  ["变幻莫测", "变化多端，无法揣测"],
+  ["放虎归山", "把老虎放回山去，比喻留下祸根"],
+  ["郑重其事", "形容态度十分严肃认真"],
+  ["卷土重来", "比喻失败后重新恢复势力"],
+  ["单枪匹马", "一人一马，比喻单独行动没人帮助"],
+  ["学以致用", "学习要能应用于实际"],
+  ["学海无涯", "学问的海洋没有边际"],
+  ["实事求是", "从实际情况出发，求得正确的结论"],
+  ["诗情画意", "像诗画一样的美好意境"],
+  ["视死如归", "把死看作回家一样，形容不怕牺牲"],
+  ["艰苦奋斗", "不怕艰难困苦，坚持斗争"],
+  ["艰苦卓绝", "斗争十分艰苦，超出寻常"],
+  ["细水长流", "比喻节约使用财物，也比喻持之以恒"],
+  ["经久不息", "经过很长时间停不下来"],
+  ["春暖花开", "春天气候温暖，百花盛开"],
+  ["皆大欢喜", "大家都非常高兴满意"],
+  ["胸有成竹", "比喻做事之前已有成熟的打算"],
+  ["高瞻远瞩", "站得高看得远，形容眼光远大"],
+  ["高枕无忧", "垫高枕头安心睡大觉，形容无所顾虑"],
+  ["海阔天空", "像大海天空一样广阔，比喻想象或说话无拘无束"],
+  ["浩如烟海", "形容文献资料等极其丰富"],
+  ["深思熟虑", "反复深入地考虑"],
+  ["深人浅出", "内容深刻而表达浅显易懂"],
+  ["添砖加瓦", "比喻做一点微小的贡献"],
+  ["清心寡欲", "保持心地清净，减少欲念"],
+  ["粗茶淡饭", "简单的饮食，形容生活俭朴"],
+  ["焕然一新", "面貌全新，形容出现了崭新的气象"],
+  ["满载而归", "装满了东西回来，形容收获很大"],
+  ["滴水穿石", "比喻力量虽小，只要持之以恒就能成功"],
+  ["慢条斯理", "形容说话做事慢腾腾，不慌不忙"],
+  ["聚精会神", "集中精神，专心致志"],
+  ["旗开得胜", "军旗一展开就取得胜利，比喻事情一开始就成功"],
+  ["兢兢业业", "形容做事小心谨慎，认真踏实"],
+  ["熟能生巧", "熟练了就能找到窍门"],
+  ["精打细算", "在使用人力物力上精细地计算"],
+  ["精诚所至", "人的诚心所到，能感动天地，事情就能成功"],
+  ["锲而不舍", "雕刻不停，比喻做事持之以恒"],
+  ["潜移默化", "人的思想性格在不知不觉中受到感染而变化"],
+  ["德高望重", "品德高尚，声望很高"],
+  ["鞠躬尽瘁", "不辞劳苦地贡献一切，到死为止"],
+  ["豁然开朗", "一下子出现开阔明朗的境界，比喻顿时明白"],
+  ["鹏程万里", "比喻前程远大"],
+  ["水涨船高", "水位升高船身也跟着升高，比喻事物随基础提高"],
+  ["破釜沉舟", "比喻下定决心，不顾一切干到底"],
+];
+
+// 成语 -> 释义 快查
+const MAP = {};
+LIB.forEach(function (it) { MAP[it[0]] = it[1]; });
+
+// ---------- 常量 ----------
+const ROUND_MS = 30000;   // 每回合答题限时
+const HINTS_MAX = 3;      // 每局提示次数
+const BASE_SCORE = 10;    // 接对一个的基础分
+const HINT_SCORE = 5;     // 提示代接的得分
+
+// ---------- DOM ----------
+const $ = function (id) { return document.getElementById(id); };
+const scoreEl = $('score'), bestEl = $('best'), scoreStat = $('scoreStat');
+const timerBar = $('timerBar'), timerNum = $('timerNum'), timerRow = $('timerRow');
+const curCard = $('curCard'), curChars = $('curChars'), curMean = $('curMean'), curAsk = $('curAsk');
+const chainBox = $('chainBox'), chainEmpty = $('chainEmpty');
+const form = $('form'), wordInput = $('word'), submitBtn = $('submitBtn');
+const hintBtn = $('hintBtn'), pauseBtn = $('pauseBtn');
+const feedbackEl = $('feedback');
+const ovStart = $('ovStart'), ovOver = $('ovOver'), ovPause = $('ovPause');
+const overTitle = $('overTitle'), overSub = $('overSub'), reviewList = $('reviewList');
+$('libCount').textContent = LIB.length;
+
+// ---------- 工具 ----------
+function py(ch) { return PINYIN[ch] || ''; }
+function pinyinOf(word) { return Array.from(word).map(py).join(' '); }
+// nextWord 首字能否接上 prevWord 末字：同字或同音皆可
+function canLink(prevWord, nextWord) {
+  const a = prevWord.slice(-1), b = nextWord.slice(0, 1);
+  return a === b || (py(a) !== '' && py(a) === py(b));
+}
+// 在库中找一个能接 word 末字（或其谐音）的未用成语，找不到返回 null
+function findNext(word, usedSet) {
+  const last = word.slice(-1), p = py(last);
+  for (let i = 0; i < LIB.length; i++) {
+    const w = LIB[i][0];
+    if (usedSet.has(w)) continue;
+    if (w.slice(0, 1) === last || (p !== '' && py(w.slice(0, 1)) === p)) return w;
+  }
+  return null;
+}
+// 起始池：只从「至少还能接出一个成语」的词条里选起始
+const START_POOL = LIB.filter(function (it) { return findNext(it[0], new Set([it[0]])) !== null; });
+
+// ---------- 最高分（读写都兜底，隐私模式不报错） ----------
+let best = 0;
+try { best = parseInt(localStorage.getItem('idiomChainBest'), 10) || 0; } catch (e) { /* 忽略 */ }
+function saveBest(v) { try { localStorage.setItem('idiomChainBest', String(v)); } catch (e) { /* 忽略 */ } }
+bestEl.textContent = best;
+
+// ---------- 状态 ----------
+let state = 'ready';      // ready / playing / paused / over
+let current = '';         // 当前要接的成语
+let used = new Set();     // 本局已用成语
+let chain = [];           // 本局链条：{word, homoph, start}
+let score = 0;
+let hints = 0;
+let roundEnd = 0;         // 本回合截止时刻（performance.now 基准）
+let remainMs = ROUND_MS;  // 暂停时冻结的剩余毫秒
+let newRecord = false;    // 本局是否刷新过最高分
+
+// ---------- 弹层与面板 ----------
+function showOverlay(ov) { ov.hidden = false; void ov.offsetWidth; ov.classList.add('open'); }
+function hideOverlay(ov) { ov.classList.remove('open'); ov.hidden = true; }
+function setPanel() {
+  const active = state === 'ready' ? ovStart : state === 'over' ? ovOver : state === 'paused' ? ovPause : null;
+  [ovStart, ovOver, ovPause].forEach(function (ov) {
+    if (ov === active) { if (ov.hidden) showOverlay(ov); }
+    else if (!ov.hidden) hideOverlay(ov);
+  });
+  pauseBtn.textContent = state === 'paused' ? '继续' : '暂停';
+  wordInput.disabled = state !== 'playing';
+  submitBtn.disabled = state !== 'playing';
+  updateHintBtn();
+}
+
+// ---------- 行内反馈 ----------
+let feedbackTimer = 0;
+function feedback(msg, isErr) {
+  feedbackEl.textContent = msg;
+  feedbackEl.classList.toggle('err', !!isErr);
+  feedbackEl.classList.add('show');
+  clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(function () { feedbackEl.classList.remove('show'); }, 2400);
+}
+function clearFeedback() {
+  clearTimeout(feedbackTimer);
+  feedbackEl.classList.remove('show', 'err');
+}
+// 重放一次 CSS 动画类（先移除并强制回流，再挂上）
+function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+// ---------- 渲染 ----------
+function renderCurrent() {
+  curChars.innerHTML = '';
+  Array.from(current).forEach(function (ch, i) {
+    const d = document.createElement('div');
+    d.className = 'char' + (i === 3 ? ' last' : '');
+    d.innerHTML = '<span class="cp">' + py(ch) + '</span><span class="cg">' + ch + '</span>';
+    curChars.appendChild(d);
+  });
+  curMean.textContent = MAP[current] || '';
+  const last = current.slice(-1);
+  curAsk.innerHTML = '请接「<b>' + last + '</b>」（' + py(last) + '）或它的同音字开头的成语';
+}
+function addChainItem(word, homoph, isStart) {
+  const item = document.createElement('div');
+  item.className = 'chain-item' + (isStart ? ' start' : '');
+  item.title = MAP[word] || '';
+  let tags = '';
+  if (isStart) tags += '<span class="tag start">起点</span>';
+  if (homoph) tags += '<span class="tag">谐音</span>';
+  item.innerHTML = '<span class="cw">' + word + '</span><span class="cp">' + pinyinOf(word) + '</span>' +
+    (tags ? '<span class="tags">' + tags + '</span>' : '');
+  chainBox.prepend(item);
+  chainEmpty.hidden = true;
+}
+function drawTimer(remain) {
+  timerBar.style.width = (remain / ROUND_MS * 100).toFixed(2) + '%';
+  timerNum.textContent = Math.ceil(remain / 1000) + 's';
+  const danger = state === 'playing' && remain <= 5000;
+  timerRow.classList.toggle('danger', danger);
+  timerBar.classList.toggle('danger', danger);
+}
+function updateHintBtn() {
+  hintBtn.textContent = '提示 ×' + hints;
+  hintBtn.disabled = state !== 'playing' || hints <= 0;
+}
+
+// ---------- 流程 ----------
+function startGame() {
+  used = new Set();
+  chain = [];
+  chainBox.innerHTML = '';
+  chainEmpty.hidden = false;
+  score = 0;
+  scoreEl.textContent = '0';
+  newRecord = false;
+  hints = HINTS_MAX;
+  current = START_POOL[Math.floor(Math.random() * START_POOL.length)][0];
+  used.add(current);
+  chain.push({ word: current, homoph: false, start: true });
+  addChainItem(current, false, true);
+  renderCurrent();
+  clearFeedback();
+  wordInput.value = '';
+  state = 'playing';
+  roundEnd = performance.now() + ROUND_MS;
+  drawTimer(ROUND_MS);
+  setPanel();
+  wordInput.focus();
+}
+// 接龙成功（含提示代接）：计分、换当前成语、重置倒计时
+function accept(word, isHint) {
+  const remain = Math.max(0, roundEnd - performance.now());
+  const homoph = word.slice(0, 1) !== current.slice(-1);
+  used.add(word);
+  chain.push({ word: word, homoph: homoph, start: false });
+  addChainItem(word, homoph, false);
+  const gain = isHint ? HINT_SCORE : BASE_SCORE + Math.floor(remain / 1000);
+  score += gain;
+  scoreEl.textContent = score;
+  replay(scoreStat, 'bump');
+  if (score > best) {
+    best = score;
+    bestEl.textContent = best;
+    saveBest(best);
+    newRecord = true;
+  }
+  current = word;
+  renderCurrent();
+  replay(curCard, 'bump');
+  roundEnd = performance.now() + ROUND_MS;
+  drawTimer(ROUND_MS);
+  wordInput.value = '';
+  feedback(isHint ? '系统代接了一手 +' + gain : '接得妙！ +' + gain, false);
+  if (findNext(current, used) === null) endGame('dead');
+}
+function endGame(reason) {
+  if (state !== 'playing') return;
+  state = 'over';
+  if (reason === 'dead') drawTimer(0);
+  const isNew = newRecord && score > 0;
+  overTitle.textContent = reason === 'time' ? '时间到！' : '词库已尽';
+  let sub = '本局得分 <b>' + score + '</b> · 接对 ' + (chain.length - 1) + ' 个' +
+    (isNew ? ' · <em>新纪录！</em>' : ' · 历史最高 ' + best);
+  if (reason === 'dead') {
+    sub += '<br>以「' + current.slice(-1) + '」或其谐音开头的成语都接完了，成绩定格于此';
+  }
+  overSub.innerHTML = sub;
+  renderReview();
+  wordInput.blur();
+  setPanel();
+}
+function renderReview() {
+  reviewList.innerHTML = '';
+  chain.forEach(function (c) {
+    const li = document.createElement('li');
+    let tags = '';
+    if (c.start) tags += '<span class="tag start">起点</span>';
+    if (c.homoph) tags += '<span class="tag">谐音</span>';
+    li.innerHTML = '<span class="rw">' + c.word + '</span><span class="rp">' + pinyinOf(c.word) + '</span>' +
+      (tags ? '<span class="tags">' + tags + '</span>' : '') +
+      '<p class="rm">' + (MAP[c.word] || '') + '</p>';
+    reviewList.appendChild(li);
+  });
+}
+
+// ---------- 回合主循环：rAF 驱动倒计时 ----------
+function loop(t) {
+  if (state === 'playing') {
+    const remain = Math.max(0, roundEnd - t);
+    drawTimer(remain);
+    if (remain <= 0) endGame('time');
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ---------- 提交校验 ----------
+function fail(msg) {
+  feedback(msg, true);
+  replay(form, 'shake');
+}
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (state !== 'playing') return;
+  const raw = wordInput.value.replace(/\s+/g, '');
+  wordInput.value = raw;
+  if (raw.length !== 4) { fail('请输入四个字的成语'); return; }
+  if (!MAP[raw]) { fail('词库中没有「' + raw + '」，换一个试试'); return; }
+  if (used.has(raw)) { fail('「' + raw + '」已经接过啦'); return; }
+  if (!canLink(current, raw)) {
+    const last = current.slice(-1);
+    fail('要用「' + last + '」（' + py(last) + '）或它的同音字开头');
+    return;
+  }
+  accept(raw, false);
+});
+
+// ---------- 提示：系统代接一手 ----------
+hintBtn.addEventListener('click', function () {
+  if (state !== 'playing' || hints <= 0) return;
+  const w = findNext(current, used);
+  if (w === null) { feedback('词库里已经接不上了', true); return; }
+  hints--;
+  updateHintBtn();
+  accept(w, true);
+});
+
+// ---------- 暂停 / 继续 ----------
+function pauseGame() {
+  if (state !== 'playing') return;
+  remainMs = Math.max(0, roundEnd - performance.now());
+  state = 'paused';
+  setPanel();
+}
+function resumeGame() {
+  if (state !== 'paused') return;
+  roundEnd = performance.now() + remainMs;
+  state = 'playing';
+  setPanel();
+}
+pauseBtn.addEventListener('click', function () {
+  if (state === 'playing') pauseGame();
+  else if (state === 'paused') resumeGame();
+});
+document.addEventListener('visibilitychange', function () {   // 切后台自动暂停
+  if (document.hidden && state === 'playing') pauseGame();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    if (state === 'playing') pauseGame();
+    else if (state === 'paused') resumeGame();
+  }
+});
+
+// ---------- 按钮 ----------
+$('btnStart').addEventListener('click', startGame);
+$('btnRestart').addEventListener('click', startGame);
+$('btnResume').addEventListener('click', resumeGame);
+$('newBtn').addEventListener('click', startGame);
+
+// ---------- 初始化 ----------
+setPanel();
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>系统给出起始成语，你用它的末字（或同音字）开头，输入一个词库里的新成语</li>
+        <li>接对一个得 10 分，答得越快加分越多；谐音接龙同样有效，界面上会标注「谐音」</li>
+        <li>每回合限时 30 秒，超时或词库里接不上就结束；当前成语的释义会一直展示</li>
+        <li>每局有 3 次「提示」，由系统代接一个成语，得 5 分</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>输入框打四个字，回车或点「接上」提交</li>
+        <li>Esc 或「暂停」按钮：暂停 / 继续，切到后台自动暂停</li>
+        <li>「新一局」随时重新开始；结算页可回看本局全部成语与释义</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

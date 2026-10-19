@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>点格棋 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：点格棋，与电脑在点阵间轮流连线抢占格子，补齐第四边得格再走，数格子定胜负，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dotsboxes/app.html">
+<style>
+    /* ===== 点格棋 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #eef0f4;
+      color: #3c4250;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 16px 30px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card {
+      width: 100%;
+      max-width: 470px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 32px rgba(60, 64, 67, .12);
+      padding: 18px 18px 14px;
+    }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    h1 { font-size: 21px; font-weight: 700; color: #232936; }
+    .sub { margin-top: 3px; font-size: 12.5px; color: #8a93a3; }
+    .btn {
+      font: inherit;
+      border: 0;
+      border-radius: 10px;
+      padding: 9px 18px;
+      background: #7c3aed;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(124, 58, 237, .3);
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(.96); }
+    .btn.ghost { background: #fff; color: #6d28d9; border: 1px solid #ddd3f6; box-shadow: none; }
+
+    .hud { display: flex; gap: 10px; margin-bottom: 12px; align-items: stretch; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1.5px solid #e6eaf2;
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: border-color .2s, background .2s;
+    }
+    .stat .lab { display: block; font-size: 12px; color: #8a93a3; letter-spacing: 2px; }
+    .stat .val { display: block; margin-top: 2px; font-size: 22px; font-weight: 700; color: #232936; font-variant-numeric: tabular-nums; }
+    .stat.me.active { border-color: #c4b1f5; background: #faf8ff; }
+    .stat.ai.active { border-color: #f8c79a; background: #fffaf5; }
+    .stat.bump { animation: bump .2s ease; }
+    @keyframes bump { 50% { transform: scale(1.06); } }
+
+    .turn-pill {
+      flex: 1.35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 4px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .turn-pill.idle { background: #f1f3f6; color: #8a93a3; }
+    .turn-pill.me { background: #f1eaff; color: #6d28d9; }
+    .turn-pill.ai { background: #fff1e4; color: #c2410c; }
+
+    .board {
+      position: relative;
+      background: #fbfcfe;
+      border: 1px solid #e6ecf4;
+      border-radius: 12px;
+    }
+    .board svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* ---- SVG 棋盘内部元素 ---- */
+    .box-bg { fill: #f4f7fb; }
+    .box-fill { fill: rgba(0,0,0,0); pointer-events: none; transform-box: fill-box; transform-origin: center; }
+    .box-fill.p1 { fill: rgba(124, 58, 237, .16); transition: fill .25s ease; }
+    .box-fill.p2 { fill: rgba(249, 115, 22, .17); transition: fill .25s ease; }
+    .box-fill.pop { animation: boxpop .32s ease; }
+    @keyframes boxpop { 40% { transform: scale(1.1); } }
+    .box-dot { pointer-events: none; }
+    .box-dot.d1 { fill: rgba(124, 58, 237, .5); }
+    .box-dot.d2 { fill: rgba(249, 115, 22, .5); }
+    .dot { fill: #c3cfdd; pointer-events: none; }
+    /* 一条线两用：透明粗线当命中区，hover 出虚线预览，画后变色定色 */
+    .edge { stroke: rgba(0,0,0,0); stroke-width: 16; stroke-linecap: round; cursor: pointer; pointer-events: stroke; }
+    .edge:not(.p1):not(.p2):hover { stroke: #b9c7d9; stroke-dasharray: 7 8; }
+    .edge.p1 { stroke: #7c3aed; stroke-width: 5; pointer-events: none; }
+    .edge.p2 { stroke: #f97316; stroke-width: 5; pointer-events: none; }
+    .float-txt {
+      font: bold 19px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-anchor: middle;
+      pointer-events: none;
+      animation: floatup .8s ease forwards;
+    }
+    @keyframes floatup { to { transform: translateY(-26px); opacity: 0; } }
+
+    /* ---- 弹层（hidden + 同步回流 + open，保证过渡生效） ---- */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      border-radius: 12px;
+      background: rgba(251, 252, 254, .88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      padding: 12px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .overlay h2 { font-size: 24px; color: #232936; }
+    .overlay h2.win { color: #6d28d9; }
+    .ov-sub { font-size: 13px; color: #6b7280; line-height: 1.9; padding: 0 8px; }
+    .ov-lab { font-size: 12.5px; color: #9aa4b2; letter-spacing: 2px; margin-top: 6px; }
+    .ov-btns { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+    .ov-btns .btn { padding: 9px 16px; }
+    .ov-best { font-size: 12px; color: #9aa4b2; margin-top: 6px; }
+
+    .hint { margin-top: 12px; text-align: center; font-size: 12.5px; color: #9aa4b2; line-height: 1.8; }
+    footer { margin-top: 10px; text-align: center; color: #bdc1c6; font-size: 12px; }
+
+    @media (max-width: 400px) {
+      .card { padding: 14px 12px 10px; }
+      h1 { font-size: 19px; }
+      .stat .val { font-size: 19px; }
+      .turn-pill { font-size: 12px; }
+      .btn { padding: 8px 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="card">
+  <header>
+    <div>
+      <h1>点格棋</h1>
+      <p class="sub">与电脑轮流连线，补齐第四边得格再走</p>
+    </div>
+    <button class="btn" id="newBtn" type="button">新局</button>
+  </header>
+  <section class="hud">
+    <div class="stat me" id="statMe"><span class="lab">你</span><span class="val" id="scoreMe">0</span></div>
+    <div class="turn-pill idle" id="turnPill">选择棋盘开始</div>
+    <div class="stat ai" id="statAi"><span class="lab">电脑</span><span class="val" id="scoreAi">0</span></div>
+  </section>
+  <div class="board" id="board">
+    <svg id="svg" role="img" aria-label="点格棋棋盘"></svg>
+    <div class="overlay" id="ovStart">
+      <h2>点格棋</h2>
+      <p class="ov-sub">轮流在相邻两点间画一条边<br>补齐某格第四条边即得该格并再走一步<br>格子占完后比分高者获胜</p>
+      <p class="ov-lab">选择棋盘开始</p>
+      <div class="ov-btns">
+        <button class="btn ghost" data-n="3" type="button">3×3</button>
+        <button class="btn" data-n="4" type="button">4×4</button>
+        <button class="btn ghost" data-n="5" type="button">5×5</button>
+      </div>
+      <p class="ov-best" id="startBest"></p>
+    </div>
+    <div class="overlay" id="ovOver" hidden>
+      <h2 id="ovTitle"></h2>
+      <p class="ov-sub" id="ovSub"></p>
+      <div class="ov-btns">
+        <button class="btn" id="btnAgain" type="button">再来一局</button>
+        <button class="btn ghost" id="btnChange" type="button">换棋盘</button>
+      </div>
+    </div>
+  </div>
+  <p class="hint">点击两点之间的空位落线 · 当心补上第三边送格给电脑 · 净胜格数计入最佳战绩</p>
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+<script>
+(() => {
+'use strict';
+/* ================= 点格棋主逻辑（零依赖，纯本地运行） =================
+   规则：轮流在相邻两点间画线；补齐某格第四条边者得该格并再走一步；
+   所有格子归属完毕后按格数定胜负。
+   电脑策略：能得格先得格 > 画安全边 > 只能送格时开最短的链。 */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const CELL = 72, PAD = 30;                    // viewBox 内格距与四周留白（纯坐标单位）
+const AI_DELAY = 560, AI_STEP_DELAY = 430;    // 电脑开步 / 连走间隔，留出可视节奏
+const COLORS = ['#', '#7c3aed', '#f97316'];   // 1=玩家紫 2=电脑橙
+
+const $ = id => document.getElementById(id);
+const svg = $('svg');
+const scoreMeEl = $('scoreMe'), scoreAiEl = $('scoreAi');
+const statMe = $('statMe'), statAi = $('statAi');
+const turnPill = $('turnPill');
+const ovStart = $('ovStart'), ovOver = $('ovOver');
+const ovTitle = $('ovTitle'), ovSub = $('ovSub');
+const startBestEl = $('startBest');
+
+/* ---------- 最佳战绩：净胜格数（键名全站唯一，读写都兜底） ---------- */
+let best = 0;
+try { best = +localStorage.getItem('dotsBoxesBest') || 0; } catch (e) {}
+function saveBest(v) { try { localStorage.setItem('dotsBoxesBest', String(v)); } catch (e) {} }
+function showBest() {
+  startBestEl.textContent = best > 0 ? '历史最佳战绩：净胜 ' + best + ' 格' : '尚无战绩，赢电脑越多越好';
+}
+
+/* ---------- 棋局数据 ---------- */
+let N = 4;                 // 每边格子数（3 / 4 / 5）
+let E = null;              // 全部边的归属：0 空 1 玩家 2 电脑（水平边在前，竖直边在后）
+let BOX = null;            // 每格归属
+let edgeEls = null;        // 边下标 → <line>
+let boxFillEls = null;     // 格下标 → 占格 <rect>
+let gBoxEl = null, gFx = null;
+let drawn = 0, total = 0;  // 已画边数 / 总边数
+let scoreMe = 0, scoreAi = 0;
+let turn = 1;              // 1 玩家 2 电脑
+let state = 'ready';       // ready / playing / over
+let aiTimer = 0;           // 电脑行动定时器句柄
+
+function elNS(tag) { return document.createElementNS(SVG_NS, tag); }
+function decode(id) {                             // 边下标 → 类型与行列
+  const hn = (N + 1) * N;                         // 水平边数量
+  if (id < hn) { const r = (id / N) | 0; return { t: 'h', r: r, c: id - r * N }; }
+  const k = id - hn, r = (k / (N + 1)) | 0;
+  return { t: 'v', r: r, c: k - r * (N + 1) };
+}
+function boxSides(r, c) {                         // 格 (r,c) 的四条边下标：上、下、左、右
+  const hn = (N + 1) * N;
+  return [r * N + c, (r + 1) * N + c, hn + r * (N + 1) + c, hn + r * (N + 1) + c + 1];
+}
+function edgesOfBox(r, c) {   // 已画边数：E 存的是归属者（1/2），必须按非零计数求和
+  const s = boxSides(r, c);
+  return (E[s[0]] ? 1 : 0) + (E[s[1]] ? 1 : 0) + (E[s[2]] ? 1 : 0) + (E[s[3]] ? 1 : 0);
+}
+function boxesTouched(id) {                       // 画这条边会影响到的格子
+  const e = decode(id), out = [];
+  if (e.t === 'h') {
+    if (e.r > 0) out.push([e.r - 1, e.c]);
+    if (e.r < N) out.push([e.r, e.c]);
+  } else {
+    if (e.c > 0) out.push([e.r, e.c - 1]);
+    if (e.c < N) out.push([e.r, e.c]);
+  }
+  return out;
+}
+
+/* ---------- 棋盘构建（SVG：底格 → 占格层 → 边 → 点阵 → 浮字层） ---------- */
+function buildBoard() {
+  svg.innerHTML = '';
+  const size = N * CELL + PAD * 2;
+  svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+  const gEdge = elNS('g'), gDot = elNS('g');
+  gBoxEl = elNS('g');
+  gFx = elNS('g');
+  gFx.setAttribute('pointer-events', 'none');
+  boxFillEls = [];
+  edgeEls = [];
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const x = PAD + c * CELL + 4, y = PAD + r * CELL + 4, w = CELL - 8;
+      const bg = elNS('rect');
+      bg.setAttribute('x', x); bg.setAttribute('y', y);
+      bg.setAttribute('width', w); bg.setAttribute('height', w);
+      bg.setAttribute('rx', 8); bg.setAttribute('class', 'box-bg');
+      const fill = elNS('rect');
+      fill.setAttribute('x', x); fill.setAttribute('y', y);
+      fill.setAttribute('width', w); fill.setAttribute('height', w);
+      fill.setAttribute('rx', 8); fill.setAttribute('class', 'box-fill');
+      gBoxEl.appendChild(bg); gBoxEl.appendChild(fill);
+      boxFillEls.push(fill);
+    }
+  }
+  // 全部待画的边：一条线两用，透明粗线做命中区，画后改色定形
+  for (let id = 0; id < total; id++) {
+    const e = decode(id), ln = elNS('line');
+    if (e.t === 'h') {
+      ln.setAttribute('x1', PAD + e.c * CELL); ln.setAttribute('y1', PAD + e.r * CELL);
+      ln.setAttribute('x2', PAD + (e.c + 1) * CELL); ln.setAttribute('y2', PAD + e.r * CELL);
+    } else {
+      ln.setAttribute('x1', PAD + e.c * CELL); ln.setAttribute('y1', PAD + e.r * CELL);
+      ln.setAttribute('x2', PAD + e.c * CELL); ln.setAttribute('y2', PAD + (e.r + 1) * CELL);
+    }
+    ln.setAttribute('class', 'edge');
+    ln.dataset.id = id;
+    gEdge.appendChild(ln);
+    edgeEls.push(ln);
+  }
+  // 点阵画在最上层，盖住线端更圆润
+  for (let r = 0; r <= N; r++) {
+    for (let c = 0; c <= N; c++) {
+      const d = elNS('circle');
+      d.setAttribute('cx', PAD + c * CELL); d.setAttribute('cy', PAD + r * CELL);
+      d.setAttribute('r', 5); d.setAttribute('class', 'dot');
+      gDot.appendChild(d);
+    }
+  }
+  svg.appendChild(gBoxEl); svg.appendChild(gEdge); svg.appendChild(gDot); svg.appendChild(gFx);
+}
+
+/* ---------- 视觉反馈 ---------- */
+function drawEdgeLine(id, who) {
+  const ln = edgeEls[id];
+  ln.classList.add(who === 1 ? 'p1' : 'p2');
+  // 描线生长动画：临时虚线偏移归零；减少动效偏好下 CSS 会禁掉过渡，用定时器兜底清理
+  ln.style.strokeDasharray = CELL;
+  ln.style.strokeDashoffset = CELL;
+  void ln.getBoundingClientRect();
+  ln.style.transition = 'stroke-dashoffset .16s ease-out';
+  ln.style.strokeDashoffset = '0';
+  setTimeout(() => {
+    ln.style.transition = ''; ln.style.strokeDasharray = ''; ln.style.strokeDashoffset = '';
+  }, 260);
+}
+function claimBox(r, c, who) {
+  const f = boxFillEls[r * N + c];
+  f.classList.add(who === 1 ? 'p1' : 'p2');
+  f.classList.remove('pop'); void f.getBoundingClientRect(); f.classList.add('pop');
+  setTimeout(() => f.classList.remove('pop'), 420);   // 不依赖动画事件，减少动效环境也安全
+  const d = elNS('circle');
+  d.setAttribute('cx', PAD + c * CELL + CELL / 2);
+  d.setAttribute('cy', PAD + r * CELL + CELL / 2);
+  d.setAttribute('r', 6.5);
+  d.setAttribute('class', 'box-dot ' + (who === 1 ? 'd1' : 'd2'));
+  gBoxEl.appendChild(d);
+  floatText(PAD + c * CELL + CELL / 2, PAD + r * CELL + CELL / 2 - 10, COLORS[who]);
+}
+function floatText(x, y, color) {
+  const t = elNS('text');
+  t.textContent = '+1';
+  t.setAttribute('x', x); t.setAttribute('y', y);
+  t.setAttribute('fill', color);
+  t.setAttribute('class', 'float-txt');
+  gFx.appendChild(t);
+  t.addEventListener('animationend', () => t.remove());
+  setTimeout(() => { if (t.isConnected) t.remove(); }, 900);   // 兜底清理
+}
+function bump(statEl, valEl, v) {
+  valEl.textContent = v;
+  statEl.classList.remove('bump'); void statEl.offsetWidth; statEl.classList.add('bump');
+}
+function setTurnUI(mode) {
+  let text, cls;
+  if (state === 'ready') { text = '选择棋盘开始'; cls = 'idle'; }
+  else if (state === 'over') { text = '对局结束'; cls = 'idle'; }
+  else if (turn === 1) { text = mode === 'combo' ? '得分！再走一步' : '轮到你落线'; cls = 'me'; }
+  else { text = '电脑思考中…'; cls = 'ai'; }
+  turnPill.textContent = text;
+  turnPill.className = 'turn-pill ' + cls;
+  statMe.classList.toggle('active', state === 'playing' && turn === 1);
+  statAi.classList.toggle('active', state === 'playing' && turn === 2);
+}
+function overlayShow(ov) {
+  ov.hidden = false;
+  void ov.offsetWidth;            // 同步回流后再加 open，保证过渡生效
+  ov.classList.add('open');
+}
+function overlayHide(ov) {
+  ov.classList.remove('open');
+  ov.hidden = true;
+}
+
+/* ---------- 落线与回合 ---------- */
+function applyMove(who, id) {
+  E[id] = who;
+  drawn++;
+  drawEdgeLine(id, who);
+  let gained = 0;
+  for (const rc of boxesTouched(id)) {
+    const r = rc[0], c = rc[1];
+    if (edgesOfBox(r, c) === 4 && !BOX[r * N + c]) {   // 第四边补齐：得格
+      BOX[r * N + c] = who;
+      claimBox(r, c, who);
+      if (who === 1) { scoreMe++; bump(statMe, scoreMeEl, scoreMe); }
+      else { scoreAi++; bump(statAi, scoreAiEl, scoreAi); }
+      gained++;
+    }
+  }
+  if (drawn >= total) endGame();
+  return gained;
+}
+function onEdgeClick(id) {
+  if (state !== 'playing' || turn !== 1 || E[id]) return;
+  const gained = applyMove(1, id);
+  if (state !== 'playing') return;          // 一手打满全场直接结算
+  if (gained) setTurnUI('combo');           // 得格奖励：继续走
+  else toAi();
+}
+function toAi() {
+  turn = 2;
+  setTurnUI();
+  aiTimer = setTimeout(aiMove, AI_DELAY + Math.random() * 320);
+}
+function aiMove() {
+  if (state !== 'playing' || turn !== 2) return;
+  const id = aiPick();
+  if (id < 0) return;
+  const gained = applyMove(2, id);
+  if (state !== 'playing') return;
+  if (gained) { aiTimer = setTimeout(aiMove, AI_STEP_DELAY); return; }   // 连吃保持节奏
+  turn = 1;
+  setTurnUI();
+}
+
+/* ---------- 电脑策略：完成格 > 安全边 > 开最短的链 ---------- */
+function completesBox(id) {
+  for (const rc of boxesTouched(id)) if (edgesOfBox(rc[0], rc[1]) === 3) return true;
+  return false;
+}
+function threesAfter(id) {          // 画这条边后新增的三边格数（其余格子边数不变）
+  const touched = boxesTouched(id);
+  let cnt = 0;
+  E[id] = 2;
+  for (const rc of touched) if (edgesOfBox(rc[0], rc[1]) === 3) cnt++;
+  E[id] = 0;
+  return cnt;
+}
+function createsThree(id) { return threesAfter(id) > 0; }
+function chainGain(id) {            // 模拟对手沿链贪心吃完，估算这条边要送几格
+  const E2 = E.slice();
+  E2[id] = 2;
+  let gain = 0;
+  for (;;) {
+    let found = false;
+    for (let r = 0; r < N && !found; r++) {
+      for (let c = 0; c < N && !found; c++) {
+        const s = boxSides(r, c);
+        // 与 edgesOfBox 同一不变量：E2 存的是归属值（0/1/2），必须按非零计数求和
+        const f = (E2[s[0]] ? 1 : 0) + (E2[s[1]] ? 1 : 0) + (E2[s[2]] ? 1 : 0) + (E2[s[3]] ? 1 : 0);
+        if (f !== 3) continue;
+        for (let i = 0; i < 4; i++) if (!E2[s[i]]) { E2[s[i]] = 2; break; }
+        gain++;
+        found = true;
+      }
+    }
+    if (!found) break;
+  }
+  return gain;
+}
+function aiPick() {
+  const moves = [];
+  for (let i = 0; i < total; i++) if (!E[i]) moves.push(i);
+  if (!moves.length) return -1;
+  // 1. 能立即得格的边优先，多选时挑画完最「干净」的（新增三边格最少）
+  let winId = -1, winTri = 99;
+  for (const id of moves) {
+    if (!completesBox(id)) continue;
+    const tri = threesAfter(id);
+    if (tri < winTri) { winTri = tri; winId = id; }
+  }
+  if (winId >= 0) return winId;
+  // 2. 安全边：画完不产生任何三边格，随机取一条
+  const safe = moves.filter(id => !createsThree(id));
+  if (safe.length) return safe[(Math.random() * safe.length) | 0];
+  // 3. 只剩坏边：先打乱避免每次都开同一处，再选送格最少的链
+  for (let i = moves.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    const t = moves[i]; moves[i] = moves[j]; moves[j] = t;
+  }
+  let bestId = moves[0], bestGain = Infinity;
+  for (const id of moves) {
+    const g = chainGain(id);
+    if (g < bestGain) { bestGain = g; bestId = id; }
+  }
+  return bestId;
+}
+
+/* ---------- 结算 ---------- */
+function endGame() {
+  state = 'over';
+  turn = 0;
+  clearTimeout(aiTimer);
+  setTurnUI();
+  const diff = scoreMe - scoreAi;
+  let sub;
+  if (diff > 0) {
+    const isNew = diff > best;
+    if (isNew) { best = diff; saveBest(best); showBest(); }
+    ovTitle.textContent = '你赢了！';
+    sub = '比分 ' + scoreMe + ' : ' + scoreAi + '，净胜 ' + diff + ' 格' +
+      (isNew ? '，刷新历史最佳！' : '（历史最佳净胜 ' + best + ' 格）');
+  } else if (diff < 0) {
+    ovTitle.textContent = '惜败一局';
+    sub = '比分 ' + scoreMe + ' : ' + scoreAi + '，电脑净胜 ' + (-diff) + ' 格，再战一回？';
+  } else {
+    ovTitle.textContent = '平分秋色';
+    sub = '比分 ' + scoreMe + ' : ' + scoreAi + '，势均力敌';
+  }
+  ovSub.textContent = sub;
+  ovTitle.classList.toggle('win', diff > 0);
+  overlayShow(ovOver);
+}
+
+/* ---------- 开局 / 大厅 ---------- */
+function startGame(n) {
+  clearTimeout(aiTimer);
+  N = n;
+  total = (N + 1) * N * 2;
+  E = new Uint8Array(total);
+  BOX = new Uint8Array(N * N);
+  drawn = 0; scoreMe = 0; scoreAi = 0; turn = 1; state = 'playing';
+  scoreMeEl.textContent = '0'; scoreAiEl.textContent = '0';
+  overlayHide(ovStart); overlayHide(ovOver);
+  buildBoard();
+  setTurnUI();
+}
+function toLobby() {
+  clearTimeout(aiTimer);
+  state = 'ready';
+  setTurnUI();
+  overlayHide(ovOver);
+  overlayShow(ovStart);
+}
+
+/* ---------- 事件绑定 ---------- */
+svg.addEventListener('click', e => {
+  const t = e.target;
+  if (t && t.classList && t.classList.contains('edge')) onEdgeClick(+t.dataset.id);
+});
+$('newBtn').addEventListener('click', () => startGame(N));
+$('btnAgain').addEventListener('click', () => startGame(N));
+$('btnChange').addEventListener('click', toLobby);
+document.querySelectorAll('#ovStart [data-n]').forEach(btn => {
+  btn.addEventListener('click', () => startGame(+btn.dataset.n));
+});
+
+/* ---------- 初始化：先摆一副 4×4 空盘作背景，等待选尺寸 ---------- */
+total = (N + 1) * N * 2;
+E = new Uint8Array(total);
+BOX = new Uint8Array(N * N);
+buildBoard();
+showBest();
+setTurnUI();
+overlayShow(ovStart);    // 初始就亮出开局面板（否则停在透明态还会挡住棋盘）
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>双方轮流在相邻两点之间画一条边，玩家先手</li>
+        <li>补齐某格的第四条边即得该格，得 1 分并可再走一步</li>
+        <li>所有格子归属完毕后，得分多的一方获胜</li>
+        <li>战术提示：补上第三边等于把得分机会递给对手</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>鼠标点击或触屏轻点两点之间的空位即可落线</li>
+        <li>「新局」随时重开；开局面板可选 3×3、4×4、5×5 棋盘</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>24点 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：24点，用加减乘除和括号把 4 张牌算成 24，限时挑战越快越高分，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/game24/app.html">
+<style>
+    /* ===== 24点 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --primary:#6d28d9; --danger:#dc2626; --ok:#2f9e44; --ink:#1f2430; --muted:#6b7280; --faint:#9aa0a6; --line:#e5e7eb; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #eef0f4;
+      color: #3c4043;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .card { position: relative; width: 100%; max-width: 520px; background: #fff; border-radius: 16px; box-shadow: 0 10px 32px rgba(60, 64, 67, .12); padding: 18px 20px 14px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    h1 { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: 1px; }
+    .hud { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+    .hud b { display: inline-block; font-variant-numeric: tabular-nums; color: var(--ink); font-size: 15px; }
+    button { font: inherit; border: 0; border-radius: 10px; cursor: pointer; color: inherit; touch-action: manipulation; }
+    button:disabled { opacity: .45; cursor: default; }
+    .btn-plain { background: #f1f3f4; color: #3c4043; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+    .btn-primary { background: var(--primary); color: #fff; font-weight: 700; padding: 10px 18px; box-shadow: 0 3px 10px rgba(109, 40, 217, .25); }
+    .btn-primary:active { transform: scale(.97); }
+    .btn-ghost { background: #fff; border: 1px solid var(--line); color: var(--muted); padding: 8px 14px; font-weight: 500; }
+    /* 倒计时进度条 */
+    .timebar { height: 6px; border-radius: 3px; background: #eceef2; overflow: hidden; margin-bottom: 14px; }
+    .timebar i { display: block; height: 100%; width: 100%; background: var(--primary); border-radius: 3px; }
+    .timebar.low i { background: var(--danger); }
+    /* 扑克牌 */
+    .cards { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; }
+    .pcard {
+      position: relative;
+      flex: 1;
+      max-width: 96px;
+      aspect-ratio: 3 / 4;
+      border: 1px solid #e3e6ee;
+      border-radius: 12px;
+      background: linear-gradient(165deg, #ffffff, #f6f7fb);
+      box-shadow: 0 4px 14px rgba(60, 64, 90, .10);
+      transition: transform .12s ease, opacity .15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .pcard:active { transform: scale(.95); }
+    .pcard .corner { position: absolute; top: 6px; left: 8px; display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; color: #2a2f3a; }
+    .pcard .corner svg { width: 11px; height: 11px; fill: currentColor; }
+    .pcard .big { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; color: #2a2f3a; }
+    .pcard.red .corner, .pcard.red .big { color: #d0334a; }
+    .pcard.used { opacity: .32; filter: grayscale(.9); }
+    .pcard.shake { animation: shake .3s ease; }
+    @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    .bump { animation: bump .2s ease; }
+    @keyframes bump { 50% { transform: scale(1.2); } }
+    /* 状态提示行 */
+    .status { min-height: 22px; text-align: center; font-size: 13px; line-height: 1.5; color: var(--faint); margin-bottom: 12px; }
+    .status.ok { color: var(--ok); font-weight: 600; }
+    .status.err { color: var(--danger); font-weight: 600; }
+    .status.info { color: var(--muted); }
+    /* 算式输入行与按钮盘 */
+    .exprrow { display: flex; gap: 8px; margin-bottom: 10px; }
+    #expr { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1.5px solid #dfe3ec; border-radius: 10px; color: var(--ink); background: #fbfcfe; outline: none; }
+    #expr:focus { border-color: var(--primary); }
+    #expr::placeholder { color: #b7bcc6; }
+    #expr:disabled { opacity: .55; }
+    .pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 12px; }
+    .pad button { background: #f4f5f8; border: 1px solid #e8eaf0; color: #333a45; font-size: 17px; font-weight: 700; padding: 9px 0; border-radius: 9px; }
+    .pad button:active { background: #e9ebf2; }
+    .bottomrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .substat { font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+    /* 答对时上飘的加分浮字 */
+    .fly { position: absolute; left: 50%; top: 33%; z-index: 40; transform: translate(-50%, 0); font-size: 24px; font-weight: 800; color: var(--ok); pointer-events: none; animation: flyup .85s ease forwards; }
+    @keyframes flyup { to { transform: translate(-50%, -52px); opacity: 0; } }
+    /* 弹层（hidden + 同步回流 + open，保证过渡生效） */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .93);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .overlay h2 { font-size: 26px; color: var(--ink); margin-bottom: 10px; }
+    .overlay p { font-size: 14px; color: var(--muted); line-height: 2; margin-bottom: 16px; }
+    footer { text-align: center; color: #bdc1c6; font-size: 12px; margin-top: 12px; }
+    @media (max-width: 480px) {
+      .card { padding: 14px 12px 12px; }
+      h1 { font-size: 18px; }
+      .hud { gap: 9px; font-size: 12px; }
+      .hud b { font-size: 14px; }
+      .pcard .big { font-size: 24px; }
+      .pcard .corner { font-size: 11px; top: 5px; left: 6px; }
+      .pad button { font-size: 15px; padding: 8px 0; }
+      .btn-primary { padding: 10px 14px; }
+    }
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+    <!-- 花色图标用内联 SVG（站点禁用 emoji，符号字形统一走矢量） -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <path id="suit-spade" d="M12 2C9.4 5.4 4 9.3 4 13.2c0 2.7 2.1 4.8 4.7 4.8 1 0 1.9-.3 2.6-.9-.2 1.8-1 3.2-2.3 4.3v.6h6v-.6c-1.3-1.1-2.1-2.5-2.3-4.3.7.6 1.6.9 2.6.9 2.6 0 4.7-2.1 4.7-4.8C20 9.3 14.6 5.4 12 2z"/>
+        <path id="suit-heart" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        <path id="suit-diamond" d="M12 2 20 12 12 22 4 12Z"/>
+        <path id="suit-club" d="M12 2.5a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zM7.4 9.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zM16.6 9.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zM11 13h2v8.5h-2z"/>
+      </defs>
+    </svg>
+
+<main class="card" id="mainCard">
+  <header>
+    <h1>24点</h1>
+    <div class="hud">
+      <span>剩余 <b id="time">03:00</b></span>
+      <span>得分 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <button id="pauseBtn" class="btn-plain" type="button" hidden>暂停</button>
+    </div>
+  </header>
+  <div class="timebar" id="timebar"><i id="timefill"></i></div>
+
+  <div class="cards" id="cards"></div>
+  <div class="status" id="status">点「开始挑战」来一局</div>
+
+  <div class="exprrow">
+    <input id="expr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64"
+           placeholder="点击牌面或直接输入算式" aria-label="算式输入框">
+    <button id="submitBtn" class="btn-primary" type="button">提交</button>
+  </div>
+
+  <div class="pad" id="pad" aria-label="算式按钮盘">
+    <button type="button" data-ins="+">+</button>
+    <button type="button" data-ins="−">−</button>
+    <button type="button" data-ins="×">×</button>
+    <button type="button" data-ins="÷">÷</button>
+    <button type="button" data-ins="(">(</button>
+    <button type="button" data-ins=")">)</button>
+    <button type="button" data-act="del">删除</button>
+    <button type="button" data-act="clear">清空</button>
+  </div>
+
+  <div class="bottomrow">
+    <span class="substat" id="substat">准备好就开始</span>
+    <button id="skipBtn" class="btn-ghost" type="button">跳过这题</button>
+  </div>
+
+  <footer>拾光集 · 在线小游戏</footer>
+
+  <div class="overlay open" id="ovStart">
+    <h2>24点</h2>
+    <p>用加减乘除和括号，把 4 张牌算成 24<br>限时 3 分钟，答得越快得分越高，连对有加成<br>点击牌面拼算式，也可以直接键盘输入</p>
+    <button id="btnStart" class="btn-primary" type="button">开始挑战</button>
+  </div>
+  <div class="overlay" id="ovPause" hidden>
+    <h2>已暂停</h2>
+    <p>倒计时已暂停，回来了就继续</p>
+    <button id="btnResume" class="btn-primary" type="button">继续挑战</button>
+  </div>
+  <div class="overlay" id="ovOver" hidden>
+    <h2>时间到</h2>
+    <p id="overInfo"></p>
+    <button id="btnRestart" class="btn-primary" type="button">再来一局</button>
+  </div>
+</main>
+
+<script>
+(() => {
+'use strict';
+/* ================= 24点 主逻辑（零依赖，纯本地运行） ================= */
+
+// ---------- 常量与 DOM ----------
+const TOTAL_MS = 180000;                 // 一局时长：3 分钟
+const $ = id => document.getElementById(id);
+const mainCard = $('mainCard');
+const cardsEl = $('cards'), exprEl = $('expr'), statusEl = $('status'), substatEl = $('substat');
+const timeEl = $('time'), timeFill = $('timefill'), timeBar = $('timebar');
+const scoreEl = $('score'), bestEl = $('best'), pauseBtn = $('pauseBtn');
+const submitBtn = $('submitBtn'), skipBtn = $('skipBtn');
+const ovStart = $('ovStart'), ovPause = $('ovPause'), ovOver = $('ovOver'), overInfo = $('overInfo');
+
+// ---------- 最高分存取（键名全站唯一，读写都兜底，隐私模式不报错） ----------
+let best = 0;
+try { best = +localStorage.getItem('game24Best') || 0; } catch (e) {}
+function saveBest(v) { try { localStorage.setItem('game24Best', String(v)); } catch (e) {} }
+bestEl.textContent = best;
+
+// ---------- 分数四则（分子/分母精确计算，避免浮点误差误判 23.999…） ----------
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = a % b; a = b; b = t; } return a || 1; }
+function frac(n, d) { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d); return { n: n / g, d: d / g }; }
+const fAdd = (a, b) => frac(a.n * b.d + b.n * a.d, a.d * b.d);
+const fSub = (a, b) => frac(a.n * b.d - b.n * a.d, a.d * b.d);
+const fMul = (a, b) => frac(a.n * b.n, a.d * b.d);
+function fDiv(a, b) { return b.n === 0 ? null : frac(a.n * b.d, a.d * b.n); }
+const is24 = f => f.n === 24 && f.d === 1;
+function fmtVal(f) {
+  if (f.d === 1) return String(f.n);
+  return String(Math.round(f.n / f.d * 1000) / 1000);
+}
+
+// ---------- 输入归一化：全角符号/乘除写法统一成解析器认识的形式 ----------
+const CHARMAP = {
+  '＋': '+', '－': '-', '−': '-', '—': '-', '–': '-',
+  '×': '*', '✕': '*', '·': '*', 'x': '*', 'X': '*',
+  '÷': '/', '／': '/', '（': '(', '）': ')'
+};
+function normalize(src) {
+  let out = '';
+  for (const ch of String(src)) {
+    if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === '\u3000') continue;
+    if (CHARMAP[ch] !== undefined) { out += CHARMAP[ch]; continue; }
+    const c = ch.charCodeAt(0);
+    if (c >= 0xFF10 && c <= 0xFF19) { out += String.fromCharCode(c - 0xFEE0); continue; } // 全角数字
+    out += ch;
+  }
+  return out;
+}
+
+// ---------- 词法分析 ----------
+function tokenize(s) {
+  const toks = [];
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch >= '0' && ch <= '9') {
+      let j = i;
+      while (j < s.length && s[j] >= '0' && s[j] <= '9') j++;
+      toks.push({ t: 'n', v: parseInt(s.slice(i, j), 10) });
+      i = j - 1;
+      continue;
+    }
+    if ('+-*/()'.indexOf(ch) >= 0) { toks.push({ t: ch }); continue; }
+    return { err: '含有无法识别的字符「' + ch + '」' };
+  }
+  return { toks };
+}
+
+// ---------- 语法分析：递归下降求值 ----------
+function parseTokens(toks) {
+  let pos = 0;
+  const peek = () => toks[pos];
+  function expr() {
+    let v = term();
+    while (peek() && (peek().t === '+' || peek().t === '-')) {
+      const op = toks[pos++].t, r = term();
+      v = op === '+' ? fAdd(v, r) : fSub(v, r);
+    }
+    return v;
+  }
+  function term() {
+    let v = factor();
+    while (peek() && (peek().t === '*' || peek().t === '/')) {
+      const op = toks[pos++].t, r = factor();
+      if (op === '/') {
+        const d = fDiv(v, r);
+        if (!d) throw { msg: '算式中有除以零，请修改' };
+        v = d;
+      } else v = fMul(v, r);
+    }
+    return v;
+  }
+  function factor() {
+    const tk = peek();
+    if (!tk) throw { msg: '算式不完整，末尾还缺内容' };
+    if (tk.t === '-') { pos++; const v = factor(); return { n: -v.n, d: v.d }; }
+    if (tk.t === '+') { pos++; return factor(); }
+    if (tk.t === 'n') { pos++; return frac(tk.v, 1); }
+    if (tk.t === '(') {
+      pos++;
+      const v = expr();
+      const nx = peek();
+      if (!nx || nx.t !== ')') throw { msg: '括号不匹配，少了右括号' };
+      pos++;
+      return v;
+    }
+    throw { msg: '算式格式不对，请检查运算符位置' };
+  }
+  const v = expr();
+  if (pos < toks.length) throw { msg: '算式末尾有多余内容，请检查' };
+  return v;
+}
+
+// ---------- 统计输入里各数字用了几次（容错扫描，坏字符直接忽略） ----------
+function usedCounts(src) {
+  const s = normalize(src), m = new Map();
+  let i = 0;
+  while (i < s.length) {
+    if (s[i] >= '0' && s[i] <= '9') {
+      let j = i;
+      while (j < s.length && s[j] >= '0' && s[j] <= '9') j++;
+      const v = parseInt(s.slice(i, j), 10);
+      m.set(v, (m.get(v) || 0) + 1);
+      i = j;
+      continue;
+    }
+    i++;
+  }
+  return m;
+}
+
+// ---------- 合法性校验：语法 → 用牌 → 结果 ----------
+function checkExpression(src, hand) {
+  const s = normalize(src);
+  if (!s) return { ok: false, msg: '请先点击牌面或输入算式' };
+  const t = tokenize(s);
+  if (t.err) return { ok: false, msg: t.err };
+  let val;
+  try { val = parseTokens(t.toks); } catch (e) { return { ok: false, msg: e.msg || '算式格式不对' }; }
+  const used = usedCounts(s), need = new Map();
+  hand.forEach(v => need.set(v, (need.get(v) || 0) + 1));
+  const keys = new Set([...used.keys(), ...need.keys()]);
+  for (const v of keys) {
+    const u = used.get(v) || 0, w = need.get(v) || 0;
+    if (u > w) return { ok: false, msg: '算式里用到了没发出的数字「' + v + '」' };
+    if (u < w) return { ok: false, msg: '还有 ' + (w - u) + ' 张牌没用上，4 张牌必须每张恰好用一次' };
+  }
+  if (is24(val)) return { ok: true };
+  return { ok: false, msg: '结果是 ' + fmtVal(val) + '，不是 24，再想想' };
+}
+
+// ---------- 出题求解器：保证每手牌有解 ----------
+// 节点 {f:分数值, s:显示串, p:优先级}，叶子 p=9，加减 p=1，乘除 p=2
+function fmtNode(a, op, b, prec) {
+  const l = a.p < prec ? '(' + a.s + ')' : a.s;
+  const r = (b.p < prec || (b.p === prec && (op === '-' || op === '÷'))) ? '(' + b.s + ')' : b.s;
+  return l + op + r;
+}
+function search24(items) {
+  if (items.length === 1) return is24(items[0].f) ? items[0] : null;
+  for (let i = 0; i < items.length; i++) {
+    for (let j = 0; j < items.length; j++) {
+      if (i === j) continue;
+      const a = items[i], b = items[j];
+      const rest = items.filter((_, k) => k !== i && k !== j);
+      const cands = [
+        { f: fAdd(a.f, b.f), s: fmtNode(a, '+', b, 1), p: 1 },
+        { f: fSub(a.f, b.f), s: fmtNode(a, '-', b, 1), p: 1 },
+        { f: fMul(a.f, b.f), s: fmtNode(a, '×', b, 2), p: 2 }
+      ];
+      const d = fDiv(a.f, b.f);
+      if (d) cands.push({ f: d, s: fmtNode(a, '÷', b, 2), p: 2 });
+      for (const c of cands) {
+        const res = search24(rest.concat([c]));
+        if (res) return res;
+      }
+    }
+  }
+  return null;
+}
+function makePuzzle() {
+  for (let tries = 0; tries < 500; tries++) {
+    const hand = [0, 0, 0, 0].map(() => 1 + (Math.random() * 13 | 0));
+    const sol = search24(hand.map(v => ({ f: frac(v, 1), s: String(v), p: 9 })));
+    if (sol) return { hand: hand, sol: sol.s };
+  }
+  return { hand: [3, 3, 8, 8], sol: '8÷(3-8÷3)' }; // 理论上到不了的兜底
+}
+
+// ---------- 游戏状态 ----------
+let state = 'ready';        // ready / playing / solved / paused / over
+let hand = [], solStr = null;
+let round = 0, solved = 0, streak = 0, score = 0, startBest = best;
+let remainMs = TOTAL_MS, puzzleStart = 0;
+
+// ---------- HUD ----------
+function fmtTime(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return String(s / 60 | 0).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+let lastTimeText = '';
+function updateTimeUI() {
+  const txt = fmtTime(remainMs);
+  if (txt !== lastTimeText) { timeEl.textContent = txt; lastTimeText = txt; }
+  timeFill.style.width = (remainMs / TOTAL_MS * 100) + '%';
+  timeBar.classList.toggle('low', remainMs < 30000);
+}
+function updateSubstat() {
+  substatEl.textContent = round > 0 ? ('第 ' + round + ' 题 · 已解 ' + solved + ' · 连对 ' + streak) : '准备好就开始';
+}
+function setStatus(msg, kind) {
+  statusEl.textContent = msg;
+  statusEl.className = 'status' + (kind ? ' ' + kind : '');
+}
+function setPanels() {
+  ovStart.hidden = state !== 'ready';
+  ovPause.hidden = state !== 'paused';
+  ovOver.hidden = state !== 'over';
+  pauseBtn.hidden = !(state === 'playing' || state === 'paused');
+  pauseBtn.textContent = state === 'paused' ? '继续' : '暂停';
+  const lock = state !== 'playing';
+  submitBtn.disabled = lock;
+  skipBtn.disabled = lock;
+  exprEl.disabled = lock;
+}
+function showOv(ov) { ov.hidden = false; void ov.offsetWidth; ov.classList.add('open'); }
+function hideOv(ov) { ov.classList.remove('open'); ov.hidden = true; }
+
+// ---------- 发牌与渲染 ----------
+const SUITS = [
+  { id: 'spade', red: false }, { id: 'heart', red: true },
+  { id: 'diamond', red: true }, { id: 'club', red: false }
+];
+function rankLabel(v) { return v === 1 ? 'A' : v === 11 ? 'J' : v === 12 ? 'Q' : v === 13 ? 'K' : String(v); }
+function renderCards() {
+  cardsEl.innerHTML = '';
+  hand.forEach(v => {
+    const s = SUITS[Math.random() * 4 | 0];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pcard' + (s.red ? ' red' : '');
+    b.dataset.v = String(v);
+    b.title = '数字 ' + v + '，点击插入算式';
+    b.setAttribute('aria-label', '数字 ' + v + '，点击插入算式');
+    b.innerHTML = '<span class="corner">' + rankLabel(v) +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#suit-' + s.id + '"/></svg></span>' +
+      '<span class="big">' + v + '</span>';
+    b.addEventListener('click', onCardClick);
+    cardsEl.appendChild(b);
+  });
+  updateUsage();
+}
+function deal() {
+  const p = makePuzzle();
+  hand = p.hand;
+  solStr = p.sol;
+  round++;
+  exprEl.value = '';
+  renderCards();
+  puzzleStart = performance.now();
+  updateSubstat();
+  setStatus('第 ' + round + ' 题：把 ' + hand.join('、') + ' 算成 24');
+}
+
+// ---------- 表达式编辑 ----------
+function updateUsage() {
+  const used = usedCounts(exprEl.value);
+  cardsEl.querySelectorAll('.pcard').forEach(c => {
+    const v = +c.dataset.v;
+    const have = hand.filter(x => x === v).length;
+    c.classList.toggle('used', (used.get(v) || 0) >= have);
+  });
+}
+function insertAtCursor(text) {
+  const el = exprEl;
+  if (document.activeElement === el && el.selectionStart !== null) {
+    const s = el.selectionStart, e = el.selectionEnd;
+    el.value = el.value.slice(0, s) + text + el.value.slice(e);
+    el.setSelectionRange(s + text.length, s + text.length);
+  } else {
+    el.value += text;
+  }
+  updateUsage();
+}
+function backspaceAtCursor() {
+  const el = exprEl;
+  if (document.activeElement === el && el.selectionStart !== null) {
+    const s = el.selectionStart, e = el.selectionEnd;
+    if (s === e && s > 0) {
+      el.value = el.value.slice(0, s - 1) + el.value.slice(e);
+      el.setSelectionRange(s - 1, s - 1);
+    } else if (s !== e) {
+      el.value = el.value.slice(0, s) + el.value.slice(e);
+      el.setSelectionRange(s, s);
+    }
+  } else {
+    el.value = el.value.slice(0, -1);
+  }
+  updateUsage();
+}
+function onCardClick() {
+  if (state !== 'playing') return;
+  const v = +this.dataset.v;
+  const have = hand.filter(x => x === v).length;
+  if ((usedCounts(exprEl.value).get(v) || 0) >= have) {
+    this.classList.remove('shake'); void this.offsetWidth; this.classList.add('shake');
+    setStatus('数字 ' + v + ' 已经用完了', 'err');
+    return;
+  }
+  insertAtCursor(String(v));
+}
+
+// ---------- 提交与跳过 ----------
+function flyPts(text) {
+  const f = document.createElement('span');
+  f.className = 'fly';
+  f.textContent = text;
+  mainCard.appendChild(f);
+  setTimeout(() => f.remove(), 900);
+}
+function submitAnswer() {
+  if (state !== 'playing') return;
+  const r = checkExpression(exprEl.value, hand);
+  if (!r.ok) { setStatus(r.msg, 'err'); return; }
+  const elapsed = (performance.now() - puzzleStart) / 1000;
+  streak++; solved++;
+  updateSubstat();
+  const pts = Math.max(30, 100 - Math.floor(elapsed) * 5) + Math.min(75, (streak - 1) * 15);
+  score += pts;
+  scoreEl.textContent = score;
+  scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
+  setTimeout(() => scoreEl.classList.remove('bump'), 240);
+  if (score > best) { best = score; bestEl.textContent = best; saveBest(best); }
+  flyPts('+' + pts);
+  setStatus('漂亮，+' + pts + ' 分！', 'ok');
+  state = 'solved';
+  setPanels();
+  setTimeout(() => {
+    if (state !== 'solved') return;   // 庆祝停顿期内可能已时间到
+    state = 'playing';
+    deal();
+    setPanels();
+  }, 750);
+}
+function skipPuzzle() {
+  if (state !== 'playing') return;
+  const prev = solStr;
+  streak = 0;
+  deal();
+  setStatus(prev ? ('连对清零 · 上一题解法之一：' + prev + ' = 24') : '已换下一题', 'info');
+}
+
+// ---------- 流程控制 ----------
+function startGame() {
+  score = 0; solved = 0; streak = 0; round = 0; startBest = best;
+  remainMs = TOTAL_MS; lastTimeText = '';
+  scoreEl.textContent = '0';
+  state = 'playing';
+  hideOv(ovStart); hideOv(ovPause); hideOv(ovOver);
+  deal();
+  setPanels();
+  updateTimeUI();
+}
+function pauseGame() {
+  if (state !== 'playing') return;
+  state = 'paused';
+  setPanels();
+  showOv(ovPause);
+}
+function resumeGame() {
+  if (state !== 'paused') return;
+  state = 'playing';
+  setPanels();
+  hideOv(ovPause);
+}
+function endGame() {
+  state = 'over';
+  timeEl.textContent = '00:00';
+  timeFill.style.width = '0%';
+  const isNew = score > startBest;
+  overInfo.textContent = '本局得分 ' + score + ' · 解出 ' + solved + ' 题 · ' +
+    (isNew ? '刷新最高纪录！' : '历史最高 ' + best);
+  setPanels();
+  showOv(ovOver);
+}
+
+// ---------- 主循环（rAF 计时，切后台由 visibilitychange 暂停） ----------
+let last = performance.now();
+function loop(t) {
+  const dt = Math.min(t - last, 50);   // 钳制大间隔，防切后台跳变
+  last = t;
+  if (state === 'playing' || state === 'solved') {
+    remainMs -= dt;
+    if (remainMs <= 0) { remainMs = 0; updateTimeUI(); endGame(); }
+    else updateTimeUI();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---------- 事件绑定 ----------
+$('btnStart').addEventListener('click', startGame);
+$('btnRestart').addEventListener('click', startGame);
+$('btnResume').addEventListener('click', resumeGame);
+pauseBtn.addEventListener('click', () => { state === 'playing' ? pauseGame() : resumeGame(); });
+submitBtn.addEventListener('click', submitAnswer);
+skipBtn.addEventListener('click', skipPuzzle);
+exprEl.addEventListener('input', updateUsage);
+document.querySelectorAll('#pad [data-ins]').forEach(b => {
+  b.addEventListener('click', () => {
+    if (state !== 'playing') return;
+    insertAtCursor(b.dataset.ins);
+  });
+});
+document.querySelectorAll('#pad [data-act]').forEach(b => {
+  b.addEventListener('click', () => {
+    if (state !== 'playing') return;
+    if (b.dataset.act === 'del') backspaceAtCursor();
+    else { exprEl.value = ''; updateUsage(); }
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.isComposing) return;                          // 中文输入法组词中的回车不拦截
+  if (e.target instanceof HTMLButtonElement) return;  // 按钮上的回车交给原生点击
+  if (e.key !== 'Enter') return;
+  if (state === 'playing') { e.preventDefault(); submitAnswer(); }
+  else if (state === 'ready') { e.preventDefault(); startGame(); }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && state === 'playing') pauseGame();   // 切后台自动暂停
+});
+
+// ---------- 初始化 ----------
+updateSubstat();
+updateTimeUI();
+setStatus('点「开始挑战」来一局');
+setPanels();
+requestAnimationFrame(loop);
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>每题发出 4 张 1~13 的扑克牌（A=1、J=11、Q=12、K=13），保证有解</li>
+        <li>用加、减、乘、除和括号把 4 个数算成 24，每张牌恰好用一次</li>
+        <li>点击牌面和运算符按钮拼算式，也可以直接用键盘输入</li>
+        <li>限时 3 分钟，答得越快得分越高，连续答对有连对加成</li>
+      </ul>
+      <h3>计分</h3>
+      <ul>
+        <li>基础分 100 起，每耗时 1 秒减 5 分，最低 30 分</li>
+        <li>连对加成：每多连对一题额外 +15，最多 +75</li>
+        <li>跳过不扣分但连对清零，并公布上一题的一种解法</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>回车：提交答案</li>
+        <li>跳过：换下一题　暂停：倒计时暂停</li>
+        <li>切到后台会自动暂停，回来点「继续挑战」</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

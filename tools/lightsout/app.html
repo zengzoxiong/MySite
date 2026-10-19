@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>点灯谜题 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：点灯谜题，点击一盏灯翻转它与上下左右相邻灯的亮灭，把 5×5 灯阵全部熄灭即通关，谜题由满盘逆推生成保证可解，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/lightsout/app.html">
+<style>
+    /* ===== 点灯谜题 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #b45309;   /* 琥珀棕：与灯光的暖黄同族 */
+      --ink: #1f2430;
+      --muted: #6b7280;
+      --line: #e8e1d1;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f2ea;
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 16px 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 430px; }
+
+    header { margin-bottom: 14px; }
+    h1 { font-size: 32px; line-height: 1.15; color: #43392a; letter-spacing: 2px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #a3947a; }
+
+    .hud { display: flex; gap: 10px; margin-bottom: 14px; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 6px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(150, 128, 88, .10);
+    }
+    .stat .lab { display: block; font-size: 12px; color: #aca087; letter-spacing: 2px; }
+    .stat .val { display: block; margin-top: 2px; font-size: 21px; font-weight: 700; color: #4a4030; font-variant-numeric: tabular-nums; }
+    .stat.bump { animation: bump .18s ease; }
+    @keyframes bump { 50% { transform: scale(1.07); } }
+
+    /* 灯箱：深蓝灰内衬底板，亮灯的光晕在深底上才好看 */
+    .board {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 9px;
+      padding: 14px;
+      background: #2b3140;
+      border-radius: 16px;
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, .4);
+      transition: box-shadow .4s;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .board.cleared { box-shadow: inset 0 2px 12px rgba(0, 0, 0, .4), 0 0 26px rgba(255, 183, 46, .4); }
+
+    .cell {
+      position: relative;
+      aspect-ratio: 1;
+      border: 0;
+      padding: 0;
+      border-radius: 50%;
+      background: #394154;
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, .45), inset 0 -1px 2px rgba(255, 255, 255, .05);
+      cursor: pointer;
+      transition: background .16s, box-shadow .16s;
+      touch-action: manipulation;
+    }
+    .cell.on {
+      background: radial-gradient(circle at 35% 30%, #ffe48e, #ffb62e 62%, #ef9d0c);
+      box-shadow: 0 0 16px rgba(255, 182, 46, .55), 0 0 4px rgba(255, 224, 130, .9), inset 0 -3px 6px rgba(176, 88, 0, .4);
+    }
+    /* 玻璃高光点：亮灯明显、灭灯几乎不可见 */
+    .cell::after {
+      content: "";
+      position: absolute;
+      left: 24%; top: 17%;
+      width: 20%; height: 20%;
+      border-radius: 50%;
+      background: #fff;
+      opacity: .08;
+      filter: blur(1px);
+      transition: opacity .16s;
+      pointer-events: none;
+    }
+    .cell.on::after { opacity: .85; }
+    .cell:active { transform: scale(.92); }
+    .cell.pop { animation: pop .22s ease; }
+    @keyframes pop { 45% { transform: scale(1.12); } }
+    .cell:focus-visible { outline: 2px solid #ffc93c; outline-offset: 2px; }
+
+    /* 胜利弹层（hidden + 同步回流 + open，保证过渡生效） */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      border-radius: 16px;
+      background: rgba(38, 43, 56, .92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      padding: 14px;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .ov-title { font-size: 30px; font-weight: 800; color: #ffd97a; letter-spacing: 2px; }
+    .ov-sub { font-size: 14px; color: #ece5d3; line-height: 1.9; font-variant-numeric: tabular-nums; }
+    .ov-btns { display: flex; gap: 10px; margin-top: 8px; width: 100%; max-width: 250px; }
+    .ov-btns .btn { padding: 10px 0; }
+
+    .modes { display: flex; gap: 8px; margin-top: 14px; }
+    .mode {
+      flex: 1;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: #7d7159;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .mode.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn {
+      flex: 1;
+      border: 0;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 10px 0;
+      border-radius: 10px;
+      background: #efe8d8;
+      color: #5d5240;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .45; cursor: default; transform: none; }
+    .btn.primary { background: var(--primary); color: #fff; box-shadow: 0 2px 10px rgba(180, 83, 9, .30); }
+    .btn:focus-visible, .mode:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    .tip { margin-top: 12px; text-align: center; font-size: 12.5px; color: #a3977e; line-height: 1.8; }
+    footer { margin-top: 26px; text-align: center; font-size: 12px; color: #bcb09a; }
+
+    @media (max-width: 560px) {
+      body { padding: 56px 12px 36px; }   /* 顶部留白避开左上角固定返回按钮 */
+      h1 { font-size: 26px; }
+      .stat .val { font-size: 18px; }
+    }
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+  <main class="wrap">
+    <header>
+      <h1>点灯谜题</h1>
+      <p class="sub">LIGHTS OUT · 熄灭整块 5×5 灯阵</p>
+    </header>
+
+    <section class="hud">
+      <div class="stat" id="movesStat"><span class="lab">步数</span><span class="val" id="moves">0</span></div>
+      <div class="stat"><span class="lab">最优参考</span><span class="val" id="opt">—</span></div>
+      <div class="stat"><span class="lab">最少步纪录</span><span class="val" id="best">—</span></div>
+    </section>
+
+    <div class="board" id="board">
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle"></p>
+        <p class="ov-sub" id="ovSub"></p>
+        <div class="ov-btns">
+          <button class="btn" id="ovReplay" type="button">重玩本关</button>
+          <button class="btn primary" id="ovNext" type="button">下一关</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modes" id="modes">
+      <button class="mode" data-mode="easy" type="button" aria-pressed="false">简单</button>
+      <button class="mode" data-mode="normal" type="button" aria-pressed="false">普通</button>
+      <button class="mode" data-mode="hard" type="button" aria-pressed="false">困难</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="newBtn" type="button">新关卡</button>
+      <button class="btn" id="undoBtn" type="button">撤销</button>
+      <button class="btn" id="resetBtn" type="button">重开</button>
+    </div>
+
+    <p class="tip" id="tip">点击任意一盏灯，它和上下左右相邻的灯会一起翻转，把全部灯光熄灭即获胜。</p>
+    <footer>拾光集 · 在线小游戏</footer>
+  </main>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 点灯谜题主逻辑（零依赖，纯本地运行） ================= */
+
+  // ---------- 棋盘常量：25 盏灯压进一个 25 位整数，位为 1 表示亮 ----------
+  const N = 5, SIZE = N * N;
+  const FULL = (1 << SIZE) - 1;                          // 满盘全亮
+  const BOTTOM = ((1 << N) - 1) << (N * (N - 1));        // 底行 5 位（位 20~24）
+  // FLIP[i]：点击第 i 格时被翻转的全部格子（自身 + 上下左右）的位掩码
+  const FLIP = new Array(SIZE);
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      let m = 1 << (r * N + c);
+      if (r > 0)     m |= 1 << ((r - 1) * N + c);
+      if (r < N - 1) m |= 1 << ((r + 1) * N + c);
+      if (c > 0)     m |= 1 << (r * N + c - 1);
+      if (c < N - 1) m |= 1 << (r * N + c + 1);
+      FLIP[r * N + c] = m;
+    }
+  }
+
+  // ---------- 求解器：首行枚举 + 逐行追灯 ----------
+  // 点灯在 GF(2) 下与点击顺序无关，任何解都唯一对应一种第一行按法，
+  // 因此枚举 32 种首行组合逐行追灯即可覆盖全部解，取最短即最优步数。
+  function chase(state, firstMask) {
+    let s = state, clicks = 0;
+    for (let c = 0; c < N; c++) {
+      if (firstMask & (1 << c)) { s ^= FLIP[c]; clicks++; }
+    }
+    for (let r = 0; r < N - 1; r++) {          // 上一行哪盏还亮，就按下一行同列
+      for (let c = 0; c < N; c++) {
+        if (s & (1 << (r * N + c))) { s ^= FLIP[(r + 1) * N + c]; clicks++; }
+      }
+    }
+    return (s & BOTTOM) === 0 ? clicks : -1;   // 底行清不干净则此首行组合无解
+  }
+  function bestSolve(state) {
+    let best = Infinity;
+    for (let m = 0; m < (1 << N); m++) {
+      const k = chase(state, m);
+      if (k >= 0 && k < best) best = k;
+    }
+    return best === Infinity ? -1 : best;
+  }
+
+  // ---------- 关卡生成：由满盘逆推 ----------
+  // 从满盘全亮出发随机施加一组点击得到初始局面；全亮本身可解，
+  // 因此逆推出的局面必定可解，这里仍用求解器复核并按难度筛最优步数区间。
+  function generate(lo, hi) {
+    let fallback = null;
+    for (let t = 0; t < 600; t++) {
+      const k = 6 + (Math.random() * 10 | 0);          // 6~15 个构造点击
+      const order = [];
+      for (let i = 0; i < SIZE; i++) order.push(i);
+      for (let i = SIZE - 1; i > 0; i--) {             // Fisher-Yates 洗牌取前 k 格
+        const j = Math.random() * (i + 1) | 0;
+        const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+      }
+      let s = FULL;
+      for (let i = 0; i < k; i++) s ^= FLIP[order[i]];
+      if (s === 0) continue;                           // 碰巧全灭，开局即胜，丢弃
+      const opt = bestSolve(s);
+      if (opt < 3) continue;                           // 太简单没意思
+      if (opt >= lo && opt <= hi) return { state: s, opt: opt };
+      if (!fallback || Math.abs(opt - lo) < Math.abs(fallback.opt - lo)) {
+        fallback = { state: s, opt: opt };             // 记录最接近区间的候选
+      }
+    }
+    return fallback || { state: FULL, opt: bestSolve(FULL) };  // 兜底：全亮本身即一关
+  }
+
+  // ---------- 难度档位：限定最优步数区间；纪录按难度分开存 ----------
+  const MODES = {
+    easy:   { label: '简单', lo: 4,  hi: 6,  key: 'lightsOutBestEasy' },
+    normal: { label: '普通', lo: 7,  hi: 10, key: 'lightsOutBestNormal' },
+    hard:   { label: '困难', lo: 11, hi: 25, key: 'lightsOutBestHard' }
+  };
+
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const boardEl = $('board'), overlay = $('overlay');
+  const movesEl = $('moves'), optEl = $('opt'), bestEl = $('best');
+  const movesStat = $('movesStat');
+  const ovTitle = $('ovTitle'), ovSub = $('ovSub');
+  const undoBtn = $('undoBtn');
+  const tipEl = $('tip');
+
+  // ---------- 本地存储（读写都兜底，隐私模式不报错） ----------
+  function bestOf(m) {
+    try {
+      const v = parseInt(localStorage.getItem(MODES[m].key), 10);
+      return isNaN(v) ? null : v;
+    } catch (e) { return null; }
+  }
+  function saveBest(m, v) {
+    try { localStorage.setItem(MODES[m].key, String(v)); } catch (e) { }
+  }
+
+  // ---------- 状态 ----------
+  let mode = 'normal';
+  let cur = 0;        // 当前灯阵
+  let initial = 0;    // 本关初始灯阵（重开用）
+  let opt = 0;        // 本关最优步数
+  let moves = 0;
+  let hist = [];      // 撤销栈：按过的格子下标
+  let solved = false;
+
+  // ---------- 构建 25 个灯格（overlay 保持在最后，盖在灯格上方） ----------
+  const cells = [];
+  for (let i = 0; i < SIZE; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell';
+    b.addEventListener('click', () => press(i));
+    boardEl.insertBefore(b, overlay);
+    cells.push(b);
+  }
+
+  // ---------- 渲染 ----------
+  function render() {
+    for (let i = 0; i < SIZE; i++) {
+      const on = (cur & (1 << i)) !== 0;
+      cells[i].classList.toggle('on', on);
+      cells[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      cells[i].setAttribute('aria-label', '第 ' + ((i / N | 0) + 1) + ' 行第 ' + (i % N + 1) + ' 列，' + (on ? '亮' : '灭'));
+    }
+    movesEl.textContent = moves;
+    optEl.textContent = opt > 0 ? opt : '—';
+    const b = bestOf(mode);
+    bestEl.textContent = b == null ? '—' : b;
+    undoBtn.disabled = solved || hist.length === 0;
+  }
+  function bump(el) {   // 数字变化时弹一下（先移除再强制回流，重置动画）
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+
+  // ---------- 交互 ----------
+  function press(i) {
+    if (solved) return;
+    cur ^= FLIP[i];
+    moves++;
+    hist.push(i);
+    bump(movesStat);
+    cells[i].classList.remove('pop');
+    void cells[i].offsetWidth;
+    cells[i].classList.add('pop');
+    render();
+    if (cur === 0) win();
+  }
+  function undo() {
+    if (solved || hist.length === 0) return;
+    const i = hist.pop();
+    cur ^= FLIP[i];     // 点击是自反操作，再按同一格即复原
+    moves--;
+    render();
+  }
+  function resetBoard() {
+    cur = initial; moves = 0; hist = []; solved = false;
+    boardEl.classList.remove('cleared');
+    hideOverlay();
+    tipEl.textContent = '本关已恢复初始局面，步数清零。';
+    render();
+  }
+  function newPuzzle() {
+    const m = MODES[mode];
+    const p = generate(m.lo, m.hi);
+    initial = p.state; opt = p.opt;
+    cur = initial; moves = 0; hist = []; solved = false;
+    boardEl.classList.remove('cleared');
+    hideOverlay();
+    tipEl.textContent = '最优参考 ' + opt + ' 步，试试能不能恰好用这么多步熄灭全部灯光。';
+    render();
+  }
+
+  // ---------- 胜利 ----------
+  function win() {
+    solved = true;
+    boardEl.classList.add('cleared');
+    tipEl.textContent = '已通关！点「下一关」继续挑战，或切换难度换个局面。';
+    const prev = bestOf(mode);
+    const isNew = prev == null || moves < prev;
+    if (isNew) saveBest(mode, moves);
+    render();   // 刷新纪录显示并禁用撤销
+    ovTitle.textContent = moves === opt ? '完美通关！' : '全部熄灭！';
+    let line = '用了 ' + moves + ' 步 · 最优参考 ' + opt + ' 步';
+    if (moves === opt) line += '，分毫不差';
+    const shown = isNew ? moves : prev;
+    if (isNew) line += '，刷新本难度最少步纪录！';
+    else if (shown != null) line += '，本难度纪录 ' + shown + ' 步';
+    ovSub.textContent = line;
+    setTimeout(() => {
+      overlay.hidden = false;
+      void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+      overlay.classList.add('open');
+    }, 430);
+  }
+  function hideOverlay() {
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+  }
+
+  // ---------- 难度切换 ----------
+  const modeBtns = Array.from(document.querySelectorAll('.mode'));
+  function setMode(next) {
+    if (!MODES[next]) return;
+    mode = next;
+    for (const btn of modeBtns) {
+      const active = btn.dataset.mode === mode;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+    newPuzzle();
+  }
+  for (const btn of modeBtns) {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
+  }
+
+  // ---------- 按钮与快捷键 ----------
+  $('newBtn').addEventListener('click', newPuzzle);
+  $('resetBtn').addEventListener('click', resetBoard);
+  undoBtn.addEventListener('click', undo);
+  $('ovNext').addEventListener('click', newPuzzle);
+  $('ovReplay').addEventListener('click', resetBoard);
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === 'KeyN') { e.preventDefault(); newPuzzle(); }
+    else if (e.code === 'KeyZ') { e.preventDefault(); undo(); }
+    else if (e.code === 'KeyR') { e.preventDefault(); resetBoard(); }
+  });
+
+  // ---------- 启动 ----------
+  setMode('normal');
+  })();
+  </script>
+
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>点击任意一盏灯，它与上下左右相邻的灯会同时翻转亮灭</li>
+        <li>把 5×5 灯阵的灯全部熄灭即通关，步数越少越好</li>
+        <li>每关由满盘逆推生成，必定可解；难度越高最优步数越长</li>
+        <li>步数恰好等于最优参考即完美通关，各难度最少步数纪录保存在本机</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击 / 触按灯格翻转灯光</li>
+        <li>N：新关卡　Z：撤销　R：重开</li>
+        <li>切换难度档会立即开始对应难度的新关卡</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汉诺塔 - 拾光集</title>
+  <meta name="description" content="拾光集在线小游戏：汉诺塔，3~8 层盘子三柱搬运，大盘不压小盘，步数与理论最优 2^n-1 对比，纯本地运行，无需联网。">
+  <link rel="icon" href="../../favicon.svg">
+  <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/hanoi/app.html">
+  <style>
+    /* ===== 汉诺塔 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+    [hidden] { display: none !important; }
+    :root {
+      --primary: #7048e8;   /* 本游戏专属强调色：靛紫 */
+      --ink: #1f2430;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f1f0f6;
+      color: var(--muted);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 16px 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap { width: 100%; max-width: 600px; }
+
+    header { margin-bottom: 14px; }
+    h1 { font-size: 30px; line-height: 1.2; color: #4b3a86; letter-spacing: 2px; }
+    .sub { margin-top: 6px; font-size: 13px; color: #9a92b8; }
+
+    /* 统计：步数 / 理论最少 / 本层数最佳 */
+    .hud { display: flex; gap: 10px; margin-bottom: 12px; }
+    .stat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #e4def3;
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(112, 72, 232, .08);
+    }
+    .stat .lab { display: block; font-size: 12px; color: #a79dc9; letter-spacing: 2px; }
+    .stat .val {
+      display: block;
+      margin-top: 2px;
+      font-size: 21px;
+      font-weight: 700;
+      color: #4b3a86;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .val.over { color: #c0392b; }   /* 步数超过理论最少时标红提醒 */
+    .stat.bump { animation: bump .18s ease; }
+    @keyframes bump { 50% { transform: scale(1.06); } }
+
+    /* 控件行：层数分段选择 + 重开 */
+    .ctrl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .seg {
+      display: flex;
+      background: #fff;
+      border: 1px solid #e4def3;
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+      box-shadow: 0 2px 8px rgba(112, 72, 232, .06);
+    }
+    .seg button {
+      border: 0;
+      background: transparent;
+      color: #7a7396;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .seg button.on { background: var(--primary); color: #fff; }
+    .btn {
+      border: 0;
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(112, 72, 232, .3);
+      touch-action: manipulation;
+    }
+    .btn:active { transform: translateY(1px); }
+
+    /* 棋盘：三柱各占 1/3，盘用百分比定位，天然响应式 */
+    .board {
+      --dh: 30px;   /* 盘高，由 JS 随层数与棋盘高度自适应 */
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      aspect-ratio: 1.55;
+      background: #ede8f8;
+      border-radius: 14px;
+      overflow: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .peg { position: absolute; top: 0; bottom: 0; width: 33.333%; cursor: pointer; }
+    .rod {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20px;
+      width: 10px;
+      border-radius: 5px 5px 0 0;
+      background: #cbc2e6;
+      transition: background .15s;
+    }
+    .peg:hover .rod { background: #b3a4e0; }
+    .base {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 86%;
+      height: 20px;
+      border-radius: 7px;
+      background: #ddd7f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .base .tag { font-size: 10px; font-weight: 600; color: #7a6cc0; letter-spacing: 3px; }
+    .base.target { background: var(--primary); }
+    .base.target .tag { color: #fff; }
+
+    /* 盘：left/width 用百分比、bottom 用 px，位置由 JS 按柱号与堆叠层计算 */
+    .disc {
+      position: absolute;
+      height: var(--dh);
+      border-radius: calc(var(--dh) / 2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+      box-shadow: 0 2px 6px rgba(80, 60, 140, .25);
+      pointer-events: none;   /* 点击穿透到柱子 */
+      z-index: 1;
+      transition: left .15s ease-in-out, bottom .15s ease-in-out;
+    }
+    .disc.no-anim { transition: none !important; }   /* resize 重摆时关过渡，防盘乱飞 */
+    .disc.sel {
+      outline: 3px solid #3b2a86;
+      outline-offset: -3px;
+      filter: brightness(.94);
+      box-shadow: 0 6px 14px rgba(60, 40, 130, .4);
+      transform: translateY(-4px);
+    }
+    .disc.deny { animation: shake .32s ease; }   /* 非法操作抖动提示 */
+    @keyframes shake {
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* 通关弹层（hidden + 同步回流 + open，保证过渡生效） */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      border-radius: 14px;
+      background: rgba(243, 240, 252, .9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      padding: 0 16px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .overlay.open { opacity: 1; }
+    .ov-title { font-size: 30px; font-weight: 800; color: #4b3a86; }
+    .ov-sub { font-size: 14px; color: var(--muted); line-height: 1.8; }
+    .ov-record { font-size: 13px; font-weight: 700; color: #b45309; }
+
+    .hint {
+      max-width: 560px;
+      margin: 12px auto 0;
+      min-height: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #9a92b8;
+      line-height: 1.7;
+    }
+    footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b3cd; }
+
+    @media (max-width: 560px) {
+      body { padding: 20px 12px 32px; }
+      h1 { font-size: 24px; }
+      .stat .val { font-size: 18px; }
+      .seg button { padding: 7px 8px; font-size: 12.5px; }
+      .btn { padding: 9px 14px; font-size: 13px; }
+      .ov-title { font-size: 24px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .disc { transition: none; }
+      .disc.deny { animation: none; }
+      .stat.bump { animation: none; }
+      .overlay { transition: none; }
+    }
+  </style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+  <main class="wrap">
+    <header>
+      <h1>汉诺塔</h1>
+      <p class="sub">把起点柱的盘子全部搬到目标柱，大盘不能压小盘</p>
+    </header>
+
+    <section class="hud">
+      <div class="stat" id="movesStat"><span class="lab">步数</span><span class="val" id="moves">0</span></div>
+      <div class="stat"><span class="lab">理论最少</span><span class="val" id="minMoves">15</span></div>
+      <div class="stat"><span class="lab">本层最佳</span><span class="val" id="best">—</span></div>
+    </section>
+
+    <section class="ctrl">
+      <div class="seg" id="seg" role="group" aria-label="选择盘子层数">
+        <button type="button" data-n="3">3 层</button>
+        <button type="button" data-n="4" class="on">4 层</button>
+        <button type="button" data-n="5">5 层</button>
+        <button type="button" data-n="6">6 层</button>
+        <button type="button" data-n="7">7 层</button>
+        <button type="button" data-n="8">8 层</button>
+      </div>
+      <button class="btn" id="newBtn" type="button">重开</button>
+    </section>
+
+    <div class="board" id="board">
+      <div class="peg" data-i="0" aria-label="起点柱">
+        <div class="rod"></div>
+        <div class="base"><span class="tag">起点</span></div>
+      </div>
+      <div class="peg" data-i="1" aria-label="中转柱">
+        <div class="rod"></div>
+        <div class="base"><span class="tag">中转</span></div>
+      </div>
+      <div class="peg" data-i="2" aria-label="目标柱">
+        <div class="rod"></div>
+        <div class="base target"><span class="tag">目标</span></div>
+      </div>
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle">通关！</p>
+        <p class="ov-sub" id="ovSub"></p>
+        <p class="ov-record" id="ovRecord" hidden></p>
+        <button class="btn" id="ovRestart" type="button">再来一局</button>
+      </div>
+    </div>
+
+    <p class="hint" id="hint"></p>
+    <footer>拾光集 · 在线小游戏</footer>
+  </main>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 汉诺塔主逻辑（零依赖，纯本地运行） ================= */
+
+  // ---------- 常量 ----------
+  const BASE_H = 20;      // 底座高度（px），盘子从底座上方开始堆叠
+  const MIN_W = 11;       // 最小盘宽度（相对棋盘宽的百分比）
+  const MAX_W = 28;       // 最大盘宽度
+  const ANIM_MS = 150;    // 移动动画每段时长（提起 / 平移 / 落下各一段）
+  const $ = id => document.getElementById(id);
+
+  // ---------- DOM ----------
+  const board = $('board');
+  const movesEl = $('moves'), minEl = $('minMoves'), bestEl = $('best');
+  const movesStat = $('movesStat');
+  const hintEl = $('hint');
+  const overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'), ovRecord = $('ovRecord');
+  const seg = $('seg');
+
+  // ---------- 状态 ----------
+  let n = 4;                // 当前层数（3~8）
+  let pegs = [[], [], []];  // 三根柱的盘子栈：数字即盘号，越小盘越小，末位是柱顶
+  let discs = {};           // 盘号 -> 对应 DOM 元素
+  let moves = 0;            // 实际步数
+  let sel = -1;             // 已拿起盘所在柱号，-1 表示未选中
+  let lock = false;         // 移动动画期间锁输入
+  let won = false;          // 本局是否已通关
+  let dh = 30;              // 当前盘高（px），随层数与棋盘高度自适应
+  let epoch = 0;            // 局代号：重开或换层后，旧动画回调直接作废
+
+  // ---------- 工具 ----------
+  const minMovesOf = k => (1 << k) - 1;   // 理论最少步数 2^n - 1（n ≤ 8，位运算安全）
+  const topOf = i => pegs[i].length ? pegs[i][pegs[i].length - 1] : undefined;
+  const bestKey = k => 'hanoiBest' + k;   // 每个层数独立记录最佳（最少）完成步数
+  function loadBest(k) {
+    try { return parseInt(localStorage.getItem(bestKey(k)), 10) || 0; }
+    catch (e) { return 0; }               // 隐私模式下读取失败按无纪录处理
+  }
+  function saveBest(k, v) {
+    try { localStorage.setItem(bestKey(k), String(v)); }
+    catch (e) { /* 写入失败时静默忽略 */ }
+  }
+
+  // ---------- 几何：left/width 用百分比、bottom 用 px，天然响应式 ----------
+  const pegCenter = i => (i * 2 + 1) / 6 * 100;   // 三柱中心：16.7% / 50% / 83.3%
+  function discWidth(size) {                      // 盘宽随盘号线性插值
+    return n === 1 ? MAX_W : MIN_W + (MAX_W - MIN_W) * (size - 1) / (n - 1);
+  }
+  function setLeft(el, peg, size) {
+    const w = discWidth(size);
+    el.style.left = (pegCenter(peg) - w / 2) + '%';
+    el.style.width = w + '%';
+  }
+  function setBottom(el, level) {                 // level 0 为最底层
+    el.style.bottom = (BASE_H + level * dh) + 'px';
+  }
+  function setBottomPx(el, px) {                  // 按像素直设 bottom，动画提起段用，不再按层号换算
+    el.style.bottom = px + 'px';
+  }
+  function findPeg(size) {
+    for (let i = 0; i < 3; i++) if (pegs[i].indexOf(size) !== -1) return i;
+    return -1;
+  }
+
+  // ---------- 布局：按棋盘实际高度算盘高，重摆全部盘与柱杆 ----------
+  function layout() {
+    const bh = board.clientHeight;
+    dh = Math.max(16, Math.min(34, (bh - BASE_H - 30) / (n + 1.2)));
+    board.style.setProperty('--dh', dh.toFixed(2) + 'px');
+    // 三柱水平就位：absolute 定位的水平偏移不会自动排开，必须显式指定 left
+    board.querySelectorAll('.peg').forEach((peg, i) => { peg.style.left = (i * 100 / 3) + '%'; });
+    board.querySelectorAll('.rod').forEach(rod => { rod.style.height = (n * dh + 26) + 'px'; });
+    // 重摆所有盘：先关过渡再定位，避免窗口缩放时盘子飞舞
+    for (const key of Object.keys(discs)) {
+      const size = +key, el = discs[key], p = findPeg(size);
+      el.classList.add('no-anim');
+      setLeft(el, p, size);
+      setBottom(el, pegs[p].indexOf(size));
+      el.style.fontSize = Math.max(10, dh * 0.5) + 'px';
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      for (const el of Object.values(discs)) el.classList.remove('no-anim');
+    }));
+  }
+
+  // ---------- 开局 ----------
+  function newGame() {
+    epoch++;
+    for (const key of Object.keys(discs)) discs[key].remove();
+    discs = {};
+    pegs = [[], [], []];
+    moves = 0; sel = -1; lock = false; won = false;
+    hideOverlay();
+    // 从最大盘到最小盘依次压入起点柱（盘号越大盘越大，放最底）
+    for (let s = n; s >= 1; s--) {
+      const el = document.createElement('div');
+      el.className = 'disc';
+      el.textContent = s;
+      board.appendChild(el);
+      discs[s] = el;
+      pegs[0].push(s);
+    }
+    layout();
+    updateHud();
+    hintEl.textContent = '点击柱子拿起顶盘，再点目标柱放下；键盘 1 / 2 / 3 同样有效';
+  }
+
+  // ---------- HUD ----------
+  function updateHud() {
+    movesEl.textContent = moves;
+    minEl.textContent = minMovesOf(n);
+    const b = loadBest(n);
+    bestEl.textContent = b ? b : '—';
+    movesEl.classList.toggle('over', moves > minMovesOf(n));   // 超出理论最少就标红
+  }
+  function bumpMoves() {   // 步数跳动反馈：先移除类再强制回流，重启动画
+    movesStat.classList.remove('bump');
+    void movesStat.offsetWidth;
+    movesStat.classList.add('bump');
+  }
+
+  // ---------- 交互：拿起 / 放下 ----------
+  function handlePeg(i) {
+    if (lock || won) return;
+    if (sel === -1) {                        // 第一次点击：拿起该柱顶盘
+      const t = topOf(i);
+      if (t === undefined) { flashDeny(i); return; }   // 空柱无盘可拿
+      sel = i;
+      discs[t].classList.add('sel');
+      hintEl.textContent = '已拿起 ' + t + ' 号盘：点目标柱放下，再点本柱取消（Esc 同效）';
+      return;
+    }
+    if (sel === i) {                         // 点回原柱：放回并取消选中
+      discs[topOf(i)].classList.remove('sel');
+      sel = -1;
+      hintEl.textContent = '已放回原柱，重新选择';
+      return;
+    }
+    const size = topOf(sel);
+    const target = topOf(i);
+    if (target !== undefined && target < size) {   // 大盘压小盘：拒绝
+      flashDeny(i);
+      hintEl.textContent = target + ' 号盘在上面，' + size + ' 号盘压不下去，换根柱子试试';
+      return;
+    }
+    // 合法移动：先更新数据，再播放 提起 → 平移 → 落下 三段动画
+    const el = discs[size];
+    el.classList.remove('sel');
+    const from = sel;                // 记下起点柱（提起高度要用）
+    pegs[from].pop();
+    const toLevel = pegs[i].length;  // 目标柱现有盘数 = 落点层号
+    pegs[i].push(size);
+    sel = -1;
+    lock = true;
+    moves++;
+    updateHud();
+    bumpMoves();
+    const ep = epoch;
+    animateMove(el, size, from, i, toLevel).then(() => {
+      if (ep !== epoch) return;      // 中途重开或换层，本局回调作废
+      lock = false;
+      hintEl.textContent = '点击柱子拿起顶盘，再点目标柱放下；键盘 1 / 2 / 3 同样有效';
+      checkWin();
+    });
+  }
+
+  // ---------- 移动动画：提起 → 平移 → 落下，定时器推进不依赖 transitionend ----------
+  function animateMove(el, size, from, to, toLevel) {
+    return new Promise(resolve => {
+      const ep = epoch;
+      const wait = ANIM_MS + 20;   // 动画时长加余量，reduced-motion 下也能按时序走完
+      el.style.zIndex = 20;        // 移动中的盘置顶，横穿其他塔时不被遮挡
+      // 第一段：提起，高过原柱塔顶（像素直设；setBottom 是层号换算，混用会把盘顶飞出棋盘）
+      setBottomPx(el, BASE_H + pegs[from].length * dh + 14);
+      setTimeout(() => {
+        if (ep !== epoch) { resolve(); return; }
+        // 第二段：平移到目标柱正上方
+        setLeft(el, to, size);
+        setTimeout(() => {
+          if (ep !== epoch) { resolve(); return; }
+          // 第三段：落到目标柱的堆叠位
+          setBottom(el, toLevel);
+          setTimeout(() => {
+            if (ep === epoch) el.style.zIndex = 1;
+            resolve();
+          }, wait);
+        }, wait);
+      }, wait);
+    });
+  }
+
+  // ---------- 非法操作：抖一下目标柱顶盘提示 ----------
+  function flashDeny(i) {
+    const t = topOf(i);
+    if (t === undefined) return;
+    const el = discs[t];
+    el.classList.remove('deny');
+    void el.offsetWidth;
+    el.classList.add('deny');
+    setTimeout(() => el.classList.remove('deny'), 360);
+  }
+
+  // ---------- 通关判定与结算 ----------
+  function checkWin() {
+    if (pegs[2].length !== n) return;
+    won = true;
+    const mn = minMovesOf(n);
+    const prev = loadBest(n);
+    const isNew = !prev || moves < prev;
+    if (isNew) saveBest(n, moves);
+    ovTitle.textContent = moves === mn ? '完美通关！' : '通关！';
+    ovSub.textContent = n + ' 层用了 ' + moves + ' 步 · 理论最少 ' + mn + ' 步'
+      + (moves === mn ? '，一步不差' : '，多走 ' + (moves - mn) + ' 步（效率 ' + Math.round(mn / moves * 100) + '%）');
+    ovRecord.textContent = isNew ? '新纪录！' + n + ' 层最佳 ' + moves + ' 步'
+      : n + ' 层历史最佳 ' + prev + ' 步';
+    ovRecord.hidden = false;
+    updateHud();
+    showOverlay();
+  }
+
+  // ---------- 弹层显隐（同步强制回流后再加 open，保证过渡生效） ----------
+  function showOverlay() {
+    overlay.hidden = false;
+    void overlay.offsetWidth;
+    overlay.classList.add('open');
+  }
+  function hideOverlay() {
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+  }
+
+  // ---------- 输入：点击三柱 ----------
+  document.querySelectorAll('.peg').forEach(peg => {
+    peg.addEventListener('click', () => handlePeg(+peg.dataset.i));
+  });
+
+  // ---------- 输入：键盘（忽略组合键，方向无关不用防滚动） ----------
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const PEG_KEYS = { Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2 };
+    if (e.code in PEG_KEYS) {
+      e.preventDefault();
+      handlePeg(PEG_KEYS[e.code]);
+    } else if (e.code === 'Escape' && sel !== -1) {
+      discs[topOf(sel)].classList.remove('sel');
+      sel = -1;
+      hintEl.textContent = '已放回原柱，重新选择';
+    } else if (e.code === 'KeyR') {
+      newGame();
+    }
+  });
+
+  // ---------- 层数切换与按钮 ----------
+  seg.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-n]');
+    if (!btn) return;
+    const k = +btn.dataset.n;
+    if (k === n) return;
+    n = k;
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+    newGame();
+  });
+  $('newBtn').addEventListener('click', newGame);
+  $('ovRestart').addEventListener('click', newGame);
+
+  // ---------- 响应式：窗口变化时重算盘高并重摆 ----------
+  window.addEventListener('resize', layout);
+
+  // ---------- 启动 ----------
+  newGame();
+  })();
+  </script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>目标：把起点柱的全部盘子搬到最右边的目标柱</li>
+        <li>每次只能移动一根柱子最顶端的盘，大盘不能压在小盘上</li>
+        <li>步数越接近理论最少 2<sup>n</sup>-1（n 为层数）越好，正好达成即完美通关</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击柱子或按 1 / 2 / 3：拿起顶盘、放下</li>
+        <li>再点原柱或按 Esc：放回取消</li>
+        <li>R：重开本局；上方 3~8 按钮切换层数</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

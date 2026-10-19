@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成语猜猜 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：成语猜猜，猜四字成语，逐字给绿黄灰位置反馈，6 次机会，含每日一题与成语解释，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/wordle-zh/app.html">
+<style>
+/* ===== 成语猜猜 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+[hidden] { display: none !important; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #c0392b;   /* 朱红：本游戏强调色 */
+  --green: #2b8a3e;     /* 绿：字对、位置也对 */
+  --amber: #d97706;     /* 黄：有此字但位置不对 */
+  --gray: #7b8087;      /* 灰：成语里没有此字 */
+  --ink: #2b2620;
+  --muted: #8a8274;
+  --line: #e5ded0;
+  --card: #ffffff;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f6f2ea;
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 52px 16px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; align-items: center; }
+
+header.top { text-align: center; }
+h1 { font-size: 30px; font-weight: 800; letter-spacing: 8px; text-indent: 8px; color: #4a3f33; }
+.sub { margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+/* 模式切换：每日一题 / 自由练习 */
+.modes { display: inline-flex; gap: 4px; margin-top: 14px; background: #efe8da; border-radius: 999px; padding: 4px; }
+.mode-btn {
+  border: 0; background: transparent; padding: 7px 18px; border-radius: 999px;
+  font-size: 14px; color: #7d7466; cursor: pointer; font-family: inherit; touch-action: manipulation;
+}
+.mode-btn.on { background: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(192, 57, 43, .3); }
+.mode-btn:disabled { opacity: .5; cursor: default; }
+.mode-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* 信息条 */
+.hud { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px 0 16px; }
+.chip {
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 12px; font-size: 12px; color: #7d7466; font-variant-numeric: tabular-nums;
+}
+
+/* 猜词面板：6 行 × 4 格 */
+.board { display: grid; gap: 8px; width: min(100%, 380px); }
+.row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tile {
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card);
+  border: 2px solid #ddd5c4;
+  border-radius: 12px;
+  font-size: clamp(22px, 7vw, 34px);
+  font-weight: 700;
+  color: var(--ink);
+  transition: transform .26s ease;
+  user-select: none; -webkit-user-select: none;
+}
+.tile.filled { border-color: #b9ae99; }
+.tile.pop { animation: pop .14s ease; }
+.tile.flip { transform: rotateX(90deg); }
+.tile.correct { background: var(--green); border-color: var(--green); color: #fff; }
+.tile.present { background: var(--amber); border-color: var(--amber); color: #fff; }
+.tile.absent  { background: var(--gray);  border-color: var(--gray);  color: #fff; }
+.tile.bounce { animation: bounce .55s ease; }
+@keyframes pop { 40% { transform: scale(1.1); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-12px); } }
+
+/* 输入行：输入法打字 + 提交按钮 */
+.guess-row { display: flex; gap: 8px; width: min(100%, 380px); margin-top: 16px; }
+.guess-row.shake { animation: shake .5s ease; }
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+.guess-input {
+  flex: 1; min-width: 0; height: 54px;
+  border: 2px solid #ddd5c4; border-radius: 14px;
+  background: var(--card);
+  font-size: 22px; font-family: inherit;
+  text-align: center; letter-spacing: 6px; text-indent: 6px;
+  color: var(--ink);
+  padding: 0 10px;
+}
+.guess-input:focus { outline: none; border-color: var(--primary); }
+.guess-input:disabled { opacity: .55; }
+.btn-submit {
+  height: 54px; padding: 0 22px;
+  border: 0; border-radius: 14px;
+  background: var(--primary); color: #fff;
+  font-size: 16px; font-weight: 600; font-family: inherit;
+  cursor: pointer; touch-action: manipulation;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, .3);
+}
+.btn-submit:active { transform: translateY(1px); }
+.btn-submit:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* 颜色图例 */
+.legend { margin-top: 12px; font-size: 12px; color: #9a917f; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.lg-item { display: inline-flex; align-items: center; gap: 5px; }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 4px; }
+.d-g { background: var(--green); }
+.d-y { background: var(--amber); }
+.d-n { background: var(--gray); }
+
+/* 用过的字：按最好提示状态着色，方便规划下一猜 */
+.used { width: min(100%, 380px); margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 12px; }
+.used-title { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 2px; margin-bottom: 8px; }
+.used-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; max-height: 118px; overflow-y: auto; }
+.u-chip {
+  min-width: 32px; height: 30px; padding: 0 7px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600;
+}
+.u0 { background: #eeebe3; color: #6f6a5e; }
+.u1 { background: #fbe6c8; color: #8a5200; }
+.u2 { background: #dcefd9; color: #1e6b2e; }
+.used-empty { font-size: 12px; color: #b3ab99; align-self: center; }
+
+footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b1a0; padding-bottom: 6px; }
+
+/* 结算弹层：挂 body 直接子级，避免被带 transform 的容器劫持 fixed 定位 */
+.overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(46, 40, 32, .45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; transition: opacity .2s ease;
+}
+.overlay.open { opacity: 1; }
+.result-card {
+  background: var(--card); border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(46, 40, 32, .3);
+  width: min(92vw, 380px); padding: 26px 22px 22px;
+  text-align: center;
+  transform: translateY(12px); transition: transform .2s ease;
+}
+.overlay.open .result-card { transform: translateY(0); }
+.r-title { font-size: 21px; font-weight: 700; color: #3d3428; }
+.r-word { font-size: 36px; font-weight: 800; letter-spacing: 10px; text-indent: 10px; color: var(--primary); margin: 14px 0 10px; }
+.r-explain { font-size: 14px; line-height: 1.8; color: #4f463a; background: #f8f4ea; border-radius: 12px; padding: 12px 14px; text-align: left; }
+.r-stats { margin-top: 12px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.r-btns { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+.r-btn {
+  padding: 10px 22px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: #4f463a;
+  font-size: 15px; font-family: inherit; cursor: pointer; touch-action: manipulation;
+}
+.r-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.r-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* 轻提示条 */
+.toast {
+  position: fixed; left: 50%; top: 16%; z-index: 320;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(46, 40, 32, .9); color: #fff;
+  font-size: 14px; padding: 9px 18px; border-radius: 999px;
+  opacity: 0; transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none; max-width: 80vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    .rules-panel .lg { color: #1e6b2e; font-weight: 700; }
+    .rules-panel .ly { color: #8a5200; font-weight: 700; }
+    .rules-panel .ln { color: #6f6a5e; font-weight: 700; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+  <main class="wrap">
+    <header class="top">
+      <h1>成语猜猜</h1>
+      <p class="sub">每题一个四字成语 · 共 6 次机会 · 逐字给颜色提示</p>
+      <div class="modes">
+        <button type="button" id="modeDaily" class="mode-btn on" aria-pressed="true">每日一题</button>
+        <button type="button" id="modeFree" class="mode-btn" aria-pressed="false">自由练习</button>
+      </div>
+    </header>
+
+    <section class="hud" aria-label="对本信息">
+      <span class="chip" id="hudDate">每日一题</span>
+      <span class="chip" id="hudLeft">剩余 6 次</span>
+      <span class="chip" id="hudStreak">连胜 0</span>
+      <span class="chip" id="hudBest">最高连胜 0</span>
+    </section>
+
+    <div class="board" id="board" aria-label="猜词面板：六行四格"></div>
+
+    <form class="guess-row" id="guessForm" autocomplete="off">
+      <input id="guessInput" class="guess-input" type="text" inputmode="text" enterkeyhint="done"
+             placeholder="输入四字成语" aria-label="输入四字成语，回车提交">
+      <button class="btn-submit" type="submit">提交</button>
+    </form>
+
+    <p class="legend">
+      <span class="lg-item"><span class="dot d-g"></span>字对位对</span>
+      <span class="lg-item"><span class="dot d-y"></span>有字错位</span>
+      <span class="lg-item"><span class="dot d-n"></span>没有此字</span>
+    </p>
+
+    <section class="used">
+      <h2 class="used-title">用过的字</h2>
+      <div class="used-list" id="usedList"></div>
+    </section>
+
+    <footer>拾光集 · 在线小游戏</footer>
+  </main>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+      <p class="r-title" id="rTitle"></p>
+      <p class="r-word" id="rWord"></p>
+      <p class="r-explain" id="rExplain"></p>
+      <p class="r-stats" id="rStats"></p>
+      <div class="r-btns">
+        <button class="r-btn primary" id="rAgain" type="button">再来一局</button>
+        <button class="r-btn" id="rClose" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 成语猜猜主逻辑（零依赖，纯本地运行） =================
+     玩法：从内置成语库随机出四字成语，玩家用输入法打字猜成语，
+     每次提交后逐字给绿黄灰位置反馈，共 6 次机会；
+     含每日一题（按日期固定、进度自动保存）与自由练习（随机出题），
+     结算弹层公布成语与解释。 */
+
+  /* ---------- 成语库（w: 成语，h: 解释），全部四字、不重复 ---------- */
+  const LIB = [
+  // —— 数字起头 ——
+  { w: '一帆风顺', h: '船挂满帆顺风行驶，比喻事情进展非常顺利。' },
+  { w: '一鸣惊人', h: '平时默默无闻，一干就有惊人的成绩。' },
+  { w: '一举两得', h: '做一件事同时得到两方面的好处。' },
+  { w: '一诺千金', h: '许下的诺言价值千金，形容说话算数。' },
+  { w: '一目十行', h: '一眼能看十行文字，形容阅读速度极快。' },
+  { w: '一丝不苟', h: '做事认真细致，一点也不马虎。' },
+  { w: '一意孤行', h: '不听劝告，固执地按自己的意思行事。' },
+  { w: '一见如故', h: '初次见面就像老朋友一样投缘。' },
+  { w: '一箭双雕', h: '一箭射中两只雕，比喻做一件事达到两个目的。' },
+  { w: '一鼓作气', h: '趁劲头大的时候一下子把事情完成。' },
+  { w: '一劳永逸', h: '辛苦一次把事情办好，以后就可以不再费力。' },
+  { w: '一视同仁', h: '对人同样看待，不分厚薄。' },
+  { w: '一毛不拔', h: '连一根毛都不肯拔，形容非常吝啬。' },
+  { w: '一叶障目', h: '被一片叶子挡住眼睛，比喻被局部的现象所迷惑。' },
+  { w: '二话不说', h: '不再多说一句，立刻行动起来。' },
+  { w: '三心二意', h: '一会儿想这样一会儿想那样，形容犹豫不决或意志不坚定。' },
+  { w: '三顾茅庐', h: '诚心诚意地一再登门拜访、邀请有才能的人。' },
+  { w: '三言两语', h: '指话很少，几句话就把事情说完。' },
+  { w: '三生有幸', h: '形容极大的幸运。' },
+  { w: '四面八方', h: '泛指各个方面或各个地方。' },
+  { w: '四海为家', h: '志在四方，任何地方都可以当作自己的家。' },
+  { w: '四平八稳', h: '形容说话做事稳当，有时也指做事只求不出差错。' },
+  { w: '五光十色', h: '色彩鲜艳、花样繁多。' },
+  { w: '五湖四海', h: '指全国各地，有时也指世界各地。' },
+  { w: '五花八门', h: '花样繁多，变化多端。' },
+  { w: '六神无主', h: '形容惊慌着急，没了主意。' },
+  { w: '七上八下', h: '形容心里慌乱不安。' },
+  { w: '七嘴八舌', h: '形容你一言我一语，议论纷纷。' },
+  { w: '八仙过海', h: '比喻各自拿出本领或办法，互相竞赛。' },
+  { w: '九牛一毛', h: '比喻极大数量中微不足道的一部分。' },
+  { w: '九死一生', h: '形容经历许多危险而幸存下来。' },
+  { w: '十全十美', h: '各方面都非常完美，毫无缺陷。' },
+  { w: '十万火急', h: '形容情况紧急到了极点。' },
+  { w: '百发百中', h: '每次都射中目标，形容射箭或射击非常准。' },
+  { w: '百折不挠', h: '无论受到多少挫折都不退缩，形容意志坚强。' },
+  { w: '千军万马', h: '形容兵马众多，声势浩大。' },
+  { w: '千钧一发', h: '千钧重物系在一根头发上，比喻情况万分危急。' },
+  { w: '千方百计', h: '想尽一切办法，用尽一切计谋。' },
+  { w: '万紫千红', h: '形容百花齐放，色彩艳丽。' },
+  { w: '万无一失', h: '极有把握，绝对不会出差错。' },
+  { w: '万象更新', h: '一切事物都改换了样子，出现了新气象。' },
+  // —— 寓言故事 ——
+  { w: '龙飞凤舞', h: '形容山势蜿蜒雄壮，后多形容书法笔势舒展活泼。' },
+  { w: '龙腾虎跃', h: '形容跑跳时动作矫健有力，也比喻奋起行动、有所作为。' },
+  { w: '画龙点睛', h: '比喻说话作文时在关键处加上精辟语句，使内容更加生动。' },
+  { w: '守株待兔', h: '比喻死守狭隘经验不知变通，也讽刺妄想不劳而获。' },
+  { w: '拔苗助长', h: '比喻违反事物发展规律急于求成，反而坏事。' },
+  { w: '亡羊补牢', h: '比喻出了问题以后及时补救，可以防止继续受损失。' },
+  { w: '狐假虎威', h: '狐狸假借老虎的威风，比喻倚仗别人的势力欺压恐吓人。' },
+  { w: '掩耳盗铃', h: '捂住自己耳朵去偷铃铛，比喻自己欺骗自己。' },
+  { w: '井底之蛙', h: '井底的蛙只能看到井口那么大的一片天，比喻见识狭窄短浅的人。' },
+  { w: '刻舟求剑', h: '比喻拘泥成法，不懂得随着情况变化而改变办法。' },
+  { w: '望梅止渴', h: '想到梅子的酸味就能止渴，比喻用空想来安慰自己。' },
+  { w: '对牛弹琴', h: '比喻对不懂道理的人讲道理，白费口舌。' },
+  { w: '杯弓蛇影', h: '把杯中弓影误当作蛇，比喻疑神疑鬼，自相惊扰。' },
+  { w: '叶公好龙', h: '比喻口头上说爱好某事物，实际并不真正爱好。' },
+  { w: '画蛇添足', h: '蛇画好了又添上脚，比喻做了多余的事，反而弄巧成拙。' },
+  { w: '鹬蚌相争', h: '蚌张开壳被鹬啄，双方互不相让，比喻双方争执不下让第三者得利。' },
+  { w: '黔驴技穷', h: '比喻仅有的一点本领也用完了。' },
+  { w: '塞翁失马', h: '比喻一时受到损失，也许反而因此能得到好处。' },
+  { w: '滥竽充数', h: '不会吹竽的人混在队伍里充数，比喻没本领的冒充有本领，或以次充好。' },
+  { w: '自相矛盾', h: '比喻说话做事前后抵触。' },
+  { w: '郑人买履', h: '郑人宁信尺码不信自己的脚，讽刺死守教条、脱离实际的人。' },
+  { w: '买椟还珠', h: '买下木匣退还珍珠，比喻没有眼光，取舍不当。' },
+  { w: '东施效颦', h: '比喻盲目模仿别人，效果适得其反。' },
+  { w: '南辕北辙', h: '心想往南而车子却向北行，比喻行动和目的正好相反。' },
+  { w: '杞人忧天', h: '比喻不必要的或毫无根据的忧虑。' },
+  // —— 历史典故 ——
+  { w: '愚公移山', h: '比喻做事有顽强的毅力，不怕困难，坚持到底。' },
+  { w: '卧薪尝胆', h: '睡在柴草上尝苦胆，形容刻苦自励，发奋图强。' },
+  { w: '破釜沉舟', h: '砸锅沉船断绝退路，比喻下定决心，不顾一切干到底。' },
+  { w: '完璧归赵', h: '比喻把原物完好无缺地归还本人。' },
+  { w: '负荆请罪', h: '背着荆条向对方认错赔罪，表示诚心道歉。' },
+  { w: '纸上谈兵', h: '在纸面上谈论用兵，比喻空谈理论，不能解决实际问题。' },
+  { w: '四面楚歌', h: '比喻陷入四面受敌、孤立无援的困境。' },
+  { w: '草木皆兵', h: '把草木都当成敌兵，形容惊慌时疑神疑鬼。' },
+  { w: '指鹿为马', h: '指着鹿说是马，比喻故意颠倒黑白，混淆是非。' },
+  { w: '凿壁偷光', h: '凿开墙壁借邻家灯光读书，形容家贫而读书刻苦。' },
+  { w: '闻鸡起舞', h: '听到鸡叫就起来舞剑练武，形容有志之士及时奋发努力。' },
+  { w: '悬梁刺股', h: '把头发吊在房梁、用锥子刺大腿提神，形容读书学习非常刻苦。' },
+  { w: '孟母三迁', h: '孟母为教子三次搬家择邻，比喻注重选择良好的学习环境。' },
+  { w: '程门立雪', h: '冒雪立在老师门前等候，形容尊敬老师，诚恳求教。' },
+  { w: '囊萤映雪', h: '用萤火虫和雪的反光照明读书，形容家境贫穷仍勤学苦读。' },
+  { w: '高山流水', h: '比喻知音难遇，也比喻乐曲高妙。' },
+  { w: '曲高和寡', h: '曲调越高深，能跟着唱的人越少，比喻言论作品不通俗，能理解的人很少。' },
+  // —— 勤学求进 ——
+  { w: '出类拔萃', h: '形容人的品德才能超出同类之上。' },
+  { w: '才高八斗', h: '形容人极有才华。' },
+  { w: '学富五车', h: '形容读书多，学问渊博。' },
+  { w: '全神贯注', h: '全部精神集中在一点上，形容注意力高度集中。' },
+  { w: '聚精会神', h: '集中精神，专心一意。' },
+  { w: '废寝忘食', h: '顾不得睡觉忘记了吃饭，形容专心努力。' },
+  { w: '孜孜不倦', h: '勤奋努力，不知疲倦。' },
+  { w: '持之以恒', h: '长久地坚持下去。' },
+  { w: '坚持不懈', h: '坚持到底，毫不松懈。' },
+  { w: '半途而废', h: '事情没做完就停止，比喻做事有始无终。' },
+  { w: '浅尝辄止', h: '略微尝试一下就停止，指学习研究不求深入。' },
+  { w: '水滴石穿', h: '水不停地滴能把石头滴穿，比喻坚持不懈，小事也能成就大功。' },
+  { w: '磨杵成针', h: '把铁棒磨成绣花针，比喻有恒心肯下功夫，再难的事也能成功。' },
+  { w: '熟能生巧', h: '技能熟练了就能找到巧妙的办法。' },
+  { w: '温故知新', h: '温习学过的知识，能获得新的理解和体会。' },
+  { w: '循序渐进', h: '按照一定的顺序和步骤逐渐深入或提高。' },
+  { w: '融会贯通', h: '把各方面的知识道理融合贯穿，得到全面透彻的理解。' },
+  { w: '举一反三', h: '从一件事情类推，知道其他许多事情。' },
+  { w: '触类旁通', h: '掌握了某一事物的规律，进而推知同类的事物。' },
+  { w: '集思广益', h: '集中众人的智慧，广泛吸收有益的意见。' },
+  { w: '群策群力', h: '大家一起出主意、一起出力量。' },
+  { w: '同心协力', h: '团结一致，共同努力。' },
+  { w: '众志成城', h: '万众一心像城墙一样坚固，比喻团结力量巨大。' },
+  { w: '万众一心', h: '千万人一条心，形容团结一致。' },
+  { w: '患难与共', h: '共同承担灾祸与困难。' },
+  { w: '雪中送炭', h: '下雪天给人送炭取暖，比喻在别人急需时给予帮助。' },
+  { w: '锦上添花', h: '比喻好上加好，美上加美。' },
+  { w: '画饼充饥', h: '画个饼来解除饥饿，比喻用空想来安慰自己。' },
+  // —— 自然景象 ——
+  { w: '海阔天空', h: '形容天地广阔，也比喻想象或说话毫无拘束。' },
+  { w: '天衣无缝', h: '仙女的衣服没有缝隙，比喻事物完美自然，找不出破绽。' },
+  { w: '山清水秀', h: '形容风景优美。' },
+  { w: '鸟语花香', h: '鸟叫得好听，花开得喷香，形容春天的美好景象。' },
+  { w: '春暖花开', h: '春天气候温暖，百花盛开，景色宜人。' },
+  { w: '风和日丽', h: '微风和煦，阳光明丽，形容天气晴朗暖和。' },
+  { w: '雨过天晴', h: '下雨后天空放晴，比喻情况由坏变好。' },
+  { w: '波澜壮阔', h: '原形容水面辽阔，现比喻声势雄壮或规模宏大。' },
+  { w: '惊涛骇浪', h: '凶猛而使人害怕的波浪，比喻险恶的环境或遭遇。' },
+  { w: '排山倒海', h: '推开高山翻倒大海，形容力量强盛，声势浩大。' },
+  { w: '地动山摇', h: '大地都震动起来，形容声势浩大或声响巨大。' },
+  { w: '天翻地覆', h: '形容变化巨大，也形容闹得很凶。' },
+  { w: '日新月异', h: '每天每月都有新变化，形容发展进步很快。' },
+  { w: '突飞猛进', h: '形容进步和发展特别迅速。' },
+  { w: '一日千里', h: '原形容马跑得快，现比喻进展极快。' },
+  { w: '光阴似箭', h: '时间像射出的箭一样快，形容时间消逝得非常快。' },
+  { w: '度日如年', h: '过一天像过一年那样长，形容日子很不好过。' },
+  { w: '争分夺秒', h: '一分一秒也不放过，形容充分利用时间。' },
+  { w: '只争朝夕', h: '抓紧时间，力争在最短时间内达到目的。' },
+  { w: '来日方长', h: '未来的日子还长，表示以后还有机会。' },
+  { w: '白驹过隙', h: '时间像白马跃过缝隙一样飞快流逝，形容时间过得极快。' },
+  { w: '昙花一现', h: '昙花开放后很快就凋谢，比喻美好的事物出现一下很快就消失。' },
+  { w: '经久不息', h: '经历很长时间也不停止，多用于形容掌声和欢呼声。' },
+  { w: '络绎不绝', h: '形容人马车船来往频繁，连续不断。' },
+  { w: '川流不息', h: '行人车马像水流一样连续不断。' },
+  { w: '门庭若市', h: '门前和院内人多得像市场一样，形容来客众多，非常热闹。' },
+  { w: '水泄不通', h: '连水都流不出去，形容拥挤或包围得非常严密。' },
+  { w: '摩肩接踵', h: '肩碰肩脚跟碰脚跟，形容人多拥挤。' },
+  { w: '人山人海', h: '人群如山似海，形容聚集的人非常多。' },
+  { w: '车水马龙', h: '车像流水马像游龙，形容车马来往不断，非常热闹。' },
+  { w: '灯火辉煌', h: '形容夜晚灯光明亮的繁华景象。' },
+  { w: '张灯结彩', h: '挂上灯笼系上彩绸，形容喜庆的景象。' },
+  { w: '五颜六色', h: '指各种颜色，形容色彩繁多鲜艳。' },
+  { w: '姹紫嫣红', h: '形容各种花朵娇艳美丽。' },
+  { w: '千姿百态', h: '形容姿态多种多样，各不相同。' },
+  { w: '瞬息万变', h: '一眨眼一呼吸之间就千变万化，形容变化非常快、非常多。' },
+  { w: '郁郁葱葱', h: '形容草木苍翠茂盛。' },
+  { w: '枝繁叶茂', h: '树木枝叶繁密茂盛。' },
+  { w: '青山绿水', h: '青翠的山，碧绿的河，泛指美丽的山河。' },
+  { w: '崇山峻岭', h: '高大陡峭的山岭。' },
+  { w: '层峦叠嶂', h: '形容山峰重叠，连绵不断。' },
+  { w: '悬崖峭壁', h: '高而陡的山崖，形容山势非常陡峭险峻。' },
+  { w: '一望无际', h: '一眼望不到边，形容非常辽阔。' },
+  { w: '一马平川', h: '能够纵马疾驰的平地，形容地势平坦开阔。' },
+  { w: '地大物博', h: '土地广袤，物产丰富。' },
+  { w: '天涯海角', h: '天的边缘海的尽头，形容极其偏远的地方。' },
+  { w: '旭日东升', h: '早晨的太阳从东方升起，形容充满朝气、蓬勃向上的气象。' },
+  { w: '生机勃勃', h: '形容自然界充满生命力，或社会生活富有朝气。' },
+  { w: '朝气蓬勃', h: '形容精神振奋，充满活力。' },
+  { w: '欣欣向荣', h: '形容草木茂盛，也比喻事业蓬勃发展。' },
+  { w: '蒸蒸日上', h: '形容事业像蒸腾的雾气一样一天天向上发展。' },
+  { w: '方兴未艾', h: '事物正在兴起发展，一时不会终止。' },
+  { w: '如日中天', h: '好像太阳正处在正午时刻，形容事物正发展到最兴盛的阶段。' },
+  { w: '日薄西山', h: '太阳快落山了，比喻人到老年或腐朽的事物衰败临近灭亡。' },
+  { w: '亭亭玉立', h: '形容女子身材修长秀美，也形容花木挺拔秀丽。' },
+  // —— 情绪神态 ——
+  { w: '欢天喜地', h: '形容非常高兴。' },
+  { w: '眉开眼笑', h: '眉头舒展眼含笑意，形容高兴愉快的样子。' },
+  { w: '喜出望外', h: '遇到出乎意料的喜事而特别高兴。' },
+  { w: '心花怒放', h: '心里高兴得像花儿盛开一样，形容极其高兴。' },
+  { w: '欣喜若狂', h: '高兴得像发了狂，形容高兴到了极点。' },
+  { w: '手舞足蹈', h: '双手舞动双脚跳起来，形容高兴到了极点。' },
+  { w: '垂头丧气', h: '耷拉着脑袋有气无力，形容因失败或不顺而情绪低落。' },
+  { w: '愁眉苦脸', h: '皱着眉头哭丧着脸，形容愁苦的神色。' },
+  { w: '心急如焚', h: '心里急得像火烧一样，形容非常着急。' },
+  { w: '忐忑不安', h: '心神不定，心中不安。' },
+  { w: '提心吊胆', h: '心和胆都悬着，形容十分担心害怕，不敢放心。' },
+  { w: '胆战心惊', h: '形容非常害怕。' },
+  { w: '大惊小怪', h: '形容对不足为奇的事情过分惊讶。' },
+  { w: '惊弓之鸟', h: '被弓箭吓怕了的鸟，比喻受过惊吓的人遇到一点动静就惶恐不安。' },
+  { w: '目瞪口呆', h: '瞪着眼睛说不出话来，形容受惊而愣住的样子。' },
+  { w: '呆若木鸡', h: '呆得像木头鸡一样，形容因恐惧或惊讶而发愣的样子。' },
+  { w: '神采飞扬', h: '形容兴奋得意，精神焕发的样子。' },
+  { w: '容光焕发', h: '脸上放出光彩，形容身体健康、精神饱满。' },
+  { w: '精神抖擞', h: '形容精神振奋。' },
+  { w: '意气风发', h: '形容精神振奋，气概昂扬。' },
+  { w: '昂首挺胸', h: '仰起头挺起胸膛，形容精神饱满、无所畏惧的样子。' },
+  { w: '生龙活虎', h: '像有生气的蛟龙和猛虎，形容活泼矫健，富有生气。' },
+  { w: '龙马精神', h: '像龙马一样旺盛的精神，形容精神矍铄。' },
+  { w: '老当益壮', h: '年纪虽老而志气更加旺盛。' },
+  { w: '返老还童', h: '由衰老恢复青春，形容老人充满了活力。' },
+  // —— 福寿吉祥 ——
+  { w: '寿比南山', h: '寿命像终南山那样长久，用于祝人长寿。' },
+  { w: '福如东海', h: '福气像东海那样广大无边，用作祝人多福。' },
+  { w: '吉祥如意', h: '吉利祥和，万事称心如意。' },
+  { w: '心想事成', h: '心里想到的都能实现，多用于祝福。' },
+  { w: '金玉满堂', h: '形容财富极多，也形容才学丰富。' },
+  { w: '花好月圆', h: '花正盛开月亮正圆，比喻美好圆满的生活。' },
+  { w: '皆大欢喜', h: '人人都高兴满意。' },
+  { w: '安居乐业', h: '安定地生活，愉快地从事自己的职业。' },
+  { w: '国泰民安', h: '国家太平，人民安乐。' },
+  { w: '风调雨顺', h: '风雨及时适量，有利于农事，形容年成好。' },
+  { w: '五谷丰登', h: '各种庄稼都丰收，形容年成好。' },
+  { w: '政通人和', h: '政事顺遂，人民和乐，形容国泰民安。' },
+  { w: '天下太平', h: '处处平安无事。' },
+  { w: '和睦相处', h: '彼此友好地相处。' },
+  // —— 品德修养 ——
+  { w: '助人为乐', h: '把帮助别人当作快乐。' },
+  { w: '舍己为人', h: '牺牲自己的利益去帮助别人。' },
+  { w: '大公无私', h: '一心为公，没有私心，也指处理公正，不偏袒任何一方。' },
+  { w: '拾金不昧', h: '拾到钱财不藏起来据为己有。' },
+  { w: '舍生取义', h: '为正义而牺牲生命。' },
+  { w: '见义勇为', h: '看到合乎正义的事就勇敢地去做。' },
+  { w: '先人后己', h: '先为别人着想，然后才想到自己。' },
+  { w: '光明磊落', h: '形容胸怀坦荡，正大光明。' },
+  { w: '两袖清风', h: '衣袖中除清风外别无所有，比喻为官清廉。' },
+  { w: '克己奉公', h: '严格要求自己，一心为公。' },
+  { w: '任劳任怨', h: '做事不辞劳苦，也不怕别人埋怨。' },
+  { w: '埋头苦干', h: '专心一意地刻苦工作。' },
+  { w: '兢兢业业', h: '形容做事谨慎、勤恳踏实。' },
+  { w: '脚踏实地', h: '脚踏在坚实的土地上，形容做事踏实认真。' },
+  { w: '实事求是', h: '按照事物的实际情况说话、办事。' },
+  { w: '精益求精', h: '已经很好了还要求更好。' },
+  { w: '全力以赴', h: '把全部力量都投入进去。' },
+  { w: '竭尽全力', h: '用尽全部力量。' },
+  { w: '自强不息', h: '自觉地努力向上，永不松懈。' },
+  // —— 险境与医道 ——
+  { w: '妙手回春', h: '医术高明，能把垂危的病人治好。' },
+  { w: '起死回生', h: '把快要死的人救活，形容医术高明，也比喻挽救了看似无望的局面。' },
+  { w: '药到病除', h: '药一服病就好了，形容治疗效果很好。' },
+  { w: '对症下药', h: '针对病症用药，比喻针对具体问题采取有效的办法。' },
+  { w: '火中取栗', h: '偷取炉火里烤熟的栗子，比喻冒风险替别人出力，自己却得不到好处。' },
+  { w: '水中捞月', h: '到水中去捞月亮，比喻去做根本做不到的事，白费力气。' },
+  { w: '大海捞针', h: '在大海里捞一根针，比喻极难找到。' },
+  { w: '跋山涉水', h: '翻山过河，形容旅途艰辛。' },
+  { w: '风餐露宿', h: '在风中吃饭在露天睡觉，形容旅途或野外生活的艰苦。' },
+  { w: '栉风沐雨', h: '用风梳头以雨水洗发，形容人经常在外面奔波劳碌。' },
+  { w: '披星戴月', h: '身披星星头顶月亮，形容早出晚归或日夜赶路，辛勤劳碌。' },
+  { w: '长途跋涉', h: '指远距离的翻山渡水，形容路途遥远，行路辛苦。' },
+  { w: '千辛万苦', h: '各种各样的艰难困苦。' },
+  { w: '含辛茹苦', h: '形容忍受辛苦，吃尽苦头。' },
+  { w: '艰苦卓绝', h: '形容斗争十分艰苦，超出寻常。' },
+  { w: '千难万险', h: '形容困难和危险极多。' },
+  { w: '化险为夷', h: '使危险的情况转变为平安。' },
+  { w: '转危为安', h: '由危险转为平安。' },
+  { w: '逢凶化吉', h: '遇到凶险转化为吉祥。' },
+  { w: '绝处逢生', h: '在走投无路的情况下找到生路。' },
+  { w: '死里逃生', h: '从极危险的境地中逃脱，幸免于死。' },
+  { w: '安然无恙', h: '平平安安，没有受到任何损伤。' },
+  // —— 深谋远虑 ——
+  { w: '高瞻远瞩', h: '站得高看得远，比喻眼光远大。' },
+  { w: '深谋远虑', h: '计划周密，考虑长远。' },
+  { w: '未雨绸缪', h: '趁天没下雨先修缮房屋门窗，比喻事先做好准备。' },
+  { w: '防患未然', h: '在事故或灾害发生之前就加以预防。' },
+  { w: '居安思危', h: '处在安定的环境中要想到可能出现的危险。' },
+  { w: '有备无患', h: '事先有准备，就可以避免祸患。' },
+  { w: '料事如神', h: '形容预料事情非常准确。' },
+  { w: '神机妙算', h: '惊人的机智巧妙的谋划，形容善于估计形势，谋划对策。' },
+  { w: '足智多谋', h: '智谋很多，形容人善于料事和用计。' },
+  // —— 文采言辞 ——
+  { w: '出口成章', h: '说出话来就成文章，形容文思敏捷，口才好。' },
+  { w: '妙笔生花', h: '生花的妙笔，比喻杰出的写作才能。' },
+  { w: '点石成金', h: '仙人一指石头变金子，比喻把平凡的事物改变成很好的事物。' },
+  { w: '行云流水', h: '像飘动的云和流动的水，形容文章书法等自然流畅，不受拘束。' },
+  { w: '一气呵成', h: '一口气做完，形容文章结构紧凑，或做事不间断、干脆利落。' },
+  { w: '一挥而就', h: '一动笔就写成了，形容写字作文画画速度很快。' },
+  { w: '字斟句酌', h: '对每一字每一句都仔细推敲，形容说话或写作态度慎重。' },
+  { w: '精雕细刻', h: '精心细致地雕刻，形容做事认真细致。' },
+  { w: '千锤百炼', h: '铁经千锤百炼才成钢，比喻经历多次艰苦斗争的锻炼，也指对文章反复加工。' },
+  { w: '字字珠玑', h: '每个字都像珍珠宝玉那样珍贵，形容文章写得好。' },
+  { w: '脍炙人口', h: '美味人人都爱吃，比喻好的诗文或事物人人都称赞。' },
+  { w: '家喻户晓', h: '每家每户都知道。' },
+  { w: '举世闻名', h: '全世界都知道，形容非常著名。' },
+  { w: '名扬四海', h: '名声传扬到四面八方，形容名声很大。' },
+  { w: '名副其实', h: '名声或名称与实际相符合。' },
+  { w: '名不虚传', h: '流传的名声不是虚假的，指确实很好，不是空有虚名。' },
+  { w: '当之无愧', h: '担当得起某种称号或荣誉，毫无愧色。' },
+  { w: '实至名归', h: '有了真正的学识本领或功业，相应的名誉自然随之而来。' },
+  { w: '名列前茅', h: '名次排在前面，形容成绩优异。' },
+  { w: '独占鳌头', h: '科举时代中状元站在鳌头上迎榜，比喻占据首位或获得第一。' },
+  { w: '金榜题名', h: '指科举考中，泛指考试被录取。' },
+  { w: '出人头地', h: '超出一般人，高人一等。' },
+  { w: '崭露头角', h: '比喻突出地显示出才能和本领。' },
+  { w: '脱颖而出', h: '锥尖透过布袋显露出来，比喻人的才能全部显示出来。' },
+  { w: '鹤立鸡群', h: '像鹤站在鸡群中一样，比喻人的仪表或才能在一群人中显得很突出。' },
+  { w: '独一无二', h: '没有相同的或没有可以相比的。' },
+  { w: '举世无双', h: '全世界找不到第二个。' },
+  { w: '无与伦比', h: '事物非常完美，没有能跟它相比的。' },
+  { w: '登峰造极', h: '登上顶峰到达最高处，比喻学问技能等达到最高的境界。' },
+  { w: '炉火纯青', h: '相传炼丹到炉中火焰转成纯青色时便炼成，比喻功夫达到纯熟完美的境界。' },
+  { w: '挥洒自如', h: '形容画画写字作文时运笔随心所欲，毫无拘束。' },
+  { w: '得心应手', h: '心里怎么想手就能怎么做，形容做事顺利或技艺纯熟。' },
+  { w: '游刃有余', h: '刀刃在骨节空隙中运转还有回旋余地，比喻技术熟练经验丰富，做事轻松利落。' },
+  { w: '驾轻就熟', h: '赶着轻载的车走在熟路上，比喻对事情熟悉，做起来容易。' },
+  { w: '信手拈来', h: '随手拿来，多形容写文章时词汇或材料丰富，不费思索就能写出来。' },
+  { w: '侃侃而谈', h: '理直气壮、从容不迫地说话。' },
+  { w: '口若悬河', h: '说话像瀑布倾泻一样滔滔不绝，形容能言善辩。' },
+  { w: '滔滔不绝', h: '像流水那样毫不间断，形容说话很多，连续不断。' },
+  { w: '妙语连珠', h: '巧妙风趣的话一个接一个，像珠子般连贯。' },
+  { w: '伶牙俐齿', h: '形容口齿伶俐，能说会道。' },
+  { w: '花言巧语', h: '原指铺张修饰内容空泛的言辞，后多指用来骗人的虚伪动听的话。' },
+  { w: '冷嘲热讽', h: '用尖刻辛辣的语言进行讥笑和讽刺。' },
+  { w: '指桑骂槐', h: '指着桑树骂槐树，比喻表面上骂这个人，实际上骂那个人。' },
+  { w: '含沙射影', h: '传说水中有种怪物见人影就喷沙，比喻暗中攻击或陷害人。' },
+  // —— 求真辨伪 ——
+  { w: '无中生有', h: '凭空捏造，把没有的说成有。' },
+  { w: '捕风捉影', h: '风和影子都抓不住，比喻说话做事没有确凿的根据。' },
+  { w: '道听途说', h: '路上听来又在路上传播的话，泛指没有根据的传闻。' },
+  { w: '以讹传讹', h: '把本来就不正确的话又错误地传出去，越传越错。' },
+  { w: '三人成虎', h: '三个人谎报城里有老虎听的人就信以为真，比喻说的人多了谣言也会被当成事实。' },
+  { w: '真相大白', h: '真实情况完全弄清楚了。' },
+  { w: '水落石出', h: '水落下去石头就露出来，比喻事情的真相完全显露出来。' },
+  { w: '原形毕露', h: '本来面目完全暴露出来。' },
+  { w: '弄巧成拙', h: '本想耍弄聪明，结果做了蠢事。' },
+  { w: '适得其反', h: '结果跟希望正好相反。' },
+  { w: '事与愿违', h: '事情没有按照预想的方向发展。' },
+  { w: '得不偿失', h: '得到的抵不上失去的。' },
+  { w: '因小失大', h: '为了小的利益而失去大的利益。' },
+  { w: '舍本逐末', h: '抛弃根本的主要的东西，去追求枝节的次要的东西。' },
+  { w: '本末倒置', h: '树根和树梢颠倒了位置，比喻把主次轻重的位置弄颠倒。' },
+  { w: '缘木求鱼', h: '爬到树上去找鱼，比喻方向或办法不对头，不可能达到目的。' },
+  { w: '背道而驰', h: '朝相反的方向奔跑，比喻行动和目的正好相反。' },
+  { w: '分道扬镳', h: '分路而行，比喻因志趣目标不同而各走各的路。' },
+  { w: '各行其是', h: '按照自己认为对的去做，形容行动不一致。' },
+  { w: '独断专行', h: '行事专断，不考虑别人的意见，形容作风不民主。' },
+  { w: '刚愎自用', h: '固执任性，自以为是，听不进别人的意见。' },
+  { w: '自以为是', h: '认为自己的看法和做法都正确，不接受别人的意见。' },
+  { w: '固执己见', h: '顽固地坚持自己的意见，不肯改变。' },
+  { w: '墨守成规', h: '战国时墨子善于守城，后形容因循守旧，不肯改进。' },
+  { w: '因循守旧', h: '沿袭旧的一套，不求改进。' },
+  { w: '故步自封', h: '把自己限制在原来的地方，比喻守着老一套，不求进步。' },
+  { w: '抱残守缺', h: '守着残缺陈旧的东西不放，形容思想保守，不求改进。' },
+  { w: '标新立异', h: '提出新奇的主张，表示与众不同。' },
+  { w: '别出心裁', h: '独创一格，与众不同。' },
+  { w: '独具匠心', h: '具有独到的想法或别致的构思。' },
+  { w: '匠心独运', h: '独创性地运用精巧的心思。' },
+  { w: '独树一帜', h: '单独树起一面旗帜，比喻自成一家。' },
+  { w: '与众不同', h: '跟大家不一样。' },
+  { w: '别具一格', h: '另有一种独特的风格。' },
+  { w: '焕然一新', h: '改变旧面貌，出现崭新的气象。' },
+  { w: '耳目一新', h: '听到和看到的都变了样，感到很新鲜。' },
+  { w: '判若两人', h: '某人前后的表现截然不同，像换了一个人。' },
+  // —— 异同较量 ——
+  { w: '天壤之别', h: '天和地的差别，形容差别极大。' },
+  { w: '大相径庭', h: '彼此相差很远或矛盾很大。' },
+  { w: '截然不同', h: '形容两件事物毫无共同之处。' },
+  { w: '如出一辙', h: '好像出自同一个车辙，形容两件事情非常相似。' },
+  { w: '大同小异', h: '大体相同，略有差异。' },
+  { w: '半斤八两', h: '旧制半斤等于八两，比喻彼此不相上下，多含贬义。' },
+  { w: '不相上下', h: '分不出高低好坏，形容水平相当。' },
+  { w: '平分秋色', h: '比喻双方各占一半，不分高低。' },
+  { w: '势均力敌', h: '双方力量相当，不分高低。' },
+  { w: '棋逢对手', h: '下棋遇到对手，比喻争斗的双方本领不相上下。' },
+  { w: '旗鼓相当', h: '旗鼓都相匹配，比喻双方力量不相上下。' }
+  ];
+
+  /* ---------- 常量与存储键 ---------- */
+  const LEN = 4;                      // 成语长度
+  const MAX_ROWS = 6;                 // 总机会次数
+  const FLIP_MS = 260;                // 单格翻牌动画时长
+  const STEP = 260;                   // 相邻格翻牌间隔
+  const KEY_BEST = 'wordleZhBest';    // 最高连胜（沿用 <游戏名>Best 驼峰键名风格）
+  const KEY_STATS = 'wordleZhStats';  // 总场次 / 胜场 / 当前连胜
+  const KEY_DAILY = 'wordleZhDaily';  // 每日一题进度
+  const TILE_CLS = ['absent', 'present', 'correct'];   // 0 灰 / 1 黄 / 2 绿
+
+  /* ---------- DOM 引用 ---------- */
+  const $ = id => document.getElementById(id);
+  const boardEl = $('board');
+  const inputEl = $('guessInput');
+  const formEl = $('guessForm');
+  const toastEl = $('toast');
+  const overlayEl = $('overlay');
+  const rTitle = $('rTitle');
+  const rWord = $('rWord');
+  const rExplain = $('rExplain');
+  const rStats = $('rStats');
+  const btnAgain = $('rAgain');
+  const btnClose = $('rClose');
+  const btnDaily = $('modeDaily');
+  const btnFree = $('modeFree');
+  const hudDate = $('hudDate');
+  const hudLeft = $('hudLeft');
+  const hudStreak = $('hudStreak');
+  const hudBest = $('hudBest');
+  const usedList = $('usedList');
+
+  /* ---------- 游戏状态 ---------- */
+  let mode = 'daily';        // daily 每日一题 / practice 自由练习
+  let answer = '';           // 本题答案成语
+  let explain = '';          // 成语解释（结算时公布）
+  let rows = [];             // 已提交猜测：{ w: 成语, s: [0灰/1黄/2绿 ×4] }
+  let status = 'playing';    // playing / won / lost
+  let revealing = false;     // 翻牌动画期间锁提交
+  let gameId = 0;            // 对局代号：每次开新局递增，用于作废上一局滞留的定时器回调
+  let composing = false;     // 输入法组词中
+  let answerIdx = -1;        // 每日一题在库中的下标
+  let lastFreeIdx = -1;      // 自由练习上一次下标，避免连续重复
+  const rowEls = [];         // rowEls[行][列] = 格子元素
+  const used = new Map();    // 已用字 -> 最好提示状态（2 绿 > 1 黄 > 0 灰）
+
+  /* ---------- 本地存储（读写都兜底，隐私模式不报错） ---------- */
+  function loadJson(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function saveJson(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* 静默忽略 */ }
+  }
+  function loadBest() {
+    try { return parseInt(localStorage.getItem(KEY_BEST), 10) || 0; } catch (e) { return 0; }
+  }
+  function saveBest(v) {
+    try { localStorage.setItem(KEY_BEST, String(v)); } catch (e) { /* 静默忽略 */ }
+  }
+
+  /* ---------- 日期与每日出题（本地时区，哈希后取模，稳定可复现） ---------- */
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function dailyIndex(ds) {
+    let h = 0;
+    for (let i = 0; i < ds.length; i++) h = (h * 31 + ds.charCodeAt(i)) >>> 0;
+    return h % LIB.length;
+  }
+
+  /* ---------- 判分：两遍扫描，先定绿，再按剩余字数定黄/灰 ---------- */
+  function scoreGuess(guess, ans) {
+    const s = [0, 0, 0, 0];
+    const rest = {};
+    for (let i = 0; i < LEN; i++) {
+      if (guess[i] === ans[i]) s[i] = 2;
+      else rest[ans[i]] = (rest[ans[i]] || 0) + 1;
+    }
+    for (let i = 0; i < LEN; i++) {
+      if (s[i] === 2) continue;
+      if (rest[guess[i]] > 0) { s[i] = 1; rest[guess[i]]--; }
+    }
+    return s;
+  }
+
+  /* ---------- 面板构建与绘制 ---------- */
+  function buildBoard() {
+    boardEl.innerHTML = '';
+    rowEls.length = 0;
+    for (let r = 0; r < MAX_ROWS; r++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const tiles = [];
+      for (let c = 0; c < LEN; c++) {
+        const t = document.createElement('div');
+        t.className = 'tile';
+        row.appendChild(t);
+        tiles.push(t);
+      }
+      boardEl.appendChild(row);
+      rowEls.push(tiles);
+    }
+  }
+
+  // 已提交的行：静态上色（恢复进度时无动画）
+  function paintRows() {
+    rows.forEach((r, i) => {
+      for (let c = 0; c < LEN; c++) {
+        const t = rowEls[i][c];
+        t.textContent = r.w[c];
+        t.classList.remove('filled', 'flip');
+        t.classList.add(TILE_CLS[r.s[c]]);
+      }
+    });
+  }
+
+  // 从输入框取出纯汉字（过滤非汉字、最多 4 个）
+  function typedChars() {
+    const m = inputEl.value.match(/[\u4e00-\u9fa5]/g);
+    return m ? m.join('').slice(0, LEN) : '';
+  }
+
+  // 当前输入行：随打字实时填字
+  function paintCur() {
+    const r = rows.length;
+    if (r >= MAX_ROWS) return;
+    const w = typedChars();
+    for (let c = 0; c < LEN; c++) {
+      const t = rowEls[r][c];
+      if (w[c]) { t.textContent = w[c]; t.classList.add('filled'); }
+      else { t.textContent = ''; t.classList.remove('filled'); }
+    }
+  }
+
+  // 最新敲入的那一格弹一下
+  function popLastTyped() {
+    const r = rows.length;
+    if (r >= MAX_ROWS) return;
+    const w = typedChars();
+    if (!w.length) return;
+    const t = rowEls[r][w.length - 1];
+    t.classList.remove('pop');
+    void t.offsetWidth;   // 同步回流，保证动画可重触发
+    t.classList.add('pop');
+  }
+
+  /* ---------- 用过的字 ---------- */
+  function updateUsed(w, s) {
+    for (let i = 0; i < LEN; i++) {
+      const prev = used.has(w[i]) ? used.get(w[i]) : -1;
+      used.set(w[i], Math.max(prev, s[i]));
+    }
+  }
+  function renderUsed() {
+    usedList.innerHTML = '';
+    if (!used.size) {
+      const sp = document.createElement('span');
+      sp.className = 'used-empty';
+      sp.textContent = '暂无，猜一次就有了';
+      usedList.appendChild(sp);
+      return;
+    }
+    for (const [ch, st] of used) {
+      const sp = document.createElement('span');
+      sp.className = 'u-chip u' + st;
+      sp.textContent = ch;
+      usedList.appendChild(sp);
+    }
+  }
+
+  /* ---------- 轻提示与输入行抖动 ---------- */
+  let toastTimer = 0;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    void toastEl.offsetWidth;   // 同步回流后再加 show，保证过渡生效
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+      setTimeout(() => { toastEl.hidden = true; }, 220);
+    }, 1600);
+  }
+  function shakeInput() {
+    formEl.classList.remove('shake');
+    void formEl.offsetWidth;
+    formEl.classList.add('shake');
+    setTimeout(() => formEl.classList.remove('shake'), 600);
+  }
+
+  /* ---------- 对局定时器与模式按钮锁 ----------
+     翻牌与结算都排在约 1 秒后的回调里；若中途切局，滞留的回调会误操作新一局状态
+     （对已清空的 rows 取元素抛 TypeError、把上一局的字写进「用过的字」）。
+     later 按对局代号过滤：回调触发时对局已换则整段作废；
+     翻牌动画期间同时禁用模式切换按钮，避免中途打断结算。 */
+  function later(fn, ms) {
+    const gid = gameId;
+    setTimeout(() => { if (gid === gameId) fn(); }, ms);
+  }
+  function setModeBusy(busy) {
+    btnDaily.disabled = busy;
+    btnFree.disabled = busy;
+  }
+
+  /* ---------- 提交一次猜测 ---------- */
+  function submitGuess() {
+    if (revealing || status !== 'playing') return;
+    const w = typedChars();
+    if (w.length !== LEN) { shakeInput(); showToast('请输入四个汉字'); return; }
+    if (rows.some(r => r.w === w)) { shakeInput(); showToast('这个成语已经猜过了'); return; }
+    revealing = true;
+    setModeBusy(true);
+    const s = scoreGuess(w, answer);
+    rows.push({ w: w, s: s });
+    const ri = rows.length - 1;
+    inputEl.value = '';
+    paintCur();
+    // 逐格翻牌：先转 90 度藏起旧字，再上色落新字
+    for (let c = 0; c < LEN; c++) {
+      const t = rowEls[ri][c];
+      later(() => { t.classList.remove('filled', 'pop'); t.classList.add('flip'); }, c * STEP);
+      later(() => {
+        t.classList.remove('flip');
+        t.textContent = w[c];
+        t.classList.add(TILE_CLS[s[c]]);
+      }, c * STEP + FLIP_MS);
+    }
+    later(() => finalizeGuess(w, s), (LEN - 1) * STEP + FLIP_MS + 60);
+  }
+
+  function finalizeGuess(w, s) {
+    revealing = false;
+    setModeBusy(false);
+    updateUsed(w, s);
+    renderUsed();
+    if (w === answer) {
+      status = 'won';
+      // 猜中：整行逐格跳一下
+      rowEls[rows.length - 1].forEach((t, i) => {
+        t.style.animationDelay = (i * 90) + 'ms';
+        t.classList.add('bounce');
+      });
+    } else if (rows.length >= MAX_ROWS) {
+      status = 'lost';
+    }
+    if (status !== 'playing') {
+      inputEl.disabled = true;
+      recordResult();
+    }
+    saveDailyProgress();
+    updateHud();
+    if (status !== 'playing') later(showResult, 550);
+  }
+
+  /* ---------- 结算记录与每日进度 ---------- */
+  function recordResult() {
+    const st = loadJson(KEY_STATS, { played: 0, won: 0, streak: 0 });
+    st.played += 1;
+    if (status === 'won') {
+      st.won += 1;
+      st.streak += 1;
+      saveBest(Math.max(loadBest(), st.streak));
+    } else {
+      st.streak = 0;
+    }
+    saveJson(KEY_STATS, st);
+  }
+  // 每日一题：每次猜完都存进度，中途刷新或切换模式后可接着猜
+  function saveDailyProgress() {
+    if (mode !== 'daily') return;
+    saveJson(KEY_DAILY, {
+      date: todayStr(),
+      idx: answerIdx,
+      rows: rows.map(r => [r.w, r.s]),
+      st: status === 'won' ? 'w' : (status === 'lost' ? 'l' : 'p')
+    });
+  }
+
+  /* ---------- HUD 信息条 ---------- */
+  function updateHud() {
+    hudDate.textContent = mode === 'daily' ? ('每日一题 · ' + todayStr()) : '自由练习 · 随机成语';
+    if (status === 'playing') hudLeft.textContent = '剩余 ' + (MAX_ROWS - rows.length) + ' 次';
+    else hudLeft.textContent = status === 'won' ? '已猜中' : '机会用完';
+    const st = loadJson(KEY_STATS, { played: 0, won: 0, streak: 0 });
+    hudStreak.textContent = '连胜 ' + st.streak;
+    hudBest.textContent = '最高连胜 ' + loadBest();
+  }
+
+  /* ---------- 结算弹层 ---------- */
+  function showResult() {
+    if (status === 'playing') return;   // 旧定时器在新一局里不生效
+    const won = status === 'won';
+    rTitle.textContent = won ? '恭喜，猜对了！' : '很遗憾，没猜中';
+    rWord.textContent = answer;
+    rExplain.textContent = explain;
+    const st = loadJson(KEY_STATS, { played: 0, won: 0, streak: 0 });
+    rStats.textContent = won
+      ? ('第 ' + rows.length + ' 次猜中 · 当前连胜 ' + st.streak + ' · 最高连胜 ' + loadBest())
+      : ('正确答案就是上面这个成语 · 连胜已清零，再来一局吧');
+    btnAgain.textContent = mode === 'daily' ? '去练一局' : '再来一局';
+    overlayEl.hidden = false;
+    void overlayEl.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+    overlayEl.classList.add('open');
+  }
+  function closeOverlay() {
+    overlayEl.classList.remove('open');
+    setTimeout(() => { overlayEl.hidden = true; }, 220);
+  }
+
+  /* ---------- 开新一局（daily 恢复当日进度 / practice 随机出题） ---------- */
+  function startGame(m) {
+    gameId += 1;               // 新对局开始，上一局滞留的定时器回调全部作废
+    setModeBusy(false);
+    mode = m;
+    status = 'playing';
+    rows = [];
+    revealing = false;
+    used.clear();
+    inputEl.value = '';
+    overlayEl.classList.remove('open');
+    overlayEl.hidden = true;
+    if (m === 'daily') {
+      const ds = todayStr();
+      const idx = dailyIndex(ds);
+      answer = LIB[idx].w;
+      explain = LIB[idx].h;
+      answerIdx = idx;
+      const saved = loadJson(KEY_DAILY, null);
+      if (saved && saved.date === ds && saved.idx === idx && Array.isArray(saved.rows)
+          && saved.rows.length <= MAX_ROWS) {
+        // 只恢复同一天、同一题的进度；成语库更新导致下标变化时按新题开始
+        rows = saved.rows.map(a => ({ w: a[0], s: a[1] }));
+        status = saved.st === 'w' ? 'won' : (saved.st === 'l' ? 'lost' : 'playing');
+      }
+    } else {
+      let idx;
+      do { idx = Math.floor(Math.random() * LIB.length); } while (idx === lastFreeIdx);
+      lastFreeIdx = idx;
+      answer = LIB[idx].w;
+      explain = LIB[idx].h;
+    }
+    buildBoard();
+    paintRows();
+    rows.forEach(r => updateUsed(r.w, r.s));
+    paintCur();
+    renderUsed();
+    syncModeBtns();
+    updateHud();
+    inputEl.disabled = status !== 'playing';
+    if (status !== 'playing') later(showResult, 400);
+  }
+
+  /* ---------- 模式切换按钮状态 ---------- */
+  function syncModeBtns() {
+    btnDaily.classList.toggle('on', mode === 'daily');
+    btnDaily.setAttribute('aria-pressed', mode === 'daily' ? 'true' : 'false');
+    btnFree.classList.toggle('on', mode === 'practice');
+    btnFree.setAttribute('aria-pressed', mode === 'practice' ? 'true' : 'false');
+  }
+
+  /* ---------- 输入：输入法组词时放行回车，平时只留汉字 ---------- */
+  function cleanInput() {
+    const w = typedChars();
+    if (inputEl.value !== w) inputEl.value = w;
+  }
+  inputEl.addEventListener('compositionstart', () => { composing = true; });
+  inputEl.addEventListener('compositionend', () => {
+    composing = false;
+    cleanInput();
+    paintCur();
+    popLastTyped();
+  });
+  inputEl.addEventListener('input', () => {
+    if (!composing) cleanInput();
+    paintCur();
+    popLastTyped();
+  });
+  inputEl.addEventListener('keydown', e => {
+    // 输入法组词中的回车是确认候选词，不能当提交
+    if (e.isComposing || e.keyCode === 229) e.stopPropagation();
+  });
+
+  /* ---------- 事件绑定 ---------- */
+  formEl.addEventListener('submit', e => {
+    e.preventDefault();
+    submitGuess();
+  });
+  btnDaily.addEventListener('click', () => { if (mode !== 'daily') startGame('daily'); });
+  btnFree.addEventListener('click', () => { if (mode !== 'practice') startGame('practice'); });
+  btnAgain.addEventListener('click', () => {
+    closeOverlay();
+    startGame('practice');
+  });
+  btnClose.addEventListener('click', closeOverlay);
+  overlayEl.addEventListener('click', e => {
+    if (e.target === overlayEl) closeOverlay();   // 点弹层空白处关闭
+  });
+
+  /* ---------- 初始化：默认进入每日一题 ---------- */
+  startGame('daily');
+  })();
+  </script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>每题是一个四字成语，共有 6 次猜词机会</li>
+        <li>输入四字成语后提交，每个字会翻牌给出颜色提示</li>
+        <li><b class="lg">绿</b>：这个字在成语里，位置也正确</li>
+        <li><b class="ly">黄</b>：这个字在成语里，但位置不对</li>
+        <li><b class="ln">灰</b>：成语里没有这个字</li>
+        <li>猜中或机会用完后，会公布成语和解释</li>
+        <li>「每日一题」每天零点更新，进度自动保存</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击输入框用输入法打字，回车或点「提交」</li>
+        <li>手机竖屏同样可玩，点输入框即可弹出键盘</li>
+        <li>可随时切换「每日一题」和「自由练习」</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

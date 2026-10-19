@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数织 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：数织，按行列数字提示填涂方格还原隐藏像素画，支持 5×5 与 10×10 两档难度，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/nonogram/app.html">
+<style>
+[hidden]{display:none!important}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#6c5ce7;
+  --primary-deep:#5747c5;
+  --danger:#e03131;
+  --ink:#2b2f3a;
+  --muted:#6b7280;
+  --faint:#9aa0a6;
+  --line:#dfe3ec;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f2f0fa;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;-webkit-tap-highlight-color:transparent}
+.card{width:100%;max-width:640px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+h1{font-size:19px;font-weight:700}
+.sub{margin-top:3px;font-size:12.5px;color:var(--faint)}
+.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--muted);padding-top:3px;flex-wrap:wrap}
+.hud b{display:inline-block;font-variant-numeric:tabular-nums;color:var(--ink);font-size:16px}
+.hud b.bump{animation:bump .18s ease}
+@keyframes bump{50%{transform:scale(1.12)}}
+button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.96)}
+.btn-plain{background:#f1f2f8;color:var(--ink);padding:7px 14px;font-weight:500}
+.btn-plain:disabled{opacity:.45;cursor:default}
+/* 工具行：难度切换 + 机会 + 模式/提示 */
+.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:8px 0 12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f1f2f8}
+.seg button{border-radius:0;padding:7px 14px;background:transparent;color:var(--muted);font-weight:600}
+.seg button.on{background:var(--primary);color:#fff}
+.chances{display:flex;align-items:center;gap:6px}
+.chances .lab{font-size:13px;color:var(--muted)}
+.hearts{display:flex;gap:3px}
+.hearts span{display:inline-flex}
+.hearts svg{width:17px;height:17px;fill:#e5484d}
+.hearts span.off svg{fill:#d9dde6}
+.btn-mode.on{background:#ece9fd;color:var(--primary-deep)}
+/* ===== 数织棋盘：网格缝隙当格线，提示区自动占位，格子由 JS 保持正方形 ===== */
+.stage{max-width:500px;margin:0 auto}
+.board-wrap{position:relative}
+.board{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.corner{background:#fff}
+.clue{background:#fff;display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:0 5px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;font-size:12.5px;transition:color .2s,opacity .3s}
+.clue i{font-style:normal;line-height:1.3}
+.colclue{flex-direction:column;justify-content:flex-end;align-items:center;padding:4px 0;gap:0}
+.rowclue{justify-content:flex-end}
+.clue.done{color:#c2c8d4}
+.board[data-n="5"] .clue{font-size:15px}
+.board[data-n="10"] .clue{font-size:12.5px}
+.cell{background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .12s,opacity .3s}
+.cell:hover{background:#f2f3fa}
+.cell.fill{background:var(--primary);animation:pop .16s ease}
+.cell.fill:hover{background:var(--primary-deep)}
+.cell.mark::after{content:'×';color:#a7aebc;font-size:.9em;line-height:1}
+.board[data-n="5"] .cell{font-size:24px}
+.board[data-n="10"] .cell{font-size:15px}
+/* 10×10 时每 5 格加粗分界线 */
+.cell.bl{border-left:2px solid #c9cfdb}
+.cell.bt{border-top:2px solid #c9cfdb}
+.cell.err{animation:errf .55s ease}
+@keyframes errf{0%,35%{background:#ffc2c5;box-shadow:inset 0 0 0 2px rgba(224,49,49,.55)}}
+.cell.hintg{animation:hintf .6s ease}
+@keyframes hintf{0%,35%{box-shadow:inset 0 0 0 3px rgba(108,92,231,.65)}}
+.cell.glow{animation:glow .55s ease both}
+@keyframes glow{45%{transform:scale(1.16);box-shadow:0 2px 12px rgba(108,92,231,.55)}}
+.board.shake{animation:shake .3s ease}
+@keyframes shake{25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+/* 通关/失败亮答案时：提示数字淡出、叉标记淡出 */
+.board-wrap.won .clue{opacity:.22}
+.board-wrap.won .cell.mark{opacity:0}
+.board-wrap.won .cell{cursor:default}
+/* 结算弹层：盖在棋盘上，半透明可透出图案 */
+.overlay{position:absolute;inset:0;z-index:5;border-radius:10px;background:rgba(248,247,253,.9);display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .2s ease}
+.overlay.open{opacity:1}
+.overlay h2{font-size:23px;color:var(--ink);margin-bottom:10px}
+.overlay p{font-size:14px;color:var(--muted);line-height:1.9;margin:6px 0 12px}
+.tips{font-size:12.5px;color:var(--faint);text-align:center;margin-top:12px;line-height:1.8}
+footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
+/* 全局小吐司提示 */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#333a45;color:#fff;padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:300}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .cell.err,.cell.hintg,.cell.glow,.board.shake,.hud b.bump{animation:none}
+}
+@media (max-width:560px){
+  .card{padding:14px 12px 10px}
+  .hud{gap:10px}
+}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="card">
+  <header>
+    <div>
+      <h1>数织</h1>
+      <p class="sub">按行列数字填涂，还原隐藏像素画</p>
+    </div>
+    <div class="hud">
+      <span>分数 <b id="score">0</b></span>
+      <span>最高 <b id="best">0</b></span>
+      <button id="newBtn" class="btn-plain" type="button">新游戏</button>
+    </div>
+  </header>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="难度切换">
+      <button id="seg5" class="on" type="button">5×5</button>
+      <button id="seg10" type="button">10×10</button>
+    </div>
+    <div class="chances">
+      <span class="lab">机会</span>
+      <span id="hearts" class="hearts"></span>
+    </div>
+    <button id="brushBtn" class="btn-plain btn-mode" type="button">涂色模式</button>
+    <button id="hintBtn" class="btn-plain" type="button">提示 3</button>
+  </div>
+  <div class="stage">
+    <div class="board-wrap" id="boardWrap">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <div>
+          <h2 id="ovTitle">数织</h2>
+          <p id="ovInfo"></p>
+          <button id="ovBtn" type="button">开始游戏</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="tips">点击方格填涂或打叉标记，右键可快速切换标记；整行或整列填涂正确时，对应数字会变灰提示。</p>
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(() => {
+'use strict';
+/* ================= 数织主逻辑（零依赖，纯本地运行） ================= */
+
+// ---------- 谜题库（1=需填涂格，0=空格；提示数字运行时按图案计算） ----------
+const PUZZLES = {
+  5: [
+    {name:'爱心', rows:['01010','11111','11111','01110','00100']},
+    {name:'小房子', rows:['00100','01110','11111','11011','11011']},
+    {name:'十字', rows:['00100','00100','11111','00100','00100']},
+    {name:'小鸭', rows:['00100','00111','11111','01110','01010']},
+    {name:'雪人', rows:['01110','01110','00000','11111','11111']},
+    {name:'音符', rows:['00010','00010','00010','01110','01110']},
+    {name:'笑脸', rows:['01110','10101','01110','10001','01110']},
+    {name:'星星', rows:['00100','01110','11111','01010','10101']}
+  ],
+  10: [
+    {name:'大爱心', rows:['0110000110','1111001111','1111111111','1111111111','1111111111','0111111110','0011111100','0001111000','0001111000','0000110000']},
+    {name:'小屋', rows:['0000110000','0001111000','0011111100','0111111110','1111111111','1111111111','1101111011','1101111011','1111001111','1111001111']},
+    {name:'帆船', rows:['0000100000','0000110000','0001111000','0011111100','0111111110','0000100000','0000100000','1111111111','0111111110','0011111100']},
+    {name:'小树', rows:['0000110000','0011111100','0111111110','1111111111','1111111111','0111111110','0011111100','0001111000','0000110000','0000110000']},
+    {name:'蘑菇', rows:['0001111000','0111111110','1111001111','1111001111','1111111111','0111111110','0001111000','0001111000','0001111000','0011111100']},
+    {name:'钥匙', rows:['0011110000','0010010000','0011110000','0001100000','0001100000','0001100000','0101101000','0101101000','0101101000','0001100000']},
+    {name:'笑脸', rows:['0001111000','0111111110','1111111111','1100110011','1100110011','1111111111','1100000011','1100000011','0111111110','0001111000']},
+    {name:'小猫', rows:['0100000010','0110000110','0111111110','0111111110','0110110110','0111111110','0111001110','0011111100','0011111100','0001111000']}
+  ]
+};
+
+// ---------- 常量与元素 ----------
+const BONUS = {5:150, 10:400};   // 通关奖励分（按难度）
+const MAX_CHANCE = 3;            // 涂错机会次数
+const MAX_HINT = 3;              // 每局提示次数
+const $ = id => document.getElementById(id);
+const board = $('board'), boardWrap = $('boardWrap'), overlay = $('overlay');
+const ovTitle = $('ovTitle'), ovInfo = $('ovInfo'), ovBtn = $('ovBtn');
+const scoreEl = $('score'), bestEl = $('best'), newBtn = $('newBtn');
+const heartsEl = $('hearts'), hintBtn = $('hintBtn'), brushBtn = $('brushBtn');
+const seg5 = $('seg5'), seg10 = $('seg10'), toastEl = $('toast');
+
+// ---------- 存档（读写都兜底，隐私模式不报错；最高分按难度分键） ----------
+function loadBest(size){
+  try{ return +localStorage.getItem('nonogramBest'+size) || 0; }catch(e){ return 0; }
+}
+function saveBest(size, v){
+  try{ localStorage.setItem('nonogramBest'+size, String(v)); }catch(e){}
+}
+
+// ---------- 状态 ----------
+let n = 5;              // 当前边长
+let pattern = [];       // 目标图案（一维 0/1）
+let rows = [];          // 行提示
+let cols = [];          // 列提示
+let cells = [];         // 每格 DOM
+let cornerEl = null;    // 左上角占位格（测量提示区尺寸用）
+let rowClueEls = [], colClueEls = [];
+let stat = [];          // 每格状态：0空 1涂 2叉标记 3锁定涂 4锁定叉
+let everFilled = [];    // 是否正确填涂过（防止反复涂擦刷分）
+let state = 'ready';    // ready / playing / won / over
+let score = 0, chance = MAX_CHANCE, hints = MAX_HINT;
+let best = loadBest(n);
+let brush = 'fill';     // fill 涂色 / mark 标记
+let curName = '';       // 当前谜题名（通关时公布）
+let lastIdx = {5:-1, 10:-1};
+let revealTimer = 0, toastTimer = 0;
+bestEl.textContent = best;
+
+// ---------- 提示数字计算：一行/列中每段连续 1 的长度 ----------
+function lineClues(line){
+  const out = []; let run = 0;
+  for(let i=0;i<line.length;i++){
+    if(line[i]) run++;
+    else if(run){ out.push(run); run = 0; }
+  }
+  if(run) out.push(run);
+  return out.length ? out : [0];
+}
+
+// ---------- 棋盘构建：角格 + 列提示行 + 逐行的行提示与格子 ----------
+function buildBoard(){
+  board.innerHTML = '';
+  board.style.gridTemplateColumns = 'auto repeat('+n+',1fr)';
+  board.style.gridTemplateRows = 'auto repeat('+n+',1fr)';
+  board.dataset.n = n;
+  rowClueEls = []; colClueEls = [];
+  const frag = document.createDocumentFragment();
+  cornerEl = document.createElement('div');
+  cornerEl.className = 'corner';
+  frag.appendChild(cornerEl);
+  for(let c=0;c<n;c++){
+    const d = document.createElement('div');
+    d.className = 'clue colclue';
+    d.innerHTML = cols[c].map(v=>'<i>'+v+'</i>').join('');
+    colClueEls.push(d); frag.appendChild(d);
+  }
+  for(let r=0;r<n;r++){
+    const d = document.createElement('div');
+    d.className = 'clue rowclue';
+    d.innerHTML = rows[r].map(v=>'<i>'+v+'</i>').join('');
+    rowClueEls.push(d); frag.appendChild(d);
+    for(let c=0;c<n;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.i = r*n+c;
+      if(n===10){        // 每 5 格加粗分界线，方便数格
+        if(c===5) cell.classList.add('bl');
+        if(r===5) cell.classList.add('bt');
+      }
+      frag.appendChild(cell);
+    }
+  }
+  board.appendChild(frag);
+  cells = Array.from(board.querySelectorAll('.cell'));
+  fitBoard();
+  updateClues();
+}
+
+// 保持格子正方形：棋盘高 = 棋盘宽 - 提示列宽 + 提示行高（缝隙宽在两式相减时抵消）
+function fitBoard(){
+  if(!cornerEl) return;
+  const h = board.clientWidth - cornerEl.offsetWidth + cornerEl.offsetHeight + 2; // +2 补边框
+  if(Math.abs(board.clientHeight - h) > 1) board.style.height = h + 'px';
+}
+
+// ---------- 渲染 ----------
+function renderCell(i){
+  const el = cells[i], s = stat[i];
+  el.classList.toggle('fill', s===1 || s===3);
+  el.classList.toggle('mark', s===2 || s===4);
+}
+
+// 当前某行/列玩家填出的分段长度（叉与空都按 0 计）
+function runsOf(fixed, isRow){
+  const out = []; let run = 0;
+  for(let k=0;k<n;k++){
+    const i = isRow ? fixed*n+k : k*n+fixed;
+    if(stat[i]===1 || stat[i]===3) run++;
+    else if(run){ out.push(run); run = 0; }
+  }
+  if(run) out.push(run);
+  return out.length ? out : [0];
+}
+
+// 整行/整列与提示一致时数字变灰
+function updateClues(){
+  for(let r=0;r<n;r++) rowClueEls[r].classList.toggle('done', runsOf(r,true).join()===rows[r].join());
+  for(let c=0;c<n;c++) colClueEls[c].classList.toggle('done', runsOf(c,false).join()===cols[c].join());
+}
+
+function renderHearts(){
+  heartsEl.innerHTML = '';
+  for(let i=0;i<MAX_CHANCE;i++){
+    const s = document.createElement('span');
+    s.className = i < chance ? '' : 'off';
+    s.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+    heartsEl.appendChild(s);
+  }
+}
+
+function bumpScore(){
+  scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
+}
+
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 1600);
+}
+
+// ---------- 交互 ----------
+function cellClick(i, forceMark){
+  if(state !== 'playing') return;
+  const s = stat[i];
+  const wantMark = forceMark || brush === 'mark';
+  if(wantMark){                       // 叉标记与空格之间自由切换
+    if(s===0){ stat[i]=2; renderCell(i); }
+    else if(s===2){ stat[i]=0; renderCell(i); }
+    updateClues();
+    return;
+  }
+  if(s===3 || s===4) return;          // 被提示/纠错锁定的格子不可改
+  if(s===1){ stat[i]=0; renderCell(i); updateClues(); return; }   // 再点一次可擦除
+  if(pattern[i]===1){                 // 涂对：计分（重复涂擦不重复计分）
+    stat[i]=1; renderCell(i);
+    if(!everFilled[i]){ score+=10; everFilled[i]=true; bumpScore(); }
+    scoreEl.textContent = score;
+    updateClues(); checkWin();
+  }else{                              // 涂错：闪红、纠正为空格标记、扣机会
+    wrongFill(i);
+  }
+}
+
+function wrongFill(i){
+  stat[i] = 4; renderCell(i);
+  const el = cells[i];
+  el.classList.remove('err'); void el.offsetWidth; el.classList.add('err');
+  score = Math.max(0, score-10); scoreEl.textContent = score;
+  chance--;
+  renderHearts();
+  board.classList.remove('shake'); void board.offsetWidth; board.classList.add('shake');
+  if(chance <= 0){ fail(); }
+  else{ toast('涂错了！剩余机会 '+chance); }
+}
+
+// ---------- 胜负判定 ----------
+function checkWin(){
+  for(let i=0;i<n*n;i++){
+    if(pattern[i]===1 && stat[i]!==1 && stat[i]!==3) return;
+  }
+  win();
+}
+
+// 对角波纹点亮像素画
+function revealWave(){
+  for(let i=0;i<n*n;i++){
+    if(stat[i]===1 || stat[i]===3){
+      const r = (i/n)|0, c = i%n;
+      cells[i].style.animationDelay = ((r+c)*45)+'ms';
+      cells[i].classList.add('glow');
+    }
+  }
+}
+
+function win(){
+  state = 'won';
+  clearTimeout(revealTimer);
+  score += BONUS[n];
+  scoreEl.textContent = score;
+  const isNew = score > best;
+  if(isNew){ best = score; saveBest(n, best); bestEl.textContent = best; }
+  boardWrap.classList.add('won');
+  revealWave();
+  revealTimer = setTimeout(function(){ showOverlay('win'); }, 2*n*45+700);
+}
+
+function fail(){
+  state = 'over';
+  clearTimeout(revealTimer);
+  // 亮出正确答案：需填涂格全部点亮，其余清空
+  for(let i=0;i<n*n;i++){
+    stat[i] = pattern[i]===1 ? 3 : 0;
+    renderCell(i);
+  }
+  boardWrap.classList.add('won');
+  revealWave();
+  revealTimer = setTimeout(function(){ showOverlay('over'); }, 1300);
+}
+
+// ---------- 弹层 ----------
+function showOverlay(kind){
+  if(kind === 'ready'){
+    ovTitle.textContent = '数织';
+    ovInfo.innerHTML = '根据行列数字提示填涂方格，还原隐藏的像素画<br>涂错会扣除机会，机会用完则挑战失败';
+    ovBtn.textContent = '开始游戏';
+  }else if(kind === 'win'){
+    ovTitle.textContent = '通关了！';
+    ovInfo.innerHTML = '你还原出了「'+curName+'」<br>本局得分 '+score+(score>=best ? ' · 新纪录！' : ' · 历史最高 '+best);
+    ovBtn.textContent = '下一题';
+  }else{
+    ovTitle.textContent = '挑战失败';
+    ovInfo.innerHTML = '正确答案已经亮在棋盘上<br>本局得分 '+score;
+    ovBtn.textContent = '再来一局';
+  }
+  overlay.hidden = false;
+  void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+  overlay.classList.add('open');
+}
+function hideOverlay(){
+  overlay.classList.remove('open');
+  overlay.hidden = true;
+}
+
+// ---------- 开局 ----------
+function newGame(){
+  clearTimeout(revealTimer);
+  const list = PUZZLES[n];
+  let idx = Math.random()*list.length|0, guard = 0;
+  while(idx === lastIdx[n] && list.length > 1 && guard++ < 8){   // 尽量不重复上一次的谜题
+    idx = Math.random()*list.length|0;
+  }
+  lastIdx[n] = idx;
+  const p = list[idx];
+  curName = p.name;
+  pattern = [];
+  for(const row of p.rows){ for(const ch of row){ pattern.push(+ch); } }
+  rows = []; cols = [];
+  for(let r=0;r<n;r++) rows.push(lineClues(pattern.slice(r*n, (r+1)*n)));
+  for(let c=0;c<n;c++){
+    const col = [];
+    for(let r=0;r<n;r++) col.push(pattern[r*n+c]);
+    cols.push(lineClues(col));
+  }
+  stat = new Array(n*n).fill(0);
+  everFilled = new Array(n*n).fill(false);
+  score = 0; chance = MAX_CHANCE; hints = MAX_HINT; brush = 'fill';
+  brushBtn.textContent = '涂色模式'; brushBtn.classList.remove('on');
+  hintBtn.textContent = '提示 '+hints; hintBtn.disabled = false;
+  scoreEl.textContent = '0';
+  renderHearts();
+  boardWrap.classList.remove('won');
+  buildBoard();
+  if(state !== 'ready'){ state = 'playing'; hideOverlay(); }
+}
+
+// ---------- 难度切换 ----------
+function setSize(v){
+  if(n === v) return;
+  n = v;
+  best = loadBest(n); bestEl.textContent = best;
+  seg5.classList.toggle('on', v===5);
+  seg10.classList.toggle('on', v===10);
+  newGame();
+}
+
+// ---------- 事件绑定 ----------
+board.addEventListener('click', function(e){
+  const el = e.target.closest('.cell');
+  if(el) cellClick(+el.dataset.i, false);
+});
+board.addEventListener('contextmenu', function(e){   // 右键快速切换叉标记
+  const el = e.target.closest('.cell');
+  if(!el) return;
+  e.preventDefault();
+  cellClick(+el.dataset.i, true);
+});
+overlay.addEventListener('click', function(e){
+  if(e.target === overlay && state === 'ready'){ state = 'playing'; hideOverlay(); }
+});
+ovBtn.addEventListener('click', function(){
+  if(state === 'ready'){ state = 'playing'; hideOverlay(); }
+  else{ newGame(); }
+});
+newBtn.addEventListener('click', newGame);
+seg5.addEventListener('click', function(){ setSize(5); });
+seg10.addEventListener('click', function(){ setSize(10); });
+brushBtn.addEventListener('click', function(){
+  brush = brush === 'fill' ? 'mark' : 'fill';
+  brushBtn.textContent = brush === 'fill' ? '涂色模式' : '标记 ×';
+  brushBtn.classList.toggle('on', brush === 'mark');
+});
+hintBtn.addEventListener('click', function(){
+  if(state !== 'playing') return;
+  if(hints <= 0){ toast('本局提示已用完'); return; }
+  const free = [];
+  for(let i=0;i<n*n;i++){
+    if(pattern[i]===1 && stat[i]!==1 && stat[i]!==3) free.push(i);
+  }
+  if(!free.length){ toast('没有需要提示的格子了'); return; }
+  const i = free[Math.random()*free.length|0];
+  stat[i] = 3; everFilled[i] = true;
+  renderCell(i);
+  const el = cells[i];
+  el.classList.remove('hintg'); void el.offsetWidth; el.classList.add('hintg');
+  hints--;
+  hintBtn.textContent = '提示 '+hints;
+  hintBtn.disabled = hints <= 0;
+  score = Math.max(0, score-20); scoreEl.textContent = score;
+  updateClues(); checkWin();
+});
+
+// ---------- 初始化：先备好一局并展示开始面板；棋盘尺寸随容器与规则栏开合自动重算 ----------
+newGame();
+showOverlay('ready');
+new ResizeObserver(fitBoard).observe(board);
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>按行列数字提示填涂方格，还原隐藏的像素画</li>
+        <li>行前、列顶数字表示该行/列中每段连续填涂格的长度与出现顺序</li>
+        <li>涂错会自动纠正为空格标记并扣 1 点机会，机会用完即挑战失败</li>
+        <li>整行/整列填涂正确时，对应数字会变灰提示</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击方格：按当前模式涂色或打叉标记，再点一次可擦除</li>
+        <li>右键方格：快速切换叉标记</li>
+        <li>「提示」直接点亮一格，每局限 3 次并扣分</li>
+        <li>顶部可切换 5×5 / 10×10 难度，最高分分开记录</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

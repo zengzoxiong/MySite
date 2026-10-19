@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>华容道 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：华容道，拖动或点选棋子滑入空位，把曹操送出底部出口。经典横刀立马等六关，含最少步数参考，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/klotski/app.html">
+<style>
+/* ===== 华容道 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+[hidden] { display: none !important; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f4f1ea;
+  color: #3f3a33;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 26px 16px 40px;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { width: 100%; max-width: 430px; }
+
+header { margin-bottom: 12px; }
+h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
+.sub { margin-top: 4px; font-size: 13px; color: #a89c8c; letter-spacing: 1px; }
+
+/* 关卡切换胶囊 */
+.levels { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip {
+  border: 1px solid #e5dfd3;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #6b6157;
+  cursor: pointer;
+  font-family: inherit;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.chip .cb { font-size: 11px; color: #b9ac99; font-variant-numeric: tabular-nums; }
+.chip.on { background: #b23a2e; border-color: #b23a2e; color: #fff; font-weight: 600; }
+.chip.on .cb { color: rgba(255, 255, 255, .8); }
+
+/* 计分区 */
+.hud { display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch; }
+.stat {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e5dfd3;
+  border-radius: 12px;
+  padding: 7px 4px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(120, 90, 60, .07);
+}
+.stat .lab { display: block; font-size: 11px; color: #b3a691; letter-spacing: 2px; }
+.stat .val { display: block; margin-top: 2px; font-size: 20px; font-weight: 700; color: #4a3f35; font-variant-numeric: tabular-nums; }
+.stat.bump { animation: bump .18s ease; }
+@keyframes bump { 50% { transform: scale(1.07); } }
+.btn {
+  border: 0;
+  background: #b23a2e;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(178, 58, 46, .3);
+  touch-action: manipulation;
+}
+.btn:active { transform: translateY(1px); }
+
+/* 木框棋盘：底格与棋子全部绝对定位，坐标由 --x/--y 经 calc 换算，--u-px 由 JS 同步实际格边长 */
+.frame {
+  --u-px: 80px;
+  --gap: 6px;
+  --pad: 10px;
+  position: relative;
+  background: linear-gradient(180deg, #7a573c, #66462e);
+  border-radius: 16px;
+  padding: var(--pad);
+  box-shadow: 0 12px 28px rgba(96, 64, 38, .28);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #f3ecd9;
+  border-radius: 8px;
+  touch-action: none;
+}
+.cellbg {
+  position: absolute;
+  width: var(--u-px);
+  height: var(--u-px);
+  left: calc(var(--gap) + var(--x) * (var(--u-px) + var(--gap)));
+  top: calc(var(--gap) + var(--y) * (var(--u-px) + var(--gap)));
+  background: rgba(163, 130, 88, .13);
+  border-radius: 7px;
+}
+.piece {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--u-px) * var(--w) + (var(--w) - 1) * var(--gap));
+  height: calc(var(--u-px) * var(--h) + (var(--h) - 1) * var(--gap));
+  left: calc(var(--gap) + var(--x) * (var(--u-px) + var(--gap)));
+  top: calc(var(--gap) + var(--y) * (var(--u-px) + var(--gap)));
+  border-radius: 9px;
+  font-weight: 700;
+  cursor: grab;
+  touch-action: none;
+  transition: left .16s ease, top .16s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 3px 8px rgba(96, 64, 38, .18);
+}
+.piece span { line-height: 1; user-select: none; -webkit-user-select: none; }
+.piece.dragging { transition: none; cursor: grabbing; z-index: 3; }
+.piece.sel {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25),
+              0 0 0 3px rgba(178, 58, 46, .55),
+              0 3px 10px rgba(178, 58, 46, .35);
+}
+/* 过关：曹操顺着出口滑出棋盘并渐隐 */
+.piece.escape {
+  transition: top .8s cubic-bezier(.5, 0, .8, .4), opacity .4s ease .5s;
+  z-index: 4;
+  opacity: 0;
+}
+/* 棋子配色：曹操朱红、关羽绿袍、竖将石青、兵卒土黄 */
+.t-cc { background: linear-gradient(180deg, #cd5a44, #b23a2e); color: #fff; }
+.t-cc span { font-size: calc(var(--u-px) * .40); letter-spacing: 4px; text-indent: 4px; }
+.t-hg { background: linear-gradient(180deg, #43946a, #2f7d4f); color: #fff; }
+.t-hg span { font-size: calc(var(--u-px) * .28); }
+.t-vg { background: linear-gradient(180deg, #6487a5, #4a6f8e); color: #fff; }
+.t-vg span { font-size: calc(var(--u-px) * .28); }
+.t-so { background: linear-gradient(180deg, #e9d9b4, #d8c49a); color: #6b5232; }
+.t-so span { font-size: calc(var(--u-px) * .38); }
+
+/* 点选后的可落点提示 */
+.ghost {
+  position: absolute;
+  z-index: 2;
+  width: var(--u-px);
+  height: var(--u-px);
+  left: calc(var(--gap) + var(--x) * (var(--u-px) + var(--gap)));
+  top: calc(var(--gap) + var(--y) * (var(--u-px) + var(--gap)));
+  border: 2px dashed rgba(178, 58, 46, .6);
+  background: rgba(178, 58, 46, .1);
+  border-radius: 8px;
+  cursor: pointer;
+  animation: ghostIn .15s ease;
+  touch-action: manipulation;
+}
+@keyframes ghostIn { from { transform: scale(.8); opacity: 0; } }
+
+/* 底部出口：在下排中间两列的木框上开出缺口 */
+.exit {
+  position: absolute;
+  bottom: -1px;
+  height: 14px;
+  left: calc(var(--pad) + var(--gap) + var(--u-px) + var(--gap));
+  width: calc(var(--u-px) * 2 + var(--gap));
+  background: #f4f1ea;
+  border-radius: 0 0 8px 8px;
+}
+.exit::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #c9a06a;
+  animation: exitPulse 1.6s ease-in-out infinite;
+}
+@keyframes exitPulse { 50% { transform: translate(-50%, 3px); } }
+
+/* 胜负弹层（hidden + 同步回流 + open，保证过渡生效） */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 8px;
+  background: rgba(243, 236, 217, .9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.overlay.open { opacity: 1; }
+.ov-title { font-size: 25px; font-weight: 800; color: #b23a2e; }
+.ov-sub { font-size: 14px; color: #6b6157; padding: 0 14px; line-height: 1.8; }
+.ov-btns { display: flex; gap: 10px; margin-top: 6px; }
+.ov-btns .btn { padding: 10px 18px; }
+
+.hint { margin-top: 14px; text-align: center; font-size: 12.5px; color: #b3a691; line-height: 1.8; }
+footer { margin-top: 18px; text-align: center; font-size: 12px; color: #c9beac; }
+
+@media (max-width: 360px) {
+  h1 { font-size: 28px; letter-spacing: 5px; }
+}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="wrap">
+  <header>
+    <h1>华容道</h1>
+    <p class="sub">横刀立马 · 送曹操出华容道</p>
+  </header>
+
+  <nav class="levels" id="levels" aria-label="选择关卡"></nav>
+
+  <section class="hud">
+    <div class="stat" id="stepStat"><span class="lab">步数</span><span class="val" id="steps">0</span></div>
+    <div class="stat"><span class="lab">参考最少</span><span class="val" id="minRef">--</span></div>
+    <div class="stat"><span class="lab">本关最佳</span><span class="val" id="best">--</span></div>
+    <button class="btn" id="restartBtn" type="button">重玩</button>
+  </section>
+
+  <div class="frame" id="frame">
+    <div class="exit" aria-hidden="true"></div>
+    <div class="board" id="board" aria-label="华容道棋盘">
+      <!-- 底格与棋子由脚本生成 -->
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle">曹操逃出了华容道！</p>
+        <p class="ov-sub" id="ovSub"></p>
+        <div class="ov-btns">
+          <button class="btn" id="ovReplay" type="button">再玩本关</button>
+          <button class="btn" id="ovNext" type="button" style="background:#8a6a48;box-shadow:0 2px 8px rgba(138,106,72,.35)">下一关</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">拖动或点选棋子滑入空位 · 曹操抵达下方出口即过关</p>
+  <footer>拾光集 · 在线小游戏</footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+/* ================= 华容道主逻辑（零依赖，纯本地运行） ================= */
+
+/* ---------- 常量与关卡 ----------
+   棋盘 4 列 5 行，共 20 格，18 格被占、2 格为空。
+   min 为「连步」口径最少步数，由广度优先搜索实算：
+   连续移动同一枚棋子（不论几格、是否拐弯）计 1 步，换棋子重新计步。
+   横刀立马 81 步与马丁·加德纳 1964 年公布、后经计算机验证的经典解一致，
+   指挥若定 70 步、兵分三路 72 步亦与通行文献相符。 */
+const COLS = 4, ROWS = 5;
+const GAP = 6;        // 格间隙 px，与 .frame 的 --gap 保持一致
+const DRAG_LOCK = 6;  // 拖拽锁轴阈值 px
+
+const LEVELS = [
+  { name: '横刀立马', min: 81, pieces: [
+    ['曹操', 1, 0, 2, 2], ['张飞', 0, 0, 1, 2], ['赵云', 3, 0, 1, 2],
+    ['马超', 0, 2, 1, 2], ['黄忠', 3, 2, 1, 2], ['关羽', 1, 2, 2, 1],
+    ['兵', 1, 3, 1, 1], ['兵', 2, 3, 1, 1], ['兵', 0, 4, 1, 1], ['兵', 3, 4, 1, 1]
+  ] },
+  { name: '初出茅庐', min: 60, pieces: [
+    ['曹操', 1, 0, 2, 2], ['张飞', 0, 0, 1, 2], ['赵云', 3, 0, 1, 2],
+    ['兵', 0, 2, 1, 1], ['兵', 1, 2, 1, 1], ['兵', 2, 2, 1, 1], ['兵', 3, 2, 1, 1],
+    ['马超', 0, 3, 1, 2], ['关羽', 1, 3, 2, 1], ['黄忠', 3, 3, 1, 2]
+  ] },
+  { name: '双雄拦路', min: 66, pieces: [
+    ['曹操', 2, 0, 2, 2], ['关羽', 0, 0, 2, 1], ['张飞', 0, 1, 1, 2], ['赵云', 1, 1, 1, 2],
+    ['马超', 0, 3, 1, 2], ['黄忠', 1, 3, 2, 1],
+    ['兵', 2, 2, 1, 1], ['兵', 3, 2, 1, 1], ['兵', 3, 3, 1, 1], ['兵', 1, 4, 1, 1]
+  ] },
+  { name: '指挥若定', min: 70, pieces: [
+    ['曹操', 1, 0, 2, 2], ['张飞', 0, 0, 1, 2], ['赵云', 3, 0, 1, 2],
+    ['马超', 0, 2, 1, 2], ['黄忠', 3, 2, 1, 2], ['关羽', 1, 3, 2, 1],
+    ['兵', 1, 2, 1, 1], ['兵', 2, 2, 1, 1], ['兵', 0, 4, 1, 1], ['兵', 3, 4, 1, 1]
+  ] },
+  { name: '兵分三路', min: 72, pieces: [
+    ['曹操', 1, 0, 2, 2], ['张飞', 0, 1, 1, 2], ['赵云', 3, 1, 1, 2],
+    ['关羽', 1, 2, 2, 1], ['马超', 0, 3, 1, 2], ['黄忠', 3, 3, 1, 2],
+    ['兵', 0, 0, 1, 1], ['兵', 3, 0, 1, 1], ['兵', 1, 3, 1, 1], ['兵', 2, 3, 1, 1]
+  ] },
+  { name: '水泄不通', min: 79, pieces: [
+    ['曹操', 1, 0, 2, 2], ['黄忠', 0, 0, 1, 2],
+    ['关羽', 0, 2, 2, 1], ['张飞', 2, 2, 2, 1],
+    ['赵云', 0, 3, 2, 1], ['马超', 2, 3, 2, 1],
+    ['兵', 3, 0, 1, 1], ['兵', 3, 1, 1, 1], ['兵', 0, 4, 1, 1], ['兵', 3, 4, 1, 1]
+  ] }
+];
+
+/* ---------- DOM ---------- */
+const $ = id => document.getElementById(id);
+const frame = $('frame'), board = $('board');
+const stepsEl = $('steps'), minRefEl = $('minRef'), bestEl = $('best');
+const stepStat = $('stepStat'), levelsEl = $('levels');
+const overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
+const ovReplay = $('ovReplay'), ovNext = $('ovNext');
+
+/* ---------- 本地存档（读写都兜底，隐私模式不报错） ---------- */
+let bests = {};
+try { bests = JSON.parse(localStorage.getItem('klotskiBest') || '{}') || {}; } catch (e) { bests = {}; }
+function saveBests() {
+  try { localStorage.setItem('klotskiBest', JSON.stringify(bests)); } catch (e) { /* 写入失败静默忽略 */ }
+}
+
+/* ---------- 状态 ---------- */
+let cur = 0;          // 当前关卡下标
+let pieces = [];      // 当前棋子对象 { name, x, y, w, h, t, el }
+let steps = 0;
+let lastMover = null; // 连步口径：上一次移动的棋子
+let won = false;
+let selected = null;  // 点选中的棋子
+let ghosts = [];      // 落点提示元素
+let uPx = 80;         // 单元格实际边长 px，resize 时重算
+
+/* ---------- 尺寸同步：格边长写入 CSS 变量，位置与字号全部由它换算 ---------- */
+function syncU() {
+  uPx = (board.clientWidth - (COLS - 1) * GAP) / COLS;
+  frame.style.setProperty('--u-px', uPx.toFixed(2) + 'px');
+}
+
+/* ---------- 棋盘工具 ---------- */
+function typeOf(p) {
+  return p.w === 2 && p.h === 2 ? 'cc' : p.w === 2 ? 'hg' : p.h === 2 ? 'vg' : 'so';
+}
+function occupied(except) {
+  const g = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
+  for (const q of pieces) {
+    if (q === except) continue;
+    for (let dy = 0; dy < q.h; dy++) {
+      for (let dx = 0; dx < q.w; dx++) g[q.y + dy][q.x + dx] = true;
+    }
+  }
+  return g;
+}
+function canPlace(p, nx, ny) {
+  if (nx < 0 || ny < 0 || nx + p.w > COLS || ny + p.h > ROWS) return false;
+  const g = occupied(p);
+  for (let dy = 0; dy < p.h; dy++) {
+    for (let dx = 0; dx < p.w; dx++) if (g[ny + dy][nx + dx]) return false;
+  }
+  return true;
+}
+/* 四个方向上逐格可滑到的所有落点 */
+function reachables(p) {
+  const out = [];
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (let k = 1; canPlace(p, p.x + dx * k, p.y + dy * k); k++) {
+      out.push({ x: p.x + dx * k, y: p.y + dy * k });
+    }
+  }
+  return out;
+}
+
+/* ---------- 渲染 ---------- */
+function renderPiece(p) {
+  p.el.style.setProperty('--x', String(p.x));
+  p.el.style.setProperty('--y', String(p.y));
+}
+function createPiece(p) {
+  const el = document.createElement('div');
+  el.className = 'piece t-' + p.t;
+  el.setAttribute('aria-label', p.name);
+  const span = document.createElement('span');
+  span.textContent = p.name;
+  el.appendChild(span);
+  el.style.setProperty('--w', String(p.w));
+  el.style.setProperty('--h', String(p.h));
+  p.el = el;
+  el._p = p;
+  renderPiece(p);            // 先定位再入 DOM，避免从默认位置产生过渡
+  board.appendChild(el);
+}
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+}
+
+/* ---------- 选中与落点提示 ---------- */
+function clearSel() {
+  if (selected) {
+    selected.el.classList.remove('sel');
+    selected = null;
+  }
+  for (const g of ghosts) g.remove();
+  ghosts = [];
+}
+function select(p) {
+  clearSel();
+  selected = p;
+  p.el.classList.add('sel');
+  for (const d of reachables(p)) {
+    const g = document.createElement('div');
+    g.className = 'ghost';
+    g.style.setProperty('--x', String(d.x));
+    g.style.setProperty('--y', String(d.y));
+    g.addEventListener('pointerdown', e => e.stopPropagation());   // 别让棋盘把选中清掉
+    g.addEventListener('click', () => {
+      if (won) return;
+      const pp = selected;
+      clearSel();
+      moveTo(pp, d.x, d.y);
+    });
+    board.appendChild(g);
+    ghosts.push(g);
+  }
+}
+function tapPiece(p) {
+  if (selected === p) { clearSel(); return; }   // 再点一次取消选中
+  const dests = reachables(p);
+  if (dests.length === 1) {                     // 唯一落点：轻点即走
+    clearSel();
+    moveTo(p, dests[0].x, dests[0].y);
+    return;
+  }
+  select(p);
+}
+
+/* ---------- 移动与计步（连步口径：连续移动同一棋子不重复计步） ---------- */
+function moveTo(p, nx, ny) {
+  if (won || (nx === p.x && ny === p.y)) return;
+  p.x = nx;
+  p.y = ny;
+  if (lastMover !== p) {
+    steps++;
+    lastMover = p;
+    stepsEl.textContent = steps;
+    bump(stepStat);
+  }
+  renderPiece(p);
+  if (p.t === 'cc' && p.x === 1 && p.y === ROWS - 2) win();   // 曹操左上角抵达出口
+}
+
+/* ---------- 拖拽（Pointer Events，一次拖拽锁定一个方向） ----------
+   锁轴后按手指位移实时钳制在合法区间内（端点为整数格），
+   松手时四舍五入吸附到格点——连续合法区间内的取整必为合法格位。 */
+let drag = null;
+board.addEventListener('pointerdown', e => {
+  if (won || drag) return;
+  const el = e.target.closest('.piece');
+  if (!el) { clearSel(); return; }              // 点在空白处：取消选中
+  drag = { p: el._p, el, id: e.pointerId, sx: e.clientX, sy: e.clientY, axis: null, off: 0, min: 0, max: 0 };
+  try { el.setPointerCapture(e.pointerId); } catch (err) { /* 捕获失败不影响点选 */ }
+});
+board.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+  if (!drag.axis) {
+    if (Math.abs(dx) < DRAG_LOCK && Math.abs(dy) < DRAG_LOCK) return;
+    drag.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    const r = slideRange(drag.p, drag.axis);
+    drag.min = r.min;
+    drag.max = r.max;
+    drag.el.classList.add('dragging');
+  }
+  e.preventDefault();
+  let off = (drag.axis === 'x' ? dx : dy) / uPx;
+  off = Math.max(drag.min, Math.min(drag.max, off));
+  drag.off = off;
+  const base = drag.axis === 'x' ? drag.p.x : drag.p.y;
+  drag.el.style.setProperty(drag.axis === 'x' ? '--x' : '--y', String(base + off));
+});
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag;
+  drag = null;
+  d.el.classList.remove('dragging');
+  if (!d.axis) { tapPiece(d.p); return; }       // 没锁过轴 = 轻点
+  clearSel();                                   // 拖动即接管操作，清掉旧的选中
+  const p = d.p;
+  const stepC = Math.round(d.off);
+  const nx = d.axis === 'x' ? p.x + stepC : p.x;
+  const ny = d.axis === 'y' ? p.y + stepC : p.y;
+  if (nx !== p.x || ny !== p.y) moveTo(p, nx, ny);
+  renderPiece(p);                               // 原地松手时吸附回弹
+}
+board.addEventListener('pointerup', endDrag);
+board.addEventListener('pointercancel', endDrag);
+
+/* 某轴允许的连续滑动区间（格为单位；另一轴保持原位） */
+function slideRange(p, axis) {
+  let lo, hi;
+  if (axis === 'x') { lo = -p.x; hi = COLS - p.w - p.x; }
+  else { lo = -p.y; hi = ROWS - p.h - p.y; }
+  for (const q of pieces) {
+    if (q === p) continue;
+    if (axis === 'x') {
+      if (q.y < p.y + p.h && p.y < q.y + q.h) {           // 该方向投影重叠才挡路
+        if (q.x + q.w <= p.x) lo = Math.max(lo, q.x + q.w - p.x);
+        else if (q.x >= p.x + p.w) hi = Math.min(hi, q.x - p.w - p.x);
+      }
+    } else {
+      if (q.x < p.x + p.w && p.x < q.x + q.w) {
+        if (q.y + q.h <= p.y) lo = Math.max(lo, q.y + q.h - p.y);
+        else if (q.y >= p.y + p.h) hi = Math.min(hi, q.y - p.h - p.y);
+      }
+    }
+  }
+  return { min: lo, max: hi };
+}
+
+/* ---------- 键盘：方向键微调选中棋子（每按一次移一格，同棋子连按仍按连步计） ---------- */
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const map = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+  if (map[e.key]) {
+    e.preventDefault();
+    if (!selected || won) return;
+    const [dx, dy] = map[e.key];
+    if (canPlace(selected, selected.x + dx, selected.y + dy)) {
+      moveTo(selected, selected.x + dx, selected.y + dy);
+      select(selected);                          // 落点提示随新位置刷新
+    }
+  } else if (e.key === 'Escape') {
+    clearSel();
+  }
+});
+
+/* ---------- 过关 ---------- */
+function win() {
+  won = true;
+  clearSel();
+  const cc = pieces.find(p => p.t === 'cc');
+  cc.el.classList.add('escape');
+  cc.el.style.setProperty('--y', String(ROWS + 0.9));   // 顺着出口滑出棋盘
+  const myLevel = cur;
+  const prev = bests[cur];
+  const isNew = prev == null || steps < prev;
+  window.setTimeout(() => {
+    if (myLevel !== cur || !won) return;               // 期间已换关或重玩则作废
+    if (isNew) {
+      bests[cur] = steps;
+      saveBests();
+      renderChips();
+      refreshHud();
+    }
+    ovTitle.textContent = '曹操逃出了华容道！';
+    ovSub.textContent = '「' + LEVELS[cur].name + '」' + steps + ' 步 · 参考最少 ' + LEVELS[cur].min + ' 步' +
+      (isNew ? ' · 新纪录！' : ' · 你的最佳 ' + bests[cur] + ' 步');
+    ovNext.hidden = cur >= LEVELS.length - 1;
+    overlay.hidden = false;
+    void overlay.offsetWidth;                          // 同步回流后再加 open，保证过渡生效
+    overlay.classList.add('open');
+  }, 800);
+}
+
+/* ---------- HUD 与关卡按钮 ---------- */
+function refreshHud() {
+  minRefEl.textContent = LEVELS[cur].min;
+  const b = bests[cur];
+  bestEl.textContent = b == null ? '--' : b;
+}
+const chipEls = [];
+function buildChips() {
+  LEVELS.forEach((lv, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    const nm = document.createElement('span');
+    nm.textContent = lv.name;
+    const bi = document.createElement('span');
+    bi.className = 'cb';
+    b.appendChild(nm);
+    b.appendChild(bi);
+    b.addEventListener('click', () => loadLevel(i));
+    levelsEl.appendChild(b);
+    chipEls.push(b);
+  });
+  renderChips();
+}
+function renderChips() {
+  chipEls.forEach((b, i) => {
+    b.classList.toggle('on', i === cur);
+    const best = bests[i];
+    b.querySelector('.cb').textContent = best == null ? LEVELS[i].min + '步' : '最佳' + best;
+  });
+}
+
+/* ---------- 开关卡 ---------- */
+function loadLevel(i) {
+  cur = i;
+  steps = 0;
+  won = false;
+  lastMover = null;
+  clearSel();
+  stepsEl.textContent = '0';
+  overlay.classList.remove('open');
+  overlay.hidden = true;
+  board.querySelectorAll('.piece').forEach(el => el.remove());
+  pieces = LEVELS[i].pieces.map(([name, x, y, w, h]) => {
+    const p = { name, x, y, w, h, t: '', el: null };
+    p.t = typeOf(p);
+    createPiece(p);
+    return p;
+  });
+  refreshHud();
+  renderChips();
+}
+
+/* ---------- 初始化：先铺 20 个底格，再开默认关（经典横刀立马） ---------- */
+for (let r = 0; r < ROWS; r++) {
+  for (let c = 0; c < COLS; c++) {
+    const bg = document.createElement('div');
+    bg.className = 'cellbg';
+    bg.style.setProperty('--x', String(c));
+    bg.style.setProperty('--y', String(r));
+    board.appendChild(bg);
+  }
+}
+buildChips();
+loadLevel(0);
+syncU();
+window.addEventListener('resize', syncU);
+
+$('restartBtn').addEventListener('click', () => loadLevel(cur));
+ovReplay.addEventListener('click', () => loadLevel(cur));
+ovNext.addEventListener('click', () => loadLevel(cur + 1));
+})();
+</script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>棋盘 4 列 5 行，棋子只能平滑进空位，不能跨越其他棋子</li>
+        <li>把曹操（红色大方块）送到底部中间的出口即过关</li>
+        <li>步数按经典「连步」口径：连续移动同一枚棋子（不论几格、是否拐弯）计 1 步，换棋子重新计步</li>
+        <li>每关标注参考最少步数（横刀立马 81 步即经典解），试试追平它</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>拖动棋子滑动，一次拖拽沿一个方向</li>
+        <li>或点选棋子后点虚线落点；只有唯一落点时轻点即走</li>
+        <li>方向键微调选中的棋子，Esc 取消选中</li>
+        <li>重玩：重开本关；点上方关卡名切换关卡</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

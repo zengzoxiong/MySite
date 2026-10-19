@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑白棋 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：黑白棋，8×8 棋盘与内置 AI 对战，夹住对方棋子即可翻转，终局数子定胜负，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/othello/app.html">
+<style>
+/* ===== 黑白棋 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
+[hidden]{display:none!important}
+:root{
+  --primary:#1e7d46;
+  --primary-deep:#166134;
+  --board-line:#1d6b40;
+  --ink:#1f2430;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:#eef0f4;
+  color:var(--ink);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:26px 16px 40px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{width:100%;max-width:500px}
+
+header{margin-bottom:14px}
+h1{font-size:26px;line-height:1.15;color:var(--ink);letter-spacing:2px}
+.sub{margin-top:6px;font-size:13px;color:#8a9199}
+
+/* 计分卡：黑方 / 白方 / 最佳战果，轮到谁谁高亮 */
+.hud{display:flex;gap:10px;margin-bottom:12px}
+.stat{
+  flex:1;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px 6px;
+  text-align:center;
+  box-shadow:0 2px 10px rgba(60,64,67,.08);
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.stat .lab{display:block;font-size:12px;color:var(--muted);letter-spacing:2px}
+.stat .val{display:block;margin-top:2px;font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat.active{border-color:var(--primary);box-shadow:0 2px 12px rgba(30,125,70,.28)}
+.stat.active .lab{color:var(--primary);font-weight:600}
+
+/* 棋盘：8×8 网格，深绿格线 + 毛毡绿格面 */
+.board{
+  --gap:3px;
+  position:relative;
+  width:100%;
+  aspect-ratio:1;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  gap:var(--gap);
+  padding:var(--gap);
+  background:var(--board-line);
+  border-radius:12px;
+  box-shadow:0 10px 32px rgba(60,64,67,.15);
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.cell{
+  position:relative;
+  background:linear-gradient(145deg,#339863,#2b8153);
+  border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,30,15,.18);
+  perspective:320px;
+  cursor:default;
+}
+/* 合法落子点：白色圆环提示；桌面端悬停变半透明黑预览落子 */
+.cell.hint{cursor:pointer}
+.cell.hint::before{
+  content:'';
+  position:absolute;
+  inset:29%;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.55);
+  pointer-events:none;
+}
+@media (hover:hover){
+  .cell.hint:hover::before{background:rgba(8,30,18,.42);border-color:transparent}
+}
+/* 最后一手：格角一颗小金点 */
+.cell.last::after{
+  content:'';
+  position:absolute;
+  top:5%;
+  right:5%;
+  width:15%;
+  height:15%;
+  border-radius:50%;
+  background:#f4b942;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.22);
+  z-index:3;
+  pointer-events:none;
+}
+/* 棋子：外层做入场缩放，内层 preserve-3d 绕 Y 轴翻转切换黑白面 */
+.discw{position:absolute;inset:7%;z-index:1;animation:appear .28s ease backwards}
+.discw.noanim{animation:none}
+@keyframes appear{from{transform:scale(.3);opacity:0}}
+.disc{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  transition:transform .5s cubic-bezier(.45,.05,.35,1);
+}
+.disc i{
+  position:absolute;inset:0;
+  border-radius:50%;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  box-shadow:0 2px 5px rgba(0,25,12,.4);
+}
+.disc .fw{background:radial-gradient(circle at 34% 28%,#ffffff,#e9ecef 45%,#c6ccd4 80%,#a9b1bc)}
+.disc .fb{transform:rotateY(180deg);background:radial-gradient(circle at 34% 28%,#667080,#363d47 45%,#191d24 80%,#0b0e13)}
+@media (prefers-reduced-motion:reduce){
+  .disc{transition:none}
+  .discw{animation:none}
+}
+
+/* 终局弹层（盖在棋盘上，hidden + 同步回流 + open 保证过渡生效） */
+.overlay{
+  position:absolute;inset:0;z-index:10;
+  border-radius:9px;
+  background:rgba(244,248,245,.9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  text-align:center;
+  opacity:0;
+  transition:opacity .22s ease;
+}
+.overlay.open{opacity:1}
+.ov-title{font-size:30px;font-weight:800;color:var(--ink)}
+.ov-title.win{color:var(--primary)}
+.ov-title.lose{color:#c0392b}
+.ov-sub{font-size:14px;color:var(--muted);padding:0 16px;line-height:1.8;font-variant-numeric:tabular-nums}
+.ov-btns{display:flex;gap:10px;margin-top:10px}
+
+/* 状态行：当前回合小圆点 + 文案 */
+.status{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:14px;color:var(--muted);
+  margin:12px 2px;min-height:20px;
+  font-variant-numeric:tabular-nums;
+}
+.status .dot{width:13px;height:13px;border-radius:50%;flex:none;box-shadow:inset -1px -2px 3px rgba(0,0,0,.28)}
+.status .dot.hide{display:none}
+.status .dot.b{background:radial-gradient(circle at 35% 30%,#5c6673,#15181d)}
+.status .dot.w{background:radial-gradient(circle at 35% 30%,#ffffff,#c9ced6)}
+
+/* 按钮区 */
+.actions{display:flex;gap:8px;justify-content:center;align-items:stretch;flex-wrap:wrap}
+.btn{
+  font:inherit;
+  border:0;
+  border-radius:10px;
+  padding:9px 20px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.btn:active{transform:scale(.96)}
+.btn.plain{background:#eef1ee;color:#3c4a42;font-weight:500}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{
+  font:inherit;
+  border:0;
+  background:#fff;
+  padding:9px 13px;
+  font-size:13px;
+  color:var(--muted);
+  cursor:pointer;
+  touch-action:manipulation;
+  border-right:1px solid var(--line);
+}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--primary);color:#fff;font-weight:600}
+
+footer{margin-top:18px;text-align:center;color:#bdc1c6;font-size:12px}
+
+@media (max-width:480px){
+  body{padding:18px 12px 30px}
+  h1{font-size:22px}
+  .stat .val{font-size:18px}
+  .ov-title{font-size:24px}
+  .btn{padding:8px 15px}
+  .seg button{padding:8px 10px}
+}
+</style>
+    <style>
+    /* 返回主页按钮（fixed 定位不挤占各页布局） */
+    .back-home {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 13px;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a6f9e;
+      border: 1px solid #d3dfee;
+      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
+      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+    .back-home:hover { background: #f0f6fc; }
+    .back-home:active { transform: translateY(1px); }
+    .back-home svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (max-width: 560px) {
+      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
+    }
+    </style>
+    <style>
+    /* ===== 右侧规则栏（可收起）=====
+       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
+       展开偏好存 localStorage，跨游戏页记忆。 */
+    .rules-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 272px;
+      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
+      background: #fff;
+      border-left: 1px solid #d7dee8;
+      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
+      z-index: 190;
+      transform: translateX(0);
+      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+      color: #5c7186;
+      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .rules-panel.closed { transform: translateX(100%); }
+    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
+    .rules-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .rules-panel h2 {
+      font-size: 15px;
+      color: #3f5568;
+      margin: 0 0 12px;
+    }
+    .rules-panel h3 {
+      font-size: 12.5px;
+      color: #4a6f9e;
+      margin: 14px 0 4px;
+      letter-spacing: 1px;
+    }
+    .rules-panel ul { margin: 0; padding-left: 18px; }
+    .rules-panel li { margin: 4px 0; }
+    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
+    .rules-handle {
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 116px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      background: #fff;
+      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
+      color: #4a6f9e;
+      font: 600 13px/1 inherit;
+      letter-spacing: 3px;
+      writing-mode: vertical-lr;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .rules-handle:active { transform: translateY(-50%) scale(.96); }
+    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    @media (min-width: 1100px) {
+      body.rules-open { padding-right: 272px; }
+    }
+    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+    @media (max-width: 560px) {
+      .rules-panel { width: min(272px, 82vw); }
+    }
+    </style>
+</head>
+<body>
+    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+  <main class="wrap">
+    <header>
+      <h1>黑白棋</h1>
+      <p class="sub">你执黑先手，夹住对方棋子即可翻转，终局子多者胜</p>
+    </header>
+
+    <section class="hud">
+      <div class="stat" id="statB"><span class="lab">你 · 黑</span><span class="val" id="cntB">2</span></div>
+      <div class="stat" id="statW"><span class="lab">AI · 白</span><span class="val" id="cntW">2</span></div>
+      <div class="stat"><span class="lab">最佳战果</span><span class="val" id="bestVal">0</span></div>
+    </section>
+
+    <div class="board" id="board">
+      <div class="overlay" id="overlay" hidden>
+        <p class="ov-title" id="ovTitle"></p>
+        <p class="ov-sub" id="ovSub"></p>
+        <div class="ov-btns">
+          <button class="btn plain" id="ovView" type="button">查看棋盘</button>
+          <button class="btn" id="ovRestart" type="button">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="status"><span class="dot hide" id="turnDot"></span><span id="statusText"></span></p>
+
+    <div class="actions">
+      <button class="btn" id="newBtn" type="button">新游戏</button>
+      <button class="btn plain" id="undoBtn" type="button" disabled>悔棋</button>
+      <div class="seg" id="levelSeg" role="group" aria-label="AI 难度">
+        <button type="button" data-level="easy">新手</button>
+        <button type="button" data-level="normal" class="on">进阶</button>
+        <button type="button" data-level="hard">大师</button>
+      </div>
+    </div>
+
+    <footer>拾光集 · 在线小游戏</footer>
+  </main>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 黑白棋核心规则与 AI（纯逻辑，不依赖 DOM） =================
+     棋盘用一维 Int8Array(64) 表示：0 空 / 1 黑 / 2 白；下标 = 行*8+列 */
+  const EMPTY = 0, BLACK = 1, WHITE = 2;
+  const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+  /* 位置权重表：角永远最贵；紧贴角的 X 位（对角）与 C 位（边邻）是负债 */
+  const WEIGHT = [
+    120, -20,  20,   5,   5,  20, -20, 120,
+    -20, -40,  -5,  -5,  -5,  -5, -40, -20,
+     20,  -5,  15,   3,   3,  15,  -5,  20,
+      5,  -5,   3,   3,   3,   3,  -5,   5,
+      5,  -5,   3,   3,   3,   3,  -5,   5,
+     20,  -5,  15,   3,   3,  15,  -5,  20,
+    -20, -40,  -5,  -5,  -5,  -5, -40, -20,
+    120, -20,  20,   5,   5,  20, -20, 120
+  ];
+  const CORNERS = [0, 7, 56, 63];
+  /* 每个角的三个相邻格：一旦角被占据，这些格就变成稳定子，负分应当抹平 */
+  const CORNER_NBR = { 0: [1, 8, 9], 7: [6, 14, 15], 56: [48, 49, 57], 63: [54, 55, 62] };
+
+  /* ---------- 走法生成与执行 ---------- */
+  // 指定落子会翻转哪些对方棋子（八个方向扫描，端点必须是己方子才算夹住）
+  function flipsFor(b, p, idx) {
+    const opp = 3 - p, x = idx & 7, y = idx >> 3;
+    const flips = [];
+    for (let d = 0; d < 8; d++) {
+      const dx = DIRS[d][0], dy = DIRS[d][1];
+      let cx = x + dx, cy = y + dy;
+      while (cx >= 0 && cx < 8 && cy >= 0 && cy < 8 && b[cy * 8 + cx] === opp) { cx += dx; cy += dy; }
+      if (cx >= 0 && cx < 8 && cy >= 0 && cy < 8 && b[cy * 8 + cx] === p) {
+        let ex = cx - dx, ey = cy - dy;
+        while (ex !== x || ey !== y) { flips.push(ey * 8 + ex); ex -= dx; ey -= dy; }
+      }
+    }
+    return flips;
+  }
+  // 快速判断某格是否有翻转线（找到一条即返回，供批量生成合法手用）
+  function hasAnyFlip(b, p, x, y) {
+    const opp = 3 - p;
+    for (let d = 0; d < 8; d++) {
+      const dx = DIRS[d][0], dy = DIRS[d][1];
+      let cx = x + dx, cy = y + dy, n = 0;
+      while (cx >= 0 && cx < 8 && cy >= 0 && cy < 8 && b[cy * 8 + cx] === opp) { n++; cx += dx; cy += dy; }
+      if (n && cx >= 0 && cx < 8 && cy >= 0 && cy < 8 && b[cy * 8 + cx] === p) return true;
+    }
+    return false;
+  }
+  function genMoves(b, p) {
+    const ms = [];
+    for (let i = 0; i < 64; i++) {
+      if (b[i] === EMPTY && hasAnyFlip(b, p, i & 7, i >> 3)) ms.push(i);
+    }
+    return ms;
+  }
+  // 原地落子并翻转，返回翻转列表供撤销（配对使用保证棋盘还原）
+  function apply(b, p, idx) {
+    const flips = flipsFor(b, p, idx);
+    b[idx] = p;
+    for (let k = 0; k < flips.length; k++) b[flips[k]] = p;
+    return flips;
+  }
+  function undoMove(b, p, idx, flips) {
+    const opp = 3 - p;
+    b[idx] = EMPTY;
+    for (let k = 0; k < flips.length; k++) b[flips[k]] = opp;
+  }
+
+  /* ---------- 评估：位置权重 + 行动力 ---------- */
+  // 双方合法手数量差（黑减白），正数表示黑方选择更多
+  function mobilityDiff(b) {
+    let mb = 0, mw = 0;
+    for (let i = 0; i < 64; i++) {
+      if (b[i] !== EMPTY) continue;
+      const x = i & 7, y = i >> 3;
+      if (hasAnyFlip(b, BLACK, x, y)) mb++;
+      if (hasAnyFlip(b, WHITE, x, y)) mw++;
+    }
+    return mb - mw;
+  }
+  // 从 p 的视角评估局面
+  function evaluate(b, p) {
+    const opp = 3 - p;
+    let sc = 0;
+    for (let i = 0; i < 64; i++) {
+      const v = b[i];
+      if (!v) continue;
+      sc += v === p ? WEIGHT[i] : -WEIGHT[i];
+    }
+    // 角被占后相邻 X/C 位不再是负债：把静态表罚分从双方账上抹平
+    for (let c = 0; c < 4; c++) {
+      const corner = CORNERS[c];
+      if (b[corner] === EMPTY) continue;
+      const nbs = CORNER_NBR[corner];
+      for (let k = 0; k < nbs.length; k++) {
+        const v = b[nbs[k]];
+        if (!v) continue;
+        sc += v === p ? -WEIGHT[nbs[k]] : WEIGHT[nbs[k]];
+      }
+    }
+    sc += mobilityDiff(b) * (p === BLACK ? 12 : -12);
+    return sc;
+  }
+
+  /* ---------- 搜索：negamax + alpha-beta 剪枝 ---------- */
+  function search(b, player, depth, alpha, beta) {
+    const moves = genMoves(b, player);
+    if (!moves.length) {
+      if (!genMoves(b, 3 - player).length) {
+        // 双方都无法落子，终局：胜负远比子差重要，用大数量级隔离
+        let d = 0;
+        for (let i = 0; i < 64; i++) { if (b[i] === player) d++; else if (b[i] !== EMPTY) d--; }
+        return d > 0 ? 100000 + d : d < 0 ? -100000 + d : 0;
+      }
+      if (depth <= 0) return evaluate(b, player);
+      return -search(b, 3 - player, depth - 1, -beta, -alpha);   // 无子可下，跳过继续搜
+    }
+    if (depth <= 0) return evaluate(b, player);
+    let bestV = -Infinity;
+    for (let k = 0; k < moves.length; k++) {
+      const m = moves[k];
+      const flips = apply(b, player, m);
+      const v = -search(b, 3 - player, depth - 1, -beta, -alpha);
+      undoMove(b, player, m, flips);
+      if (v > bestV) bestV = v;
+      if (bestV > alpha) alpha = bestV;
+      if (alpha >= beta) break;
+    }
+    return bestV;
+  }
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.random() * (i + 1) | 0;
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+  }
+
+  /* ---------- AI 选手：三档难度，残局直接穷搜到底 ---------- */
+  const LEVELS = {
+    easy:   { depth: 1, noise: .55 },   // 新手：过半随机，其余一步贪心
+    normal: { depth: 3, noise: 0 },     // 进阶：三层搜索
+    hard:   { depth: 5, noise: 0 }      // 大师：五层搜索 + 完美终局
+  };
+  const ENDGAME_EMPTIES = 10;           // 空格少到这个数就穷搜终局，走法零失误
+
+  function chooseAiMove(b, lvl) {
+    const moves = genMoves(b, WHITE);
+    if (!moves.length) return -1;
+    const cfg = LEVELS[lvl] || LEVELS.normal;
+    if (cfg.noise && Math.random() < cfg.noise) return moves[Math.random() * moves.length | 0];
+    let empties = 0;
+    for (let i = 0; i < 64; i++) if (!b[i]) empties++;
+    const depth = empties <= ENDGAME_EMPTIES ? 64 : cfg.depth;
+    shuffle(moves);                     // 打乱同分走法让棋路多变，也有助剪枝
+    let bestMove = moves[0], bestScore = -Infinity, alpha = -Infinity;
+    for (let k = 0; k < moves.length; k++) {
+      const m = moves[k];
+      const flips = apply(b, WHITE, m);
+      const v = -search(b, BLACK, depth - 1, -Infinity, -alpha);
+      undoMove(b, WHITE, m, flips);
+      if (v > bestScore) { bestScore = v; bestMove = m; }
+      if (v > alpha) alpha = v;
+    }
+    return bestMove;
+  }
+
+  /* ---------- DOM 引用与界面渲染 ---------- */
+  const $ = function (id) { return document.getElementById(id); };
+  const boardEl = $('board'), overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
+  const cntB = $('cntB'), cntW = $('cntW'), bestVal = $('bestVal');
+  const statB = $('statB'), statW = $('statW');
+  const statusText = $('statusText'), turnDot = $('turnDot');
+  const newBtn = $('newBtn'), undoBtn = $('undoBtn'), levelSeg = $('levelSeg');
+
+  let bd = new Int8Array(64);
+  let turn = BLACK;
+  let state = 'playing';      // playing / over
+  let level = 'normal';
+  let lastMove = -1;
+  let aiBusy = false;         // AI 思考期间锁棋盘与悔棋
+  let aiTimer = 0;            // AI 落子 / 跳过回合的定时器句柄
+  const history = [];         // 每手落子前的快照，供悔棋回滚
+  const cells = [], discEls = new Array(64).fill(null), rot = new Array(64).fill(0);
+
+  /* ---------- 最佳战果（获胜时最大净胜子数），驼峰键全站唯一 ---------- */
+  let best = 0;
+  try { best = +localStorage.getItem('othelloBest') || 0; } catch (e) { }
+  function saveBest(v) { try { localStorage.setItem('othelloBest', String(v)); } catch (e) { } }
+  bestVal.textContent = best > 0 ? '+' + best : '0';
+
+  // 先铺 64 个格子，overlay 是 board 的绝对定位子元素不参与网格布局
+  for (let i = 0; i < 64; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.idx = i;
+    boardEl.appendChild(c);
+    cells.push(c);
+  }
+
+  /* ---------- 棋子 DOM：外层入场动画，内层 rotateY 累加翻转黑白面 ---------- */
+  function createDisc(idx, color, anim) {
+    const wrap = document.createElement('div');
+    wrap.className = 'discw' + (anim ? '' : ' noanim');
+    const disc = document.createElement('div');
+    disc.className = 'disc';
+    const fw = document.createElement('i'); fw.className = 'fw';
+    const fb = document.createElement('i'); fb.className = 'fb';
+    disc.appendChild(fw); disc.appendChild(fb);
+    const r = color === BLACK ? 180 : 0;   // 0 度露白面，180 度露黑面
+    disc.style.transform = 'rotateY(' + r + 'deg)';
+    rot[idx] = r;
+    wrap.appendChild(disc);
+    cells[idx].appendChild(wrap);
+    discEls[idx] = disc;
+  }
+  function flipDiscDom(idx) {
+    if (!discEls[idx]) return;
+    rot[idx] += 180;
+    discEls[idx].style.transform = 'rotateY(' + rot[idx] + 'deg)';
+  }
+  function rebuildBoard() {
+    for (let i = 0; i < 64; i++) {
+      if (discEls[i]) { discEls[i].parentElement.remove(); discEls[i] = null; }
+      rot[i] = 0;
+      if (bd[i]) createDisc(i, bd[i], false);
+    }
+    updateLastMark();
+  }
+  function updateLastMark() {
+    for (let i = 0; i < 64; i++) cells[i].classList.toggle('last', i === lastMove);
+  }
+  function markHints(moves) {
+    const set = new Set(moves || []);
+    for (let i = 0; i < 64; i++) cells[i].classList.toggle('hint', set.has(i));
+  }
+
+  /* ---------- HUD 与状态行 ---------- */
+  function countAll() {
+    let b = 0, w = 0;
+    for (let i = 0; i < 64; i++) { if (bd[i] === BLACK) b++; else if (bd[i] === WHITE) w++; }
+    return { b: b, w: w };
+  }
+  function syncHud() {
+    const c = countAll();
+    cntB.textContent = c.b;
+    cntW.textContent = c.w;
+    statB.classList.toggle('active', state === 'playing' && turn === BLACK);
+    statW.classList.toggle('active', state === 'playing' && turn === WHITE);
+    undoBtn.disabled = !(state === 'playing' && !aiBusy && history.length);
+  }
+  function setStatus(text, dot) {
+    statusText.textContent = text;
+    turnDot.className = 'dot' + (dot === BLACK ? ' b' : dot === WHITE ? ' w' : ' hide');
+  }
+
+  /* ---------- 对局流程 ---------- */
+  function playMove(p, idx) {
+    history.push({ bd: bd.slice(), turn: turn, lastMove: lastMove });   // 落子前快照
+    const flips = apply(bd, p, idx);
+    createDisc(idx, p, true);
+    for (let k = 0; k < flips.length; k++) flipDiscDom(flips[k]);
+    lastMove = idx;
+    updateLastMark();
+    turn = 3 - p;
+    syncHud();
+    nextTurn();
+  }
+
+  // 从当前执子方出发推进回合：能走就走，不能走就跳过，双方都卡死则终局
+  function nextTurn() {
+    if (state !== 'playing') return;
+    const moves = genMoves(bd, turn);
+    if (moves.length) {
+      if (turn === BLACK) {
+        setStatus('你的回合，点击白圈提示格落子', BLACK);
+        markHints(moves);
+      } else {
+        markHints([]);
+        setStatus('AI 思考中…', WHITE);
+        aiBusy = true;
+        syncHud();
+        aiTimer = setTimeout(function () {
+          const m = chooseAiMove(bd, level);
+          aiBusy = false;
+          if (state !== 'playing') return;
+          playMove(WHITE, m);
+        }, 640);
+      }
+      return;
+    }
+    markHints([]);
+    if (!genMoves(bd, 3 - turn).length) { gameOver(); return; }
+    setStatus(turn === BLACK ? '你无子可下，跳过…' : 'AI 无子可下，跳过…', turn);
+    aiTimer = setTimeout(function () {
+      if (state !== 'playing') return;
+      turn = 3 - turn;
+      syncHud();
+      nextTurn();
+    }, 1100);
+  }
+
+  function gameOver() {
+    state = 'over';
+    markHints([]);
+    const c = countAll();
+    const diff = c.b - c.w;
+    let title, cls;
+    if (diff > 0) { title = '你赢了！'; cls = 'win'; }
+    else if (diff < 0) { title = '你输了'; cls = 'lose'; }
+    else { title = '平局'; cls = ''; }
+    let sub = '黑 ' + c.b + ' : ' + c.w + ' 白';
+    if (diff > 0) {
+      let rec;
+      if (diff > best) { best = diff; saveBest(best); rec = '新纪录！'; }
+      else rec = '历史最佳 +' + best;
+      bestVal.textContent = '+' + best;
+      sub += ' · 净胜 ' + diff + ' 子 · ' + rec;
+    } else if (diff < 0) {
+      sub += ' · AI 净胜 ' + (-diff) + ' 子';
+    } else {
+      sub += ' · 势均力敌';
+    }
+    setStatus('终局，黑 ' + c.b + ' : ' + c.w + ' 白', null);
+    ovTitle.textContent = title;
+    ovTitle.className = 'ov-title ' + cls;
+    ovSub.textContent = sub;
+    overlay.hidden = false;
+    void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+    overlay.classList.add('open');
+    syncHud();
+  }
+
+  function newGame() {
+    clearTimeout(aiTimer);
+    aiBusy = false;
+    bd.fill(EMPTY);
+    bd[27] = WHITE; bd[28] = BLACK; bd[35] = BLACK; bd[36] = WHITE;   // d4 白 e4 黑 d5 黑 e5 白
+    turn = BLACK;
+    state = 'playing';
+    lastMove = -1;
+    history.length = 0;
+    rebuildBoard();
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+    syncHud();
+    nextTurn();
+  }
+
+  /* 悔棋：回滚到最近一次轮到玩家落子前的局面（通常撤你与 AI 各一手） */
+  function undoStep() {
+    if (state !== 'playing' || aiBusy || !history.length) return;
+    clearTimeout(aiTimer);
+    let snap = null;
+    while (history.length) {
+      snap = history.pop();
+      if (snap.turn === BLACK) break;
+    }
+    if (!snap) return;
+    bd = snap.bd.slice();
+    turn = snap.turn;
+    lastMove = snap.lastMove;
+    rebuildBoard();
+    syncHud();
+    nextTurn();
+  }
+
+  /* ---------- 输入 ---------- */
+  boardEl.addEventListener('click', function (e) {
+    if (state !== 'playing' || turn !== BLACK || aiBusy) return;
+    const cell = e.target.closest('.cell');
+    if (!cell) return;
+    const idx = +cell.dataset.idx;
+    if (bd[idx] !== EMPTY) return;
+    if (!flipsFor(bd, BLACK, idx).length) return;
+    playMove(BLACK, idx);
+  });
+
+  levelSeg.addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-level]');
+    if (!btn) return;
+    level = btn.dataset.level;
+    const btns = levelSeg.querySelectorAll('button');
+    for (let i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i] === btn);
+  });
+
+  newBtn.addEventListener('click', newGame);
+  undoBtn.addEventListener('click', undoStep);
+  $('ovRestart').addEventListener('click', newGame);
+  $('ovView').addEventListener('click', function () {
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+  });
+
+  /* ---------- 开局 ---------- */
+  newGame();
+  })();
+  </script>
+  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="rules-scroll">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>你执黑棋，AI 执白棋，黑先白后轮流落子</li>
+        <li>落子必须夹住对方棋子（横竖斜八个方向），被夹住的棋子全部翻成己方颜色</li>
+        <li>一方无处可落时自动跳过回合；双方都无法落子时终局，盘面子多者胜</li>
+        <li>角永远翻不动，优先抢占；紧贴角落的斜格（X 位）是陷阱，别轻易送给 AI</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击带白圈的格子落子，白圈即当前合法落子点</li>
+        <li>新游戏：重开对局　悔棋：撤回你和 AI 的最近一手</li>
+        <li>难度：新手 / 进阶 / 大师三档，随时切换，下一手即生效</li>
+      </ul>
+    </div>
+  </aside>
+  <script>
+  (function () {
+    var panel = document.getElementById('rulesPanel');
+    var handle = document.getElementById('rulesHandle');
+    var saved = null;
+    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
+    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
+    function apply() {
+      panel.classList.toggle('closed', !open);
+      handle.textContent = open ? '收起' : '玩法';
+      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
+      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    }
+    handle.addEventListener('click', function () {
+      open = !open;
+      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
+      apply();
+    });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>
