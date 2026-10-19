@@ -1,6 +1,6 @@
 {
- "updated": "2026-10-18",
- "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode（早期为平台按天导出，2026-10-19 起改从 ZCode 本地会话库按天统计）、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加；2026-10-19 同步时模型名统一小写（GLM/Qwen），deepseek-v4.1-flash 与 DeepSeek-Flash 并入 deepseek-flash）。勿手改。",
+ "updated": "2026-10-20",
+ "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode（早期为平台按天导出，2026-10-19 起改从 ZCode 本地会话库按天统计）、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加；2026-10-19 同步时模型名统一小写（GLM/Qwen），deepseek-v4.1-flash 与 DeepSeek-Flash 并入 deepseek-flash）；2026-10-20 同步时多出的 deepseek-v4.1-flash-1017 变体并入 deepseek-flash。勿手改。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
   "CCSwitch_API用量_按天.csv",
@@ -1426,6 +1426,44 @@
      "inFresh": 906494,
      "out": 343923,
      "total": 29716209
+    }
+   ]
+  },
+  {
+   "date": "2026-10-19",
+   "models": [
+    {
+     "id": "mimo-v2.6-pro",
+     "inCache": 401982208,
+     "inFresh": 14009610,
+     "out": 5535996,
+     "total": 421527814
+    },
+    {
+     "id": "glm-5.3-flash",
+     "inCache": 70100032,
+     "inFresh": 6869777,
+     "out": 1283321,
+     "total": 78253130
+    },
+    {
+     "id": "deepseek-flash",
+     "inCache": 16378368,
+     "inFresh": 369873,
+     "out": 210495,
+     "total": 16958736
+    }
+   ]
+  },
+  {
+   "date": "2026-10-20",
+   "models": [
+    {
+     "id": "deepseek-flash",
+     "inCache": 260608,
+     "inFresh": 69886,
+     "out": 1907,
+     "total": 332401
     }
    ]
   }

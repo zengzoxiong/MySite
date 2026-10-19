@@ -1839,6 +1839,33 @@
       "url": "https://www.themoviedb.org/movie/57627",
       "cover": "assets/media/a-little-thing-called-love.jpg",
       "comment": "小水为了阿亮学长拼命变成更好的人，暗恋这件小事拍得又傻又真。"
+    },
+    {
+      "title": "血战湘江",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.8,
+      "release": "2017-06-30",
+      "cover": "assets/media/blood-on-xiangjiang.jpg",
+      "url": "https://www.themoviedb.org/movie/509282"
+    },
+    {
+      "title": "高山下的花环",
+      "type": "电影",
+      "status": "看过",
+      "rating": 8.4,
+      "release": "1984-10-01",
+      "cover": "assets/media/wreath-at-the-foot-of-the-mountain.jpg",
+      "url": "https://www.themoviedb.org/movie/258424"
+    },
+    {
+      "title": "百团大战",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.2,
+      "release": "2015-08-28",
+      "cover": "assets/media/hundred-regiments-offensive.jpg",
+      "url": "https://www.themoviedb.org/movie/360644"
     }
   ]
 }
