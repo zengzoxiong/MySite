@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-20",
+  "updated": "2026-10-21",
   "sections": {
     "trending": [
+      {
+        "name": "deepseek-ai/DeepInfer",
+        "url": "https://github.com/deepseek-ai/DeepInfer",
+        "desc": "DeepInfer: High-performance, large-scale inference framework for DeepSeek models",
+        "stars": 11847,
+        "language": "Python"
+      },
       {
         "name": "Gathin23/cleanyourtv",
         "url": "https://github.com/Gathin23/cleanyourtv",
         "desc": "Debloat any Android or Google TV over Wi-Fi and get an Apple TV-style home.",
-        "stars": 5038,
+        "stars": 11418,
         "language": "Java"
-      },
-      {
-        "name": "Arekejoker/qwen21-nsfw-pose-skill",
-        "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
-        "desc": "Qwen-Image 2.1 NSFW/姿势出图 skill：作者级提示词配方 + NSFW LoRA + 136 姿势 VNCCS 人偶控制；适用 Claude Code / Codex / Cursor / OpenClaw",
-        "stars": 3361,
-        "language": "Python"
-      },
-      {
-        "name": "feder-cr/git-ai",
-        "url": "https://github.com/feder-cr/git-ai",
-        "desc": "Git designed for AI agents.",
-        "stars": 2447,
-        "language": "Go"
-      },
-      {
-        "name": "HeyPuter/everything",
-        "url": "https://github.com/HeyPuter/everything",
-        "desc": "We're rebuilding and open-sourcing the world’s software from scratch.",
-        "stars": 2331,
-        "language": "JavaScript"
-      },
-      {
-        "name": "ahwootech/BRUTAL",
-        "url": "https://github.com/ahwootech/BRUTAL",
-        "desc": "A free, open source C# framework for making games, or your own game engine. Direct access to native APIs and Vulkan, with the low-level libraries around them. T",
-        "stars": 1987,
-        "language": "C#"
-      },
-      {
-        "name": "chenglou/handwired",
-        "url": "https://github.com/chenglou/handwired",
-        "desc": "Turn your regular JavaScript code into a neural net.",
-        "stars": 1804,
-        "language": "TypeScript"
       },
       {
         "name": "ly05010419/MacNativeGames",
         "url": "https://github.com/ly05010419/MacNativeGames",
         "desc": "",
-        "stars": 1655,
+        "stars": 2742,
         "language": "C"
       },
       {
-        "name": "Supermedo/uncharted_pc",
-        "url": "https://github.com/Supermedo/uncharted_pc",
-        "desc": "Uncharted: The Nathan Drake Collection running natively on Windows - by SuperMedo",
-        "stars": 1574,
-        "language": "C++"
+        "name": "ahwootech/BRUTAL",
+        "url": "https://github.com/ahwootech/BRUTAL",
+        "desc": "A free, open source C# framework for making games, or your own game engine. Direct access to native APIs and Vulkan, with the low-level libraries around them. T",
+        "stars": 2054,
+        "language": "C#"
       },
       {
         "name": "Leonxlnx/earshot",
         "url": "https://github.com/Leonxlnx/earshot",
         "desc": "Ears for coding agents: let AI hear, review and make sound. CPU-only, open source.",
-        "stars": 1503,
+        "stars": 1932,
+        "language": "Python"
+      },
+      {
+        "name": "chenglou/handwired",
+        "url": "https://github.com/chenglou/handwired",
+        "desc": "Turn your regular JavaScript code into a neural net.",
+        "stars": 1852,
+        "language": "TypeScript"
+      },
+      {
+        "name": "Supermedo/uncharted_pc",
+        "url": "https://github.com/Supermedo/uncharted_pc",
+        "desc": "Uncharted: The Nathan Drake Collection running natively on Windows - by SuperMedo",
+        "stars": 1714,
+        "language": "C++"
+      },
+      {
+        "name": "simbasjungles/free-my-tv",
+        "url": "https://github.com/simbasjungles/free-my-tv",
+        "desc": "A fast, ad-free home screen for Google TV. Open source, built with Claude Code. One button to undo.",
+        "stars": 1700,
+        "language": "Java"
+      },
+      {
+        "name": "xiaoyang111222/cn-math-taxonomy",
+        "url": "https://github.com/xiaoyang111222/cn-math-taxonomy",
+        "desc": "中小学知识图谱 + 前置诊断：数学（一–九年级、高中必修与选择性必修）+ 小学英语，课标对齐、人教版，999 知识点、4143 题、自适应诊断",
+        "stars": 1557,
         "language": "Python"
       },
       {
         "name": "Caho1/open-claude-ui",
         "url": "https://github.com/Caho1/open-claude-ui",
         "desc": "基于 REA 深度拆解并高保真还原 Claude 官方桌面端 UI。还原 30 个独立 React 组件与 8 项硬核交互物理算法，附带 3000+ 行逆向分析手册。",
-        "stars": 1246,
+        "stars": 1286,
         "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50154540,
-        "title": "MiniMax M3.1 Flash",
-        "url": "https://www.minimax.io/blog/minimax-m31f",
-        "hn": "https://news.ycombinator.com/item?id=50154540",
-        "score": 324,
-        "comments": 137
+        "id": 50170593,
+        "title": "SimCity, but with Permits",
+        "url": "https://permit.petercai.com/",
+        "hn": "https://news.ycombinator.com/item?id=50170593",
+        "score": 380,
+        "comments": 211
       },
       {
-        "id": 50150089,
-        "title": "I built a drone with only one motor [video]",
-        "url": "https://www.youtube.com/watch?v=Ndftcft6XhU",
-        "hn": "https://news.ycombinator.com/item?id=50150089",
-        "score": 287,
-        "comments": 52
+        "id": 50163277,
+        "title": "DeepInfer: High-performance inference framework for DeepSeek models",
+        "url": "https://github.com/deepseek-ai/DeepInfer",
+        "hn": "https://news.ycombinator.com/item?id=50163277",
+        "score": 2059,
+        "comments": 808
       },
       {
-        "id": 50158100,
-        "title": "Putting Linux on my RTX Spark laptop because I don't have a Microsoft account",
-        "url": "https://josie.lol/blog/linux-rtx-spark",
-        "hn": "https://news.ycombinator.com/item?id=50158100",
-        "score": 133,
-        "comments": 58
+        "id": 50168396,
+        "title": "Voxtral 3",
+        "url": "https://mistral.ai/news/voxtral-3/",
+        "hn": "https://news.ycombinator.com/item?id=50168396",
+        "score": 460,
+        "comments": 127
       },
       {
-        "id": 50152307,
-        "title": "Wine ported to OpenBSD",
-        "url": "https://marc.info/?l=openbsd-ports&m=179236125692175",
-        "hn": "https://news.ycombinator.com/item?id=50152307",
-        "score": 472,
-        "comments": 156
+        "id": 50169707,
+        "title": "What shall I teach my son?",
+        "url": "https://stevekrouse.com/ends",
+        "hn": "https://news.ycombinator.com/item?id=50169707",
+        "score": 177,
+        "comments": 255
       },
       {
-        "id": 50158138,
-        "title": "OpenBSD 8.0 release will have inteldrm/radeondrm/amdgpu drivers from Linux 6.18",
-        "url": "https://bsd.network/@brynet/117407035545900963",
-        "hn": "https://news.ycombinator.com/item?id=50158138",
-        "score": 40,
-        "comments": 7
+        "id": 50108717,
+        "title": "SlopCodeBench 10/2026 – Opus 5.5, Astra wins overall, xhigh considered harmful",
+        "url": "https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/benchmarking-new-models-on-slop-code-bench.md",
+        "hn": "https://news.ycombinator.com/item?id=50108717",
+        "score": 112,
+        "comments": 45
       },
       {
-        "id": 50136126,
-        "title": "RuneScape Bench: MMOs for Agents [video]",
-        "url": "https://www.youtube.com/watch?v=cNm4zyUtWj0",
-        "hn": "https://news.ycombinator.com/item?id=50136126",
-        "score": 124,
-        "comments": 53
+        "id": 50169053,
+        "title": "Google open-sources TorchTPU, a native PyTorch back end for TPUs",
+        "url": "https://github.com/google-pytorch/torch_tpu",
+        "hn": "https://news.ycombinator.com/item?id=50169053",
+        "score": 212,
+        "comments": 50
       },
       {
-        "id": 50154624,
-        "title": "Android apps running native on macOS",
-        "url": "https://github.com/kksimp/Mac.apk",
-        "hn": "https://news.ycombinator.com/item?id=50154624",
-        "score": 222,
-        "comments": 106
+        "id": 50165208,
+        "title": "Apple broke an essential presentation feature of iPads",
+        "url": "https://teddysvoronos.com/2026-10-19-apple-broke-an-essential-presentation-feature-of-ipads/",
+        "hn": "https://news.ycombinator.com/item?id=50165208",
+        "score": 441,
+        "comments": 241
       },
       {
-        "id": 50134472,
-        "title": "It's still ok to enjoy programming",
-        "url": "https://chriskiehl.com/article/it-is-still-ok-to-enjoy-programming",
-        "hn": "https://news.ycombinator.com/item?id=50134472",
-        "score": 375,
-        "comments": 363
+        "id": 50171771,
+        "title": "On AI writing",
+        "url": "https://www.bolkunov.com/p/on-ai-writing",
+        "hn": "https://news.ycombinator.com/item?id=50171771",
+        "score": 69,
+        "comments": 29
       },
       {
-        "id": 50150434,
-        "title": "Timestral: Mistral's time-series foundation models",
-        "url": "https://mistral.ai/news/timestral/",
-        "hn": "https://news.ycombinator.com/item?id=50150434",
-        "score": 520,
-        "comments": 97
+        "id": 50167028,
+        "title": "Ofcom concedes defeat in 4chan case",
+        "url": "https://prestonbyrne.com/2026/10/20/ofcom-concedes-defeat/",
+        "hn": "https://news.ycombinator.com/item?id=50167028",
+        "score": 284,
+        "comments": 193
       },
       {
-        "id": 50134359,
-        "title": "The fire retardant in the seafood chain",
-        "url": "https://insideclimatenews.org/news/14102026/ethoxyquin-fire-retardant-in-seafood-chain/",
-        "hn": "https://news.ycombinator.com/item?id=50134359",
-        "score": 89,
-        "comments": 28
+        "id": 50139728,
+        "title": "Making Solar Panels with a Microwave [video]",
+        "url": "https://www.youtube.com/watch?v=zcWkApGjyGM",
+        "hn": "https://news.ycombinator.com/item?id=50139728",
+        "score": 10,
+        "comments": 1
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 17924,
-        "likes": 1678
-      },
-      {
-        "id": "openbmb/MiniCPM-V-4.7-35B-A3B",
-        "url": "https://huggingface.co/openbmb/MiniCPM-V-4.7-35B-A3B",
-        "task": "image-text-to-text",
-        "downloads": 76410,
-        "likes": 1062
+        "downloads": 27737,
+        "likes": 1941
       },
       {
         "id": "black-forest-labs/flux-3-image-klein-comfy",
         "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
         "task": "image-to-image",
-        "downloads": 393062,
-        "likes": 956
+        "downloads": 439528,
+        "likes": 1081
       },
       {
         "id": "fishaudio/drama-3",
         "url": "https://huggingface.co/fishaudio/drama-3",
         "task": "text-to-speech",
-        "downloads": 11795,
-        "likes": 768
-      },
-      {
-        "id": "google/embeddinggemma-2",
-        "url": "https://huggingface.co/google/embeddinggemma-2",
-        "task": "feature-extraction",
-        "downloads": 167750,
-        "likes": 2725
-      },
-      {
-        "id": "jialinyyzz/humanizer",
-        "url": "https://huggingface.co/jialinyyzz/humanizer",
-        "task": "text-generation",
-        "downloads": 109937,
-        "likes": 1986
+        "downloads": 13495,
+        "likes": 833
       },
       {
         "id": "meta-models/Muse-Spark-Open-816B-A42B",
         "url": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B",
         "task": "image-text-to-text",
-        "downloads": 2109,
-        "likes": 579
+        "downloads": 2592,
+        "likes": 607
       },
       {
-        "id": "LiquidAI/LFM2.5-24B-A2B",
-        "url": "https://huggingface.co/LiquidAI/LFM2.5-24B-A2B",
-        "task": "text-generation",
-        "downloads": 14151,
-        "likes": 501
+        "id": "google/embeddinggemma-2",
+        "url": "https://huggingface.co/google/embeddinggemma-2",
+        "task": "feature-extraction",
+        "downloads": 172474,
+        "likes": 2762
       },
       {
         "id": "black-forest-labs/flux-3-image-klein",
         "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein",
         "task": "image-to-image",
-        "downloads": 62006,
-        "likes": 527
+        "downloads": 78897,
+        "likes": 562
+      },
+      {
+        "id": "OpenMOSS-Team/MOSS-Image-SFT",
+        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
+        "task": "text-to-image",
+        "downloads": 4547,
+        "likes": 495
+      },
+      {
+        "id": "jialinyyzz/humanizer",
+        "url": "https://huggingface.co/jialinyyzz/humanizer",
+        "task": "text-generation",
+        "downloads": 115341,
+        "likes": 2022
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 2019834,
-        "likes": 8483
+        "downloads": 2039447,
+        "likes": 8612
+      },
+      {
+        "id": "OpenMOSS-Team/MOSS-Image-Base",
+        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base",
+        "task": "text-to-image",
+        "downloads": 3558,
+        "likes": 432
       }
     ],
     "weibo": [
       {
-        "word": "蒙古国草原大火为何没烧进来",
-        "num": 646684,
+        "word": "香港名媛碎尸案曝关键新证词",
+        "num": 408885,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%92%99%E5%8F%A4%E5%9B%BD%E8%8D%89%E5%8E%9F%E5%A4%A7%E7%81%AB%E4%B8%BA%E4%BD%95%E6%B2%A1%E7%83%A7%E8%BF%9B%E6%9D%A5%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%A6%99%E6%B8%AF%E5%90%8D%E5%AA%9B%E7%A2%8E%E5%B0%B8%E6%A1%88%E6%9B%9D%E5%85%B3%E9%94%AE%E6%96%B0%E8%AF%81%E8%AF%8D%23"
       },
       {
-        "word": "留学生披旭日旗暴露个人精神的病态",
-        "num": 453707,
+        "word": "体操世锦赛男团决赛",
+        "num": 294672,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%95%99%E5%AD%A6%E7%94%9F%E6%8A%AB%E6%97%AD%E6%97%A5%E6%97%97%E6%9A%B4%E9%9C%B2%E4%B8%AA%E4%BA%BA%E7%B2%BE%E7%A5%9E%E7%9A%84%E7%97%85%E6%80%81%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%BD%93%E6%93%8D%E4%B8%96%E9%94%A6%E8%B5%9B%E7%94%B7%E5%9B%A2%E5%86%B3%E8%B5%9B%23"
       },
       {
-        "word": "六个字读懂中国经济新亮点",
-        "num": 381126,
+        "word": "同心同行长征路",
+        "num": 233187,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%85%AD%E4%B8%AA%E5%AD%97%E8%AF%BB%E6%87%82%E4%B8%AD%E5%9B%BD%E7%BB%8F%E6%B5%8E%E6%96%B0%E4%BA%AE%E7%82%B9%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%90%8C%E5%BF%83%E5%90%8C%E8%A1%8C%E9%95%BF%E5%BE%81%E8%B7%AF%23"
       },
       {
-        "word": "高反去世男子母亲付了救援相关费用",
-        "num": 186601,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%AB%98%E5%8F%8D%E5%8E%BB%E4%B8%96%E7%94%B7%E5%AD%90%E6%AF%8D%E4%BA%B2%E4%BB%98%E4%BA%86%E6%95%91%E6%8F%B4%E7%9B%B8%E5%85%B3%E8%B4%B9%E7%94%A8%23"
-      },
-      {
-        "word": "原来学霸是这样背书的",
-        "num": 176421,
+        "word": "法国乱成一锅粥了还有人威胁中国",
+        "num": 120876,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%8E%9F%E6%9D%A5%E5%AD%A6%E9%9C%B8%E6%98%AF%E8%BF%99%E6%A0%B7%E8%83%8C%E4%B9%A6%E7%9A%84%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B3%95%E5%9B%BD%E4%B9%B1%E6%88%90%E4%B8%80%E9%94%85%E7%B2%A5%E4%BA%86%E8%BF%98%E6%9C%89%E4%BA%BA%E5%A8%81%E8%83%81%E4%B8%AD%E5%9B%BD%23"
       },
       {
-        "word": "李小冉参加乘风时徐佳宁打赏至榜一",
-        "num": 173095,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%8E%E5%B0%8F%E5%86%89%E5%8F%82%E5%8A%A0%E4%B9%98%E9%A3%8E%E6%97%B6%E5%BE%90%E4%BD%B3%E5%AE%81%E6%89%93%E8%B5%8F%E8%87%B3%E6%A6%9C%E4%B8%80%23"
-      },
-      {
-        "word": "徐佳宁求婚时说给你五个亿让你作",
-        "num": 138319,
+        "word": "油车电车10年成本账怎么算",
+        "num": 94480,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BE%90%E4%BD%B3%E5%AE%81%E6%B1%82%E5%A9%9A%E6%97%B6%E8%AF%B4%E7%BB%99%E4%BD%A0%E4%BA%94%E4%B8%AA%E4%BA%BF%E8%AE%A9%E4%BD%A0%E4%BD%9C%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B2%B9%E8%BD%A6%E7%94%B5%E8%BD%A610%E5%B9%B4%E6%88%90%E6%9C%AC%E8%B4%A6%E6%80%8E%E4%B9%88%E7%AE%97%23"
       },
       {
-        "word": "谭松韵刘学义像疲惫了一天的新郎新娘",
-        "num": 126459,
+        "word": "陆毅鲍蕾女儿18岁生日试装",
+        "num": 92175,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%B0%AD%E6%9D%BE%E9%9F%B5%E5%88%98%E5%AD%A6%E4%B9%89%E5%83%8F%E7%96%B2%E6%83%AB%E4%BA%86%E4%B8%80%E5%A4%A9%E7%9A%84%E6%96%B0%E9%83%8E%E6%96%B0%E5%A8%98%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%99%86%E6%AF%85%E9%B2%8D%E8%95%BE%E5%A5%B3%E5%84%BF18%E5%B2%81%E7%94%9F%E6%97%A5%E8%AF%95%E8%A3%85%23"
       },
       {
-        "word": "身披旭日旗中国留学生或被开除遣返",
-        "num": 108074,
+        "word": "刘雯维密回归太权威了",
+        "num": 87365,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%BA%AB%E6%8A%AB%E6%97%AD%E6%97%A5%E6%97%97%E4%B8%AD%E5%9B%BD%E7%95%99%E5%AD%A6%E7%94%9F%E6%88%96%E8%A2%AB%E5%BC%80%E9%99%A4%E9%81%A3%E8%BF%94%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%88%98%E9%9B%AF%E7%BB%B4%E5%AF%86%E5%9B%9E%E5%BD%92%E5%A4%AA%E6%9D%83%E5%A8%81%E4%BA%86%23"
       },
       {
-        "word": "田曦薇剧宣真穿的婚纱",
-        "num": 100996,
+        "word": "到底谁把微信变成工作软件的",
+        "num": 63949,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B0%E6%9B%A6%E8%96%87%E5%89%A7%E5%AE%A3%E7%9C%9F%E7%A9%BF%E7%9A%84%E5%A9%9A%E7%BA%B1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%88%B0%E5%BA%95%E8%B0%81%E6%8A%8A%E5%BE%AE%E4%BF%A1%E5%8F%98%E6%88%90%E5%B7%A5%E4%BD%9C%E8%BD%AF%E4%BB%B6%E7%9A%84%23"
+      },
+      {
+        "word": "等等党赢麻了",
+        "num": 60038,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%AD%89%E7%AD%89%E5%85%9A%E8%B5%A2%E9%BA%BB%E4%BA%86%23"
+      },
+      {
+        "word": "玉簟秋追夫名场面",
+        "num": 51817,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%89%E7%B0%9F%E7%A7%8B%E8%BF%BD%E5%A4%AB%E5%90%8D%E5%9C%BA%E9%9D%A2%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2023,
-        "text": "缅甸北部果敢电信诈骗园区“卧虎山庄”在转移诈骗分子的过程中发生大规模屠杀事件，造成约70名中国公民遇害，其中有4人据称为中国公安卧底（后辟谣）。事件被认为是缅甸民族民主同盟军向缅甸政府军发动“1027行动”的导火索。",
-        "title": "缅甸",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BC%85%E7%94%B8"
-      },
-      {
-        "year": 2022,
-        "text": "英国首相莉兹·特拉斯宣布辞职，但在英国保守党决定新党魁前将会继续作为英国首相。",
-        "title": "莉兹·特拉斯",
-        "url": "https://zh.wikipedia.org/wiki/%E8%8E%89%E5%85%B9%C2%B7%E7%89%B9%E6%8B%89%E6%96%AF"
+        "year": 2025,
+        "text": "日本国会选举自由民主党总裁高市早苗为首位女性内阁总理大臣。",
+        "title": "國會 (日本)",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9C%8B%E6%9C%83_(%E6%97%A5%E6%9C%AC)"
       },
       {
         "year": 2020,
-        "text": "美国国家航空航天局的探测器OSIRIS-REx成功在小行星101955表面收集样本。",
-        "title": "美国国家航空航天局",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E5%9B%BD%E5%AE%B6%E8%88%AA%E7%A9%BA%E8%88%AA%E5%A4%A9%E5%B1%80"
+        "text": "国泰航空宣布大幅裁员8,500人，其中5,300名为香港员工，并宣布有35年历史的国泰港龙航空即日停止营运。",
+        "title": "國泰航空",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9C%8B%E6%B3%B0%E8%88%AA%E7%A9%BA"
       },
       {
-        "year": 2015,
-        "text": "韩国女团TWICE出道。",
-        "title": "TWICE",
-        "url": "https://zh.wikipedia.org/wiki/TWICE"
+        "year": 2018,
+        "text": "台湾台铁发生普悠玛翻车事故，造成18人死亡，190人受伤。",
+        "title": "臺灣鐵路",
+        "url": "https://zh.wikipedia.org/wiki/%E8%87%BA%E7%81%A3%E9%90%B5%E8%B7%AF"
       },
       {
-        "year": 2011,
-        "text": "统一7-ELEVEn狮在中华职棒22年总冠军赛击败Lamigo桃猿，获得年度总冠军。",
-        "title": "統一7-ELEVEn獅",
-        "url": "https://zh.wikipedia.org/wiki/%E7%B5%B1%E4%B8%807-ELEVEn%E7%8D%85"
+        "year": 2016,
+        "text": "域名系统提供商Dyn公司（英语：Dyn (company)）遭遇DDoS攻击。",
+        "title": "域名系统",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9F"
       },
       {
-        "year": 2011,
-        "text": "利比亚前领导人穆阿迈尔·卡扎菲在全国过渡委员会所领导部队的清剿作战中遭连环枪击身亡，象征第一次利比亚内战的终结。",
-        "title": "穆阿迈尔·卡扎菲",
-        "url": "https://zh.wikipedia.org/wiki/%E7%A9%86%E9%98%BF%E8%BF%88%E5%B0%94%C2%B7%E5%8D%A1%E6%89%8E%E8%8F%B2"
+        "year": 2010,
+        "text": "缅甸国家和平与发展委员会颁布法令，正式启用新宪法确定的新国旗和新国徽，并把国号由缅甸联邦改为缅甸联邦共和国。",
+        "title": "国家和平与发展委员会",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9B%BD%E5%AE%B6%E5%92%8C%E5%B9%B3%E4%B8%8E%E5%8F%91%E5%B1%95%E5%A7%94%E5%91%98%E4%BC%9A"
+      },
+      {
+        "year": 2010,
+        "text": "梅姬台风在台湾造成38人死亡。",
+        "title": "颱風鮎魚 (2010年)",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A2%B1%E9%A2%A8%E9%AE%8E%E9%AD%9A_(2010%E5%B9%B4)"
       }
     ]
   }
