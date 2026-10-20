@@ -1843,7 +1843,7 @@
     {
       "title": "血战湘江",
       "type": "电影",
-      "status": "看过",
+      "status": "想看",
       "rating": 5.8,
       "release": "2017-06-30",
       "cover": "assets/media/blood-on-xiangjiang.jpg",
@@ -1866,6 +1866,15 @@
       "release": "2015-08-28",
       "cover": "assets/media/hundred-regiments-offensive.jpg",
       "url": "https://www.themoviedb.org/movie/360644"
+    },
+    {
+      "title": "古田军号",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.2,
+      "release": "2019-08-01",
+      "cover": "assets/media/gutian-junhao.jpg",
+      "url": "https://www.themoviedb.org/movie/620205"
     }
   ]
 }
