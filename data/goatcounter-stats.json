@@ -1,8 +1,8 @@
 {
   "note": "数据看板「访问统计」，由 GitHub Actions 每日从 GoatCounter API 同步；勿手改。",
-  "updated": "2026-10-20",
+  "updated": "2026-10-21",
   "site": "zengzoxiong.goatcounter.com",
-  "total_visitors": 20,
+  "total_visitors": 22,
   "days": [
     {
       "date": "2026-10-06",
@@ -62,6 +62,10 @@
     },
     {
       "date": "2026-10-20",
+      "visitors": 2
+    },
+    {
+      "date": "2026-10-21",
       "visitors": 0
     }
   ]
