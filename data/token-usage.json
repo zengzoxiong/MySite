@@ -1,6 +1,6 @@
 {
- "updated": "2026-10-19",
- "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode（早期为平台按天导出，2026-10-19 起改从 ZCode 本地会话库按天统计）、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加；2026-10-19 同步时模型名统一小写（GLM/Qwen），deepseek-v4.1-flash 与 DeepSeek-Flash 并入 deepseek-flash）；2026-10-20 同步时多出的 deepseek-v4.1-flash-1017 变体并入 deepseek-flash。勿手改。",
+ "updated": "2026-10-20",
+ "note": "API Token 用量统计（模型×天聚合）。数据为桌面导出的五套来源合并：Qoder 客户端（旧版库导出，已并入同名模型）、ZCode（早期为平台按天导出，2026-10-19 起改从 ZCode 本地会话库按天统计）、CCSwitch 网关用量（claude 通道）、两个 API 平台的按天导出（deepseek 系 / mimo 系）；截止 2026-10-06，此后经导入脚本按同结构追加（导入脚本已于 2026-10-17 移除，此后手工按同结构追加；2026-10-19 同步时模型名统一小写（GLM/Qwen），deepseek-v4.1-flash 与 DeepSeek-Flash 并入 deepseek-flash）；2026-10-20 同步时多出的 deepseek-v4.1-flash-1017 变体并入 deepseek-flash。勿手改。2026-10-21 同步 2026-10-20 数据：ZCode 取本地会话库；Codex 取 CC-Switch 库的会话同步记录与代理网关记录，两源时间不重叠、request_id 无重复。",
  "sources": [
   "ZCode_Token用量_按天汇总.csv",
   "CCSwitch_API用量_按天.csv",
@@ -1452,6 +1452,46 @@
      "inFresh": 369873,
      "out": 210495,
      "total": 16958736
+    }
+   ]
+  },
+  {
+   "date": "2026-10-20",
+   "models": [
+    {
+     "id": "deepseek-flash",
+     "inCache": 104595712,
+     "inFresh": 4466403,
+     "out": 1652113,
+     "total": 110714228
+    },
+    {
+     "id": "gpt-6.1-sol",
+     "inCache": 55856640,
+     "inFresh": 2328050,
+     "out": 299592,
+     "total": 58484282
+    },
+    {
+     "id": "gpt-5.6-terra",
+     "inCache": 181504,
+     "inFresh": 24250,
+     "out": 1360,
+     "total": 207114
+    },
+    {
+     "id": "gpt-6-luna",
+     "inCache": 0,
+     "inFresh": 21625,
+     "out": 24,
+     "total": 21649
+    },
+    {
+     "id": "gpt-image-2",
+     "inCache": 0,
+     "inFresh": 2696,
+     "out": 1745,
+     "total": 4441
     }
    ]
   }
