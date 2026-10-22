@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-21",
+  "checkedAt": "2026-10-22",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -49,8 +49,8 @@
     },
     "OpenJS.NodeJS.LTS": {
       "ok": true,
-      "checkedAt": "2026-10-08",
-      "latest": "24.20.0"
+      "checkedAt": "2026-10-22",
+      "latest": "24.22.1"
     },
     "Tencent.QQ.NT": {
       "ok": true,
@@ -69,8 +69,8 @@
     },
     "astral-sh.uv": {
       "ok": true,
-      "checkedAt": "2026-10-20",
-      "latest": "0.13.4"
+      "checkedAt": "2026-10-22",
+      "latest": "0.13.5"
     }
   }
 }
