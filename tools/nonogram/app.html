@@ -24,7 +24,9 @@
 .btn-mode.on{background:var(--game-accent);color:var(--game-on-accent)}
 
 /* ===== 数织棋盘：网格缝隙当格线，提示区自动占位，格子由 JS 保持正方形 ===== */
-.stage{max-width:500px;margin:0 auto}
+/* g-wrap 是纵向 flex 主列：stage 作为子项须显式占满宽度，auto margin 的
+   收缩会让 stretch 失效、棋盘塌成内容宽度（弹层也随之溢出压住工具栏） */
+.stage{width:100%;max-width:500px;margin:0 auto}
 .board{display:grid;gap:1px;background:var(--separator);border:1px solid var(--separator);border-radius:10px;overflow:hidden}
 .corner{background:var(--bg-elevated)}
 .clue{background:var(--bg-elevated);display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:0 5px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;font-size:12.5px;transition:color .2s,opacity .3s}

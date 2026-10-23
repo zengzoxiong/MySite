@@ -17,6 +17,13 @@
 /* 规则栏展开时内容列平滑让位（位移量由共享样式 .g-page.rules-open 负责） */
 .g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
+/* 窄屏：标题独占一行，HUD 整行换到下方（共享 .g-hud-bar 自带换行能力），
+   避免四项统计加 AI 按钮把 flex-basis 为 0 的标题挤压成残字 */
+@media (max-width:560px) {
+  .g-nav { flex-wrap: wrap; }
+  .g-nav-title { flex-basis: 100%; }
+}
+
 /* 计时不足 10 秒：数字转红提醒（类名由脚本 toggle('warn') 切换） */
 .g-hud-bar .g-stat-inline b.warn { color: var(--red); }
 

@@ -433,8 +433,9 @@
             playerDisplay.textContent = '✊';
             computerDisplay.textContent = '✊';
 
-            // 禁用按钮
+            // 禁用按钮；重开键同步禁用，防止动画期间重开后旧回合仍计入新局
             choiceBtns.forEach(btn => btn.disabled = true);
+            resetBtn.disabled = true;
 
             setTimeout(() => {
                 const computerChoice = randomChoice(Math.random);
@@ -467,6 +468,7 @@
                 roundBusy = false;
                 if (!aiOn) choiceBtns.forEach(btn => btn.disabled = false);
                 if (aiOn) scheduleAiRound();
+                resetBtn.disabled = false;
             }, 1000);
         }
 

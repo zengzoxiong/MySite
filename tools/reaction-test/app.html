@@ -347,6 +347,7 @@ function finishReact() {
   reactBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onReactPad() {
+  if (react.phase === 'done') resetReact();   // done 态点击 = 再来一组：先按「重置本轮」归零，保证各组独立 5 轮
   const ev = reactClickCore(react, performance.now(), Math.random);
   if (ev === 'ignore') return;
   clearTimeout(reactTimer);
@@ -382,6 +383,7 @@ function renderAim() {
     setAimText(n ? aim.results[n - 1] + ' ms' : '点击开始',
       n ? '点击面板继续第 ' + (n + 1) + ' 轮' : '目标随机出现后尽快点中它，共 ' + ROUNDS + ' 轮');
   } else if (aim.phase === 'waiting') {
+    aimPad.className = 'pad idle aim';        // 等待期回归空闲底色，避免上一组 done 绿延续到新组
     setAimText('盯紧面板…', '目标随时出现');
   } else if (aim.phase === 'done') {
     aimPad.className = 'pad done aim';
@@ -415,6 +417,7 @@ function finishAim() {
   aimBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onAimPad() {
+  if (aim.phase === 'done') resetAim();       // done 态点击 = 再来一组：先按「重置本轮」归零，保证各组独立 5 轮
   const ev = aimPadClickCore(aim, performance.now(), Math.random);
   if (ev === 'ignore') return;
   clearTimeout(aimTimer);

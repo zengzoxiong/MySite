@@ -828,6 +828,7 @@
 
     // 键盘输入：1-9 填数，0 / Backspace / Delete 擦除，方向键移动选中格
     window.addEventListener('keydown', function (e) {
+      if (e.target.tagName === 'INPUT') return;   // 焦点在题号输入框内正常编辑，不触发棋盘快捷键
       const k = e.key;
       if (k >= '1' && k <= '9') {
         e.preventDefault();
