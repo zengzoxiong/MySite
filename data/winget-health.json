@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-22",
+  "checkedAt": "2026-10-23",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -29,8 +29,8 @@
     },
     "Microsoft.PowerShell": {
       "ok": true,
-      "checkedAt": "2026-10-14",
-      "latest": "7.6.7.0"
+      "checkedAt": "2026-10-23",
+      "latest": "7.6.8.0"
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
@@ -44,8 +44,8 @@
     },
     "Obsidian.Obsidian": {
       "ok": true,
-      "checkedAt": "2026-10-06",
-      "latest": "1.14.4"
+      "checkedAt": "2026-10-23",
+      "latest": "1.14.5"
     },
     "OpenJS.NodeJS.LTS": {
       "ok": true,
