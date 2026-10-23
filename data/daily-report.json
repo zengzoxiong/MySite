@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-23",
+  "updated": "2026-10-24",
   "sections": {
     "trending": [
       {
         "name": "Gathin23/cleanyourtv",
         "url": "https://github.com/Gathin23/cleanyourtv",
         "desc": "Debloat any Android or Google TV over Wi-Fi and get an Apple TV-style home.",
-        "stars": 23791,
+        "stars": 27744,
         "language": "Java"
-      },
-      {
-        "name": "deepseek-ai/DeepInfer",
-        "url": "https://github.com/deepseek-ai/DeepInfer",
-        "desc": "DeepInfer: High-performance, large-scale inference framework for DeepSeek models",
-        "stars": 19817,
-        "language": "Python"
       },
       {
         "name": "ly05010419/MacNativeGames",
         "url": "https://github.com/ly05010419/MacNativeGames",
         "desc": "",
-        "stars": 4452,
+        "stars": 4870,
         "language": "C"
       },
       {
         "name": "simbasjungles/free-my-tv",
         "url": "https://github.com/simbasjungles/free-my-tv",
-        "desc": "A fast, ad-free home screen for Google TV. Open source, built with Claude Code. One button to undo.",
-        "stars": 3383,
+        "desc": "A fast, ad-free home screen for Google TV, LG webOS and Samsung Tizen. One button to undo.",
+        "stars": 3928,
         "language": "Java"
       },
       {
         "name": "pengchujin/aerial-tv",
         "url": "https://github.com/pengchujin/aerial-tv",
         "desc": "给国产电视的一块干净桌面：参照 tvOS 设计的开源 Android TV 桌面，没有广告，开机自动接管。A tvOS-style launcher for Xiaomi, TCL and other China-market TVs.",
-        "stars": 3037,
+        "stars": 3798,
         "language": "Kotlin"
       },
       {
         "name": "xiaoyang111222/cn-math-taxonomy",
         "url": "https://github.com/xiaoyang111222/cn-math-taxonomy",
         "desc": "数学（小学到高中）、英语（三年级到高中）、初中物理的知识图谱：1644 个知识点、2403 条先修边、6723 道题，对齐课标，附自适应前置诊断。",
-        "stars": 2190,
+        "stars": 2775,
         "language": "Python"
       },
       {
-        "name": "tek-sys-hub/Rubix-lang",
-        "url": "https://github.com/tek-sys-hub/Rubix-lang",
-        "desc": "The 100% Pure x86-64 Assembly Systems Language",
-        "stars": 1902,
-        "language": "Assembly"
-      },
-      {
-        "name": "ikow/php2shell-poc",
-        "url": "https://github.com/ikow/php2shell-poc",
-        "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
-        "stars": 1504,
+        "name": "aicodeking/leanrea",
+        "url": "https://github.com/aicodeking/leanrea",
+        "desc": "One 8 KB skill that replaces REA (Reverse Engineer Anything): plain CLI tools, no MCP. Benchmarked: 38% faster, 35% cheaper.",
+        "stars": 1800,
         "language": "Python"
       },
       {
         "name": "JoasASantos/REA-Prompts",
         "url": "https://github.com/JoasASantos/REA-Prompts",
         "desc": "REAP - Prompts for you to use REA (Reverse Engineer Anything), get the most out of it, and clone or break down any program",
-        "stars": 1472,
+        "stars": 1715,
         "language": ""
       },
       {
-        "name": "OpenMOSS/MOSS-Image",
-        "url": "https://github.com/OpenMOSS/MOSS-Image",
-        "desc": "Official repository for MOSS-Image, a 5B-parameter base DiT model with high-quality text rendering, layout generation, and efficient fine-tuning.",
-        "stars": 1450,
+        "name": "ikow/php2shell-poc",
+        "url": "https://github.com/ikow/php2shell-poc",
+        "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
+        "stars": 1686,
         "language": "Python"
+      },
+      {
+        "name": "alchaincyf/huashu-motion",
+        "url": "https://github.com/alchaincyf/huashu-motion",
+        "desc": "让你的agent一键直出商业级产品宣传片：会作曲，能指着画面改。Commercial-grade launch films by your coding agent — point at the frame to change it.",
+        "stars": 1536,
+        "language": "JavaScript"
+      },
+      {
+        "name": "EthanArbuckle/fairplay-decrypt",
+        "url": "https://github.com/EthanArbuckle/fairplay-decrypt",
+        "desc": "Offline FairPlay App Store IPA decryption with independent key derivation",
+        "stars": 1529,
+        "language": "C"
       }
     ],
     "hn": [
       {
-        "id": 50195959,
-        "title": "Quad9 (DNS Resolver) to Exit France",
-        "url": "https://quad9.net/news/blog/au-revoir-france/",
-        "hn": "https://news.ycombinator.com/item?id=50195959",
-        "score": 865,
-        "comments": 327
+        "id": 50212065,
+        "title": "Kimi K3.1 Pro and K3.1 Pro Highspeed",
+        "url": "https://www.kimi.ai/blog/kimi-k3-1-pro",
+        "hn": "https://news.ycombinator.com/item?id=50212065",
+        "score": 597,
+        "comments": 363
       },
       {
-        "id": 50198675,
-        "title": "OpenShell – A safe, private runtime for fleets of autonomous AI agents",
-        "url": "https://github.com/NVIDIA/OpenShell",
-        "hn": "https://news.ycombinator.com/item?id=50198675",
-        "score": 239,
-        "comments": 125
+        "id": 50207910,
+        "title": "Apple Music 404 Not Found",
+        "url": "https://music.apple.com/this-url-doesnt-exist",
+        "hn": "https://news.ycombinator.com/item?id=50207910",
+        "score": 426,
+        "comments": 156
       },
       {
-        "id": 50197404,
-        "title": "Getting ready to operate GNU Taler in Germany",
-        "url": "https://www.taler.net/en/news/2026-13.html",
-        "hn": "https://news.ycombinator.com/item?id=50197404",
-        "score": 189,
-        "comments": 69
+        "id": 50213925,
+        "title": "Dessa: the most authentic full-duplex speech model ever built",
+        "url": "https://block.xyz/dessa",
+        "hn": "https://news.ycombinator.com/item?id=50213925",
+        "score": 131,
+        "comments": 47
       },
       {
-        "id": 50196718,
-        "title": "Show HN: Run full iOS 16.5 firmware on Android Devices",
-        "url": "https://github.com/oosexgang/hackios-xnu-kernel",
-        "hn": "https://news.ycombinator.com/item?id=50196718",
-        "score": 278,
-        "comments": 101
+        "id": 50211474,
+        "title": "Today, we hacked what we'd set out to hack: the iPhone",
+        "url": "https://blog.calif.io/p/iphone",
+        "hn": "https://news.ycombinator.com/item?id=50211474",
+        "score": 654,
+        "comments": 432
       },
       {
-        "id": 50194833,
-        "title": "Woman faces six years in prison over Cash App account she never opened",
-        "url": "https://www.techspot.com/news/114296-woman-spends-three-nights-jail-faces-six-years.html",
-        "hn": "https://news.ycombinator.com/item?id=50194833",
-        "score": 373,
-        "comments": 352
+        "id": 50214416,
+        "title": "OpenAI: Securing our frontier model training environment",
+        "url": "https://openai.com/index/securing-our-frontier-model-training-environment/",
+        "hn": "https://news.ycombinator.com/item?id=50214416",
+        "score": 43,
+        "comments": 37
       },
       {
-        "id": 50197313,
-        "title": "Every AI model has the same \"controversial\" take on humans",
-        "url": "https://www.modelcompare.ai/blog/ai-models-controversial-take-on-humans",
-        "hn": "https://news.ycombinator.com/item?id=50197313",
-        "score": 145,
-        "comments": 164
+        "id": 50202285,
+        "title": "Local Wikipedia: Wikipedia, but only for things a half hour walk from you",
+        "url": "https://edjefferson.com/localwiki/",
+        "hn": "https://news.ycombinator.com/item?id=50202285",
+        "score": 1158,
+        "comments": 222
       },
       {
-        "id": 50199230,
-        "title": "AI and the Enclosure of the Scientific Commons",
-        "url": "https://arxiv.org/abs/2610.27251",
-        "hn": "https://news.ycombinator.com/item?id=50199230",
-        "score": 83,
-        "comments": 45
+        "id": 50169499,
+        "title": "The Real Kevin Bacon",
+        "url": "https://pudding.cool/2026/10/kevin-bacon/",
+        "hn": "https://news.ycombinator.com/item?id=50169499",
+        "score": 197,
+        "comments": 59
       },
       {
-        "id": 50199389,
-        "title": "Hedra is a 3D open world game I wrote from scratch while in highschool",
-        "url": "https://github.com/maxilevi/project-hedra/tree/pre-ai",
-        "hn": "https://news.ycombinator.com/item?id=50199389",
-        "score": 87,
-        "comments": 20
+        "id": 50214323,
+        "title": "We are all living inside of an obscure sci-fi film from 1970",
+        "url": "https://thanksforthatjim.bearblog.dev/we-are-all-living-inside-of-an-obscure-sci-fi-film-from-1970/",
+        "hn": "https://news.ycombinator.com/item?id=50214323",
+        "score": 67,
+        "comments": 48
       },
       {
-        "id": 50150163,
-        "title": "What Is Gridifcation",
-        "url": "https://musicalform.substack.com/p/what-is-gridifcation",
-        "hn": "https://news.ycombinator.com/item?id=50150163",
-        "score": 376,
-        "comments": 183
+        "id": 50215530,
+        "title": "CVE Tracker",
+        "url": "https://cve.0xosprey.com/",
+        "hn": "https://news.ycombinator.com/item?id=50215530",
+        "score": 15,
+        "comments": 1
       },
       {
-        "id": 50192536,
-        "title": "Jailbreaking the Switch 2",
-        "url": "https://pepsipu.com/blog/2026-10-switch2-jailbreak-ns2jb/",
-        "hn": "https://news.ycombinator.com/item?id=50192536",
-        "score": 665,
-        "comments": 234
+        "id": 50202114,
+        "title": "Canadians are running out of time to oppose Bill C-22",
+        "url": "https://www.eff.org/deeplinks/2026/10/canadians-are-running-out-time-oppose-dangerous-c-22-surveillance-bill",
+        "hn": "https://news.ycombinator.com/item?id=50202114",
+        "score": 255,
+        "comments": 124
       }
     ],
     "hf_models": [
@@ -161,136 +161,142 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 51911,
-        "likes": 2348
-      },
-      {
-        "id": "black-forest-labs/flux-3-image-klein-comfy",
-        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
-        "task": "image-to-image",
-        "downloads": 512524,
-        "likes": 1293
-      },
-      {
-        "id": "OpenMOSS-Team/MOSS-Image-SFT",
-        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
-        "task": "text-to-image",
-        "downloads": 6890,
-        "likes": 573
+        "downloads": 57715,
+        "likes": 2573
       },
       {
         "id": "RecursiveSI/flint",
         "url": "https://huggingface.co/RecursiveSI/flint",
         "task": "text-generation",
-        "downloads": 420,
-        "likes": 520
+        "downloads": 1904,
+        "likes": 675
       },
       {
-        "id": "OpenMOSS-Team/MOSS-Image-Base",
-        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base",
+        "id": "black-forest-labs/flux-3-image-klein-comfy",
+        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+        "task": "image-to-image",
+        "downloads": 534837,
+        "likes": 1400
+      },
+      {
+        "id": "OpenMOSS-Team/MOSS-Image-SFT",
+        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
         "task": "text-to-image",
-        "downloads": 5013,
-        "likes": 484
-      },
-      {
-        "id": "fishaudio/drama-3",
-        "url": "https://huggingface.co/fishaudio/drama-3",
-        "task": "text-to-speech",
-        "downloads": 16305,
-        "likes": 914
+        "downloads": 7658,
+        "likes": 646
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 2054990,
-        "likes": 8891
+        "downloads": 2026951,
+        "likes": 9027
       },
       {
-        "id": "meta-models/Muse-Spark-Open-816B-A42B",
-        "url": "https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B",
-        "task": "image-text-to-text",
-        "downloads": 3163,
-        "likes": 659
+        "id": "XHToken/Spark-X2.6-4B",
+        "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
+        "task": "text-generation",
+        "downloads": 1060,
+        "likes": 410
       },
       {
-        "id": "black-forest-labs/flux-3-image-klein",
-        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein",
-        "task": "image-to-image",
-        "downloads": 102903,
-        "likes": 634
+        "id": "OpenMOSS-Team/MOSS-Image-Base",
+        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base",
+        "task": "text-to-image",
+        "downloads": 5618,
+        "likes": 519
       },
       {
-        "id": "google/embeddinggemma-2",
-        "url": "https://huggingface.co/google/embeddinggemma-2",
-        "task": "feature-extraction",
-        "downloads": 185259,
-        "likes": 2842
+        "id": "fishaudio/drama-3",
+        "url": "https://huggingface.co/fishaudio/drama-3",
+        "task": "text-to-speech",
+        "downloads": 17017,
+        "likes": 946
+      },
+      {
+        "id": "Comfy-Org/MOSS-Image",
+        "url": "https://huggingface.co/Comfy-Org/MOSS-Image",
+        "task": "",
+        "downloads": 1606363,
+        "likes": 395
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "task": "text-to-image",
+        "downloads": 2398071,
+        "likes": 4905
       }
     ],
     "weibo": [
       {
-        "word": "西藏7级地震",
-        "num": 961718,
+        "word": "独生女继承2亿遗产1年后遭离婚分产",
+        "num": 1163857,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E8%97%8F7%E7%BA%A7%E5%9C%B0%E9%9C%87%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8B%AC%E7%94%9F%E5%A5%B3%E7%BB%A7%E6%89%BF2%E4%BA%BF%E9%81%97%E4%BA%A71%E5%B9%B4%E5%90%8E%E9%81%AD%E7%A6%BB%E5%A9%9A%E5%88%86%E4%BA%A7%23"
       },
       {
-        "word": "国乒女团2比3日本女团",
-        "num": 396288,
+        "word": "BLG重量级爆冷",
+        "num": 417566,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23BLG%E9%87%8D%E9%87%8F%E7%BA%A7%E7%88%86%E5%86%B7%23"
+      },
+      {
+        "word": "红星照耀青春长征路",
+        "num": 382617,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%9B%BD%E4%B9%92%E5%A5%B3%E5%9B%A22%E6%AF%943%E6%97%A5%E6%9C%AC%E5%A5%B3%E5%9B%A2%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%98%9F%E7%85%A7%E8%80%80%E9%9D%92%E6%98%A5%E9%95%BF%E5%BE%81%E8%B7%AF%23"
       },
       {
-        "word": "长征是刻在大国重器上的信仰",
-        "num": 318218,
+        "word": "LPL瑞士轮三连败",
+        "num": 375232,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23LPL%E7%91%9E%E5%A3%AB%E8%BD%AE%E4%B8%89%E8%BF%9E%E8%B4%A5%23"
+      },
+      {
+        "word": "一个家里只能有一个女主人",
+        "num": 258123,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%95%BF%E5%BE%81%E6%98%AF%E5%88%BB%E5%9C%A8%E5%A4%A7%E5%9B%BD%E9%87%8D%E5%99%A8%E4%B8%8A%E7%9A%84%E4%BF%A1%E4%BB%B0%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%80%E4%B8%AA%E5%AE%B6%E9%87%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E4%B8%80%E4%B8%AA%E5%A5%B3%E4%B8%BB%E4%BA%BA%23"
       },
       {
-        "word": "王彦霖回应肖战说倪大红赢了",
-        "num": 282785,
+        "word": "热巴蝴蝶飞走瞬间 列入内娱史册",
+        "num": 256024,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E5%BD%A6%E9%9C%96%E5%9B%9E%E5%BA%94%E8%82%96%E6%88%98%E8%AF%B4%E5%80%AA%E5%A4%A7%E7%BA%A2%E8%B5%A2%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%83%AD%E5%B7%B4%E8%9D%B4%E8%9D%B6%E9%A3%9E%E8%B5%B0%E7%9E%AC%E9%97%B4%20%E5%88%97%E5%85%A5%E5%86%85%E5%A8%B1%E5%8F%B2%E5%86%8C%23"
       },
       {
-        "word": "苹果内屏磨砂膜能徒手撕下",
-        "num": 215740,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%8B%B9%E6%9E%9C%E5%86%85%E5%B1%8F%E7%A3%A8%E7%A0%82%E8%86%9C%E8%83%BD%E5%BE%92%E6%89%8B%E6%92%95%E4%B8%8B%23"
-      },
-      {
-        "word": "在星巴克开会1小时被提醒点单5次",
-        "num": 194093,
+        "word": "祖海认领",
+        "num": 254973,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%9C%A8%E6%98%9F%E5%B7%B4%E5%85%8B%E5%BC%80%E4%BC%9A1%E5%B0%8F%E6%97%B6%E8%A2%AB%E6%8F%90%E9%86%92%E7%82%B9%E5%8D%955%E6%AC%A1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%A5%96%E6%B5%B7%E8%AE%A4%E9%A2%86%23"
       },
       {
-        "word": "直击西藏那曲7.0级地震",
-        "num": 190464,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%9B%B4%E5%87%BB%E8%A5%BF%E8%97%8F%E9%82%A3%E6%9B%B27.0%E7%BA%A7%E5%9C%B0%E9%9C%87%23"
-      },
-      {
-        "word": "国乒男团夺亚锦赛第26冠",
-        "num": 186748,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%9B%BD%E4%B9%92%E7%94%B7%E5%9B%A2%E5%A4%BA%E4%BA%9A%E9%94%A6%E8%B5%9B%E7%AC%AC26%E5%86%A0%23"
-      },
-      {
-        "word": "后会友期 想请不敢请的都放观察室了",
-        "num": 172166,
+        "word": "黄多多正式进圈",
+        "num": 252937,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%90%8E%E4%BC%9A%E5%8F%8B%E6%9C%9F%20%E6%83%B3%E8%AF%B7%E4%B8%8D%E6%95%A2%E8%AF%B7%E7%9A%84%E9%83%BD%E6%94%BE%E8%A7%82%E5%AF%9F%E5%AE%A4%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E5%A4%9A%E5%A4%9A%E6%AD%A3%E5%BC%8F%E8%BF%9B%E5%9C%88%23"
       },
       {
-        "word": "张家齐和妈妈的关系触痛网友",
-        "num": 156043,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%A0%E5%AE%B6%E9%BD%90%E5%92%8C%E5%A6%88%E5%A6%88%E7%9A%84%E5%85%B3%E7%B3%BB%E8%A7%A6%E7%97%9B%E7%BD%91%E5%8F%8B%23"
+        "word": "刘亦菲第二套",
+        "num": 250897,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%88%98%E4%BA%A6%E8%8F%B2%E7%AC%AC%E4%BA%8C%E5%A5%97%23"
+      },
+      {
+        "word": "BLG",
+        "num": 136127,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23BLG%23"
       }
     ],
     "onthisday": [
+      {
+        "year": 2023,
+        "text": "第十四届全国人大常委会第六次会议表决通过《中华人民共和国爱国主义教育法》，自2024年1月1日起施行。",
+        "title": "2023年",
+        "url": "https://zh.wikipedia.org/wiki/2023%E5%B9%B4"
+      },
       {
         "year": 2021,
         "text": "中华民国台中市第二选举区立法委员陈柏惟遭到投票罢免，是中华民国历史上首位遭罢免的立法委员。",
@@ -298,34 +304,28 @@
         "url": "https://zh.wikipedia.org/wiki/%E8%87%BA%E4%B8%AD%E5%B8%82"
       },
       {
-        "year": 2021,
-        "text": "新西兰奥克兰结束为期1年7个月的一级灌溉禁令。",
-        "title": "新西兰",
-        "url": "https://zh.wikipedia.org/wiki/%E6%96%B0%E8%A5%BF%E5%85%B0"
+        "year": 2020,
+        "text": "荷兰癌症研究所的科学家通过PSMA PET-CT扫描发现人类新器官咽鼓管唾液腺。",
+        "title": "PET-CT",
+        "url": "https://zh.wikipedia.org/wiki/PET-CT"
       },
       {
-        "year": 2020,
-        "text": "在美国总统川普斡旋下，以色列与苏丹达成关系正常化的《以色列–苏丹和平协议》，苏丹成为第五个承认以色列的阿拉伯国家。",
-        "title": "美国总统",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E6%80%BB%E7%BB%9F"
-      },
-      {
-        "year": 2020,
-        "text": "第二次利比亚内战主要交战方民族团结政府和国民军在日内瓦签署永久停火协议。",
-        "title": "第二次利比亞內戰",
-        "url": "https://zh.wikipedia.org/wiki/%E7%AC%AC%E4%BA%8C%E6%AC%A1%E5%88%A9%E6%AF%94%E4%BA%9E%E5%85%A7%E6%88%B0"
+        "year": 2018,
+        "text": "连接香港大屿山、澳门澳门半岛和广东省珠海市的大型跨海通道港珠澳大桥正式通车。",
+        "title": "香港",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF"
       },
       {
         "year": 2016,
-        "text": "港铁观塘线正式延伸至何文田及黄埔。",
-        "title": "港鐵",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B8%AF%E9%90%B5"
+        "text": "巴基斯坦奎达的警察学院遭到恐怖分子袭击，造成62人丧命，伤者人数则超过165。",
+        "title": "巴基斯坦",
+        "url": "https://zh.wikipedia.org/wiki/%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6"
       },
       {
-        "year": 2004,
-        "text": "新潟县中越地震发生。",
-        "title": "新潟縣中越地震",
-        "url": "https://zh.wikipedia.org/wiki/%E6%96%B0%E6%BD%9F%E7%B8%A3%E4%B8%AD%E8%B6%8A%E5%9C%B0%E9%9C%87"
+        "year": 2015,
+        "text": "香港铜锣湾书店老板林荣基以出版中国大陆禁售的政治书籍闻名，遭中国当局绑架。",
+        "title": "銅鑼灣書店",
+        "url": "https://zh.wikipedia.org/wiki/%E9%8A%85%E9%91%BC%E7%81%A3%E6%9B%B8%E5%BA%97"
       }
     ]
   }
