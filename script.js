@@ -1613,17 +1613,27 @@ function tuFmt(n) {
     return (n || 0).toLocaleString('zh-CN');
 }
 
-// 中文缩写（环形图图例等紧凑场景）：404,856,332 → 4.05 亿 / 43,492,717 → 4,349.3 万
+// 中文缩写（Agent Skills 与日报卡片等紧凑场景）：404,856,332 → 4.05 亿 / 43,492,717 → 4,349.3 万
 function tuShort(n) {
     if (n >= 1e8) return (n / 1e8).toFixed(2) + ' 亿';
     if (n >= 1e4) return (n / 1e4).toLocaleString('zh-CN', { maximumFractionDigits: 1 }) + ' 万';
     return tuFmt(n);
 }
 
-// 统计口径大数（去尾零）：2,948,126,539 → 29.48 亿 / 74,684,131 → 74.68 百万 / 以下原样
-function tuBig(n) {
-    if (n >= 1e8) return parseFloat((n / 1e8).toFixed(2)) + ' 亿';
-    if (n >= 1e6) return parseFloat((n / 1e6).toFixed(2)) + ' 百万';
+// 统计口径大数（K/M/B，去尾零）：2,948,126,539 → 2.95B / 74,684,131 → 74.68M / 746,841 → 746.84K / 以下原样
+function tuUnit(n) {
+    n = n || 0;
+    const units = [['B', 1e9], ['M', 1e6], ['K', 1e3]];
+    for (let i = 0; i < units.length; i++) {
+        const [suffix, base] = units[i];
+        if (n < base) continue;
+        const v = parseFloat((n / base).toFixed(2));
+        if (v >= 1000 && i > 0) {
+            const [prevSuffix, prevBase] = units[i - 1];
+            return parseFloat((n / prevBase).toFixed(2)) + prevSuffix;
+        }
+        return v + suffix;
+    }
     return tuFmt(n);
 }
 
@@ -1675,7 +1685,7 @@ function tuJumpPage() {
 }
 
 // Token 活动热力图（GitHub 贡献图式：固定 52 列，列=周、行=周日~周六，结束于数据最后一天）。
-// 着色按当日用量五档；格子固定尺寸不拉伸（拉伸会把方格拉成胶囊）；右侧拼四项口径统计（百万/亿缩写）
+// 着色按当日用量五档；格子固定尺寸不拉伸（拉伸会把方格拉成胶囊）；右侧拼四项口径统计（K/M/B 缩写）
 function tuHeatHtml(days) {
     const fd = tuFilteredDays(days);
     if (!fd.length) return '';
@@ -1706,7 +1716,7 @@ function tuHeatHtml(days) {
     });
     const svg = `<svg viewBox="0 0 ${heatW} ${heatH}" width="${heatW}" height="${heatH}" role="img" aria-label="Token 活动热力图（近 52 周）">` +
         seq.map(c =>
-            `<rect class="tu-hcell lv${lv(c.day)}" x="${c.col * (cw + gap)}" y="${c.row * (ch + gap)}" width="${cw}" height="${ch}" rx="3"><title>${c.date} · 当日 ${tuBig(c.day)}</title></rect>`
+            `<rect class="tu-hcell lv${lv(c.day)}" x="${c.col * (cw + gap)}" y="${c.row * (ch + gap)}" width="${cw}" height="${ch}" rx="3"><title>${c.date} · 当日 ${tuUnit(c.day)}</title></rect>`
         ).join('') + '</svg>';
     // 末尾月份标签回收到容器内（超出会连带出纵向滚动条）
     const monLabels = months.map(m => {
@@ -1715,10 +1725,10 @@ function tuHeatHtml(days) {
     }).join('');
     // 右侧四项统计（随模型筛选联动）：输入·缓存命中 / 输入·缓存未命中 / 输出 / 总 Token
     const stats = [
-        [tuBig(fd.reduce((s, d) => s + d.inCache, 0)), '输入 · 缓存命中'],
-        [tuBig(fd.reduce((s, d) => s + d.inFresh, 0)), '输入 · 缓存未命中'],
-        [tuBig(fd.reduce((s, d) => s + d.out, 0)), '输出'],
-        [tuBig(fd.reduce((s, d) => s + d.total, 0)), '总 Token']
+        [tuUnit(fd.reduce((s, d) => s + d.inCache, 0)), '输入 · 缓存命中'],
+        [tuUnit(fd.reduce((s, d) => s + d.inFresh, 0)), '输入 · 缓存未命中'],
+        [tuUnit(fd.reduce((s, d) => s + d.out, 0)), '输出'],
+        [tuUnit(fd.reduce((s, d) => s + d.total, 0)), '总 Token']
     ].map(([n, l]) => `<div class="tu-stat"><span class="n">${n}</span><span class="l">${l}</span></div>`).join('');
     return `<div class="tu-heat-flex">
         <div class="tu-heat-left">${svg}<div class="tu-heat-months" style="width:${heatW}px">${monLabels}</div></div>
@@ -1785,14 +1795,14 @@ function tuDonutHtml(lines) {
         const frac = totals[i] / sum;
         const seg = `<circle class="tu-dl-seg ${l.cls}" cx="100" cy="100" r="${R}" stroke-width="22"` +
             ` stroke-dasharray="${(frac * C).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}">` +
-            `<title>${escapeHtml(l.id)} · ${tuShort(totals[i])}（${(frac * 100).toFixed(1)}%）</title></circle>`;
+            `<title>${escapeHtml(l.id)} · ${tuUnit(totals[i])}（${(frac * 100).toFixed(1)}%）</title></circle>`;
         offset += frac * C;
         return seg;
     }).join('');
     const rows = lines.map((l, i) => `
         <div class="tu-dl-row">
             <i class="lg ${l.cls}"></i>
-            <div class="tu-dl-name"><b title="${escapeHtml(l.id)}">${escapeHtml(l.id)}</b><span>${tuShort(totals[i])} tokens</span></div>
+            <div class="tu-dl-name"><b title="${escapeHtml(l.id)}">${escapeHtml(l.id)}</b><span>${tuUnit(totals[i])} tokens</span></div>
             <span class="tu-dl-pct">${(totals[i] / sum * 100).toFixed(1)}%</span>
         </div>`).join('');
     return `
@@ -1800,7 +1810,7 @@ function tuDonutHtml(lines) {
         <div class="tu-dl-flex">
             <svg viewBox="0 0 200 200" width="180" height="180" role="img" aria-label="各模型 Token 用量占比环形图">
                 <g transform="rotate(-90 100 100)">${segs}</g>
-                <text class="tu-dl-center" x="100" y="94" text-anchor="middle">${tuShort(sum)}</text>
+                <text class="tu-dl-center" x="100" y="94" text-anchor="middle">${tuUnit(sum)}</text>
                 <text class="tu-dl-sub" x="100" y="118" text-anchor="middle">tokens</text>
             </svg>
             <div class="tu-dl-list">${rows}</div>
@@ -1857,10 +1867,10 @@ function tuPaintTrend() {
             const px = (X(i) * rect.width / w).toFixed(1);
             cross.setAttribute('x1', px);
             cross.setAttribute('x2', px);
-            // 只列当日有量的模型；按当日用量降序；数值用百万/亿缩写（tuBig）
+            // 只列当日有量的模型；按当日用量降序；数值用 K/M/B 缩写（tuUnit）
             const active = lines.filter(l => l.values[i] > 0).sort((a, b) => b.values[i] - a.values[i]);
             tip.innerHTML = `<b>${dates[i]}</b>` + (active.length
-                ? active.map(l => `<span><i class="lg ${l.cls}"></i><b>${escapeHtml(l.id)}</b> · ${tuBig(l.values[i])}</span>`).join('')
+                ? active.map(l => `<span><i class="lg ${l.cls}"></i><b>${escapeHtml(l.id)}</b> · ${tuUnit(l.values[i])}</span>`).join('')
                 : '<span>当日无用量</span>');
         }
         cross.style.display = '';
@@ -1923,7 +1933,7 @@ function renderTokenUsage(animate = false) {
             <table class="tu-table">
                 <thead><tr><th>日期</th><th>模型</th><th class="num">输入（缓存命中）</th><th class="num">输入（未命中）</th><th class="num">输出</th><th class="num">总计</th></tr></thead>
                 <tbody>${pageRows.map(r =>
-                    `<tr><td>${escapeHtml(r.date)}</td><td class="tu-model">${escapeHtml(r.id)}</td><td class="num">${tuFmt(r.inCache)}</td><td class="num">${tuFmt(r.inFresh)}</td><td class="num">${tuFmt(r.out)}</td><td class="num">${tuFmt(r.total)}</td></tr>`).join('')}</tbody>
+                    `<tr><td>${escapeHtml(r.date)}</td><td class="tu-model">${escapeHtml(r.id)}</td><td class="num" title="${tuFmt(r.inCache)}">${tuUnit(r.inCache)}</td><td class="num" title="${tuFmt(r.inFresh)}">${tuUnit(r.inFresh)}</td><td class="num" title="${tuFmt(r.out)}">${tuUnit(r.out)}</td><td class="num" title="${tuFmt(r.total)}">${tuUnit(r.total)}</td></tr>`).join('')}</tbody>
             </table>
         </div>
         <div class="tu-pager">
