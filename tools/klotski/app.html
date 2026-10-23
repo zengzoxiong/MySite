@@ -7,75 +7,54 @@
 <meta name="description" content="拾光集在线小游戏：华容道，拖动或点选棋子滑入空位，把曹操送出底部出口。经典横刀立马等六关，含最少步数参考，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/klotski/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-/* ===== 华容道 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-[hidden] { display: none !important; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background: #f4f1ea;
-  color: #3f3a33;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  padding: 26px 16px 40px;
-  -webkit-tap-highlight-color: transparent;
+/* ===== 华容道 · 游戏私有样式 =====
+   页面骨架、按钮、计分卡、弹窗、规则栏等组件外观由 assets/game-ui.css 统一提供，
+   本文件只保留棋盘与棋子的个性视觉，以及少量私有布局。 */
+/* 个性色：红（木块推移）；棋盘是 4:5 高台面，内容列沿用 430px 窄列避免桌面端棋盘过大 */
+:root {
+  --game-accent: #FF3B30;
+  --wrap-max: 430px;
 }
-.wrap { width: 100%; max-width: 430px; }
 
-header { margin-bottom: 12px; }
-h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
-.sub { margin-top: 4px; font-size: 13px; color: #a89c8c; letter-spacing: 1px; }
+/* 展开规则栏时主体让位的过渡（共享样式只切换 padding，不带动效） */
+body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
-/* 关卡切换胶囊 */
-.levels { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+/* 关卡切换胶囊：保留私有 .chip/.cb 结构，脚本按这些类名生成与更新 */
+.levels { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  border: 1px solid #e5dfd3;
-  background: #fff;
+  border: 1px solid var(--separator);
+  background: var(--bg-elevated);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 13px;
-  color: #6b6157;
+  color: var(--text-secondary);
   cursor: pointer;
   font-family: inherit;
   touch-action: manipulation;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 5px;
+  transition: transform var(--dur-press) var(--ease-spring),
+              background-color var(--dur-press) var(--ease-out);
 }
-.chip .cb { font-size: 11px; color: #b9ac99; font-variant-numeric: tabular-nums; }
-.chip.on { background: #b23a2e; border-color: #b23a2e; color: #fff; font-weight: 600; }
-.chip.on .cb { color: rgba(255, 255, 255, .8); }
-
-/* 计分区 */
-.hud { display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch; }
-.stat {
-  flex: 1;
-  background: #fff;
-  border: 1px solid #e5dfd3;
-  border-radius: 12px;
-  padding: 7px 4px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(120, 90, 60, .07);
-}
-.stat .lab { display: block; font-size: 11px; color: #b3a691; letter-spacing: 2px; }
-.stat .val { display: block; margin-top: 2px; font-size: 20px; font-weight: 700; color: #4a3f35; font-variant-numeric: tabular-nums; }
-.stat.bump { animation: bump .18s ease; }
-@keyframes bump { 50% { transform: scale(1.07); } }
-.btn {
-  border: 0;
-  background: #b23a2e;
-  color: #fff;
-  font-family: inherit;
-  font-size: 14px;
+.chip .cb { font-size: 11px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+.chip.on {
+  background: var(--game-accent);
+  border-color: var(--game-accent);
+  color: var(--game-on-accent);
   font-weight: 600;
-  border-radius: 12px;
-  padding: 0 16px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(178, 58, 46, .3);
-  touch-action: manipulation;
 }
-.btn:active { transform: translateY(1px); }
+.chip.on .cb {
+  color: rgba(255, 255, 255, .8);   /* 兜底 */
+  color: color-mix(in srgb, var(--game-on-accent) 80%, transparent);
+}
+.chip:active { transform: scale(.96); }
+/* 触屏上可点关卡的触控目标不小于 44px */
+@media (pointer: coarse) {
+  .chip { min-height: var(--touch-min); }
+}
 
 /* 木框棋盘：底格与棋子全部绝对定位，坐标由 --x/--y 经 calc 换算，--u-px 由 JS 同步实际格边长 */
 .frame {
@@ -127,9 +106,10 @@ h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
 .piece span { line-height: 1; user-select: none; -webkit-user-select: none; }
 .piece.dragging { transition: none; cursor: grabbing; z-index: 3; }
 .piece.sel {
+  /* 选中环取个性色 --game-accent #FF3B30 的半透明值 */
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25),
-              0 0 0 3px rgba(178, 58, 46, .55),
-              0 3px 10px rgba(178, 58, 46, .35);
+              0 0 0 3px rgba(255, 59, 48, .55),
+              0 3px 10px rgba(255, 59, 48, .35);
 }
 /* 过关：曹操顺着出口滑出棋盘并渐隐 */
 .piece.escape {
@@ -155,8 +135,8 @@ h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
   height: var(--u-px);
   left: calc(var(--gap) + var(--x) * (var(--u-px) + var(--gap)));
   top: calc(var(--gap) + var(--y) * (var(--u-px) + var(--gap)));
-  border: 2px dashed rgba(178, 58, 46, .6);
-  background: rgba(178, 58, 46, .1);
+  border: 2px dashed rgba(255, 59, 48, .6);
+  background: rgba(255, 59, 48, .1);
   border-radius: 8px;
   cursor: pointer;
   animation: ghostIn .15s ease;
@@ -171,7 +151,7 @@ h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
   height: 14px;
   left: calc(var(--pad) + var(--gap) + var(--u-px) + var(--gap));
   width: calc(var(--u-px) * 2 + var(--gap));
-  background: #f4f1ea;
+  background: var(--bg);   /* 出口缺口露出页面底色，深浅色下都与页面一致 */
   border-radius: 0 0 8px 8px;
 }
 .exit::after {
@@ -186,179 +166,48 @@ h1 { font-size: 34px; line-height: 1.15; color: #4a3f35; letter-spacing: 8px; }
 }
 @keyframes exitPulse { 50% { transform: translate(-50%, 3px); } }
 
-/* 胜负弹层（hidden + 同步回流 + open，保证过渡生效） */
-.overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  border-radius: 8px;
-  background: rgba(243, 236, 217, .9);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-align: center;
-  opacity: 0;
-  transition: opacity .2s ease;
-}
-.overlay.open { opacity: 1; }
-.ov-title { font-size: 25px; font-weight: 800; color: #b23a2e; }
-.ov-sub { font-size: 14px; color: #6b6157; padding: 0 14px; line-height: 1.8; }
+/* 结算层：外观由 .g-overlay g-overlay-fade 统一（hidden + 同步回流 + open 过渡协议），
+   这里只把圆角对齐 8px 的棋盘，并给结算按钮行留横排布局 */
+#overlay { border-radius: 8px; }
 .ov-btns { display: flex; gap: 10px; margin-top: 6px; }
-.ov-btns .btn { padding: 10px 18px; }
-
-.hint { margin-top: 14px; text-align: center; font-size: 12.5px; color: #b3a691; line-height: 1.8; }
-footer { margin-top: 18px; text-align: center; font-size: 12px; color: #c9beac; }
-
-@media (max-width: 360px) {
-  h1 { font-size: 28px; letter-spacing: 5px; }
-}
+.ov-btns .g-alert-btn { flex: 1 1 auto; min-width: 96px; }
 </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-<main class="wrap">
+<main class="g-wrap">
   <header>
-    <h1>华容道</h1>
-    <p class="sub">横刀立马 · 送曹操出华容道</p>
+    <h1 class="g-nav-large">华容道</h1>
+    <p class="g-nav-sub">横刀立马 · 送曹操出华容道</p>
   </header>
 
   <nav class="levels" id="levels" aria-label="选择关卡"></nav>
 
-  <section class="hud">
-    <div class="stat" id="stepStat"><span class="lab">步数</span><span class="val" id="steps">0</span></div>
-    <div class="stat"><span class="lab">参考最少</span><span class="val" id="minRef">--</span></div>
-    <div class="stat"><span class="lab">本关最佳</span><span class="val" id="best">--</span></div>
-    <button class="btn" id="restartBtn" type="button">重玩</button>
+  <section class="g-hud">
+    <div class="g-stat" id="stepStat"><span class="g-stat-label">步数</span><span class="g-stat-value g-num" id="steps">0</span></div>
+    <div class="g-stat"><span class="g-stat-label">参考最少</span><span class="g-stat-value g-num" id="minRef">--</span></div>
+    <div class="g-stat"><span class="g-stat-label">本关最佳</span><span class="g-stat-value g-num" id="best">--</span></div>
+    <button class="g-btn g-btn-gray g-btn-sm" id="restartBtn" type="button">重玩</button>
   </section>
 
-  <div class="frame" id="frame">
+  <div class="frame g-stage" id="frame">
     <div class="exit" aria-hidden="true"></div>
     <div class="board" id="board" aria-label="华容道棋盘">
       <!-- 底格与棋子由脚本生成 -->
-      <div class="overlay" id="overlay" hidden>
-        <p class="ov-title" id="ovTitle">曹操逃出了华容道！</p>
-        <p class="ov-sub" id="ovSub"></p>
+      <div class="g-overlay g-overlay-fade g-overlay-win" id="overlay" hidden>
+        <p class="g-overlay-title" id="ovTitle">曹操逃出了华容道！</p>
+        <p class="g-overlay-text" id="ovSub"></p>
         <div class="ov-btns">
-          <button class="btn" id="ovReplay" type="button">再玩本关</button>
-          <button class="btn" id="ovNext" type="button" style="background:#8a6a48;box-shadow:0 2px 8px rgba(138,106,72,.35)">下一关</button>
+          <button class="g-alert-btn default" id="ovReplay" type="button">再玩本关</button>
+          <button class="g-alert-btn" id="ovNext" type="button">下一关</button>
         </div>
       </div>
     </div>
   </div>
 
-  <p class="hint">拖动或点选棋子滑入空位 · 曹操抵达下方出口即过关</p>
-  <footer>拾光集 · 在线小游戏</footer>
+  <p class="g-tips">拖动或点选棋子滑入空位 · 曹操抵达下方出口即过关</p>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 
 <script>
@@ -494,9 +343,9 @@ function createPiece(p) {
   board.appendChild(el);
 }
 function bump(el) {
-  el.classList.remove('bump');
+  el.classList.remove('g-bump');
   void el.offsetWidth;
-  el.classList.add('bump');
+  el.classList.add('g-bump');
 }
 
 /* ---------- 选中与落点提示 ---------- */
@@ -740,9 +589,9 @@ ovReplay.addEventListener('click', () => loadLevel(cur));
 ovNext.addEventListener('click', () => loadLevel(cur + 1));
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>

@@ -6,295 +6,194 @@
     <title>方块消除 - 拾光集</title>
     <link rel="icon" href="../../favicon.svg">
     <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/tetris-block/app.html">
+    <!-- 共享 Apple HIG 设计系统：组件外观、深浅色令牌与触控规范 -->
+    <link rel="stylesheet" href="../../assets/game-ui.css">
     <style>
-        :root {
-            --brand: #3b6ef6;
-            --ink: #23324f;
-            --muted: #6b7c9c;
-            --line: #e3e9f3;
-            --card: #ffffff;
-            --chip: #f4f7fc;
-        }
+        /* 游戏个性色：方块活力粉（docs/game-ui-design.md §7 分配表） */
+        :root { --game-accent: #FF2D55; }
 
+        /* 游戏私有复位：收敛默认内外边距，其余外观由共享样式表承担 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        [hidden] { display: none !important; }
 
-        body {
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(180deg, #f3f6fb 0%, #e8edf5 100%);
-            color: var(--ink);
-            display: flex;
-            justify-content: center;
-            padding: 16px 12px 24px;
+        /* 页面底座：触控免双击延迟；宽屏展开规则栏时平滑让位 */
+        .g-page {
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            transition: padding-right .28s cubic-bezier(.22, .9, .3, 1);
         }
 
-        .wrap { width: 100%; max-width: 470px; display: flex; flex-direction: column; gap: 12px; }
-
-        header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-        h1 { font-size: 22px; letter-spacing: .5px; }
-        .sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
+        /* ===== 导航标题栏：暂停图标钮（44px 触控）===== */
         .icon-btn {
-            width: 38px; height: 38px; border-radius: 12px;
-            border: 1px solid var(--line); background: var(--card); color: var(--ink);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 1px 2px rgba(35, 50, 79, .06);
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            flex: none;
         }
-        .icon-btn:active { transform: scale(.93); }
-        .icon-btn:disabled { opacity: .35; cursor: default; }
         .icon-btn svg { width: 18px; height: 18px; }
 
-        .hud { display: flex; gap: 8px; flex-wrap: wrap; }
-        .stat {
-            flex: 1; min-width: 70px;
-            background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-            padding: 7px 8px; text-align: center;
-        }
-        .stat span { display: block; font-size: 11px; color: var(--muted); }
-        .stat b { font-size: 17px; font-variant-numeric: tabular-nums; }
+        /* ===== 计分区：统计卡片 + AI 代玩标注 ===== */
+        .hud { display: flex; flex-direction: column; gap: 6px; }
 
-        .stage { display: flex; gap: 12px; justify-content: center; align-items: flex-start; }
+        /* ===== 舞台：棋盘 + 侧栏（下一个 / 键位提示）===== */
+        .stage {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: flex-start;
+        }
 
         .board-wrap {
             position: relative;
             width: min(300px, 100%);
-            border-radius: 14px; overflow: hidden;
-            border: 1px solid var(--line);
-            box-shadow: 0 6px 20px rgba(35, 50, 79, .10);
-            background: #fbfcfe;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-float);
+            background: #fbfcfe;   /* 与画布底色一致，圆角处不露底 */
         }
         #board { display: block; width: 100%; height: auto; aspect-ratio: 1 / 2; }
 
         .side { display: flex; flex-direction: column; gap: 10px; width: 106px; }
         .next-box {
-            background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-            padding: 8px; text-align: center;
+            background: var(--card);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius);
+            padding: 8px;
+            text-align: center;
         }
-        .next-box .cap { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+        .next-box .cap {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
         #next { display: block; width: 88px; height: 88px; }
 
         .kbd-help {
-            font-size: 12px; color: var(--muted); line-height: 2.1;
-            background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 2.1;
+            background: var(--card);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius);
             padding: 9px 12px;
         }
+        .kbd-help p { margin: 0; }
         kbd {
-            display: inline-block; min-width: 22px; text-align: center;
-            background: var(--chip); border: 1px solid var(--line); border-bottom-width: 2px;
-            border-radius: 6px; padding: 0 5px; font-size: 11px; font-family: inherit; color: var(--ink);
+            display: inline-block;
+            min-width: 22px;
+            text-align: center;
+            background: var(--fill);
+            border: 1px solid var(--separator);
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            padding: 0 5px;
+            font-size: 11px;
+            font-family: inherit;
+            color: var(--text);
         }
 
-        .overlay {
-            position: absolute; inset: 0; z-index: 3;
-            display: none; align-items: center; justify-content: center;
-            background: rgba(248, 250, 253, .86);
-            -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
-        }
-        .overlay.open { display: flex; }
+        /* ===== 开始 / 暂停 / 结算覆盖层内容卡（显隐协议②，由 .open 淡入）===== */
         .ov-panel {
-            background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-            padding: 20px 22px; text-align: center;
-            box-shadow: 0 10px 30px rgba(35, 50, 79, .14);
-            max-width: 88%;
+            width: min(270px, 88%);
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            text-align: center;
+            box-shadow: var(--shadow-alert);
         }
-        .ov-panel h2 { font-size: 19px; margin-bottom: 8px; }
-        .ov-panel p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
-        .btn-row { display: flex; justify-content: center; }
-        .btn {
-            border: none; background: var(--brand); color: #fff;
-            font-size: 15px; padding: 10px 26px; border-radius: 11px;
-            cursor: pointer; font-family: inherit;
+        .ov-panel .g-overlay-text { margin-top: 8px; }
+        /* 动作区出血到卡片边缘 + 发丝分隔线，仿 iOS 警告框 */
+        .ov-actions {
+            display: flex;
+            flex-direction: column;
+            margin: 16px -22px -20px;
+            border-top: var(--hairline) solid var(--separator);
         }
-        .btn:active { transform: scale(.96); }
-        .btn.ghost { background: #eef2f9; color: var(--ink); }
-        .btn + .btn { margin-left: 8px; }
 
-        .touch { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .tbtn {
-            width: 58px; height: 58px; border-radius: 16px;
-            border: 1px solid var(--line); background: var(--card); color: #33456b;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 6px rgba(35, 50, 79, .08);
-            touch-action: none; user-select: none; -webkit-user-select: none;
-            cursor: pointer;
+        /* ===== 触控方向键（游戏私有手感钮，58px 大触控）===== */
+        .touch {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .tbtn:active { background: #eef3fd; transform: scale(.94); }
+        .tbtn {
+            width: 58px;
+            height: 58px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--separator);
+            background: var(--card);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-card);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
+            transition: transform var(--dur-press) var(--ease-spring),
+                        background-color var(--dur-press) var(--ease-out);
+        }
+        .tbtn:active { background: var(--fill); transform: scale(.94); }
         .tbtn svg { width: 24px; height: 24px; pointer-events: none; }
 
-        .foot { text-align: center; font-size: 12px; color: var(--muted); }
-        .foot a { color: var(--brand); text-decoration: none; }
-
-        .ai-row { display: flex; justify-content: center; }
-        .btn-ai {
-            border: none; background: #1a73e8; color: #fff;
-            font-family: inherit; font-size: 15px; font-weight: 600;
-            padding: 11px 32px; border-radius: 11px; cursor: pointer;
-            box-shadow: 0 2px 10px rgba(26, 115, 232, .35);
-        }
-        .btn-ai:active { transform: scale(.96); }
-        .btn-ai.ai-on { background: #d93025; box-shadow: 0 2px 10px rgba(217, 48, 37, .35); }
-        .ai-badge {
-            position: absolute; top: 10px; right: 12px; z-index: 5;
-            background: rgba(26, 115, 232, .92); color: #fff;
-            font-size: 12px; font-weight: 600; padding: 4px 12px;
-            border-radius: 999px; letter-spacing: 1px; pointer-events: none;
-            box-shadow: 0 2px 8px rgba(26, 115, 232, .35);
+        /* ===== AI 代玩行：按钮 + 运行中徽标 ===== */
+        .ai-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
+        /* ===== 页脚链接 ===== */
+        .g-foot a { color: var(--game-accent-text); text-decoration: none; }
+
+        /* ===== 窄屏：棋盘与侧栏纵排，键位提示让位给触控钮 ===== */
         @media (max-width: 560px) {
             .stage { flex-direction: column; align-items: center; }
             .side { flex-direction: row; width: auto; order: -1; align-items: stretch; }
             .kbd-help { display: none; }
         }
     </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-    <main class="wrap">
-        <header>
-            <div>
-                <h1>方块消除</h1>
-                <div class="sub">经典落块 · 消行得分 · 越玩越快</div>
-            </div>
-            <button id="pauseBtn" class="icon-btn" type="button" title="暂停 / 继续（P）" aria-label="暂停或继续">
+    <main class="g-wrap">
+        <nav class="g-nav">
+            <h1 class="g-nav-title">方块消除</h1>
+            <button id="pauseBtn" class="g-btn g-btn-gray icon-btn" type="button" title="暂停 / 继续（P）" aria-label="暂停或继续">
                 <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.4" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.4" fill="currentColor"/></svg>
                 <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
             </button>
-        </header>
+        </nav>
+        <p class="g-nav-sub">经典落块 · 消行得分 · 越玩越快</p>
 
         <section class="hud">
-            <div class="stat"><span>分数</span><b id="score">0</b></div>
-            <div class="stat"><span>最高</span><b id="best">0</b></div>
-            <div class="stat"><span>等级</span><b id="level">1</b></div>
-            <div class="stat"><span>行数</span><b id="lines">0</b></div>
+            <div class="g-hud">
+                <div class="g-stat"><span class="g-stat-label">分数</span><span class="g-stat-value g-num" id="score">0</span></div>
+                <div class="g-stat"><span class="g-stat-label">最高</span><span class="g-stat-value g-num" id="best">0</span></div>
+                <div class="g-stat"><span class="g-stat-label">等级</span><span class="g-stat-value g-num" id="level">1</span></div>
+                <div class="g-stat"><span class="g-stat-label">行数</span><span class="g-stat-value g-num" id="lines">0</span></div>
+            </div>
+            <span class="g-ai-note">AI 代玩成绩不计最高分</span>
         </section>
 
         <div class="stage">
-            <div class="board-wrap">
+            <div class="board-wrap g-stage">
                 <canvas id="board" width="300" height="600"></canvas>
-                <div id="overlay" class="overlay">
+                <div id="overlay" class="g-overlay g-overlay-fade">
                     <div class="ov-panel">
-                        <h2 id="ovTitle">方块消除</h2>
-                        <p id="ovDesc"></p>
-                        <div class="btn-row">
-                            <button id="ovBtn" class="btn" type="button">开始游戏</button>
-                            <button id="ovBtn2" class="btn ghost" type="button" hidden>重新开始</button>
+                        <h2 id="ovTitle" class="g-overlay-title">方块消除</h2>
+                        <p id="ovDesc" class="g-overlay-text"></p>
+                        <div class="ov-actions">
+                            <button id="ovBtn" class="g-alert-btn default" type="button">开始游戏</button>
+                            <button id="ovBtn2" class="g-alert-btn" type="button" hidden>重新开始</button>
                         </div>
                     </div>
                 </div>
-                <div class="ai-badge" id="aiBadge" hidden>AI 代玩中 · 不计最高分</div>
             </div>
             <aside class="side">
                 <div class="next-box">
@@ -311,7 +210,8 @@
         </div>
 
         <div class="ai-row">
-            <button id="aiBtn" class="btn-ai" type="button" aria-pressed="false">AI 代玩</button>
+            <button id="aiBtn" class="g-btn g-ai-btn" type="button" aria-pressed="false">AI 代玩</button>
+            <span class="g-ai-tag" id="aiBadge" hidden>AI 代玩中 · 点击停止</span>
         </div>
 
         <div class="touch">
@@ -332,7 +232,7 @@
             </button>
         </div>
 
-        <footer class="foot"><a href="../../">拾光集</a> · 在线小游戏</footer>
+        <footer class="g-foot"><a href="../../">拾光集</a> · 在线小游戏</footer>
     </main>
 
     <script>
@@ -879,7 +779,7 @@
             } else {
                 ovTitle.textContent = aiOn ? 'AI 本局结束' : '游戏结束';
                 ovDesc.textContent = aiOn
-                    ? 'AI 代玩 · 本局得分 ' + score + '（不计最高分）'
+                    ? 'AI 代玩 · 本局得分 ' + score
                     : '本局得分 ' + score + ' · 历史最高 ' + best + (newRecord ? ' · 新纪录！' : '');
                 ovBtn.textContent = '再来一局';
             }
@@ -981,7 +881,7 @@
             aiOn = on;
             aiPlan = null; aiPlanFor = null; aiTimer = 0;
             aiBtn.textContent = on ? '停止代玩' : 'AI 代玩';
-            aiBtn.classList.toggle('ai-on', on);
+            aiBtn.classList.toggle('is-running', on);
             aiBtn.setAttribute('aria-pressed', String(on));
             aiBadge.hidden = !on;
             if (on && (state === 'start' || state === 'over')) startGame();
@@ -1099,9 +999,9 @@
         requestAnimationFrame(frame);
     })();
     </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
     
       <h3>玩法</h3>

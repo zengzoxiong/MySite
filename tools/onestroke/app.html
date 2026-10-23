@@ -7,231 +7,187 @@
 <meta name="description" content="拾光集在线小游戏：一笔画，从合适的起点出发，一笔画过图形中所有线条且不重复，支持撤销、提示与 30 个关卡，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/onestroke/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-/* ===== 一笔画 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-[hidden]{display:none!important}
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--primary:#0d9488;--primary-dark:#0b7f74;--danger:#dc2626;--amber:#f59e0b;--ink:#1f2430;--muted:#6b7280;--line:#d7e2e0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#edf3f2;color:#3c4650;min-height:100vh;display:flex;justify-content:center;padding:22px 14px 40px;-webkit-tap-highlight-color:transparent}
-.wrap{width:100%;max-width:560px}
+/* ===== 一笔画 · 拾光集自建小游戏（Apple HIG 共享组件 + 游戏私有视觉） ===== */
+/* 个性色：线条轻盈（分配表见 docs/game-ui-design.md §7） */
+:root { --game-accent: #5AC8FA; }
 
-.top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-h1{font-size:24px;font-weight:800;color:#17343a;letter-spacing:2px}
-.sub{margin-top:4px;font-size:12.5px;color:#8a97a0}
-.chips{display:flex;gap:8px;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:#44565c;font-family:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
-.chip b{color:var(--primary);font-variant-numeric:tabular-nums}
-.chip.plain{cursor:default;color:#7c8a93}
-.chip:hover{background:#f2faf8;border-color:#b7dcd5}
-.chip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* ---------- 棋盘卡片（画布舞台，触控防护由 .g-stage 提供） ---------- */
+/* 棋盘四周留白沿用 10px，画布尺寸计算不受影响 */
+.board-card { padding: 10px 10px 12px; }
+#board { display: block; margin: 0 auto; }
+#board.shake { animation: shake .3s ease; }
+@keyframes shake {
+  25% { transform: translateX(-5px); }
+  55% { transform: translateX(4px); }
+  80% { transform: translateX(-2px); }
+}
 
-.board-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:10px 10px 12px;user-select:none;-webkit-user-select:none}
-#board{display:block;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#board.shake{animation:shake .3s ease}
-@keyframes shake{25%{transform:translateX(-5px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
-.progress{height:6px;border-radius:3px;background:#e8eef0;margin:10px 4px 6px;overflow:hidden}
-.progress i{display:block;height:100%;width:0;background:var(--primary);border-radius:3px;transition:width .18s ease}
-.status{min-height:20px;text-align:center;font-size:13px;color:#7c8a93;margin:0 4px;font-variant-numeric:tabular-nums}
+/* 关卡完成度进度条 */
+.progress {
+  height: 6px;
+  margin: 10px 4px 6px;
+  border-radius: 3px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: var(--game-accent);
+  transition: width .18s ease;
+}
 
-.ctrl{display:flex;gap:10px;margin-top:14px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:600;color:#31424a;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px rgba(60,90,80,.08)}
-.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.btn:hover{border-color:#a9d4cc;color:var(--primary-dark)}
-.btn:active{transform:scale(.96)}
-.btn:disabled{opacity:.45;cursor:default;transform:none}
-.btn:disabled:hover{border-color:var(--line);color:#31424a}
-.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-.btn.primary:hover{background:var(--primary-dark);color:#fff}
-.btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+/* 状态提示行：共享灰字说明 + 居中与等宽数字微调 */
+.status {
+  min-height: 20px;
+  margin: 0 4px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
 
-footer{margin-top:24px;text-align:center;font-size:12px;color:#b0bcb9}
+/* 按钮内联图标排版（共享按钮不带图标尺寸，游戏内 svg 在此统一） */
+.g-btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#btnLevels svg { width: 13px; height: 13px; }
 
-/* ===== 胜利 / 选关弹层（挂 body 直接子级，避免 transform 劫持 fixed） ===== */
-.overlay{position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(31,36,48,.38);opacity:0;transition:opacity .2s ease}
-.overlay.open{opacity:1}
-.ov-card{width:100%;max-width:340px;background:#fff;border-radius:16px;padding:22px 20px;box-shadow:0 18px 50px rgba(31,36,48,.28);text-align:center;transform:translateY(10px);transition:transform .2s ease}
-.ov-card.wide{max-width:400px}
-.overlay.open .ov-card{transform:translateY(0)}
-.ov-card h2{font-size:20px;color:var(--ink);margin-bottom:6px}
-.ov-sub{font-size:13.5px;color:var(--muted)}
-.ov-stars{display:flex;justify-content:center;gap:6px;margin-bottom:10px}
-.star{width:30px;height:30px;fill:#dde3e8}
-.star.on{fill:var(--amber)}
-.ov-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+/* 「奇点」开关按钮的开启态（脚本只切 .on 类，外观在此声明） */
+#btnOdd.on {
+  background: var(--game-accent);
+  color: var(--game-on-accent);
+}
+
+/* ---------- 结算 / 选关弹窗的游戏私有部分 ---------- */
+/* 选关网格需要比标准 270px 警告框更宽 */
+.ov-wide { width: min(400px, 92vw); }
+
+/* 星级 */
+.ov-stars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.star {
+  width: 30px;
+  height: 30px;
+  fill: var(--text-tertiary);
+}
+.star.on { fill: var(--orange); }
 
 /* 选关网格 */
-.lv-info{font-size:12.5px;color:#8a97a0;margin-top:2px}
-.lv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 4px}
-.lv{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;background:#f3f8f7;border:1px solid #dce8e6;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;color:#2f4a4f;cursor:pointer;touch-action:manipulation}
-.lv:hover{border-color:var(--primary)}
-.lv.cur{border-color:var(--primary);box-shadow:0 0 0 2px rgba(13,148,136,.18)}
-.lv.done{background:#e8f6f3;border-color:#bfe3dc}
-.lv.locked{opacity:.42}
-.lv.locked:hover{border-color:#dce8e6}
-.lv-stars{display:flex;gap:1px}
-.lv-stars .star{width:9px;height:9px}
-.lv-num{font-variant-numeric:tabular-nums}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+.lv-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 14px 0 4px;
+}
+.lv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 2px 7px;
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  background: var(--fill-secondary);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--dur-press) var(--ease-spring),
+              border-color var(--dur-press) var(--ease-out),
+              background-color var(--dur-press) var(--ease-out);
+}
+.lv:hover { border-color: var(--game-accent); }
+.lv:active { transform: scale(.96); }
+.lv:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+.lv.cur {
+  border-color: var(--game-accent);
+  box-shadow: 0 0 0 2px rgba(90, 200, 250, .22);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--game-accent) 22%, transparent);
+}
+.lv.done {
+  background: var(--fill);
+  background: color-mix(in srgb, var(--game-accent) 10%, transparent);
+}
+.lv.locked { opacity: .42; }
+.lv.locked:hover { border-color: var(--separator); }
+.lv-stars { display: flex; gap: 1px; }
+.lv-stars .star { width: 9px; height: 9px; }
+.lv-num { font-variant-numeric: tabular-nums; }
 
-<main class="wrap" id="wrap">
-  <header class="top">
-    <div>
-      <h1>一笔画</h1>
-      <p class="sub">一笔画过所有线条，不能重复</p>
-    </div>
-    <div class="chips">
-      <button class="chip" id="btnLevels" type="button" aria-label="选择关卡"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>第 <b id="levelNo">1</b> / 30 关</button>
-      <span class="chip plain" id="timeChip">00:00</span>
+/* 规则栏展开时主体让位的过渡（面板样式由共享样式表提供） */
+body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap" id="wrap">
+  <header class="g-nav">
+    <h1 class="g-nav-title">一笔画</h1>
+    <div class="g-hud-bar">
+      <button class="g-btn g-btn-gray g-btn-sm" id="btnLevels" type="button" aria-label="选择关卡"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>第 <b id="levelNo">1</b> / 30 关</button>
+      <span class="g-stat-inline">用时 <b id="timeChip">00:00</b></span>
     </div>
   </header>
+  <p class="g-nav-sub">一笔画过所有线条，不能重复</p>
 
-  <section class="board-card" id="boardCard">
+  <section class="g-card g-stage board-card" id="boardCard">
     <canvas id="board" width="320" height="240" role="img" aria-label="一笔画棋盘"></canvas>
     <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
-    <p class="status" id="status">点击或拖动圆点起笔</p>
+    <p class="g-card-hint status" id="status">点击或拖动圆点起笔</p>
   </section>
 
-  <div class="ctrl">
-    <button class="btn" id="btnUndo" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>撤销</button>
-    <button class="btn" id="btnRestart" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/></svg>重开</button>
-    <button class="btn" id="btnHint" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.3-1.2 2.2h-4.8c-.1-.9-.5-1.7-1.2-2.2A6 6 0 0 1 12 3z"/></svg>提示</button>
-    <button class="btn" id="btnOdd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>奇点</button>
+  <div class="g-btn-row">
+    <button class="g-btn g-btn-gray" id="btnUndo" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>撤销</button>
+    <button class="g-btn g-btn-gray" id="btnRestart" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/></svg>重开</button>
+    <button class="g-btn g-btn-tinted" id="btnHint" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.3-1.2 2.2h-4.8c-.1-.9-.5-1.7-1.2-2.2A6 6 0 0 1 12 3z"/></svg>提示</button>
+    <button class="g-btn g-btn-tinted" id="btnOdd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>奇点</button>
   </div>
 
-  <footer>拾光集 · 在线小游戏</footer>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 
-<div class="overlay" id="ovWin" hidden>
-  <div class="ov-card">
-    <div class="ov-stars" id="winStars" aria-hidden="true"></div>
-    <h2 id="winTitle">过关！</h2>
-    <p class="ov-sub" id="winInfo"></p>
-    <div class="ov-btns">
-      <button class="btn" id="btnReplay" type="button">重玩本关</button>
-      <button class="btn" id="btnPick" type="button">选关</button>
-      <button class="btn primary" id="btnNext" type="button">下一关</button>
+<div class="g-alert-mask" id="ovWin" hidden>
+  <div class="g-alert" role="alertdialog" aria-modal="true">
+    <div class="g-alert-body">
+      <div class="ov-stars" id="winStars" aria-hidden="true"></div>
+      <h2 class="g-alert-title" id="winTitle">过关！</h2>
+      <p class="g-alert-msg" id="winInfo"></p>
+    </div>
+    <div class="g-alert-actions">
+      <button class="g-alert-btn" id="btnReplay" type="button">重玩本关</button>
+      <button class="g-alert-btn" id="btnPick" type="button">选关</button>
+      <button class="g-alert-btn default" id="btnNext" type="button">下一关</button>
     </div>
   </div>
 </div>
 
-<div class="overlay" id="ovLevels" hidden>
-  <div class="ov-card wide">
-    <h2>选择关卡</h2>
-    <p class="lv-info" id="lvInfo"></p>
-    <div class="lv-grid" id="lvGrid"></div>
-    <div class="ov-btns">
-      <button class="btn" id="btnLvClose" type="button">返回</button>
+<div class="g-alert-mask" id="ovLevels" hidden>
+  <div class="g-alert ov-wide" role="dialog" aria-modal="true">
+    <div class="g-alert-body">
+      <h2 class="g-alert-title">选择关卡</h2>
+      <p class="g-alert-msg" id="lvInfo"></p>
+      <div class="lv-grid" id="lvGrid"></div>
+    </div>
+    <div class="g-alert-actions">
+      <button class="g-alert-btn" id="btnLvClose" type="button">返回</button>
     </div>
   </div>
 </div>
@@ -878,9 +834,8 @@ loadLevel(Math.min(unlocked, LEVELS.length) - 1);
 requestAnimationFrame(loop);
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>
@@ -898,6 +853,7 @@ requestAnimationFrame(loop);
         <li>「提示」会标出下一步；无解时会提醒撤销或重开</li>
       </ul>
     </div>
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
   </aside>
   <script>
   (function () {

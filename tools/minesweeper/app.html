@@ -7,94 +7,73 @@
   <meta name="description" content="拾光集在线小游戏：经典扫雷，初级 / 中级 / 高级三档，首次点击必定安全，纯本地运行。">
   <link rel="icon" href="../../favicon.svg">
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/minesweeper/app.html">
+  <link rel="stylesheet" href="../../assets/game-ui.css">
   <style>
-    /* ===== 扫雷 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-    [hidden] { display: none !important; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #f4f4f0;
-      color: #4e5a52;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 26px 12px 40px;
-      -webkit-tap-highlight-color: transparent;
+    /* ===== 扫雷 · 游戏私有视觉（经典浮雕雷区 + 雷数/笑脸/计时条）=====
+       组件外观统一取共享令牌；棋盘浮雕、红色计数管、笑脸 SVG 为本作个性，保留。 */
+    :root {
+      --game-accent: #5856D6;   /* 靛蓝：经典系统蓝紫（docs/game-ui-design.md §7） */
+      /* 雷区私有配色：浅/深各一套；深色下已翻开格保持浅底，经典数字配色依旧可读 */
+      --ms-board: #cbc7bd;
+      --ms-cell: #e9e5db;
+      --ms-cell-hi: rgba(255, 255, 255, .85);
+      --ms-cell-lo: rgba(0, 0, 0, .10);
+      --ms-open: #f7f4ee;
+      --ms-open-edge: #ded9cd;
     }
-    .wrap { width: 100%; max-width: 720px; }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ms-board: #3c382f;
+        --ms-cell: #575142;
+        --ms-cell-hi: rgba(255, 255, 255, .10);
+        --ms-cell-lo: rgba(0, 0, 0, .30);
+        --ms-open: #d8d0c1;
+        --ms-open-edge: rgba(0, 0, 0, .22);
+      }
+    }
 
-    header { margin-bottom: 12px; }
-    h1 { font-size: 30px; color: #3e5147; letter-spacing: 2px; }
-    .sub { margin-top: 6px; font-size: 13px; color: #8a9a8e; }
-
-    /* 计数与重开（经典布局：雷数 - 笑脸 - 计时） */
-    .hud { display: flex; align-items: stretch; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-    .counter {
-      flex: 1;
-      background: #fff;
-      border: 1px solid #e4e2da;
-      border-radius: 12px;
-      padding: 8px 14px;
+    /* —— 经典计分条：雷数 - 笑脸 - 计时（.g-hud / .g-stat 基础上的横向排布）—— */
+    .g-hud-classic { align-items: stretch; }
+    .g-stat-counter {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 2px 10px rgba(110, 120, 105, .10);
+      padding: 8px 14px;
     }
-    .cico { display: inline-flex; width: 20px; height: 20px; }
+    .cico { display: inline-flex; width: 20px; height: 20px; flex: none; }
     .cico svg { width: 100%; height: 100%; }
-    .cval {
-      font-family: Consolas, Menlo, monospace;
+    .ms-val {
+      margin-top: 0;
+      font-family: var(--font-mono);
       font-size: 22px;
-      font-weight: 700;
-      color: #c62828;
-      font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
+      color: var(--red);        /* 经典红色计数管 */
     }
-    .face {
+
+    /* 表情重开钮：与计分卡同面，笑脸 SVG 保留 */
+    .g-face {
+      flex: none;
       width: 46px;
       height: 46px;
-      border: 1px solid #e4e2da;
-      border-radius: 12px;
-      background: #fff;
-      cursor: pointer;
       padding: 5px;
-      box-shadow: 0 2px 10px rgba(110, 120, 105, .12);
-      touch-action: manipulation;
-    }
-    .face svg { width: 100%; height: 100%; }
-    .face:active { transform: translateY(1px); }
-
-    /* 难度档位 */
-    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
-    .seg button {
-      flex: 1;
-      border: 1px solid #e0ded6;
-      background: #fff;
-      color: #5c6b60;
-      padding: 8px 0;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow-card);
       cursor: pointer;
-      font-family: inherit;
       touch-action: manipulation;
+      transition: transform var(--dur-press) var(--ease-spring);
     }
-    .seg button.active { background: #5f8f6e; border-color: #5f8f6e; color: #fff; }
+    .g-face svg { display: block; width: 100%; height: 100%; }
+    .g-face:active { transform: scale(.96); }
+    .g-face:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
 
-    /* AI 代玩按钮与状态标签 */
-    .ai-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-    .btn-ai {
-      font: inherit; border: 0; border-radius: 10px; padding: 9px 22px;
-      background: #1a73e8; color: #fff; font-weight: 600; cursor: pointer;
-      box-shadow: 0 2px 10px rgba(26, 115, 232, .35);
-      touch-action: manipulation;
-    }
-    .btn-ai:active { transform: translateY(1px); }
-    .btn-ai.stop { background: #e5484d; box-shadow: 0 2px 10px rgba(229, 72, 77, .35); }
-    .ai-tag { font-size: 12.5px; color: #8a9a8e; }
+    /* —— AI 代玩条：仅布局胶水，外观由 .g-btn / .g-ai-tag / .g-ai-note 承担 —— */
+    .ai-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .ai-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
-    /* 雷区：窄屏放不下时允许横向滚动（高级 30 列） */
+    /* —— 雷区：窄屏放不下时允许横向滚动（高级 30 列），经典浮雕格保留 —— */
     .board-scroll { position: relative; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
     .board {
       --cs: 32px;
@@ -105,17 +84,17 @@
       width: max-content;
       margin: 0 auto;
       padding: 8px;
-      background: #cbc7bd;
-      border-radius: 12px;
+      background: var(--ms-board);
+      border-radius: var(--radius);
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
     }
     .cell {
-      background: #e9e5db;
+      background: var(--ms-cell);
       border-radius: 4px;
-      box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .85), inset -2px -2px 0 rgba(0, 0, 0, .10);
+      box-shadow: inset 2px 2px 0 var(--ms-cell-hi), inset -2px -2px 0 var(--ms-cell-lo);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -123,202 +102,64 @@
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       cursor: pointer;
+      transition: transform .12s var(--ease-out);
     }
-    .cell.open { background: #f7f4ee; box-shadow: inset 0 0 0 1px #ded9cd; cursor: default; }
+    .cell:not(.open):active { transform: scale(.94); }   /* 点击轻缩放 */
+    .cell.open { background: var(--ms-open); box-shadow: inset 0 0 0 1px var(--ms-open-edge); cursor: default; }
     .cell.boom { background: #ef5350; }
     .cell svg { width: 64%; height: 64%; pointer-events: none; }
 
-    /* 胜负弹层 */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      border-radius: 12px;
-      background: rgba(250, 250, 246, .88);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      text-align: center;
-      opacity: 0;
-      transition: opacity .2s ease;
-    }
-    .overlay.open { opacity: 1; }
-    .ov-title { font-size: 32px; font-weight: 800; color: #3e5147; }
-    .overlay.win .ov-title { color: #3f9d6d; }
-    .ov-sub { font-size: 14px; color: #75857a; }
-    .btn {
-      border: 0;
-      background: #5f8f6e;
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 12px;
-      padding: 10px 20px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(95, 143, 110, .35);
-      touch-action: manipulation;
-    }
-    .btn:active { transform: translateY(1px); }
-
-    .best { margin-top: 12px; text-align: center; font-size: 13px; color: #7f9184; font-variant-numeric: tabular-nums; }
-    .hint { margin-top: 6px; text-align: center; font-size: 13px; color: #9aa99d; }
-    footer { margin-top: 24px; text-align: center; font-size: 12px; color: #b3bdb2; }
+    /* 规则栏开合时主体让位的过渡（让位规则由共享样式表提供） */
+    .g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
   </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-  <main class="wrap">
-    <header>
-      <h1>扫雷</h1>
-      <p class="sub">翻开所有安全格，别踩雷</p>
+  <main class="g-wrap">
+    <header class="g-nav">
+      <h1 class="g-nav-title">扫雷</h1>
     </header>
+    <p class="g-nav-sub">翻开所有安全格，别踩雷</p>
 
-    <section class="hud">
-      <div class="counter">
+    <!-- 经典计分条：雷数 - 笑脸 - 计时（结构保留，外观走共享令牌） -->
+    <section class="g-hud g-hud-classic">
+      <div class="g-stat g-stat-counter">
         <span class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5v17" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M7 4.2 18.5 8 7 11.8Z" fill="#e53935"/></svg></span>
-        <span class="cval" id="mineLeft">010</span>
+        <span class="g-stat-value ms-val" id="mineLeft">010</span>
       </div>
-      <button class="face" id="faceBtn" type="button" title="重新开始"></button>
-      <div class="counter">
+      <button class="g-face" id="faceBtn" type="button" title="重新开始"></button>
+      <div class="g-stat g-stat-counter">
         <span class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#78909c" stroke-width="2"/><path d="M12 7v5l3.4 2" stroke="#78909c" stroke-width="2" stroke-linecap="round" fill="none"/></svg></span>
-        <span class="cval" id="time">000</span>
+        <span class="g-stat-value ms-val" id="time">000</span>
       </div>
     </section>
 
-    <div class="seg" id="seg">
-      <button type="button" data-level="0" class="active">初级</button>
+    <div class="g-segment" id="seg" role="group" aria-label="难度">
+      <button type="button" data-level="0" class="on">初级</button>
       <button type="button" data-level="1">中级</button>
       <button type="button" data-level="2">高级</button>
     </div>
 
-    <div class="ai-bar">
-      <button class="btn-ai" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
-      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最佳纪录</span>
+    <div class="ai-block">
+      <div class="ai-bar">
+        <button class="g-btn g-ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
+        <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+      </div>
+      <p class="g-ai-note">AI 代玩成绩不计最佳用时</p>
     </div>
 
     <div class="board-scroll" id="scroll">
       <div class="board" id="board"></div>
-      <div class="overlay" id="overlay" hidden>
-        <p class="ov-title" id="ovTitle"></p>
-        <p class="ov-sub" id="ovSub"></p>
-        <button class="btn" id="againBtn" type="button">再来一局</button>
+      <div class="g-overlay g-overlay-fade" id="overlay" hidden>
+        <p class="g-overlay-title" id="ovTitle"></p>
+        <p class="g-overlay-text" id="ovSub"></p>
+        <button class="g-btn" id="againBtn" type="button">再来一局</button>
       </div>
     </div>
 
-    <p class="best" id="bestLine"></p>
-    <footer>拾光集 · 在线小游戏</footer>
+    <p class="g-tips g-num" id="bestLine"></p>
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
   </main>
 
   <script>
@@ -946,7 +787,7 @@
     updateMineCounter();                     // 剩余的雷已在核心里自动插旗
     setFace(FACE_COOL);
     if (aiOn) {                              // AI 代玩成绩不计最佳纪录
-      showOverlay(true, '用时 ' + seconds + ' 秒 · AI 代玩不计纪录');
+      showOverlay(true, '用时 ' + seconds + ' 秒 · AI 代玩成绩不计最佳用时');
       return;
     }
     const old = loadBest();
@@ -972,7 +813,7 @@
   function showOverlay(win, sub) {
     ovTitle.textContent = win ? '胜利！' : '游戏结束';
     ovSub.textContent = sub;
-    overlay.classList.toggle('win', !!win);
+    overlay.classList.toggle('g-overlay-win', !!win);
     overlay.hidden = false;
     void overlay.offsetWidth;                // 同步回流后再加 open，保证过渡生效
     overlay.classList.add('open');
@@ -1018,7 +859,7 @@
   document.querySelectorAll('#seg button').forEach(function (b) {
     b.addEventListener('click', function () {
       level = LEVELS[+b.dataset.level];
-      document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x === b); });
       reset();
     });
   });
@@ -1084,8 +925,8 @@
 
   function setAi(on) {
     aiOn = on;
-    aiBtn.textContent = on ? '停止 AI' : 'AI 代玩';
-    aiBtn.classList.toggle('stop', on);
+    aiBtn.textContent = on ? '停止代玩' : 'AI 代玩';
+    aiBtn.classList.toggle('is-running', on);
     aiBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     aiTag.hidden = !on;
     if (on && !game.over) requestAiAction();
@@ -1110,9 +951,9 @@
   /* ---------- 启动 ---------- */
   reset();
   </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
     
       <h3>玩法</h3>
@@ -1120,7 +961,7 @@
         <li>翻开所有安全格即胜，踩到地雷就输了</li>
         <li>数字表示周围 8 格里的地雷数量</li>
         <li>首次点击及其周边保证安全；剩余雷数见顶栏，计时与最佳用时同栏</li>
-        <li>点「AI 代玩」由 AI 自动推理扫雷，随时可停；AI 成绩不计最佳纪录</li>
+        <li>点「AI 代玩」由 AI 自动推理扫雷，随时可停；AI 代玩成绩不计最佳用时</li>
       </ul>
       <h3>操作</h3>
       <ul>

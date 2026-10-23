@@ -1,0 +1,992 @@
+/* ============================================================
+   拾光集 · 小游戏共享 UI 设计系统
+   风格基准：Apple 人机界面指南（HIG）iOS / macOS 视觉语言
+   独立于主站主题色：不引用主站 styles.css 及其变量，游戏 UI 不随主站变色。
+   用法：各游戏 <link rel="stylesheet" href="../../assets/game-ui.css">
+        并在自身 <style> 中声明 --game-accent（见 docs/game-ui-design.md）
+   红线：本文件只提供样式与组件外观，不包含任何玩法逻辑。
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. 字体栈
+   ----------------------------------------------------------- */
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, "Cascadia Mono",
+    "PingFang SC", Consolas, monospace;
+}
+
+/* ------------------------------------------------------------
+   2. 色彩令牌（浅色为默认，深色跟随系统）
+   ----------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+
+  /* 中性色 */
+  --bg: #F2F2F7;                      /* 分组页面背景 */
+  --bg-elevated: #FFFFFF;             /* 抬升层背景 */
+  --card: #FFFFFF;                    /* 卡片 */
+  --text: #000000;                    /* 主文字 */
+  --text-secondary: rgba(60, 60, 67, .6);   /* 次要文字 */
+  --text-tertiary: rgba(60, 60, 67, .3);    /* 弱化文字 / 占位 */
+  --separator: rgba(60, 60, 67, .29);       /* 分隔线 */
+  --fill: rgba(120, 120, 128, .16);         /* 灰填充（segmented 轨道等） */
+  --fill-secondary: rgba(120, 120, 128, .12);
+
+  /* iOS 系统语义色 */
+  --blue: #007AFF;
+  --green: #34C759;
+  --red: #FF3B30;
+  --orange: #FF9500;
+  --purple: #AF52DE;
+  --indigo: #5856D6;
+  --pink: #FF2D55;
+  --teal: #5AC8FA;
+  --yellow: #FFCC00;
+  --gray: #8E8E93;
+
+  /* 游戏个性色：各游戏在自身样式中覆盖，缺省蓝 */
+  --game-accent: #007AFF;
+  /* 实心按钮压在强调色上的文字色（默认白；黄/灰个性色页改深色，见文档 §7） */
+  --game-on-accent: #FFFFFF;
+  /* 强调色用作文字（返回键/链接/徽标）时的颜色（默认同个性色；黄/灰个性色页改深） */
+  --game-accent-text: var(--game-accent);
+  /* 高饱和实心底（红/绿语义按钮）上的文字色：#1C1C1E 对红 4.80:1、对绿 7.66:1 */
+  --on-vivid: #1C1C1E;
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* 阴影 */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 14px rgba(0, 0, 0, .06);
+  --shadow-float: 0 6px 24px rgba(0, 0, 0, .12);
+  --shadow-alert: 0 12px 40px rgba(0, 0, 0, .22);
+
+  /* 动效 */
+  --dur-press: .25s;
+  --dur-spring: .35s;
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.42, .64, 1);  /* 轻微过冲的弹簧感 */
+
+  /* 尺度 */
+  --touch-min: 44px;                  /* 最小触控目标 */
+  --hairline: .5px;
+  --wrap-max: 520px;                  /* 内容列默认最大宽度，宽版页覆盖 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --bg-elevated: #1C1C1E;
+    --card: #2C2C2E;
+    --text: #FFFFFF;
+    --text-secondary: rgba(235, 235, 245, .6);
+    --text-tertiary: rgba(235, 235, 245, .3);
+    --separator: rgba(84, 84, 88, .65);
+    --fill: rgba(120, 120, 128, .24);
+    --fill-secondary: rgba(120, 120, 128, .18);
+
+    /* 深色下系统色略提亮，保证对比度 */
+    --blue: #0A84FF;
+    --green: #30D158;
+    --red: #FF453A;
+    --orange: #FF9F0A;
+    --purple: #BF5AF2;
+    --indigo: #5E5CE6;
+    --pink: #FF375F;
+    --teal: #64D2FF;
+    --yellow: #FFD60A;
+    --gray: #98989D;
+
+    /* 深色下强调色当文字直接用个性色即可（黑底对比充足） */
+    --game-on-accent: #FFFFFF;
+    --game-accent-text: var(--game-accent);
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, .35), 0 6px 18px rgba(0, 0, 0, .35);
+    --shadow-float: 0 8px 28px rgba(0, 0, 0, .5);
+    --shadow-alert: 0 14px 48px rgba(0, 0, 0, .6);
+  }
+
+  /* 深色复位二重保险：挂在 .g-page（body 自有声明）上。
+     游戏页 <style> 在 link 之后，其 :root 覆盖（如黄/灰页写死的
+     --game-on-accent: #1C1C1E）同特异性、文档顺序在后会赢过上面的 :root 复位；
+     body 自有值胜过 html 继承值，此规则保证深色模式一定复位成功。 */
+  .g-page {
+    --game-on-accent: #FFFFFF;
+    --game-accent-text: var(--game-accent);
+  }
+}
+
+/* ------------------------------------------------------------
+   3. 基础
+   ----------------------------------------------------------- */
+.g-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: calc(var(--touch-min) + 12px) 16px 40px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.45;
+  display: flex;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+.g-page *, .g-page *::before, .g-page *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+.g-wrap {
+  width: 100%;
+  max-width: var(--wrap-max, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 宽版变体：画幅较宽的游戏（如贪吃蛇 720px 台面） */
+.g-wrap-wide { --wrap-max: 720px; }
+
+.g-tap { touch-action: manipulation; }   /* 可点元素统一去除双击缩放延迟 */
+.g-nosel {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.g-num { font-variant-numeric: tabular-nums; }  /* 计分数字等宽排布 */
+.g-mono { font-family: var(--font-mono); }
+
+/* ------------------------------------------------------------
+   4. 导航标题栏
+   ----------------------------------------------------------- */
+.g-nav {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  gap: 8px;
+}
+
+.g-nav-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 大标题（放在 .g-nav 下方单独一行） */
+.g-nav-large {
+  margin: 2px 0 4px;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: .37px;
+  line-height: 1.2;
+}
+
+.g-nav-sub {
+  margin: -8px 0 2px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 返回按钮（chevron + 文案，标准 44px 触控） */
+.g-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--touch-min);
+  padding: 0 8px 0 2px;
+  border: 0;
+  background: none;
+  color: var(--game-accent-text);
+  font-family: inherit;
+  font-size: 17px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--dur-press) var(--ease-out),
+              transform var(--dur-press) var(--ease-spring);
+}
+.g-back svg {
+  width: 12px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.g-back:active { opacity: .55; transform: scale(.96); }
+.g-back:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; border-radius: 6px; }
+
+/* 返回主页浮钮（fixed 不挤占布局，取代各页 .back-home） */
+.g-back-chip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--touch-min);
+  padding: 8px 14px;
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--game-accent-text);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--dur-press) var(--ease-spring),
+              opacity var(--dur-press) var(--ease-out);
+}
+.g-back-chip:active { transform: scale(.96); opacity: .8; }
+.g-back-chip:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+.g-back-chip svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 560px) {
+  .g-back-chip { top: 8px; left: 8px; padding: 7px 12px; font-size: 12px; }
+}
+
+/* ------------------------------------------------------------
+   5. 按钮（filled / tinted / plain / gray 四态）
+   ----------------------------------------------------------- */
+.g-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--touch-min);
+  padding: 10px 20px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--game-accent);
+  color: var(--game-on-accent);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--dur-press) var(--ease-spring),
+              opacity var(--dur-press) var(--ease-out),
+              background-color var(--dur-press) var(--ease-out);
+}
+.g-btn:active:not(:disabled) { transform: scale(.96); opacity: .85; }
+.g-btn:disabled { opacity: .35; cursor: default; }
+.g-btn:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+
+/* filled：实心（默认） */
+.g-btn-filled { background: var(--game-accent); color: var(--game-on-accent); }
+
+/* tinted：浅色底 + 强调色字 */
+.g-btn-tinted {
+  background: var(--fill);   /* 兜底：浏览器不支持 color-mix 时用系统灰填充 */
+  background: color-mix(in srgb, var(--game-accent) 16%, transparent);
+  color: var(--game-accent-text);
+}
+
+/* plain：透明底 + 强调色字 */
+.g-btn-plain {
+  background: transparent;
+  color: var(--game-accent-text);
+}
+
+/* gray：系统灰填充 + 主文字 */
+.g-btn-gray {
+  background: var(--fill);
+  color: var(--text);
+}
+
+/* 语义按钮：红/绿实心底统一用 --on-vivid 深字（对红 4.80:1、对绿 7.66:1），
+   与个性色实心按钮的文字策略一致，不随黄/灰页的 --game-on-accent 摇摆 */
+.g-btn-danger { background: var(--red); color: var(--on-vivid); }
+.g-btn-success { background: var(--green); color: var(--on-vivid); }
+
+/* 小号（工具条内） */
+.g-btn-sm {
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+.g-btn-sm:active:not(:disabled) { transform: scale(.96); }
+
+/* 横排按钮组 */
+.g-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.g-btn-row .g-btn { flex: 1 1 auto; min-width: 96px; }
+
+/* 纵排按钮列（HUD 侧列，如消消乐暂停/重开列） */
+.g-btn-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.g-btn-col .g-btn { width: 100%; }
+
+/* ------------------------------------------------------------
+   6. 卡片
+   ----------------------------------------------------------- */
+.g-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+}
+
+.g-card + .g-card { margin-top: 12px; }
+
+.g-card-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: .2px;
+}
+
+.g-card-hint {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* 分组圆角列表（iOS inset grouped） */
+.g-list {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.g-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--touch-min);
+  padding: 10px 16px;
+  font-size: 16px;
+}
+.g-row + .g-row { border-top: var(--hairline) solid var(--separator); }
+.g-row-label { color: var(--text); }
+.g-row-value { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------
+   7. 计分板 / 数据行
+   ----------------------------------------------------------- */
+
+/* 卡片式计分板 */
+.g-hud {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.g-stat {
+  flex: 1 1 84px;
+  min-width: 0;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 9px 10px;
+  text-align: center;
+}
+
+.g-stat-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  letter-spacing: .4px;
+}
+
+.g-stat-value {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* 行内 HUD 工具条：文字分数与按钮混排同一行（如贪吃蛇 header） */
+.g-hud-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-height: var(--touch-min);
+}
+.g-hud-bar .g-stat-inline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.g-hud-bar .g-stat-inline b {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.g-hud-bar .g-hud-spacer { flex: 1 1 auto; }
+
+/* 数值变化轻弹（施加给容器或数值元素均可，动画不挑层级） */
+.g-bump { animation: g-bump .28s var(--ease-spring); }
+@keyframes g-bump {
+  50% { transform: scale(1.08); }
+}
+
+/* 状态强调（危险 / 提醒）；危险态带脉冲提示 */
+.g-stat-danger .g-stat-value { color: var(--red); animation: g-pulse 1s ease infinite; }
+.g-stat-warn .g-stat-value { color: var(--orange); }
+.g-stat-ok .g-stat-value { color: var(--green); }
+.g-pulse { animation: g-pulse 1s ease infinite; }
+@keyframes g-pulse {
+  50% { opacity: .55; }
+}
+
+/* ------------------------------------------------------------
+   8. Alert 弹窗（iOS 警告框：约 270px、14px 圆角、毛玻璃、堆叠按钮）
+   ----------------------------------------------------------- */
+.g-alert-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, .28);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-press) var(--ease-out);
+}
+.g-alert-mask.open { opacity: 1; pointer-events: auto; }
+
+.g-alert {
+  width: 270px;
+  max-width: 100%;
+  border-radius: var(--radius-lg);
+  background: rgba(250, 250, 250, .82);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--shadow-alert);
+  overflow: hidden;
+  text-align: center;
+  transform: scale(.92);
+  transition: transform var(--dur-spring) var(--ease-spring);
+}
+.g-alert-mask.open .g-alert { transform: scale(1); }
+
+@media (prefers-color-scheme: dark) {
+  .g-alert { background: rgba(44, 44, 46, .82); }
+}
+
+.g-alert-body { padding: 19px 16px 16px; }
+
+.g-alert-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.g-alert-msg {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.42;
+  color: var(--text);
+}
+
+/* 操作按钮：竖向堆叠 + 发丝分隔线 */
+.g-alert-actions {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--hairline) solid var(--separator);
+}
+
+.g-alert-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: var(--touch-min);
+  padding: 11px 8px;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color .15s var(--ease-out);
+}
+.g-alert-btn + .g-alert-btn { border-top: var(--hairline) solid var(--separator); }
+.g-alert-btn:active { background: rgba(120, 120, 128, .16); }
+.g-alert-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.g-alert-btn.default { font-weight: 600; }        /* 默认操作加粗 */
+.g-alert-btn.destructive { color: var(--red); }
+
+/* ------------------------------------------------------------
+   9. Segmented Control（分段控件）
+   ----------------------------------------------------------- */
+.g-segment {
+  display: flex;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--fill);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.g-segment button {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--dur-press) var(--ease-out),
+              transform var(--dur-press) var(--ease-spring),
+              box-shadow var(--dur-press) var(--ease-out);
+}
+.g-segment button:active { transform: scale(.96); }
+.g-segment button:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 1px; }
+
+/* 选中段：白底浮起 */
+.g-segment button[aria-pressed="true"],
+.g-segment button.on {
+  background: var(--card);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .04);
+}
+
+/* ------------------------------------------------------------
+   10. Switch（开关）
+   ----------------------------------------------------------- */
+.g-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.g-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.g-switch-track {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: var(--fill);
+  transition: background-color var(--dur-press) var(--ease-out);
+  pointer-events: none;
+}
+
+.g-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #FFF;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .15), 0 1px 1px rgba(0, 0, 0, .16);
+  transition: transform var(--dur-spring) var(--ease-spring);
+}
+
+.g-switch input:checked + .g-switch-track {
+  background: var(--green);
+}
+.g-switch input:checked + .g-switch-track::after {
+  transform: translateX(20px);
+}
+.g-switch input:focus-visible + .g-switch-track {
+  outline: 2px solid var(--game-accent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   11. 状态徽标
+   ----------------------------------------------------------- */
+.g-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.g-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* 徽标底色：先给纯色 rgba 兜底（不支持 color-mix 的浏览器），再用 color-mix 跟随语义色 */
+.g-badge-ok { background: rgba(52, 199, 89, .16); background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); }
+.g-badge-warn { background: rgba(255, 149, 0, .16); background: color-mix(in srgb, var(--orange) 16%, transparent); color: var(--orange); }
+.g-badge-danger { background: rgba(255, 59, 48, .16); background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+.g-badge-info { background: rgba(0, 122, 255, .16); background: color-mix(in srgb, var(--blue) 16%, transparent); color: var(--blue); }
+.g-badge-accent {
+  background: var(--fill);
+  background: color-mix(in srgb, var(--game-accent) 16%, transparent);
+  color: var(--game-accent-text);
+}
+/* 纯文字徽标（不带圆点） */
+.g-badge-plain::before { display: none; }
+
+/* 运行中呼吸点 */
+.g-badge-live::before { animation: g-live 1.2s ease-in-out infinite; }
+@keyframes g-live {
+  50% { opacity: .3; }
+}
+
+/* ------------------------------------------------------------
+   12. 「AI 代玩」统一组件
+   ----------------------------------------------------------- */
+
+/* 代玩按钮：默认强调色实心；运行中转红并提示可停止。
+   兼容旧类名 auto-on（2048 等页 JS 只切 auto-on，零脚本改造即可套用）。 */
+.g-ai-btn {
+  background: var(--game-accent);
+  color: var(--game-on-accent);
+}
+.g-ai-btn.is-running,
+.g-ai-btn.auto-on {
+  background: var(--red);
+  color: #FFF;
+}
+.g-ai-btn.is-running:active:not(:disabled),
+.g-ai-btn.auto-on:active:not(:disabled) { opacity: .8; }
+
+/* 状态徽标文案：AI 代玩中 · 点击停止 */
+.g-ai-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, .16);   /* 兜底 */
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.g-ai-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  animation: g-live 1.2s ease-in-out infinite;
+}
+
+/* 纯 CSS 显隐方案：标签放在 .g-ai-group 内、加 .g-ai-tag-auto、不带 hidden，
+   随按钮 .is-running / .auto-on 状态自动显隐，无需任何脚本。 */
+.g-ai-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+.g-ai-tag.g-ai-tag-auto { display: none; }
+.g-ai-group:has(.g-ai-btn.is-running) .g-ai-tag-auto,
+.g-ai-group:has(.g-ai-btn.auto-on) .g-ai-tag-auto { display: inline-flex; }
+
+/* 代玩成绩不计最高分的统一标注（静态文本） */
+.g-ai-note {
+  display: block;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------
+   13. 舞台与覆盖层（画布 / 棋盘外框与结算遮罩）
+   ----------------------------------------------------------- */
+.g-stage {
+  position: relative;
+  width: 100%;
+  /* 容器级触控防护：canvas 与 DOM 棋盘都受用，防双击缩放与文本误选 */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.g-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+/* 轻遮罩（暂停 / 开始，非破坏性提示）。
+   显隐协议（二选一，见文档 §3.9）：
+   ① 静态协议：只用 hidden 切换，本类默认即可见态，无过渡；
+   ② 过渡协议：加 .g-overlay-fade，hidden + 同步回流 + .open 淡入。 */
+.g-overlay {
+  position: absolute;
+  inset: 0;
+  /* 结算/暂停层必须压住后置的棋子方块（match3/2048 私有 .overlay 原为 z-index:5，
+     方块是 absolute z-index 1-4 且被 JS 追加到 board 尾部） */
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);   /* 兜底：不支持 color-mix 时用不透明底，可读性优先 */
+  background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: center;
+  transition: opacity var(--dur-press) var(--ease-out);
+}
+
+/* 过渡协议的预备态：透明且不拦截下层点击（pointer-events 兜底，
+   防止「看不见但点得到」把棋盘锁死） */
+.g-overlay-fade {
+  opacity: 0;
+  pointer-events: none;
+}
+.g-overlay-fade.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 胜利态修饰：标题换强调色（私有 .win 修饰类可共存，见文档 §5 第 8 条） */
+.g-overlay-win .g-overlay-title { color: var(--game-accent); }
+
+.g-overlay-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.g-overlay-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* ------------------------------------------------------------
+   14. 右侧规则栏（可收起，取代各页 .rules-panel 公共块）
+   ----------------------------------------------------------- */
+.g-rules {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 272px;
+  overflow: visible;   /* 把手挂在面板左缘外侧，滚动收进内层 .g-rules-scroll */
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--separator);
+  box-shadow: -6px 0 22px rgba(0, 0, 0, .10);
+  z-index: 190;
+  transform: translateX(0);
+  transition: transform .28s cubic-bezier(.22, .9, .3, 1);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.75;
+}
+.g-rules.closed { transform: translateX(100%); }
+
+.g-rules-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 18px;
+  box-sizing: border-box;
+}
+
+.g-rules h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+.g-rules h3 {
+  margin: 14px 0 4px;
+  font-size: 12.5px;
+  color: var(--game-accent-text);
+  letter-spacing: 1px;
+}
+.g-rules ul { margin: 0; padding-left: 18px; }
+.g-rules li { margin: 4px 0; }
+
+/* 柜门式把手：44px 宽满足最小触控，随面板滑出滑入 */
+.g-rules-handle {
+  position: absolute;
+  left: -44px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  min-height: 116px;
+  padding: 0;
+  border: 1px solid var(--separator);
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  background: var(--bg-elevated);
+  box-shadow: -4px 0 14px rgba(0, 0, 0, .10);
+  color: var(--game-accent-text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 3px;
+  writing-mode: vertical-lr;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.g-rules-handle:active { transform: translateY(-50%) scale(.96); }
+.g-rules-handle:focus-visible { outline: 2px solid var(--game-accent); outline-offset: -2px; }
+
+/* 宽屏展开时主体让位（给 .g-page 加 .rules-open） */
+@media (min-width: 1100px) {
+  .g-page.rules-open { padding-right: 272px; }
+}
+/* 窄屏：面板变覆盖抽屉，游戏本体不动 */
+@media (max-width: 560px) {
+  .g-rules { width: min(272px, 82vw); }
+}
+
+/* ------------------------------------------------------------
+   15. 提示与页脚小字
+   ----------------------------------------------------------- */
+.g-tips {
+  margin: 2px 0 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
+.g-foot {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------
+   16. 动效工具类
+   ----------------------------------------------------------- */
+.g-press { transition: transform var(--dur-press) var(--ease-spring); }
+.g-press:active { transform: scale(.96); }
+
+/* 转场轻柔：淡入上移 */
+.g-fade-in { animation: g-fade-in var(--dur-spring) var(--ease-out) backwards; }
+@keyframes g-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+/* 出场 / 退场（结算层） */
+.g-pop { animation: g-pop var(--dur-spring) var(--ease-spring) backwards; }
+@keyframes g-pop {
+  from { opacity: 0; transform: scale(.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-page *, .g-page *::before, .g-page *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   17. 响应式与安全间距
+   ----------------------------------------------------------- */
+@media (max-width: 560px) {
+  .g-page { padding: 52px 12px 32px; }
+  .g-wrap { gap: 12px; }
+  .g-nav-large { font-size: 26px; }
+  .g-nav-sub { font-size: 13px; }
+  .g-stat-value { font-size: 19px; }
+  .g-stat-label { letter-spacing: .2px; }
+  .g-btn { font-size: 16px; padding: 10px 16px; }
+  .g-alert { width: min(270px, 86vw); }
+  .g-rules-handle { width: 44px; left: -44px; }
+}
+
+/* 小屏触控目标兜底：任何可点控件不小于 44px 的可点区域 */
+@media (pointer: coarse) {
+  .g-btn-sm, .g-segment button { min-height: var(--touch-min); }
+}

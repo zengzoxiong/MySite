@@ -7,81 +7,64 @@
 <meta name="description" content="拾光集在线小游戏：成语猜猜，猜四字成语，逐字给绿黄灰位置反馈，6 次机会，含每日一题与成语解释，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/wordle-zh/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-/* ===== 成语猜猜 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-[hidden] { display: none !important; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== 成语猜猜 · 拾光集自建小游戏（纯静态零依赖） =====
+   组件外观统一由 ../../assets/game-ui.css 提供（Apple HIG 视觉语言、深浅色跟随系统）；
+   本块只保留游戏个性视觉：棋盘格子、用过的字色块、输入行、轻提示条。 */
 :root {
-  --primary: #c0392b;   /* 朱红：本游戏强调色 */
-  --green: #2b8a3e;     /* 绿：字对、位置也对 */
-  --amber: #d97706;     /* 黄：有此字但位置不对 */
-  --gray: #7b8087;      /* 灰：成语里没有此字 */
-  --ink: #2b2620;
-  --muted: #8a8274;
-  --line: #e5ded0;
-  --card: #ffffff;
-}
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background: #f6f2ea;
-  color: var(--ink);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 52px 16px 0;
-  -webkit-tap-highlight-color: transparent;
-}
-.wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; align-items: center; }
+  --game-accent: #34C759;          /* 个性色：猜中绿格 */
 
-header.top { text-align: center; }
-h1 { font-size: 30px; font-weight: 800; letter-spacing: 8px; text-indent: 8px; color: #4a3f33; }
-.sub { margin-top: 6px; font-size: 13px; color: var(--muted); }
-
-/* 模式切换：每日一题 / 自由练习 */
-.modes { display: inline-flex; gap: 4px; margin-top: 14px; background: #efe8da; border-radius: 999px; padding: 4px; }
-.mode-btn {
-  border: 0; background: transparent; padding: 7px 18px; border-radius: 999px;
-  font-size: 14px; color: #7d7466; cursor: pointer; font-family: inherit; touch-action: manipulation;
-}
-.mode-btn.on { background: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(192, 57, 43, .3); }
-.mode-btn:disabled { opacity: .5; cursor: default; }
-.mode-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-/* 信息条 */
-.hud { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px 0 16px; }
-.chip {
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
-  padding: 4px 12px; font-size: 12px; color: #7d7466; font-variant-numeric: tabular-nums;
+  /* 棋盘三态反馈色（游戏个性视觉，深浅两模式通用实色） */
+  --tile-correct: #2b8a3e;         /* 绿：字对、位置也对 */
+  --tile-present: #d97706;         /* 黄：有此字但位置不对 */
+  --tile-absent: #7b8087;          /* 灰：成语里没有此字 */
+  /* 棋盘暖色描边（浅色为主，深色复位见文末补丁） */
+  --tile-line: #ddd5c4;
+  --tile-line-strong: #b9ae99;
 }
 
-/* 猜词面板：6 行 × 4 格 */
+/* 私有复位：游戏自由排版的小字/标题不受 UA 默认边距影响（[hidden] 由共享样式表提供） */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* 标题区沿用原居中气质；排版由 .g-nav-large / .g-nav-sub 承担 */
+.top { text-align: center; }
+.wrap { align-items: center; }
+.top .g-segment { width: min(100%, 300px); margin: 14px auto 0; }
+
+/* 模式切换按钮禁用态（翻牌动画期间锁定切换，原有交互保留） */
+.g-segment button:disabled { opacity: .5; cursor: default; }
+
+/* 信息条居中排布（徽标外观由 .g-badge 承担） */
+.hud { justify-content: center; }
+
+/* 猜词面板：6 行 × 4 格（游戏个性视觉保留） */
 .board { display: grid; gap: 8px; width: min(100%, 380px); }
 .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .tile {
   aspect-ratio: 1 / 1;
   display: flex; align-items: center; justify-content: center;
   background: var(--card);
-  border: 2px solid #ddd5c4;
+  border: 2px solid var(--tile-line);
   border-radius: 12px;
   font-size: clamp(22px, 7vw, 34px);
   font-weight: 700;
-  color: var(--ink);
+  color: var(--text);
   transition: transform .26s ease;
   user-select: none; -webkit-user-select: none;
 }
-.tile.filled { border-color: #b9ae99; }
+.tile.filled { border-color: var(--tile-line-strong); }
 .tile.pop { animation: pop .14s ease; }
 .tile.flip { transform: rotateX(90deg); }
-.tile.correct { background: var(--green); border-color: var(--green); color: #fff; }
-.tile.present { background: var(--amber); border-color: var(--amber); color: #fff; }
-.tile.absent  { background: var(--gray);  border-color: var(--gray);  color: #fff; }
+.tile.correct { background: var(--tile-correct); border-color: var(--tile-correct); color: #fff; }
+.tile.present { background: var(--tile-present); border-color: var(--tile-present); color: #fff; }
+.tile.absent  { background: var(--tile-absent);  border-color: var(--tile-absent);  color: #fff; }
 .tile.bounce { animation: bounce .55s ease; }
 @keyframes pop { 40% { transform: scale(1.1); } }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-12px); } }
 
-/* 输入行：输入法打字 + 提交按钮 */
-.guess-row { display: flex; gap: 8px; width: min(100%, 380px); margin-top: 16px; }
+/* 输入行：输入法打字 + 提交按钮（按钮外观由 .g-btn 承担） */
+.guess-row { display: flex; gap: 8px; width: min(100%, 380px); }
 .guess-row.shake { animation: shake .5s ease; }
 @keyframes shake {
   10%, 90% { transform: translateX(-2px); }
@@ -91,225 +74,117 @@ h1 { font-size: 30px; font-weight: 800; letter-spacing: 8px; text-indent: 8px; c
 }
 .guess-input {
   flex: 1; min-width: 0; height: 54px;
-  border: 2px solid #ddd5c4; border-radius: 14px;
+  border: 2px solid var(--tile-line); border-radius: 14px;
   background: var(--card);
   font-size: 22px; font-family: inherit;
   text-align: center; letter-spacing: 6px; text-indent: 6px;
-  color: var(--ink);
+  color: var(--text);
   padding: 0 10px;
+  transition: border-color .25s ease;
 }
-.guess-input:focus { outline: none; border-color: var(--primary); }
+.guess-input:focus { outline: none; border-color: var(--game-accent); }
 .guess-input:disabled { opacity: .55; }
-.btn-submit {
-  height: 54px; padding: 0 22px;
-  border: 0; border-radius: 14px;
-  background: var(--primary); color: #fff;
-  font-size: 16px; font-weight: 600; font-family: inherit;
-  cursor: pointer; touch-action: manipulation;
-  box-shadow: 0 2px 8px rgba(192, 57, 43, .3);
-}
-.btn-submit:active { transform: translateY(1px); }
-.btn-submit:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* 提交按钮与输入框等高 */
+.guess-row .g-btn { height: 54px; padding: 0 22px; }
 
-/* 颜色图例 */
-.legend { margin-top: 12px; font-size: 12px; color: #9a917f; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+/* 颜色图例（色块同棋盘三态） */
+.legend {
+  font-size: 12px; color: var(--text-secondary);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px;
+}
 .lg-item { display: inline-flex; align-items: center; gap: 5px; }
 .dot { display: inline-block; width: 11px; height: 11px; border-radius: 4px; }
-.d-g { background: var(--green); }
-.d-y { background: var(--amber); }
-.d-n { background: var(--gray); }
+.d-g { background: var(--tile-correct); }
+.d-y { background: var(--tile-present); }
+.d-n { background: var(--tile-absent); }
 
-/* 用过的字：按最好提示状态着色，方便规划下一猜 */
-.used { width: min(100%, 380px); margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 12px; }
-.used-title { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 2px; margin-bottom: 8px; }
+/* 用过的字：按最好提示状态着色，方便规划下一猜（卡片外观由 .g-card 承担） */
+.used { width: min(100%, 380px); }
 .used-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; max-height: 118px; overflow-y: auto; }
 .u-chip {
   min-width: 32px; height: 30px; padding: 0 7px; border-radius: 8px;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 15px; font-weight: 600;
 }
-.u0 { background: #eeebe3; color: #6f6a5e; }
+.u0 { background: var(--fill); color: var(--text-secondary); }
 .u1 { background: #fbe6c8; color: #8a5200; }
 .u2 { background: #dcefd9; color: #1e6b2e; }
-.used-empty { font-size: 12px; color: #b3ab99; align-self: center; }
+.used-empty { font-size: 12px; color: var(--text-tertiary); align-self: center; }
 
-footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b1a0; padding-bottom: 6px; }
+/* ===== 结算弹层内的成语个性展示（弹窗外框与按钮由 .g-alert 系承担） ===== */
+.r-word {
+  margin: 12px 0 10px;
+  font-family: var(--font-display);
+  font-size: 34px; font-weight: 800;
+  letter-spacing: 8px; text-indent: 8px;
+  color: var(--game-accent);
+}
+.r-explain {
+  margin-top: 10px;
+  font-size: 13.5px; line-height: 1.8;
+  color: var(--text);
+  background: var(--fill); border-radius: 12px;
+  padding: 12px 14px; text-align: left;
+}
+.r-stats { margin-top: 12px; font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
-/* 结算弹层：挂 body 直接子级，避免被带 transform 的容器劫持 fixed 定位 */
-.overlay {
-  position: fixed; inset: 0; z-index: 300;
-  background: rgba(46, 40, 32, .45);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; transition: opacity .2s ease;
-}
-.overlay.open { opacity: 1; }
-.result-card {
-  background: var(--card); border-radius: 18px;
-  box-shadow: 0 18px 50px rgba(46, 40, 32, .3);
-  width: min(92vw, 380px); padding: 26px 22px 22px;
-  text-align: center;
-  transform: translateY(12px); transition: transform .2s ease;
-}
-.overlay.open .result-card { transform: translateY(0); }
-.r-title { font-size: 21px; font-weight: 700; color: #3d3428; }
-.r-word { font-size: 36px; font-weight: 800; letter-spacing: 10px; text-indent: 10px; color: var(--primary); margin: 14px 0 10px; }
-.r-explain { font-size: 14px; line-height: 1.8; color: #4f463a; background: #f8f4ea; border-radius: 12px; padding: 12px 14px; text-align: left; }
-.r-stats { margin-top: 12px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.r-btns { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
-.r-btn {
-  padding: 10px 22px; border-radius: 12px;
-  border: 1px solid var(--line); background: var(--card); color: #4f463a;
-  font-size: 15px; font-family: inherit; cursor: pointer; touch-action: manipulation;
-}
-.r-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
-.r-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-/* 轻提示条 */
+/* 轻提示条（游戏私有组件） */
 .toast {
   position: fixed; left: 50%; top: 16%; z-index: 320;
   transform: translateX(-50%) translateY(8px);
-  background: rgba(46, 40, 32, .9); color: #fff;
+  background: rgba(28, 28, 30, .92); color: #fff;
   font-size: 14px; padding: 9px 18px; border-radius: 999px;
   opacity: 0; transition: opacity .2s ease, transform .2s ease;
   pointer-events: none; max-width: 80vw;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* 规则栏里的绿/黄/灰字义标注（对应棋盘三态） */
+.g-rules .lg { color: #1e6b2e; font-weight: 700; }
+.g-rules .ly { color: #8a5200; font-weight: 700; }
+.g-rules .ln { color: #6f6a5e; font-weight: 700; }
+
+/* 规则栏展开让位时的平滑过渡（共享样式表只管后代元素的减弱动效，此处补自身） */
+.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+
+/* ===== 深色模式私有补丁（共享组件自适应，此处只处理游戏私有暖色） ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tile-line: rgba(221, 213, 196, .22);
+    --tile-line-strong: rgba(185, 174, 153, .38);
+  }
+  .u1 { background: rgba(217, 119, 6, .26); color: #F0B25A; }
+  .u2 { background: rgba(43, 138, 62, .30); color: #7FD98F; }
+  .g-rules .lg { color: #7FD98F; }
+  .g-rules .ly { color: #F0B25A; }
+  .g-rules .ln { color: #A9A29B; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  .g-page { transition: none; }
 }
 </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    .rules-panel .lg { color: #1e6b2e; font-weight: 700; }
-    .rules-panel .ly { color: #8a5200; font-weight: 700; }
-    .rules-panel .ln { color: #6f6a5e; font-weight: 700; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
+    <!-- 返回主页按钮与右侧规则栏样式已统一至 assets/game-ui.css（.g-back-chip / .g-rules 系） -->
+    <!-- 规则栏展开让位与窄屏抽屉行为见 assets/game-ui.css（.g-rules 系） -->
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-  <main class="wrap">
+  <main class="g-wrap wrap">
     <header class="top">
-      <h1>成语猜猜</h1>
-      <p class="sub">每题一个四字成语 · 共 6 次机会 · 逐字给颜色提示</p>
-      <div class="modes">
-        <button type="button" id="modeDaily" class="mode-btn on" aria-pressed="true">每日一题</button>
-        <button type="button" id="modeFree" class="mode-btn" aria-pressed="false">自由练习</button>
+      <h1 class="g-nav-large">成语猜猜</h1>
+      <p class="g-nav-sub">每题一个四字成语 · 共 6 次机会 · 逐字给颜色提示</p>
+      <div class="g-segment" role="group" aria-label="游戏模式">
+        <button type="button" id="modeDaily" class="on" aria-pressed="true">每日一题</button>
+        <button type="button" id="modeFree" aria-pressed="false">自由练习</button>
       </div>
     </header>
 
-    <section class="hud" aria-label="对本信息">
-      <span class="chip" id="hudDate">每日一题</span>
-      <span class="chip" id="hudLeft">剩余 6 次</span>
-      <span class="chip" id="hudStreak">连胜 0</span>
-      <span class="chip" id="hudBest">最高连胜 0</span>
+    <section class="g-hud hud" aria-label="对本信息">
+      <span class="g-badge g-badge-plain g-badge-accent" id="hudDate">每日一题</span>
+      <span class="g-badge g-badge-plain" id="hudLeft">剩余 6 次</span>
+      <span class="g-badge g-badge-plain" id="hudStreak">连胜 0</span>
+      <span class="g-badge g-badge-plain" id="hudBest">最高连胜 0</span>
     </section>
 
     <div class="board" id="board" aria-label="猜词面板：六行四格"></div>
@@ -317,7 +192,7 @@ footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b1a0; 
     <form class="guess-row" id="guessForm" autocomplete="off">
       <input id="guessInput" class="guess-input" type="text" inputmode="text" enterkeyhint="done"
              placeholder="输入四字成语" aria-label="输入四字成语，回车提交">
-      <button class="btn-submit" type="submit">提交</button>
+      <button class="g-btn" type="submit">提交</button>
     </form>
 
     <p class="legend">
@@ -326,23 +201,26 @@ footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b1a0; 
       <span class="lg-item"><span class="dot d-n"></span>没有此字</span>
     </p>
 
-    <section class="used">
-      <h2 class="used-title">用过的字</h2>
+    <section class="used g-card">
+      <h2 class="g-card-title">用过的字</h2>
       <div class="used-list" id="usedList"></div>
     </section>
 
-    <footer>拾光集 · 在线小游戏</footer>
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
   </main>
 
-  <div class="overlay" id="overlay" hidden>
-    <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="rTitle">
-      <p class="r-title" id="rTitle"></p>
-      <p class="r-word" id="rWord"></p>
-      <p class="r-explain" id="rExplain"></p>
-      <p class="r-stats" id="rStats"></p>
-      <div class="r-btns">
-        <button class="r-btn primary" id="rAgain" type="button">再来一局</button>
-        <button class="r-btn" id="rClose" type="button">关闭</button>
+  <!-- 结算弹层：挂 body 直接子级，避免被带 transform 的容器劫持 fixed 定位 -->
+  <div class="g-alert-mask" id="overlay" hidden>
+    <div class="g-alert" role="alertdialog" aria-modal="true" aria-labelledby="rTitle">
+      <div class="g-alert-body">
+        <h2 class="g-alert-title" id="rTitle"></h2>
+        <p class="r-word" id="rWord"></p>
+        <p class="r-explain" id="rExplain"></p>
+        <p class="r-stats" id="rStats"></p>
+      </div>
+      <div class="g-alert-actions">
+        <button class="g-alert-btn" id="rClose" type="button">关闭</button>
+        <button class="g-alert-btn default" id="rAgain" type="button">再来一局</button>
       </div>
     </div>
   </div>
@@ -1126,9 +1004,9 @@ footer { margin-top: 26px; text-align: center; font-size: 12px; color: #b9b1a0; 
   startGame('daily');
   })();
   </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>
