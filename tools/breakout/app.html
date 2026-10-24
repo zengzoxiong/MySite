@@ -6,180 +6,62 @@
 <title>打砖块 - 拾光集</title>
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/breakout/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-h1{font-size:19px;font-weight:700}
-.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368;flex-wrap:wrap}
-.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
-.lives{display:flex;align-items:center;gap:5px}
-.life{width:10px;height:10px;border-radius:50%;background:#e03131;display:inline-block}
-.life.lost{background:#d9dce1}
-button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
-button:active{transform:scale(.96)}
-.btn-plain{background:#f1f3f4;color:#3c4043;padding:7px 14px;font-weight:500}
-.btn-ai{background:#7048e8;color:#fff;padding:7px 14px;font-weight:600}
-.btn-ai.on{background:#0ca678;animation:aiPulse 1.5s ease-in-out infinite}
-@keyframes aiPulse{0%,100%{box-shadow:0 0 0 0 rgba(18,184,134,.5)}55%{box-shadow:0 0 0 8px rgba(18,184,134,0)}}
-.stage{position:relative}
-canvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:12px;text-align:center;cursor:pointer}
-[hidden]{display:none!important}
-.overlay h2{font-size:24px;margin-bottom:10px;color:#202124}
-.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
-.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
-footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+/* ===== 打砖块 · 个性色：砖块红 =====
+   字体栈、色彩令牌、按钮、覆盖层、规则栏等组件基线统一由共享样式表 game-ui.css 提供，
+   深浅色跟随系统；此处只保留游戏私有视觉与少量页面级微调。 */
+:root { --game-accent: #FF3B30; }
 
-<main class="card">
-  <header>
-    <h1>打砖块</h1>
-    <div class="hud">
-      <span>分数 <b id="score">0</b></span>
-      <span>关卡 <b id="level">1</b></span>
-      <span>最高 <b id="best">0</b></span>
+/* 命（生命）圆点：游戏私有状态视觉，JS 依 .life / .lost 类名动态生成，类名保持不动 */
+.lives { display: flex; align-items: center; gap: 5px; }
+.life { width: 10px; height: 10px; border-radius: 50%; background: var(--game-accent); display: inline-block; }
+.life.lost { background: var(--fill); }
+
+/* 舞台覆盖层整块可点（保留 JS 中 overlay 点击即开始/继续的交互，仅补指针反馈） */
+.g-overlay { cursor: pointer; }
+
+/* 规则栏展开时主体让位的平滑过渡（共享样式表只提供位移本身） */
+.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap g-wrap-wide">
+  <header class="g-nav">
+    <h1 class="g-nav-title">打砖块</h1>
+    <div class="g-hud-bar">
+      <span class="g-stat-inline">分数 <b id="score">0</b></span>
+      <span class="g-stat-inline">关卡 <b id="level">1</b></span>
+      <span class="g-stat-inline">最高 <b id="best">0</b></span>
       <span id="lives" class="lives"></span>
-      <button id="aiBtn" class="btn-ai" type="button" aria-pressed="false">AI 代玩</button>
-      <button id="pauseBtn" class="btn-plain" type="button">暂停</button>
+      <div class="g-ai-group">
+        <button id="aiBtn" class="g-btn g-ai-btn g-btn-sm" type="button" aria-pressed="false">AI 代玩</button>
+        <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
+      </div>
+      <button id="pauseBtn" class="g-btn g-btn-gray g-btn-sm" type="button">暂停</button>
     </div>
   </header>
-  <div class="stage">
+  <span class="g-ai-note">AI 代玩成绩不计最高分</span>
+  <div class="g-stage">
     <canvas id="cv" width="640" height="480"></canvas>
-    <div class="overlay" id="ovStart">
-      <div>
-        <h2>打砖块</h2>
-        <p>移动挡板接住小球，打光全部砖块进入下一关<br>球碰到挡板的位置不同，反弹角度也不同<br>共 3 条命，越往后球速越快</p>
-        <button id="btnStart" type="button">开始游戏</button>
-      </div>
+    <div class="g-overlay" id="ovStart">
+      <h2 class="g-overlay-title">打砖块</h2>
+      <p class="g-overlay-text">移动挡板接住小球，打光全部砖块进入下一关<br>球碰到挡板的位置不同，反弹角度也不同<br>共 3 条命，越往后球速越快</p>
+      <button id="btnStart" class="g-btn" type="button">开始游戏</button>
     </div>
-    <div class="overlay" id="ovOver" hidden>
-      <div>
-        <h2>游戏结束</h2>
-        <p id="overInfo"></p>
-        <button id="btnRestart" type="button">再来一局</button>
-      </div>
+    <div class="g-overlay" id="ovOver" hidden>
+      <h2 class="g-overlay-title">游戏结束</h2>
+      <p class="g-overlay-text" id="overInfo"></p>
+      <button id="btnRestart" class="g-btn" type="button">再来一局</button>
     </div>
-    <div class="overlay" id="ovPause" hidden>
-      <div>
-        <h2>已暂停</h2>
-        <button id="btnResume" type="button">继续游戏</button>
-      </div>
+    <div class="g-overlay" id="ovPause" hidden>
+      <h2 class="g-overlay-title">已暂停</h2>
+      <button id="btnResume" class="g-btn" type="button">继续游戏</button>
     </div>
   </div>
-  <footer>拾光集 · 在线小游戏</footer>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 <script>
 (() => {
@@ -356,7 +238,7 @@ function gameOver(){
 function setAi(on){
   aiOn=on;
   aiBtn.textContent=on?'停止 AI':'AI 代玩';
-  aiBtn.classList.toggle('on',on);
+  aiBtn.classList.toggle('is-running',on);
   aiBtn.setAttribute('aria-pressed',on?'true':'false');
   if(aiRestartTimer){clearTimeout(aiRestartTimer);aiRestartTimer=null;}
   if(on){
@@ -476,9 +358,9 @@ syncHud();setPanel();
 requestAnimationFrame(loop);
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
     
       <h3>玩法</h3>

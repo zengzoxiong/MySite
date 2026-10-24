@@ -6,83 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>石头剪刀布 - 拾光集</title>
     <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/rock-paper-scissors/app.html">
+    <!-- 共享 UI 设计系统（Apple HIG），相对路径自 tools/rock-paper-scissors/ 出发 -->
+    <link rel="stylesheet" href="../../assets/game-ui.css">
     <style>
+        /* 游戏个性色：紫（保留原紫调） */
         :root {
-            --accent: #8b5cf6;
-            --accent-soft: #8b5cf633;
-            --bg: #0f172a;
-            --text: #0f172a;
-            --text-muted: #475569;
-            --border: #e2e8f0;
+            --game-accent: #AF52DE;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--text);
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.3rem;
-            margin-bottom: 8px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .scoreboard {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8fafc;
-            border-radius: 12px;
-        }
-
-        .score-item {
-            text-align: center;
-        }
-
-        .score-item .label {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .score-item .value {
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--accent);
-        }
+        /* ---------- 游戏私有视觉：猜拳战场与手势元素（保留个性，外观统一走共享令牌） ---------- */
 
         .battle-ground {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            margin: 40px 0;
+            margin: 28px 0;
             min-height: 180px;
         }
 
@@ -118,169 +56,115 @@
         .vs {
             font-size: 32px;
             font-weight: 700;
-            color: var(--accent);
-            padding: 0 20px;
+            color: var(--game-accent);
+            padding: 0 12px;
         }
 
         .choices {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
+            gap: 16px;
+            margin: 24px 0;
         }
 
+        /* 手势键：游戏个性元素（大 emoji 键帽），交互语言对齐 g-btn（按压缩放 / 焦点圈 / 禁用态） */
         .choice-btn {
+            appearance: none;
+            -webkit-appearance: none;
             width: 100px;
             height: 100px;
-            border: 3px solid var(--border);
-            background: white;
-            border-radius: 16px;
+            margin: 0;
+            padding: 0;
+            border: 2px solid var(--separator);
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            font-family: inherit;
             font-size: 48px;
             cursor: pointer;
-            transition: all 0.2s;
+            touch-action: manipulation;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform var(--dur-press) var(--ease-spring),
+                        border-color var(--dur-press) var(--ease-out),
+                        background-color var(--dur-press) var(--ease-out),
+                        box-shadow var(--dur-press) var(--ease-out),
+                        opacity var(--dur-press) var(--ease-out);
         }
 
         .choice-btn:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+            border-color: var(--game-accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-float);
+        }
+
+        .choice-btn:active:not(:disabled) {
+            transform: scale(.96);
+            opacity: .85;
+        }
+
+        .choice-btn:focus-visible {
+            outline: 2px solid var(--game-accent);
+            outline-offset: 2px;
+        }
+
+        .choice-btn:disabled {
+            opacity: .35;
+            cursor: default;
         }
 
         .choice-btn.selected {
-            border-color: var(--accent);
-            background: var(--accent-soft);
+            border-color: var(--game-accent);
+            background: var(--fill);
+            background: color-mix(in srgb, var(--game-accent) 16%, transparent);
         }
 
+        /* 单手结果横幅（回合内联提示）：语义色沿用徽标系令牌，深浅色自适应 */
         .result-message {
             text-align: center;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 24px;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            font-size: 20px;
             font-weight: 700;
-            margin: 20px 0;
+            margin: 16px 0;
             display: none;
         }
 
         .result-message.show {
             display: block;
-            animation: appear 0.3s ease-out;
-        }
-
-        @keyframes appear {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            animation: g-pop var(--dur-spring) var(--ease-spring);
         }
 
         .result-message.win {
-            background: #dcfce7;
-            color: #16a34a;
+            background: rgba(52, 199, 89, .16);
+            background: color-mix(in srgb, var(--green) 16%, transparent);
+            color: var(--green);
         }
 
         .result-message.lose {
-            background: #fee2e2;
-            color: #dc2626;
+            background: rgba(255, 59, 48, .16);
+            background: color-mix(in srgb, var(--red) 16%, transparent);
+            color: var(--red);
         }
 
         .result-message.draw {
-            background: #fef3c7;
-            color: #f59e0b;
+            background: rgba(255, 149, 0, .16);
+            background: color-mix(in srgb, var(--orange) 16%, transparent);
+            color: var(--orange);
         }
 
-        .reset-btn {
-            display: block;
-            margin: 20px auto 0;
-            padding: 12px 24px;
-            background: #64748b;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .reset-btn:hover {
-            background: #475569;
-        }
-
+        /* 按钮行：共享 .g-btn-row 之上补充卡片内留白与居中 */
         .btn-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 14px;
             margin: 20px 0 0;
+            justify-content: center;
         }
 
-        .btn-row .reset-btn {
-            margin: 0;
-        }
-
-        /* AI 代玩按钮与状态标签 */
-        .ai-btn {
-            padding: 12px 24px;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .ai-btn:hover {
-            background: #15803d;
-        }
-
-        .ai-btn.ai-on {
-            background: #dc2626;
-        }
-
-        .ai-btn.ai-on:hover {
-            background: #b91c1c;
-        }
-
-        [hidden] {
-            display: none !important;
-        }
-
-        .ai-tag {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 4px 14px;
-            border-radius: 999px;
-            background: #16a34a;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .muted {
-            color: var(--text-muted);
-            font-size: 13px;
-            text-align: center;
-        }
-
+        /* 对战记录：卡片内嵌的浅色分组块 */
         .history {
             margin-top: 20px;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 12px;
-        }
-
-        .history h3 {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
+            padding: 14px 16px;
+            background: var(--fill-secondary);
+            border-radius: var(--radius);
         }
 
         .history-list {
@@ -290,95 +174,76 @@
         }
 
         .history-item {
-            padding: 6px 12px;
-            background: white;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 5px 10px;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
         }
 
-        .history-item.win {
-            border: 1px solid #16a34a;
-            color: #16a34a;
-        }
+        .history-item.win { color: var(--green); }
+        .history-item.lose { color: var(--red); }
+        .history-item.draw { color: var(--orange); }
 
-        .history-item.lose {
-            border: 1px solid #dc2626;
-            color: #dc2626;
-        }
-
-        .history-item.draw {
-            border: 1px solid #f59e0b;
-            color: #f59e0b;
-        }
-    
-        .tool-doc-link,
-        .tool-home-link {
-            position: fixed;
-            top: 16px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #0f172a;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            text-decoration: none;
-            letter-spacing: 0.02em;
-            z-index: 9999;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-        }
-
+        /* 右上角「说明」浮钮：复用 g-back-chip 外观，仅改定位 */
         .tool-doc-link {
-            right: 16px;
+            left: auto;
+            right: 12px;
         }
 
-        .tool-home-link {
-            right: 74px;
-        }
-
-        .tool-doc-link:hover,
-        .tool-home-link:hover {
-            background: rgba(255, 255, 255, 1);
-            border-color: rgba(15, 23, 42, 0.2);
-            transform: translateY(-1px);
+        /* 窄屏：手势键与战场留出安全间距 */
+        @media (max-width: 420px) {
+            .choices { gap: 12px; }
+            .choice-btn {
+                width: 84px;
+                height: 84px;
+                font-size: 40px;
+            }
+            .battle-ground {
+                margin: 20px 0;
+                min-height: 150px;
+            }
+            .choice-display {
+                font-size: 64px;
+                height: 96px;
+            }
+            .tool-doc-link { right: 8px; }
         }
     </style>
 </head>
-<body>
-    <a class="tool-home-link" href="../../index.html">首页</a>
-    <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
-        <div class="header">
-            <h1>✌️ 石头剪刀布</h1>
-            <p>经典猜拳游戏，看看谁更厉害</p>
-            <p class="ai-tag" id="aiTag" hidden>🤖 AI 代玩中 · 自动出招</p>
-        </div>
-        <div class="card">
-            <div class="scoreboard">
-                <div class="score-item">
-                    <div class="label">玩家</div>
-                    <div class="value" id="playerScore">0</div>
-                </div>
-                <div class="score-item">
-                    <div class="label">平局</div>
-                    <div class="value" id="drawScore">0</div>
-                </div>
-                <div class="score-item">
-                    <div class="label">电脑</div>
-                    <div class="value" id="computerScore">0</div>
-                </div>
-            </div>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+    <a class="g-back-chip tool-doc-link" href="index.html">说明</a>
+    <main class="g-wrap">
+        <nav class="g-nav"><h1 class="g-nav-title">石头剪刀布</h1></nav>
+        <h1 class="g-nav-large">✌️ 石头剪刀布</h1>
+        <p class="g-nav-sub">经典猜拳游戏，看看谁更厉害</p>
 
+        <div class="g-hud">
+            <div class="g-stat">
+                <span class="g-stat-label">玩家</span>
+                <span class="g-stat-value g-num" id="playerScore">0</span>
+            </div>
+            <div class="g-stat">
+                <span class="g-stat-label">平局</span>
+                <span class="g-stat-value g-num" id="drawScore">0</span>
+            </div>
+            <div class="g-stat">
+                <span class="g-stat-label">电脑</span>
+                <span class="g-stat-value g-num" id="computerScore">0</span>
+            </div>
+        </div>
+        <span class="g-ai-note">AI 代玩成绩不计最高分</span>
+
+        <div class="g-card">
             <div class="battle-ground">
                 <div class="player-choice">
                     <div class="choice-display" id="playerDisplay">❓</div>
-                    <p class="muted">你</p>
+                    <p class="g-tips">你</p>
                 </div>
                 <div class="vs">VS</div>
                 <div class="computer-choice">
                     <div class="choice-display" id="computerDisplay">❓</div>
-                    <p class="muted">电脑</p>
+                    <p class="g-tips">电脑</p>
                 </div>
             </div>
 
@@ -390,17 +255,22 @@
                 <button class="choice-btn" data-choice="paper" title="布">✋</button>
             </div>
 
-            <div class="btn-row">
-                <button class="ai-btn" id="aiBtn" aria-pressed="false">🤖 AI 代玩</button>
-                <button class="reset-btn" id="resetBtn">🔄 重新开始</button>
+            <div class="g-btn-row btn-row">
+                <div class="g-ai-group">
+                    <button class="g-btn g-ai-btn" id="aiBtn" aria-pressed="false">AI 代玩</button>
+                    <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+                </div>
+                <button class="g-btn g-btn-gray" id="resetBtn">重新开始</button>
             </div>
 
             <div class="history" id="history" style="display: none;">
-                <h3>对战记录</h3>
+                <h3 class="g-card-title">对战记录</h3>
                 <div class="history-list" id="historyList"></div>
             </div>
         </div>
-    </div>
+
+        <footer class="g-foot">拾光集 · 在线小游戏</footer>
+    </main>
 
     <script>
         const choices = {
@@ -563,8 +433,9 @@
             playerDisplay.textContent = '✊';
             computerDisplay.textContent = '✊';
 
-            // 禁用按钮
+            // 禁用按钮；重开键同步禁用，防止动画期间重开后旧回合仍计入新局
             choiceBtns.forEach(btn => btn.disabled = true);
+            resetBtn.disabled = true;
 
             setTimeout(() => {
                 const computerChoice = randomChoice(Math.random);
@@ -597,6 +468,7 @@
                 roundBusy = false;
                 if (!aiOn) choiceBtns.forEach(btn => btn.disabled = false);
                 if (aiOn) scheduleAiRound();
+                resetBtn.disabled = false;
             }, 1000);
         }
 
@@ -636,8 +508,8 @@
 
         function setAi(on) {
             aiOn = on;
-            aiBtn.textContent = aiOn ? '🛑 停止 AI 代玩' : '🤖 AI 代玩';
-            aiBtn.classList.toggle('ai-on', aiOn);
+            aiBtn.textContent = aiOn ? '停止代玩' : 'AI 代玩';
+            aiBtn.classList.toggle('is-running', aiOn);
             aiBtn.setAttribute('aria-pressed', String(aiOn));
             aiTag.hidden = !aiOn;
             choiceBtns.forEach(btn => btn.disabled = aiOn || roundBusy);

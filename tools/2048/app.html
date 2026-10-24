@@ -7,58 +7,14 @@
   <meta name="description" content="拾光集在线小游戏：2048，方向键或滑动合并相同数字方块，纯本地运行，无需联网。">
   <link rel="icon" href="../../favicon.svg">
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/2048/app.html">
+  <link rel="stylesheet" href="../../assets/game-ui.css">
   <style>
-    /* ===== 2048 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-    [hidden] { display: none !important; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #faf6ef;
-      color: #6b6157;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 26px 16px 40px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .wrap { width: 100%; max-width: 460px; }
+    /* ===== 2048 游戏私有样式：棋盘与方块视觉保留，外围组件统一走共享样式表 ===== */
+    /* 个性色：橙（暖色方块），组件强调色一行切换 */
+    :root { --game-accent: #FF9500; }
 
-    header { margin-bottom: 14px; }
-    h1 { font-size: 40px; line-height: 1.1; color: #7b6f63; letter-spacing: 2px; }
-    .sub { margin-top: 6px; font-size: 13px; color: #a2937f; }
-
-    .hud { display: flex; gap: 10px; margin-bottom: 14px; }
-    .stat {
-      flex: 1;
-      background: #fff;
-      border: 1px solid #eee3d3;
-      border-radius: 12px;
-      padding: 8px 10px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(170, 145, 110, .10);
-    }
-    .stat .lab { display: block; font-size: 12px; color: #ab9c88; letter-spacing: 3px; }
-    .stat .val { display: block; margin-top: 2px; font-size: 22px; font-weight: 700; color: #7b6f63; font-variant-numeric: tabular-nums; }
-    .stat.bump { animation: bump .18s ease; }
-    @keyframes bump { 50% { transform: scale(1.07); } }
-
-    .btn {
-      border: 0;
-      background: #8f7a66;
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 12px;
-      padding: 0 18px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(143, 122, 102, .35);
-      touch-action: manipulation;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn.primary { background: #e08a3c; }
-    .btn.auto-on { background: #2f9e44; box-shadow: 0 2px 10px rgba(47, 158, 68, .4); }
-    .hud .btn { align-self: stretch; }
+    /* 规则栏展开时内容列平滑让位（位移量由共享样式 .g-page.rules-open 负责） */
+    .g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
     /* 棋盘：16 个底格 + 绝对定位方块，坐标全部由 CSS 变量 --x/--y 经 calc 换算，天然响应式 */
     .board {
@@ -68,10 +24,10 @@
       aspect-ratio: 1;
       background: #b9ab9c;
       border-radius: 14px;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
     }
+    /* 结算层圆角随棋盘走 */
+    .board .g-overlay { border-radius: 14px; }
+
     .cellbg, .tile {
       --tw: calc((100% - 5 * var(--gap)) / 4);
       position: absolute;
@@ -97,7 +53,7 @@
     .len3 { font-size: calc(var(--tw-px, 80px) * .36); }
     .len4 { font-size: calc(var(--tw-px, 80px) * .27); }
 
-    /* 经典配色 */
+    /* 经典配色（游戏个性视觉，原样保留） */
     .v2    { background: #eee4da; color: #776e65; }
     .v4    { background: #ede0c8; color: #776e65; }
     .v8    { background: #f2b179; color: #fff9f0; }
@@ -117,169 +73,47 @@
     .tile.pop { animation: pop .18s ease; }
     @keyframes pop { 50% { transform: scale(1.22); } }
 
-    /* 胜负弹层（hidden + 同步回流 + open，保证过渡生效） */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      border-radius: 14px;
-      background: rgba(253, 249, 242, .86);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-align: center;
-      opacity: 0;
-      transition: opacity .2s ease;
-    }
-    .overlay.open { opacity: 1; }
-    .ov-title { font-size: 34px; font-weight: 800; color: #7b6f63; }
-    .overlay.win .ov-title { color: #d98b28; }
-    .ov-sub { font-size: 14px; color: #8d8175; padding: 0 16px; }
-    .ov-btns { display: flex; gap: 10px; margin-top: 8px; }
-    .ov-btns .btn { padding: 10px 18px; }
+    /* 结算层按钮排布（按钮本体统一用 .g-alert-btn，规范 §5 第 8 条） */
+    .ov-btns .g-alert-btn { flex: 1 1 auto; min-width: 96px; }
 
-    .hint { margin-top: 14px; text-align: center; font-size: 13px; color: #ab9c88; }
-    footer { margin-top: 28px; text-align: center; font-size: 12px; color: #bfb2a0; }
+    /* 胜利态标题换强调色（私有 .win 与 g-* 共存，规范 §5 第 8 条） */
+    .g-overlay.win .g-overlay-title { color: var(--game-accent); }
   </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-  <main class="wrap">
+  <main class="g-wrap">
     <header>
-      <h1>2048</h1>
-      <p class="sub">滑动合并相同数字，目标 2048</p>
+      <h1 class="g-nav-large">2048</h1>
+      <p class="g-nav-sub">滑动合并相同数字，目标 2048</p>
     </header>
 
-    <section class="hud">
-      <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
-      <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
-      <button class="btn" id="newBtn" type="button">新游戏</button>
-      <button class="btn primary" id="autoBtn" type="button">AI 代玩</button>
+    <section class="g-hud">
+      <div class="g-stat" id="scoreStat"><span class="g-stat-label">分数</span><span class="g-stat-value g-num" id="score">0</span></div>
+      <div class="g-stat"><span class="g-stat-label">最高分</span><span class="g-stat-value g-num" id="best">0</span></div>
     </section>
 
-    <div class="board" id="board">
-      <div class="overlay" id="overlay" hidden>
-        <p class="ov-title" id="ovTitle"></p>
-        <p class="ov-sub" id="ovSub"></p>
-        <div class="ov-btns">
-          <button class="btn" id="ovContinue" type="button" hidden>继续挑战</button>
-          <button class="btn primary" id="ovRestart" type="button">再来一局</button>
+    <div class="g-hud-bar">
+      <button class="g-btn g-btn-gray" id="newBtn" type="button">新游戏</button>
+      <div class="g-ai-group">
+        <button class="g-btn g-ai-btn" id="autoBtn" type="button">AI 代玩</button>
+        <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
+      </div>
+    </div>
+
+    <div class="board g-stage" id="board">
+      <div class="g-overlay g-overlay-fade" id="overlay" hidden>
+        <p class="g-overlay-title" id="ovTitle"></p>
+        <p class="g-overlay-text" id="ovSub"></p>
+        <div class="g-btn-row ov-btns">
+          <button class="g-alert-btn" id="ovContinue" type="button" hidden>继续挑战</button>
+          <button class="g-alert-btn default" id="ovRestart" type="button">再来一局</button>
         </div>
       </div>
     </div>
 
-    <footer>拾光集 · 在线小游戏</footer>
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
   </main>
 
   <script>
@@ -405,9 +239,9 @@
   function addScore(n) {
     score += n;
     scoreEl.textContent = score;
-    scoreStat.classList.remove('bump');
+    scoreStat.classList.remove('g-bump');
     void scoreStat.offsetWidth;
-    scoreStat.classList.add('bump');
+    scoreStat.classList.add('g-bump');
     if (score > best) {
       best = score;
       bestEl.textContent = best;
@@ -728,9 +562,9 @@
   }
   newGame();
   </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
     
       <h3>玩法</h3>

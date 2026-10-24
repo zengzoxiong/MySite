@@ -7,203 +7,148 @@
 <meta name="description" content="手速反应测试：等待面板变绿后尽快点击测出毫秒级反应时间，另有瞄准测试模式，5 次平均与历史最佳保存在本地，支持 AI 代玩自动演示。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/reaction-test/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-:root { --primary:#2563eb; --danger:#c92a2a; --ink:#1f2430; --muted:#6b7280; }
-* { box-sizing:border-box; margin:0; padding:0; }
-button { font-family:inherit; }
-[hidden] { display:none !important; }
-body {
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  background:#f2f4f7; color:var(--ink); min-height:100vh;
-  display:flex; justify-content:center; padding:24px 14px;
-  -webkit-tap-highlight-color:transparent;
-}
-.wrap { width:100%; max-width:620px; }
-.head { text-align:center; margin-bottom:16px; }
-.head h1 { font-size:26px; letter-spacing:1px; }
-.head .sub { color:var(--muted); font-size:14px; margin-top:6px; }
-.panel { background:#fff; border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(31,41,55,.08); }
-/* 模式切换 */
-.tabs { display:flex; justify-content:center; margin-bottom:14px; }
-.seg { display:inline-flex; background:#eef1f5; border-radius:10px; padding:3px; }
-.tab { border:0; background:transparent; padding:8px 18px; border-radius:8px; font-size:14px; color:var(--muted); cursor:pointer; }
-.tab.active { background:#fff; color:var(--primary); font-weight:600; box-shadow:0 1px 3px rgba(31,41,55,.12); }
-/* 大面板：可点击区域，颜色随状态切换 */
-.pad { position:relative; border-radius:14px; min-height:220px; overflow:hidden;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding:16px; cursor:pointer; user-select:none;
-  transition:background-color .15s ease; touch-action:manipulation; }
-.pad.idle, .pad.between { background:#eef1f5; }
-.pad.wait { background:#e8590c; color:#fff; }
-.pad.ready { background:#2f9e44; color:#fff; }
-.pad.fail { background:var(--danger); color:#fff; }
-.pad.done { background:#e6f4ea; }
-.pad-main { font-size:26px; font-weight:700; }
-.pad-sub { font-size:13.5px; margin-top:8px; opacity:.85; }
-.pad.aim { min-height:300px; }
-/* 瞄准测试的目标按钮 */
-.target { position:absolute; border:0; background:transparent; padding:0; cursor:pointer; z-index:5; touch-action:manipulation; }
-.target svg { width:100%; height:100%; display:block; }
-/* 每轮成绩列表 */
-.chips { min-height:30px; margin-top:12px; text-align:center; }
-.chip { display:inline-block; background:#eef1f5; border-radius:999px; padding:4px 11px; font-size:13px; margin:3px 4px 0 0; font-variant-numeric:tabular-nums; }
-.result-row { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:12px; font-size:14px; color:var(--muted); }
-.result-row b { color:var(--ink); font-size:16px; margin-left:2px; }
-.row-actions { display:flex; justify-content:center; margin-top:12px; }
-.btn { border:0; border-radius:10px; padding:8px 18px; font-size:13.5px; cursor:pointer; }
-.btn.ghost { background:#eef1f5; color:var(--ink); }
-/* AI 代玩按钮：醒目蓝色，运行中切换为红色停止态 */
-.btn.ai-btn { background:var(--primary); color:#fff; padding:10px 26px; font-size:14.5px; font-weight:600; letter-spacing:1px; box-shadow:0 2px 10px rgba(37,99,235,.32); }
-.btn.ai-btn.ai-on { background:var(--danger); box-shadow:0 2px 10px rgba(201,42,42,.32); }
-.ai-row { display:flex; justify-content:center; align-items:center; gap:12px; margin:2px 0 12px; }
-.ai-tag { color:#188038; font-size:13px; font-weight:600; }
-.foot { text-align:center; color:#9aa3af; font-size:13px; margin-top:18px; }
-@media (max-width:420px) { .head h1 { font-size:22px; } .pad-main { font-size:22px; } }
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
+    /* ===== 手速反应测试 · 拾光集自建小游戏（纯静态零依赖） =====
+       组件语言遵循 docs/game-ui-design.md 与共享样式表 assets/game-ui.css（Apple HIG）。
+       本页个性色为红（紧张反应）；私有样式只保留游戏个性视觉：
+       状态大面板（等待橙 / 命中绿 / 抢跳红）、瞄准靶心与每轮成绩圆片。 */
+    :root { --game-accent: #FF3B30; }
+
+    /* 私有按钮复位：靶心等游戏私有按钮继承字体并保留点按反馈 */
+    button {
+      font: inherit;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: inherit;
       cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+
+    /* 模式切换：分段控件限宽居中 */
+    .tabs { display: flex; justify-content: center; margin-bottom: 14px; }
+    .tabs .g-segment { width: min(100%, 320px); }
+
+    /* AI 代玩行：按钮与运行徽标居中，成绩豁免标注单独占一行 */
+    .ai-row {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px 12px;
+      margin: 2px 0 4px;
+    }
+    .ai-row .g-ai-note { flex: 1 0 100%; text-align: center; }
+
+    /* 两个模式内容块的纵向节奏与按钮行居中 */
+    .mode-box { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .row-actions { display: flex; justify-content: center; }
+
+    /* 大面板：可点击区域，颜色随状态切换（游戏个性视觉保留，不做缩放以免带动瞄准靶位移） */
+    .pad {
+      position: relative;
+      border-radius: var(--radius-lg);
+      min-height: 220px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      text-align: center;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      transition: background-color .15s ease;
       touch-action: manipulation;
     }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+    .pad-main { margin: 0; font-size: 26px; font-weight: 700; }
+    .pad-sub { margin: 8px 0 0; font-size: 13.5px; opacity: .85; }
+    .pad.idle, .pad.between { background: var(--fill); color: var(--text); }
+    .pad.wait { background: #e8590c; color: #fff; }
+    .pad.ready { background: #2f9e44; color: #fff; }
+    .pad.fail { background: #c92a2a; color: #fff; }
+    .pad.done { background: #e6f4ea; color: #1f2430; }
+    .pad.aim { min-height: 300px; }
 
-<main class="wrap">
-  <header class="head">
-    <h1>手速反应测试</h1>
-    <p class="sub">测测你的反应有多少毫秒</p>
+    /* 瞄准测试的目标按钮（靶心 SVG 为游戏个性视觉） */
+    .target {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      z-index: 5;
+      touch-action: manipulation;
+    }
+    .target svg { width: 100%; height: 100%; display: block; }
+
+    /* 每轮成绩圆片（脚本按 .chip 生成，类名不动） */
+    .chips { min-height: 30px; text-align: center; }
+    .chip {
+      display: inline-block;
+      background: var(--fill);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 13px;
+      margin: 3px 4px 0 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 私有亮色的深色适配：完成态面板换深底浅字，其余跟随共享令牌 */
+    @media (prefers-color-scheme: dark) {
+      .pad.done { background: #14351f; color: #d3f0dd; }
+    }
+
+    @media (max-width: 420px) {
+      .pad-main { font-size: 22px; }
+    }
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap">
+  <header>
+    <h1 class="g-nav-large">手速反应测试</h1>
+    <p class="g-nav-sub">测测你的反应有多少毫秒</p>
   </header>
-  <section class="panel">
-    <div class="tabs" role="tablist" aria-label="模式切换">
-      <button id="tabReact" class="tab active" type="button" role="tab" aria-selected="true">经典反应</button>
-      <button id="tabAim" class="tab" type="button" role="tab" aria-selected="false">瞄准测试</button>
+
+  <section class="g-card">
+    <div class="tabs">
+      <div class="g-segment" role="tablist" aria-label="模式切换">
+        <button id="tabReact" class="on" type="button" role="tab" aria-selected="true">经典反应</button>
+        <button id="tabAim" type="button" role="tab" aria-selected="false">瞄准测试</button>
+      </div>
     </div>
 
     <div class="ai-row">
-      <button id="aiBtn" class="btn ai-btn" type="button" aria-pressed="false">AI 代玩</button>
-      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计历史最佳</span>
+      <button id="aiBtn" class="g-btn g-ai-btn" type="button" aria-pressed="false">AI 代玩</button>
+      <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+      <span class="g-ai-note">AI 代玩成绩不计历史最佳</span>
     </div>
 
     <!-- 模式一：经典反应 -->
-    <div id="reactBox">
+    <div id="reactBox" class="mode-box">
       <div id="reactPad" class="pad idle" role="button" tabindex="0" aria-label="反应测试面板，点击或按回车开始">
         <p id="reactMain" class="pad-main">点击开始</p>
         <p id="reactSub" class="pad-sub">面板变绿后立刻点击，共 5 轮</p>
       </div>
       <div id="reactChips" class="chips" aria-label="本轮各次成绩"></div>
-      <div class="result-row">
-        <span>本轮平均 <b id="reactAvg">--</b></span>
-        <span>历史最佳 <b id="reactBest">--</b></span>
+      <div class="g-hud">
+        <div class="g-stat"><span class="g-stat-label">本轮平均</span><span class="g-stat-value g-num" id="reactAvg">--</span></div>
+        <div class="g-stat"><span class="g-stat-label">历史最佳</span><span class="g-stat-value g-num" id="reactBest">--</span></div>
       </div>
-      <div class="row-actions"><button id="reactReset" class="btn ghost" type="button">重置本轮</button></div>
+      <div class="row-actions"><button id="reactReset" class="g-btn g-btn-gray" type="button">重置本轮</button></div>
     </div>
 
     <!-- 模式二：瞄准测试 -->
-    <div id="aimBox" hidden>
+    <div id="aimBox" class="mode-box" hidden>
       <div id="aimPad" class="pad idle aim" role="button" tabindex="0" aria-label="瞄准测试面板，点击或按回车开始">
         <p id="aimMain" class="pad-main">点击开始</p>
         <p id="aimSub" class="pad-sub">目标随机出现后尽快点中它，共 5 轮</p>
@@ -218,14 +163,15 @@ body {
         </button>
       </div>
       <div id="aimChips" class="chips" aria-label="本轮各次成绩"></div>
-      <div class="result-row">
-        <span>本轮平均 <b id="aimAvg">--</b></span>
-        <span>历史最佳 <b id="aimBest">--</b></span>
+      <div class="g-hud">
+        <div class="g-stat"><span class="g-stat-label">本轮平均</span><span class="g-stat-value g-num" id="aimAvg">--</span></div>
+        <div class="g-stat"><span class="g-stat-label">历史最佳</span><span class="g-stat-value g-num" id="aimBest">--</span></div>
       </div>
-      <div class="row-actions"><button id="aimReset" class="btn ghost" type="button">重置本轮</button></div>
+      <div class="row-actions"><button id="aimReset" class="g-btn g-btn-gray" type="button">重置本轮</button></div>
     </div>
   </section>
-  <footer class="foot">拾光集 · 在线小游戏</footer>
+
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 
 <script>
@@ -401,6 +347,7 @@ function finishReact() {
   reactBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onReactPad() {
+  if (react.phase === 'done') resetReact();   // done 态点击 = 再来一组：先按「重置本轮」归零，保证各组独立 5 轮
   const ev = reactClickCore(react, performance.now(), Math.random);
   if (ev === 'ignore') return;
   clearTimeout(reactTimer);
@@ -436,6 +383,7 @@ function renderAim() {
     setAimText(n ? aim.results[n - 1] + ' ms' : '点击开始',
       n ? '点击面板继续第 ' + (n + 1) + ' 轮' : '目标随机出现后尽快点中它，共 ' + ROUNDS + ' 轮');
   } else if (aim.phase === 'waiting') {
+    aimPad.className = 'pad idle aim';        // 等待期回归空闲底色，避免上一组 done 绿延续到新组
     setAimText('盯紧面板…', '目标随时出现');
   } else if (aim.phase === 'done') {
     aimPad.className = 'pad done aim';
@@ -469,6 +417,7 @@ function finishAim() {
   aimBest.textContent = shown ? shown + ' ms' : '--';
 }
 function onAimPad() {
+  if (aim.phase === 'done') resetAim();       // done 态点击 = 再来一组：先按「重置本轮」归零，保证各组独立 5 轮
   const ev = aimPadClickCore(aim, performance.now(), Math.random);
   if (ev === 'ignore') return;
   clearTimeout(aimTimer);
@@ -522,7 +471,7 @@ function setAi(on) {
   if (on === aiOn) return;
   aiOn = on;
   aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
-  aiBtn.classList.toggle('ai-on', aiOn);
+  aiBtn.classList.toggle('is-running', aiOn);
   aiBtn.setAttribute('aria-pressed', String(aiOn));
   aiTag.hidden = !aiOn;
   aiCtrl.fireAt = null;
@@ -547,8 +496,8 @@ let mode = 'react';
 function switchMode(m) {
   if (m === mode) return;
   mode = m;
-  tabReact.classList.toggle('active', m === 'react');
-  tabAim.classList.toggle('active', m === 'aim');
+  tabReact.classList.toggle('on', m === 'react');
+  tabAim.classList.toggle('on', m === 'aim');
   tabReact.setAttribute('aria-selected', String(m === 'react'));
   tabAim.setAttribute('aria-selected', String(m === 'aim'));
   reactBox.hidden = m !== 'react';
@@ -571,11 +520,10 @@ aimBest.textContent = ab ? ab + ' ms' : '--';
 renderReact();
 renderAim();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>经典反应：面板变绿的瞬间点击，测你的反应毫秒</li>
@@ -594,6 +542,7 @@ renderAim();
         <li>AI 成绩不计入历史最佳</li>
       </ul>
     </div>
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
   </aside>
   <script>
   (function () {

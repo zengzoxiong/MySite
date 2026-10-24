@@ -7,50 +7,25 @@
 <meta name="description" content="拾光集在线小游戏：点灯谜题，点击一盏灯翻转它与上下左右相邻灯的亮灭，把 5×5 灯阵全部熄灭即通关，谜题由满盘逆推生成保证可解，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/lightsout/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-    /* ===== 点灯谜题 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-    [hidden] { display: none !important; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ===== 点灯谜题 · 游戏私有样式（组件基线由 ../../assets/game-ui.css 提供） ===== */
+
+    /* 个性色：黄（灯光）。黄/灰个性色页按规范 §7.1 覆盖两个令牌并带深色复位 */
     :root {
-      --primary: #b45309;   /* 琥珀棕：与灯光的暖黄同族 */
-      --ink: #1f2430;
-      --muted: #6b7280;
-      --line: #e8e1d1;
+      --game-accent: #FFCC00;
+      --game-on-accent: #1C1C1E;       /* 实心底上的字改深：#1C1C1E 压 #FFCC00 达 11.25:1 */
+      --game-accent-text: #8A6100;     /* 强调色作文字用深琥珀，对 #F2F2F7 达 4.96:1 */
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #f5f2ea;
-      color: var(--ink);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 26px 16px 44px;
-      -webkit-tap-highlight-color: transparent;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --game-on-accent: #FFFFFF;
+        --game-accent-text: var(--game-accent);
+      }
     }
-    .wrap { width: 100%; max-width: 430px; }
 
-    header { margin-bottom: 14px; }
-    h1 { font-size: 32px; line-height: 1.15; color: #43392a; letter-spacing: 2px; }
-    .sub { margin-top: 6px; font-size: 13px; color: #a3947a; }
-
-    .hud { display: flex; gap: 10px; margin-bottom: 14px; }
-    .stat {
-      flex: 1;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 9px 6px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(150, 128, 88, .10);
-    }
-    .stat .lab { display: block; font-size: 12px; color: #aca087; letter-spacing: 2px; }
-    .stat .val { display: block; margin-top: 2px; font-size: 21px; font-weight: 700; color: #4a4030; font-variant-numeric: tabular-nums; }
-    .stat.bump { animation: bump .18s ease; }
-    @keyframes bump { 50% { transform: scale(1.07); } }
-
-    /* 灯箱：深蓝灰内衬底板，亮灯的光晕在深底上才好看 */
+    /* 灯箱：深蓝灰内衬底板，亮灯的光晕在深底上才好看（游戏个性视觉，深浅色一致） */
     .board {
-      position: relative;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 9px;
@@ -59,9 +34,6 @@
       border-radius: 16px;
       box-shadow: inset 0 2px 12px rgba(0, 0, 0, .4);
       transition: box-shadow .4s;
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-user-select: none;
     }
     .board.cleared { box-shadow: inset 0 2px 12px rgba(0, 0, 0, .4), 0 0 26px rgba(255, 183, 46, .4); }
 
@@ -100,222 +72,52 @@
     @keyframes pop { 45% { transform: scale(1.12); } }
     .cell:focus-visible { outline: 2px solid #ffc93c; outline-offset: 2px; }
 
-    /* 胜利弹层（hidden + 同步回流 + open，保证过渡生效） */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      border-radius: 16px;
-      background: rgba(38, 43, 56, .92);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-align: center;
-      padding: 14px;
-      opacity: 0;
-      transition: opacity .25s ease;
-    }
-    .overlay.open { opacity: 1; }
-    .ov-title { font-size: 30px; font-weight: 800; color: #ffd97a; letter-spacing: 2px; }
-    .ov-sub { font-size: 14px; color: #ece5d3; line-height: 1.9; font-variant-numeric: tabular-nums; }
+    /* 结算层按钮排布（按钮本体统一用 .g-alert-btn，规范 §5 第 8 条） */
     .ov-btns { display: flex; gap: 10px; margin-top: 8px; width: 100%; max-width: 250px; }
-    .ov-btns .btn { padding: 10px 0; }
+    .ov-btns .g-alert-btn { flex: 1; }
 
-    .modes { display: flex; gap: 8px; margin-top: 14px; }
-    .mode {
-      flex: 1;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 8px 0;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: #fff;
-      color: #7d7159;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .mode.active { background: var(--primary); border-color: var(--primary); color: #fff; }
-
-    .actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn {
-      flex: 1;
-      border: 0;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      padding: 10px 0;
-      border-radius: 10px;
-      background: #efe8d8;
-      color: #5d5240;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn:disabled { opacity: .45; cursor: default; transform: none; }
-    .btn.primary { background: var(--primary); color: #fff; box-shadow: 0 2px 10px rgba(180, 83, 9, .30); }
-    .btn:focus-visible, .mode:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-    .tip { margin-top: 12px; text-align: center; font-size: 12.5px; color: #a3977e; line-height: 1.8; }
-    footer { margin-top: 26px; text-align: center; font-size: 12px; color: #bcb09a; }
-
-    @media (max-width: 560px) {
-      body { padding: 56px 12px 36px; }   /* 顶部留白避开左上角固定返回按钮 */
-      h1 { font-size: 26px; }
-      .stat .val { font-size: 18px; }
-    }
+    /* 黄色个性色下胜利标题改用深琥珀强调文字色，浅色底对比度达标（规范 §7.1） */
+    .g-overlay-win .g-overlay-title { color: var(--game-accent-text); }
 </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-  <main class="wrap">
-    <header>
-      <h1>点灯谜题</h1>
-      <p class="sub">LIGHTS OUT · 熄灭整块 5×5 灯阵</p>
-    </header>
+  <main class="g-wrap">
+    <h1 class="g-nav-large">点灯谜题</h1>
+    <p class="g-nav-sub">LIGHTS OUT · 熄灭整块 5×5 灯阵</p>
 
-    <section class="hud">
-      <div class="stat" id="movesStat"><span class="lab">步数</span><span class="val" id="moves">0</span></div>
-      <div class="stat"><span class="lab">最优参考</span><span class="val" id="opt">—</span></div>
-      <div class="stat"><span class="lab">最少步纪录</span><span class="val" id="best">—</span></div>
+    <section class="g-hud">
+      <div class="g-stat" id="movesStat"><span class="g-stat-label">步数</span><span class="g-stat-value g-num" id="moves">0</span></div>
+      <div class="g-stat"><span class="g-stat-label">最优参考</span><span class="g-stat-value g-num" id="opt">—</span></div>
+      <div class="g-stat"><span class="g-stat-label">最少步纪录</span><span class="g-stat-value g-num" id="best">—</span></div>
     </section>
 
-    <div class="board" id="board">
-      <div class="overlay" id="overlay" hidden>
-        <p class="ov-title" id="ovTitle"></p>
-        <p class="ov-sub" id="ovSub"></p>
+    <div class="board g-stage" id="board">
+      <div class="g-overlay g-overlay-fade g-overlay-win" id="overlay" hidden>
+        <p class="g-overlay-title" id="ovTitle"></p>
+        <p class="g-overlay-text" id="ovSub"></p>
         <div class="ov-btns">
-          <button class="btn" id="ovReplay" type="button">重玩本关</button>
-          <button class="btn primary" id="ovNext" type="button">下一关</button>
+          <button class="g-alert-btn" id="ovReplay" type="button">重玩本关</button>
+          <button class="g-alert-btn default" id="ovNext" type="button">下一关</button>
         </div>
       </div>
     </div>
 
-    <div class="modes" id="modes">
+    <div class="g-segment" id="modes" role="group" aria-label="难度">
       <button class="mode" data-mode="easy" type="button" aria-pressed="false">简单</button>
       <button class="mode" data-mode="normal" type="button" aria-pressed="false">普通</button>
       <button class="mode" data-mode="hard" type="button" aria-pressed="false">困难</button>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" id="newBtn" type="button">新关卡</button>
-      <button class="btn" id="undoBtn" type="button">撤销</button>
-      <button class="btn" id="resetBtn" type="button">重开</button>
+    <div class="g-btn-row">
+      <button class="g-btn" id="newBtn" type="button">新关卡</button>
+      <button class="g-btn g-btn-gray" id="undoBtn" type="button">撤销</button>
+      <button class="g-btn g-btn-gray" id="resetBtn" type="button">重开</button>
     </div>
 
-    <p class="tip" id="tip">点击任意一盏灯，它和上下左右相邻的灯会一起翻转，把全部灯光熄灭即获胜。</p>
-    <footer>拾光集 · 在线小游戏</footer>
+    <p class="g-tips" id="tip">点击任意一盏灯，它和上下左右相邻的灯会一起翻转，把全部灯光熄灭即获胜。</p>
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
   </main>
 
   <script>
@@ -452,9 +254,9 @@
     undoBtn.disabled = solved || hist.length === 0;
   }
   function bump(el) {   // 数字变化时弹一下（先移除再强制回流，重置动画）
-    el.classList.remove('bump');
+    el.classList.remove('g-bump');
     void el.offsetWidth;
-    el.classList.add('bump');
+    el.classList.add('g-bump');
   }
 
   // ---------- 交互 ----------
@@ -529,7 +331,7 @@
     mode = next;
     for (const btn of modeBtns) {
       const active = btn.dataset.mode === mode;
-      btn.classList.toggle('active', active);
+      btn.classList.toggle('on', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     }
     newPuzzle();
@@ -556,9 +358,9 @@
   })();
   </script>
 
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>

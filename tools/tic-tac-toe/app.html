@@ -6,21 +6,40 @@
 <title>井字棋 - 拾光集</title>
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/tic-tac-toe/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-h1{font-size:19px;font-weight:700}
-.hud{font-size:13px;color:#5f6368;font-variant-numeric:tabular-nums}
-.hud b{color:#202124;font-size:15px;margin:0 2px}
+/* ============================================================
+   井字棋 · 页面私有样式
+   外围组件（导航 / 计分 / 按钮 / 分段 / 规则栏 / 返回钮）统一走
+   assets/game-ui.css；此处只保留棋盘等游戏个性视觉与少量私有布局。
+   个性色：灰 #8E8E93（纸笔棋类），灰个性色需对比度修正
+   （docs/game-ui-design.md §7.1：浅色实心底压深字、强调色文字加深）
+   ============================================================ */
+:root {
+  --game-accent: #8E8E93;
+  --game-on-accent: #1C1C1E;      /* 浅色：灰底压深字，对 #8E8E93 达 5.22:1 */
+  --game-accent-text: #5C5C60;    /* 浅色：强调色文字加深，对页面背景达 5.97:1 */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --game-on-accent: #FFFFFF;
+    --game-accent-text: var(--game-accent);
+  }
+}
+
+/* 规则栏展开让位的平滑过渡（.g-page.rules-open 的 padding 由共享样式表控制） */
+.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+
+/* ===== 控制区：难度 / 先后手分段控件 ===== */
 .panel{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.seg{display:inline-flex;background:#f1f3f4;border-radius:10px;padding:3px}
-.seg button{font:inherit;border:0;background:transparent;color:#5f6368;font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;cursor:pointer}
-.seg button.on{background:#fff;color:#1a73e8;box-shadow:0 1px 4px rgba(60,64,67,.16);font-weight:600}
-.seg button:active{transform:scale(.96)}
-.status{font-size:14px;color:#5f6368;margin-bottom:12px;text-align:center;min-height:20px}
-/* 棋盘：3x3 玻璃格 */
+
+/* 状态提示行（当前行棋方与结算文案） */
+.status{font-size:14px;color:var(--text-secondary);margin:2px 0 12px;text-align:center;min-height:20px}
+
+/* 对局操作行（重新开局 + AI 代玩） */
+.actions{margin-top:16px;justify-content:center}
+
+/* ===== 棋盘：3x3 玻璃格（游戏个性视觉，保留原样）===== */
 .board-wrap{position:relative;width:100%;max-width:360px;margin:0 auto}
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .cell{position:relative;aspect-ratio:1/1;border:0;border-radius:12px;background:#f1f3f4;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -37,163 +56,59 @@ h1{font-size:19px;font-weight:700}
 /* 胜利连线动画 */
 .winline{position:absolute;left:0;top:0;height:8px;border-radius:8px;background:#e5484d;opacity:.85;transform-origin:left center;transform:rotate(0deg) scaleX(0);transition:transform .45s ease;pointer-events:none}
 .winline.show{transform:rotate(var(--angle)) scaleX(1)}
-.actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-button{font:inherit;border:0;border-radius:10px;padding:9px 22px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
-button:active{transform:scale(.96)}
-.btn-plain{background:#f1f3f4;color:#3c4043;padding:9px 18px;font-weight:500}
-/* AI 代玩主按钮：醒目蓝色光晕，运行中切换为红色停止态 */
-.btn-ai{box-shadow:0 2px 10px rgba(26,115,232,.35)}
-.btn-ai.stop{background:#e5484d;box-shadow:0 2px 10px rgba(229,72,77,.35)}
-.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
-footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-<main class="card">
-  <header>
-    <h1>井字棋</h1>
-    <div class="hud">胜 <b id="sWin">0</b> · 平 <b id="sDraw">0</b> · 负 <b id="sLose">0</b></div>
-  </header>
-  <div class="panel">
-    <div class="seg" id="diffSeg">
-      <button type="button" data-diff="easy">简单</button>
-      <button type="button" data-diff="hard" class="on">困难</button>
+/* 小屏：分段控件居中换行 */
+@media (max-width: 560px) {
+  .panel{justify-content:center}
+}
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap">
+  <nav class="g-nav"><h1 class="g-nav-title">井字棋</h1></nav>
+  <div class="g-hud">
+    <div class="g-stat"><span class="g-stat-label">胜</span><span class="g-stat-value g-num" id="sWin">0</span></div>
+    <div class="g-stat"><span class="g-stat-label">平</span><span class="g-stat-value g-num" id="sDraw">0</span></div>
+    <div class="g-stat"><span class="g-stat-label">负</span><span class="g-stat-value g-num" id="sLose">0</span></div>
+  </div>
+  <p class="g-ai-note">AI 代玩成绩不计最高分</p>
+  <div class="g-card">
+    <div class="panel">
+      <div class="g-segment" id="diffSeg" role="group" aria-label="难度">
+        <button type="button" data-diff="easy">简单</button>
+        <button type="button" data-diff="hard" class="on">困难</button>
+      </div>
+      <div class="g-segment" id="firstSeg" role="group" aria-label="先后手">
+        <button type="button" data-first="player" class="on">玩家先手</button>
+        <button type="button" data-first="ai">电脑先手</button>
+      </div>
     </div>
-    <div class="seg" id="firstSeg">
-      <button type="button" data-first="player" class="on">玩家先手</button>
-      <button type="button" data-first="ai">电脑先手</button>
+    <p class="status" id="statusText">你执 X，点击格子落子</p>
+    <div class="g-stage board-wrap">
+      <div class="board" id="board">
+        <button class="cell" type="button" data-i="0"></button>
+        <button class="cell" type="button" data-i="1"></button>
+        <button class="cell" type="button" data-i="2"></button>
+        <button class="cell" type="button" data-i="3"></button>
+        <button class="cell" type="button" data-i="4"></button>
+        <button class="cell" type="button" data-i="5"></button>
+        <button class="cell" type="button" data-i="6"></button>
+        <button class="cell" type="button" data-i="7"></button>
+        <button class="cell" type="button" data-i="8"></button>
+      </div>
+      <div class="winline" id="winLine"></div>
+    </div>
+    <div class="g-btn-row actions">
+      <button class="g-btn" id="newBtn" type="button">重新开局</button>
+      <div class="g-ai-group">
+        <button class="g-btn g-ai-btn" id="aiBtn" type="button">AI 代玩</button>
+        <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
+      </div>
     </div>
   </div>
-  <div class="status" id="statusText">你执 X，点击格子落子</div>
-  <div class="board-wrap">
-    <div class="board" id="board">
-      <button class="cell" type="button" data-i="0"></button>
-      <button class="cell" type="button" data-i="1"></button>
-      <button class="cell" type="button" data-i="2"></button>
-      <button class="cell" type="button" data-i="3"></button>
-      <button class="cell" type="button" data-i="4"></button>
-      <button class="cell" type="button" data-i="5"></button>
-      <button class="cell" type="button" data-i="6"></button>
-      <button class="cell" type="button" data-i="7"></button>
-      <button class="cell" type="button" data-i="8"></button>
-    </div>
-    <div class="winline" id="winLine"></div>
-  </div>
-  <div class="actions">
-    <button id="newBtn" type="button">重新开局</button>
-    <button class="btn-ai" id="aiBtn" type="button">AI 代玩</button>
-  </div>
-  <footer>拾光集 · 在线小游戏</footer>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 <script>
 (() => {
@@ -438,7 +353,7 @@ function stopAi(msg) {
   aiRunning = false;
   clearTimeout(aiDemoTimer);
   aiBtn.textContent = 'AI 代玩';
-  aiBtn.classList.remove('stop');
+  aiBtn.classList.remove('is-running');
   if (!over) setBusy(false);
   statusText.textContent = msg || 'AI 已停止，可继续手动游玩';
 }
@@ -472,7 +387,7 @@ aiBtn.addEventListener('click', () => {
   if (over) newGame();
   aiRunning = true;
   aiBtn.textContent = '停止代玩';
-  aiBtn.classList.add('stop');
+  aiBtn.classList.add('is-running');
   statusText.textContent = 'AI 托管中，点击「停止代玩」可随时停下';
   setBusy(true);
   aiDemoTick();
@@ -519,11 +434,10 @@ newBtn.addEventListener('click', () => { stopAi(); newGame(); });   // 重新开
 newGame();
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>你执 X 先手，电脑执 O，先把三子连成一线即胜</li>
@@ -536,6 +450,7 @@ newGame();
         <li>点「AI 代玩」由 AI 托管你的落子并自动续局，随时可停（不计比分）</li>
       </ul>
     </div>
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
   </aside>
   <script>
   (function () {

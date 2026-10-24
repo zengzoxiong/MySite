@@ -7,159 +7,69 @@
 <meta name="description" content="跳跳鸟：点击或按空格扇翅上升，穿过成对管道缝隙得分，难度渐进，支持 AI 代玩，纯本地运行的网页小游戏。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/flappy-bird/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
+/* 拾光集 · 跳跳鸟页面样式
+   组件基线来自共享设计系统 assets/game-ui.css（Apple HIG），
+   此处只声明个性色与游戏私有视觉，画布内的场景绘制保持原样。 */
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-h1{font-size:19px;font-weight:700}
-.hud{display:flex;align-items:center;gap:14px;font-size:14px;color:#5f6368}
-.hud b{font-variant-numeric:tabular-nums;color:#202124;font-size:16px}
-button{font:inherit;border:0;border-radius:10px;padding:9px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer}
-button:active{transform:scale(.96)}
-/* AI 代玩按钮与状态标签 */
-.ai-btn{background:#188038;padding:9px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 2px 8px rgba(24,128,56,.30)}
-.ai-btn.ai-on{background:#d93025;box-shadow:0 2px 8px rgba(217,48,37,.30)}
-.ai-tag{color:#188038;font-weight:600}
-.stage{position:relative;max-width:480px;margin:0 auto;border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
-canvas{display:block;width:100%;height:auto;aspect-ratio:360/560;touch-action:none}
-.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.84);text-align:center;cursor:pointer;padding:16px}
-[hidden]{display:none!important}
-.overlay h2{font-size:24px;margin-bottom:8px;color:#202124}
-.overlay .big{font-size:46px;font-weight:800;color:#1a73e8;line-height:1.25;font-variant-numeric:tabular-nums}
-.overlay p{font-size:14px;color:#5f6368;line-height:1.9;margin:4px 0}
-.overlay button{margin-top:12px}
-.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
-footer{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:14px}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-<div class="card">
-  <header>
-    <h1>跳跳鸟</h1>
-    <div class="hud">
-      <span>得分 <b id="score">0</b></span>
-      <span>最高 <b id="best">0</b></span>
-      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最高分</span>
+:root {
+  /* 黄系个性色（规范 §7.1）：实心底上的文字、强调色文字改深色，保证 4.5:1 对比度 */
+  --game-accent: #FFCC00;
+  --game-on-accent: #1C1C1E;
+  --game-accent-text: #8A6100;
+}
+@media (prefers-color-scheme: dark) {
+  /* 深色页面背景为纯黑，浅色的深字/深强调色必须复位（规范 §7.1） */
+  :root {
+    --game-on-accent: #FFFFFF;
+    --game-accent-text: var(--game-accent);
+  }
+}
+
+/* 游戏舞台：480px 台面居中，圆角裁切，指针提示可点击扇翅 */
+.g-stage {
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+/* 画布保持 360×560 逻辑分辨率比例（高分屏由脚本放大位图） */
+.g-stage canvas { aspect-ratio: 360 / 560; }
+
+/* 结算层大数字（展示层类 .big）：展示字体 + 等宽数字 + 强调色文字 */
+.g-overlay .big {
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: var(--game-accent-text);
+}
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap">
+  <header class="g-nav">
+    <h1 class="g-nav-title">跳跳鸟</h1>
+    <div class="g-hud-bar">
+      <span class="g-stat-inline">得分 <b id="score">0</b></span>
+      <span class="g-stat-inline">最高 <b id="best">0</b></span>
+      <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+      <button type="button" id="aiBtn" class="g-btn g-ai-btn g-btn-sm" aria-pressed="false">AI 代玩</button>
     </div>
-    <button type="button" id="aiBtn" class="ai-btn" aria-pressed="false">AI 代玩</button>
   </header>
-  <div class="stage" id="stage">
+  <span class="g-ai-note">AI 代玩成绩不计最高分</span>
+  <div class="g-stage" id="stage">
     <canvas id="cv" width="360" height="560"></canvas>
-    <div class="overlay" id="ov" hidden></div>
+    <div class="g-overlay" id="ov" hidden></div>
   </div>
-  <footer>拾光集 · 在线小游戏</footer>
-</div>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
+</main>
 <script>
 (function () {
 'use strict';
@@ -477,14 +387,14 @@ function hideOverlay() { ov.hidden = true; }
 
 function showStart() {
   showOverlay(
-    '<h2>跳跳鸟</h2>' +
-    '<p>穿过成对管道缝隙得分<br>撞上管道或落地即结束</p>' +
-    '<button type="button">开始游戏</button>' +
-    '<p>点击画面 / 空格键 扇翅<br>也可点击右上角「AI 代玩」由 AI 自动游玩</p>'
+    '<h2 class="g-overlay-title">跳跳鸟</h2>' +
+    '<p class="g-overlay-text">穿过成对管道缝隙得分<br>撞上管道或落地即结束</p>' +
+    '<button type="button" class="g-alert-btn default">开始游戏</button>' +
+    '<p class="g-overlay-text">点击画面 / 空格键 扇翅<br>也可点击「AI 代玩」按钮由 AI 自动游玩</p>'
   );
 }
 function showPause() {
-  showOverlay('<h2>已暂停</h2><p>点击画面或按空格继续</p>');
+  showOverlay('<h2 class="g-overlay-title">已暂停</h2><p class="g-overlay-text">点击画面或按空格继续</p>');
 }
 function showOver() {
   state = 'over';
@@ -496,11 +406,11 @@ function showOver() {
   }
   syncHud();
   showOverlay(
-    '<h2>' + (isNew ? '新纪录！' : (aiOn ? 'AI 本局结束' : '游戏结束')) + '</h2>' +
+    '<h2 class="g-overlay-title">' + (isNew ? '新纪录！' : (aiOn ? 'AI 本局结束' : '游戏结束')) + '</h2>' +
     '<div class="big">' + G.score + '</div>' +
-    '<p>最高纪录 ' + best + '</p>' +
-    (aiOn ? '<p>AI 代玩中，即将自动开始下一局（成绩不计入纪录）</p>' : '') +
-    '<button type="button">再来一局</button>'
+    '<p class="g-overlay-text">最高纪录 ' + best + '</p>' +
+    (aiOn ? '<p class="g-overlay-text">AI 代玩中，即将自动开始下一局（AI 代玩成绩不计最高分）</p>' : '') +
+    '<button type="button" class="g-alert-btn default">再来一局</button>'
   );
 }
 
@@ -548,8 +458,8 @@ function aiTick(dt) {
 }
 function setAi(on) {
   aiOn = on;
-  aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
-  aiBtn.classList.toggle('ai-on', aiOn);
+  aiBtn.textContent = aiOn ? '停止代玩' : 'AI 代玩';
+  aiBtn.classList.toggle('is-running', aiOn);
   aiBtn.setAttribute('aria-pressed', String(aiOn));
   aiTag.hidden = !aiOn;
   if (aiOn) {
@@ -788,11 +698,10 @@ showStart();
 requestAnimationFrame(loop);
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>点击或按空格扇翅上升，松开受重力下坠</li>
@@ -809,6 +718,7 @@ requestAnimationFrame(loop);
         <li>随时再点一次按钮即可停止；AI 成绩不计入最高纪录</li>
       </ul>
     </div>
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
   </aside>
   <script>
   (function () {

@@ -7,176 +7,67 @@
 <meta name="description" content="拾光集在线小游戏：记忆序列，四色按键随机点亮并发出对应音调，凭记忆按原顺序复现，每轮加长一位，看你能记多长。纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/simon/app.html">
+<!-- 共享 UI 设计系统（Apple HIG），相对路径自 tools/simon/ 指向站点 assets -->
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-[hidden]{display:none!important}
-/* ===== 记忆序列 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#7c3aed;--ink:#1f2430;--muted:#6b7280;--line:#e5e7eb}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f2f4f7;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px 16px 40px;-webkit-tap-highlight-color:transparent}
-.card{width:100%;max-width:460px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-h1{font-size:20px;font-weight:800;letter-spacing:1px}
-.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation}
-.icon-btn:hover{background:#f0f6fc}
-.icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hud{display:flex;gap:10px;margin-bottom:14px}
-.stat{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
-.stat .lab{display:block;font-size:12px;color:var(--muted);letter-spacing:3px}
-.stat .val{display:block;margin-top:2px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
-.stat.bump{animation:bump .25s ease}
-@keyframes bump{50%{transform:scale(1.08)}}
-.board-wrap{position:relative}
-.board{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;background:#eef1f6;border-radius:20px;padding:12px;aspect-ratio:1/1;user-select:none;-webkit-user-select:none}
-.pad{border:0;padding:0;cursor:pointer;background:var(--c);filter:saturate(.5) brightness(.88);transition:filter .14s ease,box-shadow .14s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:16px}
+/* ===== 记忆序列 · 游戏个性样式 =====
+   组件外观（按钮/计分/弹层/规则栏/深浅色）由 game-ui.css 统一提供；
+   本块只保留游戏个性视觉：四色按键、点亮光晕、中心圆盘。 */
+:root { --game-accent: #FF2D55; }   /* 个性色：记忆灯色（粉） */
+
+/* 棋盘托盘：承托四色按键的圆角面板（圆角为游戏个性，底色走中性令牌适配深浅色） */
+.board{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;background:var(--fill);border-radius:20px;padding:12px;aspect-ratio:1/1}
+
+/* 结算/暂停覆盖层与棋盘同圆角；文案保持窄栏排版 */
+.board-wrap > .g-overlay{border-radius:20px}
+.g-overlay-text{max-width:300px}
+
 /* 四色按键：外角大圆弧拼成整圆观感；点亮时提亮 + 同色光晕 */
+.pad{border:0;padding:0;cursor:pointer;background:var(--c);filter:saturate(.5) brightness(.88);transition:filter .14s ease,box-shadow .14s ease,transform .18s var(--ease-spring);border-radius:16px}
+.pad:active{transform:scale(.96)}
+/* 四色按键配色与光晕（游戏个性视觉，深浅色通用） */
 .pad-tl{--c:#34a06b;--cl:#4ce08e;--glow:rgba(76,224,142,.5);border-radius:100% 16px 16px 16px}
 .pad-tr{--c:#d64545;--cl:#ff7a6e;--glow:rgba(255,122,110,.5);border-radius:16px 100% 16px 16px}
 .pad-bl{--c:#dba32e;--cl:#ffd54d;--glow:rgba(255,213,77,.5);border-radius:16px 16px 16px 100%}
 .pad-br{--c:#3f6fd8;--cl:#7da4ff;--glow:rgba(125,164,255,.5);border-radius:16px 16px 100% 16px}
 .pad.lit{filter:none;background:var(--cl);box-shadow:0 0 18px var(--glow),0 0 44px var(--glow)}
-/* 中心圆盘：显示轮数与阶段提示，不拦截按键点击 */
-.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:31%;aspect-ratio:1/1;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 4px 18px rgba(60,64,67,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;z-index:2}
-.hub-num{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
-.hub-hint{font-size:11px;color:var(--muted);letter-spacing:1px}
-.overlay{position:absolute;inset:0;z-index:5;border-radius:20px;background:rgba(248,249,252,.9);backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;opacity:0;transition:opacity .2s ease}
-.overlay.open{opacity:1}
-.overlay h2{font-size:24px;font-weight:800}
-.overlay p{font-size:13.5px;color:var(--muted);line-height:1.9;max-width:300px}
-.btn{border:0;border-radius:12px;padding:11px 28px;background:var(--primary);color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.3);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.btn:active{transform:translateY(1px)}
-.tips{margin-top:12px;text-align:center;font-size:12.5px;color:#9aa0a6;line-height:1.8}
-footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
-.pad:focus-visible,.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
-@media (max-width:560px){.card{padding:14px 12px 12px}.stat .val{font-size:20px}.hub-num{font-size:22px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-<main class="card">
-  <header>
-    <h1>记忆序列</h1>
+/* 中心圆盘：显示轮数与阶段提示，不拦截按键点击 */
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:31%;aspect-ratio:1/1;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--separator);box-shadow:var(--shadow-card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;z-index:2}
+.hub-num{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--text)}
+.hub-hint{font-size:11px;color:var(--text-secondary);letter-spacing:1px}
+
+/* 音效开关（导航右侧图标钮，44px 触控目标，点击轻缩放） */
+.icon-btn{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:var(--fill);color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation;transition:transform var(--dur-press) var(--ease-spring),opacity var(--dur-press) var(--ease-out)}
+.icon-btn:active{transform:scale(.96);opacity:.8}
+.icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn:focus-visible{outline:2px solid var(--game-accent);outline-offset:2px}
+.pad:focus-visible{outline:2px solid var(--game-accent);outline-offset:2px}
+
+/* 规则栏展开时主体让位的过渡（让位本身由共享样式承担） */
+.g-page{transition:padding-right .28s cubic-bezier(.22,.9,.3,1)}
+
+@media (max-width:560px){.hub-num{font-size:22px}}
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap">
+  <nav class="g-nav">
+    <h1 class="g-nav-title">记忆序列</h1>
     <button class="icon-btn" id="soundBtn" type="button" aria-label="关闭音效">
       <svg id="icoOn" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 5.4a9 9 0 0 1 0 13.2"/></svg>
       <svg id="icoOff" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>
     </button>
-  </header>
+  </nav>
 
-  <section class="hud">
-    <div class="stat" id="roundStat"><span class="lab">本轮</span><span class="val" id="hudRound">0</span></div>
-    <div class="stat" id="bestStat"><span class="lab">最长纪录</span><span class="val" id="hudBest">0</span></div>
+  <section class="g-hud">
+    <div class="g-stat" id="roundStat"><span class="g-stat-label">本轮</span><span class="g-stat-value g-num" id="hudRound">0</span></div>
+    <div class="g-stat" id="bestStat"><span class="g-stat-label">最长纪录</span><span class="g-stat-value g-num" id="hudBest">0</span></div>
   </section>
 
-  <div class="board-wrap">
+  <div class="g-stage board-wrap">
     <div class="board">
       <button class="pad pad-tl" type="button" aria-label="绿色按键"></button>
       <button class="pad pad-tr" type="button" aria-label="红色按键"></button>
@@ -184,15 +75,15 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
       <button class="pad pad-br" type="button" aria-label="蓝色按键"></button>
       <div class="hub"><span class="hub-num" id="hubNum">—</span><span class="hub-hint" id="hubHint">准备就绪</span></div>
     </div>
-    <div class="overlay" id="overlay" hidden>
-      <h2 id="ovTitle">记忆序列</h2>
-      <p id="ovText">四色按键将随机点亮并发出对应音调，凭记忆按原顺序复现；每通过一轮，序列加长一位、节奏更快。</p>
-      <button class="btn" id="ovBtn" type="button">开始游戏</button>
+    <div class="g-overlay g-overlay-fade" id="overlay" hidden>
+      <h2 class="g-overlay-title" id="ovTitle">记忆序列</h2>
+      <p class="g-overlay-text" id="ovText">四色按键将随机点亮并发出对应音调，凭记忆按原顺序复现；每通过一轮，序列加长一位、节奏更快。</p>
+      <button class="g-btn" id="ovBtn" type="button">开始游戏</button>
     </div>
   </div>
 
-  <p class="tips">点错任何一位即结束 · 电脑可用数字键 1-4 或 Q W A S</p>
-  <footer>拾光集 · 在线小游戏</footer>
+  <p class="g-tips">点错任何一位即结束 · 电脑可用数字键 1-4 或 Q W A S</p>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 <script>
 (() => {
@@ -283,9 +174,9 @@ function padsOff() { pads.forEach(p => p.classList.remove('lit')); }
 
 // ---------- HUD 与弹层 ----------
 function bump(el) {
-  el.classList.remove('bump');
+  el.classList.remove('g-bump');
   void el.offsetWidth;   // 强制回流，重新触发动画
-  el.classList.add('bump');
+  el.classList.add('g-bump');
 }
 function setHub(num, hint) {
   hubNum.textContent = num;
@@ -429,9 +320,9 @@ applySoundBtn();
 showOverlay();
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>

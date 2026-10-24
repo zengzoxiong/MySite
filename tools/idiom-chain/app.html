@@ -7,280 +7,163 @@
 <meta name="description" content="拾光集在线小游戏：成语接龙，用上一个成语的末字（或同音字）开头接新成语，内置常用成语库与释义展示，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/idiom-chain/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-/* ===== 成语接龙 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） =====
-   宣纸浅米底 + 青碧强调 + 朱砂点缀（末字提示 / 谐音徽标 / 超时告警） */
-[hidden]{display:none!important}
-:root{
-  --primary:#0f766e;
-  --danger:#c0392b;
-  --ink:#33302b;
-  --muted:#8a8478;
-  --line:#e6e2d6;
-  --bg:#f1efe7;
+/* ===== 成语接龙 · Apple HIG 共享组件化（共享样式表 assets/game-ui.css）=====
+   个性色 #FFCC00（文字灯泡暖黄），黄/灰个性色的对比度修正见 docs/game-ui-design.md §7.1。
+   私有视觉仅保留：字牌、倒计时条、接龙轨迹、谐音/起点标签；
+   私有配色一律取共享令牌，深浅色跟随系统，不再写固定亮色。 */
+:root {
+  --game-accent: #FFCC00;
+  --game-on-accent: #1C1C1E;    /* 黄底压深字，对比 11.25:1 */
+  --game-accent-text: #8A6100;  /* 强调色作文字时的深琥珀，对浅底 4.96:1 */
+  --tag-amber: #B45309;         /* 私有：「谐音」标签的琥珀描边字 */
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  background:var(--bg);color:var(--ink);
-  min-height:100vh;display:flex;justify-content:center;
-  padding:20px 14px 44px;
-  -webkit-tap-highlight-color:transparent;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --game-on-accent: #FFFFFF;
+    --game-accent-text: var(--game-accent);
+    --tag-amber: #FF9F0A;
+  }
 }
-.wrap{width:100%;max-width:560px}
 
-header{text-align:center;margin-bottom:14px}
-h1{font-size:22px;font-weight:800;letter-spacing:2px}
-.sub{margin-top:4px;font-size:12.5px;color:var(--muted)}
+/* 复位：仅清页边距；box-sizing 与 [hidden] 由共享样式表提供 */
+* { margin: 0; padding: 0; }
 
-/* HUD：分数 / 最高分 / 暂停 / 新一局 */
-.hud{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.stat{
-  flex:1;min-width:88px;background:#fff;border:1px solid var(--line);
-  border-radius:12px;padding:7px 8px;text-align:center;
-  box-shadow:0 2px 10px rgba(90,84,68,.08);
-}
-.stat .lab{display:block;font-size:11.5px;color:var(--muted);letter-spacing:2px}
-.stat .val{display:block;margin-top:2px;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
-.stat.bump{animation:bump .2s ease}
-@keyframes bump{50%{transform:scale(1.07)}}
+/* 规则栏展开让位的过渡（共享类负责位移，这里只补平滑让位） */
+body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
-button{font:inherit;touch-action:manipulation}
-.btn{
-  border:0;border-radius:12px;padding:0 16px;height:44px;
-  background:var(--primary);color:#fff;font-size:14.5px;font-weight:600;
-  cursor:pointer;box-shadow:0 2px 10px rgba(15,118,110,.28);
-}
-.btn:active{transform:translateY(1px)}
-.btn.plain{background:#edeade;color:var(--ink);font-weight:500;box-shadow:none}
-.btn:disabled{opacity:.45;cursor:default;box-shadow:none}
-.hud .btn{align-self:stretch}
+/* ---------- 计分/状态区：卡片式 HUD，灰底按钮同排（窄屏自动换行） ---------- */
+.g-hud .g-btn { align-self: stretch; }
 
-/* 倒计时条 */
-.timer-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.timer{flex:1;height:9px;background:#e7e3d6;border-radius:6px;overflow:hidden}
-.timer-bar{height:100%;width:100%;background:var(--primary);border-radius:6px}
-.timer.danger .timer-bar{background:var(--danger);animation:pulse .55s ease infinite}
-@keyframes pulse{50%{opacity:.5}}
-.timer-num{width:38px;text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.timer-row.danger .timer-num{color:var(--danger);font-weight:700}
+/* ---------- 倒计时条（游戏私有视觉） ---------- */
+.timer-row { display: flex; align-items: center; gap: 8px; }
+.timer { flex: 1; height: 9px; background: var(--fill); border-radius: 6px; overflow: hidden; }
+.timer-bar { height: 100%; width: 100%; background: var(--game-accent); border-radius: 6px; }
+/* 超时告警：JS 将 danger 加在进度条自身与外行上，两条选择器都接住 */
+.timer-bar.danger,
+.timer.danger .timer-bar {
+  background: var(--red);
+  animation: pulse .55s ease infinite;
+}
+@keyframes pulse { 50% { opacity: .5; } }
+.timer-num {
+  width: 38px; text-align: right; font-size: 13px;
+  color: var(--text-secondary); font-variant-numeric: tabular-nums;
+}
+.timer-row.danger .timer-num { color: var(--red); font-weight: 700; }
 
-/* 舞台：当前成语卡 + 接龙轨迹，弹层覆盖其上 */
-.stage{position:relative}
-.panel{
-  background:#fff;border:1px solid var(--line);border-radius:14px;
-  box-shadow:0 10px 32px rgba(90,84,68,.10);
-}
-.cur-card{padding:16px 16px 14px}
-.char-row{display:flex;justify-content:center;gap:9px;min-height:76px;align-items:stretch}
-.char{
-  width:66px;background:#fbfaf6;border:1px solid var(--line);border-radius:10px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  padding:6px 0;
-}
-.char .cp{font-size:11px;color:var(--muted)}
-.char .cg{font-size:33px;font-weight:700;line-height:1.15}
-/* 末字：下一个成语的开头，用朱砂虚线框标出 */
-.char.last{border:2px dashed var(--danger);background:#fdf6f4}
-.char.last .cg{color:var(--danger)}
-.cur-card.bump{animation:bump .25s ease}
-.cur-mean{margin-top:11px;font-size:13.5px;line-height:1.75;color:#57534a;text-align:center}
-.cur-ask{margin-top:7px;font-size:13px;color:var(--primary);text-align:center}
-.cur-ask b{color:var(--danger)}
+/* ---------- 舞台：当前成语卡 + 接龙轨迹，弹层覆盖其上 ----------
+   不套 .g-stage：它的 touch-action:none 会禁掉轨迹列表的触控滚动，
+   此处只保留弹层定位上下文。 */
+.stage { position: relative; }
 
-.chain-wrap{margin-top:10px;padding:12px 14px 10px}
-.chain-title{font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
-.chain{max-height:216px;overflow-y:auto;overscroll-behavior:contain}
-.chain-empty{font-size:12.5px;color:#b5afa1;text-align:center;padding:14px 0 10px}
-.chain-item{
-  position:relative;margin-left:7px;padding:5px 8px 6px 16px;
-  border-left:2px solid var(--line);
+/* 字牌：拼音 + 大字，末字朱砂虚线框（游戏个性视觉） */
+.cur-card { padding: 16px 16px 14px; }
+.char-row { display: flex; justify-content: center; gap: 9px; min-height: 76px; align-items: stretch; }
+.char {
+  width: 66px;
+  background: var(--fill-secondary);
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 6px 0;
 }
-.chain-item::before{
-  content:"";position:absolute;left:-6px;top:12px;width:8px;height:8px;
-  border-radius:50%;background:#fff;border:2px solid var(--primary);
+.char .cp { font-size: 11px; color: var(--text-secondary); }
+.char .cg { font-size: 33px; font-weight: 700; line-height: 1.15; color: var(--text); }
+.char.last {
+  border: 2px dashed var(--red);
+  background: rgba(255, 59, 48, .08);   /* 兜底 */
+  background: color-mix(in srgb, var(--red) 8%, transparent);
 }
-.chain-item.start::before{border-color:var(--danger)}
-.chain-item .cw{font-size:16px;font-weight:700;display:inline-block;margin-right:8px}
-.chain-item .cp{font-size:11.5px;color:var(--muted)}
-.chain-item .tags{display:inline-block;margin-left:8px;vertical-align:1px}
-.tag{
-  display:inline-block;font-size:10.5px;line-height:1.5;padding:0 5px;margin-right:4px;
-  border:1px solid #b45309;color:#b45309;border-radius:4px;
-}
-.tag.start{border-color:var(--danger);color:var(--danger)}
+.char.last .cg { color: var(--red); }
+.cur-mean { margin-top: 11px; font-size: 13.5px; line-height: 1.75; color: var(--text-secondary); text-align: center; }
+.cur-ask { margin-top: 7px; font-size: 13px; color: var(--game-accent-text); text-align: center; }
+.cur-ask b { color: var(--red); }
 
-/* 弹层（hidden + 同步回流 + open，保证过渡生效） */
-.overlay{
-  position:absolute;inset:0;z-index:5;border-radius:14px;
-  background:rgba(252,251,246,.94);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:18px;opacity:0;transition:opacity .2s ease;
+/* 接龙轨迹：时间线圆点 + 竖线（游戏个性视觉） */
+.chain-wrap { padding: 12px 14px 10px; }
+.chain-title { font-size: 12px; color: var(--text-secondary); letter-spacing: 2px; margin-bottom: 6px; }
+.chain { max-height: 216px; overflow-y: auto; overscroll-behavior: contain; }
+.chain-empty { font-size: 12.5px; color: var(--text-tertiary); text-align: center; padding: 14px 0 10px; }
+.chain-item {
+  position: relative; margin-left: 7px; padding: 5px 8px 6px 16px;
+  border-left: 2px solid var(--separator);
 }
-.overlay.open{opacity:1}
-.ov-title{font-size:26px;font-weight:800;margin-bottom:10px}
-.ov-sub{font-size:14px;color:#57534a;line-height:1.9;margin:4px 0}
-.ov-sub b{font-variant-numeric:tabular-nums;font-size:18px}
-.ov-sub em{font-style:normal;color:var(--danger);font-weight:700}
-.ov-btns{display:flex;gap:10px;margin-top:12px}
-.ov-btns .btn{height:42px}
-/* 结算复盘：本局全部成语 + 拼音 + 释义 */
-.review{width:100%;max-height:34vh;overflow-y:auto;text-align:left;margin-top:10px;padding:0 4px;overscroll-behavior:contain}
-.review li{list-style:none;padding:7px 2px;border-top:1px dashed var(--line)}
-.review li:first-child{border-top:0}
-.review .rw{font-size:15.5px;font-weight:700;margin-right:8px}
-.review .rp{font-size:11px;color:var(--muted)}
-.review .rm{font-size:12.5px;color:#6b665b;line-height:1.6;margin-top:1px}
-.review .tag{margin-left:8px;margin-right:0}
-
-/* 输入行与反馈 */
-.input-row{display:flex;gap:8px;margin-top:12px}
-.input-row input{
-  flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:12px;
-  padding:0 12px;font:16px/1.2 inherit;color:var(--ink);background:#fff;outline:none;
+.chain-item::before {
+  content: ""; position: absolute; left: -6px; top: 12px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--bg-elevated); border: 2px solid var(--game-accent);
 }
-.input-row input:focus{border-color:var(--primary)}
-.input-row input:disabled{background:#f3f1e9;color:#b5afa1}
-.input-row.shake{animation:shake .32s ease}
-@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
-.feedback{min-height:20px;margin-top:9px;font-size:13.5px;text-align:center;color:var(--primary);opacity:0;transition:opacity .25s}
-.feedback.err{color:var(--danger)}
-.feedback.show{opacity:1}
+.chain-item.start::before { border-color: var(--red); }
+.chain-item .cw { font-size: 16px; font-weight: 700; color: var(--text); display: inline-block; margin-right: 8px; }
+.chain-item .cp { font-size: 11.5px; color: var(--text-secondary); }
+.chain-item .tags { display: inline-block; margin-left: 8px; vertical-align: 1px; }
+.tag {
+  display: inline-block; font-size: 10.5px; line-height: 1.5; padding: 0 5px; margin-right: 4px;
+  border: 1px solid var(--tag-amber); color: var(--tag-amber); border-radius: 4px;
+}
+.tag.start { border-color: var(--red); color: var(--red); }
 
-.tips{margin-top:10px;font-size:12px;color:#a49e90;text-align:center;line-height:1.8}
-footer{text-align:center;color:#b8b2a3;font-size:12px;margin-top:14px}
+/* 结算复盘：本局全部成语 + 拼音 + 释义（弹层内私有滚动区） */
+.review {
+  width: 100%; max-height: 34vh; overflow-y: auto; text-align: left;
+  padding: 0 4px; overscroll-behavior: contain;
+}
+.review li { list-style: none; padding: 7px 2px; border-top: 1px dashed var(--separator); }
+.review li:first-child { border-top: 0; }
+.review .rw { font-size: 15.5px; font-weight: 700; margin-right: 8px; color: var(--text); }
+.review .rp { font-size: 11px; color: var(--text-secondary); }
+.review .rm { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-top: 1px; }
+.review .tag { margin-left: 8px; margin-right: 0; }
 
-/* 窄屏竖屏：字牌与轨迹收窄 */
-@media (max-width:420px){
-  .char{width:58px}
-  .char .cg{font-size:28px}
-  .chain{max-height:170px}
-  .review{max-height:30vh}
+/* 弹层结算文案里的数字与高亮（overSub 的 <b>/<em>） */
+.g-overlay-text b { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.g-overlay-text em { font-style: normal; color: var(--red); font-weight: 700; }
+.ov-btns { display: flex; justify-content: center; gap: 10px; }
+
+/* ---------- 输入行与反馈 ---------- */
+.input-row { display: flex; gap: 8px; }
+.input-row input {
+  flex: 1; min-width: 0; height: 44px;
+  border: 1.5px solid var(--separator); border-radius: 12px;
+  padding: 0 12px; font: 16px/1.2 inherit; color: var(--text);
+  background: var(--bg-elevated); outline: none;
+}
+.input-row input:focus { border-color: var(--game-accent); }
+.input-row input:disabled { background: var(--fill-secondary); color: var(--text-tertiary); }
+.input-row.shake { animation: shake .32s ease; }
+@keyframes shake {
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+.feedback {
+  min-height: 20px; font-size: 13.5px; text-align: center;
+  color: var(--game-accent-text); opacity: 0; transition: opacity .25s;
+}
+.feedback.err { color: var(--red); }
+.feedback.show { opacity: 1; }
+
+/* ---------- 窄屏竖屏：字牌与轨迹收窄（其余响应式由共享样式表负责） ---------- */
+@media (max-width: 420px) {
+  .char { width: 58px; }
+  .char .cg { font-size: 28px; }
+  .chain { max-height: 170px; }
+  .review { max-height: 30vh; }
 }
 </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-<main class="wrap">
-  <header>
-    <h1>成语接龙</h1>
-    <p class="sub">用末字接新成语，同音也算，看你能接多长</p>
-  </header>
+<main class="g-wrap">
+  <nav class="g-nav"><h1 class="g-nav-title">成语接龙</h1></nav>
+  <p class="g-nav-sub">用末字接新成语，同音也算，看你能接多长</p>
 
-  <section class="hud">
-    <div class="stat" id="scoreStat"><span class="lab">分数</span><span class="val" id="score">0</span></div>
-    <div class="stat"><span class="lab">最高分</span><span class="val" id="best">0</span></div>
-    <button class="btn plain" id="pauseBtn" type="button">暂停</button>
-    <button class="btn plain" id="newBtn" type="button">新一局</button>
+  <section class="g-hud">
+    <div class="g-stat" id="scoreStat"><span class="g-stat-label">分数</span><span class="g-stat-value g-num" id="score">0</span></div>
+    <div class="g-stat"><span class="g-stat-label">最高分</span><span class="g-stat-value g-num" id="best">0</span></div>
+    <button class="g-btn g-btn-gray" id="pauseBtn" type="button">暂停</button>
+    <button class="g-btn g-btn-gray" id="newBtn" type="button">新一局</button>
   </section>
 
   <div class="timer-row" id="timerRow">
@@ -289,37 +172,37 @@ footer{text-align:center;color:#b8b2a3;font-size:12px;margin-top:14px}
   </div>
 
   <div class="stage">
-    <section class="panel cur-card" id="curCard">
+    <section class="g-card cur-card" id="curCard">
       <div class="char-row" id="curChars"></div>
       <p class="cur-mean" id="curMean">点「开始挑战」后，这里会展示成语的释义</p>
       <p class="cur-ask" id="curAsk">用上一个成语的末字（或同音字）开头接龙</p>
     </section>
-    <section class="panel chain-wrap">
+    <section class="g-card chain-wrap">
       <p class="chain-title">接龙轨迹</p>
       <div class="chain" id="chainBox"></div>
       <p class="chain-empty" id="chainEmpty">还没有接龙记录</p>
     </section>
 
-    <div class="overlay" id="ovStart" hidden>
-      <p class="ov-title">成语接龙</p>
-      <p class="ov-sub">系统给出起始成语，你用它的末字（或同音字）<br>开头接一个词库里的新成语<br>内置 <b id="libCount">0</b> 条常用成语，每回合限时 30 秒<br>接不上或超时即结束，答得越快加分越多</p>
+    <div class="g-overlay g-overlay-fade" id="ovStart" hidden>
+      <p class="g-overlay-title">成语接龙</p>
+      <p class="g-overlay-text">系统给出起始成语，你用它的末字（或同音字）<br>开头接一个词库里的新成语<br>内置 <b id="libCount">0</b> 条常用成语，每回合限时 30 秒<br>接不上或超时即结束，答得越快加分越多</p>
       <div class="ov-btns">
-        <button class="btn" id="btnStart" type="button">开始挑战</button>
+        <button class="g-alert-btn default" id="btnStart" type="button">开始挑战</button>
       </div>
     </div>
-    <div class="overlay" id="ovOver" hidden>
-      <p class="ov-title" id="overTitle">游戏结束</p>
-      <p class="ov-sub" id="overSub"></p>
+    <div class="g-overlay g-overlay-fade" id="ovOver" hidden>
+      <p class="g-overlay-title" id="overTitle">游戏结束</p>
+      <p class="g-overlay-text" id="overSub"></p>
       <div class="ov-btns">
-        <button class="btn" id="btnRestart" type="button">再来一局</button>
+        <button class="g-alert-btn default" id="btnRestart" type="button">再来一局</button>
       </div>
       <ul class="review" id="reviewList"></ul>
     </div>
-    <div class="overlay" id="ovPause" hidden>
-      <p class="ov-title">已暂停</p>
-      <p class="ov-sub">倒计时已冻结，随时继续</p>
+    <div class="g-overlay g-overlay-fade" id="ovPause" hidden>
+      <p class="g-overlay-title">已暂停</p>
+      <p class="g-overlay-text">倒计时已冻结，随时继续</p>
       <div class="ov-btns">
-        <button class="btn" id="btnResume" type="button">继续游戏</button>
+        <button class="g-alert-btn default" id="btnResume" type="button">继续游戏</button>
       </div>
     </div>
   </div>
@@ -327,14 +210,13 @@ footer{text-align:center;color:#b8b2a3;font-size:12px;margin-top:14px}
   <form class="input-row" id="form" autocomplete="off">
     <input id="word" type="text" maxlength="4" aria-label="接龙成语，输入四个字"
            placeholder="输入四字成语" enterkeyhint="go" disabled>
-    <button class="btn" id="submitBtn" type="submit">接上</button>
-    <button class="btn plain" id="hintBtn" type="button" disabled>提示 ×3</button>
+    <button class="g-btn" id="submitBtn" type="submit">接上</button>
+    <button class="g-btn g-btn-tinted" id="hintBtn" type="button" disabled>提示 ×3</button>
   </form>
   <p class="feedback" id="feedback" role="status"></p>
-  <p class="tips">成语须在词库内；首字与上一个末字同字或同音即可接上<br>暂停：Esc 或「暂停」按钮 · 切到后台自动暂停</p>
-  <footer>拾光集 · 在线小游戏</footer>
+  <p class="g-tips">成语须在词库内；首字与上一个末字同字或同音即可接上<br>暂停：Esc 或「暂停」按钮 · 切到后台自动暂停</p>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
-
 <script>
 (() => {
 'use strict';
@@ -862,7 +744,7 @@ function accept(word, isHint) {
   const gain = isHint ? HINT_SCORE : BASE_SCORE + Math.floor(remain / 1000);
   score += gain;
   scoreEl.textContent = score;
-  replay(scoreStat, 'bump');
+  replay(scoreStat, 'g-bump');
   if (score > best) {
     best = score;
     bestEl.textContent = best;
@@ -871,7 +753,7 @@ function accept(word, isHint) {
   }
   current = word;
   renderCurrent();
-  replay(curCard, 'bump');
+  replay(curCard, 'g-bump');
   roundEnd = performance.now() + ROUND_MS;
   drawTimer(ROUND_MS);
   wordInput.value = '';
@@ -987,9 +869,9 @@ $('newBtn').addEventListener('click', startGame);
 setPanel();
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>

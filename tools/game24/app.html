@@ -7,39 +7,58 @@
 <meta name="description" content="拾光集在线小游戏：24点，用加减乘除和括号把 4 张牌算成 24，限时挑战越快越高分，纯本地运行，无需联网。">
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/game24/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-    /* ===== 24点 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-    [hidden] { display: none !important; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root { --primary:#6d28d9; --danger:#dc2626; --ok:#2f9e44; --ink:#1f2430; --muted:#6b7280; --faint:#9aa0a6; --line:#e5e7eb; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #eef0f4;
-      color: #3c4043;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+    /* ===== 24点 · 拾光集自建小游戏（纯静态零依赖） =====
+       组件语言遵循 docs/game-ui-design.md 与共享样式表 assets/game-ui.css（Apple HIG）。
+       本页个性色为橙（扑克暖色）；私有样式只保留游戏个性视觉：
+       扑克牌面、算式按钮盘、倒计时条、状态行与上飘加分浮字。 */
+    :root { --game-accent: #FF9500; }
+
+    /* 牌桌容器：暂停/结算弹层的定位锚点，圆角与卡片一致 */
+    .board { position: relative; }
+    .board > .g-overlay { border-radius: inherit; }
+
+    /* 牌桌内部纵向节奏：共享组件默认无外边距，导航条补一条 */
+    .g-nav { margin-bottom: 10px; }
+
+    /* 计分数字补 inline-block，.g-bump 的缩放动画才作用得到 */
+    .g-stat-inline b { display: inline-block; }
+
+    :focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+
+    /* 按钮基础复位：牌面与算式盘是游戏私有按钮，继承字体并保留点按反馈 */
+    button {
+      font: inherit;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
-    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .card { position: relative; width: 100%; max-width: 520px; background: #fff; border-radius: 16px; box-shadow: 0 10px 32px rgba(60, 64, 67, .12); padding: 18px 20px 14px; }
-    header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-    h1 { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: 1px; }
-    .hud { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
-    .hud b { display: inline-block; font-variant-numeric: tabular-nums; color: var(--ink); font-size: 15px; }
-    button { font: inherit; border: 0; border-radius: 10px; cursor: pointer; color: inherit; touch-action: manipulation; }
-    button:disabled { opacity: .45; cursor: default; }
-    .btn-plain { background: #f1f3f4; color: #3c4043; padding: 6px 12px; font-size: 13px; font-weight: 500; }
-    .btn-primary { background: var(--primary); color: #fff; font-weight: 700; padding: 10px 18px; box-shadow: 0 3px 10px rgba(109, 40, 217, .25); }
-    .btn-primary:active { transform: scale(.97); }
-    .btn-ghost { background: #fff; border: 1px solid var(--line); color: var(--muted); padding: 8px 14px; font-weight: 500; }
-    /* 倒计时进度条 */
-    .timebar { height: 6px; border-radius: 3px; background: #eceef2; overflow: hidden; margin-bottom: 14px; }
-    .timebar i { display: block; height: 100%; width: 100%; background: var(--primary); border-radius: 3px; }
-    .timebar.low i { background: var(--danger); }
-    /* 扑克牌 */
+    button:disabled { opacity: .35; cursor: default; }
+
+    /* 倒计时进度条（个性视觉，配色取共享令牌，时间告急转红） */
+    .timebar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--fill);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .timebar i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: var(--game-accent);
+      border-radius: 3px;
+      transition: background-color var(--dur-press) var(--ease-out);
+    }
+    .timebar.low i { background: var(--red); }
+
+    /* 扑克牌（个性视觉：白色牌面 + 红桃花色，深浅色下都保持实体牌观感） */
     .cards { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; }
     .pcard {
       position: relative;
@@ -50,181 +69,123 @@
       border-radius: 12px;
       background: linear-gradient(165deg, #ffffff, #f6f7fb);
       box-shadow: 0 4px 14px rgba(60, 64, 90, .10);
-      transition: transform .12s ease, opacity .15s ease;
+      transition: transform var(--dur-press) var(--ease-spring), opacity .15s ease;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
-    .pcard:active { transform: scale(.95); }
-    .pcard .corner { position: absolute; top: 6px; left: 8px; display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; color: #2a2f3a; }
+    .pcard:active { transform: scale(.96); }
+    .pcard .corner {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2a2f3a;
+    }
     .pcard .corner svg { width: 11px; height: 11px; fill: currentColor; }
-    .pcard .big { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; color: #2a2f3a; }
+    .pcard .big {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: #2a2f3a;
+    }
     .pcard.red .corner, .pcard.red .big { color: #d0334a; }
     .pcard.used { opacity: .32; filter: grayscale(.9); }
     .pcard.shake { animation: shake .3s ease; }
     @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-    .bump { animation: bump .2s ease; }
-    @keyframes bump { 50% { transform: scale(1.2); } }
-    /* 状态提示行 */
-    .status { min-height: 22px; text-align: center; font-size: 13px; line-height: 1.5; color: var(--faint); margin-bottom: 12px; }
-    .status.ok { color: var(--ok); font-weight: 600; }
-    .status.err { color: var(--danger); font-weight: 600; }
-    .status.info { color: var(--muted); }
+    /* 深色下补一层阴影，让白牌面从深色桌面浮起来 */
+    @media (prefers-color-scheme: dark) {
+      .pcard { border-color: rgba(255, 255, 255, .14); box-shadow: 0 4px 16px rgba(0, 0, 0, .45); }
+    }
+
+    /* 状态提示行（对错反馈走系统语义色，深浅色自适应） */
+    .status {
+      min-height: 22px;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+    }
+    .status.ok { color: var(--green); font-weight: 600; }
+    .status.err { color: var(--red); font-weight: 600; }
+    .status.info { color: var(--text-secondary); }
+
     /* 算式输入行与按钮盘 */
     .exprrow { display: flex; gap: 8px; margin-bottom: 10px; }
-    #expr { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1.5px solid #dfe3ec; border-radius: 10px; color: var(--ink); background: #fbfcfe; outline: none; }
-    #expr:focus { border-color: var(--primary); }
-    #expr::placeholder { color: #b7bcc6; }
+    #expr {
+      flex: 1;
+      min-width: 0;
+      min-height: var(--touch-min);
+      font: inherit;
+      font-size: 16px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--separator);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--bg-elevated);
+      outline: none;
+      transition: border-color var(--dur-press) var(--ease-out);
+    }
+    #expr:focus { border-color: var(--game-accent); }
+    #expr::placeholder { color: var(--text-tertiary); }
     #expr:disabled { opacity: .55; }
     .pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 12px; }
-    .pad button { background: #f4f5f8; border: 1px solid #e8eaf0; color: #333a45; font-size: 17px; font-weight: 700; padding: 9px 0; border-radius: 9px; }
-    .pad button:active { background: #e9ebf2; }
-    .bottomrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .substat { font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
-    /* 答对时上飘的加分浮字 */
-    .fly { position: absolute; left: 50%; top: 33%; z-index: 40; transform: translate(-50%, 0); font-size: 24px; font-weight: 800; color: var(--ok); pointer-events: none; animation: flyup .85s ease forwards; }
-    @keyframes flyup { to { transform: translate(-50%, -52px); opacity: 0; } }
-    /* 弹层（hidden + 同步回流 + open，保证过渡生效） */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 30;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .93);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      opacity: 0;
-      transition: opacity .2s ease;
+    .pad button {
+      min-height: var(--touch-min);
+      background: var(--fill);
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 700;
+      padding: 9px 0;
+      border-radius: var(--radius-sm);
+      transition: transform var(--dur-press) var(--ease-spring),
+                  background-color var(--dur-press) var(--ease-out);
     }
-    .overlay.open { opacity: 1; }
-    .overlay h2 { font-size: 26px; color: var(--ink); margin-bottom: 10px; }
-    .overlay p { font-size: 14px; color: var(--muted); line-height: 2; margin-bottom: 16px; }
-    footer { text-align: center; color: #bdc1c6; font-size: 12px; margin-top: 12px; }
+    .pad button:active { background: var(--fill-secondary); transform: scale(.96); }
+    .bottomrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .substat {
+      font-size: 12.5px;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 答对时上飘的加分浮字（个性视觉，原 z-index 40 高于弹层，保留不动） */
+    .fly {
+      position: absolute;
+      left: 50%;
+      top: 33%;
+      z-index: 40;
+      transform: translate(-50%, 0);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--green);
+      pointer-events: none;
+      animation: flyup .85s ease forwards;
+    }
+    @keyframes flyup { to { transform: translate(-50%, -52px); opacity: 0; } }
+
+    /* 规则栏展开时主体让位的过渡（共享样式只负责静态内边距） */
+    body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+
     @media (max-width: 480px) {
-      .card { padding: 14px 12px 12px; }
-      h1 { font-size: 18px; }
-      .hud { gap: 9px; font-size: 12px; }
-      .hud b { font-size: 14px; }
       .pcard .big { font-size: 24px; }
       .pcard .corner { font-size: 11px; top: 5px; left: 6px; }
-      .pad button { font-size: 15px; padding: 8px 0; }
-      .btn-primary { padding: 10px 14px; }
+      .pad button { font-size: 15px; }
     }
 </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
     <!-- 花色图标用内联 SVG（站点禁用 emoji，符号字形统一走矢量） -->
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -236,14 +197,15 @@
       </defs>
     </svg>
 
-<main class="card" id="mainCard">
-  <header>
-    <h1>24点</h1>
-    <div class="hud">
-      <span>剩余 <b id="time">03:00</b></span>
-      <span>得分 <b id="score">0</b></span>
-      <span>最高 <b id="best">0</b></span>
-      <button id="pauseBtn" class="btn-plain" type="button" hidden>暂停</button>
+<main class="g-wrap">
+  <div class="g-card board" id="mainCard">
+  <header class="g-nav">
+    <h1 class="g-nav-title">24点</h1>
+    <div class="g-hud-bar">
+      <span class="g-stat-inline">剩余 <b id="time">03:00</b></span>
+      <span class="g-stat-inline">得分 <b id="score">0</b></span>
+      <span class="g-stat-inline">最高 <b id="best">0</b></span>
+      <button id="pauseBtn" class="g-btn g-btn-gray g-btn-sm" type="button" hidden>暂停</button>
     </div>
   </header>
   <div class="timebar" id="timebar"><i id="timefill"></i></div>
@@ -254,7 +216,7 @@
   <div class="exprrow">
     <input id="expr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64"
            placeholder="点击牌面或直接输入算式" aria-label="算式输入框">
-    <button id="submitBtn" class="btn-primary" type="button">提交</button>
+    <button id="submitBtn" class="g-btn" type="button">提交</button>
   </div>
 
   <div class="pad" id="pad" aria-label="算式按钮盘">
@@ -270,26 +232,27 @@
 
   <div class="bottomrow">
     <span class="substat" id="substat">准备好就开始</span>
-    <button id="skipBtn" class="btn-ghost" type="button">跳过这题</button>
+    <button id="skipBtn" class="g-btn g-btn-plain" type="button">跳过这题</button>
   </div>
 
-  <footer>拾光集 · 在线小游戏</footer>
+  <div class="g-overlay g-overlay-fade open" id="ovStart">
+    <h2 class="g-overlay-title">24点</h2>
+    <p class="g-overlay-text">用加减乘除和括号，把 4 张牌算成 24<br>限时 3 分钟，答得越快得分越高，连对有加成<br>点击牌面拼算式，也可以直接键盘输入</p>
+    <button id="btnStart" class="g-btn" type="button">开始挑战</button>
+  </div>
+  <div class="g-overlay g-overlay-fade" id="ovPause" hidden>
+    <h2 class="g-overlay-title">已暂停</h2>
+    <p class="g-overlay-text">倒计时已暂停，回来了就继续</p>
+    <button id="btnResume" class="g-btn" type="button">继续挑战</button>
+  </div>
+  <div class="g-overlay g-overlay-fade" id="ovOver" hidden>
+    <h2 class="g-overlay-title">时间到</h2>
+    <p class="g-overlay-text" id="overInfo"></p>
+    <button id="btnRestart" class="g-btn" type="button">再来一局</button>
+  </div>
+  </div>
 
-  <div class="overlay open" id="ovStart">
-    <h2>24点</h2>
-    <p>用加减乘除和括号，把 4 张牌算成 24<br>限时 3 分钟，答得越快得分越高，连对有加成<br>点击牌面拼算式，也可以直接键盘输入</p>
-    <button id="btnStart" class="btn-primary" type="button">开始挑战</button>
-  </div>
-  <div class="overlay" id="ovPause" hidden>
-    <h2>已暂停</h2>
-    <p>倒计时已暂停，回来了就继续</p>
-    <button id="btnResume" class="btn-primary" type="button">继续挑战</button>
-  </div>
-  <div class="overlay" id="ovOver" hidden>
-    <h2>时间到</h2>
-    <p id="overInfo"></p>
-    <button id="btnRestart" class="btn-primary" type="button">再来一局</button>
-  </div>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
 
 <script>
@@ -624,8 +587,8 @@ function submitAnswer() {
   const pts = Math.max(30, 100 - Math.floor(elapsed) * 5) + Math.min(75, (streak - 1) * 15);
   score += pts;
   scoreEl.textContent = score;
-  scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
-  setTimeout(() => scoreEl.classList.remove('bump'), 240);
+  scoreEl.classList.remove('g-bump'); void scoreEl.offsetWidth; scoreEl.classList.add('g-bump');
+  setTimeout(() => scoreEl.classList.remove('g-bump'), 240);
   if (score > best) { best = score; bestEl.textContent = best; saveBest(best); }
   flyPts('+' + pts);
   setStatus('漂亮，+' + pts + ' 分！', 'ok');
@@ -733,9 +696,9 @@ setPanels();
 requestAnimationFrame(loop);
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
 
       <h3>玩法</h3>

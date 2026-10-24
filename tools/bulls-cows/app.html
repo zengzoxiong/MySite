@@ -6,176 +6,121 @@
 <title>猜数字 - 拾光集</title>
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/bulls-cows/app.html">
+<!-- 共享 UI 设计系统（Apple HIG），路径自 tools/bulls-cows/ 出发 -->
+<link rel="stylesheet" href="../../assets/game-ui.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#eef0f4;color:#3c4043;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 10px 32px rgba(60,64,67,.12);padding:18px 20px 14px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-h1{font-size:19px;font-weight:700}
-.hud{font-size:13px;color:#5f6368;font-variant-numeric:tabular-nums}
-.hud b{color:#202124;font-size:15px;margin:0 2px}
-.status{font-size:14px;color:#5f6368;text-align:center;margin-bottom:12px;min-height:20px}
-.status.err{color:#e5484d}
-/* 输入位：四个数字框 */
-.slots{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
-.slot{width:56px;height:64px;border-radius:12px;background:#f1f3f4;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#202124;font-variant-numeric:tabular-nums}
-.slot.filled{background:#e8f0fe;color:#1a73e8}
-.slots.shake{animation:shake .3s}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
-/* 屏幕数字键盘 */
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:12px auto 0}
-.pad button{font:inherit;border:0;border-radius:12px;background:#f1f3f4;color:#202124;font-size:19px;font-weight:600;padding:13px 0;cursor:pointer;font-variant-numeric:tabular-nums}
-.pad button:active{transform:scale(.95)}
-.pad button:disabled{opacity:.4;cursor:default;transform:none}
-.pad .submit{background:#1a73e8;color:#fff}
-.pad .submit:disabled{background:#9ec1f2;opacity:1}
-/* 历史记录 */
-.history{margin-top:14px;background:#f8f9fa;border-radius:12px;padding:10px 12px;min-height:96px;max-height:196px;overflow-y:auto}
-.history h2{font-size:13px;font-weight:600;color:#5f6368;margin-bottom:6px}
-.history ol{list-style:none}
-.history li{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;padding:5px 2px;border-bottom:1px solid #eceff1;font-variant-numeric:tabular-nums}
-.history li:last-child{border-bottom:0}
-.history .no{color:#9aa0a6;width:42px;flex:none}
-.history .guess{font-weight:700;color:#202124;letter-spacing:2px}
-.history .res{color:#1a73e8;font-weight:600}
-.history .res.hit{color:#e5484d}
-.history .empty{color:#bdc1c6;font-size:12.5px;text-align:center;padding:18px 0}
-/* 结果弹层 */
-.overlay{position:fixed;inset:0;background:rgba(32,33,36,.45);display:flex;align-items:center;justify-content:center;padding:20px}
-.overlay[hidden]{display:none}
-.dialog{background:#fff;border-radius:16px;padding:26px 26px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.22)}
-.dialog h2{font-size:21px;margin-bottom:10px;color:#202124}
-.dialog .answer{font-size:26px;font-weight:700;letter-spacing:6px;color:#1a73e8;margin:10px 0;font-variant-numeric:tabular-nums}
-.dialog p{font-size:14px;color:#5f6368;line-height:1.9;margin:6px 0}
-.dialog button{font:inherit;border:0;border-radius:10px;padding:10px 26px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer;margin-top:12px}
-.dialog button:active{transform:scale(.96)}
-.actions{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.btn-plain{font:inherit;border:0;border-radius:10px;padding:9px 18px;background:#f1f3f4;color:#3c4043;font-weight:500;cursor:pointer}
-.btn-plain:active{transform:scale(.96)}
-/* AI 代玩主按钮：醒目蓝色，运行中切换为红色停止态 */
-.btn-ai{font:inherit;border:0;border-radius:10px;padding:9px 20px;background:#1a73e8;color:#fff;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(26,115,232,.35)}
-.btn-ai:active{transform:scale(.96)}
-.btn-ai.stop{background:#e5484d;box-shadow:0 2px 10px rgba(229,72,77,.35)}
-.tips{font-size:12.5px;color:#9aa0a6;text-align:center;margin-top:12px;line-height:1.8}
-footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
-</style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
-</head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+/* 猜数字（1A2B）· 游戏个性色：靛蓝（推理）。组件基线取自 game-ui.css，此处只留游戏私有视觉 */
+:root { --game-accent: #5856D6; }
 
-<main class="card">
-  <header>
-    <h1>猜数字（1A2B）</h1>
-    <div class="hud">累计得分 <b id="totalScore">0</b> · 胜场 <b id="winCount">0</b></div>
-  </header>
+/* 结算弹窗：脚本沿用「只切 hidden」的静态显隐，这里补一条与 .open 等价的可见态，脚本不动 */
+.g-alert-mask:not([hidden]) { opacity: 1; pointer-events: auto; }
+.g-alert-mask:not([hidden]) .g-alert { transform: scale(1); }
+
+/* 规则栏展开让位的横向过渡（共享样式只给了位移） */
+body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+
+/* 状态提示行 */
+.status {
+  min-height: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.status.err { color: var(--red); }
+
+/* 输入位：四个数字框（保留原造型，色板换令牌） */
+.slots { display: flex; gap: 10px; justify-content: center; }
+.slot {
+  width: 56px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: var(--fill);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.slot.filled {
+  background: rgba(88, 86, 214, .14);   /* 兜底：不支持 color-mix 的浏览器 */
+  background: color-mix(in srgb, var(--game-accent) 14%, transparent);
+  color: var(--game-accent-text);
+}
+.slots.shake { animation: shake .3s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  50% { transform: translateX(7px); }
+  75% { transform: translateX(-4px); }
+}
+
+/* 屏幕数字键盘：网格布局私有，按键外观走 g-btn 组件 */
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+.pad .g-btn { width: 100%; font-size: 19px; font-variant-numeric: tabular-nums; }
+
+/* 猜测历史：行由脚本生成，类名与结构保持原样，只换色板 */
+.history {
+  min-height: 96px;
+  max-height: 196px;
+  overflow-y: auto;
+}
+.history ol { margin: 0; padding: 0; list-style: none; }
+.history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 2px;
+  border-bottom: var(--hairline) solid var(--separator);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+.history li:last-child { border-bottom: 0; }
+.history .no { width: 42px; flex: none; color: var(--text-tertiary); }
+.history .guess { color: var(--text); font-weight: 700; letter-spacing: 2px; }
+.history .res { color: var(--game-accent-text); font-weight: 600; }
+.history .res.hit { color: var(--red); }
+.history li.empty {
+  display: block;
+  padding: 18px 0;
+  border-bottom: 0;
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+/* 结算弹窗里的答案数字（游戏个性视觉） */
+.answer {
+  margin: 10px 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--game-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+</style>
+</head>
+<body class="g-page">
+    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+
+<main class="g-wrap">
+  <nav class="g-nav"><h1 class="g-nav-title">猜数字（1A2B）</h1></nav>
+  <div class="g-hud">
+    <div class="g-stat"><span class="g-stat-label">累计得分</span><span class="g-stat-value g-num" id="totalScore">0</span></div>
+    <div class="g-stat"><span class="g-stat-label">胜场</span><span class="g-stat-value g-num" id="winCount">0</span></div>
+  </div>
+  <span class="g-ai-note">AI 代玩成绩不计最高分</span>
   <div class="status" id="statusText">电脑已想好 4 位不重复数字，开始猜测吧</div>
   <div class="slots" id="slots">
     <div class="slot" id="slot0"></div>
@@ -184,35 +129,42 @@ footer{text-align:center;color:#bdc1c6;font-size:12px;margin-top:10px}
     <div class="slot" id="slot3"></div>
   </div>
   <div class="pad" id="pad">
-    <button type="button" data-d="1">1</button>
-    <button type="button" data-d="2">2</button>
-    <button type="button" data-d="3">3</button>
-    <button type="button" data-d="4">4</button>
-    <button type="button" data-d="5">5</button>
-    <button type="button" data-d="6">6</button>
-    <button type="button" data-d="7">7</button>
-    <button type="button" data-d="8">8</button>
-    <button type="button" data-d="9">9</button>
-    <button type="button" class="btn-plain" id="backBtn">退格</button>
-    <button type="button" data-d="0">0</button>
-    <button type="button" class="submit" id="submitBtn" disabled>提交</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="1">1</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="2">2</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="3">3</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="4">4</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="5">5</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="6">6</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="7">7</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="8">8</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="9">9</button>
+    <button type="button" class="g-btn g-btn-gray" id="backBtn">退格</button>
+    <button type="button" class="g-btn g-btn-gray" data-d="0">0</button>
+    <button type="button" class="g-btn" id="submitBtn" disabled>提交</button>
   </div>
-  <div class="history">
-    <h2>猜测历史（共 8 次机会）</h2>
+  <div class="history g-card">
+    <h2 class="g-card-title">猜测历史（共 8 次机会）</h2>
     <ol id="historyList"><li class="empty">还没有猜过，输入 4 位数字后点提交</li></ol>
   </div>
-  <div class="actions">
-    <button class="btn-ai" id="aiBtn" type="button">AI 代玩</button>
-    <button class="btn-plain" id="restartBtn" type="button">重新开局</button>
+  <div class="actions g-btn-row">
+    <div class="g-ai-group">
+      <button class="g-btn g-ai-btn" id="aiBtn" type="button">AI 代玩</button>
+      <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
+    </div>
+    <button class="g-btn g-btn-gray" id="restartBtn" type="button">重新开局</button>
   </div>
-  <footer>拾光集 · 在线小游戏</footer>
+  <footer class="g-foot">拾光集 · 在线小游戏</footer>
 </main>
-<div class="overlay" id="resultOverlay" hidden>
-  <div class="dialog">
-    <h2 id="resultTitle">猜中了</h2>
-    <div class="answer" id="resultAnswer"></div>
-    <p id="resultInfo"></p>
-    <button type="button" id="resultBtn">再来一局</button>
+<div class="g-alert-mask" id="resultOverlay" hidden>
+  <div class="g-alert" role="alertdialog" aria-modal="true">
+    <div class="g-alert-body">
+      <h2 class="g-alert-title" id="resultTitle">猜中了</h2>
+      <div class="answer" id="resultAnswer"></div>
+      <p class="g-alert-msg" id="resultInfo"></p>
+    </div>
+    <div class="g-alert-actions">
+      <button type="button" class="g-alert-btn default" id="resultBtn">再来一局</button>
+    </div>
   </div>
 </div>
 <script>
@@ -571,7 +523,7 @@ function stopAi(msg) {
   aiRunning = false;
   clearTimeout(aiTimer);
   aiBtn.textContent = 'AI 代玩';
-  aiBtn.classList.remove('stop');
+  aiBtn.classList.remove('is-running');
   setStatus(msg || 'AI 已停止，可继续手动游玩');
 }
 
@@ -604,9 +556,9 @@ aiBtn.addEventListener('click', () => {
   if (aiRunning) { stopAi(); return; }
   if (over) newGame();
   aiRunning = true;
-  aiBtn.textContent = '停止 AI';
-  aiBtn.classList.add('stop');
-  setStatus('AI 已接管，点击「停止 AI」可随时停下');
+  aiBtn.textContent = '停止代玩';
+  aiBtn.classList.add('is-running');
+  setStatus('AI 已接管，点击「停止代玩」可随时停下');
   aiTick();
 });
 
@@ -639,11 +591,11 @@ resultBtn.addEventListener('click', newGame);                           // AI �
 newGame();
 })();
 </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
+    <div class="g-rules-scroll">
     <h2>游戏规则</h2>
-    
+
       <h3>玩法</h3>
       <ul>
         <li>电脑随机出 4 位互不重复的数字，你来猜</li>

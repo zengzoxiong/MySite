@@ -7,73 +7,57 @@
   <meta name="description" content="拾光集在线小游戏：推箱子（Sokoban），内置 5 个渐进关卡，支持撤销、步数统计、最佳记录与 AI 代玩，纯本地运行。">
   <link rel="icon" href="../../favicon.svg">
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/sokoban/app.html">
+  <link rel="stylesheet" href="../../assets/game-ui.css">
   <style>
-    /* ===== 推箱子 · 拾光集自建小游戏（纯静态零依赖，固定亮色样式） ===== */
-    [hidden] { display: none !important; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #f3f6f9;
-      color: #4d5d6c;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 26px 16px 40px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .wrap { width: 100%; max-width: 560px; }
+    /* ===== 推箱子 · Apple HIG 组件语言 =====
+       共享样式表 assets/game-ui.css 提供字体栈、色彩令牌与 g-* 组件类；
+       本页个性色 --game-accent: #FF9500（木箱橙），深浅色跟随系统。
+       导航、计分、按钮、弹窗、规则栏统一走 g-* 类；
+       棋盘、木箱、小人、方向键等游戏个性视觉保留为私有样式。 */
+    :root { --game-accent: #FF9500; }
 
-    header { margin-bottom: 14px; }
-    h1 { font-size: 30px; color: #3f5568; letter-spacing: 1px; }
-    .sub { margin-top: 6px; font-size: 13px; color: #8ba0b2; line-height: 1.7; }
-
-    /* 顶部统计 */
-    .hud { display: flex; gap: 10px; margin-bottom: 12px; }
-    .stat {
-      flex: 1;
-      background: #fff;
-      border: 1px solid #e2eaf1;
-      border-radius: 12px;
-      padding: 8px 10px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(90, 120, 150, .10);
-    }
-    .stat .lab { display: block; font-size: 12px; color: #93a8ba; letter-spacing: 2px; }
-    .stat .val {
-      display: block; margin-top: 2px; font-size: 22px; font-weight: 700;
-      color: #3f5568; font-variant-numeric: tabular-nums;
-    }
-
-    /* 关卡切换器 */
-    .levels { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    /* ---------- 关卡切换器（类名由脚本生成，lv-btn / active 保持不变） ---------- */
+    .levels { display: flex; gap: 8px; flex-wrap: wrap; }
     .lv-btn {
       flex: 1 1 0;
       min-width: 64px;
-      border: 1px solid #e2eaf1;
-      background: #fff;
-      color: #5c7186;
+      min-height: var(--touch-min);
+      padding: 8px 4px;
+      border: 1px solid var(--separator);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--text);
       font-family: inherit;
       font-size: 14px;
       font-weight: 600;
-      border-radius: 10px;
-      padding: 9px 4px;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(90, 120, 150, .08);
       touch-action: manipulation;
+      transition: transform var(--dur-press) var(--ease-spring),
+                  background-color var(--dur-press) var(--ease-out),
+                  color var(--dur-press) var(--ease-out),
+                  border-color var(--dur-press) var(--ease-out);
     }
-    .lv-btn .best { display: block; font-size: 11px; font-weight: 400; color: #9db0c0; margin-top: 2px; }
-    .lv-btn.active { background: #4f7ea8; border-color: #4f7ea8; color: #fff; }
-    .lv-btn.active .best { color: #d7e6f2; }
+    .lv-btn:active { transform: scale(.96); }
+    .lv-btn:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
+    .lv-btn .best {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+    .lv-btn.active {
+      background: var(--game-accent);
+      border-color: var(--game-accent);
+      color: var(--game-on-accent);
+    }
+    .lv-btn.active .best { color: var(--game-on-accent); opacity: .85; }
 
-    /* 棋盘 */
-    .board-card {
-      background: #fff;
-      border: 1px solid #e2eaf1;
-      border-radius: 16px;
-      padding: 12px;
-      box-shadow: 0 4px 18px rgba(90, 120, 150, .12);
-      margin-bottom: 12px;
-    }
+    /* ---------- 计分区与 AI 标注的紧凑组合 ---------- */
+    .hud-block { display: flex; flex-direction: column; gap: 6px; }
+    header .g-ai-tag { margin-top: 8px; }
+
+    /* ---------- 棋盘（游戏个性视觉原样保留：墙 / 目标点 / 木箱 / 小人） ---------- */
     .board {
       display: grid;
       gap: 3px;
@@ -140,49 +124,7 @@
     }
     .cell.done .box-face::before { border-color: rgba(255, 255, 255, .7); }
 
-    /* 控制区 */
-    .controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      border: 0;
-      background: #4f7ea8;
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 12px;
-      padding: 11px 18px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(79, 126, 168, .35);
-      touch-action: manipulation;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn.primary { background: #3f9d6d; }
-    .btn.ghost { background: #fff; color: #4f7ea8; border: 1px solid #cfe0ee; box-shadow: 0 2px 8px rgba(90, 120, 150, .1); }
-
-    /* AI 代玩按钮与状态标签 */
-    .btn.ai { background: #3f9d6d; box-shadow: 0 2px 10px rgba(63, 157, 109, .35); }
-    .btn.ai.ai-on { background: #c85a4e; box-shadow: 0 2px 10px rgba(200, 90, 78, .35); }
-    .ai-tag {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 3px 12px;
-      border-radius: 999px;
-      background: #e7f4ec;
-      color: #2f8b52;
-      border: 1px solid #bfe3cd;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    /* 屏幕方向按钮（手机端） */
+    /* ---------- 屏幕方向按钮（移动端 58px 触控，箭头用个性色文字） ---------- */
     .dpad {
       display: grid;
       grid-template-columns: repeat(3, 58px);
@@ -191,43 +133,39 @@
       margin: 0 auto;
     }
     .dpad .btn-d {
-      border: 0;
-      border-radius: 14px;
-      background: #fff;
-      border: 1px solid #d5e2ed;
-      color: #4f7ea8;
+      border: 1px solid var(--separator);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      color: var(--game-accent-text);
+      font-family: inherit;
       font-size: 22px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(90, 120, 150, .14);
       touch-action: manipulation;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform var(--dur-press) var(--ease-spring),
+                  background-color var(--dur-press) var(--ease-out);
     }
-    .dpad .btn-d:active { transform: translateY(1px); background: #eaf2f8; }
+    .dpad .btn-d:active { transform: scale(.96); background: var(--fill); }
+    .dpad .btn-d:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
     .dpad .up { grid-column: 2; grid-row: 1; }
     .dpad .left { grid-column: 1; grid-row: 2; }
-    .dpad .mid { grid-column: 2; grid-row: 2; background: #eef4f9; cursor: default; }
+    .dpad .mid { grid-column: 2; grid-row: 2; background: var(--fill); cursor: default; }
     .dpad .right { grid-column: 3; grid-row: 2; }
     .dpad .down { grid-column: 2; grid-row: 3; }
     .dpad .btn-d svg { width: 26px; height: 26px; }
 
-    /* 提示 / 说明 */
-    .tips {
-      background: #fff;
-      border: 1px solid #e2eaf1;
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 13px;
-      line-height: 1.9;
-      color: #6b7f91;
-      box-shadow: 0 2px 10px rgba(90, 120, 150, .08);
-      margin-bottom: 14px;
+    /* ---------- 图例色板（与棋盘同色，保留识别度） ---------- */
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+    .legend .item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
-    .tips h2 { font-size: 15px; color: #3f5568; margin-bottom: 4px; }
-    .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; }
-    .legend .item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
     .sw { width: 22px; height: 22px; border-radius: 5px; flex: none; }
     .sw.wall { background: linear-gradient(160deg, #6c7f93, #55677a); }
     .sw.goal { background: #f6efe1; border: 1px solid #e2d6bb; position: relative; }
@@ -240,184 +178,59 @@
     .sw.player { background: #eef2f6; display: flex; align-items: center; justify-content: center; }
     .sw.player svg { width: 18px; height: 18px; }
 
-    /* 通关庆祝弹层 */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(52, 70, 86, .45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 50;
+    /* ---------- 结算弹窗补充（g-alert 基线之上保留庆祝细节） ----------
+       #winModal 显隐仍由既有脚本切换 hidden（§3.9 静态协议）；
+       这里常驻 .open 让遮罩保持可见态，hidden 负责整体显示 / 隐藏。 */
+    .g-alert-title.win-title { color: var(--green); }
+    .g-alert-msg b {
+      color: var(--text);
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
     }
-    .modal-card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 26px 24px;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 18px 50px rgba(40, 60, 80, .3);
-    }
-    .modal-card h2 { font-size: 24px; color: #3f9d6d; margin-bottom: 10px; }
-    .modal-card .msg { font-size: 14px; color: #6b7f91; line-height: 1.9; }
-    .modal-card .msg b { color: #3f5568; font-size: 18px; font-variant-numeric: tabular-nums; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
-    .modal-actions .btn { flex: 1; padding: 11px 8px; font-size: 14px; }
 
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: #a7b8c6;
-      padding: 6px 0 2px;
-    }
+    /* 规则栏展开时内容列平滑让位（宽屏 padding-right 由共享样式负责） */
+    .g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
     @media (max-width: 420px) {
-      h1 { font-size: 25px; }
-      .stat .val { font-size: 19px; }
       .board { gap: 2px; padding: 4px; }
     }
   </style>
-    <style>
-    /* 返回主页按钮（fixed 定位不挤占各页布局） */
-    .back-home {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 200;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: #fff;
-      color: #4a6f9e;
-      border: 1px solid #d3dfee;
-      box-shadow: 0 2px 8px rgba(60, 90, 130, .12);
-      font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      text-decoration: none;
-      touch-action: manipulation;
-    }
-    .back-home:hover { background: #f0f6fc; }
-    .back-home:active { transform: translateY(1px); }
-    .back-home svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    @media (max-width: 560px) {
-      .back-home { top: 8px; left: 8px; padding: 7px 10px; font-size: 12px; }
-    }
-    </style>
-    <style>
-    /* ===== 右侧规则栏（可收起）=====
-       展开时 body 右侧让出面板位，游戏本体居左；收起后仅剩「玩法」竖标签。
-       展开偏好存 localStorage，跨游戏页记忆。 */
-    .rules-panel {
-      position: fixed;
-      top: 0; right: 0; bottom: 0;
-      width: 272px;
-      overflow: visible; /* 把手挂在面板左缘外侧，滚动收进内层 .rules-scroll */
-      background: #fff;
-      border-left: 1px solid #d7dee8;
-      box-shadow: -6px 0 22px rgba(60, 90, 130, .10);
-      z-index: 190;
-      transform: translateX(0);
-      transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-      color: #5c7186;
-      font: 400 13px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-    .rules-panel.closed { transform: translateX(100%); }
-    /* 规则内容滚动区（面板本体必须 overflow:visible，只能在内层滚） */
-    .rules-scroll {
-      height: 100%;
-      overflow-y: auto;
-      padding: 20px 18px;
-      box-sizing: border-box;
-    }
-    .rules-panel h2 {
-      font-size: 15px;
-      color: #3f5568;
-      margin: 0 0 12px;
-    }
-    .rules-panel h3 {
-      font-size: 12.5px;
-      color: #4a6f9e;
-      margin: 14px 0 4px;
-      letter-spacing: 1px;
-    }
-    .rules-panel ul { margin: 0; padding-left: 18px; }
-    .rules-panel li { margin: 4px 0; }
-    /* 柜门式把手：挂在面板最左侧中间，随面板滑出滑入 */
-    .rules-handle {
-      position: absolute;
-      left: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 116px;
-      padding: 0;
-      border: 1px solid #d7dee8;
-      border-right: none;
-      border-radius: 12px 0 0 12px;
-      background: #fff;
-      box-shadow: -4px 0 14px rgba(60, 90, 130, .10);
-      color: #4a6f9e;
-      font: 600 13px/1 inherit;
-      letter-spacing: 3px;
-      writing-mode: vertical-lr;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-    .rules-handle:active { transform: translateY(-50%) scale(.96); }
-    body { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
-    @media (min-width: 1100px) {
-      body.rules-open { padding-right: 272px; }
-    }
-    /* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-    @media (max-width: 560px) {
-      .rules-panel { width: min(272px, 82vw); }
-    }
-    </style>
 </head>
-<body>
-    <a class="back-home" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+<body class="g-page">
+  <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
 
-  <div class="wrap">
+  <main class="g-wrap">
     <header>
-      <h1>推箱子</h1>
-      <p class="sub">把所有木箱推到目标点即可过关。箱子只能推、不能拉，推到墙角可就动不了了。内置 5 个渐进关卡，支持撤销、最佳步数记录与 AI 代玩。</p>
-      <span class="ai-tag" id="aiTag" hidden>AI 代玩中 · 不计最佳记录</span>
+      <nav class="g-nav"><h1 class="g-nav-title">推箱子</h1></nav>
+      <p class="g-nav-sub">把所有木箱推到目标点即可过关。箱子只能推、不能拉，推到墙角可就动不了了。内置 5 个渐进关卡，支持撤销、最佳步数记录与 AI 代玩。</p>
+      <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
     </header>
 
-    <!-- 统计 -->
-    <div class="hud">
-      <div class="stat"><span class="lab">步数</span><span class="val" id="movesVal">0</span></div>
-      <div class="stat"><span class="lab">推动</span><span class="val" id="pushesVal">0</span></div>
-      <div class="stat"><span class="lab">最佳</span><span class="val" id="bestVal">--</span></div>
+    <!-- 统计（AI 代玩成绩豁免标注随计分板展示） -->
+    <div class="hud-block">
+      <div class="g-hud">
+        <div class="g-stat"><span class="g-stat-label">步数</span><span class="g-stat-value g-num" id="movesVal">0</span></div>
+        <div class="g-stat"><span class="g-stat-label">推动</span><span class="g-stat-value g-num" id="pushesVal">0</span></div>
+        <div class="g-stat"><span class="g-stat-label">最佳</span><span class="g-stat-value g-num" id="bestVal">--</span></div>
+      </div>
+      <span class="g-ai-note">AI 代玩成绩不计最佳记录</span>
     </div>
 
     <!-- 关卡切换器 -->
     <div class="levels" id="levelBar"></div>
 
-    <!-- 棋盘 -->
-    <div class="board-card">
-      <div class="board" id="board" aria-label="推箱子棋盘"></div>
+    <!-- 棋盘（g-stage 触控防护；棋盘 / 木箱 / 小人个性视觉保留） -->
+    <div class="g-card">
+      <div class="g-stage">
+        <div class="board" id="board" aria-label="推箱子棋盘"></div>
+      </div>
     </div>
 
     <!-- 操作按钮 -->
-    <div class="controls">
-      <button class="btn ghost" id="undoBtn" type="button">撤销一步（U）</button>
-      <button class="btn ghost" id="restartBtn" type="button">重玩本关（R）</button>
-      <button class="btn ai" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
+    <div class="g-btn-row">
+      <button class="g-btn g-btn-gray" id="undoBtn" type="button">撤销一步（U）</button>
+      <button class="g-btn g-btn-gray" id="restartBtn" type="button">重玩本关（R）</button>
+      <button class="g-btn g-ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
     </div>
 
     <!-- 手机端方向按钮 -->
@@ -437,9 +250,9 @@
       </button>
     </div>
 
-    <!-- 玩法说明 -->
-    <div class="tips">
-      <h2>图例</h2>
+    <!-- 图例 -->
+    <div class="g-card">
+      <h2 class="g-card-title">图例</h2>
       <div class="legend">
         <div class="item"><span class="sw wall"></span>墙</div>
         <div class="item"><span class="sw goal"></span>目标点</div>
@@ -457,18 +270,20 @@
       </div>
     </div>
 
-    <footer>拾光集 · 在线小游戏</footer>
-  </div>
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
+  </main>
 
-  <!-- 通关庆祝弹层 -->
-  <div class="modal" id="winModal" hidden>
-    <div class="modal-card">
-      <h2 id="winTitle">通关啦</h2>
-      <div class="msg" id="winMsg"></div>
-      <div class="modal-actions">
-        <button class="btn primary" id="winNextBtn" type="button">下一关</button>
-        <button class="btn ghost" id="winRetryBtn" type="button">重玩本关</button>
-        <button class="btn ghost" id="winCloseBtn" type="button">关闭</button>
+  <!-- 通关庆祝弹窗（g-alert iOS 警告框规格） -->
+  <div class="g-alert-mask open" id="winModal" hidden>
+    <div class="g-alert" role="alertdialog" aria-modal="true">
+      <div class="g-alert-body">
+        <h2 class="g-alert-title win-title" id="winTitle">通关啦</h2>
+        <p class="g-alert-msg" id="winMsg"></p>
+      </div>
+      <div class="g-alert-actions">
+        <button class="g-alert-btn default" id="winNextBtn" type="button">下一关</button>
+        <button class="g-alert-btn" id="winRetryBtn" type="button">重玩本关</button>
+        <button class="g-alert-btn" id="winCloseBtn" type="button">关闭</button>
       </div>
     </div>
   </div>
@@ -1100,7 +915,7 @@
     function setAi(on) {
       aiOn = on;
       aiBtn.textContent = aiOn ? '停止 AI 代玩' : 'AI 代玩';
-      aiBtn.classList.toggle('ai-on', aiOn);
+      aiBtn.classList.toggle('is-running', aiOn);
       aiBtn.setAttribute('aria-pressed', String(aiOn));
       aiTag.hidden = !aiOn;
       if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
@@ -1162,11 +977,10 @@
     /* ---------- 启动 ---------- */
     loadLevel(0);
   </script>
-  <aside class="rules-panel" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="rules-scroll">
-    <h2>游戏规则</h2>
-    
+  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
+    <div class="g-rules-scroll">
+      <h2>游戏规则</h2>
+
       <h3>玩法</h3>
       <ul>
         <li>把所有木箱推到金色虚线目标点上即可过关</li>
@@ -1184,6 +998,7 @@
         <li>AI 代玩不计入最佳步数记录</li>
       </ul>
     </div>
+    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
   </aside>
   <script>
   (function () {
