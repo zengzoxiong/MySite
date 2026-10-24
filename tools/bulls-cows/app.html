@@ -9,6 +9,7 @@
 <!-- 共享 UI 设计系统（Apple HIG），路径自 tools/bulls-cows/ 出发 -->
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
 /* 猜数字（1A2B）· 游戏个性色：靛蓝（推理）。组件基线取自 game-ui.css，此处只留游戏私有视觉 */
 :root { --game-accent: #5856D6; }
@@ -113,7 +114,7 @@ body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap">
   <nav class="g-nav"><h1 class="g-nav-title">猜数字（1A2B）</h1></nav>
@@ -438,6 +439,7 @@ function pressDigit(d) {
   if (input.length >= 4) { shake(); return; }
   if (input.indexOf(d) >= 0) {   // 防重复数字
     shake();
+    if (window.GameSFX) GameSFX.error();
     setStatus('数字不能重复，请换一个', true);
     return;
   }
@@ -457,6 +459,7 @@ function submit() {
   if (over) return;
   if (input.length !== 4 || new Set(input).size !== 4) {
     shake();
+    if (window.GameSFX) GameSFX.error();
     setStatus('需要 4 位互不相同的数字才能提交', true);
     return;
   }
@@ -470,6 +473,7 @@ function submit() {
     over = true;
     renderSlots();
     if (step.win) {
+      if (window.GameSFX) GameSFX.win();
       // 猜中：按剩余次数计分（AI 代玩为演示，不计入累计纪录）
       if (!aiRunning) {
         record.wins += 1;
@@ -479,6 +483,7 @@ function submit() {
       }
       showResult(true, step.score);
     } else {
+      if (window.GameSFX) GameSFX.lose();
       showResult(false, 0);
     }
     return;
@@ -499,6 +504,7 @@ function showResult(win, remain) {
 
 // ================= 重开 =================
 function newGame() {
+  if (window.GameSFX) GameSFX.unlock();
   secret = makeSecret();
   input = '';
   history = [];

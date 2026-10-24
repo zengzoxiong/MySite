@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/minesweeper/app.html">
   <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
   <style>
     /* ===== 扫雷 · 游戏私有视觉（经典浮雕雷区 + 雷数/笑脸/计时条）=====
        组件外观统一取共享令牌；棋盘浮雕、红色计数管、笑脸 SVG 为本作个性，保留。 */
@@ -115,7 +116,7 @@
   </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap">
     <header class="g-nav">
@@ -733,6 +734,7 @@
     board.style.setProperty('--cs', cs + 'px');
   }
   function reset() {
+    if (window.GameSFX) GameSFX.unlock();
     stopTimer();
     if (aiRestartTimer) { window.clearTimeout(aiRestartTimer); aiRestartTimer = null; }
     seconds = 0;
@@ -770,18 +772,21 @@
     const res = core.reveal(game, i);
     paintCells(res.changed);
     if (res.started) startTimer();
+    if (window.GameSFX && !res.hit) GameSFX.click();   // 翻开（踩雷由 lose 发声）
     if (res.hit) { lose(i); return; }
     if (res.win) checkWin();
   }
   function doToggleFlag(i) {
     const res = core.toggleFlag(game, i);
     if (!res) return;
+    if (window.GameSFX) GameSFX.click();
     paintCells(res.changed);
     updateMineCounter();
   }
 
   /* ---------- 胜负（纯 UI 收尾：终局判定在 minesweeperCore 的 reveal 内完成） ---------- */
   function checkWin() {
+    if (window.GameSFX) GameSFX.win();
     stopTimer();
     updateMineCounter();                     // 剩余的雷已在核心里自动插旗
     setFace(FACE_COOL);
@@ -796,6 +801,7 @@
     showOverlay(true, '用时 ' + seconds + ' 秒' + (record ? ' · 新纪录！' : ''));
   }
   function lose(hit) {
+    if (window.GameSFX) GameSFX.lose();
     stopTimer();
     for (let i = 0; i < game.cells.length; i++) {
       const c = game.cells[i], el = cellEls[i];

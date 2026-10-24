@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/slide-puzzle/app.html">
   <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
   <style>
     /* ===== 数字华容道 · 游戏私有视觉（组件外观统一由 game-ui.css 提供） ===== */
     /* 个性色：青（滑块轻盈感，见 docs/game-ui-design.md 分配表） */
@@ -67,7 +68,7 @@
   </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap">
     <h1 class="g-nav-large">数字华容道</h1>
@@ -658,6 +659,7 @@
     const from = G.blank;
     const ev = coreMove(G, idx);
     if (!ev.moved) return;
+    if (window.GameSFX && !ev.solved) GameSFX.click();   // 滑动数字块
     setXY(els[ev.tile], from % G.n, Math.floor(from / G.n));   // 数字块滑进原空位
     movesEl.textContent = G.moves;
     if (!timerId) startTimer();             // 首次移动才开始计时
@@ -666,6 +668,7 @@
 
   /* ---------- 胜利 ---------- */
   function winGame() {
+    if (window.GameSFX) GameSFX.win();
     stopTimer();
     const old = loadBest();
     let record = false;
@@ -701,6 +704,7 @@
 
   /* ---------- 开局 ---------- */
   function newGame(size) {
+    if (window.GameSFX) GameSFX.unlock();
     board.style.setProperty('--n', size);
     syncTileFont();
     stopTimer();

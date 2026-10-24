@@ -9,6 +9,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/match3/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
   /* ===== 消消乐 · 拾光集自建小游戏（纯静态零依赖） =====
      外围组件（页面骨架、按钮、计分、弹层、规则栏）统一走共享设计系统 game-ui.css；
@@ -125,7 +126,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap">
     <nav class="g-nav"><h1 class="g-nav-title">消消乐</h1></nav>
@@ -370,6 +371,7 @@
         // 无效交换：原路换回并抖动提示，不扣步数
         applySwap(a, b);
         ta.el.classList.add('deny'); tb.el.classList.add('deny');
+        if (window.GameSFX) GameSFX.error();
         setTimeout(function () {
           ta.el.classList.remove('deny'); tb.el.classList.remove('deny');
           lock = false;
@@ -391,6 +393,7 @@
     // 基础分 = 方块数×10，四连以上每多一个加 20，再乘连击波数倍率
     const gained = (n * 10 + (n >= 4 ? (n - 3) * 20 : 0)) * combo;
     addScore(gained);
+    if (window.GameSFX) GameSFX.combo();
     const pos = centerOf(marks);
     if (combo >= 2) showFloat(pos.x, pos.y, '+' + gained, '连击 ×' + combo);
     else showFloat(pos.x, pos.y, '+' + gained);
@@ -487,6 +490,7 @@
   function gameOver() {
     state = 'over';
     lock = false;
+    if (window.GameSFX) GameSFX.lose();
     ovTitle.textContent = mode === 'time' ? '时间到' : '步数用完';
     ovSub.textContent = '本局得分 ' + score + (newRecord ? ' · 新纪录！' : (best > 0 ? ' · 历史最高 ' + best : ''));
     showOverlay(ovOver);
@@ -507,6 +511,7 @@
 
   /* ---------- 开局与模式切换 ---------- */
   function startGame(m) {
+    if (window.GameSFX) GameSFX.unlock();
     mode = m;
     state = 'playing';
     score = 0; newRecord = false; timeUp = false;

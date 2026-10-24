@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/tic-tac-toe/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
 /* ============================================================
    井字棋 · 页面私有样式
@@ -65,7 +66,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap">
   <nav class="g-nav"><h1 class="g-nav-title">井字棋</h1></nav>
@@ -234,6 +235,7 @@ function pickMove() {
 // 落一子并推进对局（点击、对方 AI、AI 代玩共用），返回胜负结果（'' 为未结束）
 function applyMove(i) {
   state = core.stepGame(state, i);
+  if (window.GameSFX) GameSFX.click();
   render();
   return state.winner;
 }
@@ -265,9 +267,11 @@ function endGame(w) {
     score.draw += 1;
     statusText.textContent = '棋逢对手，本局平局';
   } else if (w === playerMark) {
+    if (window.GameSFX) GameSFX.win();
     score.win += 1;
     statusText.textContent = '你赢了，漂亮的一局';
   } else {
+    if (window.GameSFX) GameSFX.lose();
     score.lose += 1;
     statusText.textContent = '电脑获胜，再接再厉';
   }
@@ -324,6 +328,7 @@ function aiMove() {
 }
 
 function newGame() {
+  if (window.GameSFX) GameSFX.unlock();
   if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
   state = core.freshGame('X');   // 新局：X 先手
   over = false;

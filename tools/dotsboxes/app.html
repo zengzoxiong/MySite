@@ -9,6 +9,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dotsboxes/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
     /* ===== 点格棋 · 拾光集小游戏共享 UI（Apple HIG）· 游戏私有样式 =====
        共享组件（按钮、计分、弹层、规则栏、返回钮）走 assets/game-ui.css 的 g-* 类；
@@ -143,7 +144,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap">
   <header class="g-nav">
@@ -369,6 +370,7 @@ function overlayHide(ov) {
 /* ---------- 落线与回合 ---------- */
 function applyMove(who, id) {
   E[id] = who;
+  if (window.GameSFX) GameSFX.click();
   drawn++;
   drawEdgeLine(id, who);
   let gained = 0;
@@ -378,8 +380,9 @@ function applyMove(who, id) {
       BOX[r * N + c] = who;
       claimBox(r, c, who);
       if (who === 1) { scoreMe++; bump(statMe, scoreMeEl, scoreMe); }
-      else { scoreAi++; bump(statAi, scoreAiEl, scoreAi); }
-      gained++;
+        else { scoreAi++; bump(statAi, scoreAiEl, scoreAi); }
+        gained++;
+        if (window.GameSFX && who === 1) GameSFX.score();
     }
   }
   if (drawn >= total) endGame();
@@ -483,10 +486,12 @@ function endGame() {
     const isNew = diff > best;
     if (isNew) { best = diff; saveBest(best); showBest(); }
     ovTitle.textContent = '你赢了！';
+    if (window.GameSFX) GameSFX.win();
     sub = '比分 ' + scoreMe + ' : ' + scoreAi + '，净胜 ' + diff + ' 格' +
       (isNew ? '，刷新历史最佳！' : '（历史最佳净胜 ' + best + ' 格）');
   } else if (diff < 0) {
     ovTitle.textContent = '惜败一局';
+    if (window.GameSFX) GameSFX.lose();
     sub = '比分 ' + scoreMe + ' : ' + scoreAi + '，电脑净胜 ' + (-diff) + ' 格，再战一回？';
   } else {
     ovTitle.textContent = '平分秋色';
@@ -499,6 +504,7 @@ function endGame() {
 
 /* ---------- 开局 / 大厅 ---------- */
 function startGame(n) {
+  if (window.GameSFX) GameSFX.unlock();
   clearTimeout(aiTimer);
   N = n;
   total = (N + 1) * N * 2;

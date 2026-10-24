@@ -9,6 +9,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/memory-flip/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
 /* ===== 记忆翻牌 · 游戏私有视觉（组件语言统一到 assets/game-ui.css） ===== */
 :root { --game-accent: #AF52DE; }   /* 本游戏个性色：紫 · 翻牌魔法 */
@@ -97,7 +98,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap">
   <nav class="g-nav"><h1 class="g-nav-title">记忆翻牌</h1></nav>
@@ -340,6 +341,7 @@ function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } 
 
 /* ================= 开局 ================= */
 function startGame() {
+  if (window.GameSFX) GameSFX.unlock();
   state = createGame(size);
   lock = false; seconds = 0;
   stopTimer(); renderHud(); renderBest();
@@ -360,6 +362,7 @@ function applyFlip(idx) {
   state = r.state;
   if (justStarted) startTimer();           // 第一次翻牌才开始计时
   flip(card);
+  if (window.GameSFX && r.event.type === 'first') GameSFX.click();   // 翻开本轮第一张
   if (r.event.type === 'first') return;    // 第一张：等待第二张
 
   renderHud();
@@ -376,6 +379,7 @@ function applyFlip(idx) {
     return;
   }
   /* 配对成功：保持正面，短暂停留后消隐 */
+  if (window.GameSFX) (r.event.type === 'win' ? GameSFX.win() : GameSFX.score());
   ca.classList.add('matched'); cb.classList.add('matched');
   ca.disabled = true; cb.disabled = true;
   if (r.event.type === 'win') { stopTimer(); setTimeout(showWin, 550); }

@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/sokoban/app.html">
   <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
   <style>
     /* ===== 推箱子 · Apple HIG 组件语言 =====
        共享样式表 assets/game-ui.css 提供字体栈、色彩令牌与 g-* 组件类；
@@ -199,16 +200,8 @@
 </head>
 <body class="g-page">
 
-    '    <nav class="g-tool-grid" aria-label="游戏工具栏">'
-    '<a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页">'
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a>'
-    '<button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则">'
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button>'
-    '<button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button>'
-    '<button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关">'
-    '<svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg>'
-    '<svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button>'
-    '</nav>\n'
+        <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+
 
   <main class="g-wrap">
     <header>
@@ -830,6 +823,7 @@
       if (!next) return false;
       undoStack.push(state);
       if (undoStack.length > 500) undoStack.shift();
+      if (window.GameSFX) (next.pushes > state.pushes ? GameSFX.score() : GameSFX.click());   // 推动箱子得分，空走轻点
       state = next;
       render();
       if (state.won) onWin();
@@ -843,6 +837,7 @@
 
     /* ---------- 胜负判定与庆祝 ---------- */
     function onWin() {
+      if (window.GameSFX) GameSFX.win();
       const levelNo = levelIdx + 1;
       let isNew = false;
       if (!aiOn) {                      // AI 代玩成绩不计入最佳记录
@@ -873,6 +868,7 @@
 
     /* ---------- 载入关卡 ---------- */
     function loadLevel(idx) {
+      if (window.GameSFX) GameSFX.unlock();
       levelIdx = idx;
       state = core.parseMap(LEVELS[idx].map);
       undoStack = [];

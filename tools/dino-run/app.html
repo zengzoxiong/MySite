@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/dino-run/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
 /* 游戏个性色：恐龙绿（覆盖共享样式表默认蓝，见 docs/game-ui-design.md §7） */
 :root { --game-accent: #34C759; }
@@ -20,7 +21,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap g-wrap-wide">
   <nav class="g-nav">
@@ -272,11 +273,12 @@ function reset(){
   clouds=[{x:140,y:58,v:.5},{x:430,y:34,v:.9},{x:700,y:76,v:.3}];
 }
 function setPanel(){ovStart.hidden=state!=='ready';ovOver.hidden=state!=='over';ovPause.hidden=state!=='paused';}
-function start(){reset();state='playing';setPanel();}
+function start(){reset();state='playing';setPanel();if (window.GameSFX) GameSFX.unlock();}
 function pause(){if(state!=='playing')return;state='paused';setPanel();}
 function resume(){if(state!=='paused')return;state='playing';setPanel();}
 function gameOver(){
   state='over';overAt=performance.now();
+  if (window.GameSFX) GameSFX.lose();
   const s=Math.floor(G.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计入最高纪录
   if(isNew){best=s;saveBest();bestEl.textContent=best;}
   overTitle.textContent=isNew?'新纪录！':'游戏结束';
@@ -299,6 +301,7 @@ function update(k){
   const si=Math.floor(G.score);
   if(si!==shownScore){                              // 每满 100 分闪烁提示
     if(si>0&&Math.floor(si/100)>Math.floor(shownScore/100)){scoreEl.classList.remove('g-bump');void scoreEl.offsetWidth;scoreEl.classList.add('g-bump');}
+    if (window.GameSFX && si > 0 && Math.floor(si/100) > Math.floor(shownScore/100)) GameSFX.score();   // 每满 100 分里程碑
     shownScore=si; scoreEl.textContent=si;
   }
   // 昼夜：每 400 分自动交替，按钮可手动切换

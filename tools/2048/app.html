@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/2048/app.html">
   <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
   <style>
     /* ===== 2048 游戏私有样式：棋盘与方块视觉保留，外围组件统一走共享样式表 ===== */
     /* 个性色：橙（暖色方块），组件强调色一行切换 */
@@ -82,7 +83,7 @@
   </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="autoBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="autoBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap">
     <header>
@@ -192,6 +193,7 @@
 
   /* ---------- 移动与合并（状态推进交给核心纯函数，DOM 只负责表现） ---------- */
   function move(dir) {
+    if (window.GameSFX) GameSFX.unlock();
     if (lock || over || paused) return;
     const trace = [];                     // 记录每块滑动轨迹供动画使用
     const res = core.simMove(mat, dir, trace);
@@ -238,6 +240,7 @@
 
   function addScore(n) {
     score += n;
+    if (window.GameSFX) (n >= 128 ? GameSFX.combo() : GameSFX.score());
     scoreEl.textContent = score;
     scoreStat.classList.remove('g-bump');
     void scoreStat.offsetWidth;
@@ -257,6 +260,7 @@
 
   /* ---------- 弹层 ---------- */
   function showOverlay(kind) {
+    if (window.GameSFX) (kind === 'win' ? GameSFX.win() : GameSFX.lose());
     if (kind === 'win') {
       ovTitle.textContent = '胜利！';
       ovSub.textContent = '你合成出了 2048，可以继续挑战更高分数';

@@ -8,6 +8,7 @@
     <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/space-shooter/app.html">
     <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
     <style>
     /* 拾光集 · 太空射击页面样式
        组件基线来自共享设计系统 assets/game-ui.css（Apple HIG），见 docs/game-ui-design.md。
@@ -51,7 +52,7 @@
     </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
     <main class="g-wrap">
         <nav class="g-nav">
@@ -628,6 +629,7 @@
             state = 'playing';
             hideOverlay();
             updateHud();
+            if (window.GameSFX) GameSFX.unlock();
         }
 
         function setPaused(p) {
@@ -644,6 +646,7 @@
         // 结算：AI 代玩成绩不计入最高纪录，稍候弹结算
         function gameOverUI() {
             state = 'over';
+            if (window.GameSFX) GameSFX.lose();
             newRecord = !aiOn && G.score > best && G.score > 0;
             if (newRecord) { best = G.score; saveBest(best); }
             overT = 1.6;
@@ -914,6 +917,8 @@
                     });
                 }
                 var ev = stepCore(G, s, Math.random);
+                if (window.GameSFX && ev.kills) GameSFX.score();        // 击落敌机
+                if (window.GameSFX && ev.waveClear) GameSFX.combo();    // 清空一波
                 // 事件 → 爆炸粒子与界面
                 for (var bi = 0; bi < ev.bursts.length; bi++) {
                     var bb = ev.bursts[bi];

@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/maze-runner/app.html">
   <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
   <style>
     /* ===== 迷宫寻宝 · 页面私有样式 =====
        字体栈 / 颜色令牌 / 按钮 / 计分 / 弹窗 / 规则栏等组件外观统一由
@@ -117,7 +118,7 @@
   </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap">
     <h1 class="g-nav-large">迷宫寻宝</h1>
@@ -553,6 +554,7 @@
       if (aiOn && !fromAi) return;   // AI 代玩中由 AI 全权接管
       const ev = coreMove(G, dr, dc);
       if (!ev.moved) return;
+      if (window.GameSFX && ev.gotStar) GameSFX.score();   // 拾取星星
       if (!ev.won) startTimer();
       renderPieces();
       document.getElementById('stepsVal').textContent = G.steps;
@@ -567,6 +569,7 @@
         'fill="' + (filled ? '#e0a92e' : '#ffffff') + '" stroke="#d9a441" stroke-width="1.2"/></svg>';
     }
     function finish() {
+      if (window.GameSFX) GameSFX.win();
       stopTimer();
       const sec = elapsed();
       const timeOK = sec <= PAR_TIME[G.n];
@@ -611,6 +614,7 @@
       document.getElementById('bestVal').textContent = best === null ? '--:--' : fmtTime(best);
     }
     function newGame(size) {
+      if (window.GameSFX) GameSFX.unlock();
       stopTimer();
       G = coreNewGame(size || G.n, Math.random);
       startTime = 0;

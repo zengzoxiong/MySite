@@ -9,6 +9,7 @@
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/wordle-zh/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
 <style>
 /* ===== 成语猜猜 · 拾光集自建小游戏（纯静态零依赖） =====
    组件外观统一由 ../../assets/game-ui.css 提供（Apple HIG 视觉语言、深浅色跟随系统）；
@@ -164,7 +165,7 @@
 </style>
 </head>
 <body class="g-page">
-    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
   <main class="g-wrap wrap">
     <header class="top">
@@ -809,6 +810,7 @@
     if (w.length !== LEN) { shakeInput(); showToast('请输入四个汉字'); return; }
     if (rows.some(r => r.w === w)) { shakeInput(); showToast('这个成语已经猜过了'); return; }
     revealing = true;
+    if (window.GameSFX) GameSFX.click();
     setModeBusy(true);
     const s = scoreGuess(w, answer);
     rows.push({ w: w, s: s });
@@ -835,6 +837,7 @@
     renderUsed();
     if (w === answer) {
       status = 'won';
+      if (window.GameSFX) GameSFX.win();
       // 猜中：整行逐格跳一下
       rowEls[rows.length - 1].forEach((t, i) => {
         t.style.animationDelay = (i * 90) + 'ms';
@@ -842,6 +845,7 @@
       });
     } else if (rows.length >= MAX_ROWS) {
       status = 'lost';
+      if (window.GameSFX) GameSFX.lose();
     }
     if (status !== 'playing') {
       inputEl.disabled = true;
@@ -910,6 +914,7 @@
   /* ---------- 开新一局（daily 恢复当日进度 / practice 随机出题） ---------- */
   function startGame(m) {
     gameId += 1;               // 新对局开始，上一局滞留的定时器回调全部作废
+    if (window.GameSFX) GameSFX.unlock();
     setModeBusy(false);
     mode = m;
     status = 'playing';

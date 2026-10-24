@@ -332,6 +332,8 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+/* 问号笔画加粗一档，与箭头/喇叭的视觉分量平衡 */
+.g-tool-btn svg.g-q { stroke-width: 2.7; }
 
 /* AI 格：运行中转红底白字（与 .g-ai-btn 同语义），未运行时框内「AI」字样 */
 .g-tool-btn.g-tool-ai.is-running,
