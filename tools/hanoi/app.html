@@ -339,7 +339,7 @@
     moves++;
     updateHud();
     bumpMoves();
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameSFX) GameSFX.swipe();
     const ep = epoch;
     animateMove(el, size, from, i, toLevel).then(() => {
       if (ep !== epoch) return;      // 中途重开或换层，本局回调作废

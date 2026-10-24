@@ -363,7 +363,7 @@ function draw(){
 // ---------- 输入 ----------
 function primary(){          // 空格 / 点击的统一行为：开始、跳跃、重开、继续
   if(state==='ready')start();
-  else if(state==='playing'&&!aiOn)pendingJump=true;   // 跳跃意图交给核心本帧处理
+  else if(state==='playing'&&!aiOn){pendingJump=true;if(window.GameSFX)GameSFX.jump();}   // 跳跃意图交给核心本帧处理
   else if(state==='over'&&performance.now()-overAt>500)start();
   else if(state==='paused')resume();
 }

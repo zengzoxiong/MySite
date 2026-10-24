@@ -779,7 +779,7 @@
   function doToggleFlag(i) {
     const res = core.toggleFlag(game, i);
     if (!res) return;
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameSFX) GameSFX.flag();
     paintCells(res.changed);
     updateMineCounter();
   }

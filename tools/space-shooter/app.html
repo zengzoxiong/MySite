@@ -917,7 +917,7 @@
                     });
                 }
                 var ev = stepCore(G, s, Math.random);
-                if (window.GameSFX && ev.kills) GameSFX.score();        // 击落敌机
+                if (window.GameSFX && ev.kills) GameSFX.smash();        // 击落敌机
                 if (window.GameSFX && ev.waveClear) GameSFX.combo();    // 清空一波
                 // 事件 → 爆炸粒子与界面
                 for (var bi = 0; bi < ev.bursts.length; bi++) {

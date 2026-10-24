@@ -542,7 +542,7 @@ function update(dt) {
 
   if (state === 'playing') {
     var ev = stepCore(G, dt, Math.random);
-    if (window.GameSFX && ev.gotPickup) GameSFX.score();   // 拾到护盾道具
+    if (window.GameSFX && ev.gotPickup) GameSFX.pickup();   // 拾到护盾道具
     if (window.GameSFX && ev.smashed) GameSFX.combo();     // 无敌期间撞碎陨石
     if (G.score !== shownScore) { shownScore = G.score; elScore.textContent = G.score; }
     syncShield();

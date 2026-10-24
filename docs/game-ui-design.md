@@ -249,12 +249,22 @@ iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`back
 
 ### 3.11 共享音效模块（`assets/game-sfx.js`）
 
-WebAudio 本地合成，零音频文件，暴露 `window.GameSFX`：`unlock()`（用户手势内解锁）、`click()`（轻点/落子）、`score()`（得分/正确一步）、`combo()`（连击/合并双音）、`win()`（胜利琶音）、`lose()`（失败下行）、`error()`（出错低鸣）、`muted()`。每次发声前实时读全局静音键 `localStorage.gameSfxMuted`（与音效格共用），任何失败静默。
+WebAudio 本地合成，零音频文件，暴露 `window.GameSFX`，**发声方法 16 种**（`unlock`/`muted` 为控制）：
+
+| 类别 | 方法 | 听感 |
+|---|---|---|
+| 基础交互 | `click()` 轻点/落子、`swipe()` 轻柔滑动、`score()` 得分、`combo()` 连击双音、`error()` 出错低鸣 | 三角波/正弦短音 |
+| 物品奖励 | `coin()` 金币两音、`pickup()` 拾取三音、`flag()` 插旗闷响、`powerup()` 强化四连上行 | 经典游戏机语汇 |
+| 动作 | `jump()` 跳跃上滑、`smash()` 击碎爆炸（噪声+低频） | 滑音 / 白噪声爆音 |
+| 节奏终局 | `tick()` 倒计时、`timeup()` 时间到两短一长、`levelup()` 过关两音、`win()` 胜利琶音、`lose()` 失败下行 | 琶音与下行 |
+
+每次发声前实时读全局静音键 `localStorage.gameSfxMuted`（与音效格共用），任何失败静默；同类音随机 ±15 音分微抖防机械感。
 
 - 页面 `<head>` 引入（`appearance.js` 之后）：`<script src="../../assets/game-sfx.js"></script>`。
 - 插桩规范：在关键事件点插独立一行 `if (window.GameSFX) GameSFX.xxx();`，**不改任何现有逻辑**；每页 2~5 处，高频循环事件（每帧/每键输入/每 move 事件）禁止插桩。
 - 例外：whack-mole 与 simon 保留自有 WebAudio 音效（已按同一静音键短路），不引入本模块。
 - 打字练习（typing-tutor）单键不发声，只在打错、单词完成、成绩单出口发声，避免连打刷屏。
+- 现有插桩参考：跳跃音（dino-run）插在 UI 输入层 `primary()`——跳跃判定本身在 AI_CORE 纯函数区内，红线不可插；穿管/拾星/拾道具/击落/插旗分别用 `coin`/`pickup`/`pickup`/`smash`/`flag`。
 
 ---
 

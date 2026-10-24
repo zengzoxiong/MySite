@@ -487,7 +487,7 @@ function update(dt) {
   if (state === 'playing') {
     /* 玩法推进交给纯函数核心 */
     var ev = stepCore(G, dt, Math.random);
-    if (window.GameSFX && ev.scored) GameSFX.score();   // 穿过管道得分
+    if (window.GameSFX && ev.scored) GameSFX.coin();   // 穿过管道得分
     G.bird.boost = Math.max(0, G.bird.boost - dt);
     /* 姿态：上升抬头，下降低头（纯表现） */
     G.bird.rot = Math.max(-0.42, Math.min(1.25, G.bird.vy / 520));

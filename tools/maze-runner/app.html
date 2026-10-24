@@ -554,7 +554,7 @@
       if (aiOn && !fromAi) return;   // AI 代玩中由 AI 全权接管
       const ev = coreMove(G, dr, dc);
       if (!ev.moved) return;
-      if (window.GameSFX && ev.gotStar) GameSFX.score();   // 拾取星星
+      if (window.GameSFX && ev.gotStar) GameSFX.pickup();   // 拾取星星
       if (!ev.won) startTimer();
       renderPieces();
       document.getElementById('stepsVal').textContent = G.steps;

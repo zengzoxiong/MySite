@@ -659,7 +659,7 @@
     const from = G.blank;
     const ev = coreMove(G, idx);
     if (!ev.moved) return;
-    if (window.GameSFX && !ev.solved) GameSFX.click();   // 滑动数字块
+    if (window.GameSFX && !ev.solved) GameSFX.swipe();   // 滑动数字块
     setXY(els[ev.tile], from % G.n, Math.floor(from / G.n));   // 数字块滑进原空位
     movesEl.textContent = G.moves;
     if (!timerId) startTimer();             // 首次移动才开始计时
