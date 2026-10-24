@@ -7,6 +7,7 @@
 <link rel="icon" href="../../favicon.svg">
 <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/breakout/app.html">
 <link rel="stylesheet" href="../../assets/game-ui.css">
+<script src="../../assets/appearance.js"></script>
 <style>
 /* ===== 打砖块 · 个性色：砖块红 =====
    字体栈、色彩令牌、按钮、覆盖层、规则栏等组件基线统一由共享样式表 game-ui.css 提供，
@@ -26,7 +27,7 @@
 </style>
 </head>
 <body class="g-page">
-    <a class="g-back-chip" href="../../index.html" aria-label="返回拾光集主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 <main class="g-wrap g-wrap-wide">
   <header class="g-nav">
@@ -37,7 +38,6 @@
       <span class="g-stat-inline">最高 <b id="best">0</b></span>
       <span id="lives" class="lives"></span>
       <div class="g-ai-group">
-        <button id="aiBtn" class="g-btn g-ai-btn g-btn-sm" type="button" aria-pressed="false">AI 代玩</button>
         <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
       </div>
       <button id="pauseBtn" class="g-btn g-btn-gray g-btn-sm" type="button">暂停</button>
@@ -236,7 +236,6 @@ function gameOver(){
 // ---------- AI 代玩开关 ----------
 function setAi(on){
   aiOn=on;
-  aiBtn.textContent=on?'停止 AI':'AI 代玩';
   aiBtn.classList.toggle('is-running',on);
   aiBtn.setAttribute('aria-pressed',on?'true':'false');
   if(aiRestartTimer){clearTimeout(aiRestartTimer);aiRestartTimer=null;}
@@ -357,9 +356,9 @@ syncHud();setPanel();
 requestAnimationFrame(loop);
 })();
 </script>
-  <aside class="g-rules" id="rulesPanel" role="complementary" aria-label="游戏规则">
-    <button class="g-rules-handle" id="rulesHandle" type="button">玩法</button>
-    <div class="g-rules-scroll">
+  <div class="g-alert-mask g-alert-rules open" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则" hidden>
+    <div class="g-alert">
+      <div class="g-alert-body">
     <h2>游戏规则</h2>
     
       <h3>玩法</h3>
@@ -374,28 +373,62 @@ requestAnimationFrame(loop);
         <li>空格 / 点击：发球　P：暂停</li>
         <li>AI 代玩：一键自动游玩，成绩不计最高分，随时可停止</li>
       </ul>
+      </div>
+      <div class="g-alert-actions">
+        <button class="g-alert-btn default" id="rulesClose" type="button">好的</button>
+      </div>
     </div>
-  </aside>
-  <script>
+  </div>
+<script>
+  /* 左上角工具栏：规则弹窗 + 全局音效开关；字体与主站「界面字体」联动（appearance.js 单源） */
   (function () {
-    var panel = document.getElementById('rulesPanel');
-    var handle = document.getElementById('rulesHandle');
-    var saved = null;
-    try { saved = localStorage.getItem('gameRulesOpen'); } catch (e) { }
-    var open = saved === null ? window.innerWidth >= 1100 : saved === '1';
-    function apply() {
-      panel.classList.toggle('closed', !open);
-      handle.textContent = open ? '收起' : '玩法';
-      handle.setAttribute('aria-label', open ? '收起游戏规则' : '展开游戏规则');
-      document.body.classList.toggle('rules-open', open && window.innerWidth >= 1100);
+    var mask = document.getElementById('rulesModal');
+    var rulesBtn = document.getElementById('rulesBtn');
+    var closeBtn = document.getElementById('rulesClose');
+    var lastFocus = null;
+    function openRules() {
+      if (!mask || !mask.hidden) return;
+      lastFocus = document.activeElement;
+      mask.hidden = false;                  // mask 常驻 .open（g-alert open 态），只切 hidden
+      if (closeBtn) closeBtn.focus();
     }
-    handle.addEventListener('click', function () {
-      open = !open;
-      try { localStorage.setItem('gameRulesOpen', open ? '1' : '0'); } catch (e) { }
-      apply();
+    function closeRules() {
+      if (!mask || mask.hidden) return;
+      mask.hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+      lastFocus = null;
+    }
+    if (rulesBtn) rulesBtn.addEventListener('click', openRules);
+    if (closeBtn) closeBtn.addEventListener('click', closeRules);
+    if (mask) mask.addEventListener('click', function (e) { if (e.target === mask) closeRules(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mask && !mask.hidden) { e.stopPropagation(); closeRules(); }
     });
-    window.addEventListener('resize', apply);
-    apply();
+
+    var sfxBtn = document.getElementById('sfxBtn');
+    var SFX_KEY = 'gameSfxMuted';
+    function sfxMuted() { try { return localStorage.getItem(SFX_KEY) === '1'; } catch (e) { return false; } }
+    function paintSfx() {
+      if (!sfxBtn) return;
+      var muted = sfxMuted();
+      sfxBtn.classList.toggle('is-muted', muted);
+      sfxBtn.setAttribute('aria-pressed', String(muted));
+      sfxBtn.setAttribute('aria-label', muted ? '开启音效' : '静音');
+      var on = sfxBtn.querySelector('.sfx-on'), off = sfxBtn.querySelector('.sfx-off');
+      if (on) on.toggleAttribute('hidden', muted);      // SVGElement.hidden 非反射属性，必须 toggleAttribute
+      if (off) off.toggleAttribute('hidden', !muted);
+    }
+    if (sfxBtn) sfxBtn.addEventListener('click', function () {
+      try { localStorage.setItem(SFX_KEY, sfxMuted() ? '0' : '1'); } catch (e) {}
+      paintSfx();
+    });
+    window.addEventListener('storage', function (e) { if (e.key === SFX_KEY) paintSfx(); });
+    paintSfx();
+
+    try { if (window.SiteAppearance) SiteAppearance.applySiteFontFromStorage(); } catch (e) {}
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'fontFamily' && window.SiteAppearance) SiteAppearance.applySiteFontFromStorage();
+    });
   })();
   </script>
 </body>

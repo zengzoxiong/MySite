@@ -1,20 +1,24 @@
 /* ============================================================
    拾光集 · 小游戏共享 UI 设计系统
    风格基准：Apple 人机界面指南（HIG）iOS / macOS 视觉语言
-   独立于主站主题色：不引用主站 styles.css 及其变量，游戏 UI 不随主站变色。
+   主站联动：字体跟主站「界面字体」（--font-ui，由 assets/appearance.js 写入），
+   左上角工具栏图标色跟主站主题色（--accent-color）；明暗仍跟随系统。
    用法：各游戏 <link rel="stylesheet" href="../../assets/game-ui.css">
         并在自身 <style> 中声明 --game-accent（见 docs/game-ui-design.md）
    红线：本文件只提供样式与组件外观，不包含任何玩法逻辑。
    ============================================================ */
 
 /* ------------------------------------------------------------
-   1. 字体栈
+   1. 字体栈（--font-ui 由主站 appearance.js 写到 html，未引入时回退系统栈）
    ----------------------------------------------------------- */
 :root {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+  /* 主站 styles.css 的系统栈（appearance.js 写入的 --font-ui 会内嵌引用它，游戏页需自带定义） */
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-sans: var(--font-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "PingFang SC", "Microsoft YaHei", sans-serif);
+  --font-display: var(--font-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "PingFang SC", "Microsoft YaHei", sans-serif);
   --font-mono: ui-monospace, "SF Mono", Menlo, "Cascadia Mono",
     "PingFang SC", Consolas, monospace;
 }
@@ -50,6 +54,9 @@
 
   /* 游戏个性色：各游戏在自身样式中覆盖，缺省蓝 */
   --game-accent: #007AFF;
+  /* 主站联动色：appearance.js 把主站主题色写到 html 的 --accent-color（内联），
+     四宫格工具栏取它实现跟主站换色；未设置过主题色时对齐主站默认「星蓝」 */
+  --site-accent: var(--accent-color, #2563eb);
   /* 实心按钮压在强调色上的文字色（默认白；黄/灰个性色页改深色，见文档 §7） */
   --game-on-accent: #FFFFFF;
   /* 强调色用作文字（返回键/链接/徽标）时的颜色（默认同个性色；黄/灰个性色页改深） */
@@ -273,6 +280,78 @@
 }
 @media (max-width: 560px) {
   .g-back-chip { top: 8px; left: 8px; padding: 7px 12px; font-size: 12px; }
+}
+
+/* ------------------------------------------------------------
+   4.5 左上角工具栏（横排四框：返回 / 规则 / AI 代玩 / 音效）
+   图标色接主站主题色（--site-accent），字体随 .g-page 联动。
+   取代游戏页的 .g-back-chip 返回浮钮（后者保留给实用工具页）。
+   ----------------------------------------------------------- */
+.g-tool-grid {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  display: flex;
+  gap: 8px;
+}
+
+.g-tool-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--separator);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-card);
+  color: var(--site-accent);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--dur-press) var(--ease-spring),
+              opacity var(--dur-press) var(--ease-out),
+              background-color var(--dur-press) var(--ease-out);
+}
+.g-tool-btn:active { transform: scale(.94); }
+.g-tool-btn:focus-visible { outline: 2px solid var(--site-accent); outline-offset: 2px; }
+.g-tool-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* AI 格：运行中转红底白字（与 .g-ai-btn 同语义），未运行时框内「AI」字样 */
+.g-tool-btn.g-tool-ai.is-running,
+.g-tool-btn.g-tool-ai.auto-on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #FFF;
+}
+.g-tool-btn.g-tool-ai.is-running:active,
+.g-tool-btn.g-tool-ai.auto-on:active { opacity: .8; }
+
+/* 无 AI 代玩的页面：置灰禁用 */
+.g-tool-btn[disabled] { opacity: .35; cursor: default; }
+.g-tool-btn[disabled]:active { transform: none; }
+
+/* 音效格静音态：图标切换由 JS 切两枚 svg 的 hidden 完成，无需额外样式 */
+
+@media (max-width: 560px) {
+  .g-tool-grid { top: 8px; left: 8px; gap: 6px; }
+  .g-tool-btn { width: 44px; height: 44px; border-radius: 11px; }
 }
 
 /* ------------------------------------------------------------
@@ -750,8 +829,8 @@
   animation: g-live 1.2s ease-in-out infinite;
 }
 
-/* 纯 CSS 显隐方案：标签放在 .g-ai-group 内、加 .g-ai-tag-auto、不带 hidden，
-   随按钮 .is-running / .auto-on 状态自动显隐，无需任何脚本。 */
+/* 纯 CSS 显隐方案：标签加 .g-ai-tag-auto、不带 hidden，
+   随左上角工具栏 AI 格的 .is-running / .auto-on 状态自动显隐，无需任何脚本。 */
 .g-ai-group {
   display: flex;
   align-items: center;
@@ -759,8 +838,8 @@
   gap: 8px 10px;
 }
 .g-ai-tag.g-ai-tag-auto { display: none; }
-.g-ai-group:has(.g-ai-btn.is-running) .g-ai-tag-auto,
-.g-ai-group:has(.g-ai-btn.auto-on) .g-ai-tag-auto { display: inline-flex; }
+body:has(.g-tool-ai.is-running) .g-ai-tag-auto,
+body:has(.g-tool-ai.auto-on) .g-ai-tag-auto { display: inline-flex; }
 
 /* 代玩成绩不计最高分的统一标注（静态文本） */
 .g-ai-note {
@@ -845,87 +924,40 @@
 }
 
 /* ------------------------------------------------------------
-   14. 右侧规则栏（可收起，取代各页 .rules-panel 公共块）
+   14. 游戏规则弹窗（问号按钮打开，复用 .g-alert-mask 模态）
+   显隐只切 .open（mask 关闭态自带 opacity:0 + pointer-events:none）。
    ----------------------------------------------------------- */
-.g-rules {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 272px;
-  overflow: visible;   /* 把手挂在面板左缘外侧，滚动收进内层 .g-rules-scroll */
-  background: var(--bg-elevated);
-  border-left: 1px solid var(--separator);
-  box-shadow: -6px 0 22px rgba(0, 0, 0, .10);
-  z-index: 190;
-  transform: translateX(0);
-  transition: transform .28s cubic-bezier(.22, .9, .3, 1);
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.75;
+.g-alert-rules .g-alert {
+  width: min(320px, 92vw);
+  text-align: left;
 }
-.g-rules.closed { transform: translateX(100%); }
-
-.g-rules-scroll {
-  height: 100%;
+.g-alert-rules .g-alert-body {
+  max-height: min(62vh, 500px);
   overflow-y: auto;
-  padding: 20px 18px;
-  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
-
-.g-rules h2 {
-  margin: 0 0 12px;
-  font-size: 15px;
+.g-alert-rules h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
   color: var(--text);
+  text-align: center;
 }
-.g-rules h3 {
+.g-alert-rules h3 {
   margin: 14px 0 4px;
   font-size: 12.5px;
   color: var(--game-accent-text);
   letter-spacing: 1px;
 }
-.g-rules ul { margin: 0; padding-left: 18px; }
-.g-rules li { margin: 4px 0; }
-
-/* 柜门式把手：44px 宽满足最小触控，随面板滑出滑入 */
-.g-rules-handle {
-  position: absolute;
-  left: -44px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  min-height: 116px;
-  padding: 0;
-  border: 1px solid var(--separator);
-  border-right: none;
-  border-radius: 12px 0 0 12px;
-  background: var(--bg-elevated);
-  box-shadow: -4px 0 14px rgba(0, 0, 0, .10);
-  color: var(--game-accent-text);
-  font-family: var(--font-sans);
+.g-alert-rules ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 3px;
-  writing-mode: vertical-lr;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
+  line-height: 1.75;
 }
-.g-rules-handle:active { transform: translateY(-50%) scale(.96); }
-.g-rules-handle:focus-visible { outline: 2px solid var(--game-accent); outline-offset: -2px; }
-
-/* 宽屏展开时主体让位（给 .g-page 加 .rules-open） */
-@media (min-width: 1100px) {
-  .g-page.rules-open { padding-right: 272px; }
-}
-/* 窄屏：面板变覆盖抽屉，游戏本体不动 */
-@media (max-width: 560px) {
-  .g-rules { width: min(272px, 82vw); }
-}
+.g-alert-rules li { margin: 4px 0; }
 
 /* ------------------------------------------------------------
    15. 提示与页脚小字
@@ -983,7 +1015,6 @@
   .g-stat-label { letter-spacing: .2px; }
   .g-btn { font-size: 16px; padding: 10px 16px; }
   .g-alert { width: min(270px, 86vw); }
-  .g-rules-handle { width: 44px; left: -44px; }
 }
 
 /* 小屏触控目标兜底：任何可点控件不小于 44px 的可点区域 */

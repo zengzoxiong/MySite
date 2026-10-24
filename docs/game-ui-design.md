@@ -2,7 +2,7 @@
 
 > 风格基准：苹果人机界面指南（Apple HIG）iOS / macOS 视觉语言。
 > 共享样式表：`assets/game-ui.css`。
-> **独立于主站主题色**：游戏 UI 不引用主站 `styles.css` 及其变量，不随主站变色。
+> **主站联动**：全页字体跟主站「界面字体」选择（`--font-ui`，由 `assets/appearance.js` 写入），左上角工具栏图标色跟主站主题色（`--accent-color`）；明暗仍跟随系统，其余游戏 UI 不引用主站 `styles.css`。
 > 红线先行：**只动样式与 UI 结构，绝不改玩法逻辑**（script 内允许改动的行见 §6.2，除此以外一律不动）。
 
 ---
@@ -27,11 +27,11 @@
 - `--game-on-accent`：实心底上的文字色（默认白；黄/灰个性色页必须改深色，见 §7）
 - `--game-accent-text`：强调色作文字时的颜色（返回键、链接、徽标；默认同个性色，黄/灰个性色页改深色）
 
-字体栈由样式表统一提供：
+字体栈由样式表统一提供，且已接主站「界面字体」选择：
 
-- 正文：`-apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif`
-- 标题：`SF Pro Display` 打头的展示变体（`--font-display`）
-- 等宽数字/代码：`ui-monospace, "SF Mono", Menlo, …`（`--font-mono`，计分数字用 `.g-num`）
+- 正文：`var(--font-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif)`——`--font-ui` 由 `assets/appearance.js` 按主站设置写入 html（六个选项：系统默认/思源黑体/思源宋体/霞鹜文楷/得意黑/朱雀仿宋），游戏页需在 `<head>` 引入该脚本并在页尾调用 `SiteAppearance.applySiteFontFromStorage()`（四宫格脚本已内置）。
+- 标题：`--font-display`（同样接 `--font-ui` 兜底）
+- 等宽数字/代码：`ui-monospace, "SF Mono", Menlo, …`（`--font-mono`，计分数字用 `.g-num`，不联动）
 
 浅/深两套外观跟随系统（`prefers-color-scheme`）：**凡使用 g-* 共享类的 UI，游戏页无需写深色适配**——唯黄/灰 7 个个性色页例外，需带一行深色复位块（§7.1）；游戏私有视觉（棋盘、糖果、画布内绘制）保留原样，若私有类里硬编码了亮色，按 §5 第 3 条清理或自行补深色（§5 第 11 条有清单）。
 
@@ -62,7 +62,7 @@
 | 特性 | 支持起点 | 用在哪 | 旧浏览器表现 |
 |---|---|---|---|
 | `color-mix()` | Chrome/Edge 111+、Safari 16.2+、Firefox 113+ | `.g-btn-tinted`、`.g-badge-*`、`.g-ai-tag`、`.g-overlay` 的半透明底 | 每条 color-mix 背景前都写了一条纯色/`rgba` 兜底声明，旧浏览器用兜底（tinted/徽标变灰填充、遮罩变不透明底），文字色与布局不变 |
-| `:has()` | Chrome/Edge 105+、Safari 15.4+、Firefox 121+ | §4.2 路线 A 的 `.g-ai-group:has(.g-ai-btn.is-running)` 徽标显隐 | 标签停在 `.g-ai-tag-auto` 的 `display: none`（不显示，不破版）；该页可改走路线 B |
+| `:has()` | Chrome/Edge 105+、Safari 15.4+、Firefox 121+ | §4.2 路线 A 的 `body:has(.g-tool-ai.is-running)` 徽标显隐 | 标签停在 `.g-ai-tag-auto` 的 `display: none`（不显示，不破版）；该页可改走路线 B |
 
 降级不回退为自定义背景图或固定色板，统一落到 `var(--fill)` / `rgba(…)` 系统灰。
 
@@ -74,7 +74,7 @@
 
 ```html
 <body class="g-page">
-  <a class="g-back-chip" href="../../index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>返回主页</a>
+  <nav class="g-tool-grid" aria-label="游戏工具栏">…四枚 .g-tool-btn（见 §3.10）…</nav>
   <main class="g-wrap">            <!-- 或 g-wrap g-wrap-wide（宽版，720px） -->
     <nav class="g-nav"><h1 class="g-nav-title">贪吃蛇</h1></nav>
     <h1 class="g-nav-large">贪吃蛇</h1>       <!-- 大标题，可选 -->
@@ -87,7 +87,7 @@
 
 - `.g-wrap`：默认内容列（`--wrap-max: 520px`）。
 - `.g-wrap-wide`：宽版变体（覆盖 `--wrap-max: 720px`），贪吃蛇等宽台面游戏用，避免被默认 520px 无告知收窄。
-- `.g-back-chip`：fixed 返回主页浮钮（取代各页 `.back-home` 块），44px 触控、深浅色自适应。
+- `.g-tool-grid`：fixed 左上角工具栏（返回/说明/AI/静音四框），见 §3.10；`.g-back-chip` 返回浮钮保留给实用工具页，游戏页不再使用。
 - `.g-foot` / `.g-tips`：页脚与玩法小字（中性灰，深浅色自适应）。
 
 ### 3.2 按钮（filled / tinted / plain / gray 四态）
@@ -214,25 +214,38 @@ iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`back
 
 胜利态修饰：`.g-overlay-win`（标题换强调色）。私有修饰类（如 2048 的 `.win`）与 g-* 共存规则见 §5 第 8 条。
 
-### 3.10 右侧规则栏（公共块收敛）
+### 3.10 左上角工具栏与游戏规则弹窗
 
-取代各页重复的 `.rules-panel` / `.rules-handle` 样式块（32 页同款硬编码，如 `tools/snake/app.html:68-140`）：
+**左上角工具栏（`.g-tool-grid`）**：横排四个 44px 方形图标框，取代游戏页的 `.g-back-chip`「返回主页」浮钮（该类保留给实用工具页）：
 
 ```html
-<aside class="g-rules" id="rules">
-  <div class="g-rules-scroll">
-    <h2>玩法</h2>
-    <h3>基本操作</h3>
-    <ul><li>…</li></ul>
-  </div>
-  <button class="g-rules-handle" id="rulesHandle">玩法</button>
-</aside>
+<nav class="g-tool-grid" aria-label="游戏工具栏">
+  <a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页">…回转箭头 SVG…</a>
+  <button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则">…问号 SVG…</button>
+  <button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button>
+  <button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关">…喇叭 .sfx-on/.sfx-off 两枚 SVG…</button>
+</nav>
 ```
 
-- 深浅色自适应（`--bg-elevated` / `--separator` / `--game-accent-text`），深色下不再是黑底纯白浮块。
-- `.g-rules-handle` **44px 宽**（旧版 30px 不满足最小触控），`writing-mode: vertical-lr` 竖排文案。
-- 展开让位：给 `body.g-page` 加 `.rules-open`（宽屏 `padding-right: 272px`）；窄屏自动变覆盖抽屉。
-- 偏好记忆的 localStorage 逻辑照旧，属玩法外脚本，按 §6.2 白名单处理。
+- **返回**：跳主站主页；**说明**：打开规则弹窗；**AI**：接管原位 AI 代玩按钮——「移位保 id」（原位删除、四宫格重建，`aiBtn`/`autoBtn` id 不变），AI 逻辑零改动；框内恒写「AI」，运行中 `.is-running`/`.auto-on` 红底白字，各页 JS 的 AI 按钮 label 切换行（`aiBtn.textContent = …'AI 代玩'…`）已删除；未实现 AI 代玩的页面渲染同款按钮并置 `disabled` 置灰。**音效**：全局静音开关，键 `localStorage.gameSfxMuted`（`'1'`=静音），图标两态切换（`toggleAttribute('hidden')` 切两枚 SVG）、`storage` 事件跨页同步；whack-mole 的 `beep()` 与 simon 的 `ensureAudio()` 按该键短路（其余游戏天然无声），simon 旧 `simonSound` 偏好一次性迁移。
+- 图标色走 `--site-accent`（`var(--accent-color, #2563eb)`），跟主站主题色联动；页面须引入 `<script src="../../assets/appearance.js"></script>`（四宫格脚本已内置字体调用与 storage 监听）。
+- **游戏规则弹窗**：复用 `.g-alert-mask/.g-alert` 模态，加 `.g-alert-rules` 排版（h2 居中、h3/li 规则列表、body 区滚动）。各页原 `.g-rules` 抽屉、`.g-rules-handle` 把手与 `gameRulesOpen` 开合脚本已移除，规则内容原样搬入弹窗：
+
+```html
+<div class="g-alert-mask g-alert-rules open" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则" hidden>
+  <div class="g-alert">
+    <div class="g-alert-body">
+      <h2>游戏规则</h2>
+      <h3>玩法</h3><ul><li>…</li></ul>
+    </div>
+    <div class="g-alert-actions">
+      <button class="g-alert-btn default" id="rulesClose" type="button">好的</button>
+    </div>
+  </div>
+</div>
+```
+
+- 显隐协议：mask 常驻 `.open`，**只切 `hidden`**（静态协议，无过渡依赖）；`rulesBtn` 开、`rulesClose`/遮罩/Esc 关，开合做焦点还原。
 
 ---
 
@@ -240,26 +253,25 @@ iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`back
 
 ### 4.1 按钮
 
+AI 代玩按钮统一放在左上角工具栏（§3.10），框内恒写「AI」，id 保持 `aiBtn`（2048 为 `autoBtn`）不变：
+
 ```html
-<button class="g-btn g-ai-btn" id="aiBtn" type="button">AI 代玩</button>
+<button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button>
 ```
 
-运行中样式：**两种类名都认**——`.is-running`（新）与 `.auto-on`（2048 现有，`tools/2048/app.html:703-708` 只切 `auto-on`）。因此 2048 的 JS **一个字不用改**，按钮自动获得运行中红底样式；文案「停止代玩」切换照旧（属 §6.2 白名单第 1 条，若要统一成「停止代玩」文案再改）。
+运行中样式：**两种类名都认**——`.is-running`（新）与 `.auto-on`（2048 现有）。运行中红底白字，未运行时图标色为 `--site-accent`。页面原位的 AI 按钮（`.g-btn.g-ai-btn`）已删除，JS 的 `getElementById` 照常命中四宫格按钮；按钮 label 切换行（`aiBtn.textContent = …'停止代玩'…`）已删除，状态只由类名表达。
 
 ### 4.2 运行中状态徽标（两条路线，按页面现状选）
 
 统一文案：「AI 代玩中 · 点击停止」，绿色胶囊 + 呼吸圆点（`.g-ai-tag`）。
 
-**路线 A · 纯 CSS（推荐，零脚本）**：页面**没有** aiTag 元素时（如 2048，全文无 aiTag），在按钮外加 `.g-ai-group` 容器，标签加 `.g-ai-tag-auto`、**不带** `hidden`：
+**路线 A · 纯 CSS（推荐，零脚本）**：标签加 `.g-ai-tag-auto`、**不带** `hidden`，显隐由 `body:has(.g-tool-ai.is-running)` / `body:has(.g-tool-ai.auto-on)` 自动驱动（AI 格即四宫格按钮，现代浏览器均支持 `:has()`）：
 
 ```html
 <div class="g-ai-group">
-  <button class="g-btn g-ai-btn" id="autoBtn" type="button">AI 代玩</button>
   <span class="g-ai-tag g-ai-tag-auto">AI 代玩中 · 点击停止</span>
 </div>
 ```
-
-CSS `:has(.g-ai-btn.is-running)` / `:has(.g-ai-btn.auto-on)` 自动显隐，不新增任何 JS（现代浏览器均支持 `:has()`）。
 
 **路线 B · 既有 JS 切 hidden**：页面已有 aiTag 与显隐 JS 时（snake、sudoku 等），保留 JS 机制，只改 HTML 文案与类名：
 
@@ -267,18 +279,9 @@ CSS `:has(.g-ai-btn.is-running)` / `:has(.g-ai-btn.auto-on)` 自动显隐，不�
 <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
 ```
 
-各页现有文案（「AI 代玩中 · 不计最高分」「AI 代玩中 · 不计最佳用时」「🤖 AI 代玩中 · 自动出招」等）统一改为「AI 代玩中 · 点击停止」，成绩豁免信息挪到 §4.3。
+### 4.3 代玩成绩不计的呈现
 
-### 4.3 代玩成绩不计最高分的统一标注
-
-`.g-ai-note` 为**静态标注**（HTML 里直接写死的说明文字，橙色 12px）：
-
-```html
-<span class="g-ai-note">AI 代玩成绩不计最高分</span>
-```
-
-放在计分板下或规则栏。计时类游戏写「AI 代玩成绩不计最佳用时」。
-JS 里拼接的动态结算文案（如 snake 的 `overInfo.textContent='…'+(aiOn?'AI 代玩中…':…)`，`tools/snake/app.html:386`）按 §6.2 白名单第 2 条调整措辞；其中的成绩豁免判定逻辑（`!aiOn` 等条件）一律不动。
+「AI 代玩成绩不计」类静态标注（`.g-ai-note`）已按用户要求从页面移除，成绩豁免信息统一由两处承载：**规则弹窗内**的规则条目（如扫雷「AI 代玩成绩不计最佳用时」）与 **AI 局结算文案**的动态提示（如 dino-run 的 `overInfo`「AI 代玩 · 本局得分 X」）。其行为逻辑（`!aiOn` 等豁免判定）一律不动。
 
 ---
 
@@ -295,10 +298,10 @@ JS 里拼接的动态结算文案（如 snake 的 `overInfo.textContent='…'+(a
 7. **卡片**：`.card` / `.wrap` 内容容器换 `.g-card` / `.g-wrap`；snake 等 720px 宽台面加 `.g-wrap-wide`；圆角阴影删硬编码。
 8. **弹窗**：胜负/结算层换 `.g-overlay`（协议 ①）或 `.g-overlay g-overlay-fade`（协议 ②，见 §3.9）；按钮改 `.g-alert-btn`，主操作加 `default`；私有 `.overlay { z-index: 5 }` 可删（`.g-overlay` 已自带同值 z-index），更高层叠的私有 z-index 保留不动。**私有修饰类共存规则**：g-* 类承担外观基线，游戏私有状态类（2048 的 `.win`、match3 的 `.deny`/`.clear` 等）原样保留在元素上叠加，其私有 CSS 规则继续写在游戏自己的 `<style>` 里，二者互不覆盖（`.win` 与 `.g-overlay-win` 二选一，不叠加冲突即可）。
 9. **分段/开关**：难度选择换 `.g-segment`；设置开关换 `.g-switch`。
-10. **AI 代玩**：`aiBtn` 加 `.g-ai-btn`（旧 `auto-on` 类由样式表兼容，JS 不动）；状态徽标按 §4.2 路线 A（纯 CSS `:has()`，零脚本）或路线 B（既有 hidden JS，只改文案）；成绩豁免用 `.g-ai-note` 静态标注，动态结算文案按 §6.2 白名单第 2 条改。
-11. **返回按钮与规则栏**：`.back-home` 公共块替换为 `.g-back-chip`（HTML 类名改一行，原 `<a>` 保留）；`.rules-panel`/`.rules-scroll`/`.rules-handle` 公共块替换为 `.g-rules`/`.g-rules-scroll`/`.g-rules-handle`。两者均已含深色令牌，无需手写深色适配。
-12. **响应式与触控**：删除与 `@media (max-width: 560px)` 重复的规则，保留游戏特有微调；`.g-stage` 套住棋盘即可获得触控防护（DOM 棋盘也适用）；规则栏把手已 44px，无需再改；自查可点元素 ≥44px。
-13. **自查**：切换系统深色模式看一眼外围组件（按钮/徽标/弹窗/规则栏）是否跟随，棋盘个性视觉是否原样。
+10. **AI 代玩**：AI 按钮统一在左上角工具栏（§3.10/§4.1，移位保 id）；状态徽标按 §4.2 路线 A（纯 CSS `:has()`，零脚本）或路线 B（既有 hidden JS，只改文案）；「成绩不计」信息只在规则弹窗条目与结算文案（§4.3）。
+11. **工具栏与规则弹窗**：`.back-home`/`.g-back-chip` 返回浮钮替换为 `.g-tool-grid` 四宫格（§3.10）；`.rules-panel`/`.g-rules` 抽屉整体替换为 `#rulesModal` 规则弹窗（复用 `.g-alert-mask`，内容原样搬入）；`<head>` 加 `appearance.js` 引用，静音键/字体联动由四宫格脚本统一承担。
+12. **响应式与触控**：删除与 `@media (max-width: 560px)` 重复的规则，保留游戏特有微调；`.g-stage` 套住棋盘即可获得触控防护（DOM 棋盘也适用）；自查可点元素 ≥44px（工具栏四格已 44px）。
+13. **自查**：切换系统深色模式看一眼外围组件（按钮/徽标/弹窗）是否跟随，棋盘个性视觉是否原样；主站换主题色/字体后刷新游戏页，四宫格图标色与正文字体应跟随。
 
 画布游戏（`canvas` 渲染）只改第 1~4、6~10 条涉及的外围 UI；画布内的棋盘/角色绘制风格保留。
 
@@ -413,3 +416,5 @@ JS 里拼接的动态结算文案（如 snake 的 `overInfo.textContent='…'+(a
 - **AI 状态呈现两派**：snake/sudoku 有 aiTag 元素 + hidden JS；2048 无 aiTag，只切 `autoBtn` 的 `auto-on` 类（`app.html:703-708`），样式表已兼容 `auto-on`，新徽标走 §4.2 路线 A 纯 CSS；
 - **bump 施加在容器**：match3 `app.html:504-506`、2048 `app.html:408-410` 给 `.stat` 加类，`.g-bump` 动画不挑层级，保留现状；
 - 21 个游戏有 AI 代玩且目录内带 `ai-sim.mjs`，12 个纯手动（无 AI 按钮）；`rock-paper-scissors` 无 `.back-home`/`.rules-panel` 公共块，改造时补引用即可，不强加重构。
+
+**2026-10-24 更新**：全站 33 个小游戏完成左上角四宫格工具栏改造（返回/说明/AI/静音，见 §3.10）——`.g-back-chip` 游戏页退役（保留给实用工具页）、`.g-rules` 抽屉替换为规则弹窗（内容原样迁移）、AI 按钮移位保 id 并统一「AI」字样、全局静音键 `gameSfxMuted` 接通 whack-mole/simon（其余游戏天然无声）、字体与图标色接入主站联动（`appearance.js` 单源）；`typing-tutor` 同步接入并删除其旧体系私拷贝（`.back-home`/`.rules-panel`）。`rock-paper-scissors` 属实用工具分类，维持两枚 chip 原状。
