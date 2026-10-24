@@ -23,6 +23,7 @@ logs/
 # ---- Agent 本地配置与中间目录 ----
 .claude/
 .Codex/
+.zcode/
 .zcodeignore
 
 __pycache__/
