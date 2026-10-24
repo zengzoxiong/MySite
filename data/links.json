@@ -375,6 +375,48 @@
       "description": "GitHub 39k+ Star 的在线数据库 ER 图编辑器，可视化建表并一键生成 SQL，纯前端可自部署。",
       "category": "绘图工具",
       "icon": "🗄️"
+    },
+    {
+      "title": "Stirling PDF",
+      "url": "https://pdf.is",
+      "description": "完全免费的在线 PDF 工具箱，集成编辑、转换、比较、压缩、OCR 识别、水印等 50+ 功能，界面简洁打开即用，日常处理 PDF 一个网站就够。",
+      "category": "文档工具",
+      "icon": "📄"
+    },
+    {
+      "title": "Vistep",
+      "url": "https://vistep.ai/zh/",
+      "description": "把原理做成动画的科普网站，覆盖八大领域、71 个专题，自行车变速、激光打印机、彩虹、降噪等知识都可视化演示，适合扩展知识和给孩子科普。",
+      "category": "学习",
+      "icon": "🔬"
+    },
+    {
+      "title": "Smoji 表情工作台",
+      "url": "https://smoji.zsh.moe",
+      "description": "全网表情包聚合站，收录 B 站、抖音、QQ、微博、小红书等平台合集，35 个分类、5830 张表情，可浏览、复制、一键打包下载原版表情。",
+      "category": "资源",
+      "icon": "😀"
+    },
+    {
+      "title": "就位",
+      "url": "https://fit.barrybarrywu.com",
+      "description": "人体工学计算器，输入身高即可给出椅面、桌面、屏幕高度建议，久坐办公学习的人可以借此找到最科学舒适的桌椅高度。",
+      "category": "资源",
+      "icon": "🪑"
+    },
+    {
+      "title": "GameNotOver",
+      "url": "https://gamenotover.net/zh",
+      "description": "30+ 免费在线小游戏，无需安装打开即玩，界面简洁无广告，手机电脑都能用，摸鱼放松必备。",
+      "category": "资源",
+      "icon": "🎮"
+    },
+    {
+      "title": "初音乐园",
+      "url": "https://www.mikupara.com",
+      "description": "初音未来优质插画收录站，插画来自 Pixiv、由站长手动精选更新，可按横图竖图浏览，点击即可保存无水印高清原图。",
+      "category": "资源",
+      "icon": "🎵"
     }
   ]
 }
