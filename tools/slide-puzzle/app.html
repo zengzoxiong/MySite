@@ -89,7 +89,6 @@
         <button class="g-btn g-ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
       </div>
       <div class="ai-tag-line"><span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span></div>
-      <span class="g-ai-note">AI 代玩成绩不计最高分</span>
     </div>
 
     <div class="board g-stage" id="board">
@@ -675,7 +674,7 @@
       saveBest(G.moves, seconds);
     }
     ovStats.textContent = (aiOn ? 'AI 本局完成 · ' : '') + '步数 ' + G.moves + ' · 用时 ' + fmt(seconds) +
-      (aiOn ? '（AI 代玩成绩不计最高分）' : (record ? ' · 新纪录！' : ''));
+      (aiOn ? '' : (record ? ' · 新纪录！' : ''));
     overlay.hidden = false;
     void overlay.offsetWidth;               // 同步回流后再加 open，保证过渡生效
     overlay.classList.add('open');

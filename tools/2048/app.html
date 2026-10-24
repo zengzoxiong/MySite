@@ -264,7 +264,7 @@
       overlay.classList.add('win');
     } else {
       ovTitle.textContent = '游戏结束';
-      ovSub.textContent = '最终分数 ' + score + (autoOn ? ' · AI 代玩成绩不计最高分' : (score > 0 && score >= best ? ' · 新纪录！' : ''));
+      ovSub.textContent = '最终分数 ' + score + (score > 0 && !autoOn && score >= best ? ' · 新纪录！' : '');
       ovContinue.hidden = true;
       overlay.classList.remove('win');
     }

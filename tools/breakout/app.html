@@ -43,7 +43,6 @@
       <button id="pauseBtn" class="g-btn g-btn-gray g-btn-sm" type="button">暂停</button>
     </div>
   </header>
-  <span class="g-ai-note">AI 代玩成绩不计最高分</span>
   <div class="g-stage">
     <canvas id="cv" width="640" height="480"></canvas>
     <div class="g-overlay" id="ovStart">
@@ -226,7 +225,7 @@ function gameOver(){
   state='over';
   const s=Math.floor(g.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计最高纪录
   if(isNew){best=s;saveBest(s);bestEl.textContent=best;}
-  overInfo.textContent='本局得分 '+s+' · 到达第 '+g.level+' 关 · '+(aiOn?'AI 代玩成绩不计最高分':(isNew?'新纪录！':'历史最高 '+best));
+  overInfo.textContent='本局得分 '+s+' · 到达第 '+g.level+' 关 · '+(isNew?'新纪录！':'历史最高 '+best);
   setPanel();
   if(aiOn)aiRestartTimer=setTimeout(()=>{   // AI 代玩时自动开下一局
     aiRestartTimer=null;

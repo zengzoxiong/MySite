@@ -90,7 +90,6 @@ body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
       <button type="button" id="aiBtn" class="g-btn g-ai-btn g-btn-sm" aria-pressed="false">AI 代玩</button>
     </div>
   </header>
-  <span class="g-ai-note">AI 代玩成绩不计最高分</span>
   <div class="g-stage" id="stage">
     <canvas id="cv" width="420" height="640"></canvas>
     <div class="g-overlay" id="ov" hidden></div>
@@ -441,7 +440,7 @@ function showOver() {
     '<h2>' + (isNew ? '新纪录！' : (aiOn ? 'AI 本局结束' : '游戏结束')) + '</h2>' +
     '<div class="big">' + G.score + '</div>' +
     '<p>存活 ' + G.t.toFixed(1) + ' 秒 · 最高纪录 ' + best + '</p>' +
-    (aiOn ? '<p>AI 代玩中，即将自动开始下一局（AI 代玩成绩不计最高分）</p>' : '') +
+    (aiOn ? '<p>AI 代玩中，即将自动开始下一局</p>' : '') +
     '<button type="button">再来一局</button>'
   );
 }

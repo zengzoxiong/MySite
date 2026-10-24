@@ -69,7 +69,7 @@
     .g-face:active { transform: scale(.96); }
     .g-face:focus-visible { outline: 2px solid var(--game-accent); outline-offset: 2px; }
 
-    /* —— AI 代玩条：仅布局胶水，外观由 .g-btn / .g-ai-tag / .g-ai-note 承担 —— */
+    /* —— AI 代玩条：仅布局胶水，外观由 .g-btn / .g-ai-tag 承担 —— */
     .ai-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .ai-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
@@ -146,7 +146,6 @@
         <button class="g-btn g-ai-btn" id="aiBtn" type="button" aria-pressed="false">AI 代玩</button>
         <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
       </div>
-      <p class="g-ai-note">AI 代玩成绩不计最佳用时</p>
     </div>
 
     <div class="board-scroll" id="scroll">
@@ -787,7 +786,7 @@
     updateMineCounter();                     // 剩余的雷已在核心里自动插旗
     setFace(FACE_COOL);
     if (aiOn) {                              // AI 代玩成绩不计最佳纪录
-      showOverlay(true, '用时 ' + seconds + ' 秒 · AI 代玩成绩不计最佳用时');
+      showOverlay(true, '用时 ' + seconds + ' 秒');
       return;
     }
     const old = loadBest();
