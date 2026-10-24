@@ -224,9 +224,9 @@ function pause(){if(state!=='playing')return;state='paused';setPanel();}
 function resume(){if(state!=='paused')return;state='playing';setPanel();}
 function gameOver(){
   state='over';
-  const s=Math.floor(g.score), isNew=s>best&&s>0;
+  const s=Math.floor(g.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计最高纪录
   if(isNew){best=s;saveBest(s);bestEl.textContent=best;}
-  overInfo.textContent='本局得分 '+s+' · 到达第 '+g.level+' 关 · '+(isNew?'新纪录！':'历史最高 '+best);
+  overInfo.textContent='本局得分 '+s+' · 到达第 '+g.level+' 关 · '+(aiOn?'AI 代玩成绩不计最高分':(isNew?'新纪录！':'历史最高 '+best));
   setPanel();
   if(aiOn)aiRestartTimer=setTimeout(()=>{   // AI 代玩时自动开下一局
     aiRestartTimer=null;
@@ -373,7 +373,7 @@ requestAnimationFrame(loop);
       <ul>
         <li>← → / 鼠标移动 / 触屏拖动：移动挡板</li>
         <li>空格 / 点击：发球　P：暂停</li>
-        <li>AI 代玩：一键自动游玩，随时可停止</li>
+        <li>AI 代玩：一键自动游玩，成绩不计最高分，随时可停止</li>
       </ul>
     </div>
   </aside>

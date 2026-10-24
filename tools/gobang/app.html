@@ -517,11 +517,15 @@ function place(x, y) {
   if (res.win) {
     winCells = res.win;
     over = true;
-    winRecorded = true;
-    if (current === 1) score.black += 1; else score.white += 1;
-    saveScore();
-    updateHud();
-    statusText.textContent = (current === 1 ? '黑棋' : '白棋') + '五子连珠，本局获胜';
+    if (aiRunning) {
+      statusText.textContent = (current === 1 ? '黑棋' : '白棋') + '五子连珠，AI 演示局不计比分';
+    } else {
+      winRecorded = true;
+      if (current === 1) score.black += 1; else score.white += 1;
+      saveScore();
+      updateHud();
+      statusText.textContent = (current === 1 ? '黑棋' : '白棋') + '五子连珠，本局获胜';
+    }
   } else if (res.full) {
     over = true;
     statusText.textContent = '棋盘落满，本局和棋';
@@ -694,7 +698,7 @@ reset();
       <ul>
         <li>点击 / 触屏点按交叉点落子</li>
         <li>悔棋：退一步　重新开局：清空棋盘</li>
-        <li>点「AI 代玩」可自动对弈演示（AI 托管黑白双方），随时可停</li>
+        <li>点「AI 代玩」可自动对弈演示（AI 托管黑白双方），比分不累计，随时可停</li>
       </ul>
     </div>
   </aside>

@@ -471,11 +471,13 @@ function submit() {
     over = true;
     renderSlots();
     if (step.win) {
-      // 猜中：按剩余次数计分
-      record.wins += 1;
-      record.total += step.score;
-      saveRecord();
-      updateHud();
+      // 猜中：按剩余次数计分（AI 代玩为演示，不计入累计纪录）
+      if (!aiRunning) {
+        record.wins += 1;
+        record.total += step.score;
+        saveRecord();
+        updateHud();
+      }
       showResult(true, step.score);
     } else {
       showResult(false, 0);
@@ -605,7 +607,7 @@ newGame();
       <h3>操作</h3>
       <ul>
         <li>屏幕数字键盘输入，退格可修改；重复数字会被拒绝</li>
-        <li>点「AI 代玩」可自动连续猜数并计分，随时可停</li>
+        <li>点「AI 代玩」可自动连续猜数演示，成绩不计入累计纪录，随时可停</li>
       </ul>
     </div>
   </aside>

@@ -232,7 +232,7 @@
                 <span class="g-stat-value g-num" id="computerScore">0</span>
             </div>
         </div>
-        <span class="g-ai-note">AI 代玩成绩不计最高分</span>
+        <span class="g-ai-note">AI 代玩成绩不计入比分</span>
 
         <div class="g-card">
             <div class="battle-ground">
@@ -298,12 +298,14 @@
             return { playerScore: 0, computerScore: 0, drawScore: 0, rounds: [] };
         }
 
-        // 单步推进：记录一手对战并累计比分，返回本手结果
+        // 单步推进：记录一手对战并累计比分，返回本手结果（AI 代玩为演示对局，不计入比分）
         function applyRound(state, player, computer) {
             const result = judgeRound(player, computer);
-            if (result === 'win') state.playerScore++;
-            else if (result === 'lose') state.computerScore++;
-            else state.drawScore++;
+            if (!aiOn) {
+                if (result === 'win') state.playerScore++;
+                else if (result === 'lose') state.computerScore++;
+                else state.drawScore++;
+            }
             state.rounds.push({ player: player, computer: computer, result: result });
             return result;
         }

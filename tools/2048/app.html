@@ -242,7 +242,7 @@
     scoreStat.classList.remove('g-bump');
     void scoreStat.offsetWidth;
     scoreStat.classList.add('g-bump');
-    if (score > best) {
+    if (score > best && !autoOn) {   // AI 代玩成绩不计最高分
       best = score;
       bestEl.textContent = best;
       saveBest();
@@ -264,7 +264,7 @@
       overlay.classList.add('win');
     } else {
       ovTitle.textContent = '游戏结束';
-      ovSub.textContent = '最终分数 ' + score + (score > 0 && score >= best ? ' · 新纪录！' : '');
+      ovSub.textContent = '最终分数 ' + score + (autoOn ? ' · AI 代玩成绩不计最高分' : (score > 0 && score >= best ? ' · 新纪录！' : ''));
       ovContinue.hidden = true;
       overlay.classList.remove('win');
     }
@@ -571,7 +571,8 @@
       <ul>
         <li>滑动合并相同数字，每次合并得分翻倍</li>
         <li>合成 2048 即胜利，可继续冲击更高分</li>
-        <li>棋盘填满且无可合并时结束；「AI 代玩」由 AI 托管走棋</li>
+        <li>棋盘填满且无可合并时结束</li>
+        <li>「AI 代玩」由 AI 托管走棋，成绩不计最高分</li>
       </ul>
       <h3>操作</h3>
       <ul>
