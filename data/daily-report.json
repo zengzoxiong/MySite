@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-25",
+  "updated": "2026-10-26",
   "sections": {
     "trending": [
       {
         "name": "pengchujin/aerial-tv",
         "url": "https://github.com/pengchujin/aerial-tv",
         "desc": "给国产电视的一块干净桌面：参照 tvOS 设计的开源 Android TV 桌面，没有广告，开机自动接管。A tvOS-style launcher for Xiaomi, TCL and other China-market TVs.",
-        "stars": 4349,
+        "stars": 4967,
         "language": "Kotlin"
       },
       {
         "name": "simbasjungles/free-my-tv",
         "url": "https://github.com/simbasjungles/free-my-tv",
         "desc": "A fast, ad-free home screen for Google TV, LG webOS and Samsung Tizen. One button to undo.",
-        "stars": 4249,
+        "stars": 4576,
         "language": "Java"
       },
       {
-        "name": "xiaoyang111222/cn-math-taxonomy",
-        "url": "https://github.com/xiaoyang111222/cn-math-taxonomy",
-        "desc": "数学（小学到高中）、英语（三年级到高中）、初中物理的知识图谱：1644 个知识点、2403 条先修边、6723 道题，对齐课标，附自适应前置诊断。",
-        "stars": 3198,
-        "language": "Python"
-      },
-      {
-        "name": "Zagitta/gpu-unlock",
-        "url": "https://github.com/Zagitta/gpu-unlock",
-        "desc": "Unlock FP/BF16 instruction issue rate on Nvidia 3000's cards to their professional equivalents",
-        "stars": 2661,
+        "name": "JustAResearcher/gpu-unlock-ada",
+        "url": "https://github.com/JustAResearcher/gpu-unlock-ada",
+        "desc": "GPU tensor unlock source for RTX 4090 and experimental RTX 4070 Ti SUPER; firmware generated locally",
+        "stars": 2509,
         "language": "C"
       },
       {
         "name": "JoasASantos/REA-Prompts",
         "url": "https://github.com/JoasASantos/REA-Prompts",
         "desc": "REAP - Prompts for you to use REA (Reverse Engineer Anything), get the most out of it, and clone or break down any program",
-        "stars": 2048,
-        "language": ""
+        "stars": 2392,
+        "language": "Batchfile"
       },
       {
         "name": "EthanArbuckle/fairplay-decrypt",
         "url": "https://github.com/EthanArbuckle/fairplay-decrypt",
         "desc": "Offline FairPlay App Store IPA decryption with independent key derivation",
-        "stars": 1939,
+        "stars": 2086,
         "language": "C"
-      },
-      {
-        "name": "ikow/php2shell-poc",
-        "url": "https://github.com/ikow/php2shell-poc",
-        "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
-        "stars": 1751,
-        "language": "Python"
       },
       {
         "name": "xevrion/hatchzip",
         "url": "https://github.com/xevrion/hatchzip",
-        "desc": "Extract huge archives in place: the archive shrinks as your files hatch, so you only need room for the output. ZIP, 7z, tar, split archives.",
-        "stars": 1662,
+        "desc": "HatchZip is a free, open-source archive extractor for Windows, macOS and Linux that extracts ZIP, 7z, RAR, tar and split archives in place, so it needs free spa",
+        "stars": 1931,
         "language": "Rust"
       },
       {
         "name": "wesbos/3d-model-anything",
         "url": "https://github.com/wesbos/3d-model-anything",
         "desc": "Capture iPhone LiDAR and photos, reconstruct editable Three.js rooms, and explore them in a browser.",
-        "stars": 1600,
+        "stars": 1910,
         "language": "Swift"
       },
       {
-        "name": "alchaincyf/huashu-motion",
-        "url": "https://github.com/alchaincyf/huashu-motion",
-        "desc": "让你的agent一键直出商业级产品宣传片：会作曲，能指着画面改。Commercial-grade launch films by your coding agent — point at the frame to change it.",
-        "stars": 1589,
-        "language": "JavaScript"
+        "name": "ikow/php2shell-poc",
+        "url": "https://github.com/ikow/php2shell-poc",
+        "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
+        "stars": 1787,
+        "language": "Python"
+      },
+      {
+        "name": "Jakeschincariol/day-trader-skill",
+        "url": "https://github.com/Jakeschincariol/day-trader-skill",
+        "desc": "11 Claude skills for day trading: scan thousands of charts, track breaking news, time every entry and exit, and replay every outcome before you risk a dollar.",
+        "stars": 1561,
+        "language": "Python"
+      },
+      {
+        "name": "oosexgang/hackios-xnu-kernel",
+        "url": "https://github.com/oosexgang/hackios-xnu-kernel",
+        "desc": "",
+        "stars": 1447,
+        "language": "C"
       }
     ],
     "hn": [
       {
-        "id": 50224916,
-        "title": "Steal My Bitcoin",
-        "url": "https://stealmybitcoin.com/",
-        "hn": "https://news.ycombinator.com/item?id=50224916",
-        "score": 131,
-        "comments": 33
+        "id": 50234474,
+        "title": "Dolly Parton's Imagination Library",
+        "url": "https://imaginationlibrary.com/",
+        "hn": "https://news.ycombinator.com/item?id=50234474",
+        "score": 247,
+        "comments": 45
       },
       {
-        "id": 50224463,
-        "title": "No Signs of AI Payoff Outside the Tech Sector",
-        "url": "https://www.apollo.com/wealth/insights-news/insights/daily-spark/no-signs-of-ai-payoff-outside-the-tech-sector",
-        "hn": "https://news.ycombinator.com/item?id=50224463",
-        "score": 300,
-        "comments": 269
+        "id": 50235017,
+        "title": "Why I Am a Programmer",
+        "url": "https://www.alfie.wtf/programming/why-i-am-a-programmer.html",
+        "hn": "https://news.ycombinator.com/item?id=50235017",
+        "score": 57,
+        "comments": 6
       },
       {
-        "id": 50224300,
-        "title": "The Goose Programming Language",
-        "url": "https://aardappel.github.io/goose/",
-        "hn": "https://news.ycombinator.com/item?id=50224300",
-        "score": 127,
-        "comments": 48
+        "id": 50235738,
+        "title": "What goes into making an animated film?",
+        "url": "https://www.disneyanimation.com/process/",
+        "hn": "https://news.ycombinator.com/item?id=50235738",
+        "score": 26,
+        "comments": 11
       },
       {
-        "id": 50224422,
-        "title": "Listen and read USA nuclear forces Emergency Action Messages, heard on 11175 kHz",
-        "url": "https://missileer.watch",
-        "hn": "https://news.ycombinator.com/item?id=50224422",
-        "score": 61,
-        "comments": 31
+        "id": 50235010,
+        "title": "Gheist campaign plants secret-dumping workflows using stolen GitHub tokens",
+        "url": "https://www.wiz.io/blog/gheist-attempted-scaled-abuse-of-stolen-github-tokens-stumbles",
+        "hn": "https://news.ycombinator.com/item?id=50235010",
+        "score": 33,
+        "comments": 0
       },
       {
-        "id": 50222622,
-        "title": "Roku developer repositories moved from GitHub to GitLab",
-        "url": "https://blog.roku.com/developer/gitlab-move",
-        "hn": "https://news.ycombinator.com/item?id=50222622",
-        "score": 215,
-        "comments": 143
+        "id": 50197108,
+        "title": "Overgrown, when plants invade your abandoned tabs",
+        "url": "https://charliegerard.dev/blog/overgrown-extension/",
+        "hn": "https://news.ycombinator.com/item?id=50197108",
+        "score": 24,
+        "comments": 0
       },
       {
-        "id": 50224100,
-        "title": "John Carmack on the Goose Language: multiple data stacks and relative references",
-        "url": "https://twitter.com/ID_AA_Carmack/status/2113704269274636568",
-        "hn": "https://news.ycombinator.com/item?id=50224100",
-        "score": 99,
-        "comments": 46
+        "id": 50235316,
+        "title": "Eunice is almost here",
+        "url": "https://armincat.com/articles/eunice-is-almost-here",
+        "hn": "https://news.ycombinator.com/item?id=50235316",
+        "score": 48,
+        "comments": 36
       },
       {
-        "id": 50223785,
-        "title": "Dream-1",
-        "url": "https://dreamlabs.ai/research/dream-1/",
-        "hn": "https://news.ycombinator.com/item?id=50223785",
-        "score": 116,
-        "comments": 58
+        "id": 50236081,
+        "title": "Serbia's Vucic concedes election defeat in historic win for student movement",
+        "url": "https://www.reuters.com/world/europe/serbia-votes-students-seek-unseat-vucic-snap-election-2026-10-25/",
+        "hn": "https://news.ycombinator.com/item?id=50236081",
+        "score": 48,
+        "comments": 2
       },
       {
-        "id": 50222927,
-        "title": "The St. Helena 5 pence coin shows Jonathan, a roughly 190 year old tortoise",
-        "url": "https://de.numista.com/9866",
-        "hn": "https://news.ycombinator.com/item?id=50222927",
-        "score": 73,
-        "comments": 15
+        "id": 50233779,
+        "title": "A 10-year-old CNN outperforms frontier LLMs for skin cancer diagnosis",
+        "url": "https://lynchlab.net/llm-skin-cancer",
+        "hn": "https://news.ycombinator.com/item?id=50233779",
+        "score": 321,
+        "comments": 165
       },
       {
-        "id": 50222133,
-        "title": "FreeDNS",
-        "url": "https://freedns.afraid.org/",
-        "hn": "https://news.ycombinator.com/item?id=50222133",
-        "score": 214,
-        "comments": 56
+        "id": 50233929,
+        "title": "I refuse to accept a censored Internet. Join Me at FOSDEM 27",
+        "url": "https://talkweb.eu/openweb/4558/",
+        "hn": "https://news.ycombinator.com/item?id=50233929",
+        "score": 296,
+        "comments": 159
       },
       {
-        "id": 50223844,
-        "title": "Danish Government silently drops plan to dump MS Office",
-        "url": "https://www.computerworld.dk/art/297226/digitaliseringsministeriet-har-i-al-stilhed-droppet-stort-anlagt-forsoeg-med-open-source-alternativ-til-microsoft",
-        "hn": "https://news.ycombinator.com/item?id=50223844",
-        "score": 152,
-        "comments": 91
+        "id": 50234232,
+        "title": "Oregon Police Are Charging a Local News Outlet $2.5M for Records About One Cop",
+        "url": "https://theintercept.com/2026/10/01/oregon-police-misconduct-public-records-cost-fee/",
+        "hn": "https://news.ycombinator.com/item?id=50234232",
+        "score": 274,
+        "comments": 68
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 73215,
-        "likes": 2754
+        "downloads": 85275,
+        "likes": 2965
       },
       {
         "id": "RecursiveSI/flint",
         "url": "https://huggingface.co/RecursiveSI/flint",
         "task": "text-generation",
-        "downloads": 4795,
-        "likes": 764
+        "downloads": 6444,
+        "likes": 850
       },
       {
         "id": "black-forest-labs/flux-3-image-klein-comfy",
         "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
         "task": "image-to-image",
-        "downloads": 590742,
-        "likes": 1487
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2087721,
-        "likes": 9159
-      },
-      {
-        "id": "OpenMOSS-Team/MOSS-Image-SFT",
-        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
-        "task": "text-to-image",
-        "downloads": 9717,
-        "likes": 683
+        "downloads": 660874,
+        "likes": 1597
       },
       {
         "id": "XHToken/Spark-X2.6-4B",
         "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
         "task": "text-generation",
-        "downloads": 2537,
-        "likes": 441
+        "downloads": 3488,
+        "likes": 492
       },
       {
-        "id": "fishaudio/drama-3",
-        "url": "https://huggingface.co/fishaudio/drama-3",
-        "task": "text-to-speech",
-        "downloads": 19831,
-        "likes": 977
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2107108,
+        "likes": 9325
       },
       {
-        "id": "Qwen/Qwen3.8-27B",
-        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
-        "task": "image-text-to-text",
-        "downloads": 7851161,
-        "likes": 18335
-      },
-      {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "id": "OpenMOSS-Team/MOSS-Image-SFT",
+        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
         "task": "text-to-image",
-        "downloads": 2303585,
-        "likes": 4958
+        "downloads": 10757,
+        "likes": 725
       },
       {
         "id": "MiniMaxAI/MiniMax-M3.1-Flash",
         "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash",
         "task": "image-text-to-text",
-        "downloads": 5789,
-        "likes": 304
+        "downloads": 7355,
+        "likes": 347
+      },
+      {
+        "id": "Nanbeige/Nanbeige4.3-33B",
+        "url": "https://huggingface.co/Nanbeige/Nanbeige4.3-33B",
+        "task": "text-generation",
+        "downloads": 0,
+        "likes": 334
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "task": "text-to-image",
+        "downloads": 2235846,
+        "likes": 5036
+      },
+      {
+        "id": "Qwen/Qwen3.8-27B",
+        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+        "task": "image-text-to-text",
+        "downloads": 7762014,
+        "likes": 18389
       }
     ],
     "weibo": [
       {
-        "word": "TES拿下LPL在S16首胜",
-        "num": 198268,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23TES%E6%8B%BF%E4%B8%8BLPL%E5%9C%A8S16%E9%A6%96%E8%83%9C%23"
+        "word": "iG与TES双双晋级2-1组",
+        "num": 261609,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23iG%E4%B8%8ETES%E5%8F%8C%E5%8F%8C%E6%99%8B%E7%BA%A72-1%E7%BB%84%23"
       },
       {
-        "word": "女生不要谈太久的恋爱",
-        "num": 141998,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E7%94%9F%E4%B8%8D%E8%A6%81%E8%B0%88%E5%A4%AA%E4%B9%85%E7%9A%84%E6%81%8B%E7%88%B1%23"
+        "word": "TES战胜G2",
+        "num": 192796,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23TES%E6%88%98%E8%83%9CG2%23"
       },
       {
-        "word": "渝昆高铁全线铺轨完成",
-        "num": 115683,
+        "word": "西藏巴青地震抢险安置工作一刻没停",
+        "num": 148116,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B8%9D%E6%98%86%E9%AB%98%E9%93%81%E5%85%A8%E7%BA%BF%E9%93%BA%E8%BD%A8%E5%AE%8C%E6%88%90%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E8%97%8F%E5%B7%B4%E9%9D%92%E5%9C%B0%E9%9C%87%E6%8A%A2%E9%99%A9%E5%AE%89%E7%BD%AE%E5%B7%A5%E4%BD%9C%E4%B8%80%E5%88%BB%E6%B2%A1%E5%81%9C%23"
       },
       {
-        "word": "小说里为什么没有广东霸总",
-        "num": 50031,
+        "word": "iG战胜HLE晋级2-1组",
+        "num": 63337,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E8%AF%B4%E9%87%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89%E5%B9%BF%E4%B8%9C%E9%9C%B8%E6%80%BB%23"
+        "url": "https://s.weibo.com/weibo?q=%23iG%E6%88%98%E8%83%9CHLE%E6%99%8B%E7%BA%A72-1%E7%BB%84%23"
       },
       {
-        "word": "许飞厉娜 再见爱人",
-        "num": 46810,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B8%E9%A3%9E%E5%8E%89%E5%A8%9C%20%E5%86%8D%E8%A7%81%E7%88%B1%E4%BA%BA%23"
+        "word": "众解说看TES战胜G2反应",
+        "num": 62194,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%BC%97%E8%A7%A3%E8%AF%B4%E7%9C%8BTES%E6%88%98%E8%83%9CG2%E5%8F%8D%E5%BA%94%23"
       },
       {
-        "word": "毛不易婚礼发言引网友争议",
-        "num": 46244,
+        "word": "黄子韬我结婚生子碍你事了吗",
+        "num": 61682,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%AF%9B%E4%B8%8D%E6%98%93%E5%A9%9A%E7%A4%BC%E5%8F%91%E8%A8%80%E5%BC%95%E7%BD%91%E5%8F%8B%E4%BA%89%E8%AE%AE%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E5%AD%90%E9%9F%AC%E6%88%91%E7%BB%93%E5%A9%9A%E7%94%9F%E5%AD%90%E7%A2%8D%E4%BD%A0%E4%BA%8B%E4%BA%86%E5%90%97%23"
       },
       {
-        "word": "曝刘学义张予曦差点结婚",
-        "num": 46121,
+        "word": "张智霖与前女友许秋怡世纪合体",
+        "num": 61162,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E5%88%98%E5%AD%A6%E4%B9%89%E5%BC%A0%E4%BA%88%E6%9B%A6%E5%B7%AE%E7%82%B9%E7%BB%93%E5%A9%9A%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%A0%E6%99%BA%E9%9C%96%E4%B8%8E%E5%89%8D%E5%A5%B3%E5%8F%8B%E8%AE%B8%E7%A7%8B%E6%80%A1%E4%B8%96%E7%BA%AA%E5%90%88%E4%BD%93%23"
       },
       {
-        "word": "内娱这种瘦成骷髅的风气可以停止了吗",
-        "num": 44688,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%86%85%E5%A8%B1%E8%BF%99%E7%A7%8D%E7%98%A6%E6%88%90%E9%AA%B7%E9%AB%85%E7%9A%84%E9%A3%8E%E6%B0%94%E5%8F%AF%E4%BB%A5%E5%81%9C%E6%AD%A2%E4%BA%86%E5%90%97%23"
+        "word": "蔡康永依旧没有说一句我是中国人",
+        "num": 60685,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E5%BA%B7%E6%B0%B8%E4%BE%9D%E6%97%A7%E6%B2%A1%E6%9C%89%E8%AF%B4%E4%B8%80%E5%8F%A5%E6%88%91%E6%98%AF%E4%B8%AD%E5%9B%BD%E4%BA%BA%23"
       },
       {
-        "word": "时尚博主回应艺人自费高定消息来源",
-        "num": 44688,
+        "word": "24岁女子赴泰见男网友被绑往边境",
+        "num": 51598,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%97%B6%E5%B0%9A%E5%8D%9A%E4%B8%BB%E5%9B%9E%E5%BA%94%E8%89%BA%E4%BA%BA%E8%87%AA%E8%B4%B9%E9%AB%98%E5%AE%9A%E6%B6%88%E6%81%AF%E6%9D%A5%E6%BA%90%23"
+        "url": "https://s.weibo.com/weibo?q=%2324%E5%B2%81%E5%A5%B3%E5%AD%90%E8%B5%B4%E6%B3%B0%E8%A7%81%E7%94%B7%E7%BD%91%E5%8F%8B%E8%A2%AB%E7%BB%91%E5%BE%80%E8%BE%B9%E5%A2%83%23"
       },
       {
-        "word": "LPL与LCK瑞士轮现状",
-        "num": 44547,
+        "word": "白桃星座一周运势",
+        "num": 50857,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23LPL%E4%B8%8ELCK%E7%91%9E%E5%A3%AB%E8%BD%AE%E7%8E%B0%E7%8A%B6%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%99%BD%E6%A1%83%E6%98%9F%E5%BA%A7%E4%B8%80%E5%91%A8%E8%BF%90%E5%8A%BF%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2025,
-        "text": "东帝汶成为东南亚国家联盟第11个成员国，并使该组织涵盖东南亚地区所有国家。",
-        "title": "东帝汶",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%9C%E5%B8%9D%E6%B1%B6"
+        "year": 2019,
+        "text": "恐怖组织伊斯兰国头目阿布·贝克尔·巴格达迪在美军于叙利亚伊德利卜的空袭行动中自杀身亡。",
+        "title": "伊斯兰国",
+        "url": "https://zh.wikipedia.org/wiki/%E4%BC%8A%E6%96%AF%E5%85%B0%E5%9B%BD"
       },
       {
-        "year": 2022,
-        "text": "莉兹·特拉斯以49天的时间结束了英国最短的首相任期。",
-        "title": "莉兹·特拉斯",
-        "url": "https://zh.wikipedia.org/wiki/%E8%8E%89%E5%85%B9%C2%B7%E7%89%B9%E6%8B%89%E6%96%AF"
-      },
-      {
-        "year": 2021,
-        "text": "苏丹武装部队在首都喀土穆发动军事政变，逮捕总理阿卜杜拉·哈姆杜克等官员。",
-        "title": "苏丹",
-        "url": "https://zh.wikipedia.org/wiki/%E8%8B%8F%E4%B8%B9"
+        "year": 2017,
+        "text": "泰国国王拉玛九世的世纪葬礼于曼谷皇家田广场举行。",
+        "title": "泰國君主",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B3%B0%E5%9C%8B%E5%90%9B%E4%B8%BB"
       },
       {
         "year": 2012,
-        "text": "微软在纽约发布Windows 8。",
-        "title": "Windows 8",
-        "url": "https://zh.wikipedia.org/wiki/Windows_8"
+        "text": "中国宁波市镇海区市民游行示威反对中石化PX项目。",
+        "title": "镇海区 (宁波市)",
+        "url": "https://zh.wikipedia.org/wiki/%E9%95%87%E6%B5%B7%E5%8C%BA_(%E5%AE%81%E6%B3%A2%E5%B8%82)"
       },
       {
-        "year": 2010,
-        "text": "位于印度尼西亚中爪哇省的默拉皮火山开始一系列火山喷发，并持续1个月之久。",
-        "title": "印度尼西亚",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8D%B0%E5%BA%A6%E5%B0%BC%E8%A5%BF%E4%BA%9A"
+        "year": 2011,
+        "text": "美国波音公司研发的波音787客机，首次投入商业飞行。",
+        "title": "波音",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B3%A2%E9%9F%B3"
       },
       {
-        "year": 2009,
-        "text": "统一7-ELEVEn狮在中华职棒20年总冠军赛击败兄弟象，获得年度总冠军。",
-        "title": "統一7-ELEVEn獅",
-        "url": "https://zh.wikipedia.org/wiki/%E7%B5%B1%E4%B8%807-ELEVEn%E7%8D%85"
+        "year": 2004,
+        "text": "Rockstar Games在北美发行了《侠盗猎车手：圣安地列斯》，这款游戏被认为是有史以来最棒的电子游戏之一。",
+        "title": "Rockstar Games",
+        "url": "https://zh.wikipedia.org/wiki/Rockstar_Games"
+      },
+      {
+        "year": 2002,
+        "text": "莫斯科人质危机结束，50名车臣武装分子和150名人质在俄罗斯特种部队的营救行动中死亡。",
+        "title": "莫斯科歌劇院脅持事件",
+        "url": "https://zh.wikipedia.org/wiki/%E8%8E%AB%E6%96%AF%E7%A7%91%E6%AD%8C%E5%8A%87%E9%99%A2%E8%84%85%E6%8C%81%E4%BA%8B%E4%BB%B6"
       }
     ]
   }
