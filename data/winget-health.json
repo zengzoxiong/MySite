@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-24",
+  "checkedAt": "2026-10-25",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -29,8 +29,8 @@
     },
     "Microsoft.PowerShell": {
       "ok": true,
-      "checkedAt": "2026-10-23",
-      "latest": "7.6.8.0"
+      "checkedAt": "2026-10-25",
+      "latest": "7.6.9.0"
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
