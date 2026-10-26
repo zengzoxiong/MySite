@@ -141,7 +141,7 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 0 12px;
     height: 52px;
     flex-shrink: 0;
 }
@@ -229,7 +229,7 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 6px;
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
@@ -255,14 +255,14 @@ body::before {
 
 /* 搜索框 */
 .sidebar-search {
-    padding: 0 12px 12px;
+    padding: 0 12px 10px;
     flex-shrink: 0;
 }
 
 .sidebar-search input {
     width: 100%;
     padding: 7px 10px;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     background-color: var(--search-bg);
@@ -284,16 +284,17 @@ body::before {
     display: none;
 }
 
-/* 导航区 */
+/* 导航区：左右留白 12px 与 header/搜索框对齐，底部补同值留白 */
 .sidebar-nav {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 8px;
+    padding: 0 12px 12px;
 }
 
+/* 组内不留额外空隙，组间距统一由分隔线 margin 控制（组间松于组内） */
 .sidebar-section {
-    padding: 4px 0;
+    padding: 0;
 }
 
 .sidebar-section-title {
@@ -309,7 +310,7 @@ body::before {
     color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    padding: 8px 8px 4px;
+    padding: 8px 10px 6px;
     white-space: nowrap;
     background: none;
     border: none;
@@ -351,15 +352,15 @@ body::before {
 .sidebar-divider {
     height: 1px;
     background-color: var(--border-color);
-    margin: 4px 8px;
+    margin: 8px 0;
 }
 
-/* 侧栏导航项 */
+/* 侧栏导航项：行高约 36px 保证点击区域，文字与上下留白同行放下 */
 .sidebar-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 8px;
+    padding: 7px 10px;
     font-size: 0.85rem;
     color: var(--text-secondary);
     text-decoration: none;
@@ -376,7 +377,7 @@ body::before {
 }
 
 .sidebar:not(.collapsed) .sidebar-item:hover {
-    padding-left: 13px;
+    padding-left: 15px;
 }
 
 .sidebar-item.active {
@@ -2937,7 +2938,7 @@ body.no-anim .mp-lyric > div {
         flex-direction: row;
         height: 52px;
         gap: 0;
-        padding: 16px;
+        padding: 0 12px;
     }
 
     .sidebar.collapsed .sidebar-logo {
@@ -2973,7 +2974,12 @@ body.no-anim .mp-lyric > div {
 
     .sidebar.collapsed .sidebar-item {
         justify-content: flex-start;
-        padding: 6px 8px;
+        padding: 7px 10px;
+    }
+
+    /* 移动端触控目标加大：条目行高约 42px */
+    .sidebar-item {
+        padding: 9px 10px;
     }
 
     .sidebar.collapsed .sidebar-collapse-btn {
