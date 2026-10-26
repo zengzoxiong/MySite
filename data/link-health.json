@@ -1,7 +1,7 @@
 {
   "counts": {
-    "total": 49,
-    "ok": 44,
+    "total": 56,
+    "ok": 51,
     "suspect": 4,
     "dead": 1
   },
@@ -173,6 +173,13 @@
       "state": "ok",
       "finalUrl": "",
       "checkedAt": "2026-10-01"
+    },
+    "https://docs.astral.sh/uv/getting-started/installation/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
     },
     "https://steampp.net/": {
       "status": 200,
@@ -348,6 +355,48 @@
       "state": "ok",
       "finalUrl": "https://www.drawdb.app/",
       "checkedAt": "2026-09-25"
+    },
+    "https://pdf.is": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
+    },
+    "https://vistep.ai/zh/": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
+    },
+    "https://smoji.zsh.moe": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
+    },
+    "https://fit.barrybarrywu.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
+    },
+    "https://gamenotover.net/zh": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
+    },
+    "https://www.mikupara.com": {
+      "status": 200,
+      "reason": "http",
+      "state": "ok",
+      "finalUrl": "",
+      "checkedAt": "2026-10-26"
     }
   }
 }
