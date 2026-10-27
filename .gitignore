@@ -20,12 +20,10 @@ logs/
 *.tmp
 *.temp
 
-# ---- Agent 本地配置与中间目录 ----
+# ---- Agent 本地配置与工作区 ----
 .claude/
-.Codex/
-.zcode/
 .zcodeignore
+.agent/
 
 __pycache__/
 *.pyc
-.playwright-mcp/
