@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国象棋 - 拾光集</title>
+<meta name="description" content="拾光集在线小游戏：中国象棋，完整行棋规则与内置 AI 对战，马腿象眼、飞将将死一应俱全，三档难度可悔棋，纯本地运行，无需联网。">
+<link rel="icon" href="../../favicon.svg">
+<link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/chinese-chess/app.html">
+<link rel="stylesheet" href="../../assets/game-ui.css">
+<script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
+<style>
+/* ===== 中国象棋 · 游戏私有视觉 =====
+   外围组件（导航标题栏 / 计分 / 按钮 / 结算与规则弹窗）统一使用
+   assets/game-ui.css 的 g-* 组件类；本块只保留棋盘个性视觉。 */
+:root {
+  /* 个性色：木棕 #8B5A2B（棋盘木色）。白字实心对 5.84:1、强调文字对浅底 5.32:1 */
+  --game-accent: #8B5A2B;
+  --game-accent-text: #6E4420;
+  /* 棋盘配色：浅木底 + 深木线（游戏私有视觉色） */
+  --board-bg: linear-gradient(160deg, #F3E2C0, #E8CFA0);
+  --board-line: #8A5A2E;
+  --board-river: rgba(112, 74, 38, .5);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --game-accent: #C98A4B;         /* 深色下提亮个性色保对比（黑底 7.2:1） */
+    --game-accent-text: var(--game-accent);
+    --board-bg: linear-gradient(160deg, #33271A, #241B10);
+    --board-line: #B08D5E;
+    --board-river: rgba(196, 156, 104, .55);
+  }
+}
+
+/* 棋盘：SVG 线格按 viewBox 等比缩放，棋子按交点百分比定位，天然响应式 */
+.board {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  aspect-ratio: 8.9 / 9.9;
+  border-radius: 12px;
+  background: var(--board-bg);
+  box-shadow: var(--shadow-card);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.board svg.lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.board svg.lines * { vector-effect: non-scaling-stroke; }
+
+/* 棋子：象牙圆片压汉字；红方红字、黑方墨字（象牙底明暗两版通用） */
+.pc {
+  position: absolute;
+  width: var(--pd);
+  height: var(--pd);
+  margin-left: calc(var(--pd) / -2);
+  margin-top: calc(var(--pd) / -2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #FBF4E2, #F0E4C8 62%, #DCCBA2);
+  border: 1px solid rgba(120, 90, 50, .45);
+  box-shadow: 0 2px 5px rgba(60, 40, 15, .3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;   /* 点击统一落在棋盘上换算交点 */
+  z-index: 1;
+  transition: left .16s ease-in-out, top .16s ease-in-out, transform .18s, opacity .18s;
+}
+.pc.no-anim { transition: none !important; }
+.pc.red { color: #B93A31; }
+.pc.blk { color: #33312E; }
+.pc.sel {
+  outline: 3px solid var(--game-accent);
+  outline-offset: -3px;
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 6px 12px rgba(60, 40, 15, .4);
+}
+.pc.cap { transform: scale(.4); opacity: 0; }
+
+/* 合法落点：空位小圆点、吃子位空心环；点击也落在棋盘换算，圆点只做显示 */
+.hint-dot {
+  position: absolute;
+  width: calc(var(--pd) * .3);
+  height: calc(var(--pd) * .3);
+  margin-left: calc(var(--pd) * -.15);
+  margin-top: calc(var(--pd) * -.15);
+  border-radius: 50%;
+  background: var(--game-accent);
+  opacity: .75;
+  pointer-events: none;
+  z-index: 2;
+}
+.hint-cap {
+  position: absolute;
+  width: calc(var(--pd) * .92);
+  height: calc(var(--pd) * .92);
+  margin-left: calc(var(--pd) * -.46);
+  margin-top: calc(var(--pd) * -.46);
+  border-radius: 50%;
+  border: 3px solid var(--red);
+  background: transparent;
+  opacity: .85;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 最后一手落点标记 */
+.last-mark {
+  position: absolute;
+  width: calc(var(--pd) * .22);
+  height: calc(var(--pd) * .22);
+  margin-left: calc(var(--pd) * -.11);
+  margin-top: calc(var(--pd) * -.11);
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: .9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 结算弹层：复用 .g-overlay（协议②），胜负标题私有状态色 */
+.ov-title { margin: 0; font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); }
+.ov-title.win { color: var(--green); }
+.ov-title.lose { color: var(--red); }
+.g-overlay .g-alert-actions { width: min(270px, 100%); }
+
+/* 计分卡回合高亮 + 状态行（私有状态类，外观基线由 g-* 承担） */
+.g-stat.active { box-shadow: 0 0 0 2px var(--game-accent), var(--shadow-card); }
+.g-stat.active .g-stat-label { color: var(--game-accent-text); font-weight: 600; }
+.status {
+  display: flex; align-items: center; justify-content: center;
+  margin: 0; min-height: 22px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.status.warn { color: var(--red); font-weight: 600; }
+.actions .g-segment { flex: 1 1 240px; }
+@media (max-width: 560px) {
+  .actions .g-segment { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body class="g-page">
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+
+  <main class="g-wrap">
+    <nav class="g-nav"><h1 class="g-nav-title">中国象棋</h1></nav>
+    <p class="g-nav-sub">你执红先行，将死对方将帅即获胜</p>
+
+    <section class="g-hud">
+      <div class="g-stat" id="statR"><span class="g-stat-label">你 · 红方</span><span class="g-stat-value g-num" id="capR">0</span></div>
+      <div class="g-stat" id="statB"><span class="g-stat-label">AI · 黑方</span><span class="g-stat-value g-num" id="capB">0</span></div>
+      <div class="g-stat"><span class="g-stat-label">胜场</span><span class="g-stat-value g-num" id="winVal">0</span></div>
+    </section>
+
+    <div class="g-stage">
+      <div class="board" id="board">
+        <svg class="lines" viewBox="-0.45 -0.45 8.9 9.9" aria-hidden="true">
+          <g stroke="var(--board-line)" stroke-width="1.6" fill="none" stroke-linecap="square">
+            <!-- 十条横线 -->
+            <line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/>
+            <line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/>
+            <line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/>
+            <line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/>
+            <line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/>
+            <!-- 九条竖线：中间七条在楚河汉界断开 -->
+            <line x1="0" y1="0" x2="0" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/>
+            <line x1="1" y1="0" x2="1" y2="4"/><line x1="2" y1="0" x2="2" y2="4"/>
+            <line x1="3" y1="0" x2="3" y2="4"/><line x1="4" y1="0" x2="4" y2="4"/>
+            <line x1="5" y1="0" x2="5" y2="4"/><line x1="6" y1="0" x2="6" y2="4"/>
+            <line x1="7" y1="0" x2="7" y2="4"/>
+            <line x1="1" y1="5" x2="1" y2="9"/><line x1="2" y1="5" x2="2" y2="9"/>
+            <line x1="3" y1="5" x2="3" y2="9"/><line x1="4" y1="5" x2="4" y2="9"/>
+            <line x1="5" y1="5" x2="5" y2="9"/><line x1="6" y1="5" x2="6" y2="9"/>
+            <line x1="7" y1="5" x2="7" y2="9"/>
+            <!-- 双方九宫斜线 -->
+            <line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/>
+            <line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/>
+            <!-- 外沿双线边框 -->
+            <rect x="-0.3" y="-0.3" width="8.6" height="9.6"/>
+          </g>
+          <g fill="var(--board-river)" font-size="0.5" font-weight="700" text-anchor="middle"
+             font-family="var(--font-display)">
+            <text x="2" y="4.67">楚</text><text x="3" y="4.67">河</text>
+            <text x="5" y="4.67">汉</text><text x="6" y="4.67">界</text>
+          </g>
+        </svg>
+        <div class="g-overlay g-overlay-fade" id="overlay" hidden>
+          <p class="ov-title" id="ovTitle"></p>
+          <p class="g-overlay-text g-num" id="ovSub"></p>
+          <div class="g-alert-actions">
+            <button class="g-alert-btn" id="ovView" type="button">查看棋盘</button>
+            <button class="g-alert-btn default" id="ovRestart" type="button">再来一局</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="status" id="status"></p>
+
+    <div class="actions g-btn-row">
+      <button class="g-btn" id="newBtn" type="button">新游戏</button>
+      <button class="g-btn g-btn-gray" id="undoBtn" type="button" disabled>悔棋</button>
+      <div class="g-segment" id="levelSeg" role="group" aria-label="AI 难度">
+        <button type="button" data-level="easy">新手</button>
+        <button type="button" data-level="normal" class="on">进阶</button>
+        <button type="button" data-level="hard">大师</button>
+      </div>
+    </div>
+
+    <footer class="g-foot">拾光集 · 在线小游戏</footer>
+  </main>
+
+  <script>
+  (() => {
+  'use strict';
+  /* ================= 象棋核心规则与 AI（纯逻辑，不依赖 DOM） =================
+     棋盘用 Uint8Array(90)，存棋子字符码：0 空；红方大写 K帥 A仕 B相 N傌 R俥 C炮 P兵，
+     黑方小写 k將 a士 b象 n馬 r車 c砲 p卒。行 0 在上（黑底线），行 9 在下（红底线），
+     下标 = 行*9 + 列。 */
+
+  const CODE = p => p.charCodeAt(0);
+  const K_R = CODE('K'), K_B = CODE('k');
+  const isRedPiece = p => p >= 65 && p <= 90;        // 大写为红
+  const RED = 1, BLACK = -1;                          // 行棋方
+  const MATE = 100000;
+
+  /* 棋子名（红 / 黑各一套汉字）与子力价值 */
+  const GLYPH = { K:'帥', A:'仕', B:'相', N:'傌', R:'俥', C:'炮', P:'兵',
+                  k:'將', a:'士', b:'象', n:'馬', r:'車', c:'砲', p:'卒' };
+  const VALUE = { K:0, A:200, B:200, N:400, C:450, R:900, P:100 };
+
+  const inB = (r, c) => r >= 0 && r < 10 && c >= 0 && c < 9;
+  const idx = (r, c) => r * 9 + c;
+  // 九宫判定：横 3~5 列，纵向红 7~9 行、黑 0~2 行（上下界缺一不可，否则会生成出界走法）
+  const inPalace = (side, r, c) => c >= 3 && c <= 5 &&
+    (side === RED ? (r >= 7 && r <= 9) : (r >= 0 && r <= 2));
+  const ownSide = (side, p) => p !== 0 && (side === RED ? isRedPiece(p) : !isRedPiece(p));
+  const enemySide = (side, p) => p !== 0 && !ownSide(side, p);
+  const crossedRiver = (side, r) => side === RED ? r <= 4 : r >= 5;
+
+  /* ---------- 伪合法走法生成（含吃将，供搜索用；界面层再做安全过滤） ---------- */
+  function genPseudo(bd, side) {
+    const ms = [];
+    const push = (f, tr, tc) => { if (inB(tr, tc)) ms.push({ f: f, t: idx(tr, tc) }); };
+    for (let r = 0; r < 10; r++) for (let c = 0; c < 9; c++) {
+      const p = bd[idx(r, c)];
+      if (!ownSide(side, p)) continue;
+      const f = idx(r, c);
+      const t = String.fromCharCode(p);
+      if (t === 'K' || t === 'k') {
+        // 帅将：宫内直行一步；另含飞将——同线直望可直取对方将帅（照面即违规的来源）
+        const D4 = [[-1,0],[1,0],[0,-1],[0,1]];
+        for (const [dr, dc] of D4) {
+          const tr = r + dr, tc = c + dc;
+          if (inPalace(side, tr, tc) && !ownSide(side, bd[idx(tr, tc)])) ms.push({ f: f, t: idx(tr, tc) });
+        }
+        const dr = side === RED ? -1 : 1;
+        for (let rr = r + dr; inB(rr, c); rr += dr) {
+          const q = bd[idx(rr, c)];
+          if (q === 0) continue;
+          if (q === (side === RED ? K_B : K_R)) ms.push({ f: f, t: idx(rr, c) });   // 飞将吃王
+          break;
+        }
+      } else if (t === 'A' || t === 'a') {
+        // 仕士：宫内斜行一步
+        for (const [dr, dc] of [[-1,-1],[-1,1],[1,-1],[1,1]]) {
+          const tr = r + dr, tc = c + dc;
+          if (inPalace(side, tr, tc) && !ownSide(side, bd[idx(tr, tc)])) ms.push({ f: f, t: idx(tr, tc) });
+        }
+      } else if (t === 'B' || t === 'b') {
+        // 相象：田字两步，塞象眼不过河
+        for (const [dr, dc] of [[-2,-2],[-2,2],[2,-2],[2,2]]) {
+          const tr = r + dr, tc = c + dc;
+          if (!inB(tr, tc) || crossedRiver(side, tr)) continue;   // 象不能过河
+          if (bd[idx(r + dr / 2, c + dc / 2)] !== 0) continue;   // 象眼被塞
+          if (!ownSide(side, bd[idx(tr, tc)])) ms.push({ f: f, t: idx(tr, tc) });
+        }
+      } else if (t === 'N' || t === 'n') {
+        // 马走日：先蹩马腿再落子
+        const NM = [[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],
+                    [-1,-2,0,-1],[1,-2,0,-1],[-1,2,0,1],[1,2,0,1]];
+        for (const [dr, dc, lr, lc] of NM) {
+          const tr = r + dr, tc = c + dc;
+          if (!inB(tr, tc) || bd[idx(r + lr, c + lc)] !== 0) continue;
+          if (!ownSide(side, bd[idx(tr, tc)])) ms.push({ f: f, t: idx(tr, tc) });
+        }
+      } else if (t === 'R' || t === 'r') {
+        // 車：四向直线滑行
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+          for (let rr = r + dr, cc = c + dc; inB(rr, cc); rr += dr, cc += dc) {
+            const q = bd[idx(rr, cc)];
+            if (q === 0) { ms.push({ f: f, t: idx(rr, cc) }); continue; }
+            if (enemySide(side, q)) ms.push({ f: f, t: idx(rr, cc) });
+            break;
+          }
+        }
+      } else if (t === 'C' || t === 'c') {
+        // 炮：平移如車，吃子必须隔一个炮架
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+          let screened = false;
+          for (let rr = r + dr, cc = c + dc; inB(rr, cc); rr += dr, cc += dc) {
+            const q = bd[idx(rr, cc)];
+            if (!screened) {
+              if (q === 0) ms.push({ f: f, t: idx(rr, cc) });
+              else screened = true;
+            } else if (q !== 0) {
+              if (enemySide(side, q)) ms.push({ f: f, t: idx(rr, cc) });
+              break;
+            }
+          }
+        }
+      } else {
+        // 兵卒：过河前只进一步，过河后可横走
+        const dr = side === RED ? -1 : 1;
+        push(f, r + dr, c);
+        if (crossedRiver(side, r)) { push(f, r, c - 1); push(f, r, c + 1); }
+      }
+    }
+    return ms;
+  }
+
+  /* ---------- 走子 / 还原（配对使用） ---------- */
+  function make(bd, m) {
+    const cap = bd[m.t];
+    bd[m.t] = bd[m.f];
+    bd[m.f] = 0;
+    return cap;
+  }
+  function unmake(bd, m, cap) {
+    bd[m.f] = bd[m.t];
+    bd[m.t] = cap;
+  }
+
+  /* ---------- 将军判定：(r,c) 是否被 by 方攻击 ---------- */
+  function attacked(bd, side, by) {
+    // 帅将照面：两王同线且中间无子，视为被将
+    let kr = -1, kc = -1;
+    for (let r = 0; r < 10; r++) for (let c = 0; c < 9; c++) {
+      if (bd[idx(r, c)] === (side === RED ? K_R : K_B)) { kr = r; kc = c; }
+    }
+    if (kr < 0) return true;   // 王已被吃（搜索的伪合法路径可能走到），直接视为被将
+    const dr = by === RED ? -1 : 1;   // by 方兵卒前进方向
+    // 兵卒：正前方一格；过河兵还能横吃
+    const pP = by === RED ? CODE('P') : CODE('p');
+    if (inB(kr - dr, kc) && bd[idx(kr - dr, kc)] === pP) return true;
+    for (const dc of [-1, 1]) {
+      if (inB(kr, kc + dc) && bd[idx(kr, kc + dc)] === pP && crossedRiver(by, kr)) return true;
+    }
+    // 马：落点在王位、马腿在马那侧
+    const pN = by === RED ? CODE('N') : CODE('n');
+    const NM = [[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],
+                [-1,-2,0,-1],[1,-2,0,-1],[-1,2,0,1],[1,2,0,1]];
+    for (const [mr, mc, lr, lc] of NM) {
+      const sr = kr + mr, sc = kc + mc;
+      if (inB(sr, sc) && bd[idx(sr, sc)] === pN && bd[idx(sr - lr, sc - lc)] === 0) return true;
+    }
+    // 車与砲：四向扫描，首个子是敌車则被将；隔一个架子后首个子是敌砲则被将
+    const pR = by === RED ? CODE('R') : CODE('r');
+    const pC = by === RED ? CODE('C') : CODE('c');
+    for (const [ddr, ddc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+      let seen = false, hit = false;
+      for (let rr = kr + ddr, cc = kc + ddc; inB(rr, cc) && !hit; rr += ddr, cc += ddc) {
+        const q = bd[idx(rr, cc)];
+        if (q === 0) continue;
+        if (!seen) { if (q === pR) return true; seen = true; }
+        else { if (q === pC) return true; hit = true; }
+      }
+    }
+    // 帅将照面：沿本列向对方宫扫描，首个子是对方王即照面
+    const pK = by === RED ? K_R : K_B;
+    const drK = by === RED ? 1 : -1;   // by 是红王在下方、黑王在上方，朝对方王的方向扫
+    for (let rr = kr + drK; inB(rr, kc); rr += drK) {
+      const q = bd[idx(rr, kc)];
+      if (q === 0) continue;
+      if (q === pK) return true;
+      break;
+    }
+    return false;
+  }
+
+  /* 走完这步后本方王是否安全（供界面合法手过滤） */
+  function kingSafe(bd, side, m) {
+    const cap = make(bd, m);
+    const safe = !attacked(bd, side, -side);
+    unmake(bd, m, cap);
+    return safe;
+  }
+
+  /* ---------- 局面评估（从 side 视角，兵卒带过河推进加成） ---------- */
+  function evaluate(bd, side) {
+    let sc = 0;
+    for (let r = 0; r < 10; r++) for (let c = 0; c < 9; c++) {
+      const p = bd[idx(r, c)];
+      if (p === 0) continue;
+      const t = String.fromCharCode(p);
+      let v = VALUE[t];
+      if (t === 'P') {
+        if (crossedRiver(RED, r)) v += 60 + (4 - r) * 10;      // 红卒越深入越值钱
+      } else if (t === 'p') {
+        if (crossedRiver(BLACK, r)) v += 60 + (r - 5) * 10;
+      } else if (t === 'N' || t === 'n' || t === 'C' || t === 'c') {
+        // 马炮居中略优：离边线越远加成越高
+        v += Math.min(c, 8 - c) * 4;
+      }
+      sc += (side === RED) === isRedPiece(p) ? v : -v;
+    }
+    return sc;
+  }
+
+  /* ---------- 搜索：伪合法 + 吃王剪枝（王被吃即上一手违规，大分回传即成败着） ---------- */
+  const victimValue = p => VALUE[String.fromCharCode(p)] || 0;
+  function search(bd, side, depth, alpha, beta, ply) {
+    const moves = genPseudo(bd, side);
+    // 吃子优先排序，提升剪枝效率（空位 victim 为 0，兜底防 NaN）
+    moves.sort((a, b) => victimValue(bd[b.t]) - victimValue(bd[a.t]));
+    if (!moves.length) return -(MATE - ply);   // 无棋可走：困毙同负
+    if (depth <= 0) return evaluate(bd, side) + (Math.random() * 6 - 3);
+    let best = -Infinity;
+    for (const m of moves) {
+      const victim = bd[m.t];
+      if (victim === (side === RED ? K_B : K_R)) return MATE - ply;   // 直接吃王：上一手送将
+      const cap = make(bd, m);
+      const v = -search(bd, -side, depth - 1, -beta, -alpha, ply + 1);
+      unmake(bd, m, cap);
+      if (v > best) best = v;
+      if (best > alpha) alpha = best;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  /* ---------- AI 选手：三档难度 ---------- */
+  const LEVELS = {
+    easy:   { depth: 1, noise: .35 },   // 新手：部分随机 + 一步贪心
+    normal: { depth: 3, noise: 0 },     // 进阶：三层搜索
+    hard:   { depth: 4, noise: 0 }      // 大师：四层搜索
+  };
+  function chooseAiMove(bd, lvl) {
+    const cfg = LEVELS[lvl] || LEVELS.normal;
+    const side = BLACK;
+    const moves = genPseudo(bd, side).filter(m => kingSafe(bd, side, m));
+    if (!moves.length) return null;
+    if (cfg.noise && Math.random() < cfg.noise) return moves[Math.random() * moves.length | 0];
+    moves.sort((a, b) => victimValue(bd[b.t]) - victimValue(bd[a.t]));
+    let bestM = moves[0], bestV = -Infinity, alpha = -Infinity;
+    for (const m of moves) {
+      const cap = make(bd, m);
+      const v = -search(bd, RED, cfg.depth - 1, -Infinity, -alpha, 1);
+      unmake(bd, m, cap);
+      if (v > bestV) { bestV = v; bestM = m; }
+      if (v > alpha) alpha = v;
+    }
+    return bestM;
+  }
+
+  /* ================= 界面渲染与对局流程 ================= */
+  const $ = id => document.getElementById(id);
+  const boardEl = $('board'), overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
+  const statusEl = $('status'), capREl = $('capR'), capBEl = $('capB'), winVal = $('winVal');
+  const statR = $('statR'), statB = $('statB');
+  const newBtn = $('newBtn'), undoBtn = $('undoBtn'), levelSeg = $('levelSeg');
+
+  // 交点坐标 → 百分比（与 SVG viewBox -0.45/-0.45、8.9/9.9 对齐）
+  const PAD = 0.45, VW = 8.9, VH = 9.9;
+  const px = c => (c + PAD) / VW * 100;
+  const py = r => (r + PAD) / VH * 100;
+
+  let bd = new Uint8Array(90);
+  let turn = RED;
+  let state = 'playing';      // playing / over
+  let level = 'normal';
+  let sel = -1;               // 选中子下标，-1 未选
+  let aiBusy = false;
+  let aiTimer = 0;
+  let lastMove = null;        // {f, t}
+  let capR = 0, capB = 0;     // 双方吃子数
+  const history = [];         // 每手落子前快照，供悔棋
+  const pcEls = new Array(90).fill(null);   // 下标 → 棋子 DOM
+  let hintEls = [];
+
+  /* 胜场记录（红方获胜计数） */
+  let wins = 0;
+  try { wins = parseInt(localStorage.getItem('xiangqiWins'), 10) || 0; } catch (e) {}
+  function saveWins() { try { localStorage.setItem('xiangqiWins', String(wins)); } catch (e) {} }
+  winVal.textContent = wins;
+
+  /* ---------- 棋子 DOM ---------- */
+  function createPiece(i, anim) {
+    const p = bd[i];
+    const el = document.createElement('div');
+    el.className = 'pc ' + (isRedPiece(p) ? 'red' : 'blk') + (anim ? '' : ' no-anim');
+    el.textContent = GLYPH[String.fromCharCode(p)];
+    placePiece(el, i);
+    boardEl.appendChild(el);
+    pcEls[i] = el;
+  }
+  function placePiece(el, i) {
+    el.style.left = px(i % 9) + '%';
+    el.style.top = py(Math.floor(i / 9)) + '%';
+  }
+  function clearPieces() {
+    for (let i = 0; i < 90; i++) { if (pcEls[i]) { pcEls[i].remove(); pcEls[i] = null; } }
+  }
+  function rebuildPieces() {
+    clearPieces();
+    for (let i = 0; i < 90; i++) if (bd[i]) createPiece(i, false);
+  }
+
+  /* ---------- 提示与标记 ---------- */
+  function clearHints() {
+    for (const el of hintEls) el.remove();
+    hintEls = [];
+    if (sel >= 0 && pcEls[sel]) pcEls[sel].classList.remove('sel');
+    sel = -1;
+  }
+  function showHints(moves) {
+    for (const m of moves) {
+      const el = document.createElement('div');
+      el.className = bd[m.t] ? 'hint-cap' : 'hint-dot';
+      el.style.left = px(m.t % 9) + '%';
+      el.style.top = py(Math.floor(m.t / 9)) + '%';
+      boardEl.appendChild(el);
+      hintEls.push(el);
+    }
+    pcEls[sel].classList.add('sel');
+  }
+  function markLast() {
+    boardEl.querySelectorAll('.last-mark').forEach(el => el.remove());
+    if (!lastMove) return;
+    for (const i of [lastMove.f, lastMove.t]) {
+      const el = document.createElement('div');
+      el.className = 'last-mark';
+      el.style.left = px(i % 9) + '%';
+      el.style.top = py(Math.floor(i / 9)) + '%';
+      boardEl.appendChild(el);
+    }
+  }
+
+  /* ---------- HUD 与状态行 ---------- */
+  function syncHud() {
+    capREl.textContent = capR;
+    capBEl.textContent = capB;
+    statR.classList.toggle('active', state === 'playing' && turn === RED);
+    statB.classList.toggle('active', state === 'playing' && turn === BLACK);
+    undoBtn.disabled = !(state === 'playing' && !aiBusy && history.length);
+  }
+  function setStatus(text, warn) {
+    statusEl.textContent = text;
+    statusEl.classList.toggle('warn', !!warn);
+  }
+
+  /* ---------- 走法执行 ---------- */
+  function legalMovesOf(side) {
+    return genPseudo(bd, side).filter(m => kingSafe(bd, side, m));
+  }
+
+  function playMove(m) {
+    history.push({ bd: bd.slice(), turn: turn, lastMove: lastMove, capR: capR, capB: capB });
+    const victim = bd[m.t];
+    const mover = turn;
+    make(bd, m);
+    if (victim) {
+      // 被吃子淡出后移除
+      const capEl = pcEls[m.t];
+      if (capEl) { capEl.classList.add('cap'); setTimeout(() => capEl.remove(), 220); }
+      if (mover === RED) capR++; else capB++;
+      if (window.GameSFX) GameSFX.smash();
+    } else {
+      if (window.GameSFX) GameSFX.swipe();
+    }
+    // 移动棋子 DOM
+    const el = pcEls[m.f];
+    pcEls[m.f] = null;
+    if (el) {
+      pcEls[m.t] = el;
+      el.classList.remove('sel');
+      placePiece(el, m.t);
+    }
+    lastMove = m;
+    markLast();
+    clearHints();
+    turn = -mover;
+    syncHud();
+    nextTurn();
+  }
+
+  // 回合推进：轮到谁走谁走；AI 回合交给搜索，双方都无棋则终局
+  function nextTurn() {
+    if (state !== 'playing') return;
+    const moves = legalMovesOf(turn);
+    if (!moves.length) { gameOver(-turn); return; }   // 无棋可走：困毙 / 被将死均判负
+    const checked = attacked(bd, turn, -turn);
+    if (turn === RED) {
+      setStatus(checked ? '将军！你的帅正被照将，先应将再走棋' : '你的回合，点击红子再点落点走棋', checked);
+    } else {
+      setStatus(checked ? '将军！AI 正在被将……' : 'AI 思考中…');
+      aiBusy = true;
+      syncHud();
+      aiTimer = setTimeout(() => {
+        const m = chooseAiMove(bd, level);
+        aiBusy = false;
+        if (state !== 'playing' || !m) return;
+        playMove(m);
+      }, 620);
+    }
+  }
+
+  function gameOver(winner) {
+    state = 'over';
+    clearHints();
+    const youWin = winner === RED;
+    const mvN = history.length;
+    let sub;
+    if (youWin) {
+      wins++;
+      saveWins();
+      winVal.textContent = wins;
+      if (window.GameSFX) GameSFX.win();
+      sub = '第 ' + mvN + ' 手取胜 · 累计胜 ' + wins + ' 场';
+    } else {
+      if (window.GameSFX) GameSFX.lose();
+      sub = '第 ' + mvN + ' 手落败，再接再厉';
+    }
+    setStatus(youWin ? '对局结束，红方获胜' : '对局结束，黑方获胜');
+    ovTitle.textContent = youWin ? '将死！你赢了' : '你输了';
+    ovTitle.className = 'ov-title ' + (youWin ? 'win' : 'lose');
+    ovSub.textContent = sub;
+    overlay.hidden = false;
+    void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
+    overlay.classList.add('open');
+    syncHud();
+  }
+
+  function newGame() {
+    clearTimeout(aiTimer);
+    if (window.GameSFX) GameSFX.unlock();
+    aiBusy = false;
+    bd.fill(0);
+    // 摆初始阵：车马相仕帅一线，炮居二线，兵沿河
+    const backR = 'RNBAKABNR', backB = 'rnbakabnr';
+    for (let c = 0; c < 9; c++) {
+      bd[idx(9, c)] = CODE(backR[c]);
+      bd[idx(0, c)] = CODE(backB[c]);
+    }
+    bd[idx(7, 1)] = CODE('C'); bd[idx(7, 7)] = CODE('C');
+    bd[idx(2, 1)] = CODE('c'); bd[idx(2, 7)] = CODE('c');
+    for (let c = 0; c < 9; c += 2) {
+      bd[idx(6, c)] = CODE('P');
+      bd[idx(3, c)] = CODE('p');
+    }
+    turn = RED;
+    state = 'playing';
+    sel = -1;
+    lastMove = null;
+    capR = 0; capB = 0;
+    history.length = 0;
+    rebuildPieces();
+    markLast();
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+    syncHud();
+    setStatus('你的回合，点击红子再点落点走棋');
+  }
+
+  /* 悔棋：回滚到最近一次轮到玩家落子前的局面（撤你与 AI 各一手） */
+  function undoStep() {
+    if (state !== 'playing' || aiBusy || !history.length) return;
+    clearTimeout(aiTimer);
+    let snap = null;
+    while (history.length) {
+      snap = history.pop();
+      if (snap.turn === RED) break;
+    }
+    if (!snap) return;
+    bd = snap.bd;
+    turn = snap.turn;
+    lastMove = snap.lastMove;
+    capR = snap.capR; capB = snap.capB;
+    rebuildPieces();
+    markLast();
+    syncHud();
+    setStatus('已悔棋，重新走这一手');
+    nextTurn();
+  }
+
+  /* ---------- 输入：点击棋盘换算最近交点 ---------- */
+  boardEl.addEventListener('click', e => {
+    if (state !== 'playing' || turn !== RED || aiBusy) return;
+    const rect = boardEl.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) / rect.width * VW - PAD;
+    const cy = (e.clientY - rect.top) / rect.height * VH - PAD;
+    const c = Math.round(Math.max(0, Math.min(8, cx)));
+    const r = Math.round(Math.max(0, Math.min(9, cy)));
+    const i = idx(r, c);
+    if (sel >= 0) {
+      const m = legalTargets.find(m => m.t === i);
+      if (m) { if (window.GameSFX) GameSFX.click(); playMove(m); return; }
+    }
+    if (ownSide(RED, bd[i])) {
+      if (sel === i) { clearHints(); setStatus('已取消选中'); return; }
+      clearHints();
+      sel = i;
+      legalTargets = legalMovesOf(RED).filter(m => m.f === i);
+      showHints(legalTargets);
+      if (window.GameSFX) GameSFX.click();
+      setStatus(legalTargets.length ? '点击圆点落子，空心环为吃子' : '这枚棋子暂无合法落点');
+    } else if (sel >= 0) {
+      clearHints();
+      setStatus('这里走不到，另选落点或换枚棋子');
+    }
+  });
+  let legalTargets = [];
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === 'KeyR') newGame();
+  });
+
+  levelSeg.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-level]');
+    if (!btn) return;
+    level = btn.dataset.level;
+    levelSeg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+  });
+
+  newBtn.addEventListener('click', newGame);
+  undoBtn.addEventListener('click', undoStep);
+  $('ovRestart').addEventListener('click', newGame);
+  $('ovView').addEventListener('click', () => {
+    overlay.classList.remove('open');
+    overlay.hidden = true;
+  });
+
+  /* ---------- 响应式：按棋盘宽换算棋子直径 ---------- */
+  function layout() {
+    const w = boardEl.clientWidth;
+    // 交点间距 = 1 个 viewBox 单位 = 宽 / 8.9，取 92% 做棋子直径
+    const cell = w / VW * 0.92;
+    boardEl.style.setProperty('--pd', cell.toFixed(2) + 'px');
+    boardEl.style.fontSize = (cell * 0.46).toFixed(2) + 'px';
+  }
+  window.addEventListener('resize', layout);
+
+  /* ---------- 开局 ---------- */
+  layout();
+  newGame();
+  })();
+  </script>
+  <div class="g-alert-mask g-alert-rules open" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则" hidden>
+    <div class="g-alert">
+      <div class="g-alert-body">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>你执红先行，AI 执黑，将死对方将帅即获胜；无棋可走（困毙）同样判负</li>
+        <li>車走直线、馬走日（蹩马腿）、相走田（塞象眼不过河）、仕帅限九宫、炮隔子吃、兵过河可横走</li>
+        <li>两将帅同一直线无隔子即「飞将」，属违规局面，走棋时自动过滤</li>
+        <li>新手 / 进阶 / 大师为 AI 搜索深度三档，随时切换，下一手生效</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>点击红子选中，再点圆点落子；空心红环表示吃对方子</li>
+        <li>新游戏：重开对局　悔棋：撤回你和 AI 的最近一手　R：快捷重开</li>
+      </ul>
+      </div>
+      <div class="g-alert-actions">
+        <button class="g-alert-btn default" id="rulesClose" type="button">好的</button>
+      </div>
+    </div>
+  </div>
+<script>
+  /* 左上角工具栏：规则弹窗 + 全局音效开关；字体与主站「界面字体」联动（appearance.js 单源） */
+  (function () {
+    var mask = document.getElementById('rulesModal');
+    var rulesBtn = document.getElementById('rulesBtn');
+    var closeBtn = document.getElementById('rulesClose');
+    var lastFocus = null;
+    function openRules() {
+      if (!mask || !mask.hidden) return;
+      lastFocus = document.activeElement;
+      mask.hidden = false;                  // mask 常驻 .open（g-alert open 态），只切 hidden
+      if (closeBtn) closeBtn.focus();
+    }
+    function closeRules() {
+      if (!mask || mask.hidden) return;
+      mask.hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+      lastFocus = null;
+    }
+    if (rulesBtn) rulesBtn.addEventListener('click', openRules);
+    if (closeBtn) closeBtn.addEventListener('click', closeRules);
+    if (mask) mask.addEventListener('click', function (e) { if (e.target === mask) closeRules(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mask && !mask.hidden) { e.stopPropagation(); closeRules(); }
+    });
+
+    var sfxBtn = document.getElementById('sfxBtn');
+    var SFX_KEY = 'gameSfxMuted';
+    function sfxMuted() { try { return localStorage.getItem(SFX_KEY) === '1'; } catch (e) { return false; } }
+    function paintSfx() {
+      if (!sfxBtn) return;
+      var muted = sfxMuted();
+      sfxBtn.classList.toggle('is-muted', muted);
+      sfxBtn.setAttribute('aria-pressed', String(muted));
+      sfxBtn.setAttribute('aria-label', muted ? '开启音效' : '静音');
+      var on = sfxBtn.querySelector('.sfx-on'), off = sfxBtn.querySelector('.sfx-off');
+      if (on) on.toggleAttribute('hidden', muted);      // SVGElement.hidden 非反射属性，必须 toggleAttribute
+      if (off) off.toggleAttribute('hidden', !muted);
+    }
+    if (sfxBtn) sfxBtn.addEventListener('click', function () {
+      try { localStorage.setItem(SFX_KEY, sfxMuted() ? '0' : '1'); } catch (e) {}
+      paintSfx();
+    });
+    window.addEventListener('storage', function (e) { if (e.key === SFX_KEY) paintSfx(); });
+    paintSfx();
+
+    try { if (window.SiteAppearance) SiteAppearance.applySiteFontFromStorage(); } catch (e) {}
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'fontFamily' && window.SiteAppearance) SiteAppearance.applySiteFontFromStorage();
+    });
+  })();
+  </script>
+</body>
+</html>

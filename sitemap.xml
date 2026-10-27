@@ -101,6 +101,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/chinese-chess/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/color-picker/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -742,6 +747,11 @@
   </url>
   <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/uuid-generator/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/watermelon/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

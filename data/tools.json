@@ -1151,6 +1151,20 @@
       "description": "猜四字成语逐字给绿黄灰反馈，6 次机会，含每日一题与释义",
       "icon": "🀄",
       "category": "小游戏"
+    },
+    {
+      "name": "中国象棋",
+      "path": "chinese-chess/app.html",
+      "description": "经典中国象棋，完整规则与内置 AI 对战，三档难度可悔棋",
+      "icon": "♟️",
+      "category": "小游戏"
+    },
+    {
+      "name": "合成大西瓜",
+      "path": "watermelon/app.html",
+      "description": "同果相融合成大西瓜，物理堆叠越滚越大，别越过警戒线",
+      "icon": "🍉",
+      "category": "小游戏"
     }
   ]
 }
