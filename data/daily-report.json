@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-26",
+  "updated": "2026-10-28",
   "sections": {
     "trending": [
-      {
-        "name": "pengchujin/aerial-tv",
-        "url": "https://github.com/pengchujin/aerial-tv",
-        "desc": "给国产电视的一块干净桌面：参照 tvOS 设计的开源 Android TV 桌面，没有广告，开机自动接管。A tvOS-style launcher for Xiaomi, TCL and other China-market TVs.",
-        "stars": 4967,
-        "language": "Kotlin"
-      },
-      {
-        "name": "simbasjungles/free-my-tv",
-        "url": "https://github.com/simbasjungles/free-my-tv",
-        "desc": "A fast, ad-free home screen for Google TV, LG webOS and Samsung Tizen. One button to undo.",
-        "stars": 4576,
-        "language": "Java"
-      },
       {
         "name": "JustAResearcher/gpu-unlock-ada",
         "url": "https://github.com/JustAResearcher/gpu-unlock-ada",
         "desc": "GPU tensor unlock source for RTX 4090 and experimental RTX 4070 Ti SUPER; firmware generated locally",
-        "stars": 2509,
+        "stars": 4264,
         "language": "C"
       },
       {
-        "name": "JoasASantos/REA-Prompts",
-        "url": "https://github.com/JoasASantos/REA-Prompts",
-        "desc": "REAP - Prompts for you to use REA (Reverse Engineer Anything), get the most out of it, and clone or break down any program",
-        "stars": 2392,
-        "language": "Batchfile"
+        "name": "rddmwmddr/android-ad-cleaner",
+        "url": "https://github.com/rddmwmddr/android-ad-cleaner",
+        "desc": "关掉国产安卓手机系统里的广告、热搜、资讯推荐和营销推送。不 root，可还原，支持 AI 智能体一键执行。",
+        "stars": 3188,
+        "language": "Python"
       },
       {
-        "name": "EthanArbuckle/fairplay-decrypt",
-        "url": "https://github.com/EthanArbuckle/fairplay-decrypt",
-        "desc": "Offline FairPlay App Store IPA decryption with independent key derivation",
-        "stars": 2086,
-        "language": "C"
-      },
-      {
-        "name": "xevrion/hatchzip",
-        "url": "https://github.com/xevrion/hatchzip",
-        "desc": "HatchZip is a free, open-source archive extractor for Windows, macOS and Linux that extracts ZIP, 7z, RAR, tar and split archives in place, so it needs free spa",
-        "stars": 1931,
-        "language": "Rust"
+        "name": "designfuchen/word-atlas",
+        "url": "https://github.com/designfuchen/word-atlas",
+        "desc": "词光 · Word Atlas — Illustrated IELTS vocabulary with 7,298 words, UK/US audio and FSRS review. Open-source app + CC BY 4.0 dataset.",
+        "stars": 2445,
+        "language": "TypeScript"
       },
       {
         "name": "wesbos/3d-model-anything",
         "url": "https://github.com/wesbos/3d-model-anything",
         "desc": "Capture iPhone LiDAR and photos, reconstruct editable Three.js rooms, and explore them in a browser.",
-        "stars": 1910,
+        "stars": 2211,
         "language": "Swift"
+      },
+      {
+        "name": "xevrion/hatchzip",
+        "url": "https://github.com/xevrion/hatchzip",
+        "desc": "HatchZip is a free, open-source archive extractor for Windows, macOS and Linux that extracts ZIP, 7z, RAR, tar and split archives in place, so it needs free spa",
+        "stars": 2171,
+        "language": "Rust"
+      },
+      {
+        "name": "unclebob/ub-mode",
+        "url": "https://github.com/unclebob/ub-mode",
+        "desc": "",
+        "stars": 2155,
+        "language": ""
+      },
+      {
+        "name": "t3dotgg/tstack",
+        "url": "https://github.com/t3dotgg/tstack",
+        "desc": "The agent skills I use every day. Works with Claude Code and Codex.",
+        "stars": 1988,
+        "language": "Python"
       },
       {
         "name": "ikow/php2shell-poc",
         "url": "https://github.com/ikow/php2shell-poc",
         "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
-        "stars": 1787,
-        "language": "Python"
-      },
-      {
-        "name": "Jakeschincariol/day-trader-skill",
-        "url": "https://github.com/Jakeschincariol/day-trader-skill",
-        "desc": "11 Claude skills for day trading: scan thousands of charts, track breaking news, time every entry and exit, and replay every outcome before you risk a dollar.",
-        "stars": 1561,
+        "stars": 1865,
         "language": "Python"
       },
       {
         "name": "oosexgang/hackios-xnu-kernel",
         "url": "https://github.com/oosexgang/hackios-xnu-kernel",
         "desc": "",
-        "stars": 1447,
+        "stars": 1813,
         "language": "C"
+      },
+      {
+        "name": "9bie/php2shell-bypass-aslr-exp",
+        "url": "https://github.com/9bie/php2shell-bypass-aslr-exp",
+        "desc": "A php2shell exploit that requires no modifications to the official version, and does not require display_errors or limit_memory.",
+        "stars": 1499,
+        "language": "Python"
       }
     ],
     "hn": [
       {
-        "id": 50234474,
-        "title": "Dolly Parton's Imagination Library",
-        "url": "https://imaginationlibrary.com/",
-        "hn": "https://news.ycombinator.com/item?id=50234474",
-        "score": 247,
-        "comments": 45
+        "id": 50261319,
+        "title": "Genie 4",
+        "url": "https://deepmind.google/blog/genie-4-a-new-generation-of-world-simulation/",
+        "hn": "https://news.ycombinator.com/item?id=50261319",
+        "score": 636,
+        "comments": 385
       },
       {
-        "id": 50235017,
-        "title": "Why I Am a Programmer",
-        "url": "https://www.alfie.wtf/programming/why-i-am-a-programmer.html",
-        "hn": "https://news.ycombinator.com/item?id=50235017",
-        "score": 57,
+        "id": 50261998,
+        "title": "Ghostty 1.4",
+        "url": "https://ghostty.org/docs/install/release-notes/1-4-0",
+        "hn": "https://news.ycombinator.com/item?id=50261998",
+        "score": 618,
+        "comments": 193
+      },
+      {
+        "id": 50264857,
+        "title": "Tailscale SSH: Investigation and remediation update",
+        "url": "https://tailscale.com/ssh-investigation-update",
+        "hn": "https://news.ycombinator.com/item?id=50264857",
+        "score": 140,
+        "comments": 86
+      },
+      {
+        "id": 50264853,
+        "title": "Survival LLM: AI assistant and emergency library that runs on your own computer",
+        "url": "https://www.brangus.io/survival-llm",
+        "hn": "https://news.ycombinator.com/item?id=50264853",
+        "score": 120,
+        "comments": 73
+      },
+      {
+        "id": 50265594,
+        "title": "Raspberry Pi Zero 3W and Pi 4 Model A spotted in device trees",
+        "url": "https://bret.dk/raspberry-pi-zero-3-w-pi-4-model-a/",
+        "hn": "https://news.ycombinator.com/item?id=50265594",
+        "score": 54,
+        "comments": 15
+      },
+      {
+        "id": 50239214,
+        "title": "SS United States to be sunk as largest artificial reef",
+        "url": "https://divemagazine.com/scuba-diving-news/ss-united-states-to-be-sunk-as-worlds-largest-artificial-reef-in-november",
+        "hn": "https://news.ycombinator.com/item?id=50239214",
+        "score": 37,
+        "comments": 29
+      },
+      {
+        "id": 50261352,
+        "title": "New 14‑inch MacBook Pro with M6",
+        "url": "https://www.apple.com/in/newsroom/2026/10/apple-introduces-the-new-14-inch-macbook-pro-with-m6/",
+        "hn": "https://news.ycombinator.com/item?id=50261352",
+        "score": 241,
+        "comments": 291
+      },
+      {
+        "id": 50265128,
+        "title": "Four Months of Zig",
+        "url": "https://gracefulliberty.com/articles/four-months-of-zig/",
+        "hn": "https://news.ycombinator.com/item?id=50265128",
+        "score": 43,
+        "comments": 17
+      },
+      {
+        "id": 50224079,
+        "title": "An examination of lost firefly species of the US and Canada",
+        "url": "https://journaloflostspecies.org/index.php/jls/article/view/37/33",
+        "hn": "https://news.ycombinator.com/item?id=50224079",
+        "score": 64,
         "comments": 6
       },
       {
-        "id": 50235738,
-        "title": "What goes into making an animated film?",
-        "url": "https://www.disneyanimation.com/process/",
-        "hn": "https://news.ycombinator.com/item?id=50235738",
-        "score": 26,
-        "comments": 11
-      },
-      {
-        "id": 50235010,
-        "title": "Gheist campaign plants secret-dumping workflows using stolen GitHub tokens",
-        "url": "https://www.wiz.io/blog/gheist-attempted-scaled-abuse-of-stolen-github-tokens-stumbles",
-        "hn": "https://news.ycombinator.com/item?id=50235010",
-        "score": 33,
-        "comments": 0
-      },
-      {
-        "id": 50197108,
-        "title": "Overgrown, when plants invade your abandoned tabs",
-        "url": "https://charliegerard.dev/blog/overgrown-extension/",
-        "hn": "https://news.ycombinator.com/item?id=50197108",
-        "score": 24,
-        "comments": 0
-      },
-      {
-        "id": 50235316,
-        "title": "Eunice is almost here",
-        "url": "https://armincat.com/articles/eunice-is-almost-here",
-        "hn": "https://news.ycombinator.com/item?id=50235316",
-        "score": 48,
-        "comments": 36
-      },
-      {
-        "id": 50236081,
-        "title": "Serbia's Vucic concedes election defeat in historic win for student movement",
-        "url": "https://www.reuters.com/world/europe/serbia-votes-students-seek-unseat-vucic-snap-election-2026-10-25/",
-        "hn": "https://news.ycombinator.com/item?id=50236081",
-        "score": 48,
-        "comments": 2
-      },
-      {
-        "id": 50233779,
-        "title": "A 10-year-old CNN outperforms frontier LLMs for skin cancer diagnosis",
-        "url": "https://lynchlab.net/llm-skin-cancer",
-        "hn": "https://news.ycombinator.com/item?id=50233779",
-        "score": 321,
-        "comments": 165
-      },
-      {
-        "id": 50233929,
-        "title": "I refuse to accept a censored Internet. Join Me at FOSDEM 27",
-        "url": "https://talkweb.eu/openweb/4558/",
-        "hn": "https://news.ycombinator.com/item?id=50233929",
-        "score": 296,
-        "comments": 159
-      },
-      {
-        "id": 50234232,
-        "title": "Oregon Police Are Charging a Local News Outlet $2.5M for Records About One Cop",
-        "url": "https://theintercept.com/2026/10/01/oregon-police-misconduct-public-records-cost-fee/",
-        "hn": "https://news.ycombinator.com/item?id=50234232",
-        "score": 274,
-        "comments": 68
+        "id": 50262982,
+        "title": "Radio-tagged Monarch butterflies",
+        "url": "https://blog.cwf-fcf.org/index.php/en/tiny-tracking-tags-for-big-monarch-journeys/",
+        "hn": "https://news.ycombinator.com/item?id=50262982",
+        "score": 8,
+        "comments": 3
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 85275,
-        "likes": 2965
+        "downloads": 105667,
+        "likes": 3366
       },
       {
         "id": "RecursiveSI/flint",
         "url": "https://huggingface.co/RecursiveSI/flint",
         "task": "text-generation",
-        "downloads": 6444,
-        "likes": 850
-      },
-      {
-        "id": "black-forest-labs/flux-3-image-klein-comfy",
-        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
-        "task": "image-to-image",
-        "downloads": 660874,
-        "likes": 1597
-      },
-      {
-        "id": "XHToken/Spark-X2.6-4B",
-        "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
-        "task": "text-generation",
-        "downloads": 3488,
-        "likes": 492
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2107108,
-        "likes": 9325
-      },
-      {
-        "id": "OpenMOSS-Team/MOSS-Image-SFT",
-        "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
-        "task": "text-to-image",
-        "downloads": 10757,
-        "likes": 725
-      },
-      {
-        "id": "MiniMaxAI/MiniMax-M3.1-Flash",
-        "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash",
-        "task": "image-text-to-text",
-        "downloads": 7355,
-        "likes": 347
+        "downloads": 10574,
+        "likes": 968
       },
       {
         "id": "Nanbeige/Nanbeige4.3-33B",
         "url": "https://huggingface.co/Nanbeige/Nanbeige4.3-33B",
         "task": "text-generation",
-        "downloads": 0,
-        "likes": 334
+        "downloads": 4785,
+        "likes": 665
       },
       {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "task": "text-to-image",
-        "downloads": 2235846,
-        "likes": 5036
+        "id": "XHToken/Spark-X2.6-4B",
+        "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
+        "task": "text-generation",
+        "downloads": 6191,
+        "likes": 782
+      },
+      {
+        "id": "black-forest-labs/flux-3-image-klein-comfy",
+        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+        "task": "image-to-image",
+        "downloads": 750694,
+        "likes": 1852
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2163739,
+        "likes": 9570
+      },
+      {
+        "id": "MiniMaxAI/MiniMax-M3.1-Flash",
+        "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash",
+        "task": "image-text-to-text",
+        "downloads": 11075,
+        "likes": 411
+      },
+      {
+        "id": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+        "url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+        "task": "text-generation",
+        "downloads": 1105751,
+        "likes": 391
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 7762014,
-        "likes": 18389
+        "downloads": 7522728,
+        "likes": 18531
+      },
+      {
+        "id": "InternScience/Sage-A1.5",
+        "url": "https://huggingface.co/InternScience/Sage-A1.5",
+        "task": "text-generation",
+        "downloads": 6613,
+        "likes": 335
       }
     ],
     "weibo": [
       {
-        "word": "iG与TES双双晋级2-1组",
-        "num": 261609,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23iG%E4%B8%8ETES%E5%8F%8C%E5%8F%8C%E6%99%8B%E7%BA%A72-1%E7%BB%84%23"
-      },
-      {
-        "word": "TES战胜G2",
-        "num": 192796,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23TES%E6%88%98%E8%83%9CG2%23"
-      },
-      {
-        "word": "西藏巴青地震抢险安置工作一刻没停",
-        "num": 148116,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E8%97%8F%E5%B7%B4%E9%9D%92%E5%9C%B0%E9%9C%87%E6%8A%A2%E9%99%A9%E5%AE%89%E7%BD%AE%E5%B7%A5%E4%BD%9C%E4%B8%80%E5%88%BB%E6%B2%A1%E5%81%9C%23"
-      },
-      {
-        "word": "iG战胜HLE晋级2-1组",
-        "num": 63337,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23iG%E6%88%98%E8%83%9CHLE%E6%99%8B%E7%BA%A72-1%E7%BB%84%23"
-      },
-      {
-        "word": "众解说看TES战胜G2反应",
-        "num": 62194,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%BC%97%E8%A7%A3%E8%AF%B4%E7%9C%8BTES%E6%88%98%E8%83%9CG2%E5%8F%8D%E5%BA%94%23"
-      },
-      {
-        "word": "黄子韬我结婚生子碍你事了吗",
-        "num": 61682,
+        "word": "事后道歉救不了姆巴佩",
+        "num": 893870,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E5%AD%90%E9%9F%AC%E6%88%91%E7%BB%93%E5%A9%9A%E7%94%9F%E5%AD%90%E7%A2%8D%E4%BD%A0%E4%BA%8B%E4%BA%86%E5%90%97%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%BA%8B%E5%90%8E%E9%81%93%E6%AD%89%E6%95%91%E4%B8%8D%E4%BA%86%E5%A7%86%E5%B7%B4%E4%BD%A9%23"
       },
       {
-        "word": "张智霖与前女友许秋怡世纪合体",
-        "num": 61162,
+        "word": "小城良方高开颠走",
+        "num": 603037,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%A0%E6%99%BA%E9%9C%96%E4%B8%8E%E5%89%8D%E5%A5%B3%E5%8F%8B%E8%AE%B8%E7%A7%8B%E6%80%A1%E4%B8%96%E7%BA%AA%E5%90%88%E4%BD%93%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E9%AB%98%E5%BC%80%E9%A2%A0%E8%B5%B0%23"
       },
       {
-        "word": "蔡康永依旧没有说一句我是中国人",
-        "num": 60685,
+        "word": "我国产业结构向新向优向好升级",
+        "num": 423015,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%88%91%E5%9B%BD%E4%BA%A7%E4%B8%9A%E7%BB%93%E6%9E%84%E5%90%91%E6%96%B0%E5%90%91%E4%BC%98%E5%90%91%E5%A5%BD%E5%8D%87%E7%BA%A7%23"
+      },
+      {
+        "word": "婚恋关系唯一重要的是你舒服",
+        "num": 317245,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A9%9A%E6%81%8B%E5%85%B3%E7%B3%BB%E5%94%AF%E4%B8%80%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF%E4%BD%A0%E8%88%92%E6%9C%8D%23"
+      },
+      {
+        "word": "中国足协与皇马俱乐部严正交涉",
+        "num": 316763,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E8%B6%B3%E5%8D%8F%E4%B8%8E%E7%9A%87%E9%A9%AC%E4%BF%B1%E4%B9%90%E9%83%A8%E4%B8%A5%E6%AD%A3%E4%BA%A4%E6%B6%89%23"
+      },
+      {
+        "word": "北京动物园通报萌兰身体状态",
+        "num": 230863,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E5%BA%B7%E6%B0%B8%E4%BE%9D%E6%97%A7%E6%B2%A1%E6%9C%89%E8%AF%B4%E4%B8%80%E5%8F%A5%E6%88%91%E6%98%AF%E4%B8%AD%E5%9B%BD%E4%BA%BA%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8C%97%E4%BA%AC%E5%8A%A8%E7%89%A9%E5%9B%AD%E9%80%9A%E6%8A%A5%E8%90%8C%E5%85%B0%E8%BA%AB%E4%BD%93%E7%8A%B6%E6%80%81%23"
       },
       {
-        "word": "24岁女子赴泰见男网友被绑往边境",
-        "num": 51598,
+        "word": "饲养员多次呼唤萌兰无响应",
+        "num": 150639,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%2324%E5%B2%81%E5%A5%B3%E5%AD%90%E8%B5%B4%E6%B3%B0%E8%A7%81%E7%94%B7%E7%BD%91%E5%8F%8B%E8%A2%AB%E7%BB%91%E5%BE%80%E8%BE%B9%E5%A2%83%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%A5%B2%E5%85%BB%E5%91%98%E5%A4%9A%E6%AC%A1%E5%91%BC%E5%94%A4%E8%90%8C%E5%85%B0%E6%97%A0%E5%93%8D%E5%BA%94%23"
       },
       {
-        "word": "白桃星座一周运势",
-        "num": 50857,
+        "word": "姆巴佩们别想从中国市场挣走一分钱",
+        "num": 141694,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%99%BD%E6%A1%83%E6%98%9F%E5%BA%A7%E4%B8%80%E5%91%A8%E8%BF%90%E5%8A%BF%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A7%86%E5%B7%B4%E4%BD%A9%E4%BB%AC%E5%88%AB%E6%83%B3%E4%BB%8E%E4%B8%AD%E5%9B%BD%E5%B8%82%E5%9C%BA%E6%8C%A3%E8%B5%B0%E4%B8%80%E5%88%86%E9%92%B1%23"
+      },
+      {
+        "word": "小城良方这就叫做专业",
+        "num": 128309,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E8%BF%99%E5%B0%B1%E5%8F%AB%E5%81%9A%E4%B8%93%E4%B8%9A%23"
+      },
+      {
+        "word": "小米员工房只卖给正式员工",
+        "num": 127837,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E7%B1%B3%E5%91%98%E5%B7%A5%E6%88%BF%E5%8F%AA%E5%8D%96%E7%BB%99%E6%AD%A3%E5%BC%8F%E5%91%98%E5%B7%A5%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2019,
-        "text": "恐怖组织伊斯兰国头目阿布·贝克尔·巴格达迪在美军于叙利亚伊德利卜的空袭行动中自杀身亡。",
-        "title": "伊斯兰国",
-        "url": "https://zh.wikipedia.org/wiki/%E4%BC%8A%E6%96%AF%E5%85%B0%E5%9B%BD"
+        "year": 2021,
+        "text": "为了强调元宇宙愿景，美国社群媒体网站Facebook创始人马克·祖克柏宣布将公司名称变更为“Meta”。",
+        "title": "元宇宙",
+        "url": "https://zh.wikipedia.org/wiki/%E5%85%83%E5%AE%87%E5%AE%99"
       },
       {
-        "year": 2017,
-        "text": "泰国国王拉玛九世的世纪葬礼于曼谷皇家田广场举行。",
-        "title": "泰國君主",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B3%B0%E5%9C%8B%E5%90%9B%E4%B8%BB"
+        "year": 2018,
+        "text": "重庆万州巴士坠江事故。",
+        "title": "2018年",
+        "url": "https://zh.wikipedia.org/wiki/2018%E5%B9%B4"
       },
       {
-        "year": 2012,
-        "text": "中国宁波市镇海区市民游行示威反对中石化PX项目。",
-        "title": "镇海区 (宁波市)",
-        "url": "https://zh.wikipedia.org/wiki/%E9%95%87%E6%B5%B7%E5%8C%BA_(%E5%AE%81%E6%B3%A2%E5%B8%82)"
+        "year": 2016,
+        "text": "韩国外交官杨昌洙经青瓦台委任为驻台北韩国代表部新任代表。",
+        "title": "楊昌洙",
+        "url": "https://zh.wikipedia.org/wiki/%E6%A5%8A%E6%98%8C%E6%B4%99"
       },
       {
-        "year": 2011,
-        "text": "美国波音公司研发的波音787客机，首次投入商业飞行。",
-        "title": "波音",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B3%A2%E9%9F%B3"
+        "year": 2013,
+        "text": "北京天安门广场发生恐怖袭击，3名恐怖分子驾驶一辆吉普车，冲向人行道，撞倒路上的途人，然后撞向金水桥，实施自爆。",
+        "title": "北京市",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E5%B8%82"
       },
       {
-        "year": 2004,
-        "text": "Rockstar Games在北美发行了《侠盗猎车手：圣安地列斯》，这款游戏被认为是有史以来最棒的电子游戏之一。",
-        "title": "Rockstar Games",
-        "url": "https://zh.wikipedia.org/wiki/Rockstar_Games"
+        "year": 2007,
+        "text": "克里斯蒂娜·费尔南德斯当选成为首位阿根廷经民主选举产生的女总统。",
+        "title": "阿根廷",
+        "url": "https://zh.wikipedia.org/wiki/%E9%98%BF%E6%A0%B9%E5%BB%B7"
       },
       {
-        "year": 2002,
-        "text": "莫斯科人质危机结束，50名车臣武装分子和150名人质在俄罗斯特种部队的营救行动中死亡。",
-        "title": "莫斯科歌劇院脅持事件",
-        "url": "https://zh.wikipedia.org/wiki/%E8%8E%AB%E6%96%AF%E7%A7%91%E6%AD%8C%E5%8A%87%E9%99%A2%E8%84%85%E6%8C%81%E4%BA%8B%E4%BB%B6"
+        "year": 2007,
+        "text": "统一狮在中华职棒18年总冠军赛击败La new熊，获得年度总冠军。",
+        "title": "統一7-ELEVEn獅",
+        "url": "https://zh.wikipedia.org/wiki/%E7%B5%B1%E4%B8%807-ELEVEn%E7%8D%85"
       }
     ]
   }
