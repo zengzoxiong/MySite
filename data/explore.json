@@ -3,7 +3,7 @@
   "source": {
     "provider": "网易云音乐",
     "board": "云音乐飙升榜",
-    "date": "2026-10-27",
+    "date": "2026-10-28",
     "count": 50
   },
   "tracks": [
@@ -11,28 +11,21 @@
       "title": "宝船",
       "artist": "DOUDOU / 燕云十六声",
       "src": "https://music.163.com/song/media/outer/url?id=3451003254.mp3",
-      "cover": "https://p3.music.126.net/pdpmj0csBR_nUM7c2xr6pA==/109951174135616642.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/pdpmj0csBR_nUM7c2xr6pA==/109951174135616642.jpg?param=400y400",
       "dur": 232
-    },
-    {
-      "title": "睡前别想太多",
-      "artist": "李雨霏_晚饭",
-      "src": "https://music.163.com/song/media/outer/url?id=3440961675.mp3",
-      "cover": "https://p4.music.126.net/CdAZ76__lHkE_HcjXgR_4w==/109951173999807018.jpg?param=400y400",
-      "dur": 210
     },
     {
       "title": "一张相片",
       "artist": "连麻Swimming",
       "src": "https://music.163.com/song/media/outer/url?id=3451531276.mp3",
-      "cover": "https://p4.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
       "dur": 225
     },
     {
       "title": "自由的你",
       "artist": "G.E.M.邓紫棋",
       "src": "https://music.163.com/song/media/outer/url?id=3436855494.mp3",
-      "cover": "https://p3.music.126.net/G4Vtk4Je9Sj8zB4KGlxprw==/109951174017350276.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/G4Vtk4Je9Sj8zB4KGlxprw==/109951174017350276.jpg?param=400y400",
       "dur": 297
     },
     {
@@ -46,15 +39,8 @@
       "title": "FIRESTARTER",
       "artist": "K/DA / 英雄联盟 / i-dle / Mimi Webb / Sophie Powers / 曺薇娟 / 田小娟",
       "src": "https://music.163.com/song/media/outer/url?id=3450569159.mp3",
-      "cover": "https://p4.music.126.net/9R6YxeIwMLT7nHy8W7-P-g==/109951174131850898.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/9R6YxeIwMLT7nHy8W7-P-g==/109951174131850898.jpg?param=400y400",
       "dur": 187
-    },
-    {
-      "title": "Montagem Nada Funk",
-      "artist": "Trispect",
-      "src": "https://music.163.com/song/media/outer/url?id=3444402860.mp3",
-      "cover": "https://p4.music.126.net/rxRBgvgWFRm-2QrrdMICZA==/109951174060325680.jpg?param=400y400",
-      "dur": 96
     },
     {
       "title": "撒哈拉的暴雨",
@@ -67,15 +53,8 @@
       "title": "隔岸(女版)",
       "artist": "可楼",
       "src": "https://music.163.com/song/media/outer/url?id=3445520471.mp3",
-      "cover": "https://p3.music.126.net/M1zvPh7xCdHqSUWer_yNvQ==/109951174076384529.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/M1zvPh7xCdHqSUWer_yNvQ==/109951174076384529.jpg?param=400y400",
       "dur": 231
-    },
-    {
-      "title": "双",
-      "artist": "连麻Swimming",
-      "src": "https://music.163.com/song/media/outer/url?id=3451530455.mp3",
-      "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
-      "dur": 178
     },
     {
       "title": "茉茉",
@@ -83,6 +62,20 @@
       "src": "https://music.163.com/song/media/outer/url?id=3448039922.mp3",
       "cover": "https://p4.music.126.net/x9H0NVxO5ha9wWCOvW1-eQ==/109951174106566868.jpg?param=400y400",
       "dur": 120
+    },
+    {
+      "title": "渡口",
+      "artist": "张杰",
+      "src": "https://music.163.com/song/media/outer/url?id=3452345410.mp3",
+      "cover": "https://p4.music.126.net/HQhgnTWa2eAm45AebqRvxA==/109951174149110219.jpg?param=400y400",
+      "dur": 260
+    },
+    {
+      "title": "Montagem Nada Funk",
+      "artist": "Trispect",
+      "src": "https://music.163.com/song/media/outer/url?id=3444402860.mp3",
+      "cover": "https://p4.music.126.net/rxRBgvgWFRm-2QrrdMICZA==/109951174060325680.jpg?param=400y400",
+      "dur": 96
     },
     {
       "title": "天还是阴",
@@ -95,64 +88,29 @@
       "title": "Grey trails live on",
       "artist": "Dirk / Echo",
       "src": "https://music.163.com/song/media/outer/url?id=3443989683.mp3",
-      "cover": "https://p3.music.126.net/JxqD63nhlqf0SZaWRsCoGQ==/109951174134872951.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/JxqD63nhlqf0SZaWRsCoGQ==/109951174134872951.jpg?param=400y400",
       "dur": 273
-    },
-    {
-      "title": "大理出奇迹",
-      "artist": "连麻Swimming",
-      "src": "https://music.163.com/song/media/outer/url?id=3451531274.mp3",
-      "cover": "https://p4.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
-      "dur": 161
     },
     {
       "title": "MISS ME",
       "artist": "keshi",
       "src": "https://music.163.com/song/media/outer/url?id=3452608305.mp3",
-      "cover": "https://p4.music.126.net/eFEPvZFya2W2__0WwjsuRg==/109951174154507647.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/eFEPvZFya2W2__0WwjsuRg==/109951174154507647.jpg?param=400y400",
       "dur": 193
     },
     {
-      "title": "眼泪比爱深刻",
-      "artist": "moli",
-      "src": "https://music.163.com/song/media/outer/url?id=3443782110.mp3",
-      "cover": "https://p4.music.126.net/4Vb_EF4yZNaFPzVcRbOHkg==/109951174047813257.jpg?param=400y400",
-      "dur": 139
-    },
-    {
-      "title": "Gangsta Don’t Lie",
+      "title": "双",
       "artist": "连麻Swimming",
-      "src": "https://music.163.com/song/media/outer/url?id=3451531273.mp3",
+      "src": "https://music.163.com/song/media/outer/url?id=3451530455.mp3",
       "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
-      "dur": 153
+      "dur": 178
     },
     {
-      "title": "渡口",
-      "artist": "张杰",
-      "src": "https://music.163.com/song/media/outer/url?id=3452345410.mp3",
-      "cover": "https://p4.music.126.net/HQhgnTWa2eAm45AebqRvxA==/109951174149110219.jpg?param=400y400",
-      "dur": 260
-    },
-    {
-      "title": "kiss kiss（拥吻）",
-      "artist": "三棱镜",
-      "src": "https://music.163.com/song/media/outer/url?id=3444775814.mp3",
-      "cover": "https://p4.music.126.net/tkYDrVUgeQjVV6Ct7zxV8g==/109951174066408927.jpg?param=400y400",
-      "dur": 126
-    },
-    {
-      "title": "斩鸭线",
-      "artist": "连麻Swimming",
-      "src": "https://music.163.com/song/media/outer/url?id=3451530519.mp3",
-      "cover": "https://p4.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
-      "dur": 262
-    },
-    {
-      "title": "时过境迁",
-      "artist": "苏艺馨Chency",
-      "src": "https://music.163.com/song/media/outer/url?id=3447077863.mp3",
-      "cover": "https://p4.music.126.net/K-S4YvG0xldrpZM0TQ7EVA==/109951174097879359.jpg?param=400y400",
-      "dur": 237
+      "title": "刻在我心底的名字",
+      "artist": "陈默之",
+      "src": "https://music.163.com/song/media/outer/url?id=3447017233.mp3",
+      "cover": "https://p3.music.126.net/bRsN8ZNI-F70EsNpK4M2AA==/109951174097453179.jpg?param=400y400",
+      "dur": 277
     },
     {
       "title": "月声尽，心灯明",
@@ -162,20 +120,6 @@
       "dur": 255
     },
     {
-      "title": "HOVE（FUNK）",
-      "artist": "越心",
-      "src": "https://music.163.com/song/media/outer/url?id=3441291533.mp3",
-      "cover": "https://p3.music.126.net/pUmCBx9BG5LOA85WxoCQ9A==/109951174006711148.jpg?param=400y400",
-      "dur": 112
-    },
-    {
-      "title": "刻在我心底的名字",
-      "artist": "陈默之",
-      "src": "https://music.163.com/song/media/outer/url?id=3447017233.mp3",
-      "cover": "https://p4.music.126.net/bRsN8ZNI-F70EsNpK4M2AA==/109951174097453179.jpg?param=400y400",
-      "dur": 277
-    },
-    {
       "title": "雪少年(山外山天外天)",
       "artist": "SUS.",
       "src": "https://music.163.com/song/media/outer/url?id=3441892927.mp3",
@@ -183,11 +127,18 @@
       "dur": 230
     },
     {
-      "title": "星星",
-      "artist": "Hidoyard",
-      "src": "https://music.163.com/song/media/outer/url?id=3452839724.mp3",
-      "cover": "https://p4.music.126.net/iv0__yK5DQMdurBitXZWDQ==/109951174155516729.jpg?param=400y400",
-      "dur": 151
+      "title": "大理出奇迹",
+      "artist": "连麻Swimming",
+      "src": "https://music.163.com/song/media/outer/url?id=3451531274.mp3",
+      "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
+      "dur": 161
+    },
+    {
+      "title": "过来人",
+      "artist": "喆FILM",
+      "src": "https://music.163.com/song/media/outer/url?id=3448742535.mp3",
+      "cover": "https://p3.music.126.net/0ylhLOBO_b6p7xIgP5ZOJA==/109951174061745277.jpg?param=400y400",
+      "dur": 282
     },
     {
       "title": "Housewife",
@@ -197,39 +148,39 @@
       "dur": 209
     },
     {
-      "title": "Frost Oath(NADA NEAT)",
-      "artist": "Sin Wecokat / Yilu7i",
-      "src": "https://music.163.com/song/media/outer/url?id=3442626858.mp3",
-      "cover": "https://p3.music.126.net/CFQ2nXqviA_RrSU7YbaNCA==/109951174027451267.jpg?param=400y400",
-      "dur": 104
+      "title": "Gangsta Don’t Lie",
+      "artist": "连麻Swimming",
+      "src": "https://music.163.com/song/media/outer/url?id=3451531273.mp3",
+      "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
+      "dur": 153
     },
     {
-      "title": "过来人",
-      "artist": "喆FILM",
-      "src": "https://music.163.com/song/media/outer/url?id=3448742535.mp3",
-      "cover": "https://p4.music.126.net/0ylhLOBO_b6p7xIgP5ZOJA==/109951174061745277.jpg?param=400y400",
-      "dur": 282
+      "title": "山海不说话（我路过山 山不说话）",
+      "artist": "陳鴨梨Charlie",
+      "src": "https://music.163.com/song/media/outer/url?id=3445957923.mp3",
+      "cover": "https://p4.music.126.net/UyjTXkpDk2lBw-uha0lp5A==/109951174082641753.jpg?param=400y400",
+      "dur": 210
     },
     {
-      "title": "无线网的密码是多少?",
-      "artist": "Capper / 胡先煦",
-      "src": "https://music.163.com/song/media/outer/url?id=3452837881.mp3",
-      "cover": "https://p4.music.126.net/q9TnBLKAO3IrcbaUirpP1g==/109951174155471964.jpg?param=400y400",
-      "dur": 168
+      "title": "斩鸭线",
+      "artist": "连麻Swimming",
+      "src": "https://music.163.com/song/media/outer/url?id=3451530519.mp3",
+      "cover": "https://p3.music.126.net/Eafh2qRUgw2IXXOVD4B9LQ==/109951174139932904.jpg?param=400y400",
+      "dur": 262
     },
     {
-      "title": "何必相逢",
-      "artist": "李雨霏_晚饭",
-      "src": "https://music.163.com/song/media/outer/url?id=3448737289.mp3",
-      "cover": "https://p4.music.126.net/eweCdkm0LLDvqAnfYh8EMA==/109951174112410856.jpg?param=400y400",
-      "dur": 225
+      "title": "Gasolina (Slap House)",
+      "artist": "诅咒之翼·Cursewing",
+      "src": "https://music.163.com/song/media/outer/url?id=3448795260.mp3",
+      "cover": "https://p3.music.126.net/hXrZfdsZmQxi8GmQuutnPA==/109951174112954691.jpg?param=400y400",
+      "dur": 133
     },
     {
-      "title": "前路有光",
-      "artist": "张杰",
-      "src": "https://music.163.com/song/media/outer/url?id=3451625898.mp3",
-      "cover": "https://p4.music.126.net/WU_agkznCiJ82lbi28pOYg==/109951174140945914.jpg?param=400y400",
-      "dur": 234
+      "title": "Masterpiece",
+      "artist": "LNGSHOT",
+      "src": "https://music.163.com/song/media/outer/url?id=3449273923.mp3",
+      "cover": "https://p4.music.126.net/UTshU5Ftc0WXjOTUMNuXwQ==/109951174118011730.jpg?param=400y400",
+      "dur": 170
     },
     {
       "title": "有你爱就明媚",
@@ -239,18 +190,25 @@
       "dur": 160
     },
     {
-      "title": "思念像一场重感冒",
-      "artist": "余佳运",
-      "src": "https://music.163.com/song/media/outer/url?id=3445490637.mp3",
-      "cover": "https://p4.music.126.net/Jv36uPpNVv6mo1UXqlUUXQ==/109951174076158806.jpg?param=400y400",
-      "dur": 158
+      "title": "Stay",
+      "artist": "尹浩宇Patrick",
+      "src": "https://music.163.com/song/media/outer/url?id=3448554597.mp3",
+      "cover": "https://p3.music.126.net/qRM7XV1c9UgOB9oArzNzYw==/109951174111277871.jpg?param=400y400",
+      "dur": 220
     },
     {
-      "title": "Masterpiece",
-      "artist": "LNGSHOT",
-      "src": "https://music.163.com/song/media/outer/url?id=3449273923.mp3",
-      "cover": "https://p3.music.126.net/UTshU5Ftc0WXjOTUMNuXwQ==/109951174118011730.jpg?param=400y400",
-      "dur": 170
+      "title": "何必相逢",
+      "artist": "李雨霏_晚饭",
+      "src": "https://music.163.com/song/media/outer/url?id=3448737289.mp3",
+      "cover": "https://p4.music.126.net/eweCdkm0LLDvqAnfYh8EMA==/109951174112410856.jpg?param=400y400",
+      "dur": 225
+    },
+    {
+      "title": "kiss kiss（拥吻）",
+      "artist": "三棱镜",
+      "src": "https://music.163.com/song/media/outer/url?id=3444775814.mp3",
+      "cover": "https://p3.music.126.net/tkYDrVUgeQjVV6Ct7zxV8g==/109951174066408927.jpg?param=400y400",
+      "dur": 126
     },
     {
       "title": "月亮之下",
@@ -260,53 +218,53 @@
       "dur": 168
     },
     {
-      "title": "Follow Me",
-      "artist": "Alec Benjamin",
-      "src": "https://music.163.com/song/media/outer/url?id=3444720987.mp3",
-      "cover": "https://p3.music.126.net/f5OvcKK7e44LpJ7ySBui0Q==/109951174065677398.jpg?param=400y400",
-      "dur": 171
+      "title": "Frost Oath(NADA NEAT)",
+      "artist": "Sin Wecokat / Yilu7i",
+      "src": "https://music.163.com/song/media/outer/url?id=3442626858.mp3",
+      "cover": "https://p3.music.126.net/CFQ2nXqviA_RrSU7YbaNCA==/109951174027451267.jpg?param=400y400",
+      "dur": 104
     },
     {
       "title": "Gasoline (Remix)",
       "artist": "Passat",
       "src": "https://music.163.com/song/media/outer/url?id=3448180073.mp3",
-      "cover": "https://p3.music.126.net/n2iZbwcDBPt034D4vNLY0A==/109951174107641683.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/n2iZbwcDBPt034D4vNLY0A==/109951174107641683.jpg?param=400y400",
       "dur": 204
-    },
-    {
-      "title": "NADA NEAT(Frost Oath)",
-      "artist": "Sin Wecokat / Yilu7i",
-      "src": "https://music.163.com/song/media/outer/url?id=3441361527.mp3",
-      "cover": "https://p3.music.126.net/pmTgs-XkX6Wd3nz10_jR7Q==/109951174008204005.jpg?param=400y400",
-      "dur": 130
-    },
-    {
-      "title": "Rendezvous",
-      "artist": "Mili",
-      "src": "https://music.163.com/song/media/outer/url?id=3442131349.mp3",
-      "cover": "https://p3.music.126.net/7kaZumjeo8LjULsgyb0UJw==/109951174021104763.jpg?param=400y400",
-      "dur": 209
-    },
-    {
-      "title": "别来我梦里",
-      "artist": "任然",
-      "src": "https://music.163.com/song/media/outer/url?id=3449297745.mp3",
-      "cover": "https://p3.music.126.net/8eMNmpYR0vigqFEGyd1rzA==/109951174118169632.jpg?param=400y400",
-      "dur": 223
-    },
-    {
-      "title": "Odd Dice",
-      "artist": "millsage",
-      "src": "https://music.163.com/song/media/outer/url?id=3446954477.mp3",
-      "cover": "https://p4.music.126.net/6xwcAEs9BIHsjWwOSqGeJA==/109951174097038152.jpg?param=400y400",
-      "dur": 249
     },
     {
       "title": "骰子人生",
       "artist": "Spylent",
       "src": "https://music.163.com/song/media/outer/url?id=3450878202.mp3",
-      "cover": "https://p3.music.126.net/lRpWp1zPX3UbmnxKq5I7Vg==/109951174134284361.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/lRpWp1zPX3UbmnxKq5I7Vg==/109951174134284361.jpg?param=400y400",
       "dur": 146
+    },
+    {
+      "title": "眼泪比爱深刻",
+      "artist": "moli",
+      "src": "https://music.163.com/song/media/outer/url?id=3443782110.mp3",
+      "cover": "https://p4.music.126.net/4Vb_EF4yZNaFPzVcRbOHkg==/109951174047813257.jpg?param=400y400",
+      "dur": 139
+    },
+    {
+      "title": "前路有光",
+      "artist": "张杰",
+      "src": "https://music.163.com/song/media/outer/url?id=3451625898.mp3",
+      "cover": "https://p3.music.126.net/WU_agkznCiJ82lbi28pOYg==/109951174140945914.jpg?param=400y400",
+      "dur": 234
+    },
+    {
+      "title": "Cherry Candy",
+      "artist": "Lunak",
+      "src": "https://music.163.com/song/media/outer/url?id=3451570714.mp3",
+      "cover": "https://p3.music.126.net/geIUgfHRN9iWEIo-uWSTSQ==/109951174140300294.jpg?param=400y400",
+      "dur": 141
+    },
+    {
+      "title": "星星",
+      "artist": "Hidoyard",
+      "src": "https://music.163.com/song/media/outer/url?id=3452839724.mp3",
+      "cover": "https://p3.music.126.net/iv0__yK5DQMdurBitXZWDQ==/109951174155516729.jpg?param=400y400",
+      "dur": 151
     },
     {
       "title": "Know My Name",
@@ -319,43 +277,85 @@
       "title": "焦灼",
       "artist": "太泽希恩TimeTheCion",
       "src": "https://music.163.com/song/media/outer/url?id=3445972111.mp3",
-      "cover": "https://p3.music.126.net/Zc3EtEAdmpvgpMMpZ4Egfw==/109951174082810693.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/Zc3EtEAdmpvgpMMpZ4Egfw==/109951174082810693.jpg?param=400y400",
       "dur": 153
     },
     {
-      "title": "机会到了我们出",
-      "artist": "卡力老虎 / 周乘羽",
-      "src": "https://music.163.com/song/media/outer/url?id=3440172856.mp3",
-      "cover": "https://p4.music.126.net/rt6_mInoqx0iqImk9qng2w==/109951173986994634.jpg?param=400y400",
-      "dur": 206
+      "title": "别来我梦里",
+      "artist": "任然",
+      "src": "https://music.163.com/song/media/outer/url?id=3449297745.mp3",
+      "cover": "https://p3.music.126.net/8eMNmpYR0vigqFEGyd1rzA==/109951174118169632.jpg?param=400y400",
+      "dur": 223
+    },
+    {
+      "title": "思念像一场重感冒",
+      "artist": "余佳运",
+      "src": "https://music.163.com/song/media/outer/url?id=3445490637.mp3",
+      "cover": "https://p4.music.126.net/Jv36uPpNVv6mo1UXqlUUXQ==/109951174076158806.jpg?param=400y400",
+      "dur": 158
+    },
+    {
+      "title": "Odd Dice",
+      "artist": "millsage",
+      "src": "https://music.163.com/song/media/outer/url?id=3446954477.mp3",
+      "cover": "https://p3.music.126.net/6xwcAEs9BIHsjWwOSqGeJA==/109951174097038152.jpg?param=400y400",
+      "dur": 249
     },
     {
       "title": "Come Back To Me",
       "artist": "Russ",
       "src": "https://music.163.com/song/media/outer/url?id=3440597644.mp3",
-      "cover": "https://p3.music.126.net/FCjVff3AegnCFsxg2RSVcg==/109951173992339417.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/FCjVff3AegnCFsxg2RSVcg==/109951173992339417.jpg?param=400y400",
       "dur": 187
     },
     {
-      "title": "Take Me Away",
-      "artist": "袁咏琳",
-      "src": "https://music.163.com/song/media/outer/url?id=3451884406.mp3",
-      "cover": "https://p4.music.126.net/bG0_0ihjRwrJuBVxLsIaog==/109951174144148842.jpg?param=400y400",
-      "dur": 225
+      "title": "Rendezvous",
+      "artist": "Mili",
+      "src": "https://music.163.com/song/media/outer/url?id=3442131349.mp3",
+      "cover": "https://p3.music.126.net/7kaZumjeo8LjULsgyb0UJw==/109951174021104763.jpg?param=400y400",
+      "dur": 209
     },
     {
-      "title": "目光归我",
-      "artist": "BUTON",
-      "src": "https://music.163.com/song/media/outer/url?id=3444470310.mp3",
-      "cover": "https://p3.music.126.net/JUnNfKQALPEDyF3SRgaDaQ==/109951174061459360.jpg?param=400y400",
-      "dur": 119
+      "title": "无线网的密码是多少?",
+      "artist": "Capper / 胡先煦",
+      "src": "https://music.163.com/song/media/outer/url?id=3452837881.mp3",
+      "cover": "https://p4.music.126.net/q9TnBLKAO3IrcbaUirpP1g==/109951174155471964.jpg?param=400y400",
+      "dur": 168
     },
     {
-      "title": "20 Min*liluzivert采样*BGM x jerseyclub* beat",
-      "artist": "prodjaded",
-      "src": "https://music.163.com/song/media/outer/url?id=3441284304.mp3",
-      "cover": "https://p4.music.126.net/UL92716NSTilPZQ9-ve_eQ==/109951174006509431.jpg?param=400y400",
-      "dur": 149
+      "title": "Allez, aimez!",
+      "artist": "肖战",
+      "src": "https://music.163.com/song/media/outer/url?id=3440528018.mp3",
+      "cover": "https://p3.music.126.net/EKF1_0K4a49EYk3bjyf2TQ==/109951174018605045.jpg?param=400y400",
+      "dur": 202
+    },
+    {
+      "title": "Fever Pitch",
+      "artist": "灰蒙蒙 / VOLT",
+      "src": "https://music.163.com/song/media/outer/url?id=3448187840.mp3",
+      "cover": "https://p4.music.126.net/5EkWsO7syIZWkt0ixgSe_Q==/109951174107682582.jpg?param=400y400",
+      "dur": 121
+    },
+    {
+      "title": "Follow Me",
+      "artist": "Alec Benjamin",
+      "src": "https://music.163.com/song/media/outer/url?id=3444720987.mp3",
+      "cover": "https://p3.music.126.net/f5OvcKK7e44LpJ7ySBui0Q==/109951174065677398.jpg?param=400y400",
+      "dur": 171
+    },
+    {
+      "title": "NEVER GOING BACK",
+      "artist": "K/DA / 英雄联盟 / i-dle / 田小娟 / 曺薇娟",
+      "src": "https://music.163.com/song/media/outer/url?id=3451247176.mp3",
+      "cover": "https://p4.music.126.net/310_2NP-FSWzbNw7wyzC0A==/109951174138007263.jpg?param=400y400",
+      "dur": 190
+    },
+    {
+      "title": "Patient Zero",
+      "artist": "Taylor Swift",
+      "src": "https://music.163.com/song/media/outer/url?id=3449111055.mp3",
+      "cover": "https://p3.music.126.net/zSGqjtlVfj359Cwd5R4E3A==/109951174117256781.jpg?param=400y400",
+      "dur": 226
     }
   ]
 }
