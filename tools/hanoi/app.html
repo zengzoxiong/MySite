@@ -80,6 +80,15 @@
       transition: left .15s ease-in-out, bottom .15s ease-in-out;
     }
     .disc.no-anim { transition: none !important; }   /* resize 重摆时关过渡，防盘乱飞 */
+    /* 盘色：小→大 8 档冷色彩虹（rose→teal），白字对比均 ≥4.5:1，明暗两版通用；盘号由 JS 写进 data-s */
+    .disc[data-s="1"] { background: #E11D48; }
+    .disc[data-s="2"] { background: #DB2777; }
+    .disc[data-s="3"] { background: #9333EA; }
+    .disc[data-s="4"] { background: #7C3AED; }
+    .disc[data-s="5"] { background: #4F46E5; }
+    .disc[data-s="6"] { background: #2563EB; }
+    .disc[data-s="7"] { background: #0369A1; }
+    .disc[data-s="8"] { background: #0F766E; }
     .disc.sel {
       outline: 3px solid #3b2a86;
       outline-offset: -3px;
@@ -279,6 +288,7 @@
     for (let s = n; s >= 1; s--) {
       const el = document.createElement('div');
       el.className = 'disc';
+      el.dataset.s = s;   // 盘号驱动盘色（.disc[data-s] 八档彩盘）
       el.textContent = s;
       board.appendChild(el);
       discs[s] = el;

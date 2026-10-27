@@ -564,7 +564,7 @@
 }
 
 /* ------------------------------------------------------------
-   8. Alert 弹窗（iOS 警告框：约 270px、14px 圆角、毛玻璃、堆叠按钮）
+   8. Alert 弹窗（iOS 警告框：约 270px、14px 圆角、纯实底、堆叠按钮）
    ----------------------------------------------------------- */
 .g-alert-mask {
   position: fixed;
@@ -587,9 +587,8 @@
   width: 270px;
   max-width: 100%;
   border-radius: var(--radius-lg);
-  background: rgba(250, 250, 250, .82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  /* 弹窗一律纯实底：结算/规则文字压在棋盘上必须完整可读，不做毛玻璃透底 */
+  background: #FAFAFA;
   box-shadow: var(--shadow-alert);
   overflow: hidden;
   text-align: center;
@@ -599,7 +598,7 @@
 .g-alert-mask.open .g-alert { transform: scale(1); }
 
 @media (prefers-color-scheme: dark) {
-  .g-alert { background: rgba(44, 44, 46, .82); }
+  .g-alert { background: #2C2C2E; }
 }
 
 .g-alert-body { padding: 19px 16px 16px; }
@@ -889,10 +888,7 @@ body:has(.g-tool-ai.auto-on) .g-ai-tag-auto { display: inline-flex; }
   gap: 10px;
   padding: 16px;
   border-radius: var(--radius);
-  background: var(--bg-elevated);   /* 兜底：不支持 color-mix 时用不透明底，可读性优先 */
-  background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: var(--bg-elevated);   /* 结算/暂停层同样纯实底，遮住半局棋面保文字可读 */
   text-align: center;
   transition: opacity var(--dur-press) var(--ease-out);
 }

@@ -61,7 +61,7 @@
 
 | 特性 | 支持起点 | 用在哪 | 旧浏览器表现 |
 |---|---|---|---|
-| `color-mix()` | Chrome/Edge 111+、Safari 16.2+、Firefox 113+ | `.g-btn-tinted`、`.g-badge-*`、`.g-ai-tag`、`.g-overlay` 的半透明底 | 每条 color-mix 背景前都写了一条纯色/`rgba` 兜底声明，旧浏览器用兜底（tinted/徽标变灰填充、遮罩变不透明底），文字色与布局不变 |
+| `color-mix()` | Chrome/Edge 111+、Safari 16.2+、Firefox 113+ | `.g-btn-tinted`、`.g-badge-*`、`.g-ai-tag` 的半透明底 | 每条 color-mix 背景前都写了一条纯色/`rgba` 兜底声明，旧浏览器用兜底（tinted/徽标变灰填充、遮罩变不透明底），文字色与布局不变 |
 | `:has()` | Chrome/Edge 105+、Safari 15.4+、Firefox 121+ | §4.2 路线 A 的 `body:has(.g-tool-ai.is-running)` 徽标显隐 | 标签停在 `.g-ai-tag-auto` 的 `display: none`（不显示，不破版）；该页可改走路线 B |
 
 降级不回退为自定义背景图或固定色板，统一落到 `var(--fill)` / `rgba(…)` 系统灰。
@@ -151,7 +151,7 @@
 
 ### 3.5 Alert 弹窗
 
-iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`backdrop-filter: blur(28px)`）、操作按钮竖向堆叠、发丝分隔线、默认操作加粗、破坏性操作红色。
+iOS 警告框规格：270px 宽、14px 圆角、**纯实底**（浅 `#FAFAFA` / 深 `#2C2C2E`，无毛玻璃——所有弹窗一律不透明，结算/规则文字压在棋盘上必须完整可读）、操作按钮竖向堆叠、发丝分隔线、默认操作加粗、破坏性操作红色。
 
 ```html
 <div class="g-alert-mask" id="alert" hidden>
@@ -212,7 +212,7 @@ iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`back
 
 层叠：`.g-overlay` 自带 `z-index: 5`（与 match3/2048 私有 `.overlay` 的 `z-index: 5` 等值，`tools/match3/app.html:173`、`tools/2048/app.html:124`），能压住 JS 事后追加、`z-index: 1-4` 的棋子方块（match3 `app.html:98/129/142/150`）；改造删掉私有 `.overlay` 规则后不会被方块盖住。若游戏私有层叠更高（如特效层），私有 `z-index` 规则保留不动、在私有 `<style>` 里继续声明即可。
 
-胜利态修饰：`.g-overlay-win`（标题换强调色）。私有修饰类（如 2048 的 `.win`）与 g-* 共存规则见 §5 第 8 条。
+层底为 `var(--bg-elevated)` **纯实底**（随全弹窗不透明口径，遮住半局棋面保结算文字可读）。胜利态修饰：`.g-overlay-win`（标题换强调色）。私有修饰类（如 2048 的 `.win`）与 g-* 共存规则见 §5 第 8 条。
 
 ### 3.10 左上角工具栏与游戏规则弹窗
 
@@ -229,7 +229,7 @@ iOS 警告框规格：270px 宽、14px 圆角、半透明毛玻璃背景（`back
 
 - **返回**：跳主站主页；**说明**：打开规则弹窗；**AI**：接管原位 AI 代玩按钮——「移位保 id」（原位删除、四宫格重建，`aiBtn`/`autoBtn` id 不变），AI 逻辑零改动；框内恒写「AI」，运行中 `.is-running`/`.auto-on` 红底白字，各页 JS 的 AI 按钮 label 切换行（`aiBtn.textContent = …'AI 代玩'…`）已删除；未实现 AI 代玩的页面渲染同款按钮并置 `disabled` 置灰。**音效**：全局静音开关，键 `localStorage.gameSfxMuted`（`'1'`=静音），图标两态切换（`toggleAttribute('hidden')` 切两枚 SVG）、`storage` 事件跨页同步；whack-mole 的 `beep()` 与 simon 的 `ensureAudio()` 按该键短路（其余游戏天然无声），simon 旧 `simonSound` 偏好一次性迁移。
 - 图标色走 `--site-accent`（`var(--accent-color, #2563eb)`），跟主站主题色联动；页面须引入 `<script src="../../assets/appearance.js"></script>`（四宫格脚本已内置字体调用与 storage 监听）。
-- **游戏规则弹窗**：复用 `.g-alert-mask/.g-alert` 模态，加 `.g-alert-rules` 排版（h2 居中、h3/li 规则列表、body 区滚动）。各页原 `.g-rules` 抽屉、`.g-rules-handle` 把手与 `gameRulesOpen` 开合脚本已移除，规则内容原样搬入弹窗：
+- **游戏规则弹窗**：复用 `.g-alert-mask/.g-alert` 模态，加 `.g-alert-rules` 排版（h2 居中、h3/li 规则列表、body 区滚动）。面板底色随 `.g-alert` 基线（全弹窗纯实底，见 §8）。各页原 `.g-rules` 抽屉、`.g-rules-handle` 把手与 `gameRulesOpen` 开合脚本已移除，规则内容原样搬入弹窗：
 
 ```html
 <div class="g-alert-mask g-alert-rules open" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则" hidden>
