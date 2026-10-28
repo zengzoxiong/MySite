@@ -113,6 +113,45 @@
 .u2 { background: #dcefd9; color: #1e6b2e; }
 .used-empty { font-size: 12px; color: var(--text-tertiary); align-self: center; }
 
+/* ===== 宽屏双栏：左列猜词主区（棋盘/输入/图例），右列「用过的字」拉通填满；
+   720px 以下维持原纵向堆叠，窄屏一列更好读 ===== */
+@media (min-width: 720px) {
+  .wrap {
+    --wrap-max: 880px;
+    display: grid;
+    grid-template-columns: minmax(0, 344px) minmax(240px, 1fr);
+    grid-template-rows: auto auto auto auto auto auto;
+    grid-template-areas:
+      "top   top"
+      "hud   hud"
+      "board side"
+      "guess side"
+      "legend side"
+      "foot  foot";
+    align-items: start;
+    column-gap: 26px;
+  }
+  .top { grid-area: top; }
+  .hud { grid-area: hud; }
+  .board { grid-area: board; width: 100%; }
+  .guess-row { grid-area: guess; width: 100%; }
+  .legend { grid-area: legend; }
+  .used {
+    grid-area: side;
+    width: 100%;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+  .used-list {
+    flex: 1;
+    max-height: none;
+    overflow-y: auto;
+    align-content: flex-start;
+  }
+  .g-foot { grid-area: foot; }
+}
+
 /* ===== 结算弹层内的成语个性展示（弹窗外框与按钮由 .g-alert 系承担） ===== */
 .r-word {
   margin: 12px 0 10px;

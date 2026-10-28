@@ -76,6 +76,10 @@
     .ai-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
     /* —— 雷区：窄屏放不下时允许横向滚动（高级 30 列），经典浮雕格保留 —— */
+    /* 宽屏放宽内容列，让高级 30 列按可用宽度算出的格径 ≥20px 时整盘放下、不再滚动 */
+    @media (min-width: 960px) {
+      .g-wrap { --wrap-max: 920px; }
+    }
     .board-scroll { position: relative; max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
     .board {
       --cs: 32px;

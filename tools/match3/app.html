@@ -36,7 +36,8 @@
     -webkit-touch-callout: none;
   }
   .cellbg, .tile {
-    --tw: calc((100% - 7 * var(--gap)) / 8);
+    /* 首列/首行前导间隙 + 列间 7 个间隙共 8 份，末列/末行才不会露到棋盘外 */
+    --tw: calc((100% - 8 * var(--gap)) / 8);
     position: absolute;
     width: var(--tw);
     height: var(--tw);

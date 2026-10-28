@@ -401,12 +401,15 @@ function setAi(on){
   }
 }
 aiBtn.addEventListener('click',()=>setAi(!aiOn));
-// 触屏：画面点按跳，另给两颗大按钮（仅触屏设备显示）
+// 触屏/鼠标：画面点按跳，另给两颗大按钮（触屏设备显示；pointer 事件鼠标同样可点）
 const btnJump=$('btnJump'), btnDuck=$('btnDuck');
 if('ontouchstart' in window||navigator.maxTouchPoints>0)$('touchBtns').style.display='flex';
-btnJump.addEventListener('touchstart',e=>{e.preventDefault();primary();},{passive:false});
-btnDuck.addEventListener('touchstart',e=>{e.preventDefault();pressDown();},{passive:false});
-btnDuck.addEventListener('touchend',e=>{e.preventDefault();releaseDown();},{passive:false});
+// 统一用 pointer 事件：老实现只绑 touchstart，触屏笔记本上鼠标点击毫无反应
+btnJump.addEventListener('pointerdown',e=>{e.preventDefault();primary();},{passive:false});
+btnDuck.addEventListener('pointerdown',e=>{e.preventDefault();pressDown();},{passive:false});
+btnDuck.addEventListener('pointerup',e=>{e.preventDefault();releaseDown();},{passive:false});
+btnDuck.addEventListener('pointercancel',releaseDown);
+btnDuck.addEventListener('pointerleave',releaseDown);
 
 // 切后台自动暂停，防止回来时跳帧撞死
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause();});

@@ -20,6 +20,28 @@
 
     /* ---- 棋盘：9×9 网格 + 九宫粗线 + 预设 / 关联 / 选中 / 冲突四态（个性视觉）---- */
     .board-card { padding: 10px; }
+
+    /* ===== 宽屏双栏：左列棋盘，右列操作栏（难度/统计/键盘/按钮/提示）；
+       720px 以下 .side-col 退化为普通纵向堆叠 ===== */
+    .side-col { display: flex; flex-direction: column; gap: 14px; }
+    @media (min-width: 720px) {
+      .g-wrap {
+        --wrap-max: 900px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+        grid-template-areas:
+          "head  head"
+          "board side"
+          "foot  foot";
+        align-items: start;
+        column-gap: 26px;
+      }
+      header { grid-area: head; }
+      .board-card { grid-area: board; }
+      .side-col { grid-area: side; }
+      .g-foot { grid-area: foot; }
+    }
+
     .board {
       display: grid;
       grid-template-columns: repeat(9, 1fr);
@@ -164,52 +186,55 @@
       <p class="g-nav-sub">在每行、每列、每个 3×3 宫内填入 1-9 且不重复。内置 12 个预设谜题（入门 / 中等 / 困难各 4 题），冲突即时标红，支持检查与提示。</p>
     </header>
 
-    <!-- 难度档位 -->
-    <div class="g-segment" id="diffSeg" role="group" aria-label="难度">
-      <button type="button" data-diff="入门" class="on">入门</button>
-      <button type="button" data-diff="中等">中等</button>
-      <button type="button" data-diff="困难">困难</button>
-    </div>
-
-    <!-- 统计 -->
-    <section class="g-hud">
-      <div class="g-stat"><span class="g-stat-label">题号</span><span class="g-stat-value g-num no-wrap"><b>#</b><input id="noVal" class="no-input" type="number" min="1" max="999" value="1" aria-label="题号 1 到 999，输入后回车跳转"></span></div>
-      <div class="g-stat"><span class="g-stat-label">用时</span><span class="g-stat-value g-num" id="timeVal">00:00</span></div>
-      <div class="g-stat"><span class="g-stat-label">提示</span><span class="g-stat-value g-num" id="hintVal">3</span></div>
-      <div class="g-stat"><span class="g-stat-label">最佳</span><span class="g-stat-value g-num" id="bestVal">--:--</span></div>
-    </section>
-
     <!-- 棋盘 -->
     <div class="g-card board-card">
       <div class="board g-stage" id="board" aria-label="数独棋盘"></div>
     </div>
 
-    <!-- 数字键盘 -->
-    <div class="numpad" id="numpad">
-      <button type="button" data-num="1">1</button>
-      <button type="button" data-num="2">2</button>
-      <button type="button" data-num="3">3</button>
-      <button type="button" data-num="4">4</button>
-      <button type="button" data-num="5">5</button>
-      <button type="button" data-num="6">6</button>
-      <button type="button" data-num="7">7</button>
-      <button type="button" data-num="8">8</button>
-      <button type="button" data-num="9">9</button>
-      <button type="button" class="erase" data-num="0">擦除</button>
-    </div>
+    <!-- 右侧操作栏：宽屏与棋盘并排，窄屏顺排在棋盘下方 -->
+    <div class="side-col">
+      <!-- 难度档位 -->
+      <div class="g-segment" id="diffSeg" role="group" aria-label="难度">
+        <button type="button" data-diff="入门" class="on">入门</button>
+        <button type="button" data-diff="中等">中等</button>
+        <button type="button" data-diff="困难">困难</button>
+      </div>
 
-    <!-- 功能按钮 -->
-    <div class="controls g-btn-row">
-      <button class="g-btn g-btn-tinted" id="checkBtn" type="button">检查</button>
-      <button class="g-btn" id="hintBtn" type="button">提示（剩 3 次）</button>
-      <button class="g-btn g-btn-gray" id="eraseBtn" type="button">擦除</button>
-      <button class="g-btn g-btn-gray" id="restartBtn" type="button">重开本题</button>
-      <button class="g-btn g-btn-tinted" id="nextBtn" type="button">随机抽题</button>
-    </div>
-    <span class="g-ai-tag ai-tag-center" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+      <!-- 统计 -->
+      <section class="g-hud">
+        <div class="g-stat"><span class="g-stat-label">题号</span><span class="g-stat-value g-num no-wrap"><b>#</b><input id="noVal" class="no-input" type="number" min="1" max="999" value="1" aria-label="题号 1 到 999，输入后回车跳转"></span></div>
+        <div class="g-stat"><span class="g-stat-label">用时</span><span class="g-stat-value g-num" id="timeVal">00:00</span></div>
+        <div class="g-stat"><span class="g-stat-label">提示</span><span class="g-stat-value g-num" id="hintVal">3</span></div>
+        <div class="g-stat"><span class="g-stat-label">最佳</span><span class="g-stat-value g-num" id="bestVal">--:--</span></div>
+      </section>
 
-    <!-- 状态消息 -->
-    <div class="msg-bar" id="msgBar">点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。</div>
+      <!-- 数字键盘 -->
+      <div class="numpad" id="numpad">
+        <button type="button" data-num="1">1</button>
+        <button type="button" data-num="2">2</button>
+        <button type="button" data-num="3">3</button>
+        <button type="button" data-num="4">4</button>
+        <button type="button" data-num="5">5</button>
+        <button type="button" data-num="6">6</button>
+        <button type="button" data-num="7">7</button>
+        <button type="button" data-num="8">8</button>
+        <button type="button" data-num="9">9</button>
+        <button type="button" class="erase" data-num="0">擦除</button>
+      </div>
+
+      <!-- 功能按钮 -->
+      <div class="controls g-btn-row">
+        <button class="g-btn g-btn-tinted" id="checkBtn" type="button">检查</button>
+        <button class="g-btn" id="hintBtn" type="button">提示（剩 3 次）</button>
+        <button class="g-btn g-btn-gray" id="eraseBtn" type="button">擦除</button>
+        <button class="g-btn g-btn-gray" id="restartBtn" type="button">重开本题</button>
+        <button class="g-btn g-btn-tinted" id="nextBtn" type="button">随机抽题</button>
+      </div>
+      <span class="g-ai-tag ai-tag-center" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
+
+      <!-- 状态消息 -->
+      <div class="msg-bar" id="msgBar">点击格子后用下方数字键盘或键盘 1-9 填数，Backspace 擦除。</div>
+    </div>
 
     <footer class="g-foot">拾光集 · 在线小游戏</footer>
   </main>

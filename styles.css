@@ -1931,6 +1931,218 @@ body.no-anim .mp-lyric > div {
     transition: width 0.2s linear;
 }
 
+/* ===== 全屏播放器（面板右上角全屏键进入）：网易云式左右分栏 ===== */
+.mp-full {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+}
+
+.mp-full svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.mp-full svg[hidden] { display: none; }
+
+.music-wrap.fs {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    z-index: 90;   /* 高于内容与 toast（60），低于模态弹层（300） */
+    animation: none;
+    transition: none;
+}
+
+body.mp-fs-open { overflow: hidden; }
+
+.music-wrap.fs .music-player {
+    position: absolute;
+    inset: 0;
+    display: flex;          /* 让 .mp-panel 的 flex:1 生效，内容高度锁在视口内 */
+    flex-direction: column;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    background: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    animation: mp-fs-in 0.3s ease;
+}
+
+@keyframes mp-fs-in {
+    from { opacity: 0; }
+}
+
+body.no-anim .music-wrap.fs .music-player { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .music-wrap.fs .music-player { animation: none; }
+}
+
+.music-wrap.fs .mp-row { display: none; }
+
+.music-wrap.fs .mp-panel,
+.music-wrap.fs.mp-open .mp-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    flex: 1;
+    min-height: 0;
+}
+
+.music-wrap.fs .mp-panel-inner {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(250px, 5fr) 7fr;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+        "disc  song"
+        "disc  artist"
+        "disc  lyric"
+        "prog  prog"
+        "time  time"
+        "ctrl  ctrl";
+    column-gap: clamp(28px, 5vw, 80px);
+    padding: clamp(28px, 6vh, 56px) clamp(28px, 7vw, 96px) clamp(14px, 2.5vh, 24px);
+}
+
+/* hero 拆解成三个独立网格项：大盘居左跨三行，歌名/歌手落在歌词列上方 */
+.music-wrap.fs .mp-hero { display: contents; }
+
+.music-wrap.fs .mp-disc {
+    grid-area: disc;
+    align-self: center;
+    justify-self: center;
+}
+
+.music-wrap.fs .mp-cover {
+    width: min(36vh, 340px);
+    height: min(36vh, 340px);
+}
+
+.music-wrap.fs .mp-song {
+    grid-area: song;
+    align-self: end;
+    justify-self: start;
+    font-size: 1.3rem;
+}
+
+.music-wrap.fs .mp-artist {
+    grid-area: artist;
+    align-self: start;
+    justify-self: start;
+    font-size: 0.88rem;
+    margin-top: 2px;
+}
+
+.music-wrap.fs .mp-lyric {
+    grid-area: lyric;
+    grid-template-rows: 1fr;
+    min-height: 0;
+    margin-top: 10px;
+}
+
+.music-wrap.fs .mp-lyric > div {
+    max-height: none;
+    height: 100%;
+    padding: 10px 4px;
+}
+
+.music-wrap.fs .mp-ly-line {
+    font-size: 1rem;
+    line-height: 1.7;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.music-wrap.fs .mp-ly-line.on {
+    font-size: 1.25rem;
+    padding: 10px 12px;
+}
+
+.music-wrap.fs .mp-ly-empty {
+    font-size: 0.9rem;
+    text-align: left;
+    padding: 16px 12px;
+}
+
+.music-wrap.fs .mp-progress { grid-area: prog; margin-top: 8px; }
+.music-wrap.fs .mp-timerow { grid-area: time; }
+
+.music-wrap.fs .mp-ctrl {
+    grid-area: ctrl;
+    gap: 18px;
+    padding: 10px 0 4px;
+}
+
+.music-wrap.fs .mp-lg { width: 40px; height: 40px; }
+.music-wrap.fs .mp-lg.mp-play { width: 48px; height: 48px; }
+.music-wrap.fs .mp-lg svg { width: 19px; height: 19px; }
+
+/* 全屏态歌单转为右侧玻璃抽屉（进入时默认收起，横杠键开合） */
+.music-wrap.fs .mp-list-wrap {
+    position: absolute;
+    top: clamp(28px, 6vh, 56px);
+    right: clamp(28px, 7vw, 96px);
+    width: min(360px, 44vw);
+    z-index: 6;
+    background: color-mix(in srgb, var(--card-bg) 88%, transparent);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: var(--shadow-card-hover);
+    overflow: hidden;
+}
+
+.music-wrap.fs .mp-list { max-height: min(52vh, 460px); }
+
+/* 收起态：0fr 只折列表高度，抽屉自己的 padding/边框还在，会剩一枚空胶囊——关闭时整层隐藏 */
+.music-wrap.fs.list-closed .mp-list-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease, visibility 0s linear .25s;
+}
+
+.music-wrap.fs:not(.list-closed) .mp-list-wrap {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .25s ease;
+}
+
+@media (max-width: 760px) {
+    .music-wrap.fs .mp-panel-inner {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto auto;
+        grid-template-areas:
+            "song"
+            "artist"
+            "disc"
+            "lyric"
+            "prog"
+            "time"
+            "ctrl";
+        padding: 52px 20px 12px;
+    }
+
+    .music-wrap.fs .mp-cover {
+        width: min(22vh, 170px);
+        height: min(22vh, 170px);
+    }
+
+    .music-wrap.fs .mp-song { justify-self: center; font-size: 1.1rem; }
+    .music-wrap.fs .mp-artist { justify-self: center; }
+    .music-wrap.fs .mp-disc { margin-top: 8px; }
+    .music-wrap.fs .mp-ly-line { font-size: 0.9rem; padding: 6px 10px; }
+    .music-wrap.fs .mp-ly-line.on { font-size: 1.05rem; padding: 8px 10px; }
+    .music-wrap.fs .mp-list-wrap { left: 20px; right: 20px; width: auto; }
+}
+
 .github-stats b {
     color: var(--text-primary);
     font-size: 0.88rem;

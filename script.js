@@ -2606,6 +2606,7 @@ function mpFetchLyrics() {
 }
 
 function mpToggleLyric(on) {
+    if (mp.fs) on = true;   // 全屏态歌词常显：退出时的状态还原由 mpSetFs 负责
     mp.lyricOn = on === undefined ? !mp.lyricOn : on;
     mp.el.wrap.classList.toggle('lyric', mp.lyricOn);
     mp.el.disc.title = mp.lyricOn ? '返回封面' : '查看歌词';
@@ -2638,6 +2639,9 @@ function initMusicPlayer() {
         shuffle: document.querySelector('.mi-shuffle'),
         explore: document.querySelector('.mi-explore')
     };
+    mp.el.full = document.getElementById('mpFull');
+    mp.el.fullEnter = mp.el.full.querySelector('.fi-enter');
+    mp.el.fullExit = mp.el.full.querySelector('.fi-exit');
 
     mp.audio.preload = 'none';
 
@@ -2711,8 +2715,8 @@ function initMusicPlayer() {
         if (row) mpLoad(Number(row.dataset.idx), true);
     });
 
-    // 点封面切歌词；点歌词行跳到该时间播放
-    mp.el.disc.addEventListener('click', () => mpToggleLyric());
+    // 点封面切歌词（全屏态歌词常显，封面点击不再切换）
+    mp.el.disc.addEventListener('click', () => { if (!mp.fs) mpToggleLyric(); });
     mp.el.lyricInner.addEventListener('click', (e) => {
         const line = e.target.closest('.mp-ly-line');
         if (!line || !mp.lyricLines) return;
@@ -2763,6 +2767,53 @@ function initMusicPlayer() {
         if (!mp.audio.duration) return;
         const r = mp.el.progress.getBoundingClientRect();
         mp.audio.currentTime = ((e.clientX - r.left) / r.width) * mp.audio.duration;
+    });
+
+    // ===== 全屏播放：面板右上角进入，网易云式左右分栏；Esc 退出 =====
+    mp.fs = false;
+    mp.fsRestore = null;   // 进入前的歌词态 / 列表态 / 侧栏态，退出时还原
+    const mpSetFs = (on) => {
+        if (mp.fs === on) return;
+        mp.fs = on;
+        mp.el.wrap.classList.toggle('fs', on);
+        mp.el.fullEnter.toggleAttribute('hidden', on);   // SVGElement.hidden 非反射属性，必须 toggleAttribute
+        mp.el.fullExit.toggleAttribute('hidden', !on);
+        mp.el.full.title = on ? '退出全屏' : '全屏播放';
+        mp.el.full.setAttribute('aria-label', on ? '退出全屏' : '全屏播放');
+        mp.el.full.setAttribute('aria-pressed', String(on));
+        if (on) {
+            mp.fsRestore = {
+                lyric: mp.lyricOn,
+                listClosed: mp.el.wrap.classList.contains('list-closed'),
+                sidebarCollapsed: document.body.classList.contains('sidebar-collapsed')
+            };
+            mpToggleLyric(true);      // 全屏右侧歌词常显，复用歌词加载与跟行管线
+            mpSetListClosed(true);    // 歌单转为右侧抽屉，默认收起
+            if (!mp.fsRestore.sidebarCollapsed) {   // 侧栏临时收起，退出还原（不写偏好存储）
+                sidebar.classList.add('collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            }
+            document.body.classList.add('mp-fs-open');
+        } else {
+            mpToggleLyric(mp.fsRestore.lyric);
+            mpSetListClosed(mp.fsRestore.listClosed);
+            if (!mp.fsRestore.sidebarCollapsed) {
+                sidebar.classList.remove('collapsed');
+                document.body.classList.remove('sidebar-collapsed');
+            }
+            document.body.classList.remove('mp-fs-open');
+            mp.fsRestore = null;
+        }
+    };
+    mp.el.full.addEventListener('click', () => mpSetFs(!mp.fs));
+    mp.exitFs = () => mpSetFs(false);   // 供全屏层外的入口（命令面板）切走视图前退出全屏
+    // 全屏态 Esc 先行拦截：只退全屏，不触发面板收起与全局回首页
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mp.fs) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            mpSetFs(false);
+        }
     });
 
     // 面板展开时：点面板外或按 Esc 收起（有其他弹层打开时让给它）
@@ -2837,7 +2888,8 @@ function renderSearchResults(term) {
 
     let html = '';
     if (links.length) {
-        html += group('网站收藏', links.length, links.map(buildLinkCard).join(''));
+        // 不能直接 map(buildLinkCard)：map 会把数组本身当第三参传入，搜索卡会被误渲染成 winget 勾选卡
+        html += group('网站收藏', links.length, links.map(l => buildLinkCard(l)).join(''));
     }
     if (tools.length) {
         html += group('在线工具', tools.length, tools.map(buildToolCard).join(''));
@@ -4214,6 +4266,7 @@ function toggleCmdk() {
 }
 
 function openCmdk() {
+    if (mp.fs && mp.exitFs) mp.exitFs();   // 全屏播放时命令面板浮在其上，切走视图前先退全屏
     cmdkCommands = buildCmdkCommands();
     cmdk.hidden = false;
     void cmdk.offsetHeight;

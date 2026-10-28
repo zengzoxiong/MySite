@@ -106,19 +106,19 @@
   const scoreEl = $('score'), bestEl = $('best'), nextC = $('nextC'), nextCtx = nextC.getContext('2d');
   const tipsEl = $('tips');
 
-  /* ---------- 11 档水果：半径按台面宽的比例 + 双色渐变 ---------- */
+  /* ---------- 11 档水果：半径按台面宽的比例 + 底盘双色 + 水果 emoji 贴图 ---------- */
   const TIERS = [
-    { f: .045, c1: '#C77DDF', c2: '#8E44AD', name: '葡萄' },
-    { f: .061, c1: '#F06A6A', c2: '#B93A4B', name: '樱桃' },
-    { f: .080, c1: '#FFB65C', c2: '#E67E22', name: '橘子' },
-    { f: .101, c1: '#FFE479', c2: '#D4AC0D', name: '柠檬' },
-    { f: .125, c1: '#B5E06A', c2: '#7DA345', name: '猕猴桃' },
-    { f: .152, c1: '#FF8A70', c2: '#D35236', name: '番茄' },
-    { f: .182, c1: '#FFB3C8', c2: '#E5739A', name: '桃子' },
-    { f: .215, c1: '#FFD97A', c2: '#C8912B', name: '菠萝' },
-    { f: .251, c1: '#C9A176', c2: '#7A5230', name: '椰子' },
-    { f: .290, c1: '#F2848C', c2: '#2E7D42', name: '半个西瓜' },
-    { f: .332, c1: '#63B76F', c2: '#2E7D42', name: '大西瓜' }
+    { f: .045, c1: '#C77DDF', c2: '#8E44AD', e: '🍇', name: '葡萄' },
+    { f: .061, c1: '#F06A6A', c2: '#B93A4B', e: '🍒', name: '樱桃' },
+    { f: .080, c1: '#FFB65C', c2: '#E67E22', e: '🍊', name: '橘子' },
+    { f: .101, c1: '#FFE479', c2: '#D4AC0D', e: '🍋', name: '柠檬' },
+    { f: .125, c1: '#B5E06A', c2: '#7DA345', e: '🥝', name: '猕猴桃' },
+    { f: .152, c1: '#FF8A70', c2: '#D35236', e: '🍅', name: '番茄' },
+    { f: .182, c1: '#FFB3C8', c2: '#E5739A', e: '🍑', name: '桃子' },
+    { f: .215, c1: '#FFD97A', c2: '#C8912B', e: '🍍', name: '菠萝' },
+    { f: .251, c1: '#C9A176', c2: '#7A5230', e: '🥥', name: '椰子' },
+    { f: .290, c1: '#F2848C', c2: '#2E7D42', e: '🍈', name: '半个西瓜' },
+    { f: .332, c1: '#63B76F', c2: '#2E7D42', e: '🍉', name: '大西瓜' }
   ];
   // 融合得分：新档位对应的三角数，越大越值钱
   const PTS = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66];
@@ -291,6 +291,7 @@
   }
 
   /* ---------- 渲染 ---------- */
+  /* 水果贴图：彩色圆盘打底 + emoji 直接绘成水果，尺寸随半径缩放（ghost 为落点预览的半透明态） */
   function drawBall(c, x, y, r, tier, ghost) {
     const t = TIERS[tier];
     c.save();
@@ -302,34 +303,10 @@
     c.arc(x, y, r, 0, Math.PI * 2);
     c.fillStyle = g;
     c.fill();
-    // 半个西瓜：红瓤 + 瓜籽；大西瓜：深绿条纹；其余只上高光
-    if (tier === 9) {
-      c.beginPath();
-      c.arc(x, y, r * .68, 0, Math.PI * 2);
-      c.fillStyle = '#F26D7D';
-      c.fill();
-      c.fillStyle = '#3A2A20';
-      for (const [sx, sy] of [[-.28, -.1], [.24, -.18], [-.02, .22]]) {
-        c.beginPath();
-        c.ellipse(x + sx * r, y + sy * r, r * .05, r * .08, 0, 0, Math.PI * 2);
-        c.fill();
-      }
-    } else if (tier === 10) {
-      c.clip();
-      c.strokeStyle = 'rgba(24, 82, 38, .8)';
-      c.lineWidth = r * .13;
-      for (const k of [-.62, -.21, .21, .62]) {
-        c.beginPath();
-        c.moveTo(x + k * r, y - r * 1.2);
-        c.quadraticCurveTo(x + k * r * 1.7, y, x + k * r, y + r * 1.2);
-        c.stroke();
-      }
-    }
-    // 高光
-    c.beginPath();
-    c.ellipse(x - r * .34, y - r * .42, r * .22, r * .13, -.6, 0, Math.PI * 2);
-    c.fillStyle = 'rgba(255, 255, 255, .5)';
-    c.fill();
+    c.font = (r * 1.5).toFixed(1) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(t.e, x, y + r * 0.08);
     c.restore();
   }
 

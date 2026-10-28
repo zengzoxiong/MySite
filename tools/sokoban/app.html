@@ -193,6 +193,26 @@
     /* 规则栏展开时内容列平滑让位（宽屏 padding-right 由共享样式负责） */
     .g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
 
+    /* ===== 宽屏双栏：左列关卡+棋盘，右列统计/按钮/方向键/图例；720px 以下纵向堆叠 ===== */
+    .main-col, .side-col { display: flex; flex-direction: column; gap: 14px; }
+    @media (min-width: 720px) {
+      .g-wrap {
+        --wrap-max: 920px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+        grid-template-areas:
+          "head head"
+          "main side"
+          "foot foot";
+        align-items: start;
+        column-gap: 26px;
+      }
+      header { grid-area: head; }
+      .main-col { grid-area: main; }
+      .side-col { grid-area: side; }
+      .g-foot { grid-area: foot; }
+    }
+
     @media (max-width: 420px) {
       .board { gap: 2px; padding: 4px; }
     }
@@ -210,64 +230,70 @@
       <span class="g-ai-tag" id="aiTag" hidden>AI 代玩中 · 点击停止</span>
     </header>
 
-    <!-- 统计（AI 代玩成绩豁免标注随计分板展示） -->
-    <div class="hud-block">
-      <div class="g-hud">
-        <div class="g-stat"><span class="g-stat-label">步数</span><span class="g-stat-value g-num" id="movesVal">0</span></div>
-        <div class="g-stat"><span class="g-stat-label">推动</span><span class="g-stat-value g-num" id="pushesVal">0</span></div>
-        <div class="g-stat"><span class="g-stat-label">最佳</span><span class="g-stat-value g-num" id="bestVal">--</span></div>
+    <!-- 主区：宽屏居左（关卡切换 + 棋盘），窄屏顺排 -->
+    <div class="main-col">
+      <!-- 关卡切换器 -->
+      <div class="levels" id="levelBar"></div>
+
+      <!-- 棋盘（g-stage 触控防护；棋盘 / 木箱 / 小人个性视觉保留） -->
+      <div class="g-card">
+        <div class="g-stage">
+          <div class="board" id="board" aria-label="推箱子棋盘"></div>
+        </div>
       </div>
     </div>
 
-    <!-- 关卡切换器 -->
-    <div class="levels" id="levelBar"></div>
-
-    <!-- 棋盘（g-stage 触控防护；棋盘 / 木箱 / 小人个性视觉保留） -->
-    <div class="g-card">
-      <div class="g-stage">
-        <div class="board" id="board" aria-label="推箱子棋盘"></div>
+    <!-- 侧栏：宽屏居右（统计 / 按钮 / 方向键 / 图例），窄屏顺排 -->
+    <div class="side-col">
+      <!-- 统计（AI 代玩成绩豁免标注随计分板展示） -->
+      <div class="hud-block">
+        <div class="g-hud">
+          <div class="g-stat"><span class="g-stat-label">步数</span><span class="g-stat-value g-num" id="movesVal">0</span></div>
+          <div class="g-stat"><span class="g-stat-label">推动</span><span class="g-stat-value g-num" id="pushesVal">0</span></div>
+          <div class="g-stat"><span class="g-stat-label">最佳</span><span class="g-stat-value g-num" id="bestVal">--</span></div>
+        </div>
       </div>
-    </div>
 
-    <!-- 操作按钮 -->
-    <div class="g-btn-row">
-      <button class="g-btn g-btn-gray" id="undoBtn" type="button">撤销一步（U）</button>
-      <button class="g-btn g-btn-gray" id="restartBtn" type="button">重玩本关（R）</button>
-    </div>
+      <!-- 操作按钮 -->
+      <div class="g-btn-row">
+        <button class="g-btn g-btn-gray" id="undoBtn" type="button">撤销一步（U）</button>
+        <button class="g-btn g-btn-gray" id="restartBtn" type="button">重玩本关（R）</button>
+      </div>
 
-    <!-- 手机端方向按钮 -->
-    <div class="dpad" aria-label="方向控制">
-      <button class="btn-d up" type="button" data-dir="up" aria-label="向上">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 9H5z" fill="currentColor"/></svg>
-      </button>
-      <button class="btn-d left" type="button" data-dir="left" aria-label="向左">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l9-7v14z" fill="currentColor"/></svg>
-      </button>
-      <div class="btn-d mid" aria-hidden="true"></div>
-      <button class="btn-d right" type="button" data-dir="right" aria-label="向右">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12l-9 7V5z" fill="currentColor"/></svg>
-      </button>
-      <button class="btn-d down" type="button" data-dir="down" aria-label="向下">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19l-7-9h14z" fill="currentColor"/></svg>
-      </button>
-    </div>
+      <!-- 手机端方向按钮 -->
+      <div class="dpad" aria-label="方向控制">
+        <button class="btn-d up" type="button" data-dir="up" aria-label="向上">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l7 9H5z" fill="currentColor"/></svg>
+        </button>
+        <button class="btn-d left" type="button" data-dir="left" aria-label="向左">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l9-7v14z" fill="currentColor"/></svg>
+        </button>
+        <div class="btn-d mid" aria-hidden="true"></div>
+        <button class="btn-d right" type="button" data-dir="right" aria-label="向右">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12l-9 7V5z" fill="currentColor"/></svg>
+        </button>
+        <button class="btn-d down" type="button" data-dir="down" aria-label="向下">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19l-7-9h14z" fill="currentColor"/></svg>
+        </button>
+      </div>
 
-    <!-- 图例 -->
-    <div class="g-card">
-      <h2 class="g-card-title">图例</h2>
-      <div class="legend">
-        <div class="item"><span class="sw wall"></span>墙</div>
-        <div class="item"><span class="sw goal"></span>目标点</div>
-        <div class="item"><span class="sw box"></span>木箱</div>
-        <div class="item"><span class="sw box-ok"></span>箱子已到位</div>
-        <div class="item">
-          <span class="sw player">
-            <svg viewBox="0 0 40 40" aria-hidden="true">
-              <circle cx="20" cy="14" r="7" fill="#4f7ea8"/>
-              <path d="M8 34c0-6.6 5.4-12 12-12s12 5.4 12 12z" fill="#4f7ea8"/>
-            </svg>
-          </span>
-          小人
+      <!-- 图例 -->
+      <div class="g-card">
+        <h2 class="g-card-title">图例</h2>
+        <div class="legend">
+          <div class="item"><span class="sw wall"></span>墙</div>
+          <div class="item"><span class="sw goal"></span>目标点</div>
+          <div class="item"><span class="sw box"></span>木箱</div>
+          <div class="item"><span class="sw box-ok"></span>箱子已到位</div>
+          <div class="item">
+            <span class="sw player">
+              <svg viewBox="0 0 40 40" aria-hidden="true">
+                <circle cx="20" cy="14" r="7" fill="#4f7ea8"/>
+                <path d="M8 34c0-6.6 5.4-12 12-12s12 5.4 12 12z" fill="#4f7ea8"/>
+              </svg>
+            </span>
+            小人
+          </div>
         </div>
       </div>
     </div>

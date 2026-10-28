@@ -160,8 +160,8 @@
     <p class="g-nav-sub">你执红先行，将死对方将帅即获胜</p>
 
     <section class="g-hud">
-      <div class="g-stat" id="statR"><span class="g-stat-label">你 · 红方</span><span class="g-stat-value g-num" id="capR">0</span></div>
-      <div class="g-stat" id="statB"><span class="g-stat-label">AI · 黑方</span><span class="g-stat-value g-num" id="capB">0</span></div>
+      <div class="g-stat" id="statR"><span class="g-stat-label" id="statRLabel">你 · 红方</span><span class="g-stat-value g-num" id="capR">0</span></div>
+      <div class="g-stat" id="statB"><span class="g-stat-label" id="statBLabel">AI · 黑方</span><span class="g-stat-value g-num" id="capB">0</span></div>
       <div class="g-stat"><span class="g-stat-label">胜场</span><span class="g-stat-value g-num" id="winVal">0</span></div>
     </section>
 
@@ -213,6 +213,10 @@
     <div class="actions g-btn-row">
       <button class="g-btn" id="newBtn" type="button">新游戏</button>
       <button class="g-btn g-btn-gray" id="undoBtn" type="button" disabled>悔棋</button>
+      <div class="g-segment" id="modeSeg" role="group" aria-label="对弈模式">
+        <button type="button" data-mode="ai" class="on">人机</button>
+        <button type="button" data-mode="pvp">双人</button>
+      </div>
       <div class="g-segment" id="levelSeg" role="group" aria-label="AI 难度">
         <button type="button" data-level="easy">新手</button>
         <button type="button" data-level="normal" class="on">进阶</button>
@@ -471,7 +475,10 @@
   const boardEl = $('board'), overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
   const statusEl = $('status'), capREl = $('capR'), capBEl = $('capB'), winVal = $('winVal');
   const statR = $('statR'), statB = $('statB');
-  const newBtn = $('newBtn'), undoBtn = $('undoBtn'), levelSeg = $('levelSeg');
+  const statRLabel = $('statRLabel'), statBLabel = $('statBLabel');
+  const newBtn = $('newBtn'), undoBtn = $('undoBtn'), levelSeg = $('levelSeg'), modeSeg = $('modeSeg');
+
+  const sideName = s => (s === RED ? '红方' : '黑方');
 
   // 交点坐标 → 百分比（与 SVG viewBox -0.45/-0.45、8.9/9.9 对齐）
   const PAD = 0.45, VW = 8.9, VH = 9.9;
@@ -482,6 +489,7 @@
   let turn = RED;
   let state = 'playing';      // playing / over
   let level = 'normal';
+  let mode = 'ai';            // ai：人机对弈（红方归玩家） / pvp：同屏双人轮流
   let sel = -1;               // 选中子下标，-1 未选
   let aiBusy = false;
   let aiTimer = 0;
@@ -562,6 +570,13 @@
     statusEl.classList.toggle('warn', !!warn);
   }
 
+  /* 模式切换的界面联动：HUD 称谓换人，双人模式隐藏 AI 难度 */
+  function syncModeHud() {
+    statRLabel.textContent = mode === 'ai' ? '你 · 红方' : '红方';
+    statBLabel.textContent = mode === 'ai' ? 'AI · 黑方' : '黑方';
+    levelSeg.hidden = mode === 'pvp';
+  }
+
   /* ---------- 走法执行 ---------- */
   function legalMovesOf(side) {
     return genPseudo(bd, side).filter(m => kingSafe(bd, side, m));
@@ -597,15 +612,13 @@
     nextTurn();
   }
 
-  // 回合推进：轮到谁走谁走；AI 回合交给搜索，双方都无棋则终局
+  // 回合推进：人机模式黑方交给 AI，双人模式红黑都等人走；双方都无棋则终局
   function nextTurn() {
     if (state !== 'playing') return;
     const moves = legalMovesOf(turn);
     if (!moves.length) { gameOver(-turn); return; }   // 无棋可走：困毙 / 被将死均判负
     const checked = attacked(bd, turn, -turn);
-    if (turn === RED) {
-      setStatus(checked ? '将军！你的帅正被照将，先应将再走棋' : '你的回合，点击红子再点落点走棋', checked);
-    } else {
+    if (mode === 'ai' && turn === BLACK) {
       setStatus(checked ? '将军！AI 正在被将……' : 'AI 思考中…');
       aiBusy = true;
       syncHud();
@@ -615,29 +628,44 @@
         if (state !== 'playing' || !m) return;
         playMove(m);
       }, 620);
+      return;
+    }
+    if (mode === 'ai') {
+      setStatus(checked ? '将军！你的帅正被照将，先应将再走棋' : '你的回合，点击红子再点落点走棋', checked);
+    } else {
+      const name = sideName(turn);
+      setStatus(checked ? '将军！' + name + '正被照将，先应将再走棋' : '轮到' + name + '走棋，点击棋子再点落点', checked);
     }
   }
 
   function gameOver(winner) {
     state = 'over';
     clearHints();
-    const youWin = winner === RED;
     const mvN = history.length;
-    let sub;
-    if (youWin) {
-      wins++;
-      saveWins();
-      winVal.textContent = wins;
-      if (window.GameSFX) GameSFX.win();
-      sub = '第 ' + mvN + ' 手取胜 · 累计胜 ' + wins + ' 场';
+    if (mode === 'ai') {
+      const youWin = winner === RED;
+      if (youWin) {
+        wins++;
+        saveWins();
+        winVal.textContent = wins;
+        if (window.GameSFX) GameSFX.win();
+        ovTitle.textContent = '将死！你赢了';
+        ovTitle.className = 'ov-title win';
+        ovSub.textContent = '第 ' + mvN + ' 手取胜 · 累计胜 ' + wins + ' 场';
+      } else {
+        if (window.GameSFX) GameSFX.lose();
+        ovTitle.textContent = '你输了';
+        ovTitle.className = 'ov-title lose';
+        ovSub.textContent = '第 ' + mvN + ' 手落败，再接再厉';
+      }
     } else {
-      if (window.GameSFX) GameSFX.lose();
-      sub = '第 ' + mvN + ' 手落败，再接再厉';
+      // 双人模式没有输家视角：胜方普天同庆，不计入人机胜场
+      if (window.GameSFX) GameSFX.win();
+      ovTitle.textContent = sideName(winner) + '获胜';
+      ovTitle.className = 'ov-title';
+      ovSub.textContent = '第 ' + mvN + ' 手分出胜负';
     }
-    setStatus(youWin ? '对局结束，红方获胜' : '对局结束，黑方获胜');
-    ovTitle.textContent = youWin ? '将死！你赢了' : '你输了';
-    ovTitle.className = 'ov-title ' + (youWin ? 'win' : 'lose');
-    ovSub.textContent = sub;
+    setStatus('对局结束，' + sideName(winner) + '获胜');
     overlay.hidden = false;
     void overlay.offsetWidth;   // 同步回流后再加 open，保证过渡生效
     overlay.classList.add('open');
@@ -672,19 +700,18 @@
     overlay.classList.remove('open');
     overlay.hidden = true;
     syncHud();
-    setStatus('你的回合，点击红子再点落点走棋');
+    nextTurn();
   }
 
-  /* 悔棋：回滚到最近一次轮到玩家落子前的局面（撤你与 AI 各一手） */
+  /* 悔棋：人机模式回滚到你上一手落子前（撤你与 AI 各一手）；双人模式只撤最近一手 */
   function undoStep() {
     if (state !== 'playing' || aiBusy || !history.length) return;
     clearTimeout(aiTimer);
-    let snap = null;
-    while (history.length) {
-      snap = history.pop();
-      if (snap.turn === RED) break;
+    let snap = history.pop();
+    if (mode === 'ai') {
+      while (snap.turn !== RED && history.length) snap = history.pop();
+      if (snap.turn !== RED) return;
     }
-    if (!snap) return;
     bd = snap.bd;
     turn = snap.turn;
     lastMove = snap.lastMove;
@@ -692,13 +719,14 @@
     rebuildPieces();
     markLast();
     syncHud();
-    setStatus('已悔棋，重新走这一手');
     nextTurn();
   }
 
-  /* ---------- 输入：点击棋盘换算最近交点 ---------- */
+  /* ---------- 输入：点击棋盘换算最近交点（人机只认红方回合，双人红黑都认） ---------- */
   boardEl.addEventListener('click', e => {
-    if (state !== 'playing' || turn !== RED || aiBusy) return;
+    if (state !== 'playing' || aiBusy) return;
+    if (mode === 'ai' && turn !== RED) return;
+    const side = turn;   // 当前行棋方（双人模式下黑方也由人点击）
     const rect = boardEl.getBoundingClientRect();
     const cx = (e.clientX - rect.left) / rect.width * VW - PAD;
     const cy = (e.clientY - rect.top) / rect.height * VH - PAD;
@@ -709,11 +737,11 @@
       const m = legalTargets.find(m => m.t === i);
       if (m) { if (window.GameSFX) GameSFX.click(); playMove(m); return; }
     }
-    if (ownSide(RED, bd[i])) {
+    if (ownSide(side, bd[i])) {
       if (sel === i) { clearHints(); setStatus('已取消选中'); return; }
       clearHints();
       sel = i;
-      legalTargets = legalMovesOf(RED).filter(m => m.f === i);
+      legalTargets = legalMovesOf(side).filter(m => m.f === i);
       showHints(legalTargets);
       if (window.GameSFX) GameSFX.click();
       setStatus(legalTargets.length ? '点击圆点落子，空心环为吃子' : '这枚棋子暂无合法落点');
@@ -734,6 +762,20 @@
     if (!btn) return;
     level = btn.dataset.level;
     levelSeg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+  });
+
+  // 模式切换立即生效：撤掉待走的 AI 手并重派当前回合，双人黑方由人接手
+  modeSeg.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-mode]');
+    if (!btn || btn.dataset.mode === mode) return;
+    mode = btn.dataset.mode;
+    modeSeg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+    syncModeHud();
+    clearTimeout(aiTimer);
+    aiBusy = false;
+    clearHints();
+    syncHud();
+    nextTurn();
   });
 
   newBtn.addEventListener('click', newGame);
@@ -766,15 +808,16 @@
 
       <h3>玩法</h3>
       <ul>
-        <li>你执红先行，AI 执黑，将死对方将帅即获胜；无棋可走（困毙）同样判负</li>
+        <li>「人机」模式你执红先行对战 AI；「双人」模式红黑同屏轮流操作</li>
+        <li>将死对方将帅即获胜；无棋可走（困毙）同样判负</li>
         <li>車走直线、馬走日（蹩马腿）、相走田（塞象眼不过河）、仕帅限九宫、炮隔子吃、兵过河可横走</li>
         <li>两将帅同一直线无隔子即「飞将」，属违规局面，走棋时自动过滤</li>
-        <li>新手 / 进阶 / 大师为 AI 搜索深度三档，随时切换，下一手生效</li>
+        <li>新手 / 进阶 / 大师为 AI 搜索深度三档，随时切换，下一手生效（双人模式无 AI，难度隐藏）</li>
       </ul>
       <h3>操作</h3>
       <ul>
-        <li>点击红子选中，再点圆点落子；空心红环表示吃对方子</li>
-        <li>新游戏：重开对局　悔棋：撤回你和 AI 的最近一手　R：快捷重开</li>
+        <li>点击棋子选中，再点圆点落子；空心红环表示吃对方子</li>
+        <li>新游戏：重开对局　悔棋：人机撤你与 AI 各一手，双人只撤最近一手　R：快捷重开</li>
       </ul>
       </div>
       <div class="g-alert-actions">
