@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-28",
+  "updated": "2026-10-29",
   "sections": {
     "trending": [
       {
         "name": "JustAResearcher/gpu-unlock-ada",
         "url": "https://github.com/JustAResearcher/gpu-unlock-ada",
         "desc": "GPU tensor unlock source for RTX 4090 and experimental RTX 4070 Ti SUPER; firmware generated locally",
-        "stars": 4264,
+        "stars": 4412,
         "language": "C"
       },
       {
         "name": "rddmwmddr/android-ad-cleaner",
         "url": "https://github.com/rddmwmddr/android-ad-cleaner",
         "desc": "关掉国产安卓手机系统里的广告、热搜、资讯推荐和营销推送。不 root，可还原，支持 AI 智能体一键执行。",
-        "stars": 3188,
+        "stars": 4266,
         "language": "Python"
-      },
-      {
-        "name": "designfuchen/word-atlas",
-        "url": "https://github.com/designfuchen/word-atlas",
-        "desc": "词光 · Word Atlas — Illustrated IELTS vocabulary with 7,298 words, UK/US audio and FSRS review. Open-source app + CC BY 4.0 dataset.",
-        "stars": 2445,
-        "language": "TypeScript"
-      },
-      {
-        "name": "wesbos/3d-model-anything",
-        "url": "https://github.com/wesbos/3d-model-anything",
-        "desc": "Capture iPhone LiDAR and photos, reconstruct editable Three.js rooms, and explore them in a browser.",
-        "stars": 2211,
-        "language": "Swift"
-      },
-      {
-        "name": "xevrion/hatchzip",
-        "url": "https://github.com/xevrion/hatchzip",
-        "desc": "HatchZip is a free, open-source archive extractor for Windows, macOS and Linux that extracts ZIP, 7z, RAR, tar and split archives in place, so it needs free spa",
-        "stars": 2171,
-        "language": "Rust"
       },
       {
         "name": "unclebob/ub-mode",
         "url": "https://github.com/unclebob/ub-mode",
         "desc": "",
-        "stars": 2155,
+        "stars": 3713,
         "language": ""
+      },
+      {
+        "name": "designfuchen/word-atlas",
+        "url": "https://github.com/designfuchen/word-atlas",
+        "desc": "词光 · Word Atlas — Illustrated IELTS vocabulary with 7,298 words, UK/US audio and FSRS review. Open-source app + CC BY 4.0 dataset.",
+        "stars": 3037,
+        "language": "TypeScript"
+      },
+      {
+        "name": "interplains/Zero-Breach-Toolkit",
+        "url": "https://github.com/interplains/Zero-Breach-Toolkit",
+        "desc": "Free, open-source, offline checks for traces of known mercenary spyware. Works on Windows, macOS and Linux, Android phones and iPhone backups.",
+        "stars": 2720,
+        "language": "Python"
       },
       {
         "name": "t3dotgg/tstack",
         "url": "https://github.com/t3dotgg/tstack",
         "desc": "The agent skills I use every day. Works with Claude Code and Codex.",
-        "stars": 1988,
+        "stars": 2253,
         "language": "Python"
       },
       {
-        "name": "ikow/php2shell-poc",
-        "url": "https://github.com/ikow/php2shell-poc",
-        "desc": "CVE-2026-109618/109619 — 5 RCE chains + detection rules (Suricata, Sigma, ModSecurity). PHP session.upload_progress pre-auth exploit research.",
-        "stars": 1865,
-        "language": "Python"
-      },
-      {
-        "name": "oosexgang/hackios-xnu-kernel",
-        "url": "https://github.com/oosexgang/hackios-xnu-kernel",
+        "name": "oosexgang/hakios-xnu-kernel",
+        "url": "https://github.com/oosexgang/hakios-xnu-kernel",
         "desc": "",
-        "stars": 1813,
+        "stars": 1900,
         "language": "C"
       },
       {
-        "name": "9bie/php2shell-bypass-aslr-exp",
-        "url": "https://github.com/9bie/php2shell-bypass-aslr-exp",
-        "desc": "A php2shell exploit that requires no modifications to the official version, and does not require display_errors or limit_memory.",
-        "stars": 1499,
+        "name": "anhao/ai-pose-gallery-zh",
+        "url": "https://github.com/anhao/ai-pose-gallery-zh",
+        "desc": "中文版 AI 姿势参考图库 · 1439 组 / 2878 张图片 / 完整汉化 · 零依赖静态画廊",
+        "stars": 1846,
+        "language": "HTML"
+      },
+      {
+        "name": "enesozturk/dimensional-drawing",
+        "url": "https://github.com/enesozturk/dimensional-drawing",
+        "desc": "Create Apple style dimensional drawings of UI components.",
+        "stars": 1386,
+        "language": "HTML"
+      },
+      {
+        "name": "morganlinton/BeautifulRust",
+        "url": "https://github.com/morganlinton/BeautifulRust",
+        "desc": "Agent Skills that teach coding agents to write, review, and port idiomatic Rust, plus a tested clippy config. Works with Claude Code, Codex, Copilot, Cursor, an",
+        "stars": 1365,
         "language": "Python"
       }
     ],
     "hn": [
       {
-        "id": 50261319,
-        "title": "Genie 4",
-        "url": "https://deepmind.google/blog/genie-4-a-new-generation-of-world-simulation/",
-        "hn": "https://news.ycombinator.com/item?id=50261319",
-        "score": 636,
-        "comments": 385
+        "id": 50276998,
+        "title": "Why is this fingerprinting script creating bioweapons?",
+        "url": "https://nullpt.rs/fingerprinting-bioweapons",
+        "hn": "https://news.ycombinator.com/item?id=50276998",
+        "score": 653,
+        "comments": 149
       },
       {
-        "id": 50261998,
-        "title": "Ghostty 1.4",
-        "url": "https://ghostty.org/docs/install/release-notes/1-4-0",
-        "hn": "https://news.ycombinator.com/item?id=50261998",
-        "score": 618,
-        "comments": 193
+        "id": 50274409,
+        "title": "CNC Stone Carving",
+        "url": "https://carmelitegothic.com/cnc-stone-carving/",
+        "hn": "https://news.ycombinator.com/item?id=50274409",
+        "score": 371,
+        "comments": 111
       },
       {
-        "id": 50264857,
-        "title": "Tailscale SSH: Investigation and remediation update",
-        "url": "https://tailscale.com/ssh-investigation-update",
-        "hn": "https://news.ycombinator.com/item?id=50264857",
-        "score": 140,
-        "comments": 86
+        "id": 50276792,
+        "title": "Gemini 4 Carbon",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/",
+        "hn": "https://news.ycombinator.com/item?id=50276792",
+        "score": 742,
+        "comments": 604
       },
       {
-        "id": 50264853,
-        "title": "Survival LLM: AI assistant and emergency library that runs on your own computer",
-        "url": "https://www.brangus.io/survival-llm",
-        "hn": "https://news.ycombinator.com/item?id=50264853",
-        "score": 120,
-        "comments": 73
+        "id": 50220975,
+        "title": "Why Birds Can Fly over Mount Everest",
+        "url": "https://lede-v2.nautil.us/why-birds-can-fly-over-mount-everest-237864",
+        "hn": "https://news.ycombinator.com/item?id=50220975",
+        "score": 19,
+        "comments": 2
       },
       {
-        "id": 50265594,
-        "title": "Raspberry Pi Zero 3W and Pi 4 Model A spotted in device trees",
-        "url": "https://bret.dk/raspberry-pi-zero-3-w-pi-4-model-a/",
-        "hn": "https://news.ycombinator.com/item?id=50265594",
+        "id": 50280722,
+        "title": "The case of the 9 bit AES key",
+        "url": "https://v12.sh/blog/the-case-of-the-9bit-aes-key",
+        "hn": "https://news.ycombinator.com/item?id=50280722",
         "score": 54,
-        "comments": 15
+        "comments": 26
       },
       {
-        "id": 50239214,
-        "title": "SS United States to be sunk as largest artificial reef",
-        "url": "https://divemagazine.com/scuba-diving-news/ss-united-states-to-be-sunk-as-worlds-largest-artificial-reef-in-november",
-        "hn": "https://news.ycombinator.com/item?id=50239214",
-        "score": 37,
-        "comments": 29
+        "id": 50276940,
+        "title": "MacBook Pro with PROLED XDR Display and Touch",
+        "url": "https://www.apple.com/macbook-pro/proled-xdr-display/",
+        "hn": "https://news.ycombinator.com/item?id=50276940",
+        "score": 465,
+        "comments": 799
       },
       {
-        "id": 50261352,
-        "title": "New 14‑inch MacBook Pro with M6",
-        "url": "https://www.apple.com/in/newsroom/2026/10/apple-introduces-the-new-14-inch-macbook-pro-with-m6/",
-        "hn": "https://news.ycombinator.com/item?id=50261352",
-        "score": 241,
-        "comments": 291
+        "id": 50275626,
+        "title": "Dayjob: Tax – evaluating AI agents on 50 professional tax assignments",
+        "url": "https://surgehq.ai/blog/dayjob-tax",
+        "hn": "https://news.ycombinator.com/item?id=50275626",
+        "score": 178,
+        "comments": 107
       },
       {
-        "id": 50265128,
-        "title": "Four Months of Zig",
-        "url": "https://gracefulliberty.com/articles/four-months-of-zig/",
-        "hn": "https://news.ycombinator.com/item?id=50265128",
-        "score": 43,
-        "comments": 17
+        "id": 50243060,
+        "title": "The Grid, a factory-scale robot in Massachusetts that builds PCBs on demand",
+        "url": "https://www.circuithub.com/post/unveiling-the-grid",
+        "hn": "https://news.ycombinator.com/item?id=50243060",
+        "score": 386,
+        "comments": 190
       },
       {
-        "id": 50224079,
-        "title": "An examination of lost firefly species of the US and Canada",
-        "url": "https://journaloflostspecies.org/index.php/jls/article/view/37/33",
-        "hn": "https://news.ycombinator.com/item?id=50224079",
-        "score": 64,
-        "comments": 6
+        "id": 50208960,
+        "title": "Start Doing Graph Theory",
+        "url": "https://vertex.degree/",
+        "hn": "https://news.ycombinator.com/item?id=50208960",
+        "score": 554,
+        "comments": 121
       },
       {
-        "id": 50262982,
-        "title": "Radio-tagged Monarch butterflies",
-        "url": "https://blog.cwf-fcf.org/index.php/en/tiny-tracking-tags-for-big-monarch-journeys/",
-        "hn": "https://news.ycombinator.com/item?id=50262982",
-        "score": 8,
-        "comments": 3
+        "id": 50281044,
+        "title": "Formlabs Studio 1 $699 Resin Printer",
+        "url": "https://formlabs.com/products/form-studio-1-basic-founders-edition/",
+        "hn": "https://news.ycombinator.com/item?id=50281044",
+        "score": 75,
+        "comments": 66
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 105667,
-        "likes": 3366
+        "downloads": 116770,
+        "likes": 3538
       },
       {
         "id": "RecursiveSI/flint",
         "url": "https://huggingface.co/RecursiveSI/flint",
         "task": "text-generation",
-        "downloads": 10574,
-        "likes": 968
+        "downloads": 14047,
+        "likes": 1153
       },
       {
         "id": "Nanbeige/Nanbeige4.3-33B",
         "url": "https://huggingface.co/Nanbeige/Nanbeige4.3-33B",
         "task": "text-generation",
-        "downloads": 4785,
-        "likes": 665
+        "downloads": 7412,
+        "likes": 721
       },
       {
         "id": "XHToken/Spark-X2.6-4B",
         "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
         "task": "text-generation",
-        "downloads": 6191,
-        "likes": 782
-      },
-      {
-        "id": "black-forest-labs/flux-3-image-klein-comfy",
-        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
-        "task": "image-to-image",
-        "downloads": 750694,
-        "likes": 1852
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2163739,
-        "likes": 9570
+        "downloads": 8222,
+        "likes": 853
       },
       {
         "id": "MiniMaxAI/MiniMax-M3.1-Flash",
         "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash",
         "task": "image-text-to-text",
-        "downloads": 11075,
-        "likes": 411
+        "downloads": 13247,
+        "likes": 450
       },
       {
         "id": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
         "url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
         "task": "text-generation",
-        "downloads": 1105751,
-        "likes": 391
+        "downloads": 1377570,
+        "likes": 431
       },
       {
-        "id": "Qwen/Qwen3.8-27B",
-        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
-        "task": "image-text-to-text",
-        "downloads": 7522728,
-        "likes": 18531
+        "id": "black-forest-labs/flux-3-image-klein-comfy",
+        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+        "task": "image-to-image",
+        "downloads": 798943,
+        "likes": 1951
       },
       {
-        "id": "InternScience/Sage-A1.5",
-        "url": "https://huggingface.co/InternScience/Sage-A1.5",
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2234788,
+        "likes": 9714
+      },
+      {
+        "id": "LiquidAI/LFM3-1.7B",
+        "url": "https://huggingface.co/LiquidAI/LFM3-1.7B",
         "task": "text-generation",
-        "downloads": 6613,
-        "likes": 335
+        "downloads": 8892,
+        "likes": 381
+      },
+      {
+        "id": "tencent/Hy-SimulMT-30B-A3B-FP8",
+        "url": "https://huggingface.co/tencent/Hy-SimulMT-30B-A3B-FP8",
+        "task": "translation",
+        "downloads": 165,
+        "likes": 342
       }
     ],
     "weibo": [
       {
-        "word": "事后道歉救不了姆巴佩",
-        "num": 893870,
+        "word": "女子欠1700元被限高公开照片",
+        "num": 791752,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%BA%8B%E5%90%8E%E9%81%93%E6%AD%89%E6%95%91%E4%B8%8D%E4%BA%86%E5%A7%86%E5%B7%B4%E4%BD%A9%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E6%AC%A01700%E5%85%83%E8%A2%AB%E9%99%90%E9%AB%98%E5%85%AC%E5%BC%80%E7%85%A7%E7%89%87%23"
       },
       {
-        "word": "小城良方高开颠走",
-        "num": 603037,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E9%AB%98%E5%BC%80%E9%A2%A0%E8%B5%B0%23"
-      },
-      {
-        "word": "我国产业结构向新向优向好升级",
-        "num": 423015,
+        "word": "西班牙列车相撞已致68死",
+        "num": 567515,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%88%91%E5%9B%BD%E4%BA%A7%E4%B8%9A%E7%BB%93%E6%9E%84%E5%90%91%E6%96%B0%E5%90%91%E4%BC%98%E5%90%91%E5%A5%BD%E5%8D%87%E7%BA%A7%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%A5%BF%E7%8F%AD%E7%89%99%E5%88%97%E8%BD%A6%E7%9B%B8%E6%92%9E%E5%B7%B2%E8%87%B468%E6%AD%BB%23"
       },
       {
-        "word": "婚恋关系唯一重要的是你舒服",
-        "num": 317245,
+        "word": "第140届广交会第二期圆满收官",
+        "num": 459289,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A9%9A%E6%81%8B%E5%85%B3%E7%B3%BB%E5%94%AF%E4%B8%80%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF%E4%BD%A0%E8%88%92%E6%9C%8D%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%AC%AC140%E5%B1%8A%E5%B9%BF%E4%BA%A4%E4%BC%9A%E7%AC%AC%E4%BA%8C%E6%9C%9F%E5%9C%86%E6%BB%A1%E6%94%B6%E5%AE%98%23"
       },
       {
-        "word": "中国足协与皇马俱乐部严正交涉",
-        "num": 316763,
+        "word": "劣迹网红换号复活暴露平台监管漏洞",
+        "num": 304240,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E8%B6%B3%E5%8D%8F%E4%B8%8E%E7%9A%87%E9%A9%AC%E4%BF%B1%E4%B9%90%E9%83%A8%E4%B8%A5%E6%AD%A3%E4%BA%A4%E6%B6%89%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8A%A3%E8%BF%B9%E7%BD%91%E7%BA%A2%E6%8D%A2%E5%8F%B7%E5%A4%8D%E6%B4%BB%E6%9A%B4%E9%9C%B2%E5%B9%B3%E5%8F%B0%E7%9B%91%E7%AE%A1%E6%BC%8F%E6%B4%9E%23"
       },
       {
-        "word": "北京动物园通报萌兰身体状态",
-        "num": 230863,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%8C%97%E4%BA%AC%E5%8A%A8%E7%89%A9%E5%9B%AD%E9%80%9A%E6%8A%A5%E8%90%8C%E5%85%B0%E8%BA%AB%E4%BD%93%E7%8A%B6%E6%80%81%23"
-      },
-      {
-        "word": "饲养员多次呼唤萌兰无响应",
-        "num": 150639,
+        "word": "巴基斯坦对台湾航司关闭领空",
+        "num": 220204,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%A5%B2%E5%85%BB%E5%91%98%E5%A4%9A%E6%AC%A1%E5%91%BC%E5%94%A4%E8%90%8C%E5%85%B0%E6%97%A0%E5%93%8D%E5%BA%94%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E5%AF%B9%E5%8F%B0%E6%B9%BE%E8%88%AA%E5%8F%B8%E5%85%B3%E9%97%AD%E9%A2%86%E7%A9%BA%23"
       },
       {
-        "word": "姆巴佩们别想从中国市场挣走一分钱",
-        "num": 141694,
+        "word": "十日终焉",
+        "num": 201229,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A7%86%E5%B7%B4%E4%BD%A9%E4%BB%AC%E5%88%AB%E6%83%B3%E4%BB%8E%E4%B8%AD%E5%9B%BD%E5%B8%82%E5%9C%BA%E6%8C%A3%E8%B5%B0%E4%B8%80%E5%88%86%E9%92%B1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8D%81%E6%97%A5%E7%BB%88%E7%84%89%23"
       },
       {
-        "word": "小城良方这就叫做专业",
-        "num": 128309,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E8%BF%99%E5%B0%B1%E5%8F%AB%E5%81%9A%E4%B8%93%E4%B8%9A%23"
-      },
-      {
-        "word": "小米员工房只卖给正式员工",
-        "num": 127837,
+        "word": "LYON对战IG",
+        "num": 191759,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E7%B1%B3%E5%91%98%E5%B7%A5%E6%88%BF%E5%8F%AA%E5%8D%96%E7%BB%99%E6%AD%A3%E5%BC%8F%E5%91%98%E5%B7%A5%23"
+        "url": "https://s.weibo.com/weibo?q=%23LYON%E5%AF%B9%E6%88%98IG%23"
+      },
+      {
+        "word": "三甲医生回应女子被蜱虫咬伤后瘫痪",
+        "num": 146583,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%89%E7%94%B2%E5%8C%BB%E7%94%9F%E5%9B%9E%E5%BA%94%E5%A5%B3%E5%AD%90%E8%A2%AB%E8%9C%B1%E8%99%AB%E5%92%AC%E4%BC%A4%E5%90%8E%E7%98%AB%E7%97%AA%23"
+      },
+      {
+        "word": "中年人心血管体检性价比最高",
+        "num": 146230,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%B9%B4%E4%BA%BA%E5%BF%83%E8%A1%80%E7%AE%A1%E4%BD%93%E6%A3%80%E6%80%A7%E4%BB%B7%E6%AF%94%E6%9C%80%E9%AB%98%23"
+      },
+      {
+        "word": "剑来",
+        "num": 137956,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%89%91%E6%9D%A5%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2021,
-        "text": "为了强调元宇宙愿景，美国社群媒体网站Facebook创始人马克·祖克柏宣布将公司名称变更为“Meta”。",
-        "title": "元宇宙",
-        "url": "https://zh.wikipedia.org/wiki/%E5%85%83%E5%AE%87%E5%AE%99"
+        "year": 2024,
+        "text": "西班牙东南部巴伦西亚自治区、卡斯蒂利亚-拉曼恰和安达卢西亚等地因暴雨发生洪水，至少217人死亡、2000多人失踪，为西班牙历史上死伤最严重的洪水。",
+        "title": "西班牙",
+        "url": "https://zh.wikipedia.org/wiki/%E8%A5%BF%E7%8F%AD%E7%89%99"
+      },
+      {
+        "year": 2022,
+        "text": "韩国首尔龙山区梨泰院举行的万圣节活动发生踩踏事故，造成至少151人死亡、82人受伤。",
+        "title": "大韩民国",
+        "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%9F%A9%E6%B0%91%E5%9B%BD"
       },
       {
         "year": 2018,
-        "text": "重庆万州巴士坠江事故。",
-        "title": "2018年",
-        "url": "https://zh.wikipedia.org/wiki/2018%E5%B9%B4"
+        "text": "狮子航空一架波音737 MAX客机自印尼苏加诺-哈达国际机场起飞后不久于爪哇岛外海坠毁，机上189人全数罹难。",
+        "title": "獅子航空",
+        "url": "https://zh.wikipedia.org/wiki/%E7%8D%85%E5%AD%90%E8%88%AA%E7%A9%BA"
       },
       {
         "year": 2016,
-        "text": "韩国外交官杨昌洙经青瓦台委任为驻台北韩国代表部新任代表。",
-        "title": "楊昌洙",
-        "url": "https://zh.wikipedia.org/wiki/%E6%A5%8A%E6%98%8C%E6%B4%99"
+        "text": "考古学家在位于耶路撒冷旧城的圣墓教堂内发现疑似耶稣被埋葬及复活的坟墓洞穴。",
+        "title": "耶路撒冷旧城",
+        "url": "https://zh.wikipedia.org/wiki/%E8%80%B6%E8%B7%AF%E6%92%92%E5%86%B7%E6%97%A7%E5%9F%8E"
+      },
+      {
+        "year": 2015,
+        "text": "中国大陆全面放弃一胎政策。",
+        "title": "中国大陆",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%A4%A7%E9%99%86"
       },
       {
         "year": 2013,
-        "text": "北京天安门广场发生恐怖袭击，3名恐怖分子驾驶一辆吉普车，冲向人行道，撞倒路上的途人，然后撞向金水桥，实施自爆。",
-        "title": "北京市",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E5%B8%82"
-      },
-      {
-        "year": 2007,
-        "text": "克里斯蒂娜·费尔南德斯当选成为首位阿根廷经民主选举产生的女总统。",
-        "title": "阿根廷",
-        "url": "https://zh.wikipedia.org/wiki/%E9%98%BF%E6%A0%B9%E5%BB%B7"
-      },
-      {
-        "year": 2007,
-        "text": "统一狮在中华职棒18年总冠军赛击败La new熊，获得年度总冠军。",
-        "title": "統一7-ELEVEn獅",
-        "url": "https://zh.wikipedia.org/wiki/%E7%B5%B1%E4%B8%807-ELEVEn%E7%8D%85"
+        "text": "马尔马拉项目的第一阶段开通了穿越博斯普鲁斯海峡的海底铁路隧道（英语：Marmaray Tunnel）。",
+        "title": "博斯普鲁斯海峡",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8D%9A%E6%96%AF%E6%99%AE%E9%B2%81%E6%96%AF%E6%B5%B7%E5%B3%A1"
       }
     ]
   }
