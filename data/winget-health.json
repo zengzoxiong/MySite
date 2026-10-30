@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-29",
+  "checkedAt": "2026-10-30",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -19,8 +19,8 @@
     },
     "DigitalScholar.Zotero": {
       "ok": true,
-      "checkedAt": "2026-10-07",
-      "latest": "10.0.6"
+      "checkedAt": "2026-10-30",
+      "latest": "10.0.7"
     },
     "Kingsoft.WPSOffice.CN": {
       "ok": true,
@@ -64,8 +64,8 @@
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
-      "checkedAt": "2026-10-27",
-      "latest": "4.2.0.9"
+      "checkedAt": "2026-10-30",
+      "latest": "4.2.0.12"
     },
     "astral-sh.uv": {
       "ok": true,
