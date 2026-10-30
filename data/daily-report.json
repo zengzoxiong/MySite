@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-10-30",
+  "updated": "2026-10-31",
   "sections": {
     "trending": [
-      {
-        "name": "rddmwmddr/android-ad-cleaner",
-        "url": "https://github.com/rddmwmddr/android-ad-cleaner",
-        "desc": "关掉国产安卓手机系统里的广告、热搜、资讯推荐和营销推送。不 root，可还原，支持 AI 智能体一键执行。",
-        "stars": 4715,
-        "language": "Python"
-      },
       {
         "name": "unclebob/ub-mode",
         "url": "https://github.com/unclebob/ub-mode",
         "desc": "",
-        "stars": 4667,
+        "stars": 5365,
         "language": ""
       },
       {
-        "name": "JustAResearcher/gpu-unlock-ada",
-        "url": "https://github.com/JustAResearcher/gpu-unlock-ada",
-        "desc": "GPU tensor unlock source for RTX 4090 and experimental RTX 4070 Ti SUPER; firmware generated locally",
-        "stars": 4512,
-        "language": "C"
+        "name": "rddmwmddr/android-ad-cleaner",
+        "url": "https://github.com/rddmwmddr/android-ad-cleaner",
+        "desc": "关掉国产安卓手机系统里的广告、热搜、资讯推荐和营销推送。不 root，可还原，支持 AI 智能体一键执行。",
+        "stars": 5046,
+        "language": "Python"
+      },
+      {
+        "name": "anhao/ai-pose-gallery-zh",
+        "url": "https://github.com/anhao/ai-pose-gallery-zh",
+        "desc": "中文版 AI 姿势参考图库 · 1439 组 / 2878 张图片 / 完整汉化 · 零依赖静态画廊",
+        "stars": 3930,
+        "language": "HTML"
       },
       {
         "name": "interplains/Zero-Breach-Toolkit",
         "url": "https://github.com/interplains/Zero-Breach-Toolkit",
         "desc": "Free, open-source, offline checks for traces of known mercenary spyware. Works on Windows, macOS and Linux, Android phones and iPhone backups.",
-        "stars": 3576,
+        "stars": 3853,
         "language": "Python"
       },
       {
         "name": "designfuchen/word-atlas",
         "url": "https://github.com/designfuchen/word-atlas",
         "desc": "词光 · Word Atlas — Illustrated IELTS vocabulary with 7,298 words, UK/US audio and FSRS review. Open-source app + CC BY 4.0 dataset.",
-        "stars": 3223,
+        "stars": 3353,
         "language": "TypeScript"
-      },
-      {
-        "name": "anhao/ai-pose-gallery-zh",
-        "url": "https://github.com/anhao/ai-pose-gallery-zh",
-        "desc": "中文版 AI 姿势参考图库 · 1439 组 / 2878 张图片 / 完整汉化 · 零依赖静态画廊",
-        "stars": 3108,
-        "language": "HTML"
       },
       {
         "name": "t3dotgg/tstack",
         "url": "https://github.com/t3dotgg/tstack",
         "desc": "The agent skills I use every day. Works with Claude Code and Codex.",
-        "stars": 2388,
+        "stars": 2465,
         "language": "Python"
       },
       {
-        "name": "enesozturk/dimensional-drawing",
-        "url": "https://github.com/enesozturk/dimensional-drawing",
-        "desc": "Create Apple style dimensional drawings of UI components.",
-        "stars": 1561,
-        "language": "HTML"
+        "name": "ccch1mneyyy/dsh-Go",
+        "url": "https://github.com/ccch1mneyyy/dsh-Go",
+        "desc": "dsh-go — DeepSeek Harness 装进口袋：手机本机运行，也能遥控你的电脑。",
+        "stars": 2419,
+        "language": "Dart"
       },
       {
         "name": "andyhuo520/digital-human-koubo",
         "url": "https://github.com/andyhuo520/digital-human-koubo",
         "desc": "AI digital-human talking-head videos from one photo: Renoise MCP generation + 5 editing styles + 48 creator-grade packaging components. Agent skill for Claude C",
-        "stars": 1462,
+        "stars": 1550,
         "language": "TypeScript"
       },
       {
-        "name": "morganlinton/BeautifulRust",
-        "url": "https://github.com/morganlinton/BeautifulRust",
-        "desc": "Agent Skills that teach coding agents to write, review, and port idiomatic Rust, plus a tested clippy config. Works with Claude Code, Codex, Copilot, Cursor, an",
-        "stars": 1413,
-        "language": "Python"
+        "name": "valentderah/totk-pc-recomp",
+        "url": "https://github.com/valentderah/totk-pc-recomp",
+        "desc": "Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64, with a Vulkan renderer. Game files not included.",
+        "stars": 1469,
+        "language": "C"
+      },
+      {
+        "name": "qybaihe/bla",
+        "url": "https://github.com/qybaihe/bla",
+        "desc": "🛡️ BLA (Blind LLM Agents) — Adversarial defense shield that protects binaries, Electron apps, JS bundles, Python, and WebAssembly against AI reverse-engineering",
+        "stars": 1383,
+        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50296470,
-        "title": "Binance-hacker-1029 – $5.6B stolen from Binance",
-        "url": "https://arkm.com/explorer/entity/21a94755-f604-45e5-9501-6542e23005e8",
-        "hn": "https://news.ycombinator.com/item?id=50296470",
-        "score": 437,
-        "comments": 250
+        "id": 50310687,
+        "title": "Linode Security Incident",
+        "url": "https://status.linode.com/incidents/nt58zhx3pmgm",
+        "hn": "https://news.ycombinator.com/item?id=50310687",
+        "score": 90,
+        "comments": 41
       },
       {
-        "id": 50289418,
-        "title": "We're releasing the weights of Mistral Large 4",
-        "url": "https://mistral.ai/news/mistral-large-4-oss/",
-        "hn": "https://news.ycombinator.com/item?id=50289418",
-        "score": 1108,
-        "comments": 321
+        "id": 50310796,
+        "title": "France is getting download tax for content providers (€0.055/GB)",
+        "url": "https://www.resetera.com/threads/france-is-getting-download-tax-for-content-providers-%E2%82%AC0-055-gb-for-data-delivered-to-french-users.1675109/",
+        "hn": "https://news.ycombinator.com/item?id=50310796",
+        "score": 35,
+        "comments": 10
       },
       {
-        "id": 50296486,
-        "title": "We ran AI agent swarms in Minecraft and Mindustry",
-        "url": "https://labs.ycombinator.com/projects/games/index.html",
-        "hn": "https://news.ycombinator.com/item?id=50296486",
-        "score": 74,
-        "comments": 27
+        "id": 50308697,
+        "title": "Bunny CDN Security Incident",
+        "url": "https://status.bunny.net/incidents/p6gf1by9kr7m",
+        "hn": "https://news.ycombinator.com/item?id=50308697",
+        "score": 179,
+        "comments": 35
       },
       {
-        "id": 50296947,
-        "title": "The Great American Rascal: Tom Sawyer at 150",
-        "url": "https://claremontreviewofbooks.com/the-great-american-rascal/",
-        "hn": "https://news.ycombinator.com/item?id=50296947",
-        "score": 20,
+        "id": 50307190,
+        "title": "My favourite PowerMac is a Nintendo Wii",
+        "url": "https://virtuallyfun.com/2026/10/29/my-favourite-powermac-is-a-nintendo-wii/",
+        "hn": "https://news.ycombinator.com/item?id=50307190",
+        "score": 197,
+        "comments": 52
+      },
+      {
+        "id": 50310398,
+        "title": "Sanstun: A sans-IO, parallel-friendly WireGuard implementation in Rust",
+        "url": "https://www.firezone.dev/blog/introducing-sanstun",
+        "hn": "https://news.ycombinator.com/item?id=50310398",
+        "score": 30,
         "comments": 1
       },
       {
-        "id": 50295450,
-        "title": "A tiny world model running games on a Raspberry Pi Pico 2 W",
-        "url": "https://github.com/SheepSeb/tinyworldformer",
-        "hn": "https://news.ycombinator.com/item?id=50295450",
-        "score": 73,
-        "comments": 7
+        "id": 50300683,
+        "title": "Backdoor in Claude Code for VS Code extension on the Cursor Marketplace",
+        "url": "https://phorion.io/blog/offical-claude-code-vsx-compromise/",
+        "hn": "https://news.ycombinator.com/item?id=50300683",
+        "score": 699,
+        "comments": 439
       },
       {
-        "id": 50291054,
-        "title": "H.264 Is Magic (2016)",
-        "url": "https://sidbala.com/h-264-is-magic/",
-        "hn": "https://news.ycombinator.com/item?id=50291054",
-        "score": 288,
-        "comments": 117
+        "id": 50305025,
+        "title": "Northflank Breached",
+        "url": "https://status.northflank.com",
+        "hn": "https://news.ycombinator.com/item?id=50305025",
+        "score": 323,
+        "comments": 242
       },
       {
-        "id": 50294702,
-        "title": "Patrick Stewart has died",
-        "url": "https://www.nytimes.com/2026/10/29/arts/television/patrick-stewart-dead.html",
-        "hn": "https://news.ycombinator.com/item?id=50294702",
-        "score": 2039,
-        "comments": 404
+        "id": 50309314,
+        "title": "Jules Verne's Lost Novel",
+        "url": "https://blue-continuum.com/verne-paris",
+        "hn": "https://news.ycombinator.com/item?id=50309314",
+        "score": 51,
+        "comments": 12
       },
       {
-        "id": 50294506,
-        "title": "Show HN: Auto Dismiss Mac OS \"Allow <app> to find devices on local networks?\"",
-        "url": "https://github.com/johncassil/dontallow",
-        "hn": "https://news.ycombinator.com/item?id=50294506",
-        "score": 80,
-        "comments": 63
+        "id": 50309029,
+        "title": "Infinite Mac: BeOS",
+        "url": "https://blog.persistent.info/2026/10/infinite-mac-beos.html",
+        "hn": "https://news.ycombinator.com/item?id=50309029",
+        "score": 71,
+        "comments": 15
       },
       {
-        "id": 50297089,
-        "title": "A Pig, the State, and War: Porco Rosso (Kurenai No Buta) (2014)",
-        "url": "https://journal.animationstudies.org/article/id/66/",
-        "hn": "https://news.ycombinator.com/item?id=50297089",
-        "score": 12,
-        "comments": 1
-      },
-      {
-        "id": 50295868,
-        "title": "Sylphide OS: a general-purpose OS for microcontroller-based computers",
-        "url": "https://projects.freehackers.org/sylphide-os/",
-        "hn": "https://news.ycombinator.com/item?id=50295868",
-        "score": 23,
-        "comments": 4
+        "id": 50263837,
+        "title": "Breaking the open web won't stop the bad bots",
+        "url": "https://www.techpolicy.press/breaking-the-open-web-wont-stop-the-bad-bots/",
+        "hn": "https://news.ycombinator.com/item?id=50263837",
+        "score": 157,
+        "comments": 65
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 131062,
-        "likes": 3763
+        "downloads": 145869,
+        "likes": 4003
       },
       {
         "id": "Nanbeige/Nanbeige4.3-33B",
         "url": "https://huggingface.co/Nanbeige/Nanbeige4.3-33B",
         "task": "text-generation",
-        "downloads": 9655,
-        "likes": 771
-      },
-      {
-        "id": "RecursiveSI/flint",
-        "url": "https://huggingface.co/RecursiveSI/flint",
-        "task": "text-generation",
-        "downloads": 16598,
-        "likes": 1241
+        "downloads": 12178,
+        "likes": 796
       },
       {
         "id": "LiquidAI/LFM3-1.7B",
         "url": "https://huggingface.co/LiquidAI/LFM3-1.7B",
         "task": "text-generation",
-        "downloads": 15885,
-        "likes": 476
-      },
-      {
-        "id": "XHToken/Spark-X2.6-4B",
-        "url": "https://huggingface.co/XHToken/Spark-X2.6-4B",
-        "task": "text-generation",
-        "downloads": 10163,
-        "likes": 905
-      },
-      {
-        "id": "MiniMaxAI/MiniMax-M3.1-Flash",
-        "url": "https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash",
-        "task": "image-text-to-text",
-        "downloads": 15738,
-        "likes": 489
-      },
-      {
-        "id": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
-        "url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
-        "task": "text-generation",
-        "downloads": 1578937,
-        "likes": 471
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2269999,
-        "likes": 9845
+        "downloads": 23694,
+        "likes": 559
       },
       {
         "id": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "task": "automatic-speech-recognition",
-        "downloads": 4276,
-        "likes": 401
+        "downloads": 15980,
+        "likes": 496
+      },
+      {
+        "id": "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+        "url": "https://huggingface.co/ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF",
+        "task": "text-generation",
+        "downloads": 1747945,
+        "likes": 506
       },
       {
         "id": "baidu/Unlimited-OCR-2",
         "url": "https://huggingface.co/baidu/Unlimited-OCR-2",
         "task": "image-text-to-text",
-        "downloads": 18141,
-        "likes": 378
+        "downloads": 24276,
+        "likes": 452
+      },
+      {
+        "id": "mistralai/Mistral-Large-4-1T-A52B",
+        "url": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B",
+        "task": "image-text-to-text",
+        "downloads": 1239,
+        "likes": 1338
+      },
+      {
+        "id": "RecursiveSI/flint",
+        "url": "https://huggingface.co/RecursiveSI/flint",
+        "task": "text-generation",
+        "downloads": 19015,
+        "likes": 1256
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2335172,
+        "likes": 9956
+      },
+      {
+        "id": "black-forest-labs/flux-3-image-klein-comfy",
+        "url": "https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy",
+        "task": "image-to-image",
+        "downloads": 886973,
+        "likes": 2115
       }
     ],
     "weibo": [
       {
-        "word": "红果红了",
-        "num": 1028198,
+        "word": "黄金",
+        "num": 781608,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%9E%9C%E7%BA%A2%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%84%E9%87%91%23"
       },
       {
-        "word": "BLG对战TES",
-        "num": 643577,
+        "word": "披荆斩棘成团名单",
+        "num": 508576,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%8A%AB%E8%8D%86%E6%96%A9%E6%A3%98%E6%88%90%E5%9B%A2%E5%90%8D%E5%8D%95%23"
+      },
+      {
+        "word": "开创新时代管党治党兴党强党新局面",
+        "num": 452202,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%80%E5%88%9B%E6%96%B0%E6%97%B6%E4%BB%A3%E7%AE%A1%E5%85%9A%E6%B2%BB%E5%85%9A%E5%85%B4%E5%85%9A%E5%BC%BA%E5%85%9A%E6%96%B0%E5%B1%80%E9%9D%A2%23"
+      },
+      {
+        "word": "小沈阳披荆斩棘冠军",
+        "num": 446243,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E6%B2%88%E9%98%B3%E6%8A%AB%E8%8D%86%E6%96%A9%E6%A3%98%E5%86%A0%E5%86%9B%23"
+      },
+      {
+        "word": "今年全国实现生娃基本不花钱",
+        "num": 178365,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%BB%8A%E5%B9%B4%E5%85%A8%E5%9B%BD%E5%AE%9E%E7%8E%B0%E7%94%9F%E5%A8%83%E5%9F%BA%E6%9C%AC%E4%B8%8D%E8%8A%B1%E9%92%B1%23"
+      },
+      {
+        "word": "马天宇劝文吉儿不要做的太绝情",
+        "num": 156457,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%A9%AC%E5%A4%A9%E5%AE%87%E5%8A%9D%E6%96%87%E5%90%89%E5%84%BF%E4%B8%8D%E8%A6%81%E5%81%9A%E7%9A%84%E5%A4%AA%E7%BB%9D%E6%83%85%23"
+      },
+      {
+        "word": "英特尔跌30%市值蒸发近1500亿美元",
+        "num": 140043,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%8B%B1%E7%89%B9%E5%B0%94%E8%B7%8C30%25%E5%B8%82%E5%80%BC%E8%92%B8%E5%8F%91%E8%BF%911500%E4%BA%BF%E7%BE%8E%E5%85%83%23"
+      },
+      {
+        "word": "大批理发店关停10元快剪走红",
+        "num": 136861,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23BLG%E5%AF%B9%E6%88%98TES%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%A7%E6%89%B9%E7%90%86%E5%8F%91%E5%BA%97%E5%85%B3%E5%81%9C10%E5%85%83%E5%BF%AB%E5%89%AA%E8%B5%B0%E7%BA%A2%23"
       },
       {
-        "word": "全面从严治党是全党的共同责任",
-        "num": 508843,
+        "word": "美股",
+        "num": 129435,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%85%A8%E9%9D%A2%E4%BB%8E%E4%B8%A5%E6%B2%BB%E5%85%9A%E6%98%AF%E5%85%A8%E5%85%9A%E7%9A%84%E5%85%B1%E5%90%8C%E8%B4%A3%E4%BB%BB%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%23"
       },
       {
-        "word": "小城良方云包场拿下爱奇艺史冠",
-        "num": 189836,
+        "word": "WTT蒙彼利埃女单八强赛",
+        "num": 82722,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E4%BA%91%E5%8C%85%E5%9C%BA%E6%8B%BF%E4%B8%8B%E7%88%B1%E5%A5%87%E8%89%BA%E5%8F%B2%E5%86%A0%23"
-      },
-      {
-        "word": "红果短剧凭什么这么红",
-        "num": 189206,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%9E%9C%E7%9F%AD%E5%89%A7%E5%87%AD%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E7%BA%A2%23"
-      },
-      {
-        "word": "谷歌市值蒸发超5000亿美元",
-        "num": 188752,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%B0%B7%E6%AD%8C%E5%B8%82%E5%80%BC%E8%92%B8%E5%8F%91%E8%B6%855000%E4%BA%BF%E7%BE%8E%E5%85%83%23"
-      },
-      {
-        "word": "王腾创业首款智能戒指",
-        "num": 187541,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E8%85%BE%E5%88%9B%E4%B8%9A%E9%A6%96%E6%AC%BE%E6%99%BA%E8%83%BD%E6%88%92%E6%8C%87%23"
-      },
-      {
-        "word": "茉莉奶白联名水杯爆裂致用户住院",
-        "num": 186939,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%8C%89%E8%8E%89%E5%A5%B6%E7%99%BD%E8%81%94%E5%90%8D%E6%B0%B4%E6%9D%AF%E7%88%86%E8%A3%82%E8%87%B4%E7%94%A8%E6%88%B7%E4%BD%8F%E9%99%A2%23"
-      },
-      {
-        "word": "数说中国海洋经济动力澎湃",
-        "num": 186077,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%95%B0%E8%AF%B4%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E7%BB%8F%E6%B5%8E%E5%8A%A8%E5%8A%9B%E6%BE%8E%E6%B9%83%23"
-      },
-      {
-        "word": "小城良方云包场强势来袭",
-        "num": 185662,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B0%8F%E5%9F%8E%E8%89%AF%E6%96%B9%E4%BA%91%E5%8C%85%E5%9C%BA%E5%BC%BA%E5%8A%BF%E6%9D%A5%E8%A2%AD%23"
+        "url": "https://s.weibo.com/weibo?q=%23WTT%E8%92%99%E5%BD%BC%E5%88%A9%E5%9F%83%E5%A5%B3%E5%8D%95%E5%85%AB%E5%BC%BA%E8%B5%9B%23"
       }
     ],
     "onthisday": [
       {
         "year": 2022,
-        "text": "印度古吉拉特邦莫尔比市一座百年吊桥坍塌，上百余人遇难。",
+        "text": "香港受股灾影响，恒生指数早段低见14597.31点，创2009年4月28日以来最低。",
+        "title": "香港",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF"
+      },
+      {
+        "year": 2021,
+        "text": "《联合国气候变化纲要公约》第26届缔约方会议召开。",
+        "title": "联合国气候变化框架公约",
+        "url": "https://zh.wikipedia.org/wiki/%E8%81%94%E5%90%88%E5%9B%BD%E6%B0%94%E5%80%99%E5%8F%98%E5%8C%96%E6%A1%86%E6%9E%B6%E5%85%AC%E7%BA%A6"
+      },
+      {
+        "year": 2019,
+        "text": "位于日本冲绳的世界文化遗产、琉球王国时期御城“首里城”遭遇大火，宫殿结构大面积损坏而需要重建。",
+        "title": "日本",
+        "url": "https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC"
+      },
+      {
+        "year": 2019,
+        "text": "巴基斯坦中部一列火车驶至旁遮普邦利亚卡特镇附近时突然爆炸起火，造成至少七十四人死、四十四人受伤。",
+        "title": "2019年巴基斯坦火车起火事故",
+        "url": "https://zh.wikipedia.org/wiki/2019%E5%B9%B4%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E7%81%AB%E8%BD%A6%E8%B5%B7%E7%81%AB%E4%BA%8B%E6%95%85"
+      },
+      {
+        "year": 2018,
+        "text": "纪念印度独立运动领导者萨达尔·瓦拉巴伊·帕特尔的团结雕像在古吉拉特邦那尔马达县正式落成，高达182米，是全球最高的雕像。",
         "title": "古吉拉特邦",
         "url": "https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%90%89%E6%8B%89%E7%89%B9%E9%82%A6"
       },
       {
-        "year": 2020,
-        "text": "希腊与土耳其之间的爱琴海发生Mww7.0地震，引发海啸并造成119人死亡。",
-        "title": "爱琴海",
-        "url": "https://zh.wikipedia.org/wiki/%E7%88%B1%E7%90%B4%E6%B5%B7"
-      },
-      {
-        "year": 2014,
-        "text": "瑞典成为欧盟首位于巴勒斯坦建交的成员国。",
-        "title": "瑞典",
-        "url": "https://zh.wikipedia.org/wiki/%E7%91%9E%E5%85%B8"
-      },
-      {
-        "year": 2012,
-        "text": "影响加勒比地区的飓风桑迪登陆美国新泽西州大西洋城，此次飓风已造成178人死亡。",
-        "title": "加勒比地区",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8A%A0%E5%8B%92%E6%AF%94%E5%9C%B0%E5%8C%BA"
-      },
-      {
-        "year": 2010,
-        "text": "美国喜剧演员乔恩·史都华与斯蒂芬·科拜尔在华盛顿特区主持了恢复理智和/或恐惧集会。",
-        "title": "喬恩·史都華",
-        "url": "https://zh.wikipedia.org/wiki/%E5%96%AC%E6%81%A9%C2%B7%E5%8F%B2%E9%83%BD%E8%8F%AF"
-      },
-      {
-        "year": 2007,
-        "text": "恒生指数历史单日最大成交金额，成交金额首次突破2000亿，录得2098.08亿。",
-        "title": "恒生指數",
-        "url": "https://zh.wikipedia.org/wiki/%E6%81%92%E7%94%9F%E6%8C%87%E6%95%B8"
+        "year": 2017,
+        "text": "一名乌兹别克移民驾驶租来的卡车冲撞纽约市曼哈顿下城的自行车骑士与跑步者，造成8人死亡。",
+        "title": "2017年紐約市襲擊",
+        "url": "https://zh.wikipedia.org/wiki/2017%E5%B9%B4%E7%B4%90%E7%B4%84%E5%B8%82%E8%A5%B2%E6%93%8A"
       }
     ]
   }
