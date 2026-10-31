@@ -71,14 +71,6 @@
             <div class="g-stat"><span class="g-stat-label">分数</span><span class="g-stat-value g-num" id="score">0</span></div>
             <div class="g-stat"><span class="g-stat-label">最高</span><span class="g-stat-value g-num" id="best">0</span></div>
             <div class="g-stat"><span class="g-stat-label">波次</span><span class="g-stat-value g-num" id="wave">1</span></div>
-            <div class="g-stat">
-                <span class="g-stat-label">生命</span>
-                <b class="g-stat-value hearts" id="lives">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ef5a67" d="M12 20.7C8.9 18.3 3.5 13.9 3.5 9.3 3.5 6.4 5.7 4.5 8 4.5c1.7 0 3.2.9 4 2.3.8-1.4 2.3-2.3 4-2.3 2.3 0 4.5 1.9 4.5 4.8 0 4.6-5.4 9-8.5 11.4z"/></svg>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ef5a67" d="M12 20.7C8.9 18.3 3.5 13.9 3.5 9.3 3.5 6.4 5.7 4.5 8 4.5c1.7 0 3.2.9 4 2.3.8-1.4 2.3-2.3 4-2.3 2.3 0 4.5 1.9 4.5 4.8 0 4.6-5.4 9-8.5 11.4z"/></svg>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ef5a67" d="M12 20.7C8.9 18.3 3.5 13.9 3.5 9.3 3.5 6.4 5.7 4.5 8 4.5c1.7 0 3.2.9 4 2.3.8-1.4 2.3-2.3 4-2.3 2.3 0 4.5 1.9 4.5 4.8 0 4.6-5.4 9-8.5 11.4z"/></svg>
-                </b>
-            </div>
         </section>
 
         <div class="g-stage" id="stage">
@@ -107,8 +99,11 @@
         var FIRE_CD = 0.22;              // 自动开火间隔（秒）
         var INV_TIME = 2.2;              // 受击无敌时长（秒）
 
-        // 三种敌机：菱形侦察机 / 箭头突击机 / 六边重装舰
-        var ECOLOR = { scout: '#ef6461', raider: '#f2913d', tank: '#a35ce8' };
+        // 六种敌机：菱形侦察机 / 箭头突击机 / 六边重装舰 / 蛇行穿梭机 / 三连发炮艇 / 高速狙击机
+        var ECOLOR = {
+            scout: '#ef6461', raider: '#f2913d', tank: '#a35ce8',
+            zigzag: '#8bc34a', gunship: '#26c6da', sniper: '#c7cede'
+        };
 
         /* ================= DOM 与画布 ================= */
         var cv = document.getElementById('gameCanvas');
@@ -123,7 +118,6 @@
         var scoreEl = document.getElementById('score');
         var bestEl = document.getElementById('best');
         var waveEl = document.getElementById('wave');
-        var livesEl = document.getElementById('lives');
         var aiBtn = document.getElementById('aiBtn');
         var aiBadge = document.getElementById('aiBadge');
 
@@ -173,11 +167,16 @@
                 spawnQueue: [], spawnTimer: 0, spawnGap: 1,
                 interWave: true, waveGap: 0.9,
                 fireCd: 0,
+                power: 1, wings: 0, shield: 0,    // 武器等级 / 僚机数 / 护盾层数
+                weapon: 'bullet',                 // 武器类型：bullet 弹丸 / laser 激光 / missile 追踪导弹
+                drops: [], wingCd: 0,             // 场上道具与僚机开火计时
+                combo: 0, comboT: 0,              // 连击数与连击窗口倒计时（秒）
+                aiGoal: null,                     // AI 意图点（决策网格点，实际 target 向其缓动）
                 keys: {}, target: null
             };
         }
 
-        // 组建第 n 波：数量随波次增加，强机型逐步加入
+        // 组建第 n 波：数量随波次增加，强机型逐步加入（3 波起蛇行机、4 波起炮艇、5 波起狙击机）
         function buildWaveCore(c, n) {
             c.spawnQueue.length = 0;
             var count = Math.min(6 + n * 2, 28);
@@ -186,6 +185,9 @@
                 if (n >= 2 && i % 4 === 3) t = 'raider';
                 if (n >= 3 && i % 7 === 6) t = 'tank';
                 if (n >= 5 && i % 5 === 4) t = 'raider';
+                if (n >= 3 && i % 9 === 5) t = 'zigzag';
+                if (n >= 4 && i % 8 === 2) t = 'gunship';
+                if (n >= 5 && i % 9 === 7) t = 'sniper';
                 c.spawnQueue.push(t);
             }
             c.spawnGap = Math.max(0.3, 1.0 - n * 0.05);
@@ -193,25 +195,42 @@
         }
 
         function spawnEnemyCore(c, type, rng) {
+            // hpWave：每过几波 +1 血；hpMax：封顶（防高波次变成血牛）
             var cfg = {
-                scout: { hp: 1, r: 13, score: 100, vy: 58 },
-                raider: { hp: 2, r: 16, score: 200, vy: 70 },
-                tank: { hp: 4, r: 21, score: 400, vy: 40 }
+                scout: { hp: 1, hpWave: 4, hpMax: 3, r: 13, score: 100, vy: 58 },
+                raider: { hp: 2, hpWave: 3, hpMax: 7, r: 16, score: 200, vy: 70 },
+                tank: { hp: 4, hpWave: 2, hpMax: 14, r: 21, score: 400, vy: 40 },
+                zigzag: { hp: 1, hpWave: 3, hpMax: 4, r: 12, score: 150, vy: 95 },
+                gunship: { hp: 3, hpWave: 3, hpMax: 9, r: 19, score: 350, vy: 46 },
+                sniper: { hp: 2, hpWave: 3, hpMax: 6, r: 14, score: 300, vy: 34 }
             }[type];
             var x = 26 + rng() * (LW - 52);
+            var hp = Math.min(cfg.hp + Math.floor((c.wave - 1) / cfg.hpWave), cfg.hpMax);
+            var sways = type === 'scout' || type === 'zigzag';   // 蛇行机型共用正弦摆动
             c.enemies.push({
                 type: type, x: x, baseX: x, y: -26,
-                hp: cfg.hp, maxHp: cfg.hp, r: cfg.r, score: cfg.score,
+                hp: hp, maxHp: hp, r: cfg.r, score: cfg.score,
+                elite: hp > cfg.hp,      // 血量超基础值：精英机（光环标记）
                 vy: cfg.vy * (1 + Math.min(c.wave * 0.06, 0.9)),
                 t: rng() * 6,
-                amp: type === 'scout' ? 18 + rng() * 22 : 0,
-                freq: 1.6 + rng() * 1.4,
-                fireT: 0.8 + rng() * (type === 'tank' ? 1.2 : 1.8)
+                amp: sways ? (type === 'zigzag' ? 34 + rng() * 26 : 18 + rng() * 22) : 0,
+                freq: type === 'zigzag' ? 3.2 + rng() * 1.6 : 1.6 + rng() * 1.4,
+                fireT: 0.8 + rng() * (type === 'tank' || type === 'gunship' ? 1.2 : 1.8),
+                burstN: 0, burstT: 0     // 炮艇三连发状态
             });
         }
 
+        // 生成一枚掉落道具：类型按权重抽取（火力 / 激光 / 导弹 / 僚机 / 护盾 / 清屏弹 / 补给）
+        function makeDrop(te, rng) {
+            var r = rng();
+            var type = r < 0.24 ? 'P' : r < 0.42 ? 'L' : r < 0.54 ? 'M'
+                : r < 0.68 ? 'W' : r < 0.82 ? 'S' : r < 0.91 ? 'B' : 'H';
+            return { x: te.x, y: te.y, type: type, vy: 56, t: rng() * 6 };
+        }
+
         function fireInterval(type, c, rng) {
-            var base = type === 'scout' ? 3.4 : type === 'raider' ? 2.5 : 2.1;
+            var base = type === 'scout' ? 3.4 : type === 'raider' ? 2.5
+                : type === 'tank' ? 2.1 : type === 'gunship' ? 2.4 : type === 'sniper' ? 2.8 : 3.6;
             return Math.max(0.9, base - c.wave * 0.09) * (0.75 + rng() * 0.5);
         }
 
@@ -229,7 +248,8 @@
                 var ddx = c.target.x - c.ship.x, ddy = c.target.y - c.ship.y;
                 var dist = Math.hypot(ddx, ddy);
                 if (dist > 1.5) {
-                    var step = Math.min(dist, FOLLOW_SPEED * dt);
+                    var spd = Math.min(FOLLOW_SPEED, dist * 10);   // 接近目标线性减速，避免到点急停
+                    var step = Math.min(dist, spd * dt);
                     c.ship.x += ddx / dist * step;
                     c.ship.y += ddy / dist * step;
                 }
@@ -240,23 +260,63 @@
 
         /* 核心单步推进：改写 c 并返回事件
            ev = { bursts 爆炸特效描述, kills 击落数, hits 命中数,
-                  waveClear 清空的波次号（0 表示无）, hit 是否中弹, over 是否阵亡 } */
+                  waveClear 清空的波次号（0 表示无）, hit 是否中弹, over 是否阵亡,
+                  pickups 拾取的道具, shieldPop 护盾抵挡, powerDown 火力下降 } */
         function stepCore(c, dt, rng) {
-            var ev = { bursts: [], kills: 0, hits: 0, waveClear: 0, hit: false, over: false };
+            var ev = { bursts: [], kills: 0, hits: 0, waveClear: 0, hit: false, over: false, pickups: [], shieldPop: false, powerDown: false };
             var i;
+
+            // 连击窗口倒计时：超时断连
+            c.comboT = Math.max(0, c.comboT - dt);
+            if (c.comboT <= 0) c.combo = 0;
 
             moveShipCore(c, dt);
             c.ship.inv = Math.max(0, c.ship.inv - dt);
 
-            // —— 自动开火（第 3 波起双联装） ——
+            // —— 自动开火（三种武器：弹幕随等级成长） ——
             c.fireCd -= dt;
             if (c.fireCd <= 0) {
-                if (c.wave >= 3) {
-                    c.bullets.push({ x: c.ship.x - 7, y: c.ship.y - 12, vy: -540 }, { x: c.ship.x + 7, y: c.ship.y - 12, vy: -540 });
+                if (c.weapon === 'laser') {
+                    // 脉冲激光：高频细光束，3 级双束、5 级三束
+                    c.fireCd = c.power >= 5 ? 0.08 : 0.12;
+                    if (c.power >= 5) {
+                        c.bullets.push({ x: c.ship.x - 10, y: c.ship.y - 14, vy: -620, kind: 'laser' }, { x: c.ship.x, y: c.ship.y - 16, vy: -620, kind: 'laser' }, { x: c.ship.x + 10, y: c.ship.y - 14, vy: -620, kind: 'laser' });
+                    } else if (c.power >= 3) {
+                        c.bullets.push({ x: c.ship.x - 6, y: c.ship.y - 14, vy: -620, kind: 'laser' }, { x: c.ship.x + 6, y: c.ship.y - 14, vy: -620, kind: 'laser' });
+                    } else {
+                        c.bullets.push({ x: c.ship.x, y: c.ship.y - 16, vy: -620, kind: 'laser' });
+                    }
+                } else if (c.weapon === 'missile') {
+                    // 追踪导弹：低速重弹自动寻的，命中溅射；4 级双发
+                    c.fireCd = Math.max(0.3, 0.46 - c.power * 0.03);
+                    if (c.power >= 4) {
+                        c.bullets.push({ x: c.ship.x - 8, y: c.ship.y - 12, vx: -30, vy: -260, kind: 'missile', track: 1, dmg: 3, splash: 1, rot: 0 }, { x: c.ship.x + 8, y: c.ship.y - 12, vx: 30, vy: -260, kind: 'missile', track: 1, dmg: 3, splash: 1, rot: 0 });
+                    } else {
+                        c.bullets.push({ x: c.ship.x, y: c.ship.y - 16, vx: 0, vy: -260, kind: 'missile', track: 1, dmg: 3, splash: 1, rot: 0 });
+                    }
                 } else {
-                    c.bullets.push({ x: c.ship.x, y: c.ship.y - 16, vy: -540 });
+                    // 弹丸：弹幕密度随等级提升，5 级射速加快
+                    c.fireCd = c.power >= 5 ? 0.16 : FIRE_CD;
+                    if (c.power === 1) {
+                        c.bullets.push({ x: c.ship.x, y: c.ship.y - 16, vy: -540 });
+                    } else {
+                        c.bullets.push({ x: c.ship.x - 7, y: c.ship.y - 12, vy: -540 }, { x: c.ship.x + 7, y: c.ship.y - 12, vy: -540 });
+                    }
+                    if (c.power >= 3) {
+                        c.bullets.push({ x: c.ship.x - 13, y: c.ship.y - 4, vy: -520, vx: -84 }, { x: c.ship.x + 13, y: c.ship.y - 4, vy: -520, vx: 84 });
+                    }
+                    if (c.power >= 4) {
+                        c.bullets.push({ x: c.ship.x, y: c.ship.y - 20, vy: -560 });
+                    }
                 }
-                c.fireCd = FIRE_CD;
+            }
+
+            // —— 僚机开火（跟随两侧的小无人机，匀速直射） ——
+            c.wingCd -= dt;
+            if (c.wings > 0 && c.wingCd <= 0) {
+                c.wingCd = 0.3;
+                if (c.wings >= 1) c.bullets.push({ x: c.ship.x - 22, y: c.ship.y + 2, vy: -480 });
+                if (c.wings >= 2) c.bullets.push({ x: c.ship.x + 22, y: c.ship.y + 2, vy: -480 });
             }
 
             // —— 波次调度 ——
@@ -281,11 +341,36 @@
                 }
             }
 
-            // —— 玩家子弹 ——
+            // —— 玩家子弹（斜射弹带横向分速度；追踪导弹自动寻的） ——
             for (i = 0; i < c.bullets.length; i++) {
                 var b = c.bullets[i];
+                if (b.track) {
+                    // 追踪：朝最近存活敌机限速转向
+                    var tgt = null, td = 1e9;
+                    for (var tk2 = 0; tk2 < c.enemies.length; tk2++) {
+                        var te2 = c.enemies[tk2];
+                        if (te2.dead) continue;
+                        var tdx = te2.x - b.x, tdy = te2.y - b.y;
+                        var tdd = tdx * tdx + tdy * tdy;
+                        if (tdd < td) { td = tdd; tgt = te2; }
+                    }
+                    var ca = Math.atan2(b.vy, b.vx);
+                    if (tgt) {
+                        var ta = Math.atan2(tgt.y - b.y, tgt.x - b.x);
+                        var diff = ta - ca;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+                        var turn = 4.6 * dt;
+                        ca += Math.max(-turn, Math.min(turn, diff));
+                    }
+                    var ms = 400;
+                    b.vx = Math.cos(ca) * ms;
+                    b.vy = Math.sin(ca) * ms;
+                    b.rot = ca + Math.PI / 2;   // 渲染朝向（弹头指向速度方向）
+                }
+                b.x += (b.vx || 0) * dt;
                 b.y += b.vy * dt;
-                if (b.y < -20) b.dead = true;
+                if (b.y < -24 || b.x < -20 || b.x > LW + 20) b.dead = true;
             }
 
             // —— 敌机 ——
@@ -293,8 +378,8 @@
                 var e = c.enemies[i];
                 e.t += dt;
                 e.y += e.vy * dt;
-                if (e.type === 'scout') {
-                    // 侦察机：左右正弦摆动
+                if (e.type === 'scout' || e.type === 'zigzag') {
+                    // 侦察机 / 蛇行机：左右正弦摆动（蛇行机幅度与频率更大）
                     e.x = e.baseX + Math.sin(e.t * e.freq) * e.amp;
                 } else if (e.type === 'raider') {
                     // 突击机：缓慢追踪玩家横坐标
@@ -304,20 +389,37 @@
                 }
                 e.x = Math.max(e.r + 4, Math.min(LW - e.r - 4, e.x));
                 if (e.y > LH + 34) { e.dead = true; continue; }
-                // 敌机开火：朝玩家方向瞄准（坦克在高波次三向散射）
+                // 敌机开火：朝玩家方向瞄准（坦克高波次三向散射；炮艇三连发；狙击机高速细弹）
                 if (e.y > 20 && e.y < LH - 90) {
-                    e.fireT -= dt;
-                    if (e.fireT <= 0) {
-                        e.fireT = fireInterval(e.type, c, rng);
-                        var ang = Math.atan2(c.ship.y - e.y, c.ship.x - e.x);
-                        var sp = Math.min(140 + c.wave * 9, 240);
-                        if (e.type === 'tank' && c.wave >= 4) {
-                            var offs = [-0.26, 0, 0.26];
-                            for (var oi = 0; oi < offs.length; oi++) {
-                                c.ebullets.push({ x: e.x, y: e.y + e.r * 0.5, vx: Math.cos(ang + offs[oi]) * sp, vy: Math.sin(ang + offs[oi]) * sp });
+                    if (e.burstN > 0) {
+                        // 炮艇连发中：按间隔逐发朝玩家当前位置
+                        e.burstT -= dt;
+                        if (e.burstT <= 0) {
+                            e.burstT = 0.13;
+                            e.burstN--;
+                            var ga = Math.atan2(c.ship.y - e.y, c.ship.x - e.x);
+                            var gs = Math.min(150 + c.wave * 8, 230);
+                            c.ebullets.push({ x: e.x, y: e.y + e.r * 0.4, vx: Math.cos(ga) * gs, vy: Math.sin(ga) * gs });
+                        }
+                    } else {
+                        e.fireT -= dt;
+                        if (e.fireT <= 0) {
+                            e.fireT = fireInterval(e.type, c, rng);
+                            var ang = Math.atan2(c.ship.y - e.y, c.ship.x - e.x);
+                            var sp = Math.min(140 + c.wave * 9, 240);
+                            if (e.type === 'tank' && c.wave >= 4) {
+                                var offs = [-0.26, 0, 0.26];
+                                for (var oi = 0; oi < offs.length; oi++) {
+                                    c.ebullets.push({ x: e.x, y: e.y + e.r * 0.5, vx: Math.cos(ang + offs[oi]) * sp, vy: Math.sin(ang + offs[oi]) * sp });
+                                }
+                            } else if (e.type === 'gunship') {
+                                e.burstN = 3; e.burstT = 0;   // 进入三连发
+                            } else if (e.type === 'sniper') {
+                                var sp2 = Math.min(300 + c.wave * 5, 380);
+                                c.ebullets.push({ x: e.x, y: e.y + e.r * 0.5, vx: Math.cos(ang) * sp2, vy: Math.sin(ang) * sp2, fast: 1 });
+                            } else {
+                                c.ebullets.push({ x: e.x, y: e.y + e.r * 0.5, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp });
                             }
-                        } else {
-                            c.ebullets.push({ x: e.x, y: e.y + e.r * 0.5, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp });
                         }
                     }
                 }
@@ -328,6 +430,13 @@
                 var eb = c.ebullets[i];
                 eb.x += eb.vx * dt; eb.y += eb.vy * dt;
                 if (eb.x < -10 || eb.x > LW + 10 || eb.y < -10 || eb.y > LH + 10) eb.dead = true;
+            }
+
+            // —— 道具下落 ——
+            for (i = 0; i < c.drops.length; i++) {
+                var dr = c.drops[i];
+                dr.y += dr.vy * dt; dr.t += dt;
+                if (dr.y > LH + 24) dr.dead = true;
             }
 
             // —— 命中判定：玩家子弹命中敌机 ——
@@ -341,17 +450,84 @@
                     var rr2 = (te.r + 4) * (te.r + 4);
                     if (ddx * ddx + ddy * ddy < rr2) {
                         pb.dead = true;
-                        te.hp--;
+                        te.hp -= (pb.dmg || 1);
                         ev.hits++;
-                        ev.bursts.push({ x: pb.x, y: pb.y - 2, color: '#ffd23f', n: 3, power: 0.5 });
+                        ev.bursts.push({ x: pb.x, y: pb.y - 2, color: pb.kind === 'laser' ? '#4fc3f7' : pb.kind === 'missile' ? '#ffab4a' : '#ffd23f', n: pb.kind === 'missile' ? 8 : 3, power: 0.5 });
+                        if (pb.splash) {
+                            // 导弹溅射：命中点半径内其他敌机各 1 伤（击破给基础分，不计连击）
+                            for (var si = 0; si < c.enemies.length; si++) {
+                                var se2 = c.enemies[si];
+                                if (se2 === te || se2.dead) continue;
+                                var sdx = se2.x - pb.x, sdy = se2.y - pb.y;
+                                var sr2 = (se2.r + 22) * (se2.r + 22);
+                                if (sdx * sdx + sdy * sdy < sr2) {
+                                    se2.hp -= 1;
+                                    if (se2.hp <= 0) {
+                                        se2.dead = true;
+                                        c.score += se2.score;
+                                        ev.kills++;
+                                        ev.bursts.push({ x: se2.x, y: se2.y, color: ECOLOR[se2.type], n: 16, power: 1.05, score: se2.score });
+                                    }
+                                }
+                            }
+                        }
                         if (te.hp <= 0) {
                             te.dead = true;
-                            c.score += te.score;
+                            c.combo++; c.comboT = 2.5;   // 连击 +1，刷新窗口
+                            var gain = te.score + Math.min(c.combo - 1, 8) * 10;
+                            c.score += gain;
                             ev.kills++;
-                            ev.bursts.push({ x: te.x, y: te.y, color: ECOLOR[te.type], n: 20, power: 1.1 });
+                            ev.bursts.push({ x: te.x, y: te.y, color: ECOLOR[te.type], n: 20, power: 1.1, score: gain, combo: c.combo });
+                            // 概率掉落道具（重装舰更慷慨）
+                            var dropP = te.type === 'tank' ? 0.4 : te.type === 'raider' ? 0.25 : 0.15;
+                            if (rng() < dropP) c.drops.push(makeDrop(te, rng));
                         }
                         break;
                     }
+                }
+            }
+
+            // —— 道具拾取（飞船 22px 内） ——
+            for (i = 0; i < c.drops.length; i++) {
+                var dp = c.drops[i];
+                var pdx = dp.x - c.ship.x, pdy = dp.y - c.ship.y;
+                if (pdx * pdx + pdy * pdy >= 484) continue;
+                dp.dead = true;
+                if (dp.type === 'P') {
+                    if (c.power < 5) { c.power++; ev.pickups.push({ type: 'P', level: c.power }); }
+                    else { c.score += 500; ev.pickups.push({ type: 'P', full: 1 }); }
+                } else if (dp.type === 'L') {
+                    // 激光武器：切换武器类型为高频脉冲激光
+                    c.weapon = 'laser';
+                    ev.pickups.push({ type: 'L' });
+                } else if (dp.type === 'M') {
+                    // 追踪导弹：切换武器类型为自动寻的重弹
+                    c.weapon = 'missile';
+                    ev.pickups.push({ type: 'M' });
+                } else if (dp.type === 'W') {
+                    if (c.wings < 2) { c.wings++; ev.pickups.push({ type: 'W' }); }
+                    else { c.score += 500; ev.pickups.push({ type: 'W', full: 1 }); }
+                } else if (dp.type === 'S') {
+                    if (c.shield < 2) { c.shield++; ev.pickups.push({ type: 'S' }); }
+                    else { c.score += 500; ev.pickups.push({ type: 'S', full: 1 }); }
+                } else if (dp.type === 'H') {
+                    if (c.ship.lives < 3) { c.ship.lives++; ev.pickups.push({ type: 'H' }); }
+                    else { c.score += 300; ev.pickups.push({ type: 'H', full: 1 }); }
+                } else {
+                    // B 清屏炸弹：敌弹全清，全场敌机 2 点伤害（击破给基础分，不计连击）
+                    c.ebullets.length = 0;
+                    for (var bi2 = 0; bi2 < c.enemies.length; bi2++) {
+                        var be = c.enemies[bi2];
+                        if (be.dead) continue;
+                        be.hp -= 2;
+                        if (be.hp <= 0) {
+                            be.dead = true;
+                            c.score += be.score;
+                            ev.kills++;
+                            ev.bursts.push({ x: be.x, y: be.y, color: ECOLOR[be.type], n: 20, power: 1.1, score: be.score });
+                        }
+                    }
+                    ev.pickups.push({ type: 'B' });
                 }
             }
 
@@ -379,15 +555,25 @@
                 }
             }
             if (hitFlag) {
-                // 被撞或中弹：扣一条命，进入无敌闪烁，清空敌弹给喘息
-                c.ship.lives--;
-                c.ship.inv = INV_TIME;
-                ev.bursts.push({ x: c.ship.x, y: c.ship.y, color: '#4a7bf7', n: 26, power: 1.4 });
-                c.ebullets.length = 0;
-                ev.hit = true;
-                if (c.ship.lives <= 0) {
-                    ev.over = true;
-                    ev.bursts.push({ x: c.ship.x, y: c.ship.y, color: '#ffd23f', n: 34, power: 1.6 });
+                if (c.shield > 0) {
+                    // 护盾抵挡：破一层盾，短无敌，不掉命不掉火力
+                    c.shield--;
+                    c.ship.inv = 1.2;
+                    ev.shieldPop = true;
+                    ev.bursts.push({ x: c.ship.x, y: c.ship.y, color: '#3a8ef7', n: 14, power: 0.9 });
+                } else {
+                    // 被撞或中弹：扣一条命，进入无敌闪烁，清空敌弹给喘息；火力掉一级、连击打断
+                    c.ship.lives--;
+                    c.ship.inv = INV_TIME;
+                    if (c.power > 1) { c.power--; ev.powerDown = true; }
+                    c.combo = 0; c.comboT = 0;
+                    ev.bursts.push({ x: c.ship.x, y: c.ship.y, color: '#4a7bf7', n: 26, power: 1.4 });
+                    c.ebullets.length = 0;
+                    ev.hit = true;
+                    if (c.ship.lives <= 0) {
+                        ev.over = true;
+                        ev.bursts.push({ x: c.ship.x, y: c.ship.y, color: '#ffd23f', n: 34, power: 1.6 });
+                    }
                 }
             }
 
@@ -395,6 +581,7 @@
             if (c.bullets.some(function (x2) { return x2.dead; })) c.bullets = c.bullets.filter(function (x2) { return !x2.dead; });
             if (c.ebullets.some(function (x2) { return x2.dead; })) c.ebullets = c.ebullets.filter(function (x2) { return !x2.dead; });
             if (c.enemies.some(function (x2) { return x2.dead; })) c.enemies = c.enemies.filter(function (x2) { return !x2.dead; });
+            if (c.drops.some(function (x2) { return x2.dead; })) c.drops = c.drops.filter(function (x2) { return !x2.dead; });
             return ev;
         }
 
@@ -414,7 +601,9 @@
             aimRange: 64,     // 瞄准横向容差（px）
             aimLook: 1.0,     // 瞄准时间窗口（秒）
             moveCost: 0.05,   // 每移动 100px 的代价（抑制抖动）
-            upCost: 0.30      // 每上移 100px 的代价（偏好多贴底走位）
+            upCost: 0.14,     // 每上移 100px 的代价（降低后 AI 敢于纵向走位）
+            pickW: 1.1,       // 道具吸引权重（顺路去接掉落道具）
+            pickRange: 170    // 道具吸引生效半径（px）
         };
 
         /* 匀速直线运动：两动点在 [0, tMax] 内的最近距离与时刻（解析法） */
@@ -439,10 +628,10 @@
             };
         }
 
-        /* 敌机瞬时速度线性近似（侦察机取正弦导数，突击机朝玩家追击） */
+        /* 敌机瞬时速度线性近似（侦察机 / 蛇行机取正弦导数，突击机朝玩家追击） */
         function enemyVel(e, c) {
             var vx = 0;
-            if (e.type === 'scout') {
+            if (e.type === 'scout' || e.type === 'zigzag') {
                 vx = Math.cos(e.t * e.freq) * e.freq * e.amp;
             } else if (e.type === 'raider') {
                 var vmax = 38 + c.wave * 3;
@@ -470,7 +659,21 @@
             return gain;
         }
 
-        /* 单个候选目标点的总代价：危险度 - 瞄准加分 */
+        /* 道具吸引加分：候选点越接近掉落道具（预判半秒漂移位）分越高，清屏弹更值钱 */
+        function pickGain(c, xT, yT) {
+            var gain = 0;
+            for (var i = 0; i < c.drops.length; i++) {
+                var dr = c.drops[i];
+                var dx = xT - dr.x, dy = yT - (dr.y + 28);   // 预判道具向下漂半秒
+                var d = Math.sqrt(dx * dx + dy * dy);
+                var w = dr.type === 'B' ? 1.5 : 1.0;
+                var g = AI_CFG.pickW * w * Math.max(0, 1 - d / AI_CFG.pickRange);
+                if (g > gain) gain = g;
+            }
+            return gain;
+        }
+
+        /* 单个候选目标点的总代价：危险度 - 瞄准加分 - 道具吸引 */
         function evalPoint(c, xT, yT) {
             var look = AI_CFG.look;
             var path = shipPath(c, xT, yT);
@@ -497,7 +700,7 @@
             for (i = 0; i < c.enemies.length; i++) {
                 var e = c.enemies[i];
                 if (e.y > c.ship.y + 160) continue;                // 已从下方远处掠过
-                eff = (e.r + 12) * AI_CFG.band + (e.type === 'scout' ? AI_CFG.scoutPad : 0);
+                eff = (e.r + 12) * AI_CFG.band + (e.type === 'scout' || e.type === 'zigzag' ? AI_CFG.scoutPad : 0);
                 var edx = e.x - c.ship.x, edy = e.y - c.ship.y;
                 var reach2 = (Math.abs(e.vy) + AI_CFG.speed) * look + eff + 60;
                 if (edx * edx + edy * edy > reach2 * reach2) continue;
@@ -511,7 +714,7 @@
                 if (bestD < eff) danger += AI_CFG.wEnemy / (1 + bestT) * (1 - bestD / eff);
             }
 
-            return danger - aimGain(c, xT, yT);
+            return danger - aimGain(c, xT, yT) - pickGain(c, xT, yT);
         }
 
         /* 每步决策：先粗扫候选网格，再在最优点附近加密横坐标，返回目标点 */
@@ -539,6 +742,9 @@
         var best = loadBest();
         var G = freshCore(Math.random);
         var parts = [], stars = [];
+        var rings = [], floaters = [];        // 冲击波圆环 / 得分飘字与连击艺术字
+        var shakeT = 0, shakeDur = 1, shakeAmp = 0;   // 震屏：剩余时长 / 总时长 / 振幅
+        var hitFlash = 0;                     // 受击全屏白闪
         var bannerT = 0, bannerText = '';
         var newRecord = false;
         var overT = 0;        // AI 模式：结算后自动续局倒计时
@@ -575,14 +781,48 @@
             }
         }
 
+        // 击落碎片：旋转矩形碎屑，随爆炸飞散
+        function spawnShards(x, y, color) {
+            for (var i = 0; i < 6; i++) {
+                var ang = Math.random() * Math.PI * 2;
+                var sp = 90 + Math.random() * 170;
+                var life = 0.45 + Math.random() * 0.25;
+                parts.push({
+                    x: x, y: y,
+                    vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+                    life: life, max: life,
+                    w: 3 + Math.random() * 3, h: 1.6 + Math.random() * 2,
+                    rot: Math.random() * Math.PI * 2, vr: (Math.random() - 0.5) * 14,
+                    color: color, shard: 1
+                });
+            }
+        }
+
+        /* ================= 打击感特效 ================= */
+        // 震屏登记：振幅更强或更久的震动优先，不叠加（避免连杀时越震越疯）
+        function addShake(amp, dur) {
+            if (shakeT <= 0 || amp >= shakeAmp * (shakeT / shakeDur)) {
+                shakeAmp = amp; shakeDur = dur; shakeT = dur;
+            }
+        }
+
+        // 找命中点附近的敌机（命中事件的坐标在子弹处，离敌机中心很近）
+        function nearestEnemy(x, y) {
+            var best = null, bd = 1e9;
+            for (var i = 0; i < G.enemies.length; i++) {
+                var e = G.enemies[i];
+                if (e.dead) continue;
+                var d = (e.x - x) * (e.x - x) + (e.y - y) * (e.y - y);
+                if (d < bd) { bd = d; best = e; }
+            }
+            return (best && bd < (best.r + 10) * (best.r + 10)) ? best : null;
+        }
+
         /* ================= 界面与状态切换 ================= */
         function updateHud() {
             scoreEl.textContent = G.score;
             bestEl.textContent = best;
             waveEl.textContent = Math.max(1, G.wave);
-            // 生命图标：失去的心变暗
-            var hs = livesEl.children;
-            for (var i = 0; i < hs.length; i++) hs[i].classList.toggle('off', i >= G.ship.lives);
             pauseBtn.disabled = (state === 'start' || state === 'over');
             icoPause.hidden = (state !== 'playing');
             icoPlay.hidden = (state !== 'paused');
@@ -619,6 +859,8 @@
             G = freshCore(Math.random);
             G.keys = oldKeys;               // 按住的按键跨重开延续
             parts = [];
+            rings = []; floaters = [];
+            shakeT = 0; hitFlash = 0;
             bannerT = 0.9; bannerText = '第 1 波';
             newRecord = false;
             scoreEl.textContent = '0';
@@ -661,12 +903,23 @@
             if (state === 'start') { startGame(); return; }
             if (state === 'paused') { setPaused(false); return; }
             if (state !== 'playing') return;
-            G.keys = {}; G.target = null;   // AI 全权接管，忽略物理按键与指针
+            G.keys = {};                    // AI 全权接管，忽略物理按键
+            // 决策：周期性选定网格意图点
             aiClock -= dt;
-            if (aiClock > 0) return;
-            aiClock = 0.1;
-            var t = aiPickTarget(G);
-            G.target = { x: t.x, y: t.y };
+            if (aiClock <= 0) {
+                aiClock = 0.1;
+                var t = aiPickTarget(G);
+                G.aiGoal = { x: t.x, y: t.y };
+            }
+            // 平滑：实际目标每帧向意图点缓动，飞机不再朝跳变目标反复急转
+            if (G.aiGoal) {
+                if (!G.target) G.target = { x: G.aiGoal.x, y: G.aiGoal.y };
+                var k = Math.min(1, dt * 12);
+                G.target.x += (G.aiGoal.x - G.target.x) * k;
+                G.target.y += (G.aiGoal.y - G.target.y) * k;
+            } else {
+                G.target = null;
+            }
         }
 
         function setAi(on) {
@@ -682,6 +935,25 @@
         }
 
         /* ================= 绘制 ================= */
+        // 生命心形（与 HUD 旧图标同款轮廓，on=false 时变暗）
+        function drawHeart(x, y, on) {
+            g.save();
+            g.translate(x, y);
+            g.scale(0.62, 0.62);
+            g.beginPath();
+            g.moveTo(12, 20.7);
+            g.bezierCurveTo(8.9, 18.3, 3.5, 13.9, 3.5, 9.3);
+            g.bezierCurveTo(3.5, 6.4, 5.7, 4.5, 8, 4.5);
+            g.bezierCurveTo(9.7, 4.5, 11.2, 5.4, 12, 6.8);
+            g.bezierCurveTo(12.8, 5.4, 14.3, 4.5, 16, 4.5);
+            g.bezierCurveTo(18.3, 4.5, 20.5, 6.4, 20.5, 9.3);
+            g.bezierCurveTo(20.5, 13.9, 15.1, 18.3, 12, 20.7);
+            g.closePath();
+            g.fillStyle = on ? '#ef5a67' : 'rgba(110,120,140,0.22)';
+            g.fill();
+            g.restore();
+        }
+
         function drawShip() {
             // 无敌闪烁帧：半透明 / 实体交替
             var alpha = 1;
@@ -689,55 +961,205 @@
             g.globalAlpha = alpha;
             g.save();
             g.translate(G.ship.x, G.ship.y);
-            // 引擎火焰（随机抖动）
-            var flick = 7 + Math.random() * 5;
+            // 受击挤压拉伸：横向鼓起、纵向压扁，随 sq 衰减回弹
+            var sq = G.ship.sq || 0;
+            if (sq > 0.005) g.scale(1 + sq * 0.55, 1 - sq * 0.8);
+
+            // 引擎光晕（双喷口，叠加发亮，画在机身下层）
+            g.globalCompositeOperation = 'lighter';
+            g.fillStyle = 'rgba(255,171,74,0.3)';
             g.beginPath();
-            g.moveTo(-4.5, 12);
-            g.lineTo(0, 12 + flick);
-            g.lineTo(4.5, 12);
-            g.closePath();
-            g.fillStyle = '#ffab4a';
+            g.arc(-3, 14, 4, 0, Math.PI * 2);
+            g.arc(3, 14, 4, 0, Math.PI * 2);
             g.fill();
-            // 机身：三角战机（多段折线拼装）
+            g.globalCompositeOperation = 'source-over';
+            // 双引擎火焰（外焰橙 + 内焰亮黄，随机抖动）
+            var f1 = 6 + Math.random() * 5, f2 = 6 + Math.random() * 5;
+            g.fillStyle = '#ff9a3d';
             g.beginPath();
-            g.moveTo(0, -16);
-            g.lineTo(11, 10);
-            g.lineTo(5, 7);
-            g.lineTo(0, 12);
-            g.lineTo(-5, 7);
-            g.lineTo(-11, 10);
-            g.closePath();
-            g.fillStyle = '#3a6ff2';
+            g.moveTo(-4.4, 12.5); g.lineTo(-3, 12.5 + f1); g.lineTo(-1.6, 12.5); g.closePath();
+            g.moveTo(1.6, 12.5); g.lineTo(3, 12.5 + f2); g.lineTo(4.4, 12.5); g.closePath();
             g.fill();
-            g.lineWidth = 1.2;
-            g.strokeStyle = '#2a55c4';
+            g.fillStyle = '#ffe08a';
+            g.beginPath();
+            g.moveTo(-3.7, 12.5); g.lineTo(-3, 12.5 + f1 * 0.55); g.lineTo(-2.3, 12.5); g.closePath();
+            g.moveTo(2.3, 12.5); g.lineTo(3, 12.5 + f2 * 0.55); g.lineTo(3.7, 12.5); g.closePath();
+            g.fill();
+
+            // 主翼：大后掠三角翼（整机下层，深蓝）
+            g.beginPath();
+            g.moveTo(1.5, -3);
+            g.lineTo(16.5, 9.5);
+            g.lineTo(16.5, 12.5);
+            g.lineTo(3.5, 10);
+            g.lineTo(-3.5, 10);
+            g.lineTo(-16.5, 12.5);
+            g.lineTo(-16.5, 9.5);
+            g.lineTo(-1.5, -3);
+            g.closePath();
+            g.fillStyle = '#2b4ea8';
+            g.fill();
+            // 翼前缘高光
+            g.strokeStyle = 'rgba(255,255,255,0.35)';
+            g.lineWidth = 1;
+            g.beginPath();
+            g.moveTo(1.5, -3); g.lineTo(16.5, 9.5);
+            g.moveTo(-1.5, -3); g.lineTo(-16.5, 9.5);
             g.stroke();
-            // 座舱
+
+            // 尾翼：小 V 尾
             g.beginPath();
-            g.arc(0, -3, 3.4, 0, Math.PI * 2);
-            g.fillStyle = '#d8e6ff';
+            g.moveTo(0, 7);
+            g.lineTo(5.5, 14.5);
+            g.lineTo(5.5, 16.5);
+            g.lineTo(0, 12.5);
+            g.lineTo(-5.5, 16.5);
+            g.lineTo(-5.5, 14.5);
+            g.closePath();
+            g.fillStyle = '#24418c';
             g.fill();
-            // 翼灯
-            g.fillStyle = '#ffd23f';
-            g.fillRect(-11, 8, 2.4, 2.4);
-            g.fillRect(8.6, 8, 2.4, 2.4);
+
+            // 机身：细长纺锤（横向渐变塑立体感）
+            var bodyGrad = g.createLinearGradient(-5, 0, 5, 0);
+            bodyGrad.addColorStop(0, '#2e5cc8');
+            bodyGrad.addColorStop(0.45, '#5b8df6');
+            bodyGrad.addColorStop(0.6, '#5b8df6');
+            bodyGrad.addColorStop(1, '#2e5cc8');
+            g.beginPath();
+            g.moveTo(0, -19);
+            g.lineTo(2.2, -12);
+            g.lineTo(4, -2);
+            g.lineTo(3.2, 8);
+            g.lineTo(2, 13);
+            g.lineTo(-2, 13);
+            g.lineTo(-3.2, 8);
+            g.lineTo(-4, -2);
+            g.lineTo(-2.2, -12);
+            g.closePath();
+            g.fillStyle = bodyGrad;
+            g.fill();
+            g.lineWidth = 1.1;
+            g.strokeStyle = '#24418c';
+            g.stroke();
+            // 机头高光线
+            g.strokeStyle = 'rgba(255,255,255,0.5)';
+            g.lineWidth = 1;
+            g.beginPath();
+            g.moveTo(0, -17.5); g.lineTo(0, -8);
+            g.stroke();
+
+            // 座舱：玻璃渐变椭圆
+            var cp = g.createLinearGradient(0, -10, 0, -1);
+            cp.addColorStop(0, '#eaf4ff');
+            cp.addColorStop(1, '#7fb0ff');
+            g.beginPath();
+            g.ellipse(0, -5.5, 2.6, 4.6, 0, 0, Math.PI * 2);
+            g.fillStyle = cp;
+            g.fill();
+            g.strokeStyle = 'rgba(36,65,140,0.6)';
+            g.lineWidth = 0.8;
+            g.stroke();
+
+            // 翼尖航行灯（左绿右红）
+            g.globalCompositeOperation = 'lighter';
+            g.fillStyle = 'rgba(110,231,138,0.9)';
+            g.beginPath(); g.arc(-15.6, 11, 1.4, 0, Math.PI * 2); g.fill();
+            g.fillStyle = 'rgba(255,210,63,0.9)';
+            g.beginPath(); g.arc(15.6, 11, 1.4, 0, Math.PI * 2); g.fill();
+            g.globalCompositeOperation = 'source-over';
+
+            // 护盾圈：层数对应亮度，轻微脉动
+            if (G.shield > 0) {
+                var pulse = Math.sin(performance.now() * 0.005) * 1.2;
+                g.globalCompositeOperation = 'lighter';
+                g.strokeStyle = 'rgba(90,170,255,0.65)';
+                g.lineWidth = 2;
+                g.beginPath(); g.arc(0, 0, 21 + pulse, 0, Math.PI * 2); g.stroke();
+                if (G.shield > 1) {
+                    g.strokeStyle = 'rgba(90,170,255,0.3)';
+                    g.lineWidth = 5;
+                    g.beginPath(); g.arc(0, 0, 24.5 + pulse, 0, Math.PI * 2); g.stroke();
+                }
+                g.globalCompositeOperation = 'source-over';
+            }
+
             g.restore();
             g.globalAlpha = 1;
         }
 
-        // 敌机轮廓（相对原点的路径，随类型变化）
+        // 敌机整机剪影（相对原点的多子路径，随类型变化；主体填充与闪白重描共用）
         function traceEnemy(e) {
             var r = e.r;
             if (e.type === 'scout') {
+                // 侦察机：菱形主体 + 两侧短翼板（小型无人机）
                 g.beginPath();
-                g.moveTo(0, -r); g.lineTo(r * 0.78, 0); g.lineTo(0, r); g.lineTo(-r * 0.78, 0);
+                g.moveTo(0, -r);
+                g.lineTo(r * 0.62, 0);
+                g.lineTo(0, r);
+                g.lineTo(-r * 0.62, 0);
+                g.closePath();
+                g.moveTo(r * 0.5, -r * 0.16);
+                g.lineTo(r * 1.12, -r * 0.3);
+                g.lineTo(r * 1.12, r * 0.16);
+                g.lineTo(r * 0.5, r * 0.28);
+                g.closePath();
+                g.moveTo(-r * 0.5, -r * 0.16);
+                g.lineTo(-r * 1.12, -r * 0.3);
+                g.lineTo(-r * 1.12, r * 0.16);
+                g.lineTo(-r * 0.5, r * 0.28);
                 g.closePath();
             } else if (e.type === 'raider') {
+                // 突击机：中央箭头机身 + 左右前伸攻击叉（头朝下扑向玩家）
                 g.beginPath();
-                g.moveTo(0, r); g.lineTo(r * 0.95, -r * 0.5); g.lineTo(0, -r * 0.15); g.lineTo(-r * 0.95, -r * 0.5);
+                g.moveTo(0, r);
+                g.lineTo(r * 0.3, r * 0.15);
+                g.lineTo(r * 0.26, -r * 0.62);
+                g.lineTo(0, -r * 0.5);
+                g.lineTo(-r * 0.26, -r * 0.62);
+                g.lineTo(-r * 0.3, r * 0.15);
+                g.closePath();
+                g.moveTo(r * 0.18, -r * 0.12);
+                g.lineTo(r * 0.98, -r * 0.66);
+                g.lineTo(r * 0.72, -r * 0.22);
+                g.lineTo(r * 0.3, r * 0.5);
+                g.closePath();
+                g.moveTo(-r * 0.18, -r * 0.12);
+                g.lineTo(-r * 0.98, -r * 0.66);
+                g.lineTo(-r * 0.72, -r * 0.22);
+                g.lineTo(-r * 0.3, r * 0.5);
+                g.closePath();
+            } else if (e.type === 'zigzag') {
+                // 蛇行穿梭机：燕形飞镖（上尖后掠、尾部内凹）
+                g.beginPath();
+                g.moveTo(0, -r);
+                g.lineTo(r * 0.6, -r * 0.1);
+                g.lineTo(r * 0.28, r * 0.42);
+                g.lineTo(0, r * 0.14);
+                g.lineTo(-r * 0.28, r * 0.42);
+                g.lineTo(-r * 0.6, -r * 0.1);
+                g.closePath();
+            } else if (e.type === 'gunship') {
+                // 炮艇：宽体舰身（正面宽、前缘收窄的装甲艇）
+                g.beginPath();
+                g.moveTo(-r * 0.95, -r * 0.25);
+                g.lineTo(-r * 0.5, -r * 0.55);
+                g.lineTo(r * 0.5, -r * 0.55);
+                g.lineTo(r * 0.95, -r * 0.25);
+                g.lineTo(r * 0.75, r * 0.35);
+                g.lineTo(r * 0.3, r * 0.6);
+                g.lineTo(-r * 0.3, r * 0.6);
+                g.lineTo(-r * 0.75, r * 0.35);
+                g.closePath();
+            } else if (e.type === 'sniper') {
+                // 狙击机：细长菱形（纵向拉长的瞄准体）
+                g.beginPath();
+                g.moveTo(0, r * 1.1);
+                g.lineTo(r * 0.4, 0);
+                g.lineTo(0, -r * 0.9);
+                g.lineTo(-r * 0.4, 0);
                 g.closePath();
             } else {
-                // 重装舰：慢速自转的六边形
+                // 重装舰：慢速自转的六边舰体
                 g.beginPath();
                 for (var i = 0; i < 6; i++) {
                     var a = Math.PI / 6 + i * Math.PI / 3 + e.t * 0.5;
@@ -750,8 +1172,23 @@
 
         function drawEnemy(e) {
             g.save();
-            g.translate(e.x, e.y);
+            // 击退偏移 + 挤压拉伸（被击中时纵向压扁、横向鼓起，快速回弹）
+            g.translate(e.x + (e.kx || 0), e.y + (e.ky || 0));
+            var sq = e.sq || 0;
+            if (sq > 0.005) g.scale(1 + sq * 0.7, 1 - sq);
             if (e.type === 'scout') g.rotate(Math.sin(e.t * 3) * 0.14);
+            var r = e.r;
+            // 精英机光环（血量超基础值的高波次敌机）
+            if (e.elite) {
+                g.globalCompositeOperation = 'lighter';
+                g.globalAlpha = 0.55;
+                g.strokeStyle = ECOLOR[e.type];
+                g.lineWidth = 1.6;
+                g.beginPath(); g.arc(0, 0, r + 4.5, 0, Math.PI * 2); g.stroke();
+                g.globalAlpha = 1;
+                g.globalCompositeOperation = 'source-over';
+            }
+            // 剪影主体
             traceEnemy(e);
             g.fillStyle = ECOLOR[e.type];
             g.fill();
@@ -759,18 +1196,202 @@
             g.lineWidth = 1.5;
             g.strokeStyle = 'rgba(50,40,70,0.35)';
             g.stroke();
-            // 座舱
+            // —— 机型细节 ——
+            if (e.type === 'scout') {
+                // 中心发光核心 + 头部尖端
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(255,120,110,0.55)';
+                g.beginPath(); g.arc(0, 0, r * 0.34, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
+                g.fillStyle = '#ffe3e0';
+                g.beginPath(); g.arc(0, 0, r * 0.17, 0, Math.PI * 2); g.fill();
+                g.beginPath();
+                g.moveTo(0, -r * 0.92);
+                g.lineTo(r * 0.16, -r * 0.52);
+                g.lineTo(-r * 0.16, -r * 0.52);
+                g.closePath();
+                g.fillStyle = 'rgba(255,255,255,0.5)';
+                g.fill();
+            } else if (e.type === 'raider') {
+                // 尾部双喷口光点（背向玩家）
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(255,171,74,0.6)';
+                g.beginPath();
+                g.arc(r * 0.13, -r * 0.62, r * 0.14, 0, Math.PI * 2);
+                g.arc(-r * 0.13, -r * 0.62, r * 0.14, 0, Math.PI * 2);
+                g.fill();
+                g.globalCompositeOperation = 'source-over';
+                // 座舱（头朝下，位于 +y 侧）
+                g.beginPath();
+                g.arc(0, r * 0.32, Math.max(2.2, r * 0.22), 0, Math.PI * 2);
+                g.fillStyle = 'rgba(255,255,255,0.75)';
+                g.fill();
+                // 叉翼暗纹
+                g.strokeStyle = 'rgba(60,35,15,0.3)';
+                g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(r * 0.24, r * 0.36); g.lineTo(r * 0.9, -r * 0.56);
+                g.moveTo(-r * 0.24, r * 0.36); g.lineTo(-r * 0.9, -r * 0.56);
+                g.stroke();
+            } else if (e.type === 'zigzag') {
+                // 尾部双喷口（背向玩家）+ 中心核心
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(180,255,140,0.55)';
+                g.beginPath();
+                g.arc(r * 0.16, -r * 0.2, r * 0.13, 0, Math.PI * 2);
+                g.arc(-r * 0.16, -r * 0.2, r * 0.13, 0, Math.PI * 2);
+                g.fill();
+                g.globalCompositeOperation = 'source-over';
+                g.fillStyle = '#f2ffe0';
+                g.beginPath(); g.arc(0, 0, r * 0.16, 0, Math.PI * 2); g.fill();
+            } else if (e.type === 'gunship') {
+                // 前缘炮口 + 两侧舷窗 + 装甲横纹
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(120,235,255,0.6)';
+                g.beginPath(); g.arc(0, r * 0.34, r * 0.18, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
+                g.fillStyle = '#e5feff';
+                g.beginPath(); g.arc(0, r * 0.34, r * 0.09, 0, Math.PI * 2); g.fill();
+                g.fillStyle = 'rgba(255,255,255,0.5)';
+                g.beginPath();
+                g.arc(-r * 0.42, -r * 0.1, r * 0.09, 0, Math.PI * 2);
+                g.arc(r * 0.42, -r * 0.1, r * 0.09, 0, Math.PI * 2);
+                g.fill();
+                g.strokeStyle = 'rgba(10,60,70,0.35)';
+                g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(-r * 0.7, r * 0.05); g.lineTo(r * 0.7, r * 0.05);
+                g.stroke();
+            } else if (e.type === 'sniper') {
+                // 充能核心 + 瞄准准线
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(255,120,110,0.6)';
+                g.beginPath(); g.arc(0, 0, r * 0.22, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
+                g.fillStyle = '#fff2f0';
+                g.beginPath(); g.arc(0, 0, r * 0.1, 0, Math.PI * 2); g.fill();
+                g.strokeStyle = 'rgba(70,60,90,0.35)';
+                g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(0, -r * 0.55); g.lineTo(0, r * 0.75);
+                g.moveTo(-r * 0.22, 0); g.lineTo(r * 0.22, 0);
+                g.stroke();
+            } else {
+                // 装甲内衬（跟随自转的内六边）
+                g.beginPath();
+                for (var i = 0; i < 6; i++) {
+                    var a2 = Math.PI / 6 + i * Math.PI / 3 + e.t * 0.5;
+                    var px2 = Math.cos(a2) * r * 0.64, py2 = Math.sin(a2) * r * 0.64;
+                    if (i) g.lineTo(px2, py2); else g.moveTo(px2, py2);
+                }
+                g.closePath();
+                g.fillStyle = 'rgba(35,15,60,0.35)';
+                g.fill();
+                // 六顶点铆钉
+                g.fillStyle = 'rgba(255,255,255,0.4)';
+                for (var j = 0; j < 6; j++) {
+                    var a3 = Math.PI / 6 + j * Math.PI / 3 + e.t * 0.5;
+                    g.beginPath();
+                    g.arc(Math.cos(a3) * r * 0.82, Math.sin(a3) * r * 0.82, 1.4, 0, Math.PI * 2);
+                    g.fill();
+                }
+                // 中心炮塔：暗座圈 + 发光核心
+                g.beginPath(); g.arc(0, 0, r * 0.36, 0, Math.PI * 2);
+                g.fillStyle = 'rgba(30,12,52,0.55)';
+                g.fill();
+                g.strokeStyle = 'rgba(255,255,255,0.3)';
+                g.lineWidth = 1;
+                g.stroke();
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(190,120,255,0.6)';
+                g.beginPath(); g.arc(0, 0, r * 0.2, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
+                g.fillStyle = '#f2e6ff';
+                g.beginPath(); g.arc(0, 0, r * 0.09, 0, Math.PI * 2); g.fill();
+            }
+            // 命中闪白：剪影整体重描一遍白色，随计时衰减
+            if ((e.flash || 0) > 0) {
+                traceEnemy(e);
+                g.globalAlpha = Math.min(1, e.flash / 0.1) * 0.9;
+                g.fillStyle = '#ffffff';
+                g.fill();
+                g.globalAlpha = 1;
+            }
+            g.restore();
+        }
+
+        /* ================= 道具与僚机 ================= */
+        // 道具徽章配色与名称
+        var DROP_META = {
+            P: { color: '#f5a623', glow: 'rgba(245,166,35,0.28)', label: '火力' },
+            L: { color: '#4fc3f7', glow: 'rgba(79,195,247,0.28)', label: '激光' },
+            M: { color: '#ff7043', glow: 'rgba(255,112,67,0.28)', label: '导弹' },
+            W: { color: '#38b26a', glow: 'rgba(56,178,106,0.28)', label: '僚机' },
+            S: { color: '#3a8ef7', glow: 'rgba(58,142,247,0.28)', label: '护盾' },
+            B: { color: '#ef5a67', glow: 'rgba(239,90,103,0.28)', label: '清屏' },
+            H: { color: '#e86ba8', glow: 'rgba(232,107,168,0.28)', label: '补给' }
+        };
+
+        function drawDrop(d) {
+            var meta = DROP_META[d.type];
+            var bob = Math.sin(d.t * 3.2) * 2;      // 上下浮动
+            g.save();
+            g.translate(d.x, d.y + bob);
+            // 光晕
+            g.globalCompositeOperation = 'lighter';
+            g.fillStyle = meta.glow;
+            g.beginPath(); g.arc(0, 0, 13, 0, Math.PI * 2); g.fill();
+            g.globalCompositeOperation = 'source-over';
+            // 徽章：白圈 + 彩色内圆 + 白字母
+            g.beginPath(); g.arc(0, 0, 9.5, 0, Math.PI * 2);
+            g.fillStyle = '#ffffff'; g.fill();
+            g.beginPath(); g.arc(0, 0, 8.2, 0, Math.PI * 2);
+            g.fillStyle = meta.color; g.fill();
+            g.fillStyle = '#ffffff';
+            g.font = '700 10px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+            g.textAlign = 'center';
+            g.textBaseline = 'middle';
+            g.fillText(d.type, 0, 0.5);
+            g.restore();
+        }
+
+        // 僚机：跟随两侧的绿色小无人机
+        function drawWing(side) {
+            g.save();
+            g.translate(G.ship.x + side * 22, G.ship.y + 4);
+            // 引擎光点
+            g.globalCompositeOperation = 'lighter';
+            g.fillStyle = 'rgba(120,220,160,0.4)';
+            g.beginPath(); g.arc(0, 8, 3, 0, Math.PI * 2); g.fill();
+            g.globalCompositeOperation = 'source-over';
+            // 机身小三角
             g.beginPath();
-            g.arc(0, e.type === 'raider' ? e.r * 0.05 : -e.r * 0.1, Math.max(2.5, e.r * 0.28), 0, Math.PI * 2);
-            g.fillStyle = 'rgba(255,255,255,0.75)';
+            g.moveTo(0, -8);
+            g.lineTo(5.5, 6);
+            g.lineTo(0, 3.5);
+            g.lineTo(-5.5, 6);
+            g.closePath();
+            g.fillStyle = '#2f9e63';
+            g.fill();
+            g.lineWidth = 1;
+            g.strokeStyle = '#1f7a4a';
+            g.stroke();
+            g.beginPath(); g.arc(0, -1, 1.6, 0, Math.PI * 2);
+            g.fillStyle = '#d9ffe9';
             g.fill();
             g.restore();
         }
 
         function draw() {
-            // 背景
+            g.save();
+            // 震屏：整幅画面随机偏移，振幅随剩余时长衰减
+            if (shakeT > 0) {
+                var sk = Math.max(0, shakeT / shakeDur);
+                g.translate((Math.random() * 2 - 1) * shakeAmp * sk, (Math.random() * 2 - 1) * shakeAmp * sk);
+            }
+            // 背景（多画一圈余量，震屏偏移时不露白边）
             g.fillStyle = bgGrad;
-            g.fillRect(0, 0, LW, LH);
+            g.fillRect(-24, -24, LW + 48, LH + 48);
             // 星空
             for (var i = 0; i < stars.length; i++) {
                 var st = stars[i];
@@ -783,28 +1404,124 @@
             g.globalAlpha = 1;
             // 敌机
             for (var e = 0; e < G.enemies.length; e++) drawEnemy(G.enemies[e]);
-            // 玩家子弹
+            // 玩家子弹（弹丸 / 激光光束 / 追踪导弹三种弹型）
             for (var b = 0; b < G.bullets.length; b++) {
                 var pb = G.bullets[b];
+                if (pb.kind === 'laser') {
+                    g.globalCompositeOperation = 'lighter';
+                    g.fillStyle = 'rgba(79,195,247,0.22)';
+                    rr(g, pb.x - 3, pb.y - 10, 6, 20, 3); g.fill();
+                    g.globalCompositeOperation = 'source-over';
+                    g.fillStyle = '#4fc3f7';
+                    rr(g, pb.x - 1.1, pb.y - 8, 2.2, 16, 1.1); g.fill();
+                    g.fillStyle = '#e8f7ff';
+                    rr(g, pb.x - 0.55, pb.y - 6, 1.1, 11, 0.6); g.fill();
+                    continue;
+                }
+                if (pb.kind === 'missile') {
+                    g.save();
+                    g.translate(pb.x, pb.y);
+                    g.rotate(pb.rot || 0);
+                    g.fillStyle = '#ff7043';
+                    g.beginPath();
+                    g.moveTo(0, -7);          // 弹头（速度方向）
+                    g.lineTo(3.2, 3);
+                    g.lineTo(0, 1.2);
+                    g.lineTo(-3.2, 3);
+                    g.closePath();
+                    g.fill();
+                    g.strokeStyle = '#d84315';
+                    g.lineWidth = 1;
+                    g.stroke();
+                    g.fillStyle = '#ffe0b2';
+                    g.beginPath(); g.arc(0, 1.6, 1.2, 0, Math.PI * 2); g.fill();
+                    g.restore();
+                    continue;
+                }
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(255,200,80,0.18)';
+                g.beginPath(); g.arc(pb.x, pb.y - 1, 9, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
                 g.fillStyle = 'rgba(255,210,63,0.35)';
                 rr(g, pb.x - 2.4, pb.y - 6, 4.8, 13, 2.4); g.fill();
                 g.fillStyle = '#ffd23f';
                 rr(g, pb.x - 1.4, pb.y - 4.5, 2.8, 10, 1.4); g.fill();
             }
-            // 敌弹
+            // 敌弹（狙击弹为沿速度方向的细长弹）
             for (var eb = 0; eb < G.ebullets.length; eb++) {
                 var eb2 = G.ebullets[eb];
+                if (eb2.fast) {
+                    g.save();
+                    g.translate(eb2.x, eb2.y);
+                    g.rotate(Math.atan2(eb2.vy, eb2.vx) - Math.PI / 2);
+                    g.globalCompositeOperation = 'lighter';
+                    g.fillStyle = 'rgba(255,95,87,0.25)';
+                    rr(g, -2.2, -8, 4.4, 16, 2.2); g.fill();
+                    g.globalCompositeOperation = 'source-over';
+                    g.fillStyle = '#ff5f57';
+                    rr(g, -1.2, -6, 2.4, 12, 1.2); g.fill();
+                    g.fillStyle = '#ffd9d5';
+                    rr(g, -0.6, -4, 1.2, 7, 0.6); g.fill();
+                    g.restore();
+                    continue;
+                }
+                g.globalCompositeOperation = 'lighter';
+                g.fillStyle = 'rgba(255,95,87,0.16)';
+                g.beginPath(); g.arc(eb2.x, eb2.y, 8, 0, Math.PI * 2); g.fill();
+                g.globalCompositeOperation = 'source-over';
                 g.fillStyle = 'rgba(255,95,87,0.35)';
                 g.beginPath(); g.arc(eb2.x, eb2.y, 4, 0, Math.PI * 2); g.fill();
                 g.fillStyle = '#ff5f57';
                 g.beginPath(); g.arc(eb2.x, eb2.y, 2.6, 0, Math.PI * 2); g.fill();
             }
-            // 飞船
-            if (G.ship.lives > 0) drawShip();
-            // 粒子
+            // 道具（敌机上层、飞船下层）
+            for (var di = 0; di < G.drops.length; di++) drawDrop(G.drops[di]);
+            // 僚机与飞船
+            if (G.ship.lives > 0) {
+                if (G.wings >= 1) drawWing(-1);
+                if (G.wings >= 2) drawWing(1);
+                drawShip();
+            }
+            // 冲击波圆环：半径外扩、线宽与透明度随生命衰减
+            for (var rg = 0; rg < rings.length; rg++) {
+                var r2 = rings[rg];
+                var t2 = 1 - r2.life / r2.max;
+                var rad = r2.r0 + (r2.r1 - r2.r0) * (1 - (1 - t2) * (1 - t2));   // ease-out 外扩
+                g.globalCompositeOperation = 'lighter';
+                g.globalAlpha = Math.max(0, r2.life / r2.max) * 0.8;
+                g.strokeStyle = r2.color;
+                g.lineWidth = 1.5 + 3 * (r2.life / r2.max);
+                g.beginPath();
+                g.arc(r2.x, r2.y, rad, 0, Math.PI * 2);
+                g.stroke();
+                g.globalCompositeOperation = 'source-over';
+            }
+            g.globalAlpha = 1;
+            // 粒子（shard 旋转碎屑 / glow 叠加光斑 / 普通圆点）
             for (var pi = 0; pi < parts.length; pi++) {
                 var p = parts[pi];
-                g.globalAlpha = Math.max(0, p.life / p.max);
+                var la = Math.max(0, p.life / p.max);
+                if (p.shard) {
+                    g.save();
+                    g.translate(p.x, p.y);
+                    g.rotate(p.rot);
+                    g.globalAlpha = la;
+                    g.fillStyle = p.color;
+                    g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    g.restore();
+                    continue;
+                }
+                if (p.glow) {
+                    g.globalCompositeOperation = 'lighter';
+                    g.globalAlpha = la * 0.55;
+                    g.fillStyle = p.color;
+                    g.beginPath();
+                    g.arc(p.x, p.y, p.r * (2 - la), 0, Math.PI * 2);
+                    g.fill();
+                    g.globalCompositeOperation = 'source-over';
+                    continue;
+                }
+                g.globalAlpha = la;
                 g.fillStyle = p.color;
                 g.beginPath();
                 g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -822,6 +1539,35 @@
                 g.fillText(bannerText, LW / 2, 120);
                 g.globalAlpha = 1;
             }
+            // 左上角生命（心形，失去的变暗）
+            for (var lv = 0; lv < 3; lv++) drawHeart(16 + lv * 19, 40, lv < G.ship.lives);
+            // 飘字：普通得分小字 / 连击艺术大字（弹跳缩放 + 倾斜 + 粗白描边）
+            for (var fi = 0; fi < floaters.length; fi++) {
+                var fl = floaters[fi];
+                var fa = Math.max(0, fl.life / fl.max);
+                var age = fl.max - fl.life;
+                var k = fl.art ? 1 + 0.55 * Math.pow(Math.max(0, 1 - age / 0.18), 2) : 1;   // 入场 1.55→1 弹缩
+                g.save();
+                g.globalAlpha = fa;
+                g.translate(fl.x, fl.y);
+                if (fl.rot) g.rotate(fl.rot);
+                g.scale(k, k);
+                g.font = '700 ' + fl.size + 'px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+                g.textAlign = 'center';
+                g.lineWidth = fl.art ? 5 : 3;
+                g.strokeStyle = 'rgba(255,255,255,0.9)';
+                g.strokeText(fl.text, 0, 0);
+                g.fillStyle = fl.color;
+                g.fillText(fl.text, 0, 0);
+                g.restore();
+            }
+            g.globalAlpha = 1;
+            // 受击全屏白闪
+            if (hitFlash > 0) {
+                g.fillStyle = 'rgba(255,255,255,' + (hitFlash / 0.12 * 0.3).toFixed(3) + ')';
+                g.fillRect(-24, -24, LW + 48, LH + 48);
+            }
+            g.restore();
         }
 
         /* ================= 输入：键盘 ================= */
@@ -916,14 +1662,133 @@
                         r: 1.2 + Math.random() * 1.4, color: '#ffb14d'
                     });
                 }
+                // 子弹 / 敌弹拖尾火光：随弹道反向漂的渐隐火点
+                for (var ti = 0; ti < G.bullets.length; ti++) {
+                    var tb = G.bullets[ti];
+                    if (tb.kind === 'missile') {
+                        // 导弹强尾焰（弹尾反向喷出）
+                        if (Math.random() < 0.8) parts.push({
+                            x: tb.x - tb.vx * 0.02 + (Math.random() * 3 - 1.5),
+                            y: tb.y - tb.vy * 0.02,
+                            vx: -tb.vx * 0.15, vy: -tb.vy * 0.15 + 20,
+                            life: 0.2, max: 0.2,
+                            r: 1.4 + Math.random() * 1.6,
+                            color: Math.random() < 0.4 ? '#ffe08a' : '#ff7043'
+                        });
+                        continue;
+                    }
+                    if (Math.random() < 0.4) parts.push({
+                        x: tb.x + (Math.random() * 4 - 2), y: tb.y + 9,
+                        vx: Math.random() * 30 - 15, vy: 70 + Math.random() * 50,
+                        life: 0.18, max: 0.18,
+                        r: 1 + Math.random() * 1.4,
+                        color: Math.random() < 0.4 ? '#ffe08a' : '#ffb14d'
+                    });
+                }
+                for (var tj = 0; tj < G.ebullets.length; tj++) {
+                    var tb2 = G.ebullets[tj];
+                    if (Math.random() < 0.3) parts.push({
+                        x: tb2.x, y: tb2.y,
+                        vx: -tb2.vx * 0.08, vy: -tb2.vy * 0.08 + 24,
+                        life: 0.2, max: 0.2,
+                        r: 1.2 + Math.random() * 1.4, color: '#ff8a80'
+                    });
+                }
+                // 道具下落微光拖尾
+                for (var tk = 0; tk < G.drops.length; tk++) {
+                    var td = G.drops[tk];
+                    if (Math.random() < 0.3) parts.push({
+                        x: td.x + (Math.random() * 6 - 3), y: td.y - 10,
+                        vx: 0, vy: 40, life: 0.25, max: 0.25,
+                        r: 1.2, color: DROP_META[td.type].color
+                    });
+                }
+                var prevFire = G.fireCd;
                 var ev = stepCore(G, s, Math.random);
-                if (window.GameSFX && ev.kills) GameSFX.smash();        // 击落敌机
-                if (window.GameSFX && ev.waveClear) GameSFX.combo();    // 清空一波
-                // 事件 → 爆炸粒子与界面
+                if (window.GameSFX) {
+                    if (prevFire <= 0 && G.fireCd > 0) GameSFX.shoot();     // 自动开火
+                    if (ev.hits > ev.kills) GameSFX.hit();                  // 命中未击破
+                    if (ev.kills) GameSFX.smash();                          // 击落敌机
+                    if (ev.hit) GameSFX.hurt();                             // 中弹 / 被撞
+                    if (ev.waveClear) GameSFX.combo();                      // 清空一波
+                }
+                // 事件 → 打击感特效与粒子
                 for (var bi = 0; bi < ev.bursts.length; bi++) {
                     var bb = ev.bursts[bi];
                     explode(bb.x, bb.y, bb.color, bb.n, bb.power);
+                    if (bb.power >= 1) {
+                        // 击破 / 受击 / 阵亡：冲击波 + 白光斑 + 旋转碎片 + 震屏
+                        rings.push({ x: bb.x, y: bb.y, r0: 8, r1: 24 + 22 * bb.power, life: 0.32, max: 0.32, color: bb.color });
+                        parts.push({ x: bb.x, y: bb.y, vx: 0, vy: 0, life: 0.13, max: 0.13, r: 9 + 10 * bb.power, color: '#fff6dd', glow: 1 });
+                        spawnShards(bb.x, bb.y, bb.color);
+                        addShake(bb.power >= 1.4 ? 6.5 : (bb.power >= 1.05 ? 4 : 2.5), 0.2);
+                        if (bb.score) floaters.push({ x: bb.x, y: bb.y - 12, text: '+' + bb.score, life: 0.75, max: 0.75, size: 13, color: '#c2571b' });
+                        // 连击艺术字：连击击落时在敌机处弹大字，连击越高字号越大、颜色越炽
+                        if (bb.combo >= 2) {
+                            floaters.push({
+                                x: bb.x, y: bb.y - 30, text: 'x' + bb.combo,
+                                life: 0.85, max: 0.85,
+                                size: Math.min(20 + bb.combo * 3, 46),
+                                color: bb.combo >= 10 ? '#d64525' : bb.combo >= 5 ? '#d98a1f' : '#e8821e',
+                                art: 1, rot: (Math.random() - 0.5) * 0.12
+                            });
+                        }
+                        // 连击里程碑：整五连击在画面中央弹超大艺术字 + 强化音
+                        if (bb.combo && bb.combo % 5 === 0) {
+                            floaters.push({ x: LW / 2, y: 150, text: 'x' + bb.combo + ' 连击！', life: 1.0, max: 1.0, size: 30, color: '#d98a1f', art: 1, rot: -0.04 });
+                            if (window.GameSFX) GameSFX.powerup();
+                        }
+                    } else {
+                        // 命中未破：敌机闪白 + 挤压 + 沿弹道击退
+                        var te = nearestEnemy(bb.x, bb.y);
+                        if (te) {
+                            te.flash = 0.1;
+                            te.sq = 0.32;
+                            te.ky = -(52 / te.r);
+                            te.kx = (te.kx || 0) + (Math.random() - 0.5) * 3;
+                        }
+                    }
                 }
+                // 拾取道具 → 飘字与音效
+                for (var pk = 0; pk < ev.pickups.length; pk++) {
+                    var pk2 = ev.pickups[pk];
+                    if (pk2.type === 'B') {
+                        // 清屏炸弹：超大冲击波 + 全屏白闪 + 大震屏
+                        rings.push({ x: G.ship.x, y: G.ship.y, r0: 20, r1: 430, life: 0.5, max: 0.5, color: '#ffd23f' });
+                        hitFlash = Math.max(hitFlash, 0.16);
+                        addShake(9, 0.4);
+                        floaters.push({ x: LW / 2, y: 200, text: '清屏！', life: 0.8, max: 0.8, size: 22, color: '#ef5a67' });
+                        if (window.GameSFX) { GameSFX.smash(); GameSFX.hurt(); }
+                    } else if (pk2.full) {
+                        floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: '+' + (pk2.type === 'H' ? 300 : 500), life: 0.7, max: 0.7, size: 13, color: '#c2571b' });
+                        if (window.GameSFX) GameSFX.coin();
+                    } else if (pk2.type === 'P') {
+                        floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: '火力提升 x' + pk2.level, life: 0.8, max: 0.8, size: 14, color: '#b06a10' });
+                        if (window.GameSFX) GameSFX.powerup();
+                    } else if (pk2.type === 'L') {
+                        floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: '激光武器！', life: 0.85, max: 0.85, size: 15, color: '#1a7fb5', art: 1, rot: -0.05 });
+                        if (window.GameSFX) GameSFX.powerup();
+                    } else if (pk2.type === 'M') {
+                        floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: '追踪导弹！', life: 0.85, max: 0.85, size: 15, color: '#c2571b', art: 1, rot: 0.05 });
+                        if (window.GameSFX) GameSFX.powerup();
+                    } else {
+                        var pkTxt = pk2.type === 'W' ? '僚机加入' : pk2.type === 'S' ? '护盾展开' : '生命 +1';
+                        floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: pkTxt, life: 0.8, max: 0.8, size: 14, color: '#2c3e5d' });
+                        if (window.GameSFX) GameSFX.pickup();
+                    }
+                }
+                if (ev.shieldPop) {
+                    // 护盾抵挡：蓝环爆开 + 提示
+                    rings.push({ x: G.ship.x, y: G.ship.y, r0: 16, r1: 52, life: 0.3, max: 0.3, color: '#3a8ef7' });
+                    floaters.push({ x: G.ship.x, y: G.ship.y - 26, text: '护盾抵挡！', life: 0.8, max: 0.8, size: 14, color: '#2b62b8' });
+                    addShake(3, 0.2);
+                    if (window.GameSFX) GameSFX.pickup();
+                }
+                if (ev.powerDown) {
+                    floaters.push({ x: G.ship.x, y: G.ship.y - 40, text: '火力下降', life: 0.8, max: 0.8, size: 13, color: '#8a4a2b' });
+                    if (window.GameSFX) GameSFX.error();
+                }
+                if (ev.hit) { hitFlash = 0.12; G.ship.sq = 0.5; }   // 受击：全屏白闪 + 飞船挤压
                 if (ev.waveClear) {
                     bannerT = 1.5; bannerText = '第 ' + (ev.waveClear + 1) + ' 波';
                 }
@@ -935,9 +1800,31 @@
                     p.x += p.vx * s; p.y += p.vy * s;
                     var damp = Math.exp(-2.4 * s);
                     p.vx *= damp; p.vy *= damp;
+                    if (p.shard) p.rot += p.vr * s;                  // 碎屑自转
                 }
                 if (parts.some(function (x2) { return x2.dead; })) parts = parts.filter(function (x2) { return !x2.dead; });
-                if (parts.length > 360) parts.splice(0, parts.length - 360);
+                if (parts.length > 420) parts.splice(0, parts.length - 420);
+                // 冲击波圆环 / 飘字
+                for (var ri = 0; ri < rings.length; ri++) if ((rings[ri].life -= s) <= 0) rings[ri].dead = true;
+                if (rings.some(function (x2) { return x2.dead; })) rings = rings.filter(function (x2) { return !x2.dead; });
+                for (var fi = 0; fi < floaters.length; fi++) {
+                    var fl = floaters[fi];
+                    fl.life -= s;
+                    fl.y -= (fl.art ? 20 : 34) * s;   // 艺术大字上漂更缓
+                    if (fl.life <= 0) fl.dead = true;
+                }
+                if (floaters.some(function (x2) { return x2.dead; })) floaters = floaters.filter(function (x2) { return !x2.dead; });
+                // 敌机表现状态衰减：闪白 / 挤压 / 击退（渲染层字段，不影响玩法坐标）
+                for (var ei = 0; ei < G.enemies.length; ei++) {
+                    var en = G.enemies[ei];
+                    en.flash = Math.max(0, (en.flash || 0) - s);
+                    en.sq = (en.sq || 0) * Math.exp(-9 * s);
+                    en.kx = (en.kx || 0) * Math.exp(-9 * s);
+                    en.ky = (en.ky || 0) * Math.exp(-9 * s);
+                }
+                G.ship.sq = (G.ship.sq || 0) * Math.exp(-7 * s);
+                if (shakeT > 0) shakeT -= s;
+                if (hitFlash > 0) hitFlash -= s;
                 if (bannerT > 0) bannerT -= s;
                 if (ev.over) gameOverUI();
                 else updateHud();
@@ -960,8 +1847,11 @@
       <h3>玩法</h3>
       <ul>
         <li>飞船自动开火，专注走位躲避敌机与弹幕</li>
-        <li>击落敌机得分，清空一波有奖励；敌机分侦察机、突击机、重装舰三种</li>
-        <li>3 条命，被撞或中弹扣一条并进入短暂无敌</li>
+        <li>六种敌机：侦察机（正弦摆动）、突击机（横向追击）、重装舰（三向散射）、蛇行机（高速穿梭）、炮艇（三连发压制）、狙击机（高速细弹）</li>
+        <li>敌机随波次强化：血量逐步增加（带光环的精英机更耐打），速度与射速也水涨船高</li>
+        <li>连续击落触发连击加成（每级额外 +10 分，最多 +80），中弹或超时即断</li>
+        <li>击落概率掉落道具：P 火力升级、L 激光、M 追踪导弹（切换武器类型）、W 僚机、S 护盾、B 清屏炸弹、H 补给 +1 命；已满则转化为分数</li>
+        <li>中弹掉一级火力（护盾可抵挡一次且不掉火力）；3 条命，被撞或中弹扣一条并进入短暂无敌</li>
       </ul>
       <h3>操作</h3>
       <ul>

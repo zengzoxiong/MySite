@@ -128,6 +128,12 @@
     /* —— 动作 —— */
     /* 跳跃（上滑音） */
     jump: function () { glide(330, 660, 0.16, 'square', 0.045); },
+    /* 射击 / 发射（极轻短促下滑 pew，连发不吵） */
+    shoot: function () { glide(880, 340, 0.07, 'square', 0.022); },
+    /* 命中未击破（短促叮声） */
+    hit: function () { tone(1250, 0.04, 'triangle', 0.035); },
+    /* 受击 / 受伤（低频闷响 + 噪声痛感） */
+    hurt: function () { noise(0.22, 0.14, 480); tone(130, 0.18, 'sawtooth', 0.06); },
     /* 击碎 / 爆炸（噪声爆音 + 低频体感） */
     smash: function () { noise(0.16, 0.12, 900); tone(160, 0.10, 'sawtooth', 0.05); },
 
