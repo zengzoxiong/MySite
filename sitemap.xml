@@ -601,6 +601,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://zengzoxiong.github.io/MySite/tools/pac-man/app.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/sql-formatter/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

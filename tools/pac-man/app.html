@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吃豆人 - 拾光集</title>
+    <link rel="icon" href="../../favicon.svg">
+    <link rel="canonical" href="https://zengzoxiong.github.io/MySite/tools/pac-man/app.html">
+    <link rel="stylesheet" href="../../assets/game-ui.css">
+<script src="../../assets/appearance.js"></script>
+<script src="../../assets/game-sfx.js"></script>
+    <style>
+    /* 拾光集 · 吃豆人页面样式
+       组件基线来自共享设计系统 assets/game-ui.css（Apple HIG），见 docs/game-ui-design.md。
+       画布内为经典街机配色（黑底蓝墙），外壳沿用亮色卡片，属设计意图。 */
+    :root { --game-accent: #ffd800; }   /* 个性色：吃豆人黄（规范 §7 分配表） */
+
+    #stage {
+      width: min(336px, 100%);
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--separator);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-float);
+      background: #000;
+    }
+
+    #pauseBtn svg { width: 18px; height: 18px; }
+
+    /* 生命图标：吃豆人剪影（JS 沿用 .off 明暗切换） */
+    .hearts {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3px;
+    }
+    .hearts svg { width: 15px; height: 15px; }
+    .hearts .off { opacity: .18; }
+
+    .g-foot a { color: var(--game-accent-text); text-decoration: none; }
+
+    @media (max-width: 560px) {
+      .g-nav { flex-wrap: wrap; }
+    }
+
+    body.g-page { transition: padding-right .28s cubic-bezier(.22, .9, .3, 1); }
+    </style>
+</head>
+<body class="g-page">
+    <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" id="aiBtn" type="button" aria-pressed="false" title="AI 代玩">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
+
+    <main class="g-wrap">
+        <nav class="g-nav">
+            <h1 class="g-nav-title">吃豆人</h1>
+            <div class="g-hud-bar">
+                <span class="g-ai-tag" id="aiBadge" hidden>AI 代玩中 · 点击停止</span>
+                <button id="pauseBtn" class="g-btn g-btn-gray g-btn-sm" type="button" title="暂停 / 继续（P）" aria-label="暂停或继续">
+                    <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.4" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.4" fill="currentColor"/></svg>
+                    <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+                </button>
+            </div>
+        </nav>
+        <p class="g-nav-sub">吃光豆子过关 · 能量豆反杀幽灵</p>
+
+        <section class="g-hud">
+            <div class="g-stat"><span class="g-stat-label">分数</span><span class="g-stat-value g-num" id="score">0</span></div>
+            <div class="g-stat"><span class="g-stat-label">最高</span><span class="g-stat-value g-num" id="best">0</span></div>
+            <div class="g-stat"><span class="g-stat-label">关卡</span><span class="g-stat-value g-num" id="level">1</span></div>
+            <div class="g-stat">
+                <span class="g-stat-label">生命</span>
+                <b class="g-stat-value hearts" id="lives"></b>
+            </div>
+        </section>
+
+        <div class="g-stage" id="stage">
+            <canvas id="gameCanvas" width="336" height="372"></canvas>
+            <div id="overlay" class="g-overlay g-overlay-fade">
+                <h2 class="g-overlay-title" id="ovTitle">吃豆人</h2>
+                <p class="g-overlay-text" id="ovDesc"></p>
+                <div class="g-btn-row">
+                    <button id="ovBtn" class="g-btn" type="button">开始游戏</button>
+                    <button id="ovBtn2" class="g-btn g-btn-gray" type="button" hidden>重新开始</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="g-foot"><a href="../../">拾光集</a> · 在线小游戏</footer>
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ================= 基础配置 ================= */
+        // 经典 28×31 迷宫：# 墙 / . 豆 / o 能量豆 / - 幽灵门 / 空格 路（无豆）
+        // 布局与原版一致：240 颗豆 + 4 颗能量豆，左右隧道在中央行贯通
+        var MAZE = [
+            '############################',
+            '#............##............#',
+            '#.####.#####.##.#####.####.#',
+            '#o####.#####.##.#####.####o#',
+            '#.####.#####.##.#####.####.#',
+            '#..........................#',
+            '#.####.##.########.##.####.#',
+            '#.####.##.########.##.####.#',
+            '#......##....##....##......#',
+            '######.##############.######',
+            '######.##############.######',
+            '######.              .######',
+            '######.## ###--### ##.######',
+            '######.## #      # ##.######',
+            '      .   #      #   .      ',
+            '######.## #      # ##.######',
+            '######.## ######## ##.######',
+            '######.              .######',
+            '######.## ######## ##.######',
+            '######.## ######## ##.######',
+            '#............##............#',
+            '#.####.#####.##.#####.####.#',
+            '#.####.#####.##.#####.####.#',
+            '#o..##.......  .......##..o#',
+            '###.##.##.########.##.##.###',
+            '###.##.##.########.##.##.###',
+            '#......##....##....##......#',
+            '#.##########.##.##########.#',
+            '#.##########.##.##########.#',
+            '#..........................#',
+            '############################'
+        ];
+
+        var T = 12, COLS = 28, ROWS = 31;   // tile 尺寸与迷宫规格
+        var W = COLS * T, H = ROWS * T;
+        var BASE_SPD = 9.5;                  // 全速（tile/秒），原版约 9.47
+
+        var DIRS = {
+            up: { x: 0, y: -1 }, left: { x: -1, y: 0 }, down: { x: 0, y: 1 }, right: { x: 1, y: 0 }
+        };
+        var ORDER = ['up', 'left', 'down', 'right'];       // 原版平局优先序
+        var REV = { up: 'down', down: 'up', left: 'right', right: 'left' };
+        var ANG = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
+
+        var ECOLOR = { blinky: '#ff0000', pinky: '#ffb8ff', inky: '#00ffff', clyde: '#ffb852' };
+        var WALL_COLOR = '#2121ff', DOT_COLOR = '#ffb8ae', PAC_COLOR = '#ffdf00';
+
+        /* ================= DOM 与画布 ================= */
+        var cv = document.getElementById('gameCanvas');
+        var overlayEl = document.getElementById('overlay');
+        var ovTitle = document.getElementById('ovTitle');
+        var ovDesc = document.getElementById('ovDesc');
+        var ovBtn = document.getElementById('ovBtn');
+        var ovBtn2 = document.getElementById('ovBtn2');
+        var pauseBtn = document.getElementById('pauseBtn');
+        var icoPause = document.getElementById('icoPause');
+        var icoPlay = document.getElementById('icoPlay');
+        var scoreEl = document.getElementById('score');
+        var bestEl = document.getElementById('best');
+        var levelEl = document.getElementById('level');
+        var livesEl = document.getElementById('lives');
+        var aiBtn = document.getElementById('aiBtn');
+        var aiBadge = document.getElementById('aiBadge');
+
+        var g = cv.getContext('2d');
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = W * dpr;
+        cv.height = H * dpr;
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        /* ================= 迷宫解析 ================= */
+        // walls：墙格；door：幽灵门；初始豆子图（每次关卡重置时深拷贝）
+        var walls = [], door = [], dots0 = [];
+        (function parse() {
+            for (var y = 0; y < ROWS; y++) {
+                walls.push([]); door.push([]); dots0.push([]);
+                for (var x = 0; x < COLS; x++) {
+                    var ch = MAZE[y][x];
+                    walls[y][x] = (ch === '#');
+                    door[y][x] = (ch === '-');
+                    dots0[y][x] = ch === '.' ? 1 : ch === 'o' ? 2 : 0;
+                }
+            }
+        })();
+
+        function nextTile(t, dirName) {
+            var d = DIRS[dirName];
+            return { x: (t.x + d.x + COLS) % COLS, y: t.y + d.y };
+        }
+        // 该 tile 沿 dir 是否可走（幽灵门对普通移动视作墙）
+        function canGo(t, dirName) {
+            var n = nextTile(t, dirName);
+            if (n.y < 0 || n.y >= ROWS) return false;
+            return !walls[n.y][n.x] && !door[n.y][n.x];
+        }
+        // 隧道区（中央行两端）：幽灵在此减速
+        function inTunnel(t) {
+            return t.y === 14 && (t.x <= 5 || t.x >= 22);
+        }
+
+        /* ================= 关卡速度表（近似原版） ================= */
+        function speeds() {
+            var l = G.level;
+            return {
+                pac: BASE_SPD * (l < 2 ? 0.8 : l < 5 ? 0.9 : 1.0),
+                ghost: BASE_SPD * (l < 2 ? 0.75 : l < 5 ? 0.85 : 0.95),
+                fright: BASE_SPD * (l < 2 ? 0.5 : l < 5 ? 0.55 : 0.6),
+                tunnel: BASE_SPD * 0.4,
+                eyes: BASE_SPD * 1.6,
+                house: BASE_SPD * 0.45,
+                frightDur: l === 1 ? 6 : l === 2 ? 5 : l === 3 ? 4 : l === 4 ? 3 : l < 8 ? 2 : 0
+            };
+        }
+
+        // scatter / chase 轮换表（秒）：7 20 7 20 5 20 5 之后永久 chase
+        var MODE_TABLE = [7, 20, 7, 20, 5, 20, 5, Infinity];
+
+        /* ================= 游戏状态 ================= */
+        function loadBest() {
+            try { return parseInt(localStorage.getItem('pacBest'), 10) || 0; } catch (e) { return 0; }
+        }
+        function saveBest(v) {
+            try { localStorage.setItem('pacBest', String(v)); } catch (e) { }
+        }
+
+        var state = 'start';   // start | ready | play | dying | clear | paused | over
+        var best = loadBest();
+        var G = null;
+        var pac = null, ghosts = [];
+        var bonusLife = false;          // 10000 分奖励生命（每局一次）
+        var animT = 0;                  // 全局动画计时（豆闪 / 裙摆）
+        var wakaFlip = false;           // waka 音交替
+        var pops = [];                  // 得分飘字
+        var overT = 0, aiOn = false;    // AI 续局倒计时与开关
+
+        function freshGhosts() {
+            // 出生位：blinky 在门上走廊中央（col13/14 交界），其余在房内排队
+            return [
+                { name: 'blinky', color: ECOLOR.blinky, tile: { x: 14, y: 11 }, prog: 0.5, dirName: 'left', mode: 'out', fright: 0, scatter: { x: 25, y: 0 }, homeT: 0, bobT: 0, exitAt: 0 },
+                { name: 'pinky', color: ECOLOR.pinky, tile: { x: 13, y: 14 }, prog: 0, dirName: 'up', mode: 'home', fright: 0, scatter: { x: 2, y: 0 }, homeT: 0, bobT: 0, exitAt: 0.7 },
+                { name: 'inky', color: ECOLOR.inky, tile: { x: 11, y: 14 }, prog: 0, dirName: 'up', mode: 'home', fright: 0, scatter: { x: 27, y: 30 }, homeT: 0, bobT: 0, exitAt: 3.5 },
+                { name: 'clyde', color: ECOLOR.clyde, tile: { x: 15, y: 14 }, prog: 0, dirName: 'up', mode: 'home', fright: 0, scatter: { x: 0, y: 30 }, homeT: 0, bobT: 0, exitAt: 7 }
+            ];
+        }
+
+        function resetPositions() {
+            // 吃豆人出生在两列交界（原版 col13.5）：锚定 tile14、进度 0.5、朝左
+            pac = { tile: { x: 14, y: 23 }, prog: 0.5, dirName: 'left', want: '', stopped: true, anim: 0, dieT: 0 };
+            ghosts = freshGhosts();
+            G.modeIdx = 0;
+            G.modeT = MODE_TABLE[0];
+            G.scatter = true;
+            G.frightT = 0;
+            G.chain = 0;
+            G.eatPause = 0;
+            G.fruit = null;
+        }
+
+        function resetLevel(full) {
+            var dots = [];
+            for (var y = 0; y < ROWS; y++) { dots.push(dots0[y].slice()); }
+            var dotsLeft = 0;
+            for (var y2 = 0; y2 < ROWS; y2++) for (var x2 = 0; x2 < COLS; x2++) if (dots[y2][x2]) dotsLeft++;
+            G = {
+                level: full ? 1 : G.level + 1,
+                score: full ? 0 : G.score,
+                lives: full ? 3 : G.lives,
+                dots: dots, dotsLeft: dotsLeft, dotsEaten: 0,
+                modeIdx: 0, modeT: MODE_TABLE[0], scatter: true,
+                frightT: 0, chain: 0, eatPause: 0,
+                fruit: null, fruitFlags: [false, false],
+                readyT: 2.2
+            };
+            resetPositions();
+            pops = [];
+            if (full) bonusLife = false;
+        }
+
+        function startGame() {
+            G = { level: 1, score: 0, lives: 3 };
+            resetLevel(true);
+            G.readyT = 2.2;
+            state = 'ready';
+            hideOverlay();
+            updateHud();
+            if (window.GameSFX) GameSFX.unlock();
+        }
+
+        function setPaused(p) {
+            if (p && state === 'play') {
+                state = 'paused';
+                showOverlay('paused');
+            } else if (!p && state === 'paused') {
+                state = 'play';
+                hideOverlay();
+            }
+            updateHud();
+        }
+
+        function gameOverUI() {
+            state = 'over';
+            if (window.GameSFX) GameSFX.lose();
+            var newRecord = !aiOn && G.score > best && G.score > 0;
+            if (newRecord) { best = G.score; saveBest(best); }
+            overT = 1.6;
+            updateHud();
+            setTimeout(function () {
+                if (state === 'over') showOverlay('over', newRecord);
+            }, 700);
+        }
+
+        /* ================= 得分飘字 ================= */
+        function popText(x, y, text, color) {
+            pops.push({ x: x, y: y, text: text, color: color || '#00ffff', life: 1.0, max: 1.0 });
+        }
+
+        /* ================= 界面 ================= */
+        var LIFE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffdf00" d="M12 12 L21.66 6.5 A11 11 0 1 0 21.66 17.5 Z"/></svg>';
+
+        var lastLives = -1;
+        function updateHud() {
+            scoreEl.textContent = G ? G.score : 0;
+            bestEl.textContent = best;
+            levelEl.textContent = G ? G.level : 1;
+            var n = G ? G.lives : 3;
+            if (n !== lastLives) {
+                lastLives = n;
+                var html = '';
+                for (var i = 0; i < 3; i++) html += LIFE_SVG;
+                livesEl.innerHTML = html;
+                var hs = livesEl.children;
+                for (var j = 0; j < hs.length; j++) hs[j].classList.toggle('off', j >= n);
+            }
+            pauseBtn.disabled = (state === 'start' || state === 'over');
+            icoPause.hidden = (state !== 'play');
+            icoPlay.hidden = (state !== 'paused');
+        }
+
+        function showOverlay(kind, newRecord) {
+            ovBtn2.hidden = (kind !== 'paused');
+            if (kind === 'start') {
+                ovTitle.textContent = '吃豆人';
+                ovDesc.textContent = '方向键 / WASD / 滑动转向 · 吃光豆子过关 · 能量豆让幽灵变蓝可反杀';
+                ovBtn.textContent = '开始游戏';
+            } else if (kind === 'paused') {
+                ovTitle.textContent = '已暂停';
+                ovDesc.textContent = '按 P 或点击按钮继续';
+                ovBtn.textContent = '继续游戏';
+            } else if (aiOn) {
+                ovTitle.textContent = 'AI 本局结束';
+                ovDesc.textContent = 'AI 代玩得分 ' + G.score + ' · 到达第 ' + G.level + ' 关 · 即将自动开始下一局（AI 代玩成绩不计最高分）';
+                ovBtn.textContent = '再来一局';
+            } else {
+                ovTitle.textContent = '游戏结束';
+                ovDesc.textContent = '本局得分 ' + G.score + ' · 到达第 ' + G.level + ' 关 · 历史最高 ' + best + (newRecord ? ' · 新纪录！' : '');
+                ovBtn.textContent = '再来一局';
+            }
+            overlayEl.classList.add('open');
+        }
+
+        function hideOverlay() {
+            overlayEl.classList.remove('open');
+        }
+
+        /* ================= 移动核心（tile 锚定 + 进度） =================
+           实体由「所在 tile + 朝 dir 前进的进度 prog(0..1)」描述，
+           prog 到 1 即抵达下一 tile 中心并触发决策，转向只发生在格心。 */
+        function advance(a, tilesPerSec, dt, onCenter) {
+            var remaining = tilesPerSec * dt;   // tilesPerSec 单位即 tile/秒
+            var guard = 10;
+            while (remaining > 0.0001 && guard-- > 0) {
+                if (a.stopped) {
+                    onCenter(a);          // 停滞时也给一次决策机会（吃豆 / 应用预输入）
+                    if (a.stopped) return;
+                }
+                if (!canGo(a.tile, a.dirName)) { a.stopped = true; return; }
+                var room = 1 - a.prog;
+                var mv = Math.min(remaining, room);
+                a.prog += mv;
+                remaining -= mv;
+                if (a.prog >= 1 - 0.0001) {
+                    a.tile = nextTile(a.tile, a.dirName);
+                    a.prog = 0;
+                    onCenter(a);
+                }
+            }
+        }
+
+        // 实体像素中心（tile 间线性插值；横向取模实现隧道穿越）
+        function posOf(a) {
+            var d = DIRS[a.dirName] || { x: 0, y: 0 };
+            var x = (a.tile.x + 0.5 + d.x * a.prog) * T;
+            return {
+                x: ((x % W) + W) % W,
+                y: (a.tile.y + 0.5 + d.y * a.prog) * T
+            };
+        }
+
+        /* ================= 吃豆人 ================= */
+        function pacCenter() {
+            var t = pac.tile;
+            // 吃豆
+            var dv = G.dots[t.y][t.x];
+            if (dv) {
+                G.dots[t.y][t.x] = 0;
+                G.dotsLeft--;
+                G.dotsEaten++;
+                if (dv === 1) {
+                    G.score += 10;
+                    if (window.GameSFX) { wakaFlip = !wakaFlip; wakaFlip ? GameSFX.swipe() : GameSFX.click(); }
+                } else {
+                    G.score += 50;
+                    startFright();
+                    if (window.GameSFX) GameSFX.powerup();
+                }
+                // 水果触发：第 70 / 170 颗豆
+                if ((G.dotsEaten === 70 || G.dotsEaten === 170) && !G.fruit) {
+                    G.fruit = { t: 9 };
+                    G.fruitFlags[G.dotsEaten === 70 ? 0 : 1] = true;
+                }
+                if (G.dotsLeft <= 0) {
+                    state = 'clear';
+                    G.clearT = 2.2;
+                    if (window.GameSFX) GameSFX.levelup();
+                    return;
+                }
+                if (!bonusLife && G.score >= 10000) {
+                    bonusLife = true;
+                    G.lives++;
+                    popText(13.5 * T, 20 * T, '1UP!', '#ffdf00');
+                    if (window.GameSFX) GameSFX.pickup();
+                }
+            }
+            // 水果拾取（房下走廊中央两格）
+            if (G.fruit && (t.y === 17 && (t.x === 13 || t.x === 14))) {
+                var fs = Math.min(100 * G.level, 1000);
+                G.score += fs;
+                G.fruit = null;
+                popText(14 * T, 17.5 * T, String(fs), '#ffb8de');
+                if (window.GameSFX) GameSFX.coin();
+            }
+            // 转向：预输入方向优先，其次保持当前方向
+            if (pac.want && canGo(t, pac.want)) {
+                pac.dirName = pac.want;
+                pac.stopped = false;
+            } else if (!canGo(t, pac.dirName)) {
+                pac.stopped = true;
+            } else {
+                pac.stopped = false;
+            }
+            pac.want = '';
+        }
+
+        function startFright() {
+            var sp = speeds();
+            if (sp.frightDur <= 0) return;   // 高关卡：能量豆不再惊吓幽灵
+            G.frightT = sp.frightDur;
+            G.chain = 0;
+            ghosts.forEach(function (gh) {
+                if (gh.mode === 'out') {
+                    gh.fright = G.frightT;
+                    gh.dirName = REV[gh.dirName];      // 原版：受惊立即掉头
+                    if (!canGo(gh.tile, gh.dirName)) gh.dirName = REV[gh.dirName];
+                }
+            });
+        }
+
+        /* ================= 幽灵 AI（原版规则） ================= */
+        // 前方第 n 格目标；原版「朝上时目标额外左偏」的溢出特性一并还原
+        function ahead(t, dirName, n) {
+            var d = DIRS[dirName];
+            var r = { x: t.x + d.x * n, y: t.y + d.y * n };
+            if (dirName === 'up') r.x -= n;
+            return r;
+        }
+
+        function ghostTarget(gh) {
+            if (gh.mode === 'eyes') return { x: 13, y: 11 };
+            if (G.scatter) return gh.scatter;
+            var pt = pac.tile;
+            switch (gh.name) {
+                case 'blinky':
+                    return pt;
+                case 'pinky':
+                    return ahead(pt, pac.dirName, 4);
+                case 'inky': {
+                    var p2 = ahead(pt, pac.dirName, 2);
+                    var b = ghosts[0].tile;
+                    return { x: p2.x * 2 - b.x, y: p2.y * 2 - b.y };
+                }
+                case 'clyde': {
+                    var dx = pt.x - gh.tile.x, dy = pt.y - gh.tile.y;
+                    return (dx * dx + dy * dy > 64) ? pt : gh.scatter;
+                }
+            }
+            return pt;
+        }
+
+        function ghostCenter(gh) {
+            if (gh.mode === 'eyes' && gh.tile.x === 13 && gh.tile.y === 11) {
+                gh.mode = 'entering';   // 到达门上方：脚本化入房复活
+                gh.freeX = 13.5 * T;
+                gh.freeY = 11.5 * T;
+                return;
+            }
+            var t = gh.tile;
+            var rev = REV[gh.dirName];
+            var opts = [];
+            ORDER.forEach(function (n) {
+                if (n === rev) return;
+                if (canGo(t, n)) opts.push(n);
+            });
+            if (!opts.length) { gh.dirName = rev; return; }
+            // 惊惧态：随机选路
+            if (gh.fright > 0 && gh.mode !== 'eyes') {
+                gh.dirName = opts[(Math.random() * opts.length) | 0];
+                return;
+            }
+            // 正常：选距目标最近的方向（平局按 up > left > down > right）
+            var target = ghostTarget(gh);
+            var bd = Infinity, bn = opts[0];
+            opts.forEach(function (n) {
+                var nt = nextTile(t, n);
+                var dx = nt.x - target.x, dy = nt.y - target.y;
+                var d = dx * dx + dy * dy;
+                if (d < bd) { bd = d; bn = n; }
+            });
+            gh.dirName = bn;
+        }
+
+        function updateGhost(gh, dt) {
+            var sp = speeds();
+            if (gh.mode === 'home') {
+                gh.bobT += dt;
+                gh.homeT += dt;
+                if (gh.homeT >= gh.exitAt) {
+                    gh.mode = 'leaving';
+                    gh.freeX = (gh.tile.x + 0.5) * T;   // 从房内泊位水平滑向门中点
+                    gh.freeY = (gh.tile.y + 0.5) * T;
+                }
+                return;
+            }
+            if (gh.mode === 'leaving') {
+                // 脚本化出房：先水平对齐门中点，再向上穿门
+                var mid = 13.5 * T;
+                if (Math.abs(gh.freeX - mid) > 0.5) {
+                    var dx = mid - gh.freeX;
+                    gh.freeX += Math.max(-sp.house * T * dt, Math.min(sp.house * T * dt, dx));
+                } else {
+                    gh.freeX = mid;
+                    gh.freeY -= sp.house * T * dt;
+                    if (gh.freeY <= 11.5 * T) {
+                        gh.mode = 'out';
+                        gh.tile = { x: 13, y: 11 };
+                        gh.prog = 0;
+                        gh.dirName = Math.random() < 0.5 ? 'left' : 'right';
+                        gh.freeX = undefined;
+                        gh.freeY = undefined;
+                    }
+                }
+                return;
+            }
+            if (gh.mode === 'entering') {
+                // 脚本化入房：从门上方垂直降入房内，随后复活出房
+                gh.freeX = 13.5 * T;
+                gh.freeY += sp.house * T * dt;
+                if (gh.freeY >= 14.5 * T) {
+                    gh.mode = 'leaving';   // freeY 保持，直接折返出房
+                    gh.fright = 0;
+                }
+                return;
+            }
+            // 正常移动：out / eyes
+            gh.fright = Math.max(0, gh.fright - dt);
+            var v;
+            if (gh.mode === 'eyes') v = sp.eyes;
+            else if (gh.fright > 0) v = sp.fright;
+            else if (inTunnel(gh.tile)) v = sp.tunnel;
+            else v = sp.ghost;
+            advance(gh, v, dt, ghostCenter);
+        }
+
+        // 幽灵渲染坐标（home/leaving/entering 用脚本坐标，其余用 tile 插值）
+        function ghostPos(gh) {
+            if (gh.mode === 'home') {
+                return { x: (gh.tile.x + 0.5) * T, y: (gh.tile.y + 0.5) * T + Math.sin(gh.bobT * 4) * 2 };
+            }
+            if (gh.mode === 'leaving' || gh.mode === 'entering') {
+                return {
+                    x: gh.freeX !== undefined ? gh.freeX : 13.5 * T,
+                    y: gh.freeY !== undefined ? gh.freeY : 11.5 * T
+                };
+            }
+            return posOf(gh);
+        }
+
+        /* ================= 模式计时与碰撞 ================= */
+        function updateModes(dt) {
+            if (G.eatPause > 0) { G.eatPause -= dt; return; }
+            if (G.frightT > 0) {
+                G.frightT -= dt;
+                return;                 // 惊惧期模式表暂停（原版行为）
+            }
+            G.modeT -= dt;
+            if (G.modeT <= 0) {
+                G.modeIdx++;
+                G.modeT = MODE_TABLE[Math.min(G.modeIdx, MODE_TABLE.length - 1)];
+                G.scatter = !G.scatter;
+                ghosts.forEach(function (gh) {
+                    if (gh.mode === 'out') {
+                        gh.dirName = REV[gh.dirName];
+                        if (!canGo(gh.tile, gh.dirName)) gh.dirName = REV[gh.dirName];
+                    }
+                });
+            }
+        }
+
+        function checkCollisions() {
+            for (var i = 0; i < ghosts.length; i++) {
+                var gh = ghosts[i];
+                if (gh.mode !== 'out') continue;
+                if (gh.tile.x === pac.tile.x && gh.tile.y === pac.tile.y) {
+                    if (gh.fright > 0) {
+                        var pts = 200 << G.chain;
+                        G.chain = Math.min(G.chain + 1, 3);
+                        G.score += pts;
+                        gh.mode = 'eyes';
+                        gh.fright = 0;
+                        G.eatPause = 0.9;
+                        var p = posOf(pac);
+                        popText(p.x, p.y, String(pts), '#00ffff');
+                        if (window.GameSFX) GameSFX.combo();
+                    } else {
+                        state = 'dying';
+                        pac.dieT = 0;
+                        if (window.GameSFX) GameSFX.hurt();
+                        return;
+                    }
+                }
+            }
+        }
+
+        /* ================= AI 代玩 ================= */
+        var aiClock = 0, nearestDot = null, ndClock = 0;
+
+        function findNearestDot(t) {
+            var bd = Infinity, b = null;
+            for (var y = 0; y < ROWS; y++) {
+                for (var x = 0; x < COLS; x++) {
+                    if (!G.dots[y][x]) continue;
+                    var d = Math.abs(x - t.x) + Math.abs(y - t.y);
+                    if (d < bd) { bd = d; b = { x: x, y: y }; }
+                }
+            }
+            return b;
+        }
+
+        function aiPickDir() {
+            var t = pac.tile;
+            var opts = [];
+            ORDER.forEach(function (n) { if (canGo(t, n)) opts.push(n); });
+            if (!opts.length) return pac.dirName;
+            var rev = REV[pac.dirName];
+            var bestDir = opts[0], bs = -Infinity;
+            opts.forEach(function (n) {
+                var s = 0;
+                var p = { x: t.x, y: t.y };
+                for (var k = 1; k <= 3; k++) {
+                    p = nextTile(p, n);
+                    if (walls[p.y][p.x] || door[p.y][p.x]) break;
+                    var dv = G.dots[p.y][p.x];
+                    if (dv === 2) s += 9;
+                    else if (dv === 1) s += 5;
+                    for (var i = 0; i < ghosts.length; i++) {
+                        var gh = ghosts[i];
+                        if (gh.mode !== 'out') continue;
+                        var gd = Math.abs(p.x - gh.tile.x) + Math.abs(p.y - gh.tile.y);
+                        if (gh.fright > 0) s += Math.max(0, 10 - gd) * 6;
+                        else if (gd < 5) s -= (5 - gd) * 24;
+                    }
+                }
+                if (nearestDot) {
+                    var cur = Math.abs(t.x - nearestDot.x) + Math.abs(t.y - nearestDot.y);
+                    var nt = nextTile(t, n);
+                    var aft = Math.abs(nt.x - nearestDot.x) + Math.abs(nt.y - nearestDot.y);
+                    s += (cur - aft) * 2.5;
+                }
+                if (n === pac.dirName) s += 2;
+                if (n === rev) s -= 8;
+                if (s > bs) { bs = s; bestDir = n; }
+            });
+            return bestDir;
+        }
+
+        function aiTick(dt) {
+            if (!aiOn) return;
+            if (state === 'start') { startGame(); return; }
+            if (state === 'paused') { setPaused(false); return; }
+            if (state !== 'play') return;
+            ndClock -= dt;
+            if (ndClock <= 0) { nearestDot = findNearestDot(pac.tile); ndClock = 0.4; }
+            aiClock -= dt;
+            if (aiClock > 0) return;
+            aiClock = 0.12;
+            setWant(aiPickDir());
+        }
+
+        function setAi(on) {
+            aiOn = on;
+            aiBtn.classList.toggle('is-running', aiOn);
+            aiBtn.setAttribute('aria-pressed', String(aiOn));
+            aiBadge.hidden = !aiOn;
+            if (aiOn) {
+                if (state === 'start') startGame();
+                else if (state === 'paused') setPaused(false);
+                else if (state === 'over' && overT <= 0) overT = 0.5;
+            }
+        }
+
+        /* ================= 迷宫离屏渲染 ================= */
+        // 空心轮廓墙（原版风格）：先把墙区外扩填充墙色，再按暴露边内缩填回底色，
+        // 相邻格内部无缝融合，最后只剩沿墙区边缘的一圈轮廓环带。另备一份白闪版。
+        function buildMaze(color) {
+            var off = document.createElement('canvas');
+            off.width = W * dpr;
+            off.height = H * dpr;
+            var c = off.getContext('2d');
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            var OUT = 0.8, IN = 1.2;      // 外扩与内缩量：环带宽 = OUT + IN ≈ 2px
+            c.fillStyle = color;
+            for (var y = 0; y < ROWS; y++) {
+                for (var x = 0; x < COLS; x++) {
+                    if (walls[y][x]) c.fillRect(x * T - OUT, y * T - OUT, T + OUT * 2, T + OUT * 2);
+                }
+            }
+            c.fillStyle = '#000';
+            for (var y2 = 0; y2 < ROWS; y2++) {
+                for (var x2 = 0; x2 < COLS; x2++) {
+                    if (!walls[y2][x2]) continue;
+                    var l = (x2 > 0 && walls[y2][x2 - 1]) ? 0 : IN;
+                    var r = (x2 < COLS - 1 && walls[y2][x2 + 1]) ? 0 : IN;
+                    var t2 = (y2 > 0 && walls[y2 - 1][x2]) ? 0 : IN;
+                    var b2 = (y2 < ROWS - 1 && walls[y2 + 1][x2]) ? 0 : IN;
+                    c.fillRect(x2 * T + l, y2 * T + t2, T - l - r, T - t2 - b2);
+                }
+            }
+            // 幽灵门：粉色横杆
+            c.strokeStyle = '#ffb8de';
+            c.lineWidth = 2.4;
+            c.beginPath();
+            for (var y3 = 0; y3 < ROWS; y3++) {
+                for (var x3 = 0; x3 < COLS; x3++) {
+                    if (!door[y3][x3]) continue;
+                    c.moveTo(x3 * T, (y3 + 0.5) * T);
+                    c.lineTo((x3 + 1) * T, (y3 + 0.5) * T);
+                }
+            }
+            c.stroke();
+            return off;
+        }
+        var mazeBlue = buildMaze(WALL_COLOR);
+        var mazeWhite = buildMaze('#f4f6ff');
+
+        /* ================= 绘制 ================= */
+        function drawPacBody(x, y, r, ang, open) {
+            g.beginPath();
+            g.moveTo(x, y);
+            g.arc(x, y, r, ang + open, ang + Math.PI * 2 - open);
+            g.closePath();
+            g.fillStyle = PAC_COLOR;
+            g.fill();
+        }
+
+        function drawPac() {
+            var p = posOf(pac);
+            var r = T * 0.78;
+            if (state === 'dying') {
+                // 死亡动画：嘴张大到消失，朝上
+                var k = Math.min(1, Math.max(0, (pac.dieT - 0.4) / 1.0));
+                if (k < 1) drawPacBody(p.x, p.y, r, -Math.PI / 2, 0.2 + k * (Math.PI - 0.2));
+                return;
+            }
+            var mouth = pac.stopped ? 0.12 : Math.abs(Math.sin(pac.anim * 11)) * 0.32;
+            drawPacBody(p.x, p.y, r, ANG[pac.dirName] || 0, mouth * Math.PI);
+        }
+
+        function drawGhostBody(x, y, r, color, wave) {
+            g.beginPath();
+            g.moveTo(x - r, y + r * 0.9);
+            g.lineTo(x - r, y - r * 0.1);
+            g.arc(x, y - r * 0.1, r, Math.PI, 0);
+            g.lineTo(x + r, y + r * 0.9);
+            var w = r * 2 / 3;
+            if (wave) {
+                g.lineTo(x + r - w * 0.5, y + r * 0.55);
+                g.lineTo(x + r - w, y + r * 0.9);
+                g.lineTo(x + r - w * 1.5, y + r * 0.55);
+                g.lineTo(x + r - w * 2, y + r * 0.9);
+                g.lineTo(x + r - w * 2.5, y + r * 0.55);
+            } else {
+                g.lineTo(x + r - w * 0.5, y + r * 0.9);
+                g.lineTo(x + r - w, y + r * 0.55);
+                g.lineTo(x + r - w * 1.5, y + r * 0.9);
+                g.lineTo(x + r - w * 2, y + r * 0.55);
+                g.lineTo(x + r - w * 2.5, y + r * 0.9);
+            }
+            g.closePath();
+            g.fillStyle = color;
+            g.fill();
+        }
+
+        function drawGhostEyes(x, y, dirName) {
+            var d = DIRS[dirName] || { x: 0, y: 0 };
+            var ex = d.x * 1.6, ey = d.y * 1.6;
+            g.fillStyle = '#ffffff';
+            g.beginPath();
+            g.ellipse(x - 3.2 + ex * 0.5, y - 2.4 + ey * 0.5, 2.3, 2.9, 0, 0, Math.PI * 2);
+            g.ellipse(x + 3.2 + ex * 0.5, y - 2.4 + ey * 0.5, 2.3, 2.9, 0, 0, Math.PI * 2);
+            g.fill();
+            g.fillStyle = '#2130ff';
+            g.beginPath();
+            g.arc(x - 3.2 + ex, y - 2.4 + ey, 1.3, 0, Math.PI * 2);
+            g.arc(x + 3.2 + ex, y - 2.4 + ey, 1.3, 0, Math.PI * 2);
+            g.fill();
+        }
+
+        function drawGhost(gh) {
+            var p = ghostPos(gh);
+            var r = T * 0.75;
+            var wave = Math.floor(animT * 8) % 2 === 0;
+            if (gh.mode === 'eyes' || gh.mode === 'entering') {
+                drawGhostEyes(p.x, p.y, gh.dirName);
+                return;
+            }
+            if (gh.fright > 0) {
+                var flash = gh.fright < 2 && Math.floor(gh.fright * 5) % 2 === 0;
+                drawGhostBody(p.x, p.y, r, flash ? '#f4f4ff' : '#2121de', wave);
+                // 惊惧脸：白点眼 + 波浪嘴
+                g.fillStyle = flash ? '#ff0000' : '#ffb8ae';
+                g.beginPath();
+                g.arc(p.x - 3, p.y - 2.4, 1.5, 0, Math.PI * 2);
+                g.arc(p.x + 3, p.y - 2.4, 1.5, 0, Math.PI * 2);
+                g.fill();
+                g.strokeStyle = flash ? '#ff0000' : '#ffb8ae';
+                g.lineWidth = 1.2;
+                g.beginPath();
+                g.moveTo(p.x - 5, p.y + 3.6);
+                for (var i = 1; i <= 4; i++) {
+                    g.lineTo(p.x - 5 + i * 2.5, p.y + (i % 2 ? 2.2 : 3.6));
+                }
+                g.stroke();
+                return;
+            }
+            drawGhostBody(p.x, p.y, r, gh.color, wave);
+            drawGhostEyes(p.x, p.y, gh.dirName);
+        }
+
+        function drawFruit(x, y) {
+            // 樱桃：两颗红果 + 茎叶
+            g.strokeStyle = '#31c431';
+            g.lineWidth = 1.6;
+            g.beginPath();
+            g.moveTo(x - 2.5, y + 2);
+            g.quadraticCurveTo(x - 1, y - 5, x + 4, y - 5.5);
+            g.moveTo(x + 2.5, y + 3);
+            g.quadraticCurveTo(x + 3, y - 2, x + 4, y - 5.5);
+            g.stroke();
+            g.fillStyle = '#ff2d2d';
+            g.beginPath();
+            g.arc(x - 2.5, y + 3.5, 3.1, 0, Math.PI * 2);
+            g.fill();
+            g.beginPath();
+            g.arc(x + 2.8, y + 4.2, 3.1, 0, Math.PI * 2);
+            g.fill();
+            g.fillStyle = 'rgba(255,255,255,0.55)';
+            g.beginPath();
+            g.arc(x - 3.4, y + 2.6, 1, 0, Math.PI * 2);
+            g.fill();
+        }
+
+        function draw() {
+            // 背景
+            g.fillStyle = '#000';
+            g.fillRect(0, 0, W, H);
+            // 迷宫（过关闪白：蓝白交替）
+            var flashOn = state === 'clear' && Math.floor(G.clearT * 5) % 2 === 1;
+            g.drawImage(flashOn ? mazeWhite : mazeBlue, 0, 0, W, H);
+            // 豆子
+            var blinkOn = Math.floor(animT * 5) % 2 === 0;
+            for (var y = 0; y < ROWS; y++) {
+                for (var x = 0; x < COLS; x++) {
+                    var dv = G.dots[y][x];
+                    if (!dv) continue;
+                    var cx = (x + 0.5) * T, cy = (y + 0.5) * T;
+                    if (dv === 1) {
+                        g.fillStyle = DOT_COLOR;
+                        g.beginPath();
+                        g.arc(cx, cy, 1.7, 0, Math.PI * 2);
+                        g.fill();
+                    } else if (blinkOn) {
+                        g.fillStyle = DOT_COLOR;
+                        g.beginPath();
+                        g.arc(cx, cy, 4, 0, Math.PI * 2);
+                        g.fill();
+                    }
+                }
+            }
+            // 水果
+            if (G.fruit) drawFruit(14 * T, 17.5 * T);
+            // 吃豆人与幽灵（死亡动画播放后幽灵消失；过关时全场退场）
+            var ghostsGone = state === 'clear' || (state === 'dying' && pac.dieT > 0.4);
+            if (!ghostsGone) ghosts.forEach(drawGhost);
+            if (state !== 'clear') drawPac();
+            // 飘字
+            for (var i = 0; i < pops.length; i++) {
+                var pf = pops[i];
+                g.globalAlpha = Math.max(0, pf.life / pf.max);
+                g.fillStyle = pf.color;
+                g.font = '700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+                g.textAlign = 'center';
+                g.fillText(pf.text, pf.x, pf.y);
+            }
+            g.globalAlpha = 1;
+            // 状态文字
+            if (state === 'ready') {
+                g.fillStyle = '#ffdf00';
+                g.font = '700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+                g.textAlign = 'center';
+                g.fillText('READY!', 14 * T, 17.9 * T);
+            }
+            if (state === 'over' && !aiOn) {
+                g.fillStyle = '#ff0000';
+                g.font = '700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+                g.textAlign = 'center';
+                g.fillText('GAME OVER', 14 * T, 17.9 * T);
+            }
+        }
+
+        /* ================= 输入：键盘 ================= */
+        var KEYMAP = {
+            ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+            w: 'up', s: 'down', a: 'left', d: 'right',
+            W: 'up', S: 'down', A: 'left', D: 'right'
+        };
+        function setWant(name) {
+            if (!name || !pac) return;
+            // 反向：立即掉头（原版允许中途反向；隧道 wrap 下同样成立）
+            if (name === REV[pac.dirName]) {
+                if (pac.prog > 0.0001) {
+                    pac.tile = nextTile(pac.tile, REV[pac.dirName]);
+                    pac.prog = 1 - pac.prog;
+                }
+                pac.dirName = name;
+                pac.stopped = false;
+                pac.want = '';
+                return;
+            }
+            pac.want = name;   // 其余方向缓存，到格心时应用
+        }
+        document.addEventListener('keydown', function (e) {
+            var m = KEYMAP[e.key];
+            if (m && (state === 'play') && !aiOn) { setWant(m); e.preventDefault(); }
+            if (e.key === ' ') e.preventDefault();
+            if (e.key === 'p' || e.key === 'P') {
+                if (state === 'play') setPaused(true);
+                else if (state === 'paused') setPaused(false);
+                return;
+            }
+            if (e.key === 'Enter' && (state === 'start' || state === 'over')) startGame();
+        });
+
+        /* ================= 输入：触屏滑动 ================= */
+        var swipe = null;
+        cv.addEventListener('pointerdown', function (e) {
+            try { cv.setPointerCapture(e.pointerId); } catch (err) { }
+            swipe = { x: e.clientX, y: e.clientY };
+        });
+        cv.addEventListener('pointermove', function (e) {
+            if (!swipe || state !== 'play' || aiOn) return;
+            var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+            if (Math.abs(dx) < 22 && Math.abs(dy) < 22) return;
+            setWant(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+            swipe = { x: e.clientX, y: e.clientY };   // 连续滑动可不断改向
+        });
+        cv.addEventListener('pointerup', function () { swipe = null; });
+
+        /* ================= 按钮 ================= */
+        aiBtn.addEventListener('click', function () {
+            setAi(!aiOn);
+            aiBtn.blur();
+        });
+        pauseBtn.addEventListener('click', function () {
+            if (state === 'play') setPaused(true);
+            else if (state === 'paused') setPaused(false);
+        });
+        ovBtn.addEventListener('click', function () {
+            if (state === 'start' || state === 'over') startGame();
+            else if (state === 'paused') setPaused(false);
+            ovBtn.blur();
+        });
+        ovBtn2.addEventListener('click', function () {
+            startGame();
+            ovBtn2.blur();
+        });
+
+        /* ================= 切后台自动暂停 / 失焦清键 ================= */
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && state === 'play') setPaused(true);
+        });
+
+        /* ================= 主循环 ================= */
+        var last = performance.now();
+        function frame(now) {
+            var dt = Math.min(now - last, 100);
+            last = now;
+            var s = dt / 1000;
+            animT += s;
+
+            aiTick(s);
+            if (state === 'over' && aiOn) {
+                overT -= s;
+                if (overT <= 0) startGame();
+            }
+
+            if (state === 'ready') {
+                G.readyT -= s;
+                if (G.readyT <= 0) {
+                    state = 'play';
+                    if (window.GameSFX) GameSFX.levelup();
+                }
+            } else if (state === 'play') {
+                var sp = speeds();
+                if (G.eatPause > 0) {
+                    G.eatPause -= s;      // 吃幽灵冻结：全场定格
+                } else {
+                    // 吃豆人（惊惧期略微提速，近似原版）
+                    pac.anim += s;
+                    advance(pac, sp.pac * (G.frightT > 0 ? 1.1 : 1), s, pacCenter);
+                    // 幽灵
+                    ghosts.forEach(function (gh) { updateGhost(gh, s); });
+                    updateModes(s);
+                    checkCollisions();
+                    // 水果倒计时
+                    if (G.fruit) {
+                        G.fruit.t -= s;
+                        if (G.fruit.t <= 0) G.fruit = null;
+                    }
+                }
+                // 飘字
+                for (var i = 0; i < pops.length; i++) {
+                    pops[i].life -= s;
+                    if (pops[i].life <= 0) pops[i].dead = true;
+                }
+                if (pops.some(function (x2) { return x2.dead; })) pops = pops.filter(function (x2) { return !x2.dead; });
+                if (state === 'play') updateHud();
+            } else if (state === 'dying') {
+                pac.dieT += s;
+                if (pac.dieT >= 1.6) {
+                    G.lives--;
+                    if (G.lives <= 0) {
+                        gameOverUI();
+                    } else {
+                        resetPositions();
+                        state = 'ready';
+                        G.readyT = 1.6;
+                        updateHud();
+                    }
+                }
+            } else if (state === 'clear') {
+                G.clearT -= s;
+                if (G.clearT <= 0) {
+                    resetLevel(false);
+                    state = 'ready';
+                    updateHud();
+                }
+            }
+
+            if (G) draw();
+            requestAnimationFrame(frame);
+        }
+
+        /* ================= 启动 ================= */
+        updateHud();
+        showOverlay('start');
+        requestAnimationFrame(frame);
+    })();
+    </script>
+  <div class="g-alert-mask g-alert-rules open" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则" hidden>
+    <div class="g-alert">
+      <div class="g-alert-body">
+    <h2>游戏规则</h2>
+
+      <h3>玩法</h3>
+      <ul>
+        <li>吃光迷宫里全部豆子过关，240 颗豆 + 4 颗能量豆</li>
+        <li>能量豆让幽灵短暂变蓝，此时可反杀：连吃得分 200 / 400 / 800 / 1600 翻倍</li>
+        <li>第 70 / 170 颗豆会在幽灵房下方引出水果，碰到加分</li>
+        <li>10000 分奖励一条命；关卡越高幽灵越快、惊惧时间越短</li>
+      </ul>
+      <h3>幽灵</h3>
+      <ul>
+        <li>红「追击」：始终锁定你的位置</li>
+        <li>粉「伏击」：埋伏在你前方四格</li>
+        <li>青「围堵」：与红幽灵配合包抄你的身后</li>
+        <li>橙「游走」：靠近就害羞撤离，忽近忽远</li>
+        <li>它们巡逻（散开）与追击定时轮换，进入隧道会减速</li>
+      </ul>
+      <h3>操作</h3>
+      <ul>
+        <li>方向键 / WASD / 触屏滑动：转向（可预输入）</li>
+        <li>P：暂停　Enter：开始 / 重开</li>
+      </ul>
+      <h3>AI 代玩</h3>
+      <ul>
+        <li>点击「AI 代玩」按钮，AI 自动躲鬼吃豆并自动续局</li>
+        <li>AI 代玩期间成绩不计入最高分，再点一次可随时停止</li>
+      </ul>
+      </div>
+      <div class="g-alert-actions">
+        <button class="g-alert-btn default" id="rulesClose" type="button">好的</button>
+      </div>
+    </div>
+  </div>
+<script>
+  /* 左上角工具栏：规则弹窗 + 全局音效开关；字体与主站「界面字体」联动（appearance.js 单源） */
+  (function () {
+    var mask = document.getElementById('rulesModal');
+    var rulesBtn = document.getElementById('rulesBtn');
+    var closeBtn = document.getElementById('rulesClose');
+    var lastFocus = null;
+    function openRules() {
+      if (!mask || !mask.hidden) return;
+      lastFocus = document.activeElement;
+      mask.hidden = false;                  // mask 常驻 .open（g-alert open 态），只切 hidden
+      if (closeBtn) closeBtn.focus();
+    }
+    function closeRules() {
+      if (!mask || mask.hidden) return;
+      mask.hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+      lastFocus = null;
+    }
+    if (rulesBtn) rulesBtn.addEventListener('click', openRules);
+    if (closeBtn) closeBtn.addEventListener('click', closeRules);
+    if (mask) mask.addEventListener('click', function (e) { if (e.target === mask) closeRules(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mask && !mask.hidden) { e.stopPropagation(); closeRules(); }
+    });
+
+    var sfxBtn = document.getElementById('sfxBtn');
+    var SFX_KEY = 'gameSfxMuted';
+    function sfxMuted() { try { return localStorage.getItem(SFX_KEY) === '1'; } catch (e) { return false; } }
+    function paintSfx() {
+      if (!sfxBtn) return;
+      var muted = sfxMuted();
+      sfxBtn.classList.toggle('is-muted', muted);
+      sfxBtn.setAttribute('aria-pressed', String(muted));
+      sfxBtn.setAttribute('aria-label', muted ? '开启音效' : '静音');
+      var on = sfxBtn.querySelector('.sfx-on'), off = sfxBtn.querySelector('.sfx-off');
+      if (on) on.toggleAttribute('hidden', muted);      // SVGElement.hidden 非反射属性，必须 toggleAttribute
+      if (off) off.toggleAttribute('hidden', !muted);
+    }
+    if (sfxBtn) sfxBtn.addEventListener('click', function () {
+      try { localStorage.setItem(SFX_KEY, sfxMuted() ? '0' : '1'); } catch (e) {}
+      paintSfx();
+    });
+    window.addEventListener('storage', function (e) { if (e.key === SFX_KEY) paintSfx(); });
+    paintSfx();
+
+    try { if (window.SiteAppearance) SiteAppearance.applySiteFontFromStorage(); } catch (e) {}
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'fontFamily' && window.SiteAppearance) SiteAppearance.applySiteFontFromStorage();
+    });
+  })();
+  </script>
+</body>
+</html>
