@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../assets/game-ui.css">
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
+<script src="../../assets/game-fit.js"></script>
     <style>
     /* 拾光集 · 吃豆人页面样式
        组件基线来自共享设计系统 assets/game-ui.css（Apple HIG），见 docs/game-ui-design.md。
@@ -16,7 +17,7 @@
     :root { --game-accent: #ffd800; }   /* 个性色：吃豆人黄（规范 §7 分配表） */
 
     #stage {
-      width: min(336px, 100%);
+      width: min(448px, 100%);
       margin: 0 auto;
       overflow: hidden;
       border: 1px solid var(--separator);
@@ -73,7 +74,7 @@
         </section>
 
         <div class="g-stage" id="stage">
-            <canvas id="gameCanvas" width="336" height="372"></canvas>
+            <canvas id="gameCanvas" width="448" height="496"></canvas>
             <div id="overlay" class="g-overlay g-overlay-fade">
                 <h2 class="g-overlay-title" id="ovTitle">吃豆人</h2>
                 <p class="g-overlay-text" id="ovDesc"></p>
@@ -128,7 +129,7 @@
             '############################'
         ];
 
-        var T = 12, COLS = 28, ROWS = 31;   // tile 尺寸与迷宫规格
+        var T = 16, COLS = 28, ROWS = 31;   // tile 尺寸与迷宫规格
         var W = COLS * T, H = ROWS * T;
         var BASE_SPD = 9.5;                  // 全速（tile/秒），原版约 9.47
 
@@ -661,6 +662,7 @@
             var bestDir = opts[0], bs = -Infinity;
             opts.forEach(function (n) {
                 var s = 0;
+                // 直线预看 3 格：吃豆收益（能量豆权重更高）
                 var p = { x: t.x, y: t.y };
                 for (var k = 1; k <= 3; k++) {
                     p = nextTile(p, n);
@@ -668,17 +670,19 @@
                     var dv = G.dots[p.y][p.x];
                     if (dv === 2) s += 9;
                     else if (dv === 1) s += 5;
-                    for (var i = 0; i < ghosts.length; i++) {
-                        var gh = ghosts[i];
-                        if (gh.mode !== 'out') continue;
-                        var gd = Math.abs(p.x - gh.tile.x) + Math.abs(p.y - gh.tile.y);
-                        if (gh.fright > 0) s += Math.max(0, 10 - gd) * 6;
-                        else if (gd < 5) s -= (5 - gd) * 24;
-                    }
                 }
+                // 幽灵威胁 / 追击：以走一步后的预期位置做全图曼哈顿评估，侧向来鬼同样感知
+                var nt = nextTile(t, n);
+                for (var i = 0; i < ghosts.length; i++) {
+                    var gh = ghosts[i];
+                    if (gh.mode !== 'out') continue;
+                    var gd = Math.abs(nt.x - gh.tile.x) + Math.abs(nt.y - gh.tile.y);
+                    if (gh.fright > 0) s += Math.max(0, 10 - gd) * 5;
+                    else if (gd < 6) s -= (6 - gd) * 14;
+                }
+                // 最近豆方向进步分
                 if (nearestDot) {
                     var cur = Math.abs(t.x - nearestDot.x) + Math.abs(t.y - nearestDot.y);
-                    var nt = nextTile(t, n);
                     var aft = Math.abs(nt.x - nearestDot.x) + Math.abs(nt.y - nearestDot.y);
                     s += (cur - aft) * 2.5;
                 }
