@@ -1876,6 +1876,24 @@
       "cover": "assets/media/yosuga-no-sora.jpg",
       "comment": "乡下的夏天美得安静，穹线一开一切都变了，画面与配乐都温柔到骨子里。",
       "rating": 7.0
+    },
+    {
+      "title": "通往夏天的隧道，再见的出口",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.7,
+      "release": "2022-09-09",
+      "url": "https://www.themoviedb.org/movie/916192",
+      "cover": "assets/media/tunnel-to-summer.jpg"
+    },
+    {
+      "title": "你好世界",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.3,
+      "release": "2019-09-11",
+      "url": "https://www.themoviedb.org/movie/604605",
+      "cover": "assets/media/hello-world.jpg"
     }
   ]
 }
