@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 华容道 · 游戏私有样式 =====
    页面骨架、按钮、计分卡、弹窗、规则栏等组件外观由 assets/game-ui.css 统一提供，
@@ -394,7 +395,7 @@ function tapPiece(p) {
 /* ---------- 移动与计步（连步口径：连续移动同一棋子不重复计步） ---------- */
 function moveTo(p, nx, ny) {
   if (won || (nx === p.x && ny === p.y)) return;
-  if (window.GameSFX) GameSFX.click();
+  if (window.GameSFX) GameSFX.pawn();
   p.x = nx;
   p.y = ny;
   if (lastMover !== p) {
@@ -404,6 +405,7 @@ function moveTo(p, nx, ny) {
     bump(stepStat);
   }
   renderPiece(p);
+  if (window.GameJuice) GameJuice.pop(p.el);   // 打击感：棋子落位弹一下
   if (p.t === 'cc' && p.x === 1 && p.y === ROWS - 2) win();   // 曹操左上角抵达出口
 }
 
@@ -496,6 +498,7 @@ document.addEventListener('keydown', e => {
 function win() {
   won = true;
   if (window.GameSFX) GameSFX.win();
+  if (window.GameJuice) GameJuice.win();   // 打击感：通关庆祝
   clearSel();
   const cc = pieces.find(p => p.t === 'cc');
   cc.el.classList.add('escape');

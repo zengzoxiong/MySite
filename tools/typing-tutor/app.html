@@ -133,6 +133,7 @@
     <link rel="stylesheet" href="../../assets/game-ui.css">
     <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
     <script src="../../assets/appearance.js"></script>
 </head>
 <body>
@@ -434,6 +435,7 @@
         if (K.charT) K.dtSum += performance.now() - K.charT;  /* 累计该键用时（含纠错） */
         K.correct++;
         K.idx++;
+        if (window.GameJuice) { GameJuice.good(keyEls[target]); GameJuice.combo(); }   /* 打击感：命中键位弹跳+金色粒子，连击计数 */
         if (K.idx >= K.queue.length) { updateStats(); finishKeys(); return; }
         showKeyChar();
       } else {
@@ -441,6 +443,7 @@
         K.err++;
         K.charErr[target] = (K.charErr[target] || 0) + 1;
         if (window.GameSFX) GameSFX.error();
+        if (window.GameJuice) GameJuice.bad();   /* 打击感：击错震屏红闪 */
         flash($('#bigChar'), 'shake');
         flash($('#bigChar'), 'wrong');
         var el = keyEls[target];
@@ -519,13 +522,15 @@
         W.correct++; W.pos++;
         if (W.pos >= w.length) {       /* 整词打对，自动进入下一个 */
           W.idx++; W.pos = 0;
-          if (window.GameSFX && W.idx < W.list.length) GameSFX.score();
+          if (window.GameSFX && W.idx < W.list.length) GameSFX.tick();   /* 整词打对进入下一个：滴答计时音 */
+          if (window.GameJuice) { GameJuice.good($('#wordBox')); GameJuice.combo(); }   /* 打击感：整词打对弹跳+粒子，连击计数 */
           if (W.idx >= W.list.length) { updateStats(); finishWords(); return; }
         }
         renderWord();
       } else {
         W.err++;
         W.charErr[target] = (W.charErr[target] || 0) + 1;
+        if (window.GameJuice) GameJuice.bad();   /* 打击感：打错震屏红闪 */
         var cur = $('#wordBox .cur');
         if (cur) flash(cur, 'err');
         flash($('#wordBox'), 'shake');
@@ -647,12 +652,14 @@
       var target = T.chars[T.pos];
       if (ch === target) {
         T.correct++; T.pos++;
+        if (window.GameJuice) GameJuice.combo();   /* 打击感：连续击对计连击 */
         if (T.pos >= T.chars.length) { updateStats(); finishText(); return; }
         renderTextEn();
       } else {
         /* 打错标红闪烁，不前进，打对才越过 */
         T.err++;
         T.charErr[target] = (T.charErr[target] || 0) + 1;
+        if (window.GameJuice) GameJuice.bad();   /* 打击感：打错震屏红闪 */
         var cur = $('#textEnBox .cur');
         if (cur) flash(cur, 'err');
       }
@@ -862,6 +869,7 @@
     /* 展示成绩单：先更新最佳纪录（速度更快才算破纪录），再弹出 */
     function showResult(o) {
       if (window.GameSFX) GameSFX.win();
+      if (window.GameJuice) GameJuice.win();   /* 打击感：完成一组多点多色粒子庆祝 */
       var best = loadBest(o.key);
       var isNew = false;
       if (!best || o.speed > best.speed) {

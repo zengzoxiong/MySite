@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
     /* ===== 点灯谜题 · 游戏私有样式（组件基线由 ../../assets/game-ui.css 提供） ===== */
 
@@ -265,7 +266,7 @@
   // ---------- 交互 ----------
   function press(i) {
     if (solved) return;
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameSFX) GameSFX.stone();   // 按压灯格：短促石子音
     cur ^= FLIP[i];
     moves++;
     hist.push(i);
@@ -274,6 +275,10 @@
     void cells[i].offsetWidth;
     cells[i].classList.add('pop');
     render();
+    if (window.GameJuice) {   // 打击感：按压点迸发小粒
+      const r = cells[i].getBoundingClientRect();
+      GameJuice.burst(r.left + r.width / 2, r.top + r.height / 2, '#f5a623', 6);
+    }
     if (cur === 0) win();
   }
   function undo() {
@@ -306,6 +311,7 @@
   function win() {
     solved = true;
     if (window.GameSFX) GameSFX.win();
+    if (window.GameJuice) GameJuice.win();   // 打击感：全部点亮通关庆祝
     boardEl.classList.add('cleared');
     tipEl.textContent = '已通关！点「下一关」继续挑战，或切换难度换个局面。';
     const prev = bestOf(mode);

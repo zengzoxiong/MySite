@@ -10,6 +10,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 打砖块 · 个性色：砖块红 =====
    字体栈、色彩令牌、按钮、覆盖层、规则栏等组件基线统一由共享样式表 game-ui.css 提供，
@@ -210,7 +211,16 @@ let shownScore=-1,shownLevel=-1,shownLives=-1;
 function syncHud(){
   const s=Math.floor(g.score);
   if(s===shownScore&&g.level===shownLevel&&g.lives===shownLives)return;
-  if (window.GameSFX && shownScore >= 0 && s > shownScore) GameSFX.score();   // 打掉砖块得分（核心区在 Node 模拟里运行，故在 HUD 层发声）
+  if (window.GameSFX && shownScore >= 0 && s > shownScore) GameSFX.paddle();   // 打掉砖块得分（核心区在 Node 模拟里运行，故在 HUD 层发声）
+  // 打击感：击砖得分粒子（画布上半区中心）+ 连击；消命震屏红闪
+  if (window.GameJuice) {
+    const br=cv.getBoundingClientRect();
+    if (shownScore >= 0 && s > shownScore) {
+      GameJuice.burst(br.left + br.width / 2, br.top + br.height * 0.35, '#f5a623', 8);
+      GameJuice.combo();
+    }
+    if (shownLives >= 0 && g.lives < shownLives) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }
+  }
   shownScore=s;shownLevel=g.level;shownLives=g.lives;
   scoreEl.textContent=s;levelEl.textContent=g.level;
   livesEl.innerHTML='';

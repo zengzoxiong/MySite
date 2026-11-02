@@ -10,6 +10,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* 游戏个性色：经典蛇绿（覆盖共享样式表默认蓝，见 docs/game-ui-design.md §7） */
 :root { --game-accent: #34C759; }
@@ -269,14 +270,26 @@ function step(){
     if(d.x!==-G.dir.x||d.y!==-G.dir.y){turn=d;break;}
   }
   const ev=core.advance(G,turn,Math.random);
-  if(ev==='dead'){gameOver(false);return;}
+  if(ev==='dead'){
+    if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }   // 打击感：撞击震屏红闪
+    gameOver(false);return;
+  }
   if(ev==='eat'){
     scoreEl.textContent=G.score;          // 同步 HUD 分数
     floats.push({x:G.snake[0].x*CELL+10,y:G.snake[0].y*CELL+10,t:40});   // 得分浮字
     stepMs=Math.max(70,160-G.eaten*4);    // 速度随长度渐进加快
-    if (window.GameSFX) GameSFX.score();
+    if (window.GameSFX) GameSFX.gulp();
+    // 打击感：吃到食物迸发粒子 + 连击（蛇头格子换视口坐标）
+    if (window.GameJuice) {
+      const sr=cv.getBoundingClientRect();
+      GameJuice.burst(sr.left+(G.snake[0].x+0.5)*CELL*sr.width/(CELL*N), sr.top+(G.snake[0].y+0.5)*CELL*sr.height/(CELL*N), '#ef5a67', 8);
+      GameJuice.combo();
+    }
   }
-  if(ev==='win'){gameOver(true);return;}
+  if(ev==='win'){
+    if (window.GameJuice) GameJuice.win();   // 打击感：填满棋盘庆祝
+    gameOver(true);return;
+  }
 }
 
 // ---------- 绘制 ----------

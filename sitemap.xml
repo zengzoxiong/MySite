@@ -446,11 +446,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://zengzoxiong.github.io/MySite/tools/maze-runner/app.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://zengzoxiong.github.io/MySite/tools/memory-flip/app.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 一笔画 · 拾光集自建小游戏（Apple HIG 共享组件 + 游戏私有视觉） ===== */
 /* 个性色：线条轻盈（分配表见 docs/game-ui-design.md §7） */
@@ -462,7 +463,11 @@ function pushPath(v){
   }
   path.push(v);
   onPath[v] = 1;
-  if (window.GameSFX) GameSFX.click();
+  if (window.GameSFX) GameSFX.whoosh();
+  if (window.GameJuice){   // 打击感：走到新点迸发小粒（画布逻辑坐标换视口坐标）
+    const r = cv.getBoundingClientRect(), k = r.width / W;
+    GameJuice.burst(r.left + px(v) * k, r.top + py(v) * k, COL.primary, 6);
+  }
   timerStart();
   afterChange();
 }
@@ -552,6 +557,7 @@ function doHint(){
 // ---------- 过关结算 ----------
 function winLevel(){
   if (window.GameSFX) GameSFX.win();
+  if (window.GameJuice) GameJuice.win();   // 打击感：一笔画成通关庆祝
   mode = 'won';
   timerPause();
   winEarned = undoCount === 0 ? 3 : (undoCount <= 3 ? 2 : 1);   // 星级：不撤销 3 星，撤销 3 步内 2 星
@@ -740,6 +746,7 @@ function dragStep(v){
 }
 function invalidFeedback(v){
   if (window.GameSFX) GameSFX.error();
+  if (window.GameJuice) GameJuice.bad();   // 打击感：走不通震屏+红闪
   flashDot = v;
   flashUntil = performance.now() + 350;
   if (!REDUCED){

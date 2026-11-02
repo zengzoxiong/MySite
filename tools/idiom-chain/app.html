@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 成语接龙 · Apple HIG 共享组件化（共享样式表 assets/game-ui.css）=====
    个性色 #FFCC00（文字灯泡暖黄），黄/灰个性色的对比度修正见 docs/game-ui-design.md §7.1。
@@ -747,7 +748,8 @@ function accept(word, isHint) {
   addChainItem(word, homoph, false);
   const gain = isHint ? HINT_SCORE : BASE_SCORE + Math.floor(remain / 1000);
   score += gain;
-  if (window.GameSFX) GameSFX.score();
+  if (window.GameSFX) GameSFX.crit();   // 接对成语：里程碑琶音
+  if (window.GameJuice) { GameJuice.good(curCard); GameJuice.combo(); }   // 打击感：接对弹跳+粒子，连击计数
   scoreEl.textContent = score;
   replay(scoreStat, 'g-bump');
   if (score > best) {
@@ -771,6 +773,7 @@ function endGame(reason) {
   if (window.GameSFX) GameSFX.lose();
   if (reason === 'dead') drawTimer(0);
   const isNew = newRecord && score > 0;
+  if (window.GameJuice && isNew) GameJuice.win();   // 打击感：刷新最高纪录时粒子庆祝
   overTitle.textContent = reason === 'time' ? '时间到！' : '词库已尽';
   let sub = '本局得分 <b>' + score + '</b> · 接对 ' + (chain.length - 1) + ' 个' +
     (isNew ? ' · <em>新纪录！</em>' : ' · 历史最高 ' + best);
@@ -810,6 +813,7 @@ requestAnimationFrame(loop);
 // ---------- 提交校验 ----------
 function fail(msg) {
   if (window.GameSFX) GameSFX.error();
+  if (window.GameJuice) GameJuice.bad();   // 打击感：接不上震屏红闪
   feedback(msg, true);
   replay(form, 'shake');
 }

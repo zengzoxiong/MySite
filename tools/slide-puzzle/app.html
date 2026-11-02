@@ -11,7 +11,8 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
-  <style>
+<script src="../../assets/game-juice.js"></script>
+    <style>
     /* ===== 数字华容道 · 游戏私有视觉（组件外观统一由 game-ui.css 提供） ===== */
     /* 个性色：青（滑块轻盈感，见 docs/game-ui-design.md 分配表） */
     :root { --game-accent: #5AC8FA; }
@@ -662,6 +663,7 @@
     if (!ev.moved) return;
     if (window.GameSFX && !ev.solved) GameSFX.swipe();   // 滑动数字块
     setXY(els[ev.tile], from % G.n, Math.floor(from / G.n));   // 数字块滑进原空位
+    if (window.GameJuice) GameJuice.pop(els[ev.tile]);   // 打击感：滑块落位弹跳
     movesEl.textContent = G.moves;
     if (!timerId) startTimer();             // 首次移动才开始计时
     if (ev.solved) winGame();
@@ -670,6 +672,8 @@
   /* ---------- 胜利 ---------- */
   function winGame() {
     if (window.GameSFX) GameSFX.win();
+    // 打击感：通关多点多色庆祝（与彩带叠加）
+    if (window.GameJuice) GameJuice.win();
     stopTimer();
     const old = loadBest();
     let record = false;

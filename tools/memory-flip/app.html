@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 记忆翻牌 · 游戏私有视觉（组件语言统一到 assets/game-ui.css） ===== */
 :root { --game-accent: #AF52DE; }   /* 本游戏个性色：紫 · 翻牌魔法 */
@@ -326,7 +327,7 @@ function buildCard(idx, shapeIdx) {
     '</span>';
   return btn;
 }
-function flip(card) { card.classList.add('flipped'); card.setAttribute('aria-label', '已翻开的卡片'); }
+function flip(card) { card.classList.add('flipped'); if (window.GameJuice) GameJuice.pop(card); /* 打击感：翻牌弹一下 */ card.setAttribute('aria-label', '已翻开的卡片'); }
 function unflip(card) { card.classList.remove('flipped'); card.setAttribute('aria-label', '未翻开的卡片'); }
 function renderHud() { stMoves.textContent = state.moves; stTime.textContent = fmtTime(seconds); }
 function renderBest() {
@@ -363,13 +364,14 @@ function applyFlip(idx) {
   state = r.state;
   if (justStarted) startTimer();           // 第一次翻牌才开始计时
   flip(card);
-  if (window.GameSFX && r.event.type === 'first') GameSFX.click();   // 翻开本轮第一张
+  if (window.GameSFX && r.event.type === 'first') GameSFX.stone();   // 翻开本轮第一张
   if (r.event.type === 'first') return;    // 第一张：等待第二张
 
   renderHud();
   const ca = board.children[r.event.a], cb = board.children[r.event.b];
   if (r.event.type === 'miss') {
     /* 配对失败：标记红色边框，锁板后翻回 */
+    if (window.GameJuice) GameJuice.bad();   // 打击感：配对失败轻微震屏+红闪
     lock = true;
     ca.classList.add('miss'); cb.classList.add('miss');
     setTimeout(() => {
@@ -381,9 +383,13 @@ function applyFlip(idx) {
   }
   /* 配对成功：保持正面，短暂停留后消隐 */
   if (window.GameSFX) (r.event.type === 'win' ? GameSFX.win() : GameSFX.score());
+  const rc = ca.getBoundingClientRect();   // 打击感：配对成功迸发粒子 + 连击
+  if (window.GameJuice) { GameJuice.burst(rc.left + rc.width / 2, rc.top + rc.height / 2, '#AF52DE', 12); GameJuice.combo(); }
+  if (window.GameSFX) GameSFX.capture();   // 打击感：配对成功
   ca.classList.add('matched'); cb.classList.add('matched');
   ca.disabled = true; cb.disabled = true;
-  if (r.event.type === 'win') { stopTimer(); setTimeout(showWin, 550); }
+  if (r.event.type === 'win') { stopTimer(); if (window.GameJuice) GameJuice.win();   // 打击感：全部配对通关庆祝
+    setTimeout(showWin, 550); }
 }
 
 /* ================= 点击判定（事件委托） ================= */

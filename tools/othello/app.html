@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 黑白棋 · 游戏私有视觉与私有状态修饰类 =====
    外围组件（导航标题栏 / 计分 / 按钮 / 结算弹窗 / 规则栏）统一使用
@@ -448,13 +449,19 @@ body{transition:padding-right .28s cubic-bezier(.22,.9,.3,1)}
 
   /* ---------- 对局流程 ---------- */
   function playMove(p, idx) {
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameSFX) GameSFX.stone();
     history.push({ bd: bd.slice(), turn: turn, lastMove: lastMove });   // 落子前快照
     const flips = apply(bd, p, idx);
     createDisc(idx, p, true);
     for (let k = 0; k < flips.length; k++) flipDiscDom(flips[k]);
     lastMove = idx;
     updateLastMark();
+    // 打击感：落子迸发粒子（含翻转时更密）
+    if (window.GameJuice) {
+      const dr = cells[idx].getBoundingClientRect();
+      GameJuice.burst(dr.left + dr.width / 2, dr.top + dr.height / 2,
+        p === BLACK ? '#3a3f52' : '#f5f5f5', flips.length > 0 ? 10 : 5);
+    }
     turn = 3 - p;
     syncHud();
     nextTurn();
@@ -504,6 +511,8 @@ body{transition:padding-right .28s cubic-bezier(.22,.9,.3,1)}
     else { title = '平局'; cls = ''; }
     if (window.GameSFX && diff > 0) GameSFX.win();
     if (window.GameSFX && diff < 0) GameSFX.lose();
+    // 打击感：胜负结算包
+    if (window.GameJuice) (diff > 0 ? GameJuice.win() : diff < 0 ? GameJuice.bad() : GameJuice.flash('rgba(255,255,255,.3)'));
     let sub = '黑 ' + c.b + ' : ' + c.w + ' 白';
     if (diff > 0) {
       let rec;

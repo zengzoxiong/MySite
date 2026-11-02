@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
   <style>
     /* ===== 数独 · 游戏私有样式：棋盘个性视觉保留，外围组件统一走共享样式表 ===== */
     /* 个性色：靛蓝（静心逻辑），组件强调色一行切换 */
@@ -625,7 +626,12 @@
       startTimer();
       grid = res.grid;
       render();
-      if (window.GameSFX) (computeConflicts(grid).size ? GameSFX.error() : GameSFX.score());   // 产生冲突报错，无冲突得分
+      if (window.GameSFX) (computeConflicts(grid).size ? GameSFX.error() : GameSFX.stone());   // 产生冲突报错，无冲突落子石音
+      if (window.GameJuice) {
+        const cellEl = boardEl.querySelector('[data-idx="' + selected + '"]');
+        if (computeConflicts(grid).size) GameJuice.bad();             // 打击感：产生冲突震屏红闪
+        else { GameJuice.pop(cellEl); GameJuice.combo(); }            // 打击感：填对数字格子弹跳+连击
+      }
       checkComplete();
     }
     function eraseCell() {
@@ -650,7 +656,7 @@
         else if (grid[i] !== parseInt(puzzle.a[i], 10)) wrong++;
       }
       render();
-      if (wrong > 0) setMsg('有 ' + wrong + ' 处填错，红色格子需要修改。', 'err');
+      if (wrong > 0) { setMsg('有 ' + wrong + ' 处填错，红色格子需要修改。', 'err'); if (window.GameJuice) GameJuice.bad(); }   // 打击感：检查发现填错震屏红闪
       else if (empty > 0) setMsg('目前全部正确，还剩 ' + empty + ' 个空格，继续加油。', 'ok');
       else setMsg('全部正确。', 'ok');
     }
@@ -675,6 +681,7 @@
       hintsLeft--;
       startTimer();
       render();
+      if (window.GameJuice) GameJuice.pop(boardEl.querySelector('[data-idx="' + idx + '"]'));   // 打击感：提示填入的格子弹跳
       document.getElementById('hintVal').textContent = hintsLeft;
       document.getElementById('hintBtn').textContent = '提示（剩 ' + hintsLeft + ' 次）';
       setMsg('已填入一个正确数字。', 'ok');
@@ -688,6 +695,7 @@
       }
       finished = true;
       if (window.GameSFX) GameSFX.win();
+      if (window.GameJuice) GameJuice.win();   // 打击感：解出整题多点粒子庆祝
       stopTimer();
       const sec = elapsed();
       const prev = loadBest(curDiff);

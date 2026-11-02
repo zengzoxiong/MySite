@@ -4,7 +4,8 @@
    本模块每次发声前实时读键；全部失败静默。
    用法：页面 <head> 引入后，在事件点调用
         if (window.GameSFX) GameSFX.coin();  等。
-   音色增强：同类音随机 ±15 音分微抖（防机械重复感）、滑音（jump）、
+   音色增强：同类音随机 ±15 音分微抖（防机械重复感）、滑音（jump）、白噪声+低通的爆音层（smash）、
+   语义细分音色（stone/pawn/capture/lineClear/bigClear/merge/gulp/sparkle/paddle/brick/boom/portal/crit/whoosh）。
    白噪声+低通的爆音层（smash）。
    ============================================================ */
 (function () {
@@ -147,6 +148,36 @@
     /* 胜利 / 通关（四音上行琶音） */
     win: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.14, 'triangle', 0.08, i * 0.11); }); },
     /* 失败 / 游戏结束（三音下行） */
-    lose: function () { [392, 311, 262].forEach(function (f, i) { tone(f, 0.16, 'sawtooth', 0.06, i * 0.12); }); }
+    lose: function () { [392, 311, 262].forEach(function (f, i) { tone(f, 0.16, 'sawtooth', 0.06, i * 0.12); }); },
+
+    /* —— 扩展音色（按游戏语义细分） —— */
+    /* 落子（围棋 / 五子棋：短促木音） */
+    stone: function () { tone(190, 0.045, 'sine', 0.09); tone(330, 0.03, 'triangle', 0.035, 0.006); },
+    /* 象棋落子（厚实啪声） */
+    pawn: function () { noise(0.03, 0.05, 1400); tone(160, 0.05, 'sine', 0.08); },
+    /* 吃子 / 翻转（清脆断奏双音） */
+    capture: function () { tone(660, 0.05, 'square', 0.05); tone(440, 0.07, 'square', 0.04, 0.045); },
+    /* 消行（上行三连扫，俄罗斯方块 / 三消） */
+    lineClear: function () { [523, 659, 784].forEach(function (f, i) { tone(f, 0.06, 'triangle', 0.055, i * 0.035); }); },
+    /* 大消（四消 / 大连锁：四连上行 + 高噪扫） */
+    bigClear: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.07, 'triangle', 0.06, i * 0.04); }); noise(0.12, 0.05, 2200); },
+    /* 合并（2048 / 合成类 pop 双音） */
+    merge: function () { tone(392, 0.06, 'sine', 0.06); tone(587, 0.09, 'sine', 0.05, 0.045); },
+    /* 吞食（下滑 gulp，贪吃蛇） */
+    gulp: function () { glide(620, 210, 0.09, 'sine', 0.06); },
+    /* 星星（高频闪烁三连） */
+    sparkle: function () { [1568, 2093, 2637].forEach(function (f, i) { tone(f, 0.05, 'sine', 0.045, i * 0.045); }); },
+    /* 挡板弹（breakout） */
+    paddle: function () { tone(300, 0.045, 'square', 0.045); },
+    /* 击砖（可选音高阶梯 step） */
+    brick: function (step) { tone(480 + (step || 0) * 36, 0.05, 'square', 0.045); },
+    /* 大爆炸（重噪声 + 低频，踩雷 / 坠毁） */
+    boom: function () { noise(0.3, 0.17, 680); tone(92, 0.24, 'sawtooth', 0.075); },
+    /* 传送 / 通关滑音 */
+    portal: function () { glide(380, 940, 0.2, 'sine', 0.06); },
+    /* 里程碑琶音（连对里程碑 / 大奖） */
+    crit: function () { [659, 784, 988, 1319].forEach(function (f, i) { tone(f, 0.06, 'triangle', 0.055, i * 0.05); }); },
+    /* 冲刺 / 滑动嗖声 */
+    whoosh: function () { noise(0.09, 0.05, 2600); }
   };
 })();

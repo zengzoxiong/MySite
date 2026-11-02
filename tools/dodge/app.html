@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* 陨石闪避 · 页面私有样式
    字体栈 / 颜色令牌 / 按钮 / 弹窗 / 规则栏等组件外观统一由 assets/game-ui.css 提供，
@@ -431,7 +432,8 @@ function showPause() {
 }
 function showOver() {
   state = 'over';
-  if (window.GameSFX) GameSFX.lose();
+  if (window.GameSFX) { GameSFX.boom(); GameSFX.lose(); }   // 打击感：被撞爆炸 + 结算
+  if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }   // 打击感：被撞震屏红闪
   overGuard = 0.6;
   var isNew = !aiOn && G.score > best;   // AI 代玩成绩不计入最高纪录
   if (isNew) {

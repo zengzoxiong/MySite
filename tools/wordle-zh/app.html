@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 成语猜猜 · 拾光集自建小游戏（纯静态零依赖） =====
    组件外观统一由 ../../assets/game-ui.css 提供（Apple HIG 视觉语言、深浅色跟随系统）；
@@ -878,6 +879,7 @@
     if (w === answer) {
       status = 'won';
       if (window.GameSFX) GameSFX.win();
+      if (window.GameJuice) GameJuice.win();   // 打击感：绿色行粒子迸发庆祝
       // 猜中：整行逐格跳一下
       rowEls[rows.length - 1].forEach((t, i) => {
         t.style.animationDelay = (i * 90) + 'ms';
@@ -886,6 +888,9 @@
     } else if (rows.length >= MAX_ROWS) {
       status = 'lost';
       if (window.GameSFX) GameSFX.lose();
+      if (window.GameJuice) GameJuice.bad();   // 打击感：机会用完震屏红闪
+    } else if (window.GameJuice) {
+      GameJuice.bad();   // 打击感：猜错震屏红闪
     }
     if (status !== 'playing') {
       inputEl.disabled = true;

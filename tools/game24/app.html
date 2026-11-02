@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
     /* ===== 24点 · 拾光集自建小游戏（纯静态零依赖） =====
        组件语言遵循 docs/game-ui-design.md 与共享样式表 assets/game-ui.css（Apple HIG）。
@@ -584,18 +585,19 @@ function submitAnswer() {
   if (state !== 'playing') return;
   const r = checkExpression(exprEl.value, hand);
   if (window.GameSFX && !r.ok) GameSFX.error();
-  if (!r.ok) { setStatus(r.msg, 'err'); return; }
+  if (!r.ok) { if (window.GameJuice) GameJuice.bad(); setStatus(r.msg, 'err'); return; }   // 打击感：答错震屏+红闪
   const elapsed = (performance.now() - puzzleStart) / 1000;
   streak++; solved++;
   updateSubstat();
   const pts = Math.max(30, 100 - Math.floor(elapsed) * 5) + Math.min(75, (streak - 1) * 15);
   score += pts;
-  if (window.GameSFX) GameSFX.score();
+  if (window.GameSFX) GameSFX.crit();   // 答对一题：里程碑琶音
   scoreEl.textContent = score;
   scoreEl.classList.remove('g-bump'); void scoreEl.offsetWidth; scoreEl.classList.add('g-bump');
   setTimeout(() => scoreEl.classList.remove('g-bump'), 240);
   if (score > best) { best = score; bestEl.textContent = best; saveBest(best); }
   flyPts('+' + pts);
+  if (window.GameJuice) { GameJuice.good(exprEl); GameJuice.combo(); }   // 打击感：答对弹跳+金色粒子，连对计数
   setStatus('漂亮，+' + pts + ' 分！', 'ok');
   state = 'solved';
   setPanels();
@@ -610,6 +612,7 @@ function skipPuzzle() {
   if (state !== 'playing') return;
   const prev = solStr;
   streak = 0;
+  if (window.GameJuice) GameJuice.resetCombo();   // 打击感：跳过清零连对，连击徽标同步收起
   deal();
   setStatus(prev ? ('连对清零 · 上一题解法之一：' + prev + ' = 24') : '已换下一题', 'info');
 }
@@ -644,6 +647,7 @@ function endGame() {
   timeEl.textContent = '00:00';
   timeFill.style.width = '0%';
   const isNew = score > startBest;
+  if (window.GameJuice && isNew) GameJuice.win();   // 打击感：刷新最高纪录时粒子庆祝
   overInfo.textContent = '本局得分 ' + score + ' · 解出 ' + solved + ' 题 · ' +
     (isNew ? '刷新最高纪录！' : '历史最高 ' + best);
   setPanels();

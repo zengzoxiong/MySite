@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* 叠叠高 · 页面私有样式
    字体栈 / 颜色令牌 / 按钮 / 弹窗 / 规则栏等组件外观统一由 assets/game-ui.css 提供，
@@ -289,6 +290,8 @@ function showPause() {
 function showOver() {
   state = 'over';
   if (window.GameSFX) GameSFX.lose();
+  // 打击感：结束震屏 + 红闪，连击清零
+  if (window.GameJuice) { GameJuice.bad(); GameJuice.resetCombo(); }
   overGuard = 0.6;
   var isNew = !aiOn && G.score > best;   // AI 代玩成绩不计入最高纪录
   if (isNew) {
@@ -326,21 +329,35 @@ function doDrop() {
   if (state !== 'playing' || !G.moving) return;
   var ev = core.drop(G);
   if (!ev) return;
+  // 打击感：落稳轻震
+  if (window.GameJuice) GameJuice.shake('sm');
   if (ev.missed) {
     /* 完全悬空：整块坠落，进入结束动画 */
+    if (window.GameSFX) GameSFX.smash();   // 整块坠落碎裂音
     debris.push({ x: ev.x, w: ev.w, y: ev.y, vx: ev.dir * 40, vy: -60, hue: ev.hue });
     state = 'dying';
     dieT = 0;
     return;
   }
   if (ev.perfect) {
-    if (window.GameSFX) GameSFX.combo();   // 完全对齐连击
+    if (window.GameSFX) GameSFX.crit();   // 打击感：完美对齐里程碑
     var top = G.stack[G.stack.length - 1];
     texts.push({ s: '完美 +' + ev.combo, x: top.x + top.w / 2, y: ev.y - 8, life: 1.1, max: 1.1 });
+    // 打击感：完美对齐金色粒子迸发（画布→视口坐标，含相机位移）+ 连击徽标
+    if (window.GameJuice) {
+      var rc = cv.getBoundingClientRect();
+      GameJuice.burst(rc.left + (top.x + top.w / 2) * rc.width / W, rc.top + (ev.y + BH / 2 + cam) * rc.height / H, '#f5a623', 12);
+      GameJuice.combo();
+    }
   } else {
-    if (window.GameSFX) GameSFX.score();   // 普通放置
+    if (window.GameSFX) GameSFX.paddle();   // 普通放置落稳
     for (var i = 0; i < ev.cuts.length; i++) {
       debris.push({ x: ev.cuts[i].x, w: ev.cuts[i].w, y: ev.y, vx: ev.cuts[i].vx, vy: -40, hue: ev.hue });
+    }
+    // 打击感：落块中心金色粒子迸发（画布→视口坐标，含相机位移）
+    if (window.GameJuice) {
+      var pb = G.stack[G.stack.length - 1], rn = cv.getBoundingClientRect();
+      GameJuice.burst(rn.left + (pb.x + pb.w / 2) * rn.width / W, rn.top + (ev.y + BH / 2 + cam) * rn.height / H, '#f5a623', 8);
     }
   }
   syncHud();

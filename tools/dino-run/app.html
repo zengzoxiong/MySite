@@ -10,6 +10,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* 游戏个性色：恐龙绿（覆盖共享样式表默认蓝，见 docs/game-ui-design.md §7） */
 :root { --game-accent: #34C759; }
@@ -279,7 +280,8 @@ function pause(){if(state!=='playing')return;state='paused';setPanel();}
 function resume(){if(state!=='paused')return;state='playing';setPanel();}
 function gameOver(){
   state='over';overAt=performance.now();
-  if (window.GameSFX) GameSFX.lose();
+  if (window.GameSFX) { GameSFX.boom(); GameSFX.lose(); }   // 打击感：撞击爆炸 + 结算
+  if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }   // 打击感：撞击震屏红闪
   const s=Math.floor(G.score), isNew=!aiOn&&s>best&&s>0;   // AI 代玩成绩不计入最高纪录
   if(isNew){best=s;saveBest();bestEl.textContent=best;}
   overTitle.textContent=isNew?'新纪录！':'游戏结束';

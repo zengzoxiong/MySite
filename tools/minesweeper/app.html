@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
   <style>
     /* ===== 扫雷 · 游戏私有视觉（经典浮雕雷区 + 雷数/笑脸/计时条）=====
        组件外观统一取共享令牌；棋盘浮雕、红色计数管、笑脸 SVG 为本作个性，保留。 */
@@ -777,7 +778,8 @@
     const res = core.reveal(game, i);
     paintCells(res.changed);
     if (res.started) startTimer();
-    if (window.GameSFX && !res.hit) GameSFX.click();   // 翻开（踩雷由 lose 发声）
+    if (window.GameSFX && !res.hit) GameSFX.stone();   // 翻开（踩雷由 lose 发声）
+    if (window.GameJuice && !res.hit) GameJuice.pop(cellEls[i]);   // 打击感：翻开的格子弹一下
     if (res.hit) { lose(i); return; }
     if (res.win) checkWin();
   }
@@ -785,6 +787,7 @@
     const res = core.toggleFlag(game, i);
     if (!res) return;
     if (window.GameSFX) GameSFX.flag();
+    if (window.GameJuice) GameJuice.pop(cellEls[i]);   // 打击感：插旗弹一下
     paintCells(res.changed);
     updateMineCounter();
   }
@@ -792,6 +795,7 @@
   /* ---------- 胜负（纯 UI 收尾：终局判定在 minesweeperCore 的 reveal 内完成） ---------- */
   function checkWin() {
     if (window.GameSFX) GameSFX.win();
+    if (window.GameJuice) GameJuice.win();   // 打击感：通关庆祝
     stopTimer();
     updateMineCounter();                     // 剩余的雷已在核心里自动插旗
     setFace(FACE_COOL);
@@ -806,7 +810,13 @@
     showOverlay(true, '用时 ' + seconds + ' 秒' + (record ? ' · 新纪录！' : ''));
   }
   function lose(hit) {
-    if (window.GameSFX) GameSFX.lose();
+    if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.3)'); }   // 打击感：踩雷大震屏+红闪
+    if (window.GameSFX) { GameSFX.boom(); GameSFX.lose(); }   // 打击感：踩雷爆炸 + 失败音
+    const boomEl = cellEls[hit];                              // 打击感：爆炸点迸发红色粒子
+    if (window.GameJuice && boomEl) {
+      const bc = boomEl.getBoundingClientRect();
+      GameJuice.burst(bc.left + bc.width / 2, bc.top + bc.height / 2, '#ef5350', 14);
+    }
     stopTimer();
     for (let i = 0; i < game.cells.length; i++) {
       const c = game.cells[i], el = cellEls[i];

@@ -10,6 +10,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 五子棋 · 游戏私有视觉与私有状态修饰类 =====
    外围组件（导航标题栏 / 计分 / 按钮 / 规则栏 / 返回钮）统一使用
@@ -515,9 +516,19 @@ function place(x, y) {
   board = res.board;
   moves.push({ x, y, p: current });
   hover = null;
+  // 打击感：落子迸发粒子（画布逻辑坐标换算视口坐标）
+  if (window.GameJuice) {
+    const cr = cv.getBoundingClientRect();
+    GameJuice.burst(
+      cr.left + (PAD + x * CELL) * cr.width / SIZE,
+      cr.top + (PAD + y * CELL) * cr.height / SIZE,
+      current === 1 ? '#3a3f52' : '#ffffff', 6
+    );
+  }
 
   if (res.win) {
     if (window.GameSFX) GameSFX.win();
+    if (window.GameJuice) GameJuice.win();   // 打击感：五连珠庆祝
     winCells = res.win;
     over = true;
     if (aiRunning) {
@@ -533,7 +544,7 @@ function place(x, y) {
     over = true;
     statusText.textContent = '棋盘落满，本局和棋';
   } else {
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameSFX) GameSFX.stone();
     current = 3 - current;
     statusText.textContent = '轮到' + (current === 1 ? '黑棋' : '白棋') + '落子';
     turnDot.className = 'dot ' + (current === 1 ? 'black' : 'white');

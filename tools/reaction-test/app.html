@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
     /* ===== 手速反应测试 · 拾光集自建小游戏（纯静态零依赖） =====
        组件语言遵循 docs/game-ui-design.md 与共享样式表 assets/game-ui.css（Apple HIG）。
@@ -351,11 +352,13 @@ function onReactPad() {
   const ev = reactClickCore(react, performance.now(), Math.random);
   if (ev === 'ignore') return;
   if (window.GameSFX && ev === 'start') GameSFX.unlock();
-  if (window.GameSFX && ev === 'hit') GameSFX.score();    // 命中一轮
+  if (window.GameSFX && ev === 'hit') GameSFX.crit();    // 命中一轮：里程碑琶音
   if (window.GameSFX && ev === 'fail') GameSFX.error();   // 抢跳
+  if (ev === 'hit' && window.GameJuice) { const rc = reactPad.getBoundingClientRect(); GameJuice.burst(rc.left + rc.width / 2, rc.top + rc.height / 2, '#38b26a', 10); GameJuice.combo(); }   // 打击感：命中粒子迸发+连击
+  if (window.GameJuice && ev === 'fail') GameJuice.shake('lg');   // 打击感：抢跳大幅震屏
   clearTimeout(reactTimer);
   if (ev === 'start') scheduleReactGreen();
-  if (ev === 'done') { finishReact(); if (aiOn) aiPauseUntil = performance.now() + 1200; }
+  if (ev === 'done') { if (window.GameJuice) GameJuice.win(); if (window.GameSFX) GameSFX.win(); finishReact(); if (aiOn) aiPauseUntil = performance.now() + 1200; }   // 打击感：整组完成粒子庆祝+胜利音
   renderChips(reactChips, react.results);
   renderReact();
 }
@@ -431,8 +434,9 @@ function onAimPad() {
 function onAimTargetHit() {
   const ev = aimHitCore(aim, performance.now());
   if (ev === 'ignore') return;
-  if (window.GameSFX && ev === 'hit') GameSFX.score();    // 点中目标一轮
-  if (ev === 'done') { finishAim(); if (aiOn) aiPauseUntil = performance.now() + 1200; }
+  if (window.GameSFX && ev === 'hit') GameSFX.crit();    // 点中目标一轮：里程碑琶音
+  if (ev === 'hit' && window.GameJuice) { const tr = aimTarget.getBoundingClientRect(); GameJuice.burst(tr.left + tr.width / 2, tr.top + tr.height / 2, '#dc2626', 10); GameJuice.combo(); }   // 打击感：靶心处粒子迸发+连击
+  if (ev === 'done') { if (window.GameJuice) GameJuice.win(); if (window.GameSFX) GameSFX.win(); finishAim(); if (aiOn) aiPauseUntil = performance.now() + 1200; }   // 打击感：整组完成粒子庆祝+胜利音
   renderChips(aimChips, aim.results);
   renderAim();
 }

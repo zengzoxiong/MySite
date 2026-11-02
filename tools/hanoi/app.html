@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
   <style>
     /* ===== 汉诺塔 · 游戏私有视觉（组件语言统一到 assets/game-ui.css） ===== */
     :root { --game-accent: #AF52DE; }   /* 本游戏个性色：紫 · 彩色圆盘 */
@@ -350,7 +351,7 @@
     moves++;
     updateHud();
     bumpMoves();
-    if (window.GameSFX) GameSFX.swipe();
+    if (window.GameSFX) GameSFX.pawn();   // 移动圆盘：厚实落子声
     const ep = epoch;
     animateMove(el, size, from, i, toLevel).then(() => {
       if (ep !== epoch) return;      // 中途重开或换层，本局回调作废
@@ -377,7 +378,7 @@
           // 第三段：落到目标柱的堆叠位
           setBottom(el, toLevel);
           setTimeout(() => {
-            if (ep === epoch) el.style.zIndex = 1;
+            if (ep === epoch) { el.style.zIndex = 1; if (window.GameJuice) GameJuice.pop(el);   /* 打击感：落盘弹一下 */ }
             resolve();
           }, wait);
         }, wait);
@@ -390,6 +391,7 @@
     const t = topOf(i);
     if (t === undefined) return;
     if (window.GameSFX) GameSFX.error();
+    if (window.GameJuice) GameJuice.bad();   // 打击感：无效操作震屏+红闪
     const el = discs[t];
     el.classList.remove('deny');
     void el.offsetWidth;
@@ -402,6 +404,7 @@
     if (pegs[2].length !== n) return;
     won = true;
     if (window.GameSFX) GameSFX.win();
+    if (window.GameJuice) GameJuice.win();   // 打击感：通关庆祝
     const mn = minMovesOf(n);
     const prev = loadBest(n);
     const isNew = !prev || moves < prev;

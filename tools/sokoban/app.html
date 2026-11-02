@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
   <style>
     /* ===== 推箱子 · Apple HIG 组件语言 =====
        共享样式表 assets/game-ui.css 提供字体栈、色彩令牌与 g-* 组件类；
@@ -847,12 +848,27 @@
     function applyDir(dir) {
       if (state.won) return false;
       const next = core.step(state, dir);
-      if (!next) return false;
+      if (!next) {
+        if (window.GameJuice) GameJuice.bad();   // 打击感：撞墙无效操作震屏+红闪
+        if (window.GameSFX) GameSFX.error();
+        return false;
+      }
+      const onGoal = next.pushes > state.pushes && state.goals.has(next.player * 2 - state.player);   // 本步推箱入位
+      const boxPos = onGoal ? next.player * 2 - state.player : -1;
       undoStack.push(state);
       if (undoStack.length > 500) undoStack.shift();
-      if (window.GameSFX) (next.pushes > state.pushes ? GameSFX.score() : GameSFX.click());   // 推动箱子得分，空走轻点
+      if (window.GameSFX) (next.pushes > state.pushes ? GameSFX.pawn() : GameSFX.click());   // 推动箱子厚实啪声，空走轻点
+      if (onGoal && window.GameSFX) GameSFX.capture();   // 推箱入位：清脆断奏音（与下方粒子迸发同条件）
       state = next;
       render();
+      if (window.GameJuice) {   // 打击感：移动小人弹一下；推箱入位再迸发金粒
+        const pe = boardEl.children[next.player] && boardEl.children[next.player].querySelector('.piece');
+        if (pe) GameJuice.pop(pe);
+        if (onGoal) {
+          const be = boardEl.children[boxPos] && boardEl.children[boxPos].querySelector('.piece');
+          if (be) { const br = be.getBoundingClientRect(); GameJuice.burst(br.left + br.width / 2, br.top + br.height / 2, '#f5a623', 12); }
+        }
+      }
       if (state.won) onWin();
       return true;
     }
@@ -865,6 +881,7 @@
     /* ---------- 胜负判定与庆祝 ---------- */
     function onWin() {
       if (window.GameSFX) GameSFX.win();
+      if (window.GameJuice) GameJuice.win();   // 打击感：通关庆祝
       const levelNo = levelIdx + 1;
       let isNew = false;
       if (!aiOn) {                      // AI 代玩成绩不计入最佳记录

@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 数织个性色：靛蓝（逻辑像素） ===== */
 :root { --game-accent: #5856D6; }
@@ -301,7 +302,8 @@ function cellClick(i, forceMark){
   if(s===1){ stat[i]=0; renderCell(i); updateClues(); return; }   // 再点一次可擦除
   if(pattern[i]===1){                 // 涂对：计分（重复涂擦不重复计分）
     stat[i]=1; renderCell(i);
-    if (window.GameSFX) GameSFX.click();
+    if (window.GameJuice) GameJuice.pop(cells[i]);   // 打击感：涂对格子弹一下
+    if (window.GameSFX) GameSFX.stone();
     if(!everFilled[i]){ score+=10; everFilled[i]=true; bumpScore(); }
     scoreEl.textContent = score;
     updateClues(); checkWin();
@@ -312,6 +314,7 @@ function cellClick(i, forceMark){
 
 function wrongFill(i){
   if (window.GameSFX) GameSFX.error();
+  if (window.GameJuice) GameJuice.bad();   // 打击感：涂错震屏+红闪
   stat[i] = 4; renderCell(i);
   const el = cells[i];
   el.classList.remove('err'); void el.offsetWidth; el.classList.add('err');
@@ -344,6 +347,7 @@ function revealWave(){
 
 function win(){
   if (window.GameSFX) GameSFX.win();
+  if (window.GameJuice) GameJuice.win();   // 打击感：通关庆祝
   state = 'won';
   clearTimeout(revealTimer);
   score += BONUS[n];
@@ -473,6 +477,7 @@ hintBtn.addEventListener('click', function(){
   const i = free[Math.random()*free.length|0];
   stat[i] = 3; everFilled[i] = true;
   renderCell(i);
+  if (window.GameJuice) GameJuice.pop(cells[i]);   // 打击感：提示点亮的格子弹一下
   const el = cells[i];
   el.classList.remove('hintg'); void el.offsetWidth; el.classList.add('hintg');
   hints--;

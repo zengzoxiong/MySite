@@ -10,6 +10,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
     <style>
     /* 拾光集 · 吃豆人页面样式
        组件基线来自共享设计系统 assets/game-ui.css（Apple HIG），见 docs/game-ui-design.md。
@@ -410,6 +411,11 @@
                     G.score += 50;
                     startFright();
                     if (window.GameSFX) GameSFX.powerup();
+                    // 打击感：能量豆迸发白色粒子
+                    if (window.GameJuice) {
+                        const pr = cv.getBoundingClientRect();
+                        GameJuice.burst(pr.left + (t.x + 0.5) * T * pr.width / W, pr.top + (t.y + 0.5) * T * pr.height / H, '#ffffff', 10);
+                    }
                 }
                 // 水果触发：第 70 / 170 颗豆
                 if ((G.dotsEaten === 70 || G.dotsEaten === 170) && !G.fruit) {
@@ -420,6 +426,7 @@
                     state = 'clear';
                     G.clearT = 2.2;
                     if (window.GameSFX) GameSFX.levelup();
+                    if (window.GameJuice) GameJuice.win();   // 打击感：过关庆祝
                     return;
                 }
                 if (!bonusLife && G.score >= 10000) {
@@ -627,11 +634,18 @@
                         G.eatPause = 0.9;
                         var p = posOf(pac);
                         popText(p.x, p.y, String(pts), '#00ffff');
-                        if (window.GameSFX) GameSFX.combo();
+                        if (window.GameSFX) GameSFX.capture();
+                        // 打击感：吃幽灵轻震 + 粒子迸发
+                        if (window.GameJuice) {
+                            GameJuice.shake('sm');
+                            const gr = cv.getBoundingClientRect();
+                            GameJuice.burst(gr.left + p.x * gr.width / W, gr.top + p.y * gr.height / H, '#00ffff', 12);
+                        }
                     } else {
                         state = 'dying';
                         pac.dieT = 0;
                         if (window.GameSFX) GameSFX.hurt();
+                        if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }   // 打击感：死亡震屏红闪
                         return;
                     }
                 }

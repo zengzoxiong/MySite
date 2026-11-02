@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
   <style>
     /* ===== 2048 游戏私有样式：棋盘与方块视觉保留，外围组件统一走共享样式表 ===== */
     /* 个性色：橙（暖色方块），组件强调色一行切换 */
@@ -226,11 +227,18 @@
         stay.v *= 2;
         stay.el.className = tileClass(stay.v, 'pop');
         stay.el.textContent = stay.v;
+        // 打击感：合并块弹跳 + 金色粒子迸发 + 连击计数
+        if (window.GameJuice) {
+          const rc = stay.el.getBoundingClientRect();
+          GameJuice.burst(rc.left + rc.width / 2, rc.top + rc.height / 2, '#f5a623', 8);
+          GameJuice.combo();
+        }
       }
       addScore(res.gained);
       if (core.maxOf(mat) >= WIN_VALUE && !won) {
         won = true;
         paused = true;
+        if (window.GameJuice) GameJuice.win();
         showOverlay('win');
       }
       spawnAt();
@@ -241,11 +249,16 @@
 
   function addScore(n) {
     score += n;
-    if (window.GameSFX) (n >= 128 ? GameSFX.combo() : GameSFX.score());
+    if (window.GameSFX) (n >= 128 ? GameSFX.combo() : GameSFX.merge());
     scoreEl.textContent = score;
     scoreStat.classList.remove('g-bump');
     void scoreStat.offsetWidth;
     scoreStat.classList.add('g-bump');
+    // 打击感：得分飘字（有合并才飘）
+    if (n > 0 && window.GameJuice) {
+      const sr = scoreStat.getBoundingClientRect();
+      GameJuice.float(sr.left + sr.width / 2, sr.bottom + 6, '+' + n, '#e8821e');
+    }
     if (score > best && !autoOn) {   // AI 代玩成绩不计最高分
       best = score;
       bestEl.textContent = best;
@@ -256,6 +269,7 @@
   function checkOver() {
     if (core.hasMoves(mat)) return;   // 核心纯函数判定：还有空格或相邻同值即未结束
     over = true;
+    if (window.GameJuice) { GameJuice.shake('lg'); GameJuice.flash('rgba(239,90,103,.26)'); GameJuice.resetCombo(); }
     showOverlay('lose');
   }
 

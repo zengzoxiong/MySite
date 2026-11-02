@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
     <style>
         /* 游戏个性色：方块活力粉（docs/game-ui-design.md §7 分配表） */
         :root { --game-accent: #FF2D55; }
@@ -616,6 +617,9 @@
             var d = 0;
             while (!collide(cur.m, cur.x, cur.y + 1)) { cur.y++; d++; }
             if (d > 0) addScore(d * 2);
+            // 打击感：硬降落地轻震 + 撞击音
+            if (window.GameJuice) GameJuice.shake('sm');
+            if (window.GameSFX) GameSFX.hit();
             lockPiece();
         }
 
@@ -623,11 +627,19 @@
         function lockPiece() {
             var res = core.lockInto(grid, cur.m, cur.x, cur.y, cur.type);
             grid = res.grid;
+            var lockRow = cur.y + cur.m.length;   // 打击感：记录锁定底行，供消行粒子定位
             cur = null;
             if (res.toppedOut) { gameOver(); return; }
             var n = res.n;
             if (n > 0) {
-                if (window.GameSFX) (n >= 2 ? GameSFX.combo() : GameSFX.score());   // 消 1 行得分，消多行连击
+                if (window.GameSFX) (n >= 4 ? GameSFX.bigClear() : n >= 2 ? GameSFX.combo() : GameSFX.lineClear());   // 消 1 行得分，消多行连击
+                // 打击感：消行金色粒子迸发（画布→视口坐标），消 ≥2 行震屏、连消计连击
+                if (window.GameJuice) {
+                    var br = boardCv.getBoundingClientRect(), uk = br.height / (ROWS * CELL);
+                    GameJuice.burst(br.left + br.width / 2, br.top + Math.min(lockRow, ROWS) * uk, '#f5a623', 14);
+                    if (n >= 2) GameJuice.shake('md');
+                    GameJuice.combo();
+                }
                 lines += n;
                 addScore((LINE_SCORES[n] || 1200) * level);
                 level = Math.floor(lines / 10) + 1;
@@ -824,6 +836,8 @@
         function gameOver() {
             state = 'over';
             if (window.GameSFX) GameSFX.lose();
+            // 打击感：结束震屏 + 红闪，连击清零
+            if (window.GameJuice) { GameJuice.bad(); GameJuice.resetCombo(); }
             // AI 代玩成绩不计入最高纪录
             newRecord = !aiOn && score > best && score > 0;
             if (newRecord) { best = score; saveBest(best); }

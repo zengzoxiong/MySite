@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
 /* ===== 合成大西瓜 · 游戏私有视觉 =====
    外围组件（导航标题栏 / 计分 / 按钮 / 结算与规则弹窗）统一使用
@@ -237,13 +238,21 @@
         mergedBig = true;
         floaters.push({ x: nf.x, y: nf.y - nf.r - 30, txt: '大西瓜！', t: 0, big: true });
       }
-      if (window.GameSFX) (tier >= 7 ? GameSFX.powerup() : GameSFX.coin());
+      if (window.GameSFX) (tier >= 7 ? GameSFX.powerup() : GameSFX.merge());
+      // 打击感：融合点按新果配色迸发粒子 + 连击徽标（画布→视口坐标）
+      if (window.GameJuice) {
+          const rc = canvas.getBoundingClientRect();
+          GameJuice.burst(rc.left + nf.x / W * rc.width, rc.top + nf.y / H * rc.height, TIERS[tier].c1, 12);
+          GameJuice.combo();
+      }
     }
     if (merges.length) {
       fruits = fruits.filter(f => !f.dead);
       scoreEl.textContent = score;
       bumpScore();
       if (mergedBig && window.GameSFX) GameSFX.win();
+      // 打击感：合出大西瓜，全台多点多色庆祝
+      if (mergedBig && window.GameJuice) GameJuice.win();
     }
   }
 
@@ -382,6 +391,8 @@
   function gameOver() {
     state = 'over';
     if (window.GameSFX) GameSFX.lose();
+    // 打击感：判负震屏 + 红闪，连击清零
+    if (window.GameJuice) { GameJuice.bad(); GameJuice.resetCombo(); }
     const isNew = score > best;
     if (isNew) { best = score; saveBest(); bestEl.textContent = best; }
     ovTitle.textContent = '瓜堆到顶了';

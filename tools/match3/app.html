@@ -11,6 +11,7 @@
 <script src="../../assets/appearance.js"></script>
 <script src="../../assets/game-sfx.js"></script>
 <script src="../../assets/game-fit.js"></script>
+<script src="../../assets/game-juice.js"></script>
 <style>
   /* ===== 消消乐 · 拾光集自建小游戏（纯静态零依赖） =====
      外围组件（页面骨架、按钮、计分、弹层、规则栏）统一走共享设计系统 game-ui.css；
@@ -399,12 +400,19 @@
     const pos = centerOf(marks);
     if (combo >= 2) showFloat(pos.x, pos.y, '+' + gained, '连击 ×' + combo);
     else showFloat(pos.x, pos.y, '+' + gained);
+    // 打击感：消除群中心金色粒子迸发 + 连击徽标（棋盘百分比坐标换视口坐标）
+    if (window.GameJuice) {
+      const br = board.getBoundingClientRect();
+      GameJuice.burst(br.left + pos.x / 100 * br.width, br.top + pos.y / 100 * br.height, '#f5a623', 10 + n);
+      GameJuice.combo();
+    }
     const cleared = [];
     marks.forEach(function (idx) {
       const r = (idx / SIZE) | 0, c = idx % SIZE;
       const t = grid[r][c];
       if (!t) return;
       t.el.classList.add('clear');
+      if (window.GameJuice) GameJuice.pop(t.el.firstChild);   // 打击感：糖果本体弹跳（外层已走 clear 缩放消失动画）
       cleared.push(t);
       grid[r][c] = null;
     });
@@ -493,6 +501,8 @@
     state = 'over';
     lock = false;
     if (window.GameSFX) GameSFX.lose();
+    // 打击感：结算震屏 + 红闪，连击清零
+    if (window.GameJuice) { GameJuice.bad(); GameJuice.resetCombo(); }
     ovTitle.textContent = mode === 'time' ? '时间到' : '步数用完';
     ovSub.textContent = '本局得分 ' + score + (newRecord ? ' · 新纪录！' : (best > 0 ? ' · 历史最高 ' + best : ''));
     showOverlay(ovOver);
