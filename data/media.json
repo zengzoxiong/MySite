@@ -1824,7 +1824,7 @@
     {
       "title": "初恋这件小事",
       "type": "电影",
-      "status": "想看",
+      "status": "看过",
       "rating": 7.8,
       "release": "2010-08-12",
       "url": "https://www.themoviedb.org/movie/57627",
@@ -1902,6 +1902,15 @@
       "release": "2026-09-19",
       "url": "https://www.themoviedb.org/tv/236910/season/2",
       "cover": "assets/media/zhongguo-jiuhu-s2.jpg"
+    },
+    {
+      "title": "垫底辣妹",
+      "type": "电影",
+      "status": "看过",
+      "rating": 7.5,
+      "release": "2015-05-01",
+      "url": "https://www.themoviedb.org/movie/349498",
+      "cover": "assets/media/flying-colors.jpg"
     }
   ]
 }
