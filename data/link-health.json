@@ -1,8 +1,8 @@
 {
   "counts": {
     "total": 56,
-    "ok": 51,
-    "suspect": 4,
+    "ok": 50,
+    "suspect": 5,
     "dead": 1
   },
   "results": {
@@ -301,11 +301,11 @@
       "checkedAt": "2026-09-25"
     },
     "https://tool.cccyun.cc": {
-      "status": 200,
-      "reason": "http",
-      "state": "ok",
+      "status": 0,
+      "reason": "net",
+      "state": "suspect",
       "finalUrl": "",
-      "checkedAt": "2026-09-25"
+      "checkedAt": "2026-11-03"
     },
     "https://xdxsb.top/FreeTool": {
       "status": 200,
