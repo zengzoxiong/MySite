@@ -1894,6 +1894,14 @@
       "release": "2019-09-11",
       "url": "https://www.themoviedb.org/movie/604605",
       "cover": "assets/media/hello-world.jpg"
+    },
+    {
+      "title": "中国救护2",
+      "type": "纪录片",
+      "status": "看过",
+      "release": "2026-09-19",
+      "url": "https://www.themoviedb.org/tv/236910/season/2",
+      "cover": "assets/media/zhongguo-jiuhu-s2.jpg"
     }
   ]
 }
