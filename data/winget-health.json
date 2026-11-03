@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-10-31",
+  "checkedAt": "2026-11-03",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -9,8 +9,8 @@
     },
     "ClashVergeRev.ClashVergeRev": {
       "ok": true,
-      "checkedAt": "2026-10-09",
-      "latest": "2.5.8"
+      "checkedAt": "2026-11-03",
+      "latest": "2.5.9"
     },
     "Daum.PotPlayer": {
       "ok": true,
@@ -44,8 +44,8 @@
     },
     "Obsidian.Obsidian": {
       "ok": true,
-      "checkedAt": "2026-10-23",
-      "latest": "1.14.5"
+      "checkedAt": "2026-11-03",
+      "latest": "1.15.0"
     },
     "OpenJS.NodeJS.LTS": {
       "ok": true,
