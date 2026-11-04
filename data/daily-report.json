@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-03",
+  "updated": "2026-11-04",
   "sections": {
     "trending": [
       {
         "name": "deepseek-ai/dsh-superagent-prototype",
         "url": "https://github.com/deepseek-ai/dsh-superagent-prototype",
         "desc": "Towards a More Autonomous Agent System",
-        "stars": 13341,
+        "stars": 16675,
         "language": "TypeScript"
+      },
+      {
+        "name": "storytold/craft-anything",
+        "url": "https://github.com/storytold/craft-anything",
+        "desc": "Craft Anything: understand how any software works, and craft your own.",
+        "stars": 8305,
+        "language": "Rust"
       },
       {
         "name": "heydamir/unslop",
         "url": "https://github.com/heydamir/unslop",
         "desc": "A Claude skill that turns vibecoded, AI-looking UI into a designed interface",
-        "stars": 6308,
+        "stars": 7520,
         "language": "JavaScript"
       },
       {
         "name": "wangzan101/Mika",
         "url": "https://github.com/wangzan101/Mika",
         "desc": "An on-device AI agent for Android that operates apps and the web to get things done for you.",
-        "stars": 5344,
+        "stars": 6037,
         "language": "Kotlin"
-      },
-      {
-        "name": "storytold/craft-anything",
-        "url": "https://github.com/storytold/craft-anything",
-        "desc": "Craft Anything: understand how any software works, and craft your own.",
-        "stars": 4397,
-        "language": "Rust"
       },
       {
         "name": "valentderah/totk-pc-recomp",
         "url": "https://github.com/valentderah/totk-pc-recomp",
         "desc": "Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows and Linux x86-64, with a Vulkan renderer. Game files not included.",
-        "stars": 4031,
+        "stars": 4501,
         "language": "C"
       },
       {
         "name": "patch-gg/pixelfx",
         "url": "https://github.com/patch-gg/pixelfx",
         "desc": "244 pixel art effects, every one a small piece of code. Plus a Claude Code skill to make your own.",
-        "stars": 3535,
+        "stars": 4107,
         "language": "JavaScript"
       },
       {
         "name": "Djihads80/Eglantine",
         "url": "https://github.com/Djihads80/Eglantine",
         "desc": "VERY experimental Nintendo Switch 2 emulator",
-        "stars": 2524,
+        "stars": 3023,
         "language": "C++"
-      },
-      {
-        "name": "paipiange/nvzhuang",
-        "url": "https://github.com/paipiange/nvzhuang",
-        "desc": "1407 张 AI 女装参考图集与虚拟试穿网站，支持中英检索、OpenAI Images / Gemini / 豆包及自定义 Base URL、API Key、模型。https://github.com/paipiange/nvzhuang",
-        "stars": 2045,
-        "language": "Go"
-      },
-      {
-        "name": "lexifina/global-law",
-        "url": "https://github.com/lexifina/global-law",
-        "desc": "Git for Global Law: the law of every country as one git history, each country's record a submodule, every commit one law taking effect",
-        "stars": 1702,
-        "language": "HTML"
       },
       {
         "name": "BryceYuuu/RUN",
         "url": "https://github.com/BryceYuuu/RUN",
         "desc": "RUN · 润：海外移居手册（欧洲 36 国 · 110 条路线 · 主要移民地区）",
-        "stars": 1559,
+        "stars": 3012,
         "language": "Python"
+      },
+      {
+        "name": "paipiange/nvzhuang",
+        "url": "https://github.com/paipiange/nvzhuang",
+        "desc": "1407 张 AI 女装参考图集与虚拟试穿网站，支持中英检索、OpenAI Images / Gemini / 豆包及自定义 Base URL、API Key、模型。https://github.com/paipiange/nvzhuang",
+        "stars": 2122,
+        "language": "Go"
+      },
+      {
+        "name": "Verlintas/NOIR",
+        "url": "https://github.com/Verlintas/NOIR",
+        "desc": "手机隐私审计：用 adb 扫出 Android 应用的权限、上报端点与数据流向，并给出可回滚的处置。Desktop Android leak audit: permissions, endpoints, data flows, reversible fixes.",
+        "stars": 1759,
+        "language": "Kotlin"
       }
     ],
     "hn": [
       {
-        "id": 50341174,
-        "title": "Astra can read and write weights to improve Qwen",
-        "url": "https://rikiyat.github.io/blog/weight-space-programming/",
-        "hn": "https://news.ycombinator.com/item?id=50341174",
-        "score": 1915,
-        "comments": 606
+        "id": 50358582,
+        "title": "The Little Book of Generative AI Foundations: An Intuitive Mathematical Primer",
+        "url": "https://arxiv.org/abs/2605.29713",
+        "hn": "https://news.ycombinator.com/item?id=50358582",
+        "score": 159,
+        "comments": 19
       },
       {
-        "id": 50340088,
-        "title": "Show HN: Subvocal – Talk to your computer without making noise",
-        "url": "https://news.ycombinator.com/item?id=50340088",
-        "hn": "https://news.ycombinator.com/item?id=50340088",
-        "score": 548,
-        "comments": 296
+        "id": 50358562,
+        "title": "Safari introduces Adaptive Dark Mode in 27.3",
+        "url": "https://webkit.org/blog/18541/introducing-adaptive-dark-mode/",
+        "hn": "https://news.ycombinator.com/item?id=50358562",
+        "score": 212,
+        "comments": 135
       },
       {
-        "id": 50339397,
-        "title": "US boy names that became girl names and vice versa",
-        "url": "https://namedaisy.com/blog/boy-names-that-became-girl-names",
-        "hn": "https://news.ycombinator.com/item?id=50339397",
-        "score": 291,
-        "comments": 308
+        "id": 50358702,
+        "title": "The Internals of PostgreSQL",
+        "url": "https://www.interdb.jp/pg/index.html",
+        "hn": "https://news.ycombinator.com/item?id=50358702",
+        "score": 62,
+        "comments": 2
       },
       {
-        "id": 50336518,
-        "title": "If you love a website, back it up",
-        "url": "https://blog.mistys-internet.website/post/2026/10/29/if-you-love-a-website-back-it-up/",
-        "hn": "https://news.ycombinator.com/item?id=50336518",
-        "score": 401,
-        "comments": 93
+        "id": 50339288,
+        "title": "Jailbreaking my car's navigation system just so I can change the time",
+        "url": "https://blog.nns.ee/2026/11/02/renault-hack/",
+        "hn": "https://news.ycombinator.com/item?id=50339288",
+        "score": 571,
+        "comments": 228
       },
       {
-        "id": 50339913,
-        "title": "Launch HN: Momentic (YC W24) – Agents that catch bugs by using your app",
-        "url": "https://momentic.ai/",
-        "hn": "https://news.ycombinator.com/item?id=50339913",
-        "score": 122,
-        "comments": 79
+        "id": 50354358,
+        "title": "Stringman, an $800 open-source room scale gripper robot",
+        "url": "https://neufangled.com/",
+        "hn": "https://news.ycombinator.com/item?id=50354358",
+        "score": 327,
+        "comments": 127
       },
       {
-        "id": 50339221,
-        "title": "Show HN: Warsaw in voxels – An interactive 3D map of the city centre",
-        "url": "https://p.migdal.pl/warsaw-vibe-voxel/",
-        "hn": "https://news.ycombinator.com/item?id=50339221",
-        "score": 215,
-        "comments": 36
+        "id": 50346755,
+        "title": "Show HN: HackerTV – HN's most-recommended Youtube videos as 24/7 TV channels",
+        "url": "https://hackertv.org",
+        "hn": "https://news.ycombinator.com/item?id=50346755",
+        "score": 133,
+        "comments": 31
       },
       {
-        "id": 50344919,
-        "title": "The SEC Should Block Anthropic's IPO to Protect the Public",
-        "url": "https://www.techpolicy.press/the-sec-should-block-anthropics-ipo-to-protect-the-public/",
-        "hn": "https://news.ycombinator.com/item?id=50344919",
-        "score": 188,
-        "comments": 116
+        "id": 50355251,
+        "title": "Qwen 3.8 27B on my laptop can interpret model weights, too",
+        "url": "https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/",
+        "hn": "https://news.ycombinator.com/item?id=50355251",
+        "score": 457,
+        "comments": 144
       },
       {
-        "id": 50346153,
-        "title": "Intel stock collapse worsens as $3.5T chip rout spreads",
-        "url": "https://finance.yahoo.com/markets/article/the-intel-stock-collapse-is-getting-worse--and-the-37-trillion-chip-rout-is-spreading-212154947.html",
-        "hn": "https://news.ycombinator.com/item?id=50346153",
-        "score": 58,
-        "comments": 27
+        "id": 50356944,
+        "title": "macOS 27 does not support CoreStorage volumes",
+        "url": "https://wadetregaskis.com/macos-27-golden-gate-does-not-actually-support-corestorage-or-hfs-volumes/",
+        "hn": "https://news.ycombinator.com/item?id=50356944",
+        "score": 85,
+        "comments": 45
       },
       {
-        "id": 50338728,
-        "title": "Ask HN: Who is hiring? (November 2026)",
-        "url": "https://news.ycombinator.com/item?id=50338728",
-        "hn": "https://news.ycombinator.com/item?id=50338728",
-        "score": 173,
-        "comments": 142
+        "id": 50333131,
+        "title": "Japan's Jimi 'Mundane' Halloween Costumes of 2026",
+        "url": "https://spoon-tamago.com/japan-jimi-mundane-halloween-costumes-2026/",
+        "hn": "https://news.ycombinator.com/item?id=50333131",
+        "score": 79,
+        "comments": 14
       },
       {
-        "id": 50340619,
-        "title": "Self-Employed? Solopreneur? NIST Has a Cybersecurity Guide Just for You",
-        "url": "https://www.nist.gov/news-events/news/2026/11/self-employed-solopreneur-nist-has-cybersecurity-guide-just-you",
-        "hn": "https://news.ycombinator.com/item?id=50340619",
-        "score": 92,
-        "comments": 27
+        "id": 50336918,
+        "title": "Fujifilm to boost tape production 5x as AI fuels archiving demand",
+        "url": "https://arstechnica.com/gadgets/2026/10/fujifilm-to-boost-tape-production-5x-as-ai-fuels-archiving-demand/",
+        "hn": "https://news.ycombinator.com/item?id=50336918",
+        "score": 354,
+        "comments": 143
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "LiquidAI/LFM3-1.7B",
         "url": "https://huggingface.co/LiquidAI/LFM3-1.7B",
         "task": "text-generation",
-        "downloads": 42384,
-        "likes": 1069
-      },
-      {
-        "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
-        "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
-        "task": "image-text-to-text",
-        "downloads": 177009,
-        "likes": 4704
+        "downloads": 47817,
+        "likes": 1399
       },
       {
         "id": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "task": "automatic-speech-recognition",
-        "downloads": 32439,
-        "likes": 684
+        "downloads": 38942,
+        "likes": 737
+      },
+      {
+        "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+        "task": "image-text-to-text",
+        "downloads": 187260,
+        "likes": 4849
       },
       {
         "id": "mistralai/Mistral-Large-4-1T-A52B",
         "url": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B",
         "task": "image-text-to-text",
-        "downloads": 5500,
-        "likes": 1501
-      },
-      {
-        "id": "baidu/Unlimited-OCR-2",
-        "url": "https://huggingface.co/baidu/Unlimited-OCR-2",
-        "task": "image-text-to-text",
-        "downloads": 147588,
-        "likes": 562
+        "downloads": 6556,
+        "likes": 1543
       },
       {
         "id": "speridlabs/idol",
         "url": "https://huggingface.co/speridlabs/idol",
         "task": "image-to-3d",
-        "downloads": 7787,
-        "likes": 419
+        "downloads": 10742,
+        "likes": 509
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 2467613,
-        "likes": 10366
+        "downloads": 2488128,
+        "likes": 10488
       },
       {
         "id": "ccore/Qwen3.5-4B-3D-Coder",
         "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
         "task": "",
-        "downloads": 63499,
-        "likes": 564
+        "downloads": 91123,
+        "likes": 604
       },
       {
         "id": "Pika-Labs/Pika-H3-Flex",
         "url": "https://huggingface.co/Pika-Labs/Pika-H3-Flex",
         "task": "image-to-video",
-        "downloads": 491,
-        "likes": 361
+        "downloads": 633,
+        "likes": 390
       },
       {
-        "id": "abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+        "id": "baidu/Unlimited-OCR-2",
+        "url": "https://huggingface.co/baidu/Unlimited-OCR-2",
+        "task": "image-text-to-text",
+        "downloads": 189897,
+        "likes": 590
+      },
+      {
+        "id": "abenzerps/Qwen-Image-2.1-Turbo-Quantized",
+        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Turbo-Quantized",
         "task": "text-to-image",
-        "downloads": 2516622,
-        "likes": 5553
+        "downloads": 2508590,
+        "likes": 5622
       }
     ],
     "weibo": [
       {
-        "word": "红果这些短剧人气好高",
-        "num": 1145202,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%9E%9C%E8%BF%99%E4%BA%9B%E7%9F%AD%E5%89%A7%E4%BA%BA%E6%B0%94%E5%A5%BD%E9%AB%98%23"
-      },
-      {
-        "word": "新华社追问国乒男队怎么了",
-        "num": 809917,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%96%B0%E5%8D%8E%E7%A4%BE%E8%BF%BD%E9%97%AE%E5%9B%BD%E4%B9%92%E7%94%B7%E9%98%9F%E6%80%8E%E4%B9%88%E4%BA%86%23"
-      },
-      {
-        "word": "数说进博会新亮点",
-        "num": 718772,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%95%B0%E8%AF%B4%E8%BF%9B%E5%8D%9A%E4%BC%9A%E6%96%B0%E4%BA%AE%E7%82%B9%23"
-      },
-      {
-        "word": "结婚当天离世新郎系心脏压塞死亡",
-        "num": 705879,
+        "word": "女生刷到另一个自己竟是双胞胎",
+        "num": 1252909,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BB%93%E5%A9%9A%E5%BD%93%E5%A4%A9%E7%A6%BB%E4%B8%96%E6%96%B0%E9%83%8E%E7%B3%BB%E5%BF%83%E8%84%8F%E5%8E%8B%E5%A1%9E%E6%AD%BB%E4%BA%A1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E7%94%9F%E5%88%B7%E5%88%B0%E5%8F%A6%E4%B8%80%E4%B8%AA%E8%87%AA%E5%B7%B1%E7%AB%9F%E6%98%AF%E5%8F%8C%E8%83%9E%E8%83%8E%23"
       },
       {
-        "word": "多读书真的会影响三观",
-        "num": 679568,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%9A%E8%AF%BB%E4%B9%A6%E7%9C%9F%E7%9A%84%E4%BC%9A%E5%BD%B1%E5%93%8D%E4%B8%89%E8%A7%82%23"
-      },
-      {
-        "word": "高圆圆随便打扮一下就成法拉利了",
-        "num": 539774,
+        "word": "TES对战IG",
+        "num": 1014951,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%AB%98%E5%9C%86%E5%9C%86%E9%9A%8F%E4%BE%BF%E6%89%93%E6%89%AE%E4%B8%80%E4%B8%8B%E5%B0%B1%E6%88%90%E6%B3%95%E6%8B%89%E5%88%A9%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23TES%E5%AF%B9%E6%88%98IG%23"
       },
       {
-        "word": "网约车被围堵事件周边商户发声",
-        "num": 536033,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BD%91%E7%BA%A6%E8%BD%A6%E8%A2%AB%E5%9B%B4%E5%A0%B5%E4%BA%8B%E4%BB%B6%E5%91%A8%E8%BE%B9%E5%95%86%E6%88%B7%E5%8F%91%E5%A3%B0%23"
-      },
-      {
-        "word": "后会友期到底找过多少人啊",
-        "num": 502062,
+        "word": "2026世界市长对话宁波",
+        "num": 888998,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%90%8E%E4%BC%9A%E5%8F%8B%E6%9C%9F%E5%88%B0%E5%BA%95%E6%89%BE%E8%BF%87%E5%A4%9A%E5%B0%91%E4%BA%BA%E5%95%8A%23"
+        "url": "https://s.weibo.com/weibo?q=%232026%E4%B8%96%E7%95%8C%E5%B8%82%E9%95%BF%E5%AF%B9%E8%AF%9D%E5%AE%81%E6%B3%A2%23"
       },
       {
-        "word": "巩立姣退役后减重60多斤",
-        "num": 501862,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B7%A9%E7%AB%8B%E5%A7%A3%E9%80%80%E5%BD%B9%E5%90%8E%E5%87%8F%E9%87%8D60%E5%A4%9A%E6%96%A4%23"
+        "word": "iPhone天气下周五温差",
+        "num": 857835,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23iPhone%E5%A4%A9%E6%B0%94%E4%B8%8B%E5%91%A8%E4%BA%94%E6%B8%A9%E5%B7%AE%23"
       },
       {
-        "word": "高校通报有人男扮女装进女生宿舍",
-        "num": 432271,
+        "word": "红果历史短剧有点出乎意料",
+        "num": 792807,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%AB%98%E6%A0%A1%E9%80%9A%E6%8A%A5%E6%9C%89%E4%BA%BA%E7%94%B7%E6%89%AE%E5%A5%B3%E8%A3%85%E8%BF%9B%E5%A5%B3%E7%94%9F%E5%AE%BF%E8%88%8D%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%9E%9C%E5%8E%86%E5%8F%B2%E7%9F%AD%E5%89%A7%E6%9C%89%E7%82%B9%E5%87%BA%E4%B9%8E%E6%84%8F%E6%96%99%23"
+      },
+      {
+        "word": "杨幂曾偷偷观察唐嫣",
+        "num": 779030,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%A8%E5%B9%82%E6%9B%BE%E5%81%B7%E5%81%B7%E8%A7%82%E5%AF%9F%E5%94%90%E5%AB%A3%23"
+      },
+      {
+        "word": "抖音副总裁恶语回应专家批评",
+        "num": 382718,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%8A%96%E9%9F%B3%E5%89%AF%E6%80%BB%E8%A3%81%E6%81%B6%E8%AF%AD%E5%9B%9E%E5%BA%94%E4%B8%93%E5%AE%B6%E6%89%B9%E8%AF%84%23"
+      },
+      {
+        "word": "女子凌晨被陌生人钻被窝贴脸窥探",
+        "num": 331828,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E5%87%8C%E6%99%A8%E8%A2%AB%E9%99%8C%E7%94%9F%E4%BA%BA%E9%92%BB%E8%A2%AB%E7%AA%9D%E8%B4%B4%E8%84%B8%E7%AA%A5%E6%8E%A2%23"
+      },
+      {
+        "word": "女子每天玩手机10小时患手机痴呆症",
+        "num": 244681,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E6%AF%8F%E5%A4%A9%E7%8E%A9%E6%89%8B%E6%9C%BA10%E5%B0%8F%E6%97%B6%E6%82%A3%E6%89%8B%E6%9C%BA%E7%97%B4%E5%91%86%E7%97%87%23"
+      },
+      {
+        "word": "李钟硕新剧回春了",
+        "num": 243745,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%8E%E9%92%9F%E7%A1%95%E6%96%B0%E5%89%A7%E5%9B%9E%E6%98%A5%E4%BA%86%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2020,
-        "text": "2020年美国总统选举；美国民主党代表拜登击败争取连任的共和党特朗普当选美国总统。",
-        "title": "2020年美國總統選舉",
-        "url": "https://zh.wikipedia.org/wiki/2020%E5%B9%B4%E7%BE%8E%E5%9C%8B%E7%B8%BD%E7%B5%B1%E9%81%B8%E8%88%89"
+        "year": 2019,
+        "text": "周梓乐，在将军澳尚德邨停车场跌落重伤(延至11月8日死亡亡)。事件随后引发全港多区连续多日的严重示威与冲突。",
+        "title": "周梓樂墮樓事件",
+        "url": "https://zh.wikipedia.org/wiki/%E5%91%A8%E6%A2%93%E6%A8%82%E5%A2%AE%E6%A8%93%E4%BA%8B%E4%BB%B6"
       },
       {
         "year": 2016,
-        "text": "北京时间晚上20:43，中国第一款重型运载火箭长征五号在海南文昌航天发射场成功发射。",
-        "title": "北京时间",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E6%97%B6%E9%97%B4"
+        "text": "193个国家签署的《巴黎协议》正式生效，计划将气温上升控制在工业革命前的2℃范围。",
+        "title": "国家",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9B%BD%E5%AE%B6"
       },
       {
-        "year": 2014,
-        "text": "于世界贸易中心六号大楼原址重建的世界贸易中心一号大楼向公众开放，顶替在九一一被摧毁的北塔（英语：List of tenants in One World Trade Center）。",
-        "title": "世界贸易中心六号大楼",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%96%E7%95%8C%E8%B4%B8%E6%98%93%E4%B8%AD%E5%BF%83%E5%85%AD%E5%8F%B7%E5%A4%A7%E6%A5%BC"
+        "year": 2015,
+        "text": "伯利兹大选，迪安·奥利弗·巴罗领导联合民主党（英语：United Democratic Party (Belize)）获众议院（英语：House of Representatives (Belize)）过半议席，续任总理。",
+        "title": "2015年貝里斯大選",
+        "url": "https://zh.wikipedia.org/wiki/2015%E5%B9%B4%E8%B2%9D%E9%87%8C%E6%96%AF%E5%A4%A7%E9%81%B8"
       },
       {
-        "year": 2011,
-        "text": "北京时间凌晨01:43，神舟八号飞船与天宫一号首次对接成功，中国成为继美国和俄罗斯之后，世界上第三个掌握完整的太空对接技术的国家。",
-        "title": "北京时间",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8C%97%E4%BA%AC%E6%97%B6%E9%97%B4"
+        "year": 2012,
+        "text": "塞奥佐罗斯二世获选为亚历山大科普特正教会的教宗。",
+        "title": "亞歷山大科普特正教會教宗列表",
+        "url": "https://zh.wikipedia.org/wiki/%E4%BA%9E%E6%AD%B7%E5%B1%B1%E5%A4%A7%E7%A7%91%E6%99%AE%E7%89%B9%E6%AD%A3%E6%95%99%E6%9C%83%E6%95%99%E5%AE%97%E5%88%97%E8%A1%A8"
       },
       {
-        "year": 2007,
-        "text": "巴基斯坦总统佩尔韦兹·穆沙拉夫颁布全国紧急状态令，中止宪法并且实行临时宪法令。",
-        "title": "巴基斯坦总统",
-        "url": "https://zh.wikipedia.org/wiki/%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E6%80%BB%E7%BB%9F"
+        "year": 2010,
+        "text": "在首宗涉及空中客车A380的航空事故中，澳洲航空32号班机发生引擎失控故障，最终在新加坡樟宜机场紧急迫降，所幸无人伤亡。",
+        "title": "空中客车A380",
+        "url": "https://zh.wikipedia.org/wiki/%E7%A9%BA%E4%B8%AD%E5%AE%A2%E8%BD%A6A380"
       },
       {
-        "year": 2007,
-        "text": "台湾乐团苏打绿成为第一个在台北小巨蛋开演唱会的独立音乐艺人。",
-        "title": "蘇打綠",
-        "url": "https://zh.wikipedia.org/wiki/%E8%98%87%E6%89%93%E7%B6%A0"
+        "year": 2008,
+        "text": "民主党候选人巴拉克·奥巴马赢得美国总统选举，成为首位非裔美国总统。",
+        "title": "民主党 (美国)",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B0%91%E4%B8%BB%E5%85%9A_(%E7%BE%8E%E5%9B%BD)"
       }
     ]
   }
