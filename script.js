@@ -2305,7 +2305,13 @@ function spawnRipple(host, e) {
 }
 
 // ===== 视图控制 =====
+// 各视图共用文档滚动条，切视图时浏览器会保留上一视图的滚动位置；统一回到顶部
+function resetViewScroll() {
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+}
+
 function goHome() {
+    resetViewScroll();
     currentView = 'home';
     searchFrom = 'home';
     searchInput.value = '';
@@ -3507,6 +3513,7 @@ function fxGoTo(code) {
     sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.toggle('active', !!i.dataset.fx));
     homeNav.classList.remove('active');
+    resetViewScroll();
     renderFx(true);
     if (window.innerWidth <= 768) {
         closeMobileMenu();
@@ -4412,6 +4419,7 @@ function initEventListeners() {
         currentView = 'tools';
         searchFrom = 'tools';
         searchInput.value = '';
+        resetViewScroll();
         renderTools(true);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
@@ -4425,6 +4433,7 @@ function initEventListeners() {
             if (currentView !== 'search') {
                 searchFrom = currentView;
                 currentView = 'search';
+                resetViewScroll();
                 sidebarCategories.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarTools.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                 sidebarMedia.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -4439,6 +4448,7 @@ function initEventListeners() {
         if (currentView === 'search') {
             currentView = searchFrom;
             restoreSidebarActive();
+            resetViewScroll();
             renderCurrentView();
         }
     });
@@ -4472,6 +4482,7 @@ function initEventListeners() {
         currentCategory = item.dataset.category;
         currentView = 'links';
         searchFrom = 'links';
+        resetViewScroll();
         renderLinks(true);
         // 移动端自动关闭菜单
         if (window.innerWidth <= 768) {
@@ -4508,6 +4519,7 @@ function initEventListeners() {
         currentView = 'media';
         searchFrom = 'media';
         searchInput.value = '';
+        resetViewScroll();
         renderMedia(true);
         if (window.innerWidth <= 768) {
             closeMobileMenu();
@@ -4525,6 +4537,7 @@ function initEventListeners() {
         sidebarData.querySelectorAll('.sidebar-item').forEach(i => i.classList.toggle('active', i === item));
         homeNav.classList.remove('active');
         searchInput.value = ''; // 切视图清空搜索，避免残留
+        resetViewScroll();
         if (item.dataset.ghstars) {
             // 我的 Stars：工作流每日同步的星标仓库
             currentCategory = '';
