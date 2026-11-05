@@ -1,331 +1,331 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-04",
+  "updated": "2026-11-05",
   "sections": {
     "trending": [
       {
         "name": "deepseek-ai/dsh-superagent-prototype",
         "url": "https://github.com/deepseek-ai/dsh-superagent-prototype",
         "desc": "Towards a More Autonomous Agent System",
-        "stars": 16675,
+        "stars": 18557,
         "language": "TypeScript"
       },
       {
         "name": "storytold/craft-anything",
         "url": "https://github.com/storytold/craft-anything",
         "desc": "Craft Anything: understand how any software works, and craft your own.",
-        "stars": 8305,
+        "stars": 11705,
         "language": "Rust"
-      },
-      {
-        "name": "heydamir/unslop",
-        "url": "https://github.com/heydamir/unslop",
-        "desc": "A Claude skill that turns vibecoded, AI-looking UI into a designed interface",
-        "stars": 7520,
-        "language": "JavaScript"
-      },
-      {
-        "name": "wangzan101/Mika",
-        "url": "https://github.com/wangzan101/Mika",
-        "desc": "An on-device AI agent for Android that operates apps and the web to get things done for you.",
-        "stars": 6037,
-        "language": "Kotlin"
-      },
-      {
-        "name": "valentderah/totk-pc-recomp",
-        "url": "https://github.com/valentderah/totk-pc-recomp",
-        "desc": "Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows and Linux x86-64, with a Vulkan renderer. Game files not included.",
-        "stars": 4501,
-        "language": "C"
       },
       {
         "name": "patch-gg/pixelfx",
         "url": "https://github.com/patch-gg/pixelfx",
         "desc": "244 pixel art effects, every one a small piece of code. Plus a Claude Code skill to make your own.",
-        "stars": 4107,
+        "stars": 4713,
         "language": "JavaScript"
       },
       {
-        "name": "Djihads80/Eglantine",
-        "url": "https://github.com/Djihads80/Eglantine",
-        "desc": "VERY experimental Nintendo Switch 2 emulator",
-        "stars": 3023,
-        "language": "C++"
-      },
-      {
-        "name": "BryceYuuu/RUN",
-        "url": "https://github.com/BryceYuuu/RUN",
-        "desc": "RUN · 润：海外移居手册（欧洲 36 国 · 110 条路线 · 主要移民地区）",
-        "stars": 3012,
-        "language": "Python"
-      },
-      {
-        "name": "paipiange/nvzhuang",
-        "url": "https://github.com/paipiange/nvzhuang",
-        "desc": "1407 张 AI 女装参考图集与虚拟试穿网站，支持中英检索、OpenAI Images / Gemini / 豆包及自定义 Base URL、API Key、模型。https://github.com/paipiange/nvzhuang",
-        "stars": 2122,
-        "language": "Go"
+        "name": "KKKKhazix/agent-autoloop",
+        "url": "https://github.com/KKKKhazix/agent-autoloop",
+        "desc": "让你的命令行 Agent 在后台自己接活、自己跟进到底；平时不烦你，遇到拿不准的事才发卡片找你拍板。",
+        "stars": 2477,
+        "language": "TypeScript"
       },
       {
         "name": "Verlintas/NOIR",
         "url": "https://github.com/Verlintas/NOIR",
         "desc": "手机隐私审计：用 adb 扫出 Android 应用的权限、上报端点与数据流向，并给出可回滚的处置。Desktop Android leak audit: permissions, endpoints, data flows, reversible fixes.",
-        "stars": 1759,
+        "stars": 2022,
         "language": "Kotlin"
+      },
+      {
+        "name": "elvarofficial/teardown",
+        "url": "https://github.com/elvarofficial/teardown",
+        "desc": "A Claude Code skill that turns any machine into a 3D simulator you can take apart",
+        "stars": 1908,
+        "language": "JavaScript"
+      },
+      {
+        "name": "caru-ini/stack-diagram",
+        "url": "https://github.com/caru-ini/stack-diagram",
+        "desc": "Agent skill: describe your stack in a sentence, get an architecture diagram with official logos",
+        "stars": 1748,
+        "language": "TypeScript"
+      },
+      {
+        "name": "govijr/terminal-mac",
+        "url": "https://github.com/govijr/terminal-mac",
+        "desc": "Entire MacOS running in your terminal.",
+        "stars": 1513,
+        "language": "Swift"
+      },
+      {
+        "name": "mromidev/claude-animated-shorts",
+        "url": "https://github.com/mromidev/claude-animated-shorts",
+        "desc": "Free Claude skill: viral animated story shorts (2D characters in a 3D world) with three.js + Remotion",
+        "stars": 1512,
+        "language": "TypeScript"
+      },
+      {
+        "name": "Arjun-Ingole/hop",
+        "url": "https://github.com/Arjun-Ingole/hop",
+        "desc": "Install Linux next to Windows without a USB stick",
+        "stars": 1507,
+        "language": "PowerShell"
       }
     ],
     "hn": [
       {
-        "id": 50358582,
-        "title": "The Little Book of Generative AI Foundations: An Intuitive Mathematical Primer",
-        "url": "https://arxiv.org/abs/2605.29713",
-        "hn": "https://news.ycombinator.com/item?id=50358582",
-        "score": 159,
-        "comments": 19
+        "id": 50371246,
+        "title": "Residential proxies detected on White House network",
+        "url": "https://layer3intel.com/blog/residential-proxies-white-house-network",
+        "hn": "https://news.ycombinator.com/item?id=50371246",
+        "score": 546,
+        "comments": 159
       },
       {
-        "id": 50358562,
-        "title": "Safari introduces Adaptive Dark Mode in 27.3",
-        "url": "https://webkit.org/blog/18541/introducing-adaptive-dark-mode/",
-        "hn": "https://news.ycombinator.com/item?id=50358562",
-        "score": 212,
-        "comments": 135
+        "id": 50372945,
+        "title": "Introducing Images 2.6",
+        "url": "https://openai.com/index/introducing-images-2-6/",
+        "hn": "https://news.ycombinator.com/item?id=50372945",
+        "score": 26,
+        "comments": 8
       },
       {
-        "id": 50358702,
-        "title": "The Internals of PostgreSQL",
-        "url": "https://www.interdb.jp/pg/index.html",
-        "hn": "https://news.ycombinator.com/item?id=50358702",
-        "score": 62,
+        "id": 50364336,
+        "title": "AI is forcing us to pay off 40 years of technical debt",
+        "url": "https://spectrum.ieee.org/ai-in-cybersecurity-php2shell-vulnerability",
+        "hn": "https://news.ycombinator.com/item?id=50364336",
+        "score": 1028,
+        "comments": 618
+      },
+      {
+        "id": 50369925,
+        "title": "Ripple-65B Preview: U.S. Open-Weight SOTA on Agentic Coding",
+        "url": "https://www.ricursive.com/ripple",
+        "hn": "https://news.ycombinator.com/item?id=50369925",
+        "score": 204,
+        "comments": 71
+      },
+      {
+        "id": 50372929,
+        "title": "Local privilege escalation vulnerabilities in Linux",
+        "url": "https://openai.com/index/a-thousand-fewer-paths-to-root/",
+        "hn": "https://news.ycombinator.com/item?id=50372929",
+        "score": 28,
+        "comments": 18
+      },
+      {
+        "id": 50370610,
+        "title": "Insects don't swarm at LED lights",
+        "url": "https://www.birdsoutsidemywindow.org/2026/11/03/insects-dont-swarm-at-led-lights/",
+        "hn": "https://news.ycombinator.com/item?id=50370610",
+        "score": 152,
+        "comments": 90
+      },
+      {
+        "id": 50372164,
+        "title": "Hacking the Xbox 360 Hypervisor Part 3: Bad Update Improvements",
+        "url": "https://icode4.coffee/?p=1746",
+        "hn": "https://news.ycombinator.com/item?id=50372164",
+        "score": 46,
         "comments": 2
       },
       {
-        "id": 50339288,
-        "title": "Jailbreaking my car's navigation system just so I can change the time",
-        "url": "https://blog.nns.ee/2026/11/02/renault-hack/",
-        "hn": "https://news.ycombinator.com/item?id=50339288",
-        "score": 571,
-        "comments": 228
+        "id": 50369106,
+        "title": "A new Go API for JSON",
+        "url": "https://go.dev/blog/jsonv2",
+        "hn": "https://news.ycombinator.com/item?id=50369106",
+        "score": 211,
+        "comments": 88
       },
       {
-        "id": 50354358,
-        "title": "Stringman, an $800 open-source room scale gripper robot",
-        "url": "https://neufangled.com/",
-        "hn": "https://news.ycombinator.com/item?id=50354358",
-        "score": 327,
-        "comments": 127
+        "id": 50366999,
+        "title": "Kimi K3.1 Pro model weights are out",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "hn": "https://news.ycombinator.com/item?id=50366999",
+        "score": 343,
+        "comments": 89
       },
       {
-        "id": 50346755,
-        "title": "Show HN: HackerTV – HN's most-recommended Youtube videos as 24/7 TV channels",
-        "url": "https://hackertv.org",
-        "hn": "https://news.ycombinator.com/item?id=50346755",
-        "score": 133,
-        "comments": 31
-      },
-      {
-        "id": 50355251,
-        "title": "Qwen 3.8 27B on my laptop can interpret model weights, too",
-        "url": "https://simonwillison.net/2026/Nov/3/qwen-can-interpret-model-weights/",
-        "hn": "https://news.ycombinator.com/item?id=50355251",
-        "score": 457,
-        "comments": 144
-      },
-      {
-        "id": 50356944,
-        "title": "macOS 27 does not support CoreStorage volumes",
-        "url": "https://wadetregaskis.com/macos-27-golden-gate-does-not-actually-support-corestorage-or-hfs-volumes/",
-        "hn": "https://news.ycombinator.com/item?id=50356944",
-        "score": 85,
-        "comments": 45
-      },
-      {
-        "id": 50333131,
-        "title": "Japan's Jimi 'Mundane' Halloween Costumes of 2026",
-        "url": "https://spoon-tamago.com/japan-jimi-mundane-halloween-costumes-2026/",
-        "hn": "https://news.ycombinator.com/item?id=50333131",
-        "score": 79,
-        "comments": 14
-      },
-      {
-        "id": 50336918,
-        "title": "Fujifilm to boost tape production 5x as AI fuels archiving demand",
-        "url": "https://arstechnica.com/gadgets/2026/10/fujifilm-to-boost-tape-production-5x-as-ai-fuels-archiving-demand/",
-        "hn": "https://news.ycombinator.com/item?id=50336918",
-        "score": 354,
-        "comments": 143
+        "id": 50370654,
+        "title": "Qualcomm Cloud AI 100 Ultra – 150W AI Accelerator Card with 128GB at 548GB/s",
+        "url": "https://www.qualcomm.com/data-center/products/cloud-ai-100-ultra",
+        "hn": "https://news.ycombinator.com/item?id=50370654",
+        "score": 90,
+        "comments": 40
       }
     ],
     "hf_models": [
       {
-        "id": "LiquidAI/LFM3-1.7B",
-        "url": "https://huggingface.co/LiquidAI/LFM3-1.7B",
-        "task": "text-generation",
-        "downloads": 47817,
-        "likes": 1399
-      },
-      {
         "id": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
         "task": "automatic-speech-recognition",
-        "downloads": 38942,
-        "likes": 737
+        "downloads": 44939,
+        "likes": 1485
       },
       {
         "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
         "task": "image-text-to-text",
-        "downloads": 187260,
-        "likes": 4849
-      },
-      {
-        "id": "mistralai/Mistral-Large-4-1T-A52B",
-        "url": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B",
-        "task": "image-text-to-text",
-        "downloads": 6556,
-        "likes": 1543
+        "downloads": 221621,
+        "likes": 5267
       },
       {
         "id": "speridlabs/idol",
         "url": "https://huggingface.co/speridlabs/idol",
         "task": "image-to-3d",
-        "downloads": 10742,
-        "likes": 509
+        "downloads": 14613,
+        "likes": 619
       },
       {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2488128,
-        "likes": 10488
+        "id": "LiquidAI/LFM3-1.7B",
+        "url": "https://huggingface.co/LiquidAI/LFM3-1.7B",
+        "task": "text-generation",
+        "downloads": 54959,
+        "likes": 1485
       },
       {
-        "id": "ccore/Qwen3.5-4B-3D-Coder",
-        "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
-        "task": "",
-        "downloads": 91123,
-        "likes": 604
+        "id": "mistralai/Mistral-Large-4-1T-A52B",
+        "url": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B",
+        "task": "image-text-to-text",
+        "downloads": 8200,
+        "likes": 1589
+      },
+      {
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "task": "image-text-to-text",
+        "downloads": 797,
+        "likes": 489
       },
       {
         "id": "Pika-Labs/Pika-H3-Flex",
         "url": "https://huggingface.co/Pika-Labs/Pika-H3-Flex",
         "task": "image-to-video",
-        "downloads": 633,
-        "likes": 390
+        "downloads": 749,
+        "likes": 429
       },
       {
-        "id": "baidu/Unlimited-OCR-2",
-        "url": "https://huggingface.co/baidu/Unlimited-OCR-2",
-        "task": "image-text-to-text",
-        "downloads": 189897,
-        "likes": 590
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2493402,
+        "likes": 10616
       },
       {
-        "id": "abenzerps/Qwen-Image-2.1-Turbo-Quantized",
-        "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Turbo-Quantized",
-        "task": "text-to-image",
-        "downloads": 2508590,
-        "likes": 5622
+        "id": "ccore/Qwen3.5-4B-3D-Coder",
+        "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
+        "task": "",
+        "downloads": 123321,
+        "likes": 654
+      },
+      {
+        "id": "burner22/numbat",
+        "url": "https://huggingface.co/burner22/numbat",
+        "task": "",
+        "downloads": 8118,
+        "likes": 342
       }
     ],
     "weibo": [
       {
-        "word": "女生刷到另一个自己竟是双胞胎",
-        "num": 1252909,
+        "word": "上岸第一件先娶意中人",
+        "num": 2080116,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E7%94%9F%E5%88%B7%E5%88%B0%E5%8F%A6%E4%B8%80%E4%B8%AA%E8%87%AA%E5%B7%B1%E7%AB%9F%E6%98%AF%E5%8F%8C%E8%83%9E%E8%83%8E%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%8A%E5%B2%B8%E7%AC%AC%E4%B8%80%E4%BB%B6%E5%85%88%E5%A8%B6%E6%84%8F%E4%B8%AD%E4%BA%BA%23"
       },
       {
-        "word": "TES对战IG",
-        "num": 1014951,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23TES%E5%AF%B9%E6%88%98IG%23"
-      },
-      {
-        "word": "2026世界市长对话宁波",
-        "num": 888998,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%232026%E4%B8%96%E7%95%8C%E5%B8%82%E9%95%BF%E5%AF%B9%E8%AF%9D%E5%AE%81%E6%B3%A2%23"
-      },
-      {
-        "word": "iPhone天气下周五温差",
-        "num": 857835,
+        "word": "高市早苗以怪异姿势面见日本天皇",
+        "num": 986824,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23iPhone%E5%A4%A9%E6%B0%94%E4%B8%8B%E5%91%A8%E4%BA%94%E6%B8%A9%E5%B7%AE%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%AB%98%E5%B8%82%E6%97%A9%E8%8B%97%E4%BB%A5%E6%80%AA%E5%BC%82%E5%A7%BF%E5%8A%BF%E9%9D%A2%E8%A7%81%E6%97%A5%E6%9C%AC%E5%A4%A9%E7%9A%87%23"
       },
       {
-        "word": "红果历史短剧有点出乎意料",
-        "num": 792807,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%A2%E6%9E%9C%E5%8E%86%E5%8F%B2%E7%9F%AD%E5%89%A7%E6%9C%89%E7%82%B9%E5%87%BA%E4%B9%8E%E6%84%8F%E6%96%99%23"
-      },
-      {
-        "word": "杨幂曾偷偷观察唐嫣",
-        "num": 779030,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%A8%E5%B9%82%E6%9B%BE%E5%81%B7%E5%81%B7%E8%A7%82%E5%AF%9F%E5%94%90%E5%AB%A3%23"
-      },
-      {
-        "word": "抖音副总裁恶语回应专家批评",
-        "num": 382718,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%8A%96%E9%9F%B3%E5%89%AF%E6%80%BB%E8%A3%81%E6%81%B6%E8%AF%AD%E5%9B%9E%E5%BA%94%E4%B8%93%E5%AE%B6%E6%89%B9%E8%AF%84%23"
-      },
-      {
-        "word": "女子凌晨被陌生人钻被窝贴脸窥探",
-        "num": 331828,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E5%87%8C%E6%99%A8%E8%A2%AB%E9%99%8C%E7%94%9F%E4%BA%BA%E9%92%BB%E8%A2%AB%E7%AA%9D%E8%B4%B4%E8%84%B8%E7%AA%A5%E6%8E%A2%23"
-      },
-      {
-        "word": "女子每天玩手机10小时患手机痴呆症",
-        "num": 244681,
+        "word": "方浩明以亲身经历感知中国",
+        "num": 787562,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%AD%90%E6%AF%8F%E5%A4%A9%E7%8E%A9%E6%89%8B%E6%9C%BA10%E5%B0%8F%E6%97%B6%E6%82%A3%E6%89%8B%E6%9C%BA%E7%97%B4%E5%91%86%E7%97%87%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%96%B9%E6%B5%A9%E6%98%8E%E4%BB%A5%E4%BA%B2%E8%BA%AB%E7%BB%8F%E5%8E%86%E6%84%9F%E7%9F%A5%E4%B8%AD%E5%9B%BD%23"
       },
       {
-        "word": "李钟硕新剧回春了",
-        "num": 243745,
+        "word": "张萌真的是一个很有眼光的妙人",
+        "num": 607151,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%A0%E8%90%8C%E7%9C%9F%E7%9A%84%E6%98%AF%E4%B8%80%E4%B8%AA%E5%BE%88%E6%9C%89%E7%9C%BC%E5%85%89%E7%9A%84%E5%A6%99%E4%BA%BA%23"
+      },
+      {
+        "word": "青稚白小纯这俩人咋这么口是心非",
+        "num": 379536,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%9D%92%E7%A8%9A%E7%99%BD%E5%B0%8F%E7%BA%AF%E8%BF%99%E4%BF%A9%E4%BA%BA%E5%92%8B%E8%BF%99%E4%B9%88%E5%8F%A3%E6%98%AF%E5%BF%83%E9%9D%9E%23"
+      },
+      {
+        "word": "美科技股两极分化原因",
+        "num": 365864,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E7%A7%91%E6%8A%80%E8%82%A1%E4%B8%A4%E6%9E%81%E5%88%86%E5%8C%96%E5%8E%9F%E5%9B%A0%23"
+      },
+      {
+        "word": "GEN LYON",
+        "num": 343554,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23GEN%20LYON%23"
+      },
+      {
+        "word": "曝厉娜的商务价格",
+        "num": 340292,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E5%8E%89%E5%A8%9C%E7%9A%84%E5%95%86%E5%8A%A1%E4%BB%B7%E6%A0%BC%23"
+      },
+      {
+        "word": "曝勇士拒绝给波尔津吉斯支付薪水",
+        "num": 335357,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E5%8B%87%E5%A3%AB%E6%8B%92%E7%BB%9D%E7%BB%99%E6%B3%A2%E5%B0%94%E6%B4%A5%E5%90%89%E6%96%AF%E6%94%AF%E4%BB%98%E8%96%AA%E6%B0%B4%23"
+      },
+      {
+        "word": "陕西省教育厅回应延安大学教师离世",
+        "num": 326865,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%8E%E9%92%9F%E7%A1%95%E6%96%B0%E5%89%A7%E5%9B%9E%E6%98%A5%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%99%95%E8%A5%BF%E7%9C%81%E6%95%99%E8%82%B2%E5%8E%85%E5%9B%9E%E5%BA%94%E5%BB%B6%E5%AE%89%E5%A4%A7%E5%AD%A6%E6%95%99%E5%B8%88%E7%A6%BB%E4%B8%96%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2019,
-        "text": "周梓乐，在将军澳尚德邨停车场跌落重伤(延至11月8日死亡亡)。事件随后引发全港多区连续多日的严重示威与冲突。",
-        "title": "周梓樂墮樓事件",
-        "url": "https://zh.wikipedia.org/wiki/%E5%91%A8%E6%A2%93%E6%A8%82%E5%A2%AE%E6%A8%93%E4%BA%8B%E4%BB%B6"
+        "year": 2021,
+        "text": "中国国务院台湾事务办公室将苏贞昌、游锡堃和吴钊燮列为“台独”顽固分子，并实施惩戒措施。",
+        "title": "中华人民共和国",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD"
       },
       {
-        "year": 2016,
-        "text": "193个国家签署的《巴黎协议》正式生效，计划将气温上升控制在工业革命前的2℃范围。",
-        "title": "国家",
-        "url": "https://zh.wikipedia.org/wiki/%E5%9B%BD%E5%AE%B6"
+        "year": 2021,
+        "text": "塞拉利昂共和国首都自由城发生油罐车与卡车相撞导致的爆炸事故，造成至少108人死亡和100多人受伤。",
+        "title": "塞拉利昂",
+        "url": "https://zh.wikipedia.org/wiki/%E5%A1%9E%E6%8B%89%E5%88%A9%E6%98%82"
       },
       {
-        "year": 2015,
-        "text": "伯利兹大选，迪安·奥利弗·巴罗领导联合民主党（英语：United Democratic Party (Belize)）获众议院（英语：House of Representatives (Belize)）过半议席，续任总理。",
-        "title": "2015年貝里斯大選",
-        "url": "https://zh.wikipedia.org/wiki/2015%E5%B9%B4%E8%B2%9D%E9%87%8C%E6%96%AF%E5%A4%A7%E9%81%B8"
+        "year": 2017,
+        "text": "北斗三号全球组网双星首次发射",
+        "title": "北斗卫星导航系统",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F"
       },
       {
-        "year": 2012,
-        "text": "塞奥佐罗斯二世获选为亚历山大科普特正教会的教宗。",
-        "title": "亞歷山大科普特正教會教宗列表",
-        "url": "https://zh.wikipedia.org/wiki/%E4%BA%9E%E6%AD%B7%E5%B1%B1%E5%A4%A7%E7%A7%91%E6%99%AE%E7%89%B9%E6%AD%A3%E6%95%99%E6%9C%83%E6%95%99%E5%AE%97%E5%88%97%E8%A1%A8"
+        "year": 2013,
+        "text": "印度发射火星轨道探测器，为该国的首个太阳系探测器。",
+        "title": "印度",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8D%B0%E5%BA%A6"
       },
       {
-        "year": 2010,
-        "text": "在首宗涉及空中客车A380的航空事故中，澳洲航空32号班机发生引擎失控故障，最终在新加坡樟宜机场紧急迫降，所幸无人伤亡。",
-        "title": "空中客车A380",
-        "url": "https://zh.wikipedia.org/wiki/%E7%A9%BA%E4%B8%AD%E5%AE%A2%E8%BD%A6A380"
+        "year": 2009,
+        "text": "美国胡德堡陆军基地发生枪击案，12名军人和1名军方雇员在事件中丧生。",
+        "title": "胡德堡",
+        "url": "https://zh.wikipedia.org/wiki/%E8%83%A1%E5%BE%B7%E5%A0%A1"
       },
       {
-        "year": 2008,
-        "text": "民主党候选人巴拉克·奥巴马赢得美国总统选举，成为首位非裔美国总统。",
-        "title": "民主党 (美国)",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B0%91%E4%B8%BB%E5%85%9A_(%E7%BE%8E%E5%9B%BD)"
+        "year": 2007,
+        "text": "作为中国探月工程第一阶段的嫦娥一号人造卫星进入环月轨道，为中国首颗绕月人造卫星。",
+        "title": "嫦娥一号",
+        "url": "https://zh.wikipedia.org/wiki/%E5%AB%A6%E5%A8%A5%E4%B8%80%E5%8F%B7"
       }
     ]
   }
