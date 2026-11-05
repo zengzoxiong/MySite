@@ -1911,6 +1911,14 @@
       "release": "2015-05-01",
       "url": "https://www.themoviedb.org/movie/349498",
       "cover": "assets/media/flying-colors.jpg"
+    },
+    {
+      "title": "中国救护1",
+      "type": "纪录片",
+      "status": "看过",
+      "release": "2023-09-30",
+      "url": "https://www.themoviedb.org/tv/236910/season/1",
+      "cover": "assets/media/zhongguo-jiuhu-s1.jpg"
     }
   ]
 }
