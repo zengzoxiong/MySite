@@ -1,13 +1,31 @@
 {
-  "updated": "2026-10-26",
+  "updated": "2026-11-06",
   "repos": [
+    {
+      "name": "nature-skills",
+      "full_name": "Yuan1z0825/nature-skills",
+      "url": "https://github.com/Yuan1z0825/nature-skills",
+      "desc": "符合nature论文学术表达和科研绘图的Skill",
+      "language": "Python",
+      "stars": 52546,
+      "starred_at": "2026-11-06"
+    },
+    {
+      "name": "HEU_KMS_Activator",
+      "full_name": "zbezj/HEU_KMS_Activator",
+      "url": "https://github.com/zbezj/HEU_KMS_Activator",
+      "desc": "",
+      "language": "",
+      "stars": 44288,
+      "starred_at": "2026-11-06"
+    },
     {
       "name": "hallmark",
       "full_name": "Nutlope/hallmark",
       "url": "https://github.com/Nutlope/hallmark",
       "desc": "Anti-AI-slop design skill for Claude Code, Cursor, and Codex.",
       "language": "CSS",
-      "stars": 48746,
+      "stars": 49595,
       "starred_at": "2026-10-26"
     },
     {
@@ -25,7 +43,7 @@
       "url": "https://github.com/mrgoonie/claudekit-skills",
       "desc": "All powerful skills of ClaudeKit.cc!",
       "language": "Python",
-      "stars": 2235,
+      "stars": 2236,
       "starred_at": "2026-10-18"
     },
     {
@@ -34,7 +52,7 @@
       "url": "https://github.com/vercel-labs/skills",
       "desc": "The open agent skills tool - npx skills",
       "language": "TypeScript",
-      "stars": 38269,
+      "stars": 38383,
       "starred_at": "2026-10-18"
     },
     {
@@ -43,7 +61,7 @@
       "url": "https://github.com/obra/superpowers",
       "desc": "An agentic skills framework & software development methodology that works.",
       "language": "Shell",
-      "stars": 313001,
+      "stars": 313593,
       "starred_at": "2026-10-18"
     },
     {
@@ -52,7 +70,7 @@
       "url": "https://github.com/nexu-io/open-design",
       "desc": "The 1st Collaborative AI Design Agent Workspace. Local-first and open source. Create motion, prototypes, websites, apps, dashboards, presentations, images, and ",
       "language": "TypeScript",
-      "stars": 106108,
+      "stars": 106308,
       "starred_at": "2026-10-18"
     },
     {
@@ -61,7 +79,7 @@
       "url": "https://github.com/hugohe3/ppt-master",
       "desc": "AI turns documents or topics into real, native PowerPoint decks—with native shapes, transitions and animations, data-backed charts and tables on demand, audio n",
       "language": "Python",
-      "stars": 73930,
+      "stars": 74261,
       "starred_at": "2026-10-18"
     },
     {
@@ -70,7 +88,7 @@
       "url": "https://github.com/claude-office-skills/skills",
       "desc": "A curated collection of practical Claude Skills for real-world office tasks",
       "language": "TypeScript",
-      "stars": 563,
+      "stars": 567,
       "starred_at": "2026-10-18"
     },
     {
@@ -79,7 +97,7 @@
       "url": "https://github.com/anthropics/skills",
       "desc": "Public repository for Agent Skills",
       "language": "Python",
-      "stars": 187750,
+      "stars": 188158,
       "starred_at": "2026-10-18"
     },
     {
@@ -88,7 +106,7 @@
       "url": "https://github.com/upstash/context7",
       "desc": "Context7 Platform -- Up-to-date docs for AI agents",
       "language": "TypeScript",
-      "stars": 64248,
+      "stars": 64294,
       "starred_at": "2026-10-18"
     },
     {
@@ -97,7 +115,7 @@
       "url": "https://github.com/microsoft/playwright-mcp",
       "desc": "Playwright MCP server",
       "language": "TypeScript",
-      "stars": 39232,
+      "stars": 39271,
       "starred_at": "2026-10-18"
     },
     {
@@ -106,7 +124,7 @@
       "url": "https://github.com/microsoft/markitdown",
       "desc": "Python tool for converting files and office documents to Markdown.",
       "language": "Python",
-      "stars": 194052,
+      "stars": 194200,
       "starred_at": "2026-10-18"
     },
     {
@@ -142,7 +160,7 @@
       "url": "https://github.com/browser-use/browser-use",
       "desc": "Open-source Python library for AI browser agents, plus Browser Use Cloud: stealth browsers and a hosted agent API.",
       "language": "Python",
-      "stars": 120131,
+      "stars": 120214,
       "starred_at": "2026-10-18"
     },
     {
@@ -151,7 +169,7 @@
       "url": "https://github.com/microsoft/playwright",
       "desc": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API. ",
       "language": "TypeScript",
-      "stars": 99397,
+      "stars": 99469,
       "starred_at": "2026-10-18"
     },
     {
@@ -160,7 +178,7 @@
       "url": "https://github.com/HeyPuter/everything",
       "desc": "We're rebuilding and open-sourcing the world’s software from scratch.",
       "language": "JavaScript",
-      "stars": 7276,
+      "stars": 7452,
       "starred_at": "2026-10-17"
     },
     {
@@ -169,7 +187,7 @@
       "url": "https://github.com/NandhaKishorM/laya",
       "desc": "Non-autoregressive System 1 decision engine. Typed choice, score and yes/no decisions over any text in a single forward pass, in 100+ languages, with a router t",
       "language": "Python",
-      "stars": 35061,
+      "stars": 35123,
       "starred_at": "2026-10-15"
     },
     {
@@ -178,7 +196,7 @@
       "url": "https://github.com/PiggyBackBayonet/MiAuto",
       "desc": "小米 / OPPO / vivo 等 ICCOA CarLink 手机投上车机：无线连接，无需转接盒、无需 root。Car-side ICCOA CarLink receiver for Xiaomi CarWith, OPPO Car+ and vivo Jovi InCar.",
       "language": "Kotlin",
-      "stars": 495,
+      "stars": 498,
       "starred_at": "2026-10-15"
     },
     {
@@ -187,7 +205,7 @@
       "url": "https://github.com/cathrynlavery/diagram-design",
       "desc": "Editorial diagram design for Claude Code, Codex, GitHub Copilot, Cursor, Factory Droid, Qoder, and Pi. 45 diagram types. Self-contained HTML + SVG. No shadows. ",
       "language": "HTML",
-      "stars": 65286,
+      "stars": 65494,
       "starred_at": "2026-10-15"
     },
     {
@@ -196,7 +214,7 @@
       "url": "https://github.com/morluto/rea",
       "desc": "Reverse engineer anything with agents, from app behavior down to native binaries.",
       "language": "TypeScript",
-      "stars": 434246,
+      "stars": 437894,
       "starred_at": "2026-10-15"
     },
     {
@@ -205,7 +223,7 @@
       "url": "https://github.com/D4Vinci/Scrapling",
       "desc": "🕷️ The BEST Web Scraping framework that handles everything from a single request to a full-scale crawl! Don't be shy, join here: https://discord.gg/EMgGbDceNQ a",
       "language": "Python",
-      "stars": 97928,
+      "stars": 98820,
       "starred_at": "2026-10-09"
     },
     {
@@ -214,7 +232,7 @@
       "url": "https://github.com/CursorTouch/Windows-MCP",
       "desc": "MCP Server for Computer Use in Windows",
       "language": "Python",
-      "stars": 11142,
+      "stars": 11187,
       "starred_at": "2026-10-09"
     },
     {
@@ -223,7 +241,7 @@
       "url": "https://github.com/LAMDA-NeSy/Research-Starter-Kit",
       "desc": "从0开始，掌握做科研、写论文的基本流程。",
       "language": "",
-      "stars": 9789,
+      "stars": 9842,
       "starred_at": "2026-10-06"
     },
     {
@@ -232,7 +250,7 @@
       "url": "https://github.com/Tianyu199509/DeskBox",
       "desc": "A free, open-source Windows desktop organizer with native-feeling WinUI 3 widgets.",
       "language": "C#",
-      "stars": 8276,
+      "stars": 8407,
       "starred_at": "2026-10-01"
     },
     {
@@ -241,7 +259,7 @@
       "url": "https://github.com/PowerShell/PowerShell",
       "desc": "PowerShell for every system!",
       "language": "C#",
-      "stars": 56029,
+      "stars": 56036,
       "starred_at": "2026-10-01"
     },
     {
@@ -250,7 +268,7 @@
       "url": "https://github.com/BeyondDimension/SteamTools",
       "desc": "🛠「Watt Toolkit」是一个开源跨平台的多功能 Steam 工具箱。",
       "language": "C#",
-      "stars": 27416,
+      "stars": 27420,
       "starred_at": "2026-09-28"
     },
     {
@@ -259,7 +277,7 @@
       "url": "https://github.com/gcc-mirror/gcc",
       "desc": "",
       "language": "C++",
-      "stars": 11342,
+      "stars": 11346,
       "starred_at": "2026-09-28"
     },
     {
@@ -268,7 +286,7 @@
       "url": "https://github.com/mattpocock/skills",
       "desc": "Skills for Real Engineers. Straight from my .agents directory.",
       "language": "Shell",
-      "stars": 315168,
+      "stars": 316667,
       "starred_at": "2026-09-18"
     },
     {
@@ -293,9 +311,9 @@
       "name": "tubatools",
       "full_name": "luolangaga/tubatools",
       "url": "https://github.com/luolangaga/tubatools",
-      "desc": "这是图吧工具箱基于 WinUI 3 全新重构的版本，一款由社区驱动、深度契合 Windows 11 设计美学的现代化工具箱。它不仅确保你始终使用最新版本的工具，还集成了更加丰富的实用功能，更可满足高度自定义的个性化需求。",
+      "desc": "这是基于图吧工具箱的使用WinUI 3 全新重构的版本，一款由社区驱动、深度契合 Windows 11 设计美学的现代化工具箱。它不仅确保你始终使用最新版本的工具，还集成了更加丰富的实用内置 fluent 风格的工具，更可满足高度自定义的个性化需求。",
       "language": "C#",
-      "stars": 6072,
+      "stars": 6092,
       "starred_at": "2026-09-05"
     },
     {
@@ -304,7 +322,7 @@
       "url": "https://github.com/DietrichGebert/ponytail",
       "desc": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
       "language": "JavaScript",
-      "stars": 185221,
+      "stars": 185838,
       "starred_at": "2026-08-23"
     },
     {
@@ -322,7 +340,7 @@
       "url": "https://github.com/clash-verge-rev/clash-verge-rev",
       "desc": "A modern GUI client based on Tauri, designed to run in Windows, macOS and Linux for tailored proxy experience",
       "language": "Rust",
-      "stars": 156541,
+      "stars": 156760,
       "starred_at": "2026-08-06"
     },
     {
@@ -331,7 +349,7 @@
       "url": "https://github.com/NickeManarin/ScreenToGif",
       "desc": "🎬 ScreenToGif allows you to record a selected area of your screen, edit and save it as a gif or video.",
       "language": "C#",
-      "stars": 27889,
+      "stars": 27890,
       "starred_at": "2026-08-06"
     },
     {
@@ -340,7 +358,7 @@
       "url": "https://github.com/op7418/Humanizer-zh",
       "desc": "Humanizer 的汉化版本，Claude Code Skills，旨在消除文本中 AI 生成的痕迹。",
       "language": "Python",
-      "stars": 22076,
+      "stars": 22155,
       "starred_at": "2026-07-25"
     },
     {
@@ -358,7 +376,7 @@
       "url": "https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning",
       "desc": "This is the homepage of a new book entitled \"Mathematical Foundations of Reinforcement Learning.\"",
       "language": "MATLAB",
-      "stars": 18429,
+      "stars": 18435,
       "starred_at": "2026-07-14"
     },
     {
@@ -367,7 +385,7 @@
       "url": "https://github.com/jgm/pandoc",
       "desc": "Universal markup converter",
       "language": "Haskell",
-      "stars": 46829,
+      "stars": 46840,
       "starred_at": "2026-07-13"
     },
     {
@@ -376,7 +394,7 @@
       "url": "https://github.com/alibaba/page-agent",
       "desc": "JavaScript in-page GUI agent. Control web interfaces with natural language.",
       "language": "TypeScript",
-      "stars": 29640,
+      "stars": 29645,
       "starred_at": "2026-07-12"
     },
     {
@@ -385,7 +403,7 @@
       "url": "https://github.com/DeusData/codebase-memory-mcp",
       "desc": "Local code intelligence for developers and AI agents. Connect code, docs and infrastructure in a persistent graph, with CBM Lens, MCP tools, agent integrations ",
       "language": "C",
-      "stars": 48174,
+      "stars": 48236,
       "starred_at": "2026-07-12"
     },
     {
@@ -394,7 +412,7 @@
       "url": "https://github.com/Panniantong/Agent-Reach",
       "desc": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
       "language": "Python",
-      "stars": 109202,
+      "stars": 109673,
       "starred_at": "2026-07-12"
     },
     {
@@ -403,7 +421,7 @@
       "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
       "desc": "Chrome DevTools for coding agents",
       "language": "TypeScript",
-      "stars": 54850,
+      "stars": 54888,
       "starred_at": "2026-07-11"
     },
     {
@@ -412,7 +430,7 @@
       "url": "https://github.com/jlevy/the-art-of-command-line",
       "desc": "Master the command line, in one page",
       "language": "",
-      "stars": 162685,
+      "stars": 162689,
       "starred_at": "2026-07-08"
     },
     {
@@ -421,7 +439,7 @@
       "url": "https://github.com/k88hudson/git-flight-rules",
       "desc": "Flight rules for git",
       "language": "",
-      "stars": 42582,
+      "stars": 42581,
       "starred_at": "2026-07-08"
     },
     {
@@ -430,7 +448,7 @@
       "url": "https://github.com/ruanyf/weekly",
       "desc": "科技爱好者周刊，每周五发布",
       "language": "",
-      "stars": 107682,
+      "stars": 107751,
       "starred_at": "2026-07-08"
     },
     {
@@ -439,7 +457,7 @@
       "url": "https://github.com/conda-forge/miniforge",
       "desc": "A conda-forge distribution.",
       "language": "Shell",
-      "stars": 10341,
+      "stars": 10342,
       "starred_at": "2026-07-06"
     },
     {
@@ -448,7 +466,7 @@
       "url": "https://github.com/jgraph/drawio-mcp",
       "desc": "",
       "language": "JavaScript",
-      "stars": 5779,
+      "stars": 5785,
       "starred_at": "2026-07-03"
     },
     {
@@ -457,7 +475,7 @@
       "url": "https://github.com/github/awesome-copilot",
       "desc": "Community-contributed instructions, agents, skills, and configurations to help you make the most of GitHub Copilot.",
       "language": "JavaScript",
-      "stars": 40841,
+      "stars": 40880,
       "starred_at": "2026-07-03"
     },
     {
@@ -502,7 +520,7 @@
       "url": "https://github.com/farion1231/cc-switch",
       "desc": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode,DeepSeek Harness and more. Only official website: ccswitch.io",
       "language": "Rust",
-      "stars": 152102,
+      "stars": 152368,
       "starred_at": "2026-06-22"
     },
     {
@@ -511,7 +529,7 @@
       "url": "https://github.com/github/github-mcp-server",
       "desc": "GitHub's official MCP Server",
       "language": "Go",
-      "stars": 34263,
+      "stars": 34288,
       "starred_at": "2026-06-22"
     },
     {
@@ -520,7 +538,7 @@
       "url": "https://github.com/pytorch/pytorch",
       "desc": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
       "language": "Python",
-      "stars": 105166,
+      "stars": 105216,
       "starred_at": "2026-06-21"
     },
     {
@@ -529,7 +547,7 @@
       "url": "https://github.com/multica-ai/andrej-karpathy-skills",
       "desc": "A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.",
       "language": "",
-      "stars": 229870,
+      "stars": 230272,
       "starred_at": "2026-06-18"
     },
     {
@@ -538,7 +556,7 @@
       "url": "https://github.com/OthmanAdi/planning-with-files",
       "desc": "Persistent file-based planning for AI coding agents and long-running tasks. Crash-proof markdown plans, session recovery after /clear and compaction, per-turn r",
       "language": "Shell",
-      "stars": 27908,
+      "stars": 27926,
       "starred_at": "2026-06-16"
     },
     {
@@ -556,7 +574,7 @@
       "url": "https://github.com/sickn33/agentic-awesome-skills",
       "desc": "2,926+ reusable AI agent skills for Claude Code, Codex, Cursor and Gemini CLI. AAS Core adds local catalog discovery, agent-owned selection and plan preview. CL",
       "language": "Python",
-      "stars": 49220,
+      "stars": 49284,
       "starred_at": "2026-06-16"
     },
     {
@@ -565,7 +583,7 @@
       "url": "https://github.com/Egonex-AI/Understand-Anything",
       "desc": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude C",
       "language": "TypeScript",
-      "stars": 90948,
+      "stars": 91110,
       "starred_at": "2026-06-16"
     },
     {
@@ -583,7 +601,7 @@
       "url": "https://github.com/datawhalechina/hello-agents",
       "desc": "📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程",
       "language": "Python",
-      "stars": 86152,
+      "stars": 86271,
       "starred_at": "2026-04-11"
     },
     {
@@ -592,7 +610,7 @@
       "url": "https://github.com/521xueweihan/HelloGitHub",
       "desc": ":octocat: 分享 GitHub 上有趣、入门级的开源项目。Share interesting, entry-level open source projects on GitHub.",
       "language": "Python",
-      "stars": 187086,
+      "stars": 187311,
       "starred_at": "2026-04-11"
     },
     {
@@ -600,8 +618,8 @@
       "full_name": "krahets/hello-algo",
       "url": "https://github.com/krahets/hello-algo",
       "desc": "《Hello 算法》：动画图解、一键运行的数据结构与算法教程。支持简中、繁中、English、日本語，提供 Python, Java, C++, C, C#, JS, Go, Swift, Rust, Ruby, Kotlin, TS, Dart 等代码实现",
-      "language": "Swift",
-      "stars": 131964,
+      "language": "Python",
+      "stars": 131977,
       "starred_at": "2026-04-11"
     }
   ]
