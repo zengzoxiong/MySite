@@ -1,11 +1,11 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-06",
+  "checkedAt": "2026-11-07",
   "packages": {
     "7zip.7zip": {
       "ok": true,
-      "checkedAt": "2026-10-21",
-      "latest": "26.05"
+      "checkedAt": "2026-11-07",
+      "latest": "26.06"
     },
     "ClashVergeRev.ClashVergeRev": {
       "ok": true,
@@ -19,8 +19,8 @@
     },
     "DigitalScholar.Zotero": {
       "ok": true,
-      "checkedAt": "2026-10-30",
-      "latest": "10.0.7"
+      "checkedAt": "2026-11-07",
+      "latest": "10.0.8"
     },
     "Kingsoft.WPSOffice.CN": {
       "ok": true,
