@@ -1495,7 +1495,8 @@ body.sidebar-collapsed .main-content {
     max-height: min(220px, 34vh);
     scrollbar-width: none;
     scroll-behavior: smooth; /* 跟行时翻滚过去，不是瞬跳到某一行 */
-    padding: 8px 0 10px;
+    /* padding 不能放基态：0fr 只塌内容不塌 padding，收起后会留一条残缝露出歌词切片 */
+    padding: 0;
     /* 当前行居中时上下边缘必然各切出半行，用渐隐遮罩让它淡出而不是硬切在进度条上 */
     -webkit-mask-image: linear-gradient(to bottom, transparent, currentColor 24%, currentColor 76%, transparent);
     mask-image: linear-gradient(to bottom, transparent, currentColor 24%, currentColor 76%, transparent);
@@ -1522,6 +1523,11 @@ body.no-anim .mp-lyric > div {
 
 .music-wrap.lyric .mp-lyric {
     grid-template-rows: 1fr;
+}
+
+/* padding 只在歌词区展开时给，收起态才能塌到 0 */
+.music-wrap.lyric .mp-lyric > div {
+    padding: 8px 0 10px;
 }
 
 .music-wrap.lyric .mp-list-wrap {
@@ -1931,12 +1937,21 @@ body.no-anim .mp-lyric > div {
     transition: width 0.2s linear;
 }
 
-/* ===== 全屏播放器（面板右上角全屏键进入）：网易云式左右分栏 ===== */
+/* ===== 全屏播放器：展开后全屏键与收起箭头并排在卡片右上角；全屏态改钉视口右上角 ===== */
 .mp-full {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 14px;
+    right: 50px;   /* 卡右内边距 18 + 箭头 26 + 间距 6，与箭头同行 */
     z-index: 3;
+}
+
+/* 收起态不显示全屏键（它只从展开面板进入） */
+.music-wrap:not(.mp-open) .mp-full { display: none; }
+
+/* 全屏态收起箭头随迷你条隐藏，退出键单独贴右上角 */
+.music-wrap.fs .mp-full {
+    top: 14px;
+    right: 18px;
 }
 
 .mp-full svg {
@@ -2113,6 +2128,8 @@ body.no-anim .music-wrap.fs .music-player { animation: none; }
     opacity: 1;
     visibility: visible;
     transition: opacity .25s ease;
+    /* 全屏歌词常显，.lyric 会把列表压成 0fr——抽屉展开时必须抢回 1fr，否则只剩空胶囊 */
+    grid-template-rows: 1fr;
 }
 
 @media (max-width: 760px) {

@@ -2712,8 +2712,8 @@ function initMusicPlayer() {
         mp.el.listToggle.setAttribute('aria-expanded', String(!closed));
     };
     mp.el.listToggle.addEventListener('click', () => {
-        // 歌词态下列表被 .lyric 规则强制收起，此时点列表键要先退回封面态再展开
-        if (mp.lyricOn) { mpToggleLyric(false); mpSetListClosed(false); return; }
+        // 歌词态下列表被 .lyric 规则强制收起，此时点列表键要先退回封面态再展开；全屏态歌词常显，直接开合右侧抽屉
+        if (mp.lyricOn && !mp.fs) { mpToggleLyric(false); mpSetListClosed(false); return; }
         mpSetListClosed(!mp.el.wrap.classList.contains('list-closed'));
     });
     mp.el.list.addEventListener('click', (e) => {
