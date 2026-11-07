@@ -6,6 +6,7 @@ on:
       - 'tools/**'
       - 'data/tools.json'
       - 'scripts/check_tools.py'
+      - 'scripts/check_tools_js.mjs'
   schedule:
     - cron: '50 19 * * 0' # 每周日 UTC 19:50（北京时间周一 03:50，深夜低峰）
   workflow_dispatch:
@@ -24,5 +25,5 @@ jobs:
           python-version: '3.12'
 
       # 纯 CI 守卫：违例退出码 1 亮红灯并写 step summary，不自动改文件
-      - name: 体检工具页（canonical/favicon/署名/去品牌/登记）
+      - name: 体检工具页（canonical/favicon/署名/去品牌/登记/行内JS语法）
         run: python scripts/check_tools.py

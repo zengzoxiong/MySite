@@ -12,12 +12,17 @@
   5. 无上游品牌残留：JustHTMLs / htmls.dev（大小写不敏感）
   6. tools.json 每个 category 都登记在顶层 categories 清单里（前端按条目
      动态归纳分类所以显示不受影响，但清单与实际不一致属于数据缺陷）
+  7. 行内 <script> 块 JS 语法可解析（交给 scripts/check_tools_js.mjs，new Function
+     级别只解析不执行；抓「页面能开但按钮全废」的损伤——2026-11 曾有 21 页
+     首次导入即带语法损坏潜伏两个月）
 
 用法：python scripts/check_tools.py
 """
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -48,6 +53,28 @@ def check_page(page: Path, registered: set, canonical_expected: str):
     return out
 
 
+def check_inline_js():
+    """检查项 7：行内 <script> 语法解析（node scripts/check_tools_js.mjs）。
+
+    本机无 node 时跳过（CI 的 ubuntu runner 自带 node，守卫不受影响）；
+    node 脚本自身执行失败按违例处理，避免守卫静默失效。"""
+    node = shutil.which('node')
+    if not node:
+        print('  [i] 未找到 node，跳过行内 JS 语法检查')
+        return []
+    try:
+        proc = subprocess.run(
+            [node, str(ROOT / 'scripts' / 'check_tools_js.mjs')],
+            cwd=ROOT, capture_output=True, text=True, timeout=120,
+        )
+        payload = json.loads(proc.stdout)
+    except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired) as e:
+        return [('scripts/check_tools_js.mjs', f'行内 JS 语法检查执行失败：{e}')]
+    errors = payload.get('errors') or []
+    print(f'行内 JS 语法：{payload.get("checked", 0)} 个脚本块，错误 {len(errors)} 个')
+    return [(it['file'], f'行内 JS 语法错误：{it["error"]}') for it in errors]
+
+
 def main():
     data = json.loads((ROOT / 'data' / 'tools.json').read_text(encoding='utf-8'))
     tools = data['tools']
@@ -73,13 +100,16 @@ def main():
     for rel in sorted(registered - on_disk):
         violations.append((rel, 'tools.json 已登记但文件不存在'))
 
+    # 检查项 7：行内 <script> JS 语法
+    violations.extend(check_inline_js())
+
     print(f'体检 {len(pages)} 个工具页 + {len(index_pages)} 个目录默认页，违例 {len(violations)} 处')
     for rel, msg in violations:
         print(f'  [x] {rel}: {msg}')
     if violations:
         write_summary(violations, len(pages) + len(index_pages))
         sys.exit(1)
-    print('全部通过：canonical/favicon/署名/去品牌/登记/分类 六项均 OK')
+    print('全部通过：canonical/favicon/署名/去品牌/登记/分类/行内JS语法 七项均 OK')
 
 
 def write_summary(violations, page_count):
