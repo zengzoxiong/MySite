@@ -261,9 +261,7 @@
 
     <script>
         function parseTSV(input) {
-              const rows = input.trim().split(/
-?
-/).map(row => row.split("	"));
+              const rows = input.trim().split(/\r?\n/).map(row => row.split("\t"));
               const headers = rows.shift();
               return rows.map(row => Object.fromEntries(headers.map((h, i) => [h, row[i] ?? ""])));
             }

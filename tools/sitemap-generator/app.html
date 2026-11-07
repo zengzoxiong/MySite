@@ -202,9 +202,7 @@ https://example.com/about"></textarea>
 
     <script>
         function generateSitemap() {
-                const urls = document.getElementById('sitemap-urls').value.split(/
-?
-/).filter(Boolean);
+                const urls = document.getElementById('sitemap-urls').value.split(/\r?\n/).filter(Boolean);
                 const changefreq = document.getElementById('sitemap-changefreq').value;
                 const priority = document.getElementById('sitemap-priority').value;
                 const items = urls.map(url => {
@@ -213,8 +211,7 @@ https://example.com/about"></textarea>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
-                }).join('
-');
+                }).join('\n');
                 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${items}

@@ -287,9 +287,7 @@
             output.value = '';
         });
         document.getElementById('sample').addEventListener('click', () => {
-            input.value = 'function greet(name) {
-console.log(`Hello, ${name}`);
-}';
+            input.value = 'function greet(name) {\nconsole.log(`Hello, ${name}`);\n}';
             mode.value = 'indent';
             spaces.value = '4';
             indentText();

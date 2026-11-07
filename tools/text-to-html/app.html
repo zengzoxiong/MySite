@@ -261,12 +261,11 @@
 
     <script>
         function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, ch => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", """: "&quot;", "'": "&#39;"}[ch]));
+  return text.replace(/[&<>"']/g, ch => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"}[ch]));
 }
 
         function transform(input) {
-            return escapeHtml(input).replace(/
-/g, "<br>");
+            return escapeHtml(input).replace(/\n/g, "<br>");
         }
 
         function convert() {

@@ -261,9 +261,7 @@
 
     <script>
         function parseSimpleYAML(yaml) {
-              const lines = yaml.split(/
-?
-/);
+              const lines = yaml.split(/\r?\n/);
               const root = {};
               const stack = [{ indent: -1, value: root }];
               for (const line of lines) {

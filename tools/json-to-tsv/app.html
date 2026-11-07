@@ -264,8 +264,7 @@
               if (!Array.isArray(data) || data.length === 0) return "";
               const headers = Array.from(new Set(data.flatMap(item => Object.keys(item))));
               const rows = data.map(item => headers.map(h => item[h] ?? ""));
-              return [headers.join("	"), ...rows.map(r => r.join("	"))].join("
-");
+              return [headers.join("\t"), ...rows.map(r => r.join("\t"))].join("\n");
             }
 
         function transform(input) {

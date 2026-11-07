@@ -270,8 +270,7 @@
                 else if (index === arr.length - 1) node = "<" + node;
                 else node = "<" + node + ">";
                 if (node.match(/^<\//)) pad -= 1;
-                formatted += PADDING.repeat(Math.max(pad, 0)) + node + "
-";
+                formatted += PADDING.repeat(Math.max(pad, 0)) + node + "\n";
                 if (node.match(/^<[^!?/].*[^/]?>$/)) pad += 1;
               });
               return formatted.trim();

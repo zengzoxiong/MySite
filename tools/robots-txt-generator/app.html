@@ -202,12 +202,8 @@
     <script>
         function generateRobots() {
                 const agent = document.getElementById('robots-agent').value.trim() || '*';
-                const allowLines = document.getElementById('robots-allow').value.split(/
-?
-/).filter(Boolean);
-                const disallowLines = document.getElementById('robots-disallow').value.split(/
-?
-/).filter(Boolean);
+                const allowLines = document.getElementById('robots-allow').value.split(/\r?\n/).filter(Boolean);
+                const disallowLines = document.getElementById('robots-disallow').value.split(/\r?\n/).filter(Boolean);
                 const sitemap = document.getElementById('robots-sitemap').value.trim();
 
                 let output = `User-agent: ${agent}

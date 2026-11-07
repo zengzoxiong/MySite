@@ -272,7 +272,7 @@
   return `<${nodeName}>${escapeXml(String(obj))}</${nodeName}>`;
 }
 function escapeXml(value) {
-  return value.replace(/[<>&'"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","'":"&apos;",""":"&quot;"}[c]));
+  return value.replace(/[<>&'"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","'":"&apos;","\"":"&quot;"}[c]));
 }
 
         function transform(input) {

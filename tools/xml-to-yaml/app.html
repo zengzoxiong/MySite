@@ -282,19 +282,16 @@
             function stringifyYAML(value, indent = 0) {
               const pad = "  ".repeat(indent);
               if (Array.isArray(value)) {
-                return value.map(item => pad + "- " + stringifyYAML(item, indent + 1).trim()).join("
-");
+                return value.map(item => pad + "- " + stringifyYAML(item, indent + 1).trim()).join("\n");
               }
               if (value && typeof value === "object") {
                 return Object.keys(value).map(key => {
                   const val = value[key];
                   if (val && typeof val === "object") {
-                    return pad + key + ":
-" + stringifyYAML(val, indent + 1);
+                    return pad + key + ":\n" + stringifyYAML(val, indent + 1);
                   }
                   return pad + key + ": " + String(val);
-                }).join("
-");
+                }).join("\n");
               }
               return pad + String(value);
             }

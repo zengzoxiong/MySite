@@ -266,8 +266,7 @@
               const headerRow = `| ${headers.join(" | ")} |`;
               const separator = `| ${headers.map(() => "---").join(" | ")} |`;
               const rows = data.map(item => `| ${headers.map(h => String(item[h] ?? "")).join(" | ")} |`);
-              return [headerRow, separator, ...rows].join("
-");
+              return [headerRow, separator, ...rows].join("\n");
             }
 
         function transform(input) {

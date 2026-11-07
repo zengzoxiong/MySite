@@ -221,8 +221,7 @@
                 if (url) lines.push(`<meta property="og:url" content="${url}">`);
                 if (image) lines.push(`<meta property="og:image" content="${image}">`);
 
-                document.getElementById('meta-output').value = lines.join('
-');
+                document.getElementById('meta-output').value = lines.join('\n');
             }
 
             function clearOutput() {

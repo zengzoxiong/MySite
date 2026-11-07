@@ -260,8 +260,7 @@
                             queryPart = parts.slice(1).join('?');
                         }
                         const params = new URLSearchParams(queryPart);
-                        paramsInput.value.split('
-        ').forEach(line => {
+                        paramsInput.value.split('\n        ').forEach(line => {
                             const trimmed = line.trim();
                             if (!trimmed) return;
                             const index = trimmed.indexOf('=');
