@@ -1,331 +1,331 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-06",
+  "updated": "2026-11-08",
   "sections": {
     "trending": [
-      {
-        "name": "deepseek-ai/dsh-superagent-prototype",
-        "url": "https://github.com/deepseek-ai/dsh-superagent-prototype",
-        "desc": "Towards a More Autonomous Agent System",
-        "stars": 19476,
-        "language": "TypeScript"
-      },
-      {
-        "name": "storytold/craft-anything",
-        "url": "https://github.com/storytold/craft-anything",
-        "desc": "Craft Anything: understand how any software works, and craft your own.",
-        "stars": 14983,
-        "language": "Rust"
-      },
       {
         "name": "KKKKhazix/agent-autoloop",
         "url": "https://github.com/KKKKhazix/agent-autoloop",
         "desc": "让你的命令行 Agent 在后台自己接活、自己跟进到底；平时不烦你，遇到拿不准的事才发卡片找你拍板。",
-        "stars": 3230,
+        "stars": 3949,
         "language": "TypeScript"
-      },
-      {
-        "name": "Verlintas/NOIR",
-        "url": "https://github.com/Verlintas/NOIR",
-        "desc": "手机隐私审计：用 adb 扫出 Android 应用的权限、上报端点与数据流向，并给出可回滚的处置。Desktop Android leak audit: permissions, endpoints, data flows, reversible fixes.",
-        "stars": 2474,
-        "language": "Kotlin"
       },
       {
         "name": "worldonlyu/Google_AI_Pro_2Year_ZeroCost_Auto",
         "url": "https://github.com/worldonlyu/Google_AI_Pro_2Year_ZeroCost_Auto",
         "desc": "Google_AI_Pro_2Year_ZeroCost_Auto",
-        "stars": 2334,
+        "stars": 3049,
         "language": "Python"
       },
       {
-        "name": "zortos293/Lichii",
-        "url": "https://github.com/zortos293/Lichii",
-        "desc": "VERY experimental Nintendo Switch 2 emulator",
-        "stars": 2252,
-        "language": "C++"
+        "name": "Minireel/HGhub",
+        "url": "https://github.com/Minireel/HGhub",
+        "desc": "YellowFruit third-party client",
+        "stars": 2255,
+        "language": "TypeScript"
       },
       {
         "name": "govijr/terminal-mac",
         "url": "https://github.com/govijr/terminal-mac",
         "desc": "Entire MacOS running in your terminal.",
-        "stars": 1956,
+        "stars": 2239,
         "language": "Swift"
-      },
-      {
-        "name": "caru-ini/stack-diagram",
-        "url": "https://github.com/caru-ini/stack-diagram",
-        "desc": "Agent skill: describe your stack in a sentence, get an architecture diagram with official logos",
-        "stars": 1867,
-        "language": "TypeScript"
       },
       {
         "name": "mromidev/claude-animated-shorts",
         "url": "https://github.com/mromidev/claude-animated-shorts",
         "desc": "Free Claude skill: viral animated story shorts (2D characters in a 3D world) with three.js + Remotion",
-        "stars": 1744,
+        "stars": 2216,
         "language": "TypeScript"
+      },
+      {
+        "name": "caru-ini/stack-diagram",
+        "url": "https://github.com/caru-ini/stack-diagram",
+        "desc": "Agent skill: describe your stack in a sentence, get an architecture diagram with official logos",
+        "stars": 2064,
+        "language": "TypeScript"
+      },
+      {
+        "name": "NotRexed/Hookshot",
+        "url": "https://github.com/NotRexed/Hookshot",
+        "desc": "A Native Recompilation Of The Legend Of Zelda: Ocarina Of Time Nintendo Switch 2 Remake",
+        "stars": 1719,
+        "language": "C++"
+      },
+      {
+        "name": "JenkinWoo/sheeridVerify",
+        "url": "https://github.com/JenkinWoo/sheeridVerify",
+        "desc": "",
+        "stars": 1643,
+        "language": "JavaScript"
       },
       {
         "name": "wquguru/cicada",
         "url": "https://github.com/wquguru/cicada",
         "desc": "知了 Cicada · 任何会议和直播的实时字幕、同声传译、AI 会议纪要，Mac、Windows、Linux、Android 免费开源。Live subtitles, interpreting and meeting notes for any call or stream, on Mac, Windows, Lin",
-        "stars": 1484,
+        "stars": 1617,
         "language": "Swift"
+      },
+      {
+        "name": "s1dashu/quiet-md",
+        "url": "https://github.com/s1dashu/quiet-md",
+        "desc": "Blazing-fast native notes app for macOS & Windows. Rust + GPUI, local-first, compatible with Feishu/Lark DocxXML.",
+        "stars": 1265,
+        "language": "Rust"
       }
     ],
     "hn": [
       {
-        "id": 50385272,
-        "title": "Claude Code sends your email address to websites",
-        "url": "https://github.com/anthropics/claude-code/issues/107757",
-        "hn": "https://news.ycombinator.com/item?id=50385272",
-        "score": 354,
-        "comments": 114
+        "id": 50406563,
+        "title": "The end of Microsoft Research's AI Frontiers group",
+        "url": "https://hunch.net/?p=13764006",
+        "hn": "https://news.ycombinator.com/item?id=50406563",
+        "score": 294,
+        "comments": 161
       },
       {
-        "id": 50383740,
-        "title": "Search for everyone",
-        "url": "https://kagi.com/changelog#11820",
-        "hn": "https://news.ycombinator.com/item?id=50383740",
-        "score": 456,
-        "comments": 222
+        "id": 50406670,
+        "title": "What I run on my $10 USD OpenStick homelab",
+        "url": "https://blog.bosscher.ch/posts/openstick/",
+        "hn": "https://news.ycombinator.com/item?id=50406670",
+        "score": 243,
+        "comments": 54
       },
       {
-        "id": 50384233,
-        "title": "MS Paint Remote Code Execution Vulnerability",
-        "url": "https://www.cve.org/CVERecord?id=CVE-2026-83844",
-        "hn": "https://news.ycombinator.com/item?id=50384233",
-        "score": 266,
-        "comments": 80
+        "id": 50406111,
+        "title": "Apple’s grey list: Words and phrases your iPhone won’t help you spell",
+        "url": "https://www.theguardian.com/technology/2026/nov/06/struggling-to-spell-male-chauvinist-pig-apple-grey-list-means-your-iphone-wont-help-you",
+        "hn": "https://news.ycombinator.com/item?id=50406111",
+        "score": 276,
+        "comments": 186
       },
       {
-        "id": 50378228,
-        "title": "sshole",
-        "url": "https://sshhole.com",
-        "hn": "https://news.ycombinator.com/item?id=50378228",
-        "score": 2259,
-        "comments": 562
+        "id": 50406292,
+        "title": "Show HN: Coldframe, a honeypot that poses as a supermarket fridge controller",
+        "url": "https://github.com/hedgerow-dev/coldframe",
+        "hn": "https://news.ycombinator.com/item?id=50406292",
+        "score": 165,
+        "comments": 35
       },
       {
-        "id": 50379704,
-        "title": "Alpine Linux Security Advisory: OpenSSH-server password authentication bypass",
-        "url": "https://alpinelinux.org/posts/2026-11-05-openssh-password-authentication-bypass/",
-        "hn": "https://news.ycombinator.com/item?id=50379704",
-        "score": 567,
-        "comments": 120
+        "id": 50406222,
+        "title": "MaxxBench – \"Nice DeepSWE score. But is it true?\"",
+        "url": "https://maxxbench.unlap.ai/research/why-maxxbench/",
+        "hn": "https://news.ycombinator.com/item?id=50406222",
+        "score": 148,
+        "comments": 39
       },
       {
-        "id": 50383057,
-        "title": "The Hackintosh Reborn",
-        "url": "https://www.naut.ca/blog/2026/11/05/the-hackintosh-reborn-with-ai/",
-        "hn": "https://news.ycombinator.com/item?id=50383057",
-        "score": 175,
-        "comments": 74
-      },
-      {
-        "id": 50383963,
-        "title": "Tencent Launches Hy4, One of the Leading Open-Source AI Models",
-        "url": "https://www.tencent.com/tencent-launches-hy4-joining-the-ranks-of-the-worlds-leading-open-source-ai-models/",
-        "hn": "https://news.ycombinator.com/item?id=50383963",
-        "score": 73,
+        "id": 50405172,
+        "title": "Retro Song Bird: Plug in any Game Boy cartridge to hear the soundtrack",
+        "url": "https://www.retrosongbird.com/",
+        "hn": "https://news.ycombinator.com/item?id=50405172",
+        "score": 19,
         "comments": 2
       },
       {
-        "id": 50381383,
-        "title": "Window Sweaters",
-        "url": "https://github.com/saragordic/window-sweaters",
-        "hn": "https://news.ycombinator.com/item?id=50381383",
-        "score": 227,
-        "comments": 77
+        "id": 50403052,
+        "title": "Need for Speed Underground 2 online in the browser",
+        "url": "https://nfsu2.xyz/",
+        "hn": "https://news.ycombinator.com/item?id=50403052",
+        "score": 739,
+        "comments": 214
       },
       {
-        "id": 50381687,
-        "title": "Launch HN: Rivet (YC W23) – Scale and Orchestrate Agents on S3",
-        "url": "https://github.com/rivet-dev/rivet",
-        "hn": "https://news.ycombinator.com/item?id=50381687",
-        "score": 71,
-        "comments": 38
+        "id": 50408350,
+        "title": "Show HN: An offline desktop companion to help maintain a healthy blink rhythm",
+        "url": "https://eyesrhythm.com/",
+        "hn": "https://news.ycombinator.com/item?id=50408350",
+        "score": 10,
+        "comments": 1
       },
       {
-        "id": 50383739,
-        "title": "Goodbye from Salon",
-        "url": "https://www.salon.com/2026/11/05/goodbye-from-salon/",
-        "hn": "https://news.ycombinator.com/item?id=50383739",
-        "score": 376,
-        "comments": 137
+        "id": 50377661,
+        "title": "Uranium cubes reveal why the German nuclear project failed",
+        "url": "https://arstechnica.com/science/2026/11/uranium-cubes-reveal-why-the-german-nuclear-project-failed/",
+        "hn": "https://news.ycombinator.com/item?id=50377661",
+        "score": 25,
+        "comments": 3
+      },
+      {
+        "id": 50406319,
+        "title": "Five memorable books about programming (2008)",
+        "url": "https://prog21.dadgum.com/19.html",
+        "hn": "https://news.ycombinator.com/item?id=50406319",
+        "score": 68,
+        "comments": 40
       }
     ],
     "hf_models": [
       {
-        "id": "moonshotai/Kimi-K3.1-Pro",
-        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
-        "task": "image-text-to-text",
-        "downloads": 11658,
-        "likes": 918
-      },
-      {
         "id": "speridlabs/idol",
         "url": "https://huggingface.co/speridlabs/idol",
         "task": "image-to-3d",
-        "downloads": 17180,
-        "likes": 769
+        "downloads": 20689,
+        "likes": 1103
       },
       {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2561845,
-        "likes": 10726
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "task": "image-text-to-text",
+        "downloads": 22571,
+        "likes": 1627
       },
       {
         "id": "ccore/Qwen3.5-4B-3D-Coder",
         "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
         "task": "",
-        "downloads": 157157,
-        "likes": 701
+        "downloads": 221506,
+        "likes": 871
       },
       {
-        "id": "Pika-Labs/Pika-H3-Flex",
-        "url": "https://huggingface.co/Pika-Labs/Pika-H3-Flex",
+        "id": "xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
+        "url": "https://huggingface.co/xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
+        "task": "text-generation",
+        "downloads": 1369,
+        "likes": 460
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 863,
-        "likes": 473
+        "downloads": 2643778,
+        "likes": 10983
       },
       {
-        "id": "mistralai/Mistral-Large-4-1T-A52B",
-        "url": "https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B",
-        "task": "image-text-to-text",
-        "downloads": 9592,
-        "likes": 1615
-      },
-      {
-        "id": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
-        "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
-        "task": "automatic-speech-recognition",
-        "downloads": 57297,
-        "likes": 3057
+        "id": "ricursiveAI/Ripple-65B-Preview",
+        "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
+        "task": "",
+        "downloads": 3803,
+        "likes": 368
       },
       {
         "id": "burner22/numbat",
         "url": "https://huggingface.co/burner22/numbat",
         "task": "",
-        "downloads": 8789,
-        "likes": 354
+        "downloads": 9212,
+        "likes": 380
       },
       {
         "id": "FusionCow/Sulphur-3",
         "url": "https://huggingface.co/FusionCow/Sulphur-3",
         "task": "",
-        "downloads": 607,
-        "likes": 379
+        "downloads": 997,
+        "likes": 404
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 8037597,
-        "likes": 19211
+        "downloads": 7813215,
+        "likes": 19336
+      },
+      {
+        "id": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+        "url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+        "task": "automatic-speech-recognition",
+        "downloads": 63798,
+        "likes": 3094
       }
     ],
     "weibo": [
       {
-        "word": "温瑞博3比0王楚钦",
-        "num": 2825211,
+        "word": "iG对战GEN",
+        "num": 577217,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23iG%E5%AF%B9%E6%88%98GEN%23"
+      },
+      {
+        "word": "8省份大到暴雪",
+        "num": 419460,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B8%A9%E7%91%9E%E5%8D%9A3%E6%AF%940%E7%8E%8B%E6%A5%9A%E9%92%A6%23"
+        "url": "https://s.weibo.com/weibo?q=%238%E7%9C%81%E4%BB%BD%E5%A4%A7%E5%88%B0%E6%9A%B4%E9%9B%AA%23"
       },
       {
-        "word": "美股",
-        "num": 1067212,
+        "word": "共赴APEC之约",
+        "num": 345402,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%85%B1%E8%B5%B4APEC%E4%B9%8B%E7%BA%A6%23"
+      },
+      {
+        "word": "日乒3人晋级女单四强",
+        "num": 150429,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%97%A5%E4%B9%923%E4%BA%BA%E6%99%8B%E7%BA%A7%E5%A5%B3%E5%8D%95%E5%9B%9B%E5%BC%BA%23"
+      },
+      {
+        "word": "网友发现棉服填充物是聚酯纤维",
+        "num": 94006,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BD%91%E5%8F%8B%E5%8F%91%E7%8E%B0%E6%A3%89%E6%9C%8D%E5%A1%AB%E5%85%85%E7%89%A9%E6%98%AF%E8%81%9A%E9%85%AF%E7%BA%A4%E7%BB%B4%23"
+      },
+      {
+        "word": "马天宇和张萌被审判",
+        "num": 92581,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%A9%AC%E5%A4%A9%E5%AE%87%E5%92%8C%E5%BC%A0%E8%90%8C%E8%A2%AB%E5%AE%A1%E5%88%A4%23"
       },
       {
-        "word": "何以中国对话红山",
-        "num": 859693,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%BD%95%E4%BB%A5%E4%B8%AD%E5%9B%BD%E5%AF%B9%E8%AF%9D%E7%BA%A2%E5%B1%B1%23"
+        "word": "爸爸去哪儿3重聚为康康庆生",
+        "num": 90211,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%88%B8%E7%88%B8%E5%8E%BB%E5%93%AA%E5%84%BF3%E9%87%8D%E8%81%9A%E4%B8%BA%E5%BA%B7%E5%BA%B7%E5%BA%86%E7%94%9F%23"
       },
       {
-        "word": "陆翊长文回应和文吉儿王子璇关系",
-        "num": 853775,
+        "word": "瓦伦西亚vs皇马",
+        "num": 84202,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%99%86%E7%BF%8A%E9%95%BF%E6%96%87%E5%9B%9E%E5%BA%94%E5%92%8C%E6%96%87%E5%90%89%E5%84%BF%E7%8E%8B%E5%AD%90%E7%92%87%E5%85%B3%E7%B3%BB%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%93%A6%E4%BC%A6%E8%A5%BF%E4%BA%9Avs%E7%9A%87%E9%A9%AC%23"
       },
       {
-        "word": "美股崩跌原因",
-        "num": 826777,
+        "word": "鹿晗投资天霸至今没拿过分红",
+        "num": 69280,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%B9%BF%E6%99%97%E6%8A%95%E8%B5%84%E5%A4%A9%E9%9C%B8%E8%87%B3%E4%BB%8A%E6%B2%A1%E6%8B%BF%E8%BF%87%E5%88%86%E7%BA%A2%23"
+      },
+      {
+        "word": "诺丁汉森林3比1曼城",
+        "num": 63327,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%E5%B4%A9%E8%B7%8C%E5%8E%9F%E5%9B%A0%23"
-      },
-      {
-        "word": "DK对战BLG",
-        "num": 749767,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23DK%E5%AF%B9%E6%88%98BLG%23"
-      },
-      {
-        "word": "官方回应居民医保参保人数下降",
-        "num": 453597,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%AE%98%E6%96%B9%E5%9B%9E%E5%BA%94%E5%B1%85%E6%B0%91%E5%8C%BB%E4%BF%9D%E5%8F%82%E4%BF%9D%E4%BA%BA%E6%95%B0%E4%B8%8B%E9%99%8D%23"
-      },
-      {
-        "word": "54岁大哥靠AI短剧还清负债",
-        "num": 448450,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%2354%E5%B2%81%E5%A4%A7%E5%93%A5%E9%9D%A0AI%E7%9F%AD%E5%89%A7%E8%BF%98%E6%B8%85%E8%B4%9F%E5%80%BA%23"
-      },
-      {
-        "word": "无薪招聘",
-        "num": 394697,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%97%A0%E8%96%AA%E6%8B%9B%E8%81%98%23"
-      },
-      {
-        "word": "纳斯达克",
-        "num": 384547,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BA%B3%E6%96%AF%E8%BE%BE%E5%85%8B%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%AF%BA%E4%B8%81%E6%B1%89%E6%A3%AE%E6%9E%973%E6%AF%941%E6%9B%BC%E5%9F%8E%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2017,
-        "text": "《联合国气候变化纲要公约》第23届缔约方会议召开。",
-        "title": "联合国气候变化框架公约",
-        "url": "https://zh.wikipedia.org/wiki/%E8%81%94%E5%90%88%E5%9B%BD%E6%B0%94%E5%80%99%E5%8F%98%E5%8C%96%E6%A1%86%E6%9E%B6%E5%85%AC%E7%BA%A6"
+        "year": 2016,
+        "text": "共和党参选人唐纳德·特朗普在总统选举中击败民主党参选人希拉里·克林顿胜出，成为美国史上唯一未曾担任政府文武官职及最富有的总统。",
+        "title": "共和黨 (美國)",
+        "url": "https://zh.wikipedia.org/wiki/%E5%85%B1%E5%92%8C%E9%BB%A8_(%E7%BE%8E%E5%9C%8B)"
+      },
+      {
+        "year": 2013,
+        "text": "强烈台风海燕自菲律宾中部登陆，造成至少6,340人死亡、近3万人受伤，为菲律宾独立后死伤最惨重的风灾。",
+        "title": "颱風海燕",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A2%B1%E9%A2%A8%E6%B5%B7%E7%87%95"
       },
       {
         "year": 2012,
-        "text": "2011年金三角中国船员遇袭案在昆明市中级人民法院一审宣判。主犯糯康被判死刑。桑康、依莱、扎西卡均被判死刑，扎波被判死刑缓期执行，扎拖波被判有期徒刑8年。",
-        "title": "湄公河慘案",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B9%84%E5%85%AC%E6%B2%B3%E6%85%98%E6%A1%88"
+        "text": "中国共产党第十八次全国代表大会在北京召开。",
+        "title": "中国共产党第十八次全国代表大会",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%85%B1%E4%BA%A7%E5%85%9A%E7%AC%AC%E5%8D%81%E5%85%AB%E6%AC%A1%E5%85%A8%E5%9B%BD%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A"
       },
       {
-        "year": 2012,
-        "text": "巴拉克·奥巴马成功连任美国总统。",
-        "title": "巴拉克·奧巴馬",
-        "url": "https://zh.wikipedia.org/wiki/%E5%B7%B4%E6%8B%89%E5%85%8B%C2%B7%E5%A5%A7%E5%B7%B4%E9%A6%AC"
+        "year": 2011,
+        "text": "潜在威胁天体2005 YU55通过地球轨道时距离地球有0.85月球距离，成为自1976年来最靠近地球的小行星。",
+        "title": "潛在威脅天體",
+        "url": "https://zh.wikipedia.org/wiki/%E6%BD%9B%E5%9C%A8%E5%A8%81%E8%84%85%E5%A4%A9%E9%AB%94"
       },
       {
-        "year": 2012,
-        "text": "塔米·鲍德温成为美国历史上首个出柜的美国众议院议员。",
-        "title": "塔米·鮑德溫",
-        "url": "https://zh.wikipedia.org/wiki/%E5%A1%94%E7%B1%B3%C2%B7%E9%AE%91%E5%BE%B7%E6%BA%AB"
-      },
-      {
-        "year": 2005,
-        "text": "缅甸将首都从仰光迁往位于该国中部的彬马那，其后将彬马那改名为内比都。",
-        "title": "缅甸",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BC%85%E7%94%B8"
+        "year": 2006,
+        "text": "马来西亚前首相马哈蒂尔·穆罕默德因心脏病发作，而被送入国家心脏中心（IJN）。惟媒体被告知，马哈迪只是轻微的心脏病发作，情况稳定。",
+        "title": "马来西亚",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A9%AC%E6%9D%A5%E8%A5%BF%E4%BA%9A"
       },
       {
         "year": 2002,
-        "text": "三峡大坝导流明渠合龙。",
-        "title": "长江三峡水利枢纽工程",
-        "url": "https://zh.wikipedia.org/wiki/%E9%95%BF%E6%B1%9F%E4%B8%89%E5%B3%A1%E6%B0%B4%E5%88%A9%E6%9E%A2%E7%BA%BD%E5%B7%A5%E7%A8%8B"
+        "text": "中国共产党第十六次全国代表大会在北京召开。",
+        "title": "中国共产党第十六次全国代表大会",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%85%B1%E4%BA%A7%E5%85%9A%E7%AC%AC%E5%8D%81%E5%85%AD%E6%AC%A1%E5%85%A8%E5%9B%BD%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A"
       }
     ]
   }
