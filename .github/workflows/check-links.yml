@@ -33,7 +33,19 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/link-health.json
             git commit -m "chore: 定时体检网站收藏死链"
-            git push
+            ok=0
+            for i in 1 2 3; do
+              if git push; then ok=1; break; fi
+              if [[ $i -lt 3 ]]; then
+                echo "push 失败（第 $i 次，多为服务端瞬时故障），拉取远端重放后重试"
+                git pull --rebase --autostash || true
+                sleep 10
+              fi
+            done
+            if [[ $ok != 1 ]]; then
+              echo "push 连续 3 次失败"
+              exit 1
+            fi
           else
             echo "体检结果无变化，跳过提交"
           fi
