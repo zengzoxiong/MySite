@@ -1376,6 +1376,20 @@
      "inFresh": 161769,
      "out": 1409,
      "total": 534954
+    },
+    {
+     "id": "deepseek-v4-flash",
+     "inCache": 11264,
+     "inFresh": 26042,
+     "out": 1369,
+     "total": 38675
+    },
+    {
+     "id": "glm-5.3",
+     "inCache": 0,
+     "inFresh": 135,
+     "out": 281,
+     "total": 416
     }
    ]
   },
@@ -1388,6 +1402,13 @@
      "inFresh": 641324,
      "out": 268937,
      "total": 46946485
+    },
+    {
+     "id": "deepseek-v4-flash",
+     "inCache": 46003072,
+     "inFresh": 415334,
+     "out": 230887,
+     "total": 46649293
     },
     {
      "id": "deepseek-v4-pro",
@@ -1422,10 +1443,17 @@
     },
     {
      "id": "deepseek-v4.1-flash",
-     "inCache": 28465792,
-     "inFresh": 906494,
-     "out": 343923,
-     "total": 29716209
+     "inCache": 28507904,
+     "inFresh": 921735,
+     "out": 345170,
+     "total": 29774809
+    },
+    {
+     "id": "glm-5.3",
+     "inCache": 2154752,
+     "inFresh": 86738,
+     "out": 40152,
+     "total": 2281642
     }
    ]
   },
@@ -1500,10 +1528,10 @@
    "models": [
     {
      "id": "deepseek-v4.1-flash",
-     "inCache": 96062592,
-     "inFresh": 2675695,
-     "out": 522290,
-     "total": 99260577
+     "inCache": 96217600,
+     "inFresh": 2684066,
+     "out": 522664,
+     "total": 99424330
     },
     {
      "id": "gpt-6.1-sol",
@@ -1840,18 +1868,18 @@
    "date": "2026-11-06",
    "models": [
     {
+     "id": "gpt-6.1-sol",
+     "inCache": 40822784,
+     "inFresh": 1187708,
+     "out": 140888,
+     "total": 42151380
+    },
+    {
      "id": "glm-5.3-flash",
      "inCache": 41512832,
      "inFresh": 459615,
      "out": 69043,
      "total": 42041490
-    },
-    {
-     "id": "gpt-6.1-sol",
-     "inCache": 40201216,
-     "inFresh": 1169693,
-     "out": 136687,
-     "total": 41507596
     },
     {
      "id": "gpt-5.6-sol",
@@ -1912,10 +1940,10 @@
    "models": [
     {
      "id": "deepseek-v4.1-flash",
-     "inCache": 384210492,
-     "inFresh": 6149516,
-     "out": 1190624,
-     "total": 391550632
+     "inCache": 393148732,
+     "inFresh": 6409217,
+     "out": 1335415,
+     "total": 400893364
     },
     {
      "id": "glm-5.3-flash",
@@ -1926,13 +1954,13 @@
     },
     {
      "id": "gpt-6.1-sol",
-     "inCache": 107273088,
-     "inFresh": 2149942,
-     "out": 230249,
-     "total": 109653279
+     "inCache": 116974976,
+     "inFresh": 2463559,
+     "out": 275871,
+     "total": 119714406
     },
     {
-     "id": "conatus-free",
+     "id": "Conatus",
      "inCache": 9077996,
      "inFresh": 2437451,
      "out": 64224,
