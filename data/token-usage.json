@@ -1885,7 +1885,7 @@
      "total": 260049117
     },
     {
-     "id": "deepseek-flash",
+     "id": "deepseek-v4.1-flash",
      "inCache": 75769856,
      "inFresh": 470062,
      "out": 86839,
@@ -1912,17 +1912,10 @@
    "models": [
     {
      "id": "deepseek-v4.1-flash",
-     "inCache": 252025088,
-     "inFresh": 3342844,
-     "out": 703145,
-     "total": 256071077
-    },
-    {
-     "id": "deepseek-flash",
-     "inCache": 131437244,
-     "inFresh": 2655062,
-     "out": 486173,
-     "total": 134578479
+     "inCache": 384210492,
+     "inFresh": 6149516,
+     "out": 1190624,
+     "total": 391550632
     },
     {
      "id": "glm-5.3-flash",
@@ -1944,13 +1937,6 @@
      "inFresh": 2437451,
      "out": 64224,
      "total": 11579671
-    },
-    {
-     "id": "deepseek-flash[1m]",
-     "inCache": 748160,
-     "inFresh": 151610,
-     "out": 1306,
-     "total": 901076
     }
    ]
   }
