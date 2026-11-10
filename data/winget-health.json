@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-07",
+  "checkedAt": "2026-11-10",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -59,8 +59,8 @@
     },
     "Tencent.TencentMeeting": {
       "ok": true,
-      "checkedAt": "2026-11-05",
-      "latest": "3.47.2.405"
+      "checkedAt": "2026-11-10",
+      "latest": "3.48.0.443"
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
