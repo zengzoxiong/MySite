@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-10",
+  "checkedAt": "2026-11-11",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -24,8 +24,8 @@
     },
     "Kingsoft.WPSOffice.CN": {
       "ok": true,
-      "checkedAt": "2026-10-13",
-      "latest": "12.1.0.29161"
+      "checkedAt": "2026-11-11",
+      "latest": "12.1.0.29690"
     },
     "Microsoft.PowerShell": {
       "ok": true,
@@ -34,8 +34,8 @@
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
-      "checkedAt": "2026-10-28",
-      "latest": "1.143.1"
+      "checkedAt": "2026-11-11",
+      "latest": "1.144.0"
     },
     "NetEase.UURemote": {
       "ok": true,
@@ -64,8 +64,8 @@
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
-      "checkedAt": "2026-11-06",
-      "latest": "4.2.0.13"
+      "checkedAt": "2026-11-11",
+      "latest": "4.2.0.52"
     },
     "astral-sh.uv": {
       "ok": true,
