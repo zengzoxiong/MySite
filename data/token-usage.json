@@ -1980,17 +1980,10 @@
     },
     {
      "id": "deepseek-v4.1-flash",
-     "inCache": 57416256,
-     "inFresh": 3152676,
-     "out": 157034,
-     "total": 60725966
-    },
-    {
-     "id": "dfmodel",
-     "inCache": 29312896,
-     "inFresh": 999167,
-     "out": 35198,
-     "total": 30347261
+     "inCache": 86729152,
+     "inFresh": 4151843,
+     "out": 192232,
+     "total": 91073227
     },
     {
      "id": "gpt-6.1-sol",
