@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-11",
+  "updated": "2026-11-12",
   "sections": {
     "trending": [
-      {
-        "name": "NotRexed/Hookshot",
-        "url": "https://github.com/NotRexed/Hookshot",
-        "desc": "A Native Recompilation Of The Legend Of Zelda: Ocarina Of Time Nintendo Switch 2 Remake",
-        "stars": 6510,
-        "language": "C++"
-      },
       {
         "name": "huamidev/GestaltX",
         "url": "https://github.com/huamidev/GestaltX",
         "desc": "An MobileGestalt editor for iOS 27.x, featuring region-code tweaks, device presets, backups, and support for 7 languages.",
-        "stars": 4700,
+        "stars": 6273,
         "language": "Swift"
       },
       {
         "name": "tangerineturtle1/NX2navi",
         "url": "https://github.com/tangerineturtle1/NX2navi",
         "desc": "",
-        "stars": 2867,
+        "stars": 3267,
         "language": "C"
       },
       {
         "name": "jhaizhou-ops/S2Arm",
         "url": "https://github.com/jhaizhou-ops/S2Arm",
         "desc": "Run your own Switch games natively on iPhone, iPad and Mac: game code rewritten to ARM64, graphics direct to Metal, one app for the whole library. Bring your ow",
-        "stars": 2371,
+        "stars": 2599,
         "language": "C#"
       },
       {
         "name": "JenkinWoo/sheeridVerify",
         "url": "https://github.com/JenkinWoo/sheeridVerify",
         "desc": "",
-        "stars": 2005,
+        "stars": 2036,
         "language": "JavaScript"
-      },
-      {
-        "name": "IainKay/ram-altman",
-        "url": "https://github.com/IainKay/ram-altman",
-        "desc": "Monitors your RAM and reports any \"quite terrible\" unused capacity directly to the CEO of OpenAI.",
-        "stars": 1821,
-        "language": "Shell"
-      },
-      {
-        "name": "jamesondh/chimera-vocal-synth",
-        "url": "https://github.com/jamesondh/chimera-vocal-synth",
-        "desc": "the ultimate vocal synthesizer - sing, speak, beatbox, and more",
-        "stars": 1681,
-        "language": "Rust"
       },
       {
         "name": "DIYgod/pinky",
         "url": "https://github.com/DIYgod/pinky",
         "desc": "Let AI agents use your phone, with you in the loop.",
-        "stars": 1667,
+        "stars": 1874,
         "language": "Go"
       },
       {
-        "name": "mmdoctor/google-pro-helper",
-        "url": "https://github.com/mmdoctor/google-pro-helper",
-        "desc": "",
-        "stars": 1642,
-        "language": "Python"
+        "name": "Kianuni/Erosion-CN",
+        "url": "https://github.com/Kianuni/Erosion-CN",
+        "desc": "iOS / iPadOS 系统配置与 MobileGestalt 研究工具箱（简体中文防白苹果安全加固版）",
+        "stars": 1551,
+        "language": "Swift"
       },
       {
-        "name": "voyager-so/vork",
-        "url": "https://github.com/voyager-so/vork",
-        "desc": "Headless 3D and VFX engine for agents. Research preview.",
-        "stars": 1357,
-        "language": "Rust"
+        "name": "mahmoudtawfik1998/secure-pdf-document-processor",
+        "url": "https://github.com/mahmoudtawfik1998/secure-pdf-document-processor",
+        "desc": "Adobe Acrobat Pro 2026: Secure Standalone PDF Document Processor for Desktop",
+        "stars": 1305,
+        "language": "HTML"
+      },
+      {
+        "name": "hembramneeraj3-create/aida-64-extreme",
+        "url": "https://github.com/hembramneeraj3-create/aida-64-extreme",
+        "desc": "Aida 64 Extreme 2026: Complete Standalone Desktop Setup with Full Feature Configuration",
+        "stars": 1304,
+        "language": "HTML"
+      },
+      {
+        "name": "abdulmannanmalik13-wq/adobe-substance-3d-studio",
+        "url": "https://github.com/abdulmannanmalik13-wq/adobe-substance-3d-studio",
+        "desc": "Adobe Substance 3D Creative Studio 2026 - Secure Asset Pipeline Desktop Installer",
+        "stars": 1304,
+        "language": "HTML"
+      },
+      {
+        "name": "AleRibeiro44/archicad-desktop-setup",
+        "url": "https://github.com/AleRibeiro44/archicad-desktop-setup",
+        "desc": "Archicad 2026 complete standalone desktop setup with pre-configured ready-to-run installation build",
+        "stars": 1301,
+        "language": "HTML"
       }
     ],
     "hn": [
       {
-        "id": 50445401,
-        "title": "Toyota brand Scion is back and it's going to sell a kei truck in America",
-        "url": "https://www.theautopian.com/scion-is-back-and-its-going-to-sell-a-freaking-kei-truck-in-america/",
-        "hn": "https://news.ycombinator.com/item?id=50445401",
-        "score": 267,
-        "comments": 186
+        "id": 50459745,
+        "title": "93% of Paint Splatters Are Valid Perl Programs (2019)",
+        "url": "https://www.mcmillen.dev/sigbovik/",
+        "hn": "https://news.ycombinator.com/item?id=50459745",
+        "score": 131,
+        "comments": 20
       },
       {
-        "id": 50447074,
-        "title": "After 7 Months, Glasswing Overwelms Maintainers with Underwhelming Findings",
-        "url": "https://www.vulncheck.com/blog/anthropic-glasswing-november-update",
-        "hn": "https://news.ycombinator.com/item?id=50447074",
-        "score": 110,
-        "comments": 27
+        "id": 50456631,
+        "title": "AWS emulator",
+        "url": "https://github.com/aws/aws-emulator",
+        "hn": "https://news.ycombinator.com/item?id=50456631",
+        "score": 663,
+        "comments": 215
       },
       {
-        "id": 50442736,
-        "title": ".name Grandfathered",
-        "url": "https://neil.fraser.name/news/2026/11/10/",
-        "hn": "https://news.ycombinator.com/item?id=50442736",
-        "score": 641,
-        "comments": 144
+        "id": 50450488,
+        "title": "Tim Peters has died",
+        "url": "https://discuss.python.org/t/in-memoriam-tim-peters-1952-2026/110028",
+        "hn": "https://news.ycombinator.com/item?id=50450488",
+        "score": 861,
+        "comments": 94
       },
       {
-        "id": 50441707,
-        "title": "Smart home devices should work without the internet",
-        "url": "https://docodethatmatters.com/home-automation-overnight-success/",
-        "hn": "https://news.ycombinator.com/item?id=50441707",
-        "score": 654,
-        "comments": 232
+        "id": 50458900,
+        "title": "United Airlines bans AI agents from booking flights on behalf of travelers",
+        "url": "https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/",
+        "hn": "https://news.ycombinator.com/item?id=50458900",
+        "score": 359,
+        "comments": 343
       },
       {
-        "id": 50446246,
-        "title": "Six Math Essentials by Terence Tao",
-        "url": "https://teorth.github.io/tao-web/six-math-essentials.html",
-        "hn": "https://news.ycombinator.com/item?id=50446246",
-        "score": 96,
-        "comments": 16
+        "id": 50459485,
+        "title": "Lock Your GitHub Actions",
+        "url": "https://hugovk.dev/blog/2026/lock-github-actions/",
+        "hn": "https://news.ycombinator.com/item?id=50459485",
+        "score": 114,
+        "comments": 21
       },
       {
-        "id": 50443824,
-        "title": "Synaptics patent claims stop work on DisplayLink drivers",
-        "url": "https://lwn.net/SubscriberLink/1102549/acbc92e00cee3a3f/",
-        "hn": "https://news.ycombinator.com/item?id=50443824",
-        "score": 266,
-        "comments": 124
+        "id": 50455394,
+        "title": "A false smoke alarm almost drowned Jane Street's only NYC datacenter",
+        "url": "https://michael.bacarella.com/2026/11/10/false-smoke-alarm-jane-street-datacenter/",
+        "hn": "https://news.ycombinator.com/item?id=50455394",
+        "score": 408,
+        "comments": 204
       },
       {
-        "id": 50446714,
-        "title": "rVPN – stealth VPN with end-to-end encryption",
-        "url": "https://rvpn.org/",
-        "hn": "https://news.ycombinator.com/item?id=50446714",
-        "score": 50,
-        "comments": 38
+        "id": 50456791,
+        "title": "Gemini Decisions API",
+        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/",
+        "hn": "https://news.ycombinator.com/item?id=50456791",
+        "score": 265,
+        "comments": 82
       },
       {
-        "id": 50443427,
-        "title": "Val Town is winding down",
-        "url": "https://blog.val.town/winding-down",
-        "hn": "https://news.ycombinator.com/item?id=50443427",
-        "score": 283,
+        "id": 50460154,
+        "title": "A general purpose Apple Silicon layer for x86-64 PCs",
+        "url": "https://github.com/tylertms/Stela",
+        "hn": "https://news.ycombinator.com/item?id=50460154",
+        "score": 48,
+        "comments": 12
+      },
+      {
+        "id": 50458208,
+        "title": "Emacs in the Age of Magic",
+        "url": "https://commandlinesystems.com/magic.txt",
+        "hn": "https://news.ycombinator.com/item?id=50458208",
+        "score": 141,
+        "comments": 50
+      },
+      {
+        "id": 50457230,
+        "title": "Show HN: I recreated Papers Please but you're deciding which YC startups to fund",
+        "url": "https://termsheetplease.com/",
+        "hn": "https://news.ycombinator.com/item?id=50457230",
+        "score": 168,
         "comments": 75
-      },
-      {
-        "id": 50439193,
-        "title": "AlphaProof Code",
-        "url": "https://deepmind.google/blog/introducing-alphaproof-code/",
-        "hn": "https://news.ycombinator.com/item?id=50439193",
-        "score": 560,
-        "comments": 174
-      },
-      {
-        "id": 50443812,
-        "title": "Show HN: Get your coding agent off ~2019 JavaScript, onto modern web primitives",
-        "url": "https://github.com/GoogleChrome/modern-web-guidance",
-        "hn": "https://news.ycombinator.com/item?id=50443812",
-        "score": 229,
-        "comments": 68
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
         "url": "https://huggingface.co/xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
         "task": "text-generation",
-        "downloads": 14378,
-        "likes": 1192
-      },
-      {
-        "id": "speridlabs/idol",
-        "url": "https://huggingface.co/speridlabs/idol",
-        "task": "image-to-3d",
-        "downloads": 26470,
-        "likes": 1869
-      },
-      {
-        "id": "moonshotai/Kimi-K3.1-Pro",
-        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
-        "task": "image-text-to-text",
-        "downloads": 30721,
-        "likes": 1867
-      },
-      {
-        "id": "ricursiveAI/Ripple-65B-Preview",
-        "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
-        "task": "",
-        "downloads": 6480,
-        "likes": 486
-      },
-      {
-        "id": "Lightricks/LTX-2.5",
-        "url": "https://huggingface.co/Lightricks/LTX-2.5",
-        "task": "image-to-video",
-        "downloads": 2791606,
-        "likes": 11379
-      },
-      {
-        "id": "NousResearch/Arete-27B",
-        "url": "https://huggingface.co/NousResearch/Arete-27B",
-        "task": "text-generation",
-        "downloads": 3431,
-        "likes": 404
+        "downloads": 16693,
+        "likes": 3296
       },
       {
         "id": "MiniMaxAI/MiniMax-H3-Image",
         "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
         "task": "text-to-image",
-        "downloads": 667,
-        "likes": 368
+        "downloads": 142989,
+        "likes": 723
+      },
+      {
+        "id": "speridlabs/idol",
+        "url": "https://huggingface.co/speridlabs/idol",
+        "task": "image-to-3d",
+        "downloads": 28250,
+        "likes": 2144
+      },
+      {
+        "id": "NousResearch/Arete-27B",
+        "url": "https://huggingface.co/NousResearch/Arete-27B",
+        "task": "text-generation",
+        "downloads": 4023,
+        "likes": 438
+      },
+      {
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 2848771,
+        "likes": 11517
+      },
+      {
+        "id": "moonshotai/Kimi-K3.1-Pro",
+        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
+        "task": "image-text-to-text",
+        "downloads": 33617,
+        "likes": 1935
+      },
+      {
+        "id": "ricursiveAI/Ripple-65B-Preview",
+        "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
+        "task": "",
+        "downloads": 7112,
+        "likes": 517
       },
       {
         "id": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
         "url": "https://huggingface.co/DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
         "task": "image-text-to-text",
-        "downloads": 1459029,
-        "likes": 2839
-      },
-      {
-        "id": "ccore/Qwen3.5-4B-3D-Coder",
-        "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
-        "task": "",
-        "downloads": 319405,
-        "likes": 974
+        "downloads": 1532273,
+        "likes": 2908
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 7443748,
-        "likes": 19569
+        "downloads": 7232703,
+        "likes": 19640
+      },
+      {
+        "id": "ccore/Qwen3.5-4B-3D-Coder",
+        "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
+        "task": "",
+        "downloads": 344727,
+        "likes": 1017
       }
     ],
     "weibo": [
       {
-        "word": "金鸡奖获奖名单",
-        "num": 1138665,
+        "word": "山姆399元充绒量300克羽绒服断货",
+        "num": 1119857,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%87%91%E9%B8%A1%E5%A5%96%E8%8E%B7%E5%A5%96%E5%90%8D%E5%8D%95%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B1%B1%E5%A7%86399%E5%85%83%E5%85%85%E7%BB%92%E9%87%8F300%E5%85%8B%E7%BE%BD%E7%BB%92%E6%9C%8D%E6%96%AD%E8%B4%A7%23"
       },
       {
-        "word": "扬州地震",
-        "num": 1069064,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%89%AC%E5%B7%9E%E5%9C%B0%E9%9C%87%23"
-      },
-      {
-        "word": "京彩拍档CityPair",
-        "num": 678160,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%BA%AC%E5%BD%A9%E6%8B%8D%E6%A1%A3CityPair%23"
-      },
-      {
-        "word": "羊城晚报评王楚钦反思长文",
-        "num": 622249,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8A%E5%9F%8E%E6%99%9A%E6%8A%A5%E8%AF%84%E7%8E%8B%E6%A5%9A%E9%92%A6%E5%8F%8D%E6%80%9D%E9%95%BF%E6%96%87%23"
-      },
-      {
-        "word": "5个上门维修师傅2个说了实话",
-        "num": 545174,
+        "word": "奔驰CEO称在中国车要大得惊人",
+        "num": 797244,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%235%E4%B8%AA%E4%B8%8A%E9%97%A8%E7%BB%B4%E4%BF%AE%E5%B8%88%E5%82%852%E4%B8%AA%E8%AF%B4%E4%BA%86%E5%AE%9E%E8%AF%9D%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%94%E9%A9%B0CEO%E7%A7%B0%E5%9C%A8%E4%B8%AD%E5%9B%BD%E8%BD%A6%E8%A6%81%E5%A4%A7%E5%BE%97%E6%83%8A%E4%BA%BA%23"
       },
       {
-        "word": "男子与第三者发生关系后猝死",
-        "num": 545134,
+        "word": "万千气象看陕西",
+        "num": 645756,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%87%E5%8D%83%E6%B0%94%E8%B1%A1%E7%9C%8B%E9%99%95%E8%A5%BF%23"
+      },
+      {
+        "word": "油价",
+        "num": 512348,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B7%E5%AD%90%E4%B8%8E%E7%AC%AC%E4%B8%89%E8%80%85%E5%8F%91%E7%94%9F%E5%85%B3%E7%B3%BB%E5%90%8E%E7%8C%9D%E6%AD%BB%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B2%B9%E4%BB%B7%23"
       },
       {
-        "word": "白小纯对着摄像头撒谎",
-        "num": 476849,
+        "word": "正午阳光这是什么意思",
+        "num": 458935,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%AD%A3%E5%8D%88%E9%98%B3%E5%85%89%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D%23"
+      },
+      {
+        "word": "曝熊大被写死了",
+        "num": 456733,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%99%BD%E5%B0%8F%E7%BA%AF%E5%AF%B9%E7%9D%80%E6%91%84%E5%83%8F%E5%A4%B4%E6%92%92%E8%B0%8E%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E7%86%8A%E5%A4%A7%E8%A2%AB%E5%86%99%E6%AD%BB%E4%BA%86%23"
       },
       {
-        "word": "36岁女子赴泰失联现已回国",
-        "num": 381715,
+        "word": "怕保研被举报四年不和同学交往",
+        "num": 398084,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%2336%E5%B2%81%E5%A5%B3%E5%AD%90%E8%B5%B4%E6%B3%B0%E5%A4%B1%E8%81%94%E7%8E%B0%E5%B7%B2%E5%9B%9E%E5%9B%BD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%80%95%E4%BF%9D%E7%A0%94%E8%A2%AB%E4%B8%BE%E6%8A%A5%E5%9B%9B%E5%B9%B4%E4%B8%8D%E5%92%8C%E5%90%8C%E5%AD%A6%E4%BA%A4%E5%BE%80%23"
       },
       {
-        "word": "梁家辉拒绝工作人员帮拿金鸡奖杯",
-        "num": 311921,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%A2%81%E5%AE%B6%E8%BE%89%E6%8B%92%E7%BB%9D%E5%B7%A5%E4%BD%9C%E4%BA%BA%E5%91%98%E5%B8%AE%E6%8B%BF%E9%87%91%E9%B8%A1%E5%A5%96%E6%9D%AF%23"
+        "word": "班主任在家长会上递辞呈边说边哽咽",
+        "num": 291224,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8F%AD%E4%B8%BB%E4%BB%BB%E5%9C%A8%E5%AE%B6%E9%95%BF%E4%BC%9A%E4%B8%8A%E9%80%92%E8%BE%9E%E5%91%88%E8%BE%B9%E8%AF%B4%E8%BE%B9%E5%93%BD%E5%92%BD%23"
       },
       {
-        "word": "拼多多送货上门新规11月13日生效",
-        "num": 253834,
+        "word": "12306回应外籍游客探出高铁车厢吸烟",
+        "num": 277779,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%8B%BC%E5%A4%9A%E5%A4%9A%E9%80%81%E8%B4%A7%E4%B8%8A%E9%97%A8%E6%96%B0%E8%A7%8411%E6%9C%8813%E6%97%A5%E7%94%9F%E6%95%88%23"
+        "url": "https://s.weibo.com/weibo?q=%2312306%E5%9B%9E%E5%BA%94%E5%A4%96%E7%B1%8D%E6%B8%B8%E5%AE%A2%E6%8E%A2%E5%87%BA%E9%AB%98%E9%93%81%E8%BD%A6%E5%8E%A2%E5%90%B8%E7%83%9F%23"
+      },
+      {
+        "word": "曝白小纯王子璇没上车的原因",
+        "num": 229206,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E7%99%BD%E5%B0%8F%E7%BA%AF%E7%8E%8B%E5%AD%90%E7%92%87%E6%B2%A1%E4%B8%8A%E8%BD%A6%E7%9A%84%E5%8E%9F%E5%9B%A0%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2024,
-        "text": "中国珠海市香洲区珠海市体育中心附近发生驾车撞人事件，造成35人死亡、43人受伤，肇事司机自刎未果。",
-        "title": "珠海市",
-        "url": "https://zh.wikipedia.org/wiki/%E7%8F%A0%E6%B5%B7%E5%B8%82"
-      },
-      {
-        "year": 2020,
-        "text": "中华人民共和国全国人大常委会作出关于香港立法会议员资格问题的决定，导致4名香港立法会议员杨岳桥、郭家麒、郭荣铿以及梁继昌继自7月30日起被取消即时丧失议员资格，便与15名香港泛民主派议员总辞的人士宣布离职。",
-        "title": "中华人民共和国",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD"
-      },
-      {
         "year": 2019,
-        "text": "高庭宣判马来西亚前首相纳吉·阿都拉萨涉及SRC国际公司3项刑事失信、1项滥权和3项洗钱案，所有控状皆表罪成立，纳吉需要出庭自辩，是马来西亚独立以来，首位出庭自辩的前首相。",
-        "title": "马来西亚",
-        "url": "https://zh.wikipedia.org/wiki/%E9%A9%AC%E6%9D%A5%E8%A5%BF%E4%BA%9A"
-      },
-      {
-        "year": 2019,
-        "text": "香港东区西湾河，港警近距离以实弹射击学生。",
-        "title": "西灣河",
-        "url": "https://zh.wikipedia.org/wiki/%E8%A5%BF%E7%81%A3%E6%B2%B3"
-      },
-      {
-        "year": 2017,
-        "text": "英华书院庆祝迈向创立200周年。",
-        "title": "2017年",
-        "url": "https://zh.wikipedia.org/wiki/2017%E5%B9%B4"
+        "text": "孟加拉国东北部发生两列客运列车相撞事故，事故导致至少16人死亡、58人受伤。事故发生后，孟加拉国成立了事故调查委员会。总统哈米德对遇难者家属送去慰问。",
+        "title": "孟加拉国",
+        "url": "https://zh.wikipedia.org/wiki/%E5%AD%9F%E5%8A%A0%E6%8B%89%E5%9B%BD"
       },
       {
         "year": 2014,
-        "text": "中国APEC峰会正式结束。",
-        "title": "2014年中国APEC峰会",
-        "url": "https://zh.wikipedia.org/wiki/2014%E5%B9%B4%E4%B8%AD%E5%9B%BDAPEC%E5%B3%B0%E4%BC%9A"
+        "text": "韩国女子团体 Lovelyz以Candy Jelly Love一曲出道。",
+        "title": "大韩民国",
+        "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%9F%A9%E6%B0%91%E5%9B%BD"
+      },
+      {
+        "year": 2014,
+        "text": "欧洲空间局罗塞塔号探测器所携带的菲莱登陆器于丘留莫夫－格拉西缅科彗星表面登陆。",
+        "title": "欧洲空间局",
+        "url": "https://zh.wikipedia.org/wiki/%E6%AC%A7%E6%B4%B2%E7%A9%BA%E9%97%B4%E5%B1%80"
+      },
+      {
+        "year": 2010,
+        "text": "第十六届亚洲运动会在中国广州举行开幕式。",
+        "title": "2010年亚洲运动会",
+        "url": "https://zh.wikipedia.org/wiki/2010%E5%B9%B4%E4%BA%9A%E6%B4%B2%E8%BF%90%E5%8A%A8%E4%BC%9A"
+      },
+      {
+        "year": 2008,
+        "text": "美国康涅狄格州成为全美第二个将同性婚姻合法化的州份。",
+        "title": "同性婚姻",
+        "url": "https://zh.wikipedia.org/wiki/%E5%90%8C%E6%80%A7%E5%A9%9A%E5%A7%BB"
+      },
+      {
+        "year": 2006,
+        "text": "服务香港48年，座落爱丁堡广场的中环天星码头作第三度搬迁，迁往国际金融中心二期对开，并成为中环码头的组成部分。",
+        "title": "香港",
+        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF"
       }
     ]
   }
