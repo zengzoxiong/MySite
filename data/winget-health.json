@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-11",
+  "checkedAt": "2026-11-12",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -29,13 +29,13 @@
     },
     "Microsoft.PowerShell": {
       "ok": true,
-      "checkedAt": "2026-10-25",
-      "latest": "7.6.9.0"
+      "checkedAt": "2026-11-12",
+      "latest": "7.7.0.0"
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
-      "checkedAt": "2026-11-11",
-      "latest": "1.144.0"
+      "checkedAt": "2026-11-12",
+      "latest": "1.145.3"
     },
     "NetEase.UURemote": {
       "ok": true,
@@ -49,8 +49,8 @@
     },
     "OpenJS.NodeJS.LTS": {
       "ok": true,
-      "checkedAt": "2026-10-28",
-      "latest": "26.13.0"
+      "checkedAt": "2026-11-12",
+      "latest": "26.13.1"
     },
     "Tencent.QQ.NT": {
       "ok": true,
