@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-12",
+  "updated": "2026-11-13",
   "sections": {
     "trending": [
       {
         "name": "huamidev/GestaltX",
         "url": "https://github.com/huamidev/GestaltX",
-        "desc": "An MobileGestalt editor for iOS 27.x, featuring region-code tweaks, device presets, backups, and support for 7 languages.",
-        "stars": 6273,
+        "desc": "An MobileGestalt editor for iOS 27.x, featuring region-code tweaks, device presets, backups.",
+        "stars": 6944,
         "language": "Swift"
       },
       {
         "name": "tangerineturtle1/NX2navi",
         "url": "https://github.com/tangerineturtle1/NX2navi",
         "desc": "",
-        "stars": 3267,
+        "stars": 3563,
         "language": "C"
       },
       {
         "name": "jhaizhou-ops/S2Arm",
         "url": "https://github.com/jhaizhou-ops/S2Arm",
         "desc": "Run your own Switch games natively on iPhone, iPad and Mac: game code rewritten to ARM64, graphics direct to Metal, one app for the whole library. Bring your ow",
-        "stars": 2599,
+        "stars": 2757,
         "language": "C#"
-      },
-      {
-        "name": "JenkinWoo/sheeridVerify",
-        "url": "https://github.com/JenkinWoo/sheeridVerify",
-        "desc": "",
-        "stars": 2036,
-        "language": "JavaScript"
-      },
-      {
-        "name": "DIYgod/pinky",
-        "url": "https://github.com/DIYgod/pinky",
-        "desc": "Let AI agents use your phone, with you in the loop.",
-        "stars": 1874,
-        "language": "Go"
       },
       {
         "name": "Kianuni/Erosion-CN",
         "url": "https://github.com/Kianuni/Erosion-CN",
         "desc": "iOS / iPadOS 系统配置与 MobileGestalt 研究工具箱（简体中文防白苹果安全加固版）",
-        "stars": 1551,
+        "stars": 1722,
         "language": "Swift"
       },
       {
-        "name": "mahmoudtawfik1998/secure-pdf-document-processor",
-        "url": "https://github.com/mahmoudtawfik1998/secure-pdf-document-processor",
-        "desc": "Adobe Acrobat Pro 2026: Secure Standalone PDF Document Processor for Desktop",
-        "stars": 1305,
-        "language": "HTML"
+        "name": "HybridRobotics/supermimic",
+        "url": "https://github.com/HybridRobotics/supermimic",
+        "desc": "Humanoid whole-body motion tracking with one differentiable world model.",
+        "stars": 1306,
+        "language": "Python"
       },
       {
-        "name": "hembramneeraj3-create/aida-64-extreme",
-        "url": "https://github.com/hembramneeraj3-create/aida-64-extreme",
-        "desc": "Aida 64 Extreme 2026: Complete Standalone Desktop Setup with Full Feature Configuration",
-        "stars": 1304,
-        "language": "HTML"
+        "name": "agentes-chat/agentes-chat",
+        "url": "https://github.com/agentes-chat/agentes-chat",
+        "desc": "Open-source, self-hosted Slack alternative where your team and AI agents work together in channels and DMs. Agents run on Claude, ChatGPT/Codex, Gemini or Grok,",
+        "stars": 1167,
+        "language": "TypeScript"
       },
       {
-        "name": "abdulmannanmalik13-wq/adobe-substance-3d-studio",
-        "url": "https://github.com/abdulmannanmalik13-wq/adobe-substance-3d-studio",
-        "desc": "Adobe Substance 3D Creative Studio 2026 - Secure Asset Pipeline Desktop Installer",
-        "stars": 1304,
-        "language": "HTML"
+        "name": "Th0rgal/satmux",
+        "url": "https://github.com/Th0rgal/satmux",
+        "desc": "Accelerate high-latency GEO inflight Wi-Fi via warm BBR TCP multiplexing + 1-RTT Ground-TLS + zlib (zero dependencies)",
+        "stars": 1057,
+        "language": "Python"
       },
       {
-        "name": "AleRibeiro44/archicad-desktop-setup",
-        "url": "https://github.com/AleRibeiro44/archicad-desktop-setup",
-        "desc": "Archicad 2026 complete standalone desktop setup with pre-configured ready-to-run installation build",
-        "stars": 1301,
-        "language": "HTML"
+        "name": "HolyArrs/HolyArrs",
+        "url": "https://github.com/HolyArrs/HolyArrs",
+        "desc": "One self-hosted app for your shows, movies and music.",
+        "stars": 967,
+        "language": "Go"
+      },
+      {
+        "name": "apex-compute/ANR",
+        "url": "https://github.com/apex-compute/ANR",
+        "desc": "Apex Neural Rendering (ANR) by Apex Compute",
+        "stars": 949,
+        "language": "C++"
+      },
+      {
+        "name": "FrigadeHQ/yogurt",
+        "url": "https://github.com/FrigadeHQ/yogurt",
+        "desc": "Private AI meeting notes. Free and open source.",
+        "stars": 945,
+        "language": "TypeScript"
       }
     ],
     "hn": [
       {
-        "id": 50459745,
-        "title": "93% of Paint Splatters Are Valid Perl Programs (2019)",
-        "url": "https://www.mcmillen.dev/sigbovik/",
-        "hn": "https://news.ycombinator.com/item?id=50459745",
-        "score": 131,
-        "comments": 20
+        "id": 50467087,
+        "title": "Jensen Huang resigns",
+        "url": "https://apnews.com/article/nvidia-megaspeed-china-singapore-huang-5403f152a601cf82ce939f1d24fffa0f",
+        "hn": "https://news.ycombinator.com/item?id=50467087",
+        "score": 2843,
+        "comments": 2705
       },
       {
-        "id": 50456631,
-        "title": "AWS emulator",
-        "url": "https://github.com/aws/aws-emulator",
-        "hn": "https://news.ycombinator.com/item?id=50456631",
-        "score": 663,
-        "comments": 215
+        "id": 50472038,
+        "title": "Rust 1.100",
+        "url": "https://blog.rust-lang.org/2026/11/12/Rust-1.100.0/",
+        "hn": "https://news.ycombinator.com/item?id=50472038",
+        "score": 364,
+        "comments": 151
       },
       {
-        "id": 50450488,
-        "title": "Tim Peters has died",
-        "url": "https://discuss.python.org/t/in-memoriam-tim-peters-1952-2026/110028",
-        "hn": "https://news.ycombinator.com/item?id=50450488",
-        "score": 861,
-        "comments": 94
+        "id": 50472260,
+        "title": "Gemini 4 Hydrogen and Orchestrator",
+        "url": "https://antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity/",
+        "hn": "https://news.ycombinator.com/item?id=50472260",
+        "score": 275,
+        "comments": 61
       },
       {
-        "id": 50458900,
-        "title": "United Airlines bans AI agents from booking flights on behalf of travelers",
-        "url": "https://www.cbsnews.com/news/united-airlines-bans-ai-agents-booking-flights/",
-        "hn": "https://news.ycombinator.com/item?id=50458900",
-        "score": 359,
-        "comments": 343
+        "id": 50474361,
+        "title": "Foundation Models framework",
+        "url": "https://developer.apple.com/foundation-models-framework/",
+        "hn": "https://news.ycombinator.com/item?id=50474361",
+        "score": 108,
+        "comments": 13
       },
       {
-        "id": 50459485,
-        "title": "Lock Your GitHub Actions",
-        "url": "https://hugovk.dev/blog/2026/lock-github-actions/",
-        "hn": "https://news.ycombinator.com/item?id=50459485",
-        "score": 114,
-        "comments": 21
+        "id": 50472490,
+        "title": "Dwarf planet candidate appears which takes roughly 280 years to orbit our sun",
+        "url": "https://www.smithsonianmag.com/smart-news/astronomers-found-a-mysterious-object-orbiting-far-beyond-pluto-it-could-be-a-new-dwarf-planet-hidden-in-our-solar-system-180989857/",
+        "hn": "https://news.ycombinator.com/item?id=50472490",
+        "score": 185,
+        "comments": 90
       },
       {
-        "id": 50455394,
-        "title": "A false smoke alarm almost drowned Jane Street's only NYC datacenter",
-        "url": "https://michael.bacarella.com/2026/11/10/false-smoke-alarm-jane-street-datacenter/",
-        "hn": "https://news.ycombinator.com/item?id=50455394",
-        "score": 408,
-        "comments": 204
+        "id": 50470488,
+        "title": "Show HN: My $300 embroidery machine needed a subscription, so I built my own app",
+        "url": "https://github.com/simpsoka/zigzag",
+        "hn": "https://news.ycombinator.com/item?id=50470488",
+        "score": 301,
+        "comments": 125
       },
       {
-        "id": 50456791,
-        "title": "Gemini Decisions API",
-        "url": "https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/",
-        "hn": "https://news.ycombinator.com/item?id=50456791",
-        "score": 265,
-        "comments": 82
+        "id": 50475829,
+        "title": "Richard A. Posner has died",
+        "url": "https://www.law.uchicago.edu/news/senior-lecturer-richard-posner-law-and-economics-pioneer-and-former-federal-appellate-judge",
+        "hn": "https://news.ycombinator.com/item?id=50475829",
+        "score": 21,
+        "comments": 2
       },
       {
-        "id": 50460154,
-        "title": "A general purpose Apple Silicon layer for x86-64 PCs",
-        "url": "https://github.com/tylertms/Stela",
-        "hn": "https://news.ycombinator.com/item?id=50460154",
-        "score": 48,
-        "comments": 12
+        "id": 50471731,
+        "title": "Service degradation on Microsoft 365",
+        "url": "https://status.cloud.microsoft/",
+        "hn": "https://news.ycombinator.com/item?id=50471731",
+        "score": 456,
+        "comments": 426
       },
       {
-        "id": 50458208,
-        "title": "Emacs in the Age of Magic",
-        "url": "https://commandlinesystems.com/magic.txt",
-        "hn": "https://news.ycombinator.com/item?id=50458208",
-        "score": 141,
-        "comments": 50
+        "id": 50471761,
+        "title": "22-Year-Old PostgreSQL Bug Turned into Remote Code Execution",
+        "url": "https://mehmetince.net/part-3-6-how-i-ended-up-turning-a-22-year-old-postgresql-type-confusion-primitive-into-rce-cve-2026-6460/",
+        "hn": "https://news.ycombinator.com/item?id=50471761",
+        "score": 137,
+        "comments": 17
       },
       {
-        "id": 50457230,
-        "title": "Show HN: I recreated Papers Please but you're deciding which YC startups to fund",
-        "url": "https://termsheetplease.com/",
-        "hn": "https://news.ycombinator.com/item?id=50457230",
-        "score": 168,
-        "comments": 75
+        "id": 50468888,
+        "title": "I'm making LLMs work on small and old devices",
+        "url": "https://github.com/hyperionaidev/smolmaxxing/",
+        "hn": "https://news.ycombinator.com/item?id=50468888",
+        "score": 275,
+        "comments": 89
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
         "url": "https://huggingface.co/xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
         "task": "text-generation",
-        "downloads": 16693,
-        "likes": 3296
+        "downloads": 18933,
+        "likes": 4723
       },
       {
         "id": "MiniMaxAI/MiniMax-H3-Image",
         "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
         "task": "text-to-image",
-        "downloads": 142989,
-        "likes": 723
-      },
-      {
-        "id": "speridlabs/idol",
-        "url": "https://huggingface.co/speridlabs/idol",
-        "task": "image-to-3d",
-        "downloads": 28250,
-        "likes": 2144
+        "downloads": 306718,
+        "likes": 868
       },
       {
         "id": "NousResearch/Arete-27B",
         "url": "https://huggingface.co/NousResearch/Arete-27B",
         "task": "text-generation",
-        "downloads": 4023,
-        "likes": 438
+        "downloads": 4669,
+        "likes": 485
+      },
+      {
+        "id": "speridlabs/idol",
+        "url": "https://huggingface.co/speridlabs/idol",
+        "task": "image-to-3d",
+        "downloads": 29904,
+        "likes": 2231
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 2848771,
-        "likes": 11517
-      },
-      {
-        "id": "moonshotai/Kimi-K3.1-Pro",
-        "url": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro",
-        "task": "image-text-to-text",
-        "downloads": 33617,
-        "likes": 1935
-      },
-      {
-        "id": "ricursiveAI/Ripple-65B-Preview",
-        "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
-        "task": "",
-        "downloads": 7112,
-        "likes": 517
-      },
-      {
-        "id": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
-        "url": "https://huggingface.co/DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
-        "task": "image-text-to-text",
-        "downloads": 1532273,
-        "likes": 2908
+        "downloads": 2782513,
+        "likes": 11631
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 7232703,
-        "likes": 19640
+        "downloads": 7094218,
+        "likes": 19743
+      },
+      {
+        "id": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
+        "url": "https://huggingface.co/DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
+        "task": "image-text-to-text",
+        "downloads": 1599836,
+        "likes": 2980
       },
       {
         "id": "ccore/Qwen3.5-4B-3D-Coder",
         "url": "https://huggingface.co/ccore/Qwen3.5-4B-3D-Coder",
         "task": "",
-        "downloads": 344727,
-        "likes": 1017
+        "downloads": 368236,
+        "likes": 1048
+      },
+      {
+        "id": "Comfy-Org/MiniMax-H3-Image",
+        "url": "https://huggingface.co/Comfy-Org/MiniMax-H3-Image",
+        "task": "text-to-image",
+        "downloads": 835593,
+        "likes": 290
+      },
+      {
+        "id": "ricursiveAI/Ripple-65B-Preview",
+        "url": "https://huggingface.co/ricursiveAI/Ripple-65B-Preview",
+        "task": "",
+        "downloads": 7667,
+        "likes": 534
       }
     ],
     "weibo": [
       {
-        "word": "山姆399元充绒量300克羽绒服断货",
-        "num": 1119857,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%B1%B1%E5%A7%86399%E5%85%83%E5%85%85%E7%BB%92%E9%87%8F300%E5%85%8B%E7%BE%BD%E7%BB%92%E6%9C%8D%E6%96%AD%E8%B4%A7%23"
-      },
-      {
-        "word": "奔驰CEO称在中国车要大得惊人",
-        "num": 797244,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A5%94%E9%A9%B0CEO%E7%A7%B0%E5%9C%A8%E4%B8%AD%E5%9B%BD%E8%BD%A6%E8%A6%81%E5%A4%A7%E5%BE%97%E6%83%8A%E4%BA%BA%23"
-      },
-      {
-        "word": "万千气象看陕西",
-        "num": 645756,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%87%E5%8D%83%E6%B0%94%E8%B1%A1%E7%9C%8B%E9%99%95%E8%A5%BF%23"
-      },
-      {
-        "word": "油价",
-        "num": 512348,
+        "word": "金价",
+        "num": 1733849,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%B2%B9%E4%BB%B7%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%87%91%E4%BB%B7%23"
       },
       {
-        "word": "正午阳光这是什么意思",
-        "num": 458935,
+        "word": "王子璇白小纯4公里开了三小时",
+        "num": 1420612,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E5%AD%90%E7%92%87%E7%99%BD%E5%B0%8F%E7%BA%AF4%E5%85%AC%E9%87%8C%E5%BC%80%E4%BA%86%E4%B8%89%E5%B0%8F%E6%97%B6%23"
+      },
+      {
+        "word": "中国正在编织这样一张大网",
+        "num": 735135,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%AD%A3%E5%8D%88%E9%98%B3%E5%85%89%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E6%AD%A3%E5%9C%A8%E7%BC%96%E7%BB%87%E8%BF%99%E6%A0%B7%E4%B8%80%E5%BC%A0%E5%A4%A7%E7%BD%91%23"
       },
       {
-        "word": "曝熊大被写死了",
-        "num": 456733,
+        "word": "给阿嬷的情书获奖反应冷淡",
+        "num": 482273,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BB%99%E9%98%BF%E5%AC%B7%E7%9A%84%E6%83%85%E4%B9%A6%E8%8E%B7%E5%A5%96%E5%8F%8D%E5%BA%94%E5%86%B7%E6%B7%A1%23"
+      },
+      {
+        "word": "后会友期民宿离晚餐地点不到四公里",
+        "num": 372717,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%90%8E%E4%BC%9A%E5%8F%8B%E6%9C%9F%E6%B0%91%E5%AE%BF%E7%A6%BB%E6%99%9A%E9%A4%90%E5%9C%B0%E7%82%B9%E4%B8%8D%E5%88%B0%E5%9B%9B%E5%85%AC%E9%87%8C%23"
+      },
+      {
+        "word": "英伟达大跌13%",
+        "num": 339898,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%8B%B1%E4%BC%9F%E8%BE%BE%E5%A4%A7%E8%B7%8C13%25%23"
+      },
+      {
+        "word": "刘欢妻子长文",
+        "num": 337945,
         "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E7%86%8A%E5%A4%A7%E8%A2%AB%E5%86%99%E6%AD%BB%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%88%98%E6%AC%A2%E5%A6%BB%E5%AD%90%E9%95%BF%E6%96%87%23"
       },
       {
-        "word": "怕保研被举报四年不和同学交往",
-        "num": 398084,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%80%95%E4%BF%9D%E7%A0%94%E8%A2%AB%E4%B8%BE%E6%8A%A5%E5%9B%9B%E5%B9%B4%E4%B8%8D%E5%92%8C%E5%90%8C%E5%AD%A6%E4%BA%A4%E5%BE%80%23"
-      },
-      {
-        "word": "班主任在家长会上递辞呈边说边哽咽",
-        "num": 291224,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%8F%AD%E4%B8%BB%E4%BB%BB%E5%9C%A8%E5%AE%B6%E9%95%BF%E4%BC%9A%E4%B8%8A%E9%80%92%E8%BE%9E%E5%91%88%E8%BE%B9%E8%AF%B4%E8%BE%B9%E5%93%BD%E5%92%BD%23"
-      },
-      {
-        "word": "12306回应外籍游客探出高铁车厢吸烟",
-        "num": 277779,
+        "word": "普通人用AI和会用AI的人",
+        "num": 333658,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%2312306%E5%9B%9E%E5%BA%94%E5%A4%96%E7%B1%8D%E6%B8%B8%E5%AE%A2%E6%8E%A2%E5%87%BA%E9%AB%98%E9%93%81%E8%BD%A6%E5%8E%A2%E5%90%B8%E7%83%9F%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%99%AE%E9%80%9A%E4%BA%BA%E7%94%A8AI%E5%92%8C%E4%BC%9A%E7%94%A8AI%E7%9A%84%E4%BA%BA%23"
       },
       {
-        "word": "曝白小纯王子璇没上车的原因",
-        "num": 229206,
+        "word": "7碗米饭摆拍事件更显媒体调查价值",
+        "num": 323083,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%237%E7%A2%97%E7%B1%B3%E9%A5%AD%E6%91%86%E6%8B%8D%E4%BA%8B%E4%BB%B6%E6%9B%B4%E6%98%BE%E5%AA%92%E4%BD%93%E8%B0%83%E6%9F%A5%E4%BB%B7%E5%80%BC%23"
+      },
+      {
+        "word": "金价再迎暴跌专家劝别抄底",
+        "num": 286011,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9B%9D%E7%99%BD%E5%B0%8F%E7%BA%AF%E7%8E%8B%E5%AD%90%E7%92%87%E6%B2%A1%E4%B8%8A%E8%BD%A6%E7%9A%84%E5%8E%9F%E5%9B%A0%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%87%91%E4%BB%B7%E5%86%8D%E8%BF%8E%E6%9A%B4%E8%B7%8C%E4%B8%93%E5%AE%B6%E5%8A%9D%E5%88%AB%E6%8A%84%E5%BA%95%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2019,
-        "text": "孟加拉国东北部发生两列客运列车相撞事故，事故导致至少16人死亡、58人受伤。事故发生后，孟加拉国成立了事故调查委员会。总统哈米德对遇难者家属送去慰问。",
-        "title": "孟加拉国",
-        "url": "https://zh.wikipedia.org/wiki/%E5%AD%9F%E5%8A%A0%E6%8B%89%E5%9B%BD"
+        "year": 2022,
+        "text": "土耳其最大城市伊斯坦布尔独立大街发生爆炸袭击，至少8人死亡、81人受伤。当局指责库尔德斯坦工人党及叙利亚民主联盟党策动事件，以报复土耳其于2019年入侵叙利亚罗贾瓦地区。",
+        "title": "土耳其",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9C%9F%E8%80%B3%E5%85%B6"
       },
       {
-        "year": 2014,
-        "text": "韩国女子团体 Lovelyz以Candy Jelly Love一曲出道。",
-        "title": "大韩民国",
-        "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%9F%A9%E6%B0%91%E5%9B%BD"
+        "year": 2016,
+        "text": "新西兰南岛中部城市克赖斯特彻奇遭遇Mw7.8的大地震，造成2人死亡和多处受到严重破坏。",
+        "title": "新西兰",
+        "url": "https://zh.wikipedia.org/wiki/%E6%96%B0%E8%A5%BF%E5%85%B0"
       },
       {
-        "year": 2014,
-        "text": "欧洲空间局罗塞塔号探测器所携带的菲莱登陆器于丘留莫夫－格拉西缅科彗星表面登陆。",
-        "title": "欧洲空间局",
-        "url": "https://zh.wikipedia.org/wiki/%E6%AC%A7%E6%B4%B2%E7%A9%BA%E9%97%B4%E5%B1%80"
+        "year": 2015,
+        "text": "恐怖组织伊斯兰国成员在法国巴黎发动连续恐怖袭击，造成137人死亡和368人受伤。",
+        "title": "伊斯兰国",
+        "url": "https://zh.wikipedia.org/wiki/%E4%BC%8A%E6%96%AF%E5%85%B0%E5%9B%BD"
+      },
+      {
+        "year": 2013,
+        "text": "夏威夷州将同性婚姻合法化。",
+        "title": "夏威夷州",
+        "url": "https://zh.wikipedia.org/wiki/%E5%A4%8F%E5%A8%81%E5%A4%B7%E5%B7%9E"
       },
       {
         "year": 2010,
-        "text": "第十六届亚洲运动会在中国广州举行开幕式。",
-        "title": "2010年亚洲运动会",
-        "url": "https://zh.wikipedia.org/wiki/2010%E5%B9%B4%E4%BA%9A%E6%B4%B2%E8%BF%90%E5%8A%A8%E4%BC%9A"
+        "text": "被缅甸军政府软禁于寓所中长达十年的缅甸政治家昂山素季获释。",
+        "title": "緬甸軍政府",
+        "url": "https://zh.wikipedia.org/wiki/%E7%B7%AC%E7%94%B8%E8%BB%8D%E6%94%BF%E5%BA%9C"
       },
       {
-        "year": 2008,
-        "text": "美国康涅狄格州成为全美第二个将同性婚姻合法化的州份。",
-        "title": "同性婚姻",
-        "url": "https://zh.wikipedia.org/wiki/%E5%90%8C%E6%80%A7%E5%A9%9A%E5%A7%BB"
-      },
-      {
-        "year": 2006,
-        "text": "服务香港48年，座落爱丁堡广场的中环天星码头作第三度搬迁，迁往国际金融中心二期对开，并成为中环码头的组成部分。",
-        "title": "香港",
-        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF"
+        "year": 2009,
+        "text": "美国国家航空航天局宣布在月球南极发现水源。",
+        "title": "美国国家航空航天局",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E5%9B%BD%E5%AE%B6%E8%88%AA%E7%A9%BA%E8%88%AA%E5%A4%A9%E5%B1%80"
       }
     ]
   }
