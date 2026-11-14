@@ -22,6 +22,7 @@ logs/
 
 # ---- Agent 本地配置与工作区 ----
 .claude/
+.zcode/
 .zcodeignore
 .agent/
 
