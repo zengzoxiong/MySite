@@ -13,7 +13,8 @@
 ```
 MySite/
 ├── index.html            # 主页：仪表盘 + 各视图容器 + 设置弹层 + 命令面板
-├── script.js             # 全部交互逻辑（约 4680 行，单文件无模块）
+├── script.js             # 主交互逻辑（ES Module 入口；设置中心/命令面板已拆至 js/，见「模块化试点」）
+├── js/                   # script.js 拆分出的 ES Module（common / settings / cmdk），PRECACHE 已收录
 ├── styles.css            # 全站样式（液态玻璃设计系统，含明暗主题）
 ├── settings.html         # 设置页（iframe 载入主站弹层，postMessage 通信）
 ├── sw.js                 # PWA Service Worker（导航/数据网络优先，其余 SWR，改预缓存或策略须升版本号）
@@ -25,7 +26,7 @@ MySite/
 │   ├── link-health.json  # §1 死链体检结果（工作流每周生成，勿手改）
 │   ├── winget-health.json # §1 winget 包体检结果（工作流每日生成，勿手改）
 │   ├── media.json        # §2 影视收藏（六大类型，详见下文规范）
-│   ├── tools.json        # §3 在线工具登记（驱动 tools/ 目录展示）
+│   ├── tools.json        # §3 在线工具登记（驱动 tools/ 目录展示；offline:true = 进 SW 离线包）
 │   ├── agent-plugins.json# §4 Agent Skills 注册表 + MCP 清单
 │   ├── stars.json        # §5 我的 Stars（工作流每日同步，勿手改）
 │   ├── playlist.json     # §6 首页音乐播放器歌单
@@ -45,9 +46,10 @@ MySite/
 │   ├── appearance.js     # 外观偏好清单（界面字体/时钟风格），index 与 settings 共用，须在 script.js 之前加载
 │   └── icon.svg          # PWA 图标（星芒）
 ├── tools/                # 151 个自建网页工具（每工具一目录 + app.html，128 个另有 index.html 说明页）
-├── scripts/              # 11 个脚本：同步 8（sync_tmdb / sync_stars / sync_explore / sync_lyrics /
+├── scripts/              # 13 个脚本：同步 8（sync_tmdb / sync_stars / sync_explore / sync_lyrics /
 │                         #   sync_ghactivity / sync_fx / sync_goatcounter / sync_daily_report）+
-│                         #   体检 3（check_links / check_winget / check_tools）
+│                         #   体检 3（check_links / check_winget / check_tools）+
+│                         #   脚手架 1（new_tool）+ 离线标记 1（check_offline）
 └── .github/workflows/    # 定时任务（TMDB 评分 / GitHub Stars / 探索歌单）
 ```
 
@@ -83,8 +85,10 @@ MySite/
 
 ### 3. 在线工具（tools/ + data/tools.json）
 
-1. 新建 `tools/工具名/app.html`（自包含单文件，参考 image-converter 的风格）；
-2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`。
+1. **首选脚手架**：`python scripts/new_tool.py --name 目录名 --title "显示名" --category 分类 --desc "一句话" --icon 图标`，自动生成目录与 app.html/index.html 模板、登记 tools.json、按字母序收录 sitemap.xml 并自跑 check_tools.py 七项体检（`--no-index` 免说明页、`--game` 游戏模板、`--offline` 写离线标记、`--accent` 游戏个性色）；手工新建时 app.html 自包含单文件、参考 image-converter 的风格；
+2. `data/tools.json` 登记：`{"name","path":"工具名/app.html","description","icon","category"}`，纯计算工具加 `"offline": true`。
+
+**工具离线可用**：纯计算工具（零外部引用、无共享资产）标 `"offline": true`（2026-11 起 121 页，离线包约 1.5 MB），SW 激活时按标记补缺进独立缓存 `mysite-tools-v1`；`scripts/check_offline.py` 负责扫描判定与标记同步（兼守卫：已标记页出现外部引用会报出，`--apply` 可增可删）。不标记：游戏页、vendor 缺失页（js-formatter/html-formatter/sql-formatter/image-compressor，vendor 目录缺失待补）、vendor 动态拼接页（file-preview/to-pdf）、运行时外部请求页（ip-info、qr-decoder）。
    工具页统一引用 `../../favicon.svg`，固定亮色内联样式（与主站深色无关，属设计意图）。
 - **从上游搬来的页面必须去品牌**：`tools/*` 多数源自 `justhtmls/html-tools`，页面里的 `JustHTMLs`/`htmls.dev` 字样（返回链接文案、示例数据、`<title>` 后缀、页脚版权、作者徽标、「查看源码」按钮）和 `<link rel="canonical">` 都要改成本站（title/页脚用「拾光集」，canonical 指向规范页 `https://zengzoxiong.github.io/MySite/tools/<工具>/app.html`——留着来源站 canonical 会把 SEO 权重白送出去；index.html 与 app.html 双页并存，canonical 必须统一收敛到 app.html 才不分散权重）。
 - **工具页体检**：`.github/workflows/check-tools.yml` 在 `tools/**`/`data/tools.json`/脚本变动时 + 每周一 03:50（北京，深夜低峰）跑 `scripts/check_tools.py`，七项检查：tools.json 登记双向一致、canonical 指向规范页（app.html，index.html 同检）、引用 `../../favicon.svg`、含「拾光集」署名、无 `JustHTMLs`/`htmls.dev` 残留、tools.json 的 category 都登记在 categories 清单、**行内 `<script>` JS 语法可解析**（交给 `scripts/check_tools_js.mjs`，new Function 级别只解析不执行，抓「页面能开但按钮全废」的损伤——2026-11 曾有 21 页首次导入即带语法损坏潜伏两个月；本机无 node 跳过该子项，CI runner 自带 node）；违例退出码 1 让 CI 红灯并写 step summary，**不自动改文件**。存量 151 个 app.html + 128 个 index.html 已于 2026-10 全量对齐（canonical 统一指 app.html、index.html 去掉上游「查看源码」按钮），sitemap 同步收录 app.html（含 svg-editor/image-converter），新搬页面先跑一遍脚本再提交。
@@ -163,6 +167,12 @@ MySite/
 
 ## 前端架构与约定（script.js / styles.css）
 
+### script.js 模块化（试点，2026-11 起）
+
+- `index.html` 以 `<script type="module">` 载入 script.js（全站无内联事件属性、无 window 全局导出，经典脚本转 module 零语义差异）；设置中心拆至 `js/settings.js`（主题/动画/字体应用 + 设置弹层 postMessage 接收），命令面板拆至 `js/cmdk.js`（Ctrl/Cmd+K），共享设施在 `js/common.js`（`safeInit`/`lsGet`/`lsSet`/`escapeHtml`/`OVERLAY_IDS` 弹层清单单一来源）
+- **循环导入约定**：js/ 子模块从 `../script.js` 导入主模块绑定（script.js 顶部 export 清单统一维护），**只允许在函数体内访问**——let 绑定要等主模块主体执行完才有值；各弹层的 DOM 常量归各自模块自查，全局 ESC 兜底改读 common.js 的 `OVERLAY_IDS`
+- 新拆模块记得同步加进 sw.js 的 PRECACHE 并升 CACHE 版本
+
 ### 首页签到（拾光签）
 
 - **位置与解锁**：一言卡片（`.quote-corner`）未签到时是封签面板 `#checkinPanel`（朱印+提示+「翻开今日签」），签到后隐藏并解锁 `#quoteBody`——**一言此时才敲 hitokoto**（`initQuote` 里 `isCheckedInToday()` 把关），未签到不浪费外部请求。「换一句」随时可刷；hitokoto 对同 IP 短窗缓存，**请求必须带 `_t` nonce** 否则刷新拿回同一句。签面上的文字（吉凶/签句）走每日固定种子，不跟一言刷新联动。
@@ -230,6 +240,7 @@ MySite/
 - **升 `CACHE` 版本的口径**：SWR 下普通资源内容改动靠后台 revalidate 自愈，**不需要**升版本；只有改 `PRECACHE` 清单、改缓存策略/语义（如修剪规则）、或要强制清掉老访客旧缓存时才升（v14→v15→…）。为改一行 CSS 去升版本会触发全量重下，别做
 - 运行时缓存（PRECACHE 之外的同源 GET，工具页/海报等）有 `RUNTIME_MAX` 上限，超出按写入顺序淘汰最旧的；PRECACHE 条目不修剪
 - 注册带特性检测 + 静默失败
+- **工具离线包（v21 起）**：独立缓存 `mysite-tools-v1`，activate 白名单保留、不随版本 bump 清空；激活时拉 data/tools.json 把 `offline:true` 的工具页**补缺**进包（已缓存的跳过，页面内容更新靠访问时 SWR 自愈）并**对账**删除撤销标记的条目；tools.json 拉不到（离线激活）跳过、下次再补。fetch 分支零改动——导航失败回退的 `caches.match` 本来就搜全部缓存，自动兜底。老访客新增 offline 标记要等下一次 sw.js 变更激活才进包（新访客即得）
 
 ## 本地测试方法
 
