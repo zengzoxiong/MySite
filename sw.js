@@ -1,5 +1,13 @@
 /* Service Worker：PWA 离线缓存（数据文件与页面导航网络优先，其余骨架 stale-while-revalidate） */
-const CACHE = 'mysite-v20'; // v20: styles.css 改版（背景底色与环境光斑随主题色联动），bump 让访客拿到新样式
+const CACHE = 'mysite-v21'; // v21: script.js 模块化拆分（js/common|settings|cmdk.js 进预缓存）+ 工具离线包（TOOLS_CACHE 随 tools.json 的 offline 标记同步）
+// 工具离线包缓存：独立于主 CACHE，activate 时白名单保留、不随版本 bump 清空。
+// 条目来自 data/tools.json 里 offline:true 的工具页（scripts/check_offline.py 维护标记），
+// 每次激活只补缺不重复下载，页面内容更新由访问时的 SWR 自愈；标记页离线导航
+// 由 fetch 分支失败后的 caches.match 兜底（它搜全部缓存，fetch 分支零改动）。
+// 注意：老访客新增 offline 工具要等下一次 sw.js 变更激活才进包（新访客即得）
+const TOOLS_CACHE = 'mysite-tools-v1';
+// 离线包附加资源：标记工具的本地 vendor 小库（tools.json 不含 vendor 信息，qr-generator 用）
+const TOOLS_CACHE_EXTRA = ['assets/vendor/qrcodejs/qrcode.min.js'];
 // 运行时缓存（PRECACHE 之外的同源资源）条目上限：工具页/海报会随浏览不断
 // 进缓存，不修剪的话老访客的存储无限增长；超出按写入顺序淘汰最旧的
 const RUNTIME_MAX = 300;
@@ -12,6 +20,9 @@ const PRECACHE = [
     './settings.html',
     './styles.css',
     './script.js',
+    './js/common.js',
+    './js/settings.js',
+    './js/cmdk.js',
     './assets/appearance.js',
     './data/links.json',
     './data/tools.json',
@@ -35,7 +46,8 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys()
-            .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+            .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== TOOLS_CACHE).map((k) => caches.delete(k))))
+            .then(toolsOfflineSync)
             .then(() => self.clients.claim())
     );
 });
@@ -104,4 +116,30 @@ function trimRuntime(cache) {
         if (drop <= 0) return;
         return Promise.all(runtime.slice(0, drop).map((r) => cache.delete(r)));
     });
+}
+
+// 工具离线包同步：读 tools.json 取 offline:true 条目，补缺缓存并删除已撤销标记的旧条目。
+// 任一失败只跳过（离线激活、tools.json 拉不到都不阻断 SW 激活），下次激活再补
+async function toolsOfflineSync() {
+    let manifest;
+    try {
+        const res = await fetch('./data/tools.json', { cache: 'no-cache' });
+        manifest = await res.json();
+    } catch (err) {
+        manifest = await caches.match('./data/tools.json').then((c) => (c ? c.json() : null)).catch(() => null);
+    }
+    if (!manifest || !Array.isArray(manifest.tools)) return;
+    const base = new URL(self.registration.scope);
+    const urls = new Set(TOOLS_CACHE_EXTRA.map((p) => new URL(p, base).href));
+    for (const t of manifest.tools) {
+        if (t.offline) urls.add(new URL(`tools/${t.path.split('/')[0]}/app.html`, base).href);
+    }
+    const cache = await caches.open(TOOLS_CACHE);
+    await Promise.all([...urls].map(async (u) => {
+        if (await cache.match(u)) return; // 已缓存只跳过
+        await cache.add(u).catch((err) => console.warn('离线包补缺跳过:', u, err));
+    }));
+    // 对账：删除清单外的旧条目（工具下线/撤销离线标记）
+    const keys = await cache.keys();
+    await Promise.all(keys.filter((r) => !urls.has(r.url)).map((r) => cache.delete(r)));
 }
