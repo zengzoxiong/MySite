@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-14",
+  "checkedAt": "2026-11-17",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -39,8 +39,8 @@
     },
     "NetEase.UURemote": {
       "ok": true,
-      "checkedAt": "2026-11-14",
-      "latest": "4.47.1.5286"
+      "checkedAt": "2026-11-17",
+      "latest": "4.48.0.5446"
     },
     "Obsidian.Obsidian": {
       "ok": true,
@@ -64,8 +64,8 @@
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
-      "checkedAt": "2026-11-11",
-      "latest": "4.2.0.52"
+      "checkedAt": "2026-11-17",
+      "latest": "4.2.0.1000"
     },
     "astral-sh.uv": {
       "ok": true,
