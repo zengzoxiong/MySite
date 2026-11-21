@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-19",
+  "checkedAt": "2026-11-21",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -39,8 +39,8 @@
     },
     "NetEase.UURemote": {
       "ok": true,
-      "checkedAt": "2026-11-19",
-      "latest": "4.48.1.5606"
+      "checkedAt": "2026-11-21",
+      "latest": "4.48.2.5754"
     },
     "Obsidian.Obsidian": {
       "ok": true,
