@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "sections": {
     "trending": [
       {
         "name": "erkamyaman/rust-anything",
         "url": "https://github.com/erkamyaman/rust-anything",
         "desc": "Rewrite your whole app in Rust, one piece at a time, checked against the original's recorded behavior at every step. CLIs, HTTP servers and libraries in TypeScr",
-        "stars": 5227,
+        "stars": 6646,
         "language": "Rust"
       },
       {
         "name": "krisgfx9/Wireless-Device-Battery-Monitor",
         "url": "https://github.com/krisgfx9/Wireless-Device-Battery-Monitor",
         "desc": "Show the battery level of wireless mice, headsets, keyboards and controllers on the Windows 10/11 taskbar. Lightweight tray app, no vendor software needed. Supp",
-        "stars": 4676,
+        "stars": 5305,
         "language": "C++"
       },
       {
         "name": "gylive/google-ultra",
         "url": "https://github.com/gylive/google-ultra",
         "desc": "",
-        "stars": 2451,
+        "stars": 2533,
         "language": "Python"
       },
       {
         "name": "Hut-hzf/ung220z-tool",
         "url": "https://github.com/Hut-hzf/ung220z-tool",
         "desc": "ung220z-tool 是一个针对 UNG220Z（九联/Unionman 中国移动光猫）的一键凭据提取工具，仅限在你自己的设备上用于找回忘记的管理密码、迁移宽带配置或安全自查。",
-        "stars": 1753,
+        "stars": 2002,
         "language": "Python"
       },
       {
-        "name": "duwqijlk/muse-protocol",
-        "url": "https://github.com/duwqijlk/muse-protocol",
-        "desc": "muse.ai 注册与邀请码兑换协议研究（纯 HTTP Python 实现）",
-        "stars": 1655,
-        "language": "Python"
-      },
-      {
-        "name": "CzzzzzzJ/mdldm-maitian",
-        "url": "https://github.com/CzzzzzzJ/mdldm-maitian",
-        "desc": "麦田：自媒体多平台发布中控与数据监控（B站/抖音/小红书/视频号/YouTube/X），飞书卡片通知 + 数据大屏",
-        "stars": 1603,
-        "language": "JavaScript"
-      },
-      {
-        "name": "haziqahmedqasmi/PeakCut",
-        "url": "https://github.com/haziqahmedqasmi/PeakCut",
-        "desc": "AI clipping for long videos and live streams. Self-hosted, bring your own AI key.",
-        "stars": 1342,
-        "language": "Python"
+        "name": "bookwjitchieni1986/blender-ai-mcp-addon",
+        "url": "https://github.com/bookwjitchieni1986/blender-ai-mcp-addon",
+        "desc": "AI assistant and MCP server for Blender: visual chat, scene tools, multi-agent workflows. Works with ChatGPT/GPT, Claude, Gemini, Ollama, OpenCode. Blender AI a",
+        "stars": 1778,
+        "language": ""
       },
       {
         "name": "sybil-solutions/inference-optimisation-skill",
         "url": "https://github.com/sybil-solutions/inference-optimisation-skill",
         "desc": "Agent skill for hill-climbing local LLM serving speed (decode, speculative decoding, prefill, KV, startup, TTFT) on any hardware and quantization",
-        "stars": 1262,
+        "stars": 1331,
         "language": "Python"
       },
       {
         "name": "joshpuckett/allo",
         "url": "https://github.com/joshpuckett/allo",
         "desc": "Allo is your friendly neighborhood typeface, free and open source",
-        "stars": 1152,
+        "stars": 1251,
+        "language": "Python"
+      },
+      {
+        "name": "iamajmeena/neonclipping",
+        "url": "https://github.com/iamajmeena/neonclipping",
+        "desc": "Paste a link, get captioned 9:16 clips in ~2 min. Free, local, open-source clipping engine (audio-first, YouTube captions, local LLM).",
+        "stars": 1244,
         "language": "Python"
       },
       {
         "name": "chuanqisun/spaceship",
         "url": "https://github.com/chuanqisun/spaceship",
-        "desc": "Steer your ideas in realtime",
-        "stars": 947,
+        "desc": "Steer ideas like a space pilot!",
+        "stars": 993,
         "language": "HTML"
+      },
+      {
+        "name": "siliconjungle/shapeshift-labs-ink-studio",
+        "url": "https://github.com/siliconjungle/shapeshift-labs-ink-studio",
+        "desc": "Sculpting, animation and simulation toolkit for pixel-art Gaussian splats",
+        "stars": 870,
+        "language": "JavaScript"
       }
     ],
     "hn": [
       {
-        "id": 50562754,
-        "title": "Anthropic’s Nasdaq debut",
-        "url": "https://www.reuters.com/business/finance/anthropics-historic-debut-put-ais-promise-peril-wall-st-test-2026-11-19/",
-        "hn": "https://news.ycombinator.com/item?id=50562754",
-        "score": 889,
-        "comments": 1754
+        "id": 50579568,
+        "title": "Hurried Announcement: Alessandro Masullo GRH",
+        "url": "https://math216.wordpress.com/2026/11/20/hurried-announcement-alessandro-masullo-grh/",
+        "hn": "https://news.ycombinator.com/item?id=50579568",
+        "score": 1481,
+        "comments": 683
       },
       {
-        "id": 50563066,
-        "title": "Pancreatic cancer halted by virus injection in three patients",
-        "url": "https://www.newscientist.com/article/2528235-pancreatic-cancer-halted-by-virus-injection-in-three-patients/",
-        "hn": "https://news.ycombinator.com/item?id=50563066",
-        "score": 560,
-        "comments": 83
+        "id": 50581260,
+        "title": "Inkling 2 Mini",
+        "url": "https://thinkingmachines.ai/news/inkling-2-mini/",
+        "hn": "https://news.ycombinator.com/item?id=50581260",
+        "score": 618,
+        "comments": 100
       },
       {
-        "id": 50568130,
-        "title": "Gemini 4 Neon is the new #1 on the Models Engineering Index",
-        "url": "https://git-aarvin.github.io/mei/",
-        "hn": "https://news.ycombinator.com/item?id=50568130",
-        "score": 65,
-        "comments": 33
+        "id": 50574968,
+        "title": "Levent Alpöge claims proof of the Generalized Riemann Hypothesis [pdf]",
+        "url": "https://alpo.ge/remark.pdf",
+        "hn": "https://news.ycombinator.com/item?id=50574968",
+        "score": 2325,
+        "comments": 1572
       },
       {
-        "id": 50567209,
-        "title": "Synology Security Advisory",
-        "url": "https://www.synology.com/en-uk/security/advisory/Synology_SA_26_21",
-        "hn": "https://news.ycombinator.com/item?id=50567209",
-        "score": 93,
-        "comments": 62
+        "id": 50583982,
+        "title": "Re: Riemann",
+        "url": "https://borretti.me/article/re-riemann",
+        "hn": "https://news.ycombinator.com/item?id=50583982",
+        "score": 66,
+        "comments": 29
       },
       {
-        "id": 50563148,
-        "title": "Claude solves two open problems in the physics of black holes",
-        "url": "https://www.anthropic.com/research/claude-black-hole-physics",
-        "hn": "https://news.ycombinator.com/item?id=50563148",
-        "score": 373,
-        "comments": 174
+        "id": 50583274,
+        "title": "NINLIVE: The Nine Inch Nails live archive",
+        "url": "https://ninlive.com/",
+        "hn": "https://news.ycombinator.com/item?id=50583274",
+        "score": 85,
+        "comments": 23
       },
       {
-        "id": 50528119,
-        "title": "How to CAD Almost Anything",
-        "url": "https://ocw.mit.edu/courses/res-16-002-how-to-cad-almost-anything-january-iap-2024/",
-        "hn": "https://news.ycombinator.com/item?id=50528119",
-        "score": 111,
-        "comments": 22
+        "id": 50579331,
+        "title": "We promoted developers into architects without informing them",
+        "url": "https://manidoraisamy.com/developer-to-architect.html",
+        "hn": "https://news.ycombinator.com/item?id=50579331",
+        "score": 282,
+        "comments": 171
       },
       {
-        "id": 50519231,
-        "title": "Garage Door Spam",
-        "url": "https://blog.harrison.page/garage-door-spam/",
-        "hn": "https://news.ycombinator.com/item?id=50519231",
-        "score": 745,
-        "comments": 315
+        "id": 50578358,
+        "title": "Unforced Navier-Stokes Singularity and the Generalized Riemann Hypothesis",
+        "url": "https://terrytao.wordpress.com/2026/11/20/unforced-euler-singularity-unforced-navier-stokes-singularity-and-the-generalized-riemann-hypothesis/",
+        "hn": "https://news.ycombinator.com/item?id=50578358",
+        "score": 326,
+        "comments": 133
       },
       {
-        "id": 50564159,
-        "title": "The 98% Slot Machine: How Paid Advertising Became an Extraction Tax",
-        "url": "https://globalcommercegraph.com/writing/the-ninety-eight-percent-slot-machine",
-        "hn": "https://news.ycombinator.com/item?id=50564159",
-        "score": 193,
-        "comments": 102
+        "id": 50583768,
+        "title": "Sir Brian May adds new dimension to Hera asteroid",
+        "url": "https://www.esa.int/articles/about-us/directorates/operations/space-safety/hera/sir-brian-may-adds-new-dimension-to-hera-asteroid",
+        "hn": "https://news.ycombinator.com/item?id=50583768",
+        "score": 26,
+        "comments": 3
       },
       {
-        "id": 50567374,
-        "title": "RegExr: Temporarily Offline",
-        "url": "https://regexr.com/",
-        "hn": "https://news.ycombinator.com/item?id=50567374",
-        "score": 42,
-        "comments": 22
+        "id": 50577265,
+        "title": "Language Models Can Rewrite Their Own Weights",
+        "url": "https://arxiv.org/abs/2611.21885",
+        "hn": "https://news.ycombinator.com/item?id=50577265",
+        "score": 330,
+        "comments": 108
       },
       {
-        "id": 50558906,
-        "title": "Someone reported java4shell bug in September 2026",
-        "url": "https://github.com/openjdk/jdk/pull/32781",
-        "hn": "https://news.ycombinator.com/item?id=50558906",
-        "score": 364,
-        "comments": 93
+        "id": 50581110,
+        "title": "DreamCoder: Coding harness and IDE from the author of Mastering Emacs",
+        "url": "https://www.masteringemacs.org/article/announcing-dreamcoder",
+        "hn": "https://news.ycombinator.com/item?id=50581110",
+        "score": 91,
+        "comments": 13
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "higurashi-ai/Haru-4B",
         "url": "https://huggingface.co/higurashi-ai/Haru-4B",
         "task": "audio-to-audio",
-        "downloads": 6266,
-        "likes": 3643
-      },
-      {
-        "id": "tencent/Hy4-flash",
-        "url": "https://huggingface.co/tencent/Hy4-flash",
-        "task": "image-text-to-text",
-        "downloads": 2053,
-        "likes": 346
-      },
-      {
-        "id": "apple/FastFrames-L",
-        "url": "https://huggingface.co/apple/FastFrames-L",
-        "task": "text-to-video",
-        "downloads": 0,
-        "likes": 331
+        "downloads": 7323,
+        "likes": 5421
       },
       {
         "id": "harness-hub/Qwen3.8-27B-pi-adapted",
         "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
         "task": "image-text-to-text",
-        "downloads": 1320,
-        "likes": 739
+        "downloads": 1874,
+        "likes": 861
       },
       {
         "id": "Qwen/Qwen3.8-27B",
         "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
         "task": "image-text-to-text",
-        "downloads": 6647301,
-        "likes": 20682
+        "downloads": 6454419,
+        "likes": 20801
       },
       {
-        "id": "inworld/voice-isolator",
-        "url": "https://huggingface.co/inworld/voice-isolator",
-        "task": "audio-to-audio",
+        "id": "thinkingmachines/Inkling-2-Mini",
+        "url": "https://huggingface.co/thinkingmachines/Inkling-2-Mini",
+        "task": "image-text-to-text",
+        "downloads": 136,
+        "likes": 589
+      },
+      {
+        "id": "Sentinel7/h3",
+        "url": "https://huggingface.co/Sentinel7/h3",
+        "task": "",
         "downloads": 0,
-        "likes": 265
-      },
-      {
-        "id": "MiniMaxAI/MiniMax-H3-Image",
-        "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
-        "task": "text-to-image",
-        "downloads": 821710,
-        "likes": 1647
-      },
-      {
-        "id": "maxwell-model/Maxwell-V1-Flash",
-        "url": "https://huggingface.co/maxwell-model/Maxwell-V1-Flash",
-        "task": "text-generation",
-        "downloads": 1703,
-        "likes": 287
+        "likes": 261
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 2934937,
-        "likes": 12743
+        "downloads": 2964523,
+        "likes": 12896
       },
       {
-        "id": "chatrlabs/Qwen-Image-2.1-Uncensored-Omni-Quantized",
-        "url": "https://huggingface.co/chatrlabs/Qwen-Image-2.1-Uncensored-Omni-Quantized",
+        "id": "unsloth/Inkling-2-Mini-GGUF",
+        "url": "https://huggingface.co/unsloth/Inkling-2-Mini-GGUF",
+        "task": "image-text-to-text",
+        "downloads": 0,
+        "likes": 191
+      },
+      {
+        "id": "tencent/Hy4-flash",
+        "url": "https://huggingface.co/tencent/Hy4-flash",
+        "task": "image-text-to-text",
+        "downloads": 3949,
+        "likes": 545
+      },
+      {
+        "id": "sensenova/SenseNova-Loop-9B",
+        "url": "https://huggingface.co/sensenova/SenseNova-Loop-9B",
+        "task": "image-text-to-text",
+        "downloads": 1631,
+        "likes": 445
+      },
+      {
+        "id": "MiniMaxAI/MiniMax-H3-Image",
+        "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
         "task": "text-to-image",
-        "downloads": 268540,
-        "likes": 693
+        "downloads": 876986,
+        "likes": 1702
       }
     ],
     "weibo": [
       {
-        "word": "中俄美元首会晤富有成果",
-        "num": 1061733,
+        "word": "DeepSeek付费体验直线上升",
+        "num": 1114427,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E4%BF%84%E7%BE%8E%E5%85%83%E9%A6%96%E4%BC%9A%E6%99%A4%E5%AF%8C%E6%9C%89%E6%88%90%E6%9E%9C%23"
+        "url": "https://s.weibo.com/weibo?q=%23DeepSeek%E4%BB%98%E8%B4%B9%E4%BD%93%E9%AA%8C%E7%9B%B4%E7%BA%BF%E4%B8%8A%E5%8D%87%23"
       },
       {
-        "word": "马斯克从深圳飞到了上海",
-        "num": 924453,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%A9%AC%E6%96%AF%E5%85%8B%E4%BB%8E%E6%B7%B1%E5%9C%B3%E9%A3%9E%E5%88%B0%E4%BA%86%E4%B8%8A%E6%B5%B7%23"
-      },
-      {
-        "word": "一图读懂深圳倡议",
-        "num": 609202,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%80%E5%9B%BE%E8%AF%BB%E6%87%82%E6%B7%B1%E5%9C%B3%E5%80%A1%E8%AE%AE%23"
-      },
-      {
-        "word": "特朗普离开深圳前与王毅面谈",
-        "num": 494574,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%9C%97%E6%99%AE%E7%A6%BB%E5%BC%80%E6%B7%B1%E5%9C%B3%E5%89%8D%E4%B8%8E%E7%8E%8B%E6%AF%85%E9%9D%A2%E8%B0%88%23"
-      },
-      {
-        "word": "多所高校不向2027级研究生提供宿舍",
-        "num": 470253,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%9A%E6%89%80%E9%AB%98%E6%A0%A1%E4%B8%8D%E5%90%912027%E7%BA%A7%E7%A0%94%E7%A9%B6%E7%94%9F%E6%8F%90%E4%BE%9B%E5%AE%BF%E8%88%8D%23"
-      },
-      {
-        "word": "美股再度大跌",
-        "num": 356723,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E8%82%A1%E5%86%8D%E5%BA%A6%E5%A4%A7%E8%B7%8C%23"
-      },
-      {
-        "word": "Anthropic股价跌破100",
-        "num": 339812,
+        "word": "黎曼猜想",
+        "num": 819105,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23Anthropic%E8%82%A1%E4%BB%B7%E8%B7%8C%E7%A0%B4100%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%BB%8E%E6%9B%BC%E7%8C%9C%E6%83%B3%23"
       },
       {
-        "word": "两京十五日 轻喜剧",
-        "num": 339036,
+        "word": "APEC盛会效应拉满",
+        "num": 657541,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%A4%E4%BA%AC%E5%8D%81%E4%BA%94%E6%97%A5%20%E8%BD%BB%E5%96%9C%E5%89%A7%23"
+        "url": "https://s.weibo.com/weibo?q=%23APEC%E7%9B%9B%E4%BC%9A%E6%95%88%E5%BA%94%E6%8B%89%E6%BB%A1%23"
       },
       {
-        "word": "GTA6",
-        "num": 337907,
+        "word": "特朗普涉中俄美最新表态",
+        "num": 399300,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23GTA6%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%9C%97%E6%99%AE%E6%B6%89%E4%B8%AD%E4%BF%84%E7%BE%8E%E6%9C%80%E6%96%B0%E8%A1%A8%E6%80%81%23"
       },
       {
-        "word": "杨超越董思成 二搭",
-        "num": 336737,
+        "word": "胖东来搬离后原址所开新商场几乎倒闭",
+        "num": 366011,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%83%96%E4%B8%9C%E6%9D%A5%E6%90%AC%E7%A6%BB%E5%90%8E%E5%8E%9F%E5%9D%80%E6%89%80%E5%BC%80%E6%96%B0%E5%95%86%E5%9C%BA%E5%87%A0%E4%B9%8E%E5%80%92%E9%97%AD%23"
+      },
+      {
+        "word": "张萌回应青稚打听式安慰",
+        "num": 329816,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9D%A8%E8%B6%85%E8%B6%8A%E8%91%A3%E6%80%9D%E6%88%90%20%E4%BA%8C%E6%90%AD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%BC%A0%E8%90%8C%E5%9B%9E%E5%BA%94%E9%9D%92%E7%A8%9A%E6%89%93%E5%90%AC%E5%BC%8F%E5%AE%89%E6%85%B0%23"
+      },
+      {
+        "word": "美AI科技股崩盘原因",
+        "num": 325824,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8EAI%E7%A7%91%E6%8A%80%E8%82%A1%E5%B4%A9%E7%9B%98%E5%8E%9F%E5%9B%A0%23"
+      },
+      {
+        "word": "金价罕见大跌原因找到了",
+        "num": 276669,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E9%87%91%E4%BB%B7%E7%BD%95%E8%A7%81%E5%A4%A7%E8%B7%8C%E5%8E%9F%E5%9B%A0%E6%89%BE%E5%88%B0%E4%BA%86%23"
+      },
+      {
+        "word": "林更新你怎么什么都敢演",
+        "num": 271381,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9E%97%E6%9B%B4%E6%96%B0%E4%BD%A0%E6%80%8E%E4%B9%88%E4%BB%80%E4%B9%88%E9%83%BD%E6%95%A2%E6%BC%94%23"
+      },
+      {
+        "word": "深圳人又开始原装出街了",
+        "num": 250376,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B7%B1%E5%9C%B3%E4%BA%BA%E5%8F%88%E5%BC%80%E5%A7%8B%E5%8E%9F%E8%A3%85%E5%87%BA%E8%A1%97%E4%BA%86%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2023,
-        "text": "香港迪士尼乐园新园区魔雪奇缘世界开幕，为全球迪士尼首个以卖座动画“魔雪奇缘”为主题的园区，当中的‘雪岭滑雪橇’更为香港独有的过山车。",
-        "title": "香港迪士尼樂園",
-        "url": "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF%E8%BF%AA%E5%A3%AB%E5%B0%BC%E6%A8%82%E5%9C%92"
+        "year": 2022,
+        "text": "第22届世界杯足球赛在卡达开幕。",
+        "title": "2022年國際足協世界盃",
+        "url": "https://zh.wikipedia.org/wiki/2022%E5%B9%B4%E5%9C%8B%E9%9A%9B%E8%B6%B3%E5%8D%94%E4%B8%96%E7%95%8C%E7%9B%83"
       },
       {
-        "year": 2019,
-        "text": "安倍晋三成为日本宪政史上，在任时间最长的内阁总理大臣。",
-        "title": "安倍晋三",
-        "url": "https://zh.wikipedia.org/wiki/%E5%AE%89%E5%80%8D%E6%99%8B%E4%B8%89"
+        "year": 2022,
+        "text": "印度尼西亚西爪哇省发生Mww 5.6地震，造成至少271人死亡、2,043人受伤。",
+        "title": "印度尼西亚",
+        "url": "https://zh.wikipedia.org/wiki/%E5%8D%B0%E5%BA%A6%E5%B0%BC%E8%A5%BF%E4%BA%9A"
       },
       {
-        "year": 2019,
-        "text": "美国国会正式通过香港人权与民主法案。",
-        "title": "美国国会",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E5%9B%BD%E4%BC%9A"
+        "year": 2021,
+        "text": "美国威斯康辛州沃科夏耶诞游行发生休旅车冲撞游行队伍事故，造成5人死亡和40多人受伤。",
+        "title": "美国",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD"
+      },
+      {
+        "year": 2017,
+        "text": "津巴布韦总统罗伯特·穆加贝迫于政变压力辞职，结束对津巴布韦近30年的统治。",
+        "title": "辛巴威總統",
+        "url": "https://zh.wikipedia.org/wiki/%E8%BE%9B%E5%B7%B4%E5%A8%81%E7%B8%BD%E7%B5%B1"
       },
       {
         "year": 2013,
-        "text": "首届中国国际马戏节在中国广东省珠海市横琴举行。",
-        "title": "中國",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B"
+        "text": "由于乌克兰总统亚努科维奇拒绝签署与欧盟的联合协议，基辅爆发大规模抗议，并蔓延至全国。",
+        "title": "烏克蘭總統",
+        "url": "https://zh.wikipedia.org/wiki/%E7%83%8F%E5%85%8B%E8%98%AD%E7%B8%BD%E7%B5%B1"
       },
       {
-        "year": 2007,
-        "text": "第13届东盟首脑会议在新加坡开幕，与会的东盟10国领导人签署了第一份具有普遍法律约束力的文件《东盟宪章》。",
-        "title": "东南亚国家联盟",
-        "url": "https://zh.wikipedia.org/wiki/%E4%B8%9C%E5%8D%97%E4%BA%9A%E5%9B%BD%E5%AE%B6%E8%81%94%E7%9B%9F"
-      },
-      {
-        "year": 2005,
-        "text": "台北101首度举办台北101国际登高赛，比赛楼层1～91楼（2046阶），楼高392米，正式超越美国帝国大厦登高赛的比赛规模，成为世界上最高楼的登高赛。",
-        "title": "台北101",
-        "url": "https://zh.wikipedia.org/wiki/%E5%8F%B0%E5%8C%97101"
+        "year": 2012,
+        "text": "以色列和哈马斯等武装组织之间的停火协议正式生效，结束长达一周的云柱行动。",
+        "title": "以色列",
+        "url": "https://zh.wikipedia.org/wiki/%E4%BB%A5%E8%89%B2%E5%88%97"
       }
     ]
   }
