@@ -1,7 +1,7 @@
 // 设置中心：主题/动画/字体应用 + 设置弹层（iframe 加载 settings.html，postMessage 单向同步）。
 // 拆分自 script.js 原第 4070–4164 行；跨块调用（时钟/天气/待办）走对主 script.js 的
 // 循环导入，仅在函数体内访问（约定见 js/common.js 头部）。
-import { lsGet } from './common.js';
+import { lsGet, setModalInert } from './common.js';
 import { applyClockStyle, initWeather, lastWeatherRaw, updateTodoCount } from '../script.js';
 
 const settingsBtn = document.getElementById('settingsBtn');
@@ -45,11 +45,13 @@ export function initSettingsModal() {
         void settingsModal.offsetHeight; // 同步回流，保证过渡生效（不依赖被节流的 rAF）
         settingsModal.classList.add('open');
         document.body.classList.add('modal-open'); // 锁定背景滚动
+        setModalInert(settingsModal, true); // 屏蔽背景焦点与读屏穿透
         settingsClose.focus();
     };
     const close = () => {
         settingsModal.classList.remove('open');
         document.body.classList.remove('modal-open');
+        setModalInert(settingsModal, false);
         setTimeout(() => { if (!settingsModal.classList.contains('open')) settingsModal.hidden = true; }, 200);
         settingsBtn.focus(); // 焦点还原
     };
@@ -80,8 +82,12 @@ export function initSettingsModal() {
             document.body.classList.remove('no-anim');
             document.body.classList.remove('sidebar-collapsed');
             sidebar.classList.remove('collapsed');
-            document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('section-collapsed'));
-            document.getElementById('todoList').innerHTML = '';
+            document.querySelectorAll('.sidebar-section').forEach(s => {
+                s.classList.remove('section-collapsed');
+                const titleBtn = s.querySelector('.sidebar-section-title');
+                if (titleBtn) titleBtn.setAttribute('aria-expanded', 'true');
+            });
+            document.getElementById('todoList').replaceChildren();
             updateTodoCount();
         } else if (e.data && e.data.type === 'close-settings') {
             close();

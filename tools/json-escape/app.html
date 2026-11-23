@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JSON 字符串转义</h1>
             <p>在 JSON 字符串转义与反转义之间转换</p>
@@ -215,11 +218,11 @@
             <div class="grid">
                 <div>
                     <label>输入文本</label>
-                    <textarea id="input" placeholder="输入原始文本或转义后的字符串"></textarea>
+                    <textarea id="input" placeholder="输入原始文本或转义后的字符串" aria-label="输入原始文本或转义后的字符串"></textarea>
                 </div>
                 <div>
                     <label>输出结果</label>
-                    <textarea id="output" readonly placeholder="转换后的结果"></textarea>
+                    <textarea id="output" readonly placeholder="转换后的结果" aria-label="转换后的结果"></textarea>
                 </div>
             </div>
             <div class="actions">
@@ -256,7 +259,7 @@
         copyBtn.addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
     </script>
 </body>

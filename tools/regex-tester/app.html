@@ -240,12 +240,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
 
         <div class="header">
             <h1>正则表达式测试器</h1>
@@ -277,7 +280,7 @@
 
         <div class="test-section">
             <label>测试文本</label>
-            <textarea class="test-textarea" id="test-text" placeholder="输入要测试的文本...">Hello World! This is a test with some words like code, test, and regex.
+            <textarea class="test-textarea" id="test-text" placeholder="输入要测试的文本..." aria-label="输入要测试的文本...">Hello World! This is a test with some words like code, test, and regex.
 Contact: example@email.com or https://example.com
 Phone: 13812345678</textarea>
 

@@ -223,12 +223,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>XML 转 JSON</h1>
             <p>将 XML 格式转换为 JSON 格式</p>
@@ -251,10 +254,10 @@
             </div>
 
             <div class="action-bar">
-                <button class="btn" onclick="convertToJSON()">XML 转 JSON →</button>
-                <button class="btn" onclick="convertToXML()">← JSON 转 XML</button>
-                <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                <button class="btn" data-ev-id="ev1">XML 转 JSON →</button>
+                <button class="btn" data-ev-id="ev2">← JSON 转 XML</button>
+                <button class="btn btn-secondary" data-ev-id="ev3">示例</button>
+                <button class="btn btn-secondary" data-ev-id="ev4">清空</button>
             </div>
 
             <div class="error-msg" id="error-msg"></div>
@@ -264,24 +267,24 @@
                     <div class="editor-header">
                         <span class="editor-title">XML</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="copyToClipboard('xml-input')">复制</button>
-                            <button class="icon-btn" onclick="pasteFromClipboard('xml-input')">粘贴</button>
-                            <button class="icon-btn" onclick="document.getElementById('xml-input').value=''">清空</button>
+                            <button class="icon-btn" data-ev-id="ev5">复制</button>
+                            <button class="icon-btn" data-ev-id="ev6">粘贴</button>
+                            <button class="icon-btn" data-ev-id="ev7">清空</button>
                         </div>
                     </div>
-                    <textarea class="editor-textarea" id="xml-input" placeholder="在此输入 XML..." oninput="handleInput()"></textarea>
+                    <textarea class="editor-textarea" id="xml-input" placeholder="在此输入 XML..." data-ev-id="ev8" aria-label="在此输入 XML..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">JSON</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="copyToClipboard('json-output')">复制</button>
-                            <button class="icon-btn" onclick="pasteFromClipboard('json-output')">粘贴</button>
-                            <button class="icon-btn" onclick="document.getElementById('json-output').value=''">清空</button>
+                            <button class="icon-btn" data-ev-id="ev9">复制</button>
+                            <button class="icon-btn" data-ev-id="ev10">粘贴</button>
+                            <button class="icon-btn" data-ev-id="ev11">清空</button>
                         </div>
                     </div>
-                    <textarea class="editor-textarea" id="json-output" placeholder="转换结果将显示在这里..." readonly></textarea>
+                    <textarea class="editor-textarea" id="json-output" placeholder="转换结果将显示在这里..." readonly aria-label="转换结果将显示在这里..."></textarea>
                 </div>
             </div>
         </div>
@@ -544,7 +547,22 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { convertToJSON(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { convertToXML(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { copyToClipboard('xml-input'); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { pasteFromClipboard('xml-input'); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { document.getElementById('xml-input').value=''; });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('input', function(event) { handleInput(); });
+  document.querySelector('[data-ev-id="ev9"]')?.addEventListener('click', function(event) { copyToClipboard('json-output'); });
+  document.querySelector('[data-ev-id="ev10"]')?.addEventListener('click', function(event) { pasteFromClipboard('json-output'); });
+  document.querySelector('[data-ev-id="ev11"]')?.addEventListener('click', function(event) { document.getElementById('json-output').value=''; });
+})();
+</script>
     
 </body>
 </html>

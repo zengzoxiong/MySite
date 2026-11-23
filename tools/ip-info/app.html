@@ -178,12 +178,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>IP 地址信息查询</h1>
         </div>
@@ -193,9 +196,9 @@
                 <label>查询 IP 地址（留空查询本机 IP）：</label>
                 <div class="input-wrapper">
                     <input type="text" id="ip-input" placeholder="例如: 8.8.8.8">
-                    <button class="btn" onclick="queryIP()" id="query-btn">查询</button>
+                    <button class="btn" id="query-btn" data-ev-id="ev1">查询</button>
                 </div>
-                <button class="btn" onclick="getMyIP()" style="margin-top: 12px; width: 100%;">查询本机 IP</button>
+                <button class="btn" style="margin-top: 12px; width: 100%;" data-ev-id="ev2">查询本机 IP</button>
             </div>
             <div class="error-msg" id="error-msg"></div>
         </div>
@@ -296,7 +299,13 @@
         window.addEventListener('load', () => {
             getMyIP();
         });
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { queryIP(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { getMyIP(); });
+})();
+</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onerror="this.onerror=null;this.href='../../assets/vendor/fontawesome/css/all.min.css';">
 </body>
 </html>

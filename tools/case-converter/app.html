@@ -163,12 +163,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>大小写转换工具</h1>
             <p>在各种命名格式之间转换文本</p>
@@ -177,7 +180,7 @@
         <div class="card">
             <div class="input-area">
                 <label>输入文本</label>
-                <textarea id="input" placeholder="输入要转换的文本... 例如: hello world" oninput="convert()"></textarea>
+                <textarea id="input" placeholder="输入要转换的文本... 例如: hello world" data-ev-id="ev1" aria-label="输入要转换的文本... 例如: hello world"></textarea>
             </div>
 
             <div class="results">
@@ -186,7 +189,7 @@
                         <span class="result-name">小写 (lowercase)</span>
                     </div>
                     <div class="result-value" id="lowercase">hello world</div>
-                    <button class="copy-btn" onclick="copy('lowercase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev2">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -194,7 +197,7 @@
                         <span class="result-name">大写 (UPPERCASE)</span>
                     </div>
                     <div class="result-value" id="uppercase">HELLO WORLD</div>
-                    <button class="copy-btn" onclick="copy('uppercase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev3">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -202,7 +205,7 @@
                         <span class="result-name">首字母大写 (Title Case)</span>
                     </div>
                     <div class="result-value" id="titlecase">Hello World</div>
-                    <button class="copy-btn" onclick="copy('titlecase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev4">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -210,7 +213,7 @@
                         <span class="result-name">句首大写 (Sentence case)</span>
                     </div>
                     <div class="result-value" id="sentencecase">Hello world</div>
-                    <button class="copy-btn" onclick="copy('sentencecase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev5">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -218,7 +221,7 @@
                         <span class="result-name">驼峰命名 (camelCase)</span>
                     </div>
                     <div class="result-value" id="camelcase">helloWorld</div>
-                    <button class="copy-btn" onclick="copy('camelcase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev6">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -226,7 +229,7 @@
                         <span class="result-name">帕斯卡命名 (PascalCase)</span>
                     </div>
                     <div class="result-value" id="pascalcase">HelloWorld</div>
-                    <button class="copy-btn" onclick="copy('pascalcase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev7">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -234,7 +237,7 @@
                         <span class="result-name">蛇形命名 (snake_case)</span>
                     </div>
                     <div class="result-value" id="snakecase">hello_world</div>
-                    <button class="copy-btn" onclick="copy('snakecase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev8">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -242,7 +245,7 @@
                         <span class="result-name">常量命名 (CONSTANT_CASE)</span>
                     </div>
                     <div class="result-value" id="constantcase">HELLO_WORLD</div>
-                    <button class="copy-btn" onclick="copy('constantcase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev9">复制</button>
                 </div>
 
                 <div class="result-item">
@@ -250,7 +253,7 @@
                         <span class="result-name">烤串命名 (kebab-case)</span>
                     </div>
                     <div class="result-value" id="kebabcase">hello-world</div>
-                    <button class="copy-btn" onclick="copy('kebabcase')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev10">复制</button>
                 </div>
             </div>
         </div>
@@ -371,7 +374,21 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('input', function(event) { convert(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copy('lowercase'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copy('uppercase'); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { copy('titlecase'); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { copy('sentencecase'); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { copy('camelcase'); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { copy('pascalcase'); });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('click', function(event) { copy('snakecase'); });
+  document.querySelector('[data-ev-id="ev9"]')?.addEventListener('click', function(event) { copy('constantcase'); });
+  document.querySelector('[data-ev-id="ev10"]')?.addEventListener('click', function(event) { copy('kebabcase'); });
+})();
+</script>
     
 </body>
 </html>

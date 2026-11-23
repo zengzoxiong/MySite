@@ -144,12 +144,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>日期差值计算器</h1>
             <p>计算两个日期之间的天数、小时数和总秒数</p>
@@ -172,7 +175,7 @@
             </div>
 
             <div class="result" id="result"></div>
-            <div class="status" id="status">请选择开始和结束时间。</div>
+            <div class="status" id="status" role="status">请选择开始和结束时间。</div>
         </div>
     </div>
 

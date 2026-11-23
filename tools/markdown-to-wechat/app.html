@@ -356,12 +356,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Markdown 转公众号排版</h1>
             <p>赛博科技蓝色系公众号样式，所见即所得</p>
@@ -370,12 +373,12 @@
         <div class="card">
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="loadExample()">加载示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">加载示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev2">清空</button>
                 </div>
                 <div class="btn-group">
-                    <button class="btn" onclick="copyWechatHtml()">复制公众号内容</button>
-                    <button class="btn btn-secondary" onclick="copyPreviewHtml()">复制预览 HTML</button>
+                    <button class="btn" data-ev-id="ev3">复制公众号内容</button>
+                    <button class="btn btn-secondary" data-ev-id="ev4">复制预览 HTML</button>
                 </div>
             </div>
             <div class="editor-container">
@@ -383,8 +386,8 @@
                     <div class="editor-header">
                         <span class="editor-title">Markdown 输入</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="pasteMarkdown()">粘贴</button>
-                            <button class="icon-btn" onclick="clearAll()">清空</button>
+                            <button class="icon-btn" data-ev-id="ev5">粘贴</button>
+                            <button class="icon-btn" data-ev-id="ev6">清空</button>
                         </div>
                     </div>
                     <textarea class="editor-textarea" id="markdown-input" placeholder="# 标题：赛博科技蓝色系公众号排版
@@ -397,7 +400,7 @@
 - 自适应间距
 - 清晰层级
 
-> 引用内容会自动转换成醒目的蓝色块。
+ aria-label="markdown-input"> 引用内容会自动转换成醒目的蓝色块。
 
 ```js
 const theme = "cyber-blue";
@@ -420,7 +423,7 @@ console.log(theme);
                     <div class="editor-header">
                         <span class="editor-title">公众号排版预览</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="copyWechatHtml()">复制</button>
+                            <button class="icon-btn" data-ev-id="ev7">复制</button>
                         </div>
                     </div>
                     <div class="preview-content" id="html-preview"></div>
@@ -455,7 +458,7 @@ console.log(theme);
             html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
             html = html.replace(/_(.+?)_/g, '<em>$1</em>');
             html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
-            html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
             html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1">');
             html = html.replace(/^[\*\-] (.+)$/gm, '<li>$1</li>');
             html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
@@ -567,7 +570,7 @@ console.log(theme);
             textarea.style.left = '-9999px';
             document.body.appendChild(textarea);
             textarea.select();
-            const ok = document.execCommand('copy');
+            let ok = true; try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) { ok = false; }
             document.body.removeChild(textarea);
             if (ok) {
                 showToast(successMessage);
@@ -596,7 +599,7 @@ console.log(theme);
             selection.removeAllRanges();
             selection.addRange(range);
 
-            const ok = document.execCommand('copy');
+            let ok = true; try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) { ok = false; }
             selection.removeAllRanges();
             document.body.removeChild(wrapper);
 
@@ -686,6 +689,17 @@ console.log(theme);
         }
 
         convert();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { loadExample(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyWechatHtml(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { copyPreviewHtml(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { pasteMarkdown(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { copyWechatHtml(); });
+})();
+</script>
 </body>
 </html>

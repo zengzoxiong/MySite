@@ -255,12 +255,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>📜 每日一言</h1>
             <p>每日一句名言，点亮人生智慧</p>
@@ -291,7 +294,7 @@
         </div>
     </div>
 
-    <div class="copy-toast" id="copyToast">已复制到剪贴板</div>
+    <div class="copy-toast" id="copyToast" role="status">已复制到剪贴板</div>
 
     <script>
         const quotes = [

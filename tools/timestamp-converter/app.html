@@ -250,12 +250,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Unix 时间戳转换</h1>
             <p>时间戳与日期时间格式互相转换</p>
@@ -270,16 +273,16 @@
             <h3>时间戳转日期时间</h3>
             <div class="input-group">
                 <input type="number" id="timestamp-input" placeholder="输入 Unix 时间戳 (秒或毫秒)">
-                <button class="btn" onclick="convertToDate()">转换</button>
+                <button class="btn" data-ev-id="ev1">转换</button>
             </div>
             <div class="result" id="date-result">
                 <div style="text-align: center; color: #999; padding: 20px;">输入时间戳查看转换结果</div>
             </div>
             <div class="quick-actions">
-                <button class="quick-btn" onclick="setTimestamp(Math.floor(Date.now() / 1000))">当前时间</button>
-                <button class="quick-btn" onclick="setTimestamp(0)">Unix 纪元</button>
-                <button class="quick-btn" onclick="setTimestamp(Math.floor(Date.now() / 1000) + 86400)">明天</button>
-                <button class="quick-btn" onclick="setTimestamp(Math.floor(Date.now() / 1000) - 86400)">昨天</button>
+                <button class="quick-btn" data-ev-id="ev2">当前时间</button>
+                <button class="quick-btn" data-ev-id="ev3">Unix 纪元</button>
+                <button class="quick-btn" data-ev-id="ev4">明天</button>
+                <button class="quick-btn" data-ev-id="ev5">昨天</button>
             </div>
         </div>
 
@@ -287,8 +290,8 @@
             <h3>日期时间转时间戳</h3>
             <div class="input-group">
                 <input type="datetime-local" id="datetime-input">
-                <button class="btn" onclick="convertToTimestamp()">转换</button>
-                <button class="btn btn-secondary" onclick="setCurrentDatetime()">当前时间</button>
+                <button class="btn" data-ev-id="ev6">转换</button>
+                <button class="btn btn-secondary" data-ev-id="ev7">当前时间</button>
             </div>
             <div class="result" id="timestamp-result">
                 <div style="text-align: center; color: #999; padding: 20px;">选择日期时间查看转换结果</div>
@@ -476,7 +479,18 @@
         document.getElementById('timestamp-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') convertToDate();
         });
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { convertToDate(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { setTimestamp(Math.floor(Date.now() / 1000)); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { setTimestamp(0); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { setTimestamp(Math.floor(Date.now() / 1000) + 86400); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { setTimestamp(Math.floor(Date.now() / 1000) - 86400); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { convertToTimestamp(); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { setCurrentDatetime(); });
+})();
+</script>
     
 </body>
 </html>

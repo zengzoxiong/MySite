@@ -250,12 +250,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JWT 解码器</h1>
             <p>解码和验证 JSON Web Token</p>
@@ -269,9 +272,9 @@
             <div class="input-area">
                 <div class="input-header">
                     <h3>输入 JWT Token</h3>
-                    <button class="clear-btn" onclick="clearInput()">清空</button>
+                    <button class="clear-btn" data-ev-id="ev1">清空</button>
                 </div>
-                <textarea id="jwt-input" placeholder="粘贴你的 JWT Token 在这里..." oninput="decode()"></textarea>
+                <textarea id="jwt-input" placeholder="粘贴你的 JWT Token 在这里..." data-ev-id="ev2" aria-label="粘贴你的 JWT Token 在这里..."></textarea>
                 <div id="error-output"></div>
             </div>
 
@@ -440,7 +443,13 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { clearInput(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('input', function(event) { decode(); });
+})();
+</script>
     
 </body>
 </html>

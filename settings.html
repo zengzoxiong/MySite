@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>设置</title>
     <link rel="stylesheet" href="styles.css">
     <!-- 外观偏好清单（与主站共用一份），必须先于下面内联脚本 -->
@@ -11,6 +12,7 @@
         /* 设置页自身布局（复用全站变量与开关组件样式） */
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: stretch;
             padding: 0;
@@ -19,25 +21,32 @@
 
         .settings-page {
             width: 100%;
-            max-height: 100vh; /* 选项变多后靠本页自己滚，别撑破弹层 */
+            max-height: 100vh;
+            max-height: 100dvh; /* 选项变多后靠本页自己滚，别撑破弹层 */
             overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
             background-color: var(--card-bg);
             padding: 26px 28px;
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
         }
 
-        .settings-page::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .settings-page::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .settings-page::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 2px;
+        @supports not (scrollbar-color: auto) {
+            .settings-page {
+                scrollbar-width: auto;
+            }
+            .settings-page::-webkit-scrollbar {
+                width: 4px;
+            }
+            .settings-page::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .settings-page::-webkit-scrollbar-thumb {
+                background: var(--border-color);
+                border-radius: 2px;
+            }
         }
 
         .settings-page .settings-title {
@@ -90,7 +99,7 @@
 </head>
 <body>
     <div class="settings-page">
-        <div class="settings-title">设置</div>
+        <h1 class="settings-title">设置</h1>
         <div class="settings-item settings-col">
             <span class="settings-label">主题色</span>
             <div class="accent-dots" id="accentDots" role="radiogroup" aria-label="主题色"></div>
@@ -102,14 +111,14 @@
         <div class="settings-item">
             <span class="settings-label">动画效果</span>
             <label class="settings-switch">
-                <input type="checkbox" id="settingAnim" checked>
+                <input type="checkbox" id="settingAnim" checked aria-label="动画效果">
                 <span class="slider"></span>
             </label>
         </div>
         <div class="settings-item">
             <span class="settings-label">搜索回车后聚焦首条</span>
             <label class="settings-switch">
-                <input type="checkbox" id="settingFocusFirst" checked>
+                <input type="checkbox" id="settingFocusFirst" checked aria-label="搜索回车后聚焦首条">
                 <span class="slider"></span>
             </label>
         </div>
@@ -211,23 +220,41 @@
             catch (e) { return null; }
         }
 
-        function renderAccentDots() {
+        function renderAccentDots(focusId) {
             const saved = readAccentSaved();
-            accentDots.innerHTML = '';
-            AP.ACCENTS.forEach((a) => {
+            const activeId = saved ? saved.id : '';
+            accentDots.replaceChildren();
+            AP.ACCENTS.forEach((a, idx) => {
+                const isChecked = activeId === a.id;
                 const dot = document.createElement('button');
                 dot.type = 'button';
-                dot.className = 'accent-dot' + ((saved ? saved.id : '') === a.id ? ' active' : '');
+                dot.setAttribute('role', 'radio');
+                dot.setAttribute('aria-checked', String(isChecked));
+                dot.tabIndex = isChecked || (!activeId && idx === 0) ? 0 : -1;
+                dot.className = 'accent-dot' + (isChecked ? ' active' : '');
                 dot.style.background = 'linear-gradient(135deg, ' + a.p + ', ' + a.s + ')';
                 dot.title = a.name;
                 dot.setAttribute('aria-label', '主题色：' + a.name);
-                dot.addEventListener('click', () => {
+                const selectAccent = (shouldFocus) => {
                     lsSet(KEY_ACCENT, JSON.stringify({ id: a.id, p: a.p, s: a.s }));
                     AP.applyAccent(a.id);
                     notify('accent-changed');
-                    renderAccentDots();
+                    renderAccentDots(shouldFocus ? a.id : '');
+                };
+                dot.addEventListener('click', () => selectAccent(false));
+                dot.addEventListener('keydown', (e) => {
+                    const step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
+                        : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+                    if (!step) return;
+                    e.preventDefault();
+                    const next = AP.ACCENTS[(idx + step + AP.ACCENTS.length) % AP.ACCENTS.length];
+                    lsSet(KEY_ACCENT, JSON.stringify({ id: next.id, p: next.p, s: next.s }));
+                    AP.applyAccent(next.id);
+                    notify('accent-changed');
+                    renderAccentDots(next.id);
                 });
                 accentDots.appendChild(dot);
+                if (focusId && focusId === a.id) dot.focus();
             });
         }
         renderAccentDots();
@@ -277,7 +304,7 @@
 
         function hideCityList() {
             cityList.hidden = true;
-            cityList.innerHTML = '';
+            cityList.replaceChildren();
         }
 
         function cityRow(item, plainText) {
@@ -305,7 +332,7 @@
         }
 
         function renderCityList(items, loading, failText) {
-            cityList.innerHTML = '';
+            cityList.replaceChildren();
             if (failText) {
                 cityList.appendChild(cityRow(null, failText));
                 cityList.hidden = false;

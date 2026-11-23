@@ -151,12 +151,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>HTML 实体编码/解码</h1>
             <p>将 HTML 特殊字符转换为实体编码或反向转换</p>
@@ -164,27 +167,27 @@
 
         <div class="card">
             <div class="action-bar">
-                <button class="btn" onclick="encode()">编码 →</button>
-                <button class="btn" onclick="decode()">← 解码</button>
-                <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                <button class="btn" data-ev-id="ev1">编码 →</button>
+                <button class="btn" data-ev-id="ev2">← 解码</button>
+                <button class="btn btn-secondary" data-ev-id="ev3">示例</button>
+                <button class="btn btn-secondary" data-ev-id="ev4">清空</button>
             </div>
 
             <div class="editor-container">
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">输入</span>
-                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="pasteToInput()">粘贴</button>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" data-ev-id="ev5">粘贴</button>
                     </div>
-                    <textarea class="editor-textarea" id="input" placeholder="输入要编码/解码的文本..."></textarea>
+                    <textarea class="editor-textarea" id="input" placeholder="输入要编码/解码的文本..." aria-label="输入要编码/解码的文本..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">输出</span>
-                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="copyOutput()">复制</button>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" data-ev-id="ev6">复制</button>
                     </div>
-                    <textarea class="editor-textarea" id="output" placeholder="输出结果..." readonly></textarea>
+                    <textarea class="editor-textarea" id="output" placeholder="输出结果..." readonly aria-label="输出结果..."></textarea>
                 </div>
             </div>
         </div>
@@ -325,7 +328,17 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { encode(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { decode(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { pasteToInput(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { copyOutput(); });
+})();
+</script>
     
 </body>
 </html>

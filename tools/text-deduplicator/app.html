@@ -152,12 +152,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>文本去重工具</h1>
             <p>按行去重、保持顺序，适合清理名单和清单</p>
@@ -173,11 +176,11 @@
             <div class="grid">
                 <div>
                     <h3 style="margin-bottom: 8px; color: #111827;">原始文本</h3>
-                    <textarea id="input" placeholder="每行一个条目"></textarea>
+                    <textarea id="input" placeholder="每行一个条目" aria-label="每行一个条目"></textarea>
                 </div>
                 <div>
                     <h3 style="margin-bottom: 8px; color: #111827;">去重结果</h3>
-                    <textarea id="output" readonly placeholder="结果会显示在这里"></textarea>
+                    <textarea id="output" readonly placeholder="结果会显示在这里" aria-label="结果会显示在这里"></textarea>
                 </div>
             </div>
 
@@ -237,7 +240,7 @@
             }
             output.select();
             output.setSelectionRange(0, output.value.length);
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         }
 
         function clearAll() {

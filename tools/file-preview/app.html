@@ -213,7 +213,9 @@
             .bar .name { max-width: 100%; }
             .view { max-height: none; }
         }
-    </style>
+    
+        :root { color-scheme: light; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
@@ -263,7 +265,7 @@
                     <button class="mini" id="printBtn" type="button" hidden>打印 / 存 PDF</button>
                     <a class="mini" id="openTab" hidden>新窗口打开</a>
                 </div>
-                <div class="notice" id="notice" hidden></div>
+                <div class="notice" id="notice" hidden role="status"></div>
                 <div class="view" id="view">
                     <div class="empty">
                         <h3>还没有选择文件</h3>

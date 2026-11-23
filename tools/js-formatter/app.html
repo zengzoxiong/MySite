@@ -105,7 +105,7 @@
             font-size: 14px;
             font-weight: 600;
             background: var(--accent);
-            color: white;
+            color: #111827;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JavaScript 格式化工具</h1>
             <p>美化 JavaScript 代码并提升可读性</p>
@@ -215,11 +218,11 @@
             <div class="grid">
                 <div>
                     <label>输入 JavaScript</label>
-                    <textarea id="input" placeholder="粘贴需要格式化的 JS 代码"></textarea>
+                    <textarea id="input" placeholder="粘贴需要格式化的 JS 代码" aria-label="粘贴需要格式化的 JS 代码"></textarea>
                 </div>
                 <div>
                     <label>输出结果</label>
-                    <textarea id="output" readonly placeholder="格式化后的代码"></textarea>
+                    <textarea id="output" readonly placeholder="格式化后的代码" aria-label="格式化后的代码"></textarea>
                 </div>
             </div>
             <div class="row" style="margin-top: 16px;">
@@ -274,7 +277,7 @@
         copyBtn.addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
     </script>
 </body>

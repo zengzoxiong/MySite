@@ -166,12 +166,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Lorem Ipsum 生成器</h1>
             <p>生成占位文本用于设计和测试</p>
@@ -195,9 +198,9 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn" onclick="generate()">生成</button>
-                <button class="btn btn-secondary" onclick="copyOutput()">复制</button>
-                <button class="btn btn-secondary" onclick="clearOutput()">清空</button>
+                <button class="btn" data-ev-id="ev1">生成</button>
+                <button class="btn btn-secondary" data-ev-id="ev2">复制</button>
+                <button class="btn btn-secondary" data-ev-id="ev3">清空</button>
             </div>
 
             <div class="output-area">
@@ -343,7 +346,14 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyOutput(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { clearOutput(); });
+})();
+</script>
     
 </body>
 </html>

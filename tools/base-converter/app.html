@@ -208,12 +208,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>进制转换工具</h1>
             <p>支持二进制、八进制、十进制、十六进制互相转换</p>
@@ -226,10 +229,10 @@
                         <span class="base-title">二进制</span>
                         <span class="base-badge">BASE-2</span>
                     </div>
-                    <input type="text" class="base-input" id="binary" placeholder="0" oninput="convert('binary')">
+                    <input type="text" class="base-input" id="binary" placeholder="0" data-ev-id="ev1">
                     <div class="base-info">
                         <span class="decimal-value" id="binary-decimal"></span>
-                        <button class="copy-btn" onclick="copyValue('binary')">复制</button>
+                        <button class="copy-btn" data-ev-id="ev2">复制</button>
                     </div>
                     <div class="error-msg" id="binary-error"></div>
                 </div>
@@ -239,10 +242,10 @@
                         <span class="base-title">八进制</span>
                         <span class="base-badge">BASE-8</span>
                     </div>
-                    <input type="text" class="base-input" id="octal" placeholder="0" oninput="convert('octal')">
+                    <input type="text" class="base-input" id="octal" placeholder="0" data-ev-id="ev3">
                     <div class="base-info">
                         <span class="decimal-value" id="octal-decimal"></span>
-                        <button class="copy-btn" onclick="copyValue('octal')">复制</button>
+                        <button class="copy-btn" data-ev-id="ev4">复制</button>
                     </div>
                     <div class="error-msg" id="octal-error"></div>
                 </div>
@@ -252,10 +255,10 @@
                         <span class="base-title">十进制</span>
                         <span class="base-badge">BASE-10</span>
                     </div>
-                    <input type="text" class="base-input" id="decimal" placeholder="0" oninput="convert('decimal')">
+                    <input type="text" class="base-input" id="decimal" placeholder="0" data-ev-id="ev5">
                     <div class="base-info">
                         <span class="decimal-value">常用进制</span>
-                        <button class="copy-btn" onclick="copyValue('decimal')">复制</button>
+                        <button class="copy-btn" data-ev-id="ev6">复制</button>
                     </div>
                     <div class="error-msg" id="decimal-error"></div>
                 </div>
@@ -265,10 +268,10 @@
                         <span class="base-title">十六进制</span>
                         <span class="base-badge">BASE-16</span>
                     </div>
-                    <input type="text" class="base-input" id="hexadecimal" placeholder="0" oninput="convert('hexadecimal')">
+                    <input type="text" class="base-input" id="hexadecimal" placeholder="0" data-ev-id="ev7">
                     <div class="base-info">
                         <span class="decimal-value" id="hexadecimal-decimal"></span>
-                        <button class="copy-btn" onclick="copyValue('hexadecimal')">复制</button>
+                        <button class="copy-btn" data-ev-id="ev8">复制</button>
                     </div>
                     <div class="error-msg" id="hexadecimal-error"></div>
                 </div>
@@ -436,7 +439,19 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('input', function(event) { convert('binary'); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyValue('binary'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('input', function(event) { convert('octal'); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { copyValue('octal'); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('input', function(event) { convert('decimal'); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { copyValue('decimal'); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('input', function(event) { convert('hexadecimal'); });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('click', function(event) { copyValue('hexadecimal'); });
+})();
+</script>
     
 </body>
 </html>

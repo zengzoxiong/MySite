@@ -208,12 +208,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
 
         <div class="header">
             <h1>颜色选择器</h1>
@@ -256,22 +259,22 @@
                 <div class="format-item">
                     <div class="format-label">HEX</div>
                     <div class="format-value" id="format-hex">#ff6b6b</div>
-                    <button class="copy-btn" onclick="copyValue('format-hex')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev1">复制</button>
                 </div>
                 <div class="format-item">
                     <div class="format-label">RGB</div>
                     <div class="format-value" id="format-rgb">rgb(255, 107, 107)</div>
-                    <button class="copy-btn" onclick="copyValue('format-rgb')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev2">复制</button>
                 </div>
                 <div class="format-item">
                     <div class="format-label">HSL</div>
                     <div class="format-value" id="format-hsl">hsl(0, 100%, 71%)</div>
-                    <button class="copy-btn" onclick="copyValue('format-hsl')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev3">复制</button>
                 </div>
                 <div class="format-item">
                     <div class="format-label">HSV</div>
                     <div class="format-value" id="format-hsv">hsv(0, 58%, 100%)</div>
-                    <button class="copy-btn" onclick="copyValue('format-hsv')">复制</button>
+                    <button class="copy-btn" data-ev-id="ev4">复制</button>
                 </div>
             </div>
         </div>
@@ -393,7 +396,15 @@
 
         // Initialize
         updateColor(currentColor);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { copyValue('format-hex'); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyValue('format-rgb'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyValue('format-hsl'); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { copyValue('format-hsv'); });
+})();
+</script>
     
 </body>
 </html>

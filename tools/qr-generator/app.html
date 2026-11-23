@@ -187,12 +187,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
 
         <div class="header">
             <h1>二维码生成器</h1>
@@ -202,7 +205,7 @@
             <div class="input-section">
                 <div class="input-group">
                     <label>内容</label>
-                    <textarea id="text" placeholder="输入文本或网址...">https://zengzoxiong.github.io/MySite/</textarea>
+                    <textarea id="text" placeholder="输入文本或网址..." aria-label="输入文本或网址...">https://zengzoxiong.github.io/MySite/</textarea>
                 </div>
 
                 <div class="options-grid">
@@ -245,7 +248,7 @@
             <div class="preview-section">
                 <div id="qrcode"></div>
                 <div class="actions">
-                    <button class="btn" onclick="downloadQR()">
+                    <button class="btn" data-ev-id="ev1">
                         <i class="fas fa-download"></i> 下载 PNG
                     </button>
                 </div>
@@ -318,7 +321,12 @@
 
         // Initial generation
         generateQR();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { downloadQR(); });
+})();
+</script>
     
 </body>
 </html>

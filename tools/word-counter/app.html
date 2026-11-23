@@ -236,12 +236,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>字数统计工具</h1>
             <p>实时统计文本的字数、词数、行数等信息</p>
@@ -251,9 +254,9 @@
             <div class="input-area">
                 <div class="input-header">
                     <h3>输入文本</h3>
-                    <button class="clear-btn" onclick="clearText()">清空</button>
+                    <button class="clear-btn" data-ev-id="ev1">清空</button>
                 </div>
-                <textarea id="input" placeholder="在此输入或粘贴文本..." oninput="analyze()"></textarea>
+                <textarea id="input" placeholder="在此输入或粘贴文本..." data-ev-id="ev2" aria-label="在此输入或粘贴文本..."></textarea>
             </div>
 
             <div class="stats">
@@ -308,7 +311,7 @@
 
             <div class="options">
                 <div class="option-item">
-                    <input type="checkbox" id="count-space" checked onchange="analyze()">
+                    <input type="checkbox" id="count-space" checked data-ev-id="ev3">
                     <label for="count-space">统计空格</label>
                 </div>
             </div>
@@ -366,7 +369,14 @@
 
         // 初始化
         analyze();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { clearText(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('input', function(event) { analyze(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('change', function(event) { analyze(); });
+})();
+</script>
     
 </body>
 </html>

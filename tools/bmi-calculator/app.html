@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>BMI 计算器</h1>
             <p>快速计算身体质量指数 BMI</p>
@@ -228,7 +231,7 @@
             <div class="output-box" style="margin-top: 16px;">
                 <p class="muted">BMI 结果</p>
                 <div class="result" id="bmi">--</div>
-                <p class="muted" id="status">--</p>
+                <p class="muted" id="status" role="status">--</p>
             </div>
         </div>
     </div>

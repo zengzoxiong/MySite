@@ -83,7 +83,7 @@
             font-size: 16px;
             font-weight: 600;
             background: var(--accent);
-            color: white;
+            color: #111827;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
@@ -209,12 +209,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>🎲 掷骰子工具</h1>
             <p>模拟掷骰子，支持多种骰子类型</p>
@@ -250,6 +253,21 @@
     </div>
 
     <script>
+function showNotice(msg) {
+    let el = document.getElementById('toolNoticeAlert');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toolNoticeAlert';
+        el.setAttribute('role', 'alert');
+        el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:90vw;text-align:center;';
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
         const diceContainer = document.getElementById('diceContainer');
         const rollBtn = document.getElementById('rollBtn');
         const result = document.getElementById('result');
@@ -263,7 +281,7 @@
             const sides = parseInt(diceTypeSelect.value);
 
             if (count < 1 || count > 12) {
-                alert('骰子数量必须在 1-12 之间');
+                showNotice('骰子数量必须在 1-12 之间');
                 return;
             }
 

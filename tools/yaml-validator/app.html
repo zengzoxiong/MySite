@@ -192,27 +192,30 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>YAML 验证器</h1>
             <p>验证 YAML 语法并转换为 JSON</p>
         </div>
 
         <div class="card">
-            <div class="status-box" id="status-box">
-                <p id="status-message">YAML 格式正确</p>
+            <div class="status-box" id="status-box" role="status">
+                <p id="status-message" role="status">YAML 格式正确</p>
             </div>
 
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="validateAndConvert()">验证并转换</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">验证并转换</button>
+                    <button class="btn btn-secondary" data-ev-id="ev2">示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev3">清空</button>
                 </div>
             </div>
 
@@ -221,14 +224,14 @@
                     <div class="editor-header">
                         <span class="editor-title">YAML 输入</span>
                     </div>
-                    <textarea class="editor-textarea" id="yaml-input" placeholder="在此输入 YAML..."></textarea>
+                    <textarea class="editor-textarea" id="yaml-input" placeholder="在此输入 YAML..." aria-label="在此输入 YAML..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">JSON 输出</span>
                     </div>
-                    <textarea class="editor-textarea" id="json-output" placeholder="转换后的 JSON 将显示在这里..." readonly></textarea>
+                    <textarea class="editor-textarea" id="json-output" placeholder="转换后的 JSON 将显示在这里..." readonly aria-label="转换后的 JSON 将显示在这里..."></textarea>
                 </div>
             </div>
         </div>
@@ -345,7 +348,14 @@ limits:
   timeout: 30`;
             validateAndConvert();
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { validateAndConvert(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { clearAll(); });
+})();
+</script>
     
 </body>
 </html>

@@ -26,3 +26,22 @@ export function escapeHtml(s) {
 // 弹层清单单一来源：全局 ESC 兜底判断「有没有弹层开着」用（settings/cmdk/talisman/ghPanel
 // 各自的关闭监听会先一步处理；这里只负责「全没开时 ESC 回首页」的兜底）
 export const OVERLAY_IDS = ['settingsModal', 'talismanModal', 'cmdk', 'ghPanel'];
+
+// IME 输入法安全的 Enter 键判断：中文/日文/韩文输入法组词确认时的 Enter（isComposing 或 Safari 229）不触发提交
+export function isEnterKey(e) {
+    return e.key === 'Enter' && !e.isComposing && e.keyCode !== 229;
+}
+
+// 弹层打开时对背景内容设置 inert（圈定键盘焦点、屏蔽读屏穿透），关闭时恢复
+export function setModalInert(modalEl, active) {
+    const sidebar = document.getElementById('sidebar');
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const main = document.getElementById('mainContent');
+    if (sidebar) sidebar.inert = active;
+    if (mobileBtn) mobileBtn.inert = active;
+    if (main) {
+        for (const child of main.children) {
+            if (child !== modalEl) child.inert = active;
+        }
+    }
+}

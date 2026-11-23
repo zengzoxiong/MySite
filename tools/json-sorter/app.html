@@ -216,27 +216,30 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JSON 键名排序</h1>
             <p>按字母顺序排序 JSON 键名</p>
         </div>
 
         <div class="card">
-            <div class="status-box" id="status-box">
-                <p id="status-message">已完成转换</p>
+            <div class="status-box" id="status-box" role="status">
+                <p id="status-message" role="status">已完成转换</p>
             </div>
 
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="convert()">立即转换</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">立即转换</button>
+                    <button class="btn btn-secondary" data-ev-id="ev2">示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev3">清空</button>
                 </div>
                 <div class="controls"></div>
             </div>
@@ -246,14 +249,14 @@
                     <div class="editor-header">
                         <span class="editor-title">输入</span>
                     </div>
-                    <textarea class="editor-textarea" id="input" placeholder="粘贴 JSON 数据..."></textarea>
+                    <textarea class="editor-textarea" id="input" placeholder="粘贴 JSON 数据..." aria-label="粘贴 JSON 数据..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">输出</span>
                     </div>
-                    <textarea class="editor-textarea" id="output" placeholder="排序后的 JSON 将显示在这里..." readonly></textarea>
+                    <textarea class="editor-textarea" id="output" placeholder="排序后的 JSON 将显示在这里..." readonly aria-label="排序后的 JSON 将显示在这里..."></textarea>
                 </div>
             </div>
         </div>
@@ -311,7 +314,14 @@
             document.getElementById('input').value = `{"b":2,"a":1,"c":{"b":2,"a":1}}`;
             convert();
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { convert(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { clearAll(); });
+})();
+</script>
 
 </body>
 </html>

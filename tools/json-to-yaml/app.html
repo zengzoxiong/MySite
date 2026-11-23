@@ -214,12 +214,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
 
         <div class="header">
             <h1>JSON 转 YAML</h1>
@@ -231,8 +234,8 @@
                 <div class="panel-header">
                     <span class="panel-title"><span class="icon">{}</span> JSON 输入</span>
                     <div>
-                        <button class="example-btn" onclick="loadExample()">加载示例</button>
-                        <button class="copy-btn" onclick="copyInput()">复制</button>
+                        <button class="example-btn" data-ev-id="ev1">加载示例</button>
+                        <button class="copy-btn" data-ev-id="ev2">复制</button>
                     </div>
                 </div>
                 <textarea id="json-input" placeholder='粘贴或输入 JSON，例如：
@@ -240,15 +243,15 @@
   "name": "张三",
   "age": 25,
   "hobbies": ["读书", "旅游"]
-}'></textarea>
+}' aria-label="json-input"></textarea>
             </div>
 
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title"><span class="icon">📄</span> YAML 输出</span>
-                    <button class="copy-btn" id="copy-output" onclick="copyOutput()">复制</button>
+                    <button class="copy-btn" id="copy-output" data-ev-id="ev3">复制</button>
                 </div>
-                <textarea id="yaml-output" readonly placeholder="YAML 输出将显示在这里..."></textarea>
+                <textarea id="yaml-output" readonly placeholder="YAML 输出将显示在这里..." aria-label="YAML 输出将显示在这里..."></textarea>
             </div>
         </div>
     </div>
@@ -398,7 +401,14 @@
 
         // Initial load
         loadExample();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { loadExample(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyInput(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyOutput(); });
+})();
+</script>
     
 </body>
 </html>

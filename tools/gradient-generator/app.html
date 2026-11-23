@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>渐变色生成器</h1>
             <p>生成 CSS 线性渐变并实时预览</p>
@@ -234,7 +237,7 @@
             <div class="preview" id="preview" style="margin-top: 16px; min-height: 160px;"></div>
             <div class="output-box" style="margin-top: 16px;">
                 <label>CSS 代码</label>
-                <textarea id="cssOutput" class="code" readonly></textarea>
+                <textarea id="cssOutput" class="code" readonly aria-label="cssOutput"></textarea>
                 <div class="actions">
                     <button class="btn" id="copy">复制 CSS</button>
                 </div>
@@ -262,7 +265,7 @@
 
         copyBtn.addEventListener('click', () => {
             cssOutput.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
 
         updateGradient();

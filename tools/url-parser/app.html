@@ -156,12 +156,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>URL 解析器</h1>
             <p>快速拆分协议、域名、路径和参数</p>
@@ -186,7 +189,7 @@
                 <tbody></tbody>
             </table>
 
-            <div class="status" id="status">输入 URL 后点击解析。</div>
+            <div class="status" id="status" role="status">输入 URL 后点击解析。</div>
         </div>
     </div>
 

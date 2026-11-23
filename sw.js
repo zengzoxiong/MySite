@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（数据文件与页面导航网络优先，其余骨架 stale-while-revalidate） */
-const CACHE = 'mysite-v22'; // v22: 新增 Token 用量「模型藏品星云」（js/token-nebula.js 进预缓存）
+const CACHE = 'mysite-v23'; // v23: favicon.svg 进预缓存、网络优先超时改 AbortSignal.timeout、离线包分批补缺
 // 工具离线包缓存：独立于主 CACHE，activate 时白名单保留、不随版本 bump 清空。
 // 条目来自 data/tools.json 里 offline:true 的工具页（scripts/check_offline.py 维护标记），
 // 每次激活只补缺不重复下载，页面内容更新由访问时的 SWR 自愈；标记页离线导航
@@ -32,6 +32,7 @@ const PRECACHE = [
     './data/playlist.json',
     './data/stars.json',
     './manifest.json',
+    './favicon.svg',
     './assets/icon.svg'
 ];
 
@@ -58,14 +59,25 @@ self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
     if (e.request.method !== 'GET' || url.origin !== location.origin) return;
 
-    // 网络优先（数据文件 + 页面导航）：3s 超时/失败回退缓存；成功时顺手更新缓存
+    // 网络优先（数据文件 + 页面导航）：3s 超时（AbortSignal 真正取消请求）或失败回退缓存；成功时顺手更新缓存
     if (NETWORK_FIRST_RE.test(url.pathname) || e.request.mode === 'navigate') {
         e.respondWith((async () => {
             try {
-                const fresh = await Promise.race([
-                    fetch(e.request, { cache: 'no-cache' }),
-                    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
-                ]);
+                let signal;
+                let timer;
+                if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+                    signal = AbortSignal.timeout(3000);
+                } else {
+                    const ac = new AbortController();
+                    timer = setTimeout(() => ac.abort(), 3000);
+                    signal = ac.signal;
+                }
+                let fresh;
+                try {
+                    fresh = await fetch(e.request, { cache: 'no-cache', signal });
+                } finally {
+                    if (timer) clearTimeout(timer);
+                }
                 if (fresh && fresh.status === 200) {
                     const clone = fresh.clone();
                     caches.open(CACHE)
@@ -136,10 +148,16 @@ async function toolsOfflineSync() {
         if (t.offline) urls.add(new URL(`tools/${t.path.split('/')[0]}/app.html`, base).href);
     }
     const cache = await caches.open(TOOLS_CACHE);
-    await Promise.all([...urls].map(async (u) => {
-        if (await cache.match(u)) return; // 已缓存只跳过
-        await cache.add(u).catch((err) => console.warn('离线包补缺跳过:', u, err));
-    }));
+    // 分批并发补缺（每批 6 个），避免激活时一次性并发百余请求阻塞带宽
+    const missing = [];
+    for (const u of urls) {
+        if (!(await cache.match(u))) missing.push(u);
+    }
+    const BATCH = 6;
+    for (let i = 0; i < missing.length; i += BATCH) {
+        const chunk = missing.slice(i, i + BATCH);
+        await Promise.all(chunk.map((u) => cache.add(u).catch((err) => console.warn('离线包补缺跳过:', u, err))));
+    }
     // 对账：删除清单外的旧条目（工具下线/撤销离线标记）
     const keys = await cache.keys();
     await Promise.all(keys.filter((r) => !urls.has(r.url)).map((r) => cache.delete(r)));

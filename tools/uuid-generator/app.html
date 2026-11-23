@@ -285,12 +285,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>UUID 生成器</h1>
             <p>快速生成各种版本的 UUID</p>
@@ -323,10 +326,10 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="generate()">
+                <button class="btn btn-primary" data-ev-id="ev1">
                     <i>⚡</i> 生成 UUID
                 </button>
-                <button class="btn btn-secondary" onclick="clearOutput()">
+                <button class="btn btn-secondary" data-ev-id="ev2">
                     <i>🗑️</i> 清空
                 </button>
             </div>
@@ -334,7 +337,7 @@
             <div class="output-area">
                 <div class="output-header">
                     <h3>生成结果</h3>
-                    <button class="copy-btn" onclick="copyAll()">复制全部</button>
+                    <button class="copy-btn" data-ev-id="ev3">复制全部</button>
                 </div>
                 <div class="output-list" id="output">
                     <div class="empty-state">
@@ -526,7 +529,14 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearOutput(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyAll(); });
+})();
+</script>
     
 </body>
 </html>

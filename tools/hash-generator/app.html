@@ -186,12 +186,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>哈希生成器</h1>
             <p>计算文本的 MD5、SHA-1、SHA-256 等哈希值</p>
@@ -200,7 +203,7 @@
         <div class="card">
             <div class="input-area">
                 <label>输入文本</label>
-                <textarea id="input" placeholder="在此输入要计算哈希值的文本..."></textarea>
+                <textarea id="input" placeholder="在此输入要计算哈希值的文本..." aria-label="在此输入要计算哈希值的文本..."></textarea>
             </div>
 
             <div class="output-grid">
@@ -210,7 +213,7 @@
                         <span class="hash-badge">128 位</span>
                     </div>
                     <div class="hash-value" id="md5"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('md5')">复制 MD5</button>
+                    <button class="copy-btn" data-ev-id="ev1">复制 MD5</button>
                 </div>
 
                 <div class="hash-item">
@@ -219,7 +222,7 @@
                         <span class="hash-badge">160 位</span>
                     </div>
                     <div class="hash-value" id="sha1"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('sha1')">复制 SHA-1</button>
+                    <button class="copy-btn" data-ev-id="ev2">复制 SHA-1</button>
                 </div>
 
                 <div class="hash-item">
@@ -228,7 +231,7 @@
                         <span class="hash-badge">256 位</span>
                     </div>
                     <div class="hash-value" id="sha256"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('sha256')">复制 SHA-256</button>
+                    <button class="copy-btn" data-ev-id="ev3">复制 SHA-256</button>
                 </div>
 
                 <div class="hash-item">
@@ -237,7 +240,7 @@
                         <span class="hash-badge">384 位</span>
                     </div>
                     <div class="hash-value" id="sha384"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('sha384')">复制 SHA-384</button>
+                    <button class="copy-btn" data-ev-id="ev4">复制 SHA-384</button>
                 </div>
 
                 <div class="hash-item">
@@ -246,7 +249,7 @@
                         <span class="hash-badge">512 位</span>
                     </div>
                     <div class="hash-value" id="sha512"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('sha512')">复制 SHA-512</button>
+                    <button class="copy-btn" data-ev-id="ev5">复制 SHA-512</button>
                 </div>
 
                 <div class="hash-item">
@@ -255,7 +258,7 @@
                         <span class="hash-badge">编码</span>
                     </div>
                     <div class="hash-value" id="base64"><span class="empty-state">等待输入...</span></div>
-                    <button class="copy-btn" onclick="copyHash('base64')">复制 Base64</button>
+                    <button class="copy-btn" data-ev-id="ev6">复制 Base64</button>
                 </div>
             </div>
         </div>
@@ -500,7 +503,17 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { copyHash('md5'); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyHash('sha1'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyHash('sha256'); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { copyHash('sha384'); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { copyHash('sha512'); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { copyHash('base64'); });
+})();
+</script>
     
 </body>
 </html>

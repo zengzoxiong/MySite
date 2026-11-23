@@ -262,12 +262,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JSON 格式化工具</h1>
             <p>格式化、压缩和验证 JSON 数据</p>
@@ -278,16 +281,16 @@
 
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="formatJSON()">格式化</button>
-                    <button class="btn btn-success" onclick="minifyJSON()">压缩</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">格式化</button>
+                    <button class="btn btn-success" data-ev-id="ev2">压缩</button>
+                    <button class="btn btn-secondary" data-ev-id="ev3">示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev4">清空</button>
                 </div>
 
                 <div class="options">
                     <div class="option-item">
                         <label>缩进:</label>
-                        <select id="indent-style" onchange="formatJSON()">
+                        <select id="indent-style" data-ev-id="ev5">
                             <option value="2">2 空格</option>
                             <option value="4" selected>4 空格</option>
                             <option value="tab">Tab</option>
@@ -295,7 +298,7 @@
                     </div>
                     <div class="option-item">
                         <label>
-                            <input type="checkbox" id="sort-keys" onchange="formatJSON()">
+                            <input type="checkbox" id="sort-keys" data-ev-id="ev6">
                             排序键名
                         </label>
                     </div>
@@ -307,26 +310,26 @@
                     <div class="editor-header">
                         <span class="editor-title">输入 JSON</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="pasteToInput()">粘贴</button>
-                            <button class="icon-btn" onclick="document.getElementById('input').value=''">清空</button>
+                            <button class="icon-btn" data-ev-id="ev7">粘贴</button>
+                            <button class="icon-btn" data-ev-id="ev8">清空</button>
                         </div>
                     </div>
                     <textarea class="editor-textarea" id="input" placeholder='在此输入 JSON，例如：
 {
   "name": "John",
   "age": 30
-}'></textarea>
+}' aria-label="input"></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">输出结果</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="copyOutput()">复制</button>
-                            <button class="icon-btn" onclick="downloadOutput()">下载</button>
+                            <button class="icon-btn" data-ev-id="ev9">复制</button>
+                            <button class="icon-btn" data-ev-id="ev10">下载</button>
                         </div>
                     </div>
-                    <textarea class="editor-textarea" id="output" readonly placeholder="格式化后的 JSON 将显示在这里..."></textarea>
+                    <textarea class="editor-textarea" id="output" readonly placeholder="格式化后的 JSON 将显示在这里..." aria-label="格式化后的 JSON 将显示在这里..."></textarea>
                     <div class="stats">
                         <div class="stat-item">字符: <span class="stat-value" id="char-count">0</span></div>
                         <div class="stat-item">行数: <span class="stat-value" id="line-count">0</span></div>
@@ -528,7 +531,21 @@
         document.getElementById('input').addEventListener('paste', () => {
             setTimeout(formatJSON, 100);
         });
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { formatJSON(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { minifyJSON(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('change', function(event) { formatJSON(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('change', function(event) { formatJSON(); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { pasteToInput(); });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('click', function(event) { document.getElementById('input').value=''; });
+  document.querySelector('[data-ev-id="ev9"]')?.addEventListener('click', function(event) { copyOutput(); });
+  document.querySelector('[data-ev-id="ev10"]')?.addEventListener('click', function(event) { downloadOutput(); });
+})();
+</script>
     
 </body>
 </html>

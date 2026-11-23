@@ -160,6 +160,8 @@
                 ensurePreconnect(href);
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
+                // 先以 print 媒体类型异步加载，避免 CDN 慢时阻塞首屏渲染；就绪后切回 all
+                link.media = 'print';
                 link.href = href + path;
                 const next = () => { link.remove(); attempt(); };
                 let settled = false;
@@ -169,7 +171,9 @@
                 }, 8000);
                 link.onload = () => {
                     if (settled) return;
-                    settled = true; clearTimeout(timer); resolve();
+                    settled = true; clearTimeout(timer);
+                    link.media = 'all';
+                    resolve();
                 };
                 link.onerror = () => {
                     if (settled) return;
@@ -296,8 +300,12 @@
         clockStyleFromStorage: clockStyleFromStorage
     };
 
-    // 本文件在 <head> 里同步加载：顺手把已选字体的样式表先挂上，
-    // 让字体分片在页面解析阶段就开始下载，别等到 DOMContentLoaded 才动手
+    // 本文件在 <head> 里同步加载：立即落定明暗主题，避免深色用户首帧闪白
+    try {
+        applyThemeMode();
+    } catch (e) { /* 忽略 */ }
+
+    // 异步挂上已选字体的样式表（media=print→all 非阻塞），让字体分片尽早开始下载
     try {
         fontById(localStorage.getItem(KEY_FONT)).css.forEach(injectCss);
     } catch (e) { /* 隐私模式下 localStorage 可能不可用 */ }

@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>文本查找替换</h1>
             <p>批量查找并替换文本内容</p>
@@ -214,7 +217,7 @@
         <div class="card">
             <div>
                 <label>原始文本</label>
-                <textarea id="input" placeholder="粘贴需要处理的文本"></textarea>
+                <textarea id="input" placeholder="粘贴需要处理的文本" aria-label="粘贴需要处理的文本"></textarea>
             </div>
             <div class="grid" style="margin-top: 16px;">
                 <div>
@@ -236,7 +239,7 @@
             </div>
             <div class="output-box" style="margin-top: 16px;">
                 <label>输出结果</label>
-                <textarea id="output" readonly placeholder="替换后的文本"></textarea>
+                <textarea id="output" readonly placeholder="替换后的文本" aria-label="替换后的文本"></textarea>
                 <p class="muted">替换次数：<span id="count">0</span></p>
             </div>
         </div>
@@ -278,7 +281,7 @@
         copyBtn.addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
     </script>
 </body>

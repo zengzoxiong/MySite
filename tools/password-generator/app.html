@@ -418,19 +418,22 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
 
-    <div class="container">
+    <div class="container" role="main">
         <h1>🔐 安全密码生成器</h1>
         <p class="subtitle">创建强大且安全的密码，保护您的数字生活</p>
 
         <div class="password-display">
             <div id="passwordOutput">点击下方按钮生成密码</div>
-            <button class="copy-btn" onclick="copyPassword()">复制</button>
+            <button class="copy-btn" data-ev-id="ev1">复制</button>
         </div>
 
         <div class="control-group">
@@ -475,18 +478,33 @@
             <div class="strength-text" id="strengthText">请生成密码</div>
         </div>
 
-        <button class="generate-btn" onclick="generatePassword()">
+        <button class="generate-btn" data-ev-id="ev2">
             生成新密码
         </button>
 
         <div class="history">
             <div class="history-title">最近生成的密码</div>
             <div class="history-list" id="historyList"></div>
-            <button class="clear-history" onclick="clearHistory()">清除历史</button>
+            <button class="clear-history" data-ev-id="ev3">清除历史</button>
         </div>
     </div>
 
     <script>
+function showNotice(msg) {
+    let el = document.getElementById('toolNoticeAlert');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toolNoticeAlert';
+        el.setAttribute('role', 'alert');
+        el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:90vw;text-align:center;';
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
         let passwordHistory = JSON.parse(localStorage.getItem('passwordHistory')) || [];
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -509,7 +527,7 @@
             const includeSymbols = document.getElementById('symbols').checked;
 
             if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
-                alert('请至少选择一种字符类型');
+                showNotice('请至少选择一种字符类型');
                 return;
             }
 
@@ -649,7 +667,14 @@
             localStorage.removeItem('passwordHistory');
             displayHistory();
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { copyPassword(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { generatePassword(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { clearHistory(); });
+})();
+</script>
     
 </body>
 </html>

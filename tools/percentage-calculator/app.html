@@ -173,12 +173,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>百分比计算器</h1>
             <p>快速计算百分比相关问题</p>
@@ -197,7 +200,7 @@
                         <input type="number" id="p1-y" placeholder="百分比">
                         <span>%</span>
                     </div>
-                    <button class="calc-btn" onclick="calc1()">计算</button>
+                    <button class="calc-btn" data-ev-id="ev1">计算</button>
                     <div class="result" id="r1-result"></div>
                 </div>
 
@@ -211,7 +214,7 @@
                         <input type="number" id="p2-y" placeholder="总数">
                         <span>的</span>
                     </div>
-                    <button class="calc-btn" onclick="calc2()">计算</button>
+                    <button class="calc-btn" data-ev-id="ev2">计算</button>
                     <div class="result" id="r2-result"></div>
                 </div>
 
@@ -225,8 +228,8 @@
                         <span>%</span>
                     </div>
                     <div class="input-group">
-                        <button class="calc-btn" style="width: auto; flex: 1;" onclick="calc3('increase')">增加</button>
-                        <button class="calc-btn" style="width: auto; flex: 1;" onclick="calc3('decrease')">减少</button>
+                        <button class="calc-btn" style="width: auto; flex: 1;" data-ev-id="ev3">增加</button>
+                        <button class="calc-btn" style="width: auto; flex: 1;" data-ev-id="ev4">减少</button>
                     </div>
                     <div class="result" id="r3-result"></div>
                 </div>
@@ -240,7 +243,7 @@
                     <div class="input-group">
                         <input type="number" id="p4-to" placeholder="到">
                     </div>
-                    <button class="calc-btn" onclick="calc4()">计算</button>
+                    <button class="calc-btn" data-ev-id="ev5">计算</button>
                     <div class="result" id="r4-result"></div>
                 </div>
             </div>
@@ -321,7 +324,16 @@
             }
             return parseFloat(num.toFixed(4)).toLocaleString();
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { calc1(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { calc2(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { calc3('increase'); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { calc3('decrease'); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { calc4(); });
+})();
+</script>
     
 </body>
 </html>

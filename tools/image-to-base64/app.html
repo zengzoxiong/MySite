@@ -349,31 +349,34 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>图片 Base64 互转</h1>
             <p>图片与 Base64 编码字符串之间的双向转换</p>
         </div>
 
         <div class="mode-toggle">
-            <button class="mode-btn active" data-mode="image-to-base64" onclick="setMode('image-to-base64')">图片转 Base64</button>
-            <button class="mode-btn" data-mode="base64-to-image" onclick="setMode('base64-to-image')">Base64 转图片</button>
+            <button class="mode-btn active" data-mode="image-to-base64" data-ev-id="ev1">图片转 Base64</button>
+            <button class="mode-btn" data-mode="base64-to-image" data-ev-id="ev2">Base64 转图片</button>
         </div>
 
         <div class="card">
             <!-- 图片转Base64模式 -->
             <div class="input-section active" id="image-to-base64-section">
-                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                <div class="upload-area" id="upload-area" data-ev-id="ev3">
                     <div class="upload-icon">📷</div>
                     <div class="upload-text">点击上传或拖拽图片到此处</div>
                     <div class="upload-hint">支持 JPG、PNG、GIF、WebP 等格式</div>
                 </div>
-                <input type="file" id="file-input" class="file-input" accept="image/*" onchange="handleFile(this.files[0])">
+                <input type="file" id="file-input" class="file-input" accept="image/*" data-ev-id="ev4">
 
                 <div class="preview-section" id="preview-section">
                 <div class="image-preview">
@@ -402,24 +405,24 @@
                     <div class="output-header">
                         <h3>Base64 输出</h3>
                         <div class="output-actions">
-                            <button class="btn btn-primary" onclick="copyBase64()">复制 Base64</button>
-                            <button class="btn btn-secondary" onclick="downloadBase64()">下载文件</button>
-                            <button class="btn btn-secondary" onclick="reset()">重新上传</button>
+                            <button class="btn btn-primary" data-ev-id="ev5">复制 Base64</button>
+                            <button class="btn btn-secondary" data-ev-id="ev6">下载文件</button>
+                            <button class="btn btn-secondary" data-ev-id="ev7">重新上传</button>
                         </div>
                     </div>
 
                     <div class="format-options">
                         <div class="format-option">
-                            <input type="radio" id="format-data-uri" name="format" value="data-uri" checked onchange="updateOutput()">
+                            <input type="radio" id="format-data-uri" name="format" value="data-uri" checked data-ev-id="ev8">
                             <label for="format-data-uri">Data URI (包含前缀)</label>
                         </div>
                         <div class="format-option">
-                            <input type="radio" id="format-base64-only" name="format" value="base64-only" onchange="updateOutput()">
+                            <input type="radio" id="format-base64-only" name="format" value="base64-only" data-ev-id="ev9">
                             <label for="format-base64-only">仅 Base64 字符串</label>
                         </div>
                     </div>
 
-                    <textarea class="output-textarea" id="output-text" readonly></textarea>
+                    <textarea class="output-textarea" id="output-text" readonly aria-label="output-text"></textarea>
                 </div>
             </div>
             </div>
@@ -429,10 +432,10 @@
                 <div class="base64-input-section">
                     <div class="base64-input-header">
                         <h3>Base64 输入</h3>
-                        <button class="btn btn-secondary" onclick="clearBase64Input()">清空</button>
+                        <button class="btn btn-secondary" data-ev-id="ev10">清空</button>
                     </div>
-                    <textarea class="base64-textarea" id="base64-input" placeholder="粘贴 Base64 字符串或 Data URI（如：data:image/png;base64,iVBORw0KG...）"></textarea>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="convertBase64ToImage()">转换为图片</button>
+                    <textarea class="base64-textarea" id="base64-input" placeholder="粘贴 Base64 字符串或 Data URI（如：data:image/png;base64,iVBORw0KG...）" aria-label="粘贴 Base64 字符串或 Data URI（如：data:image/png"></textarea>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" data-ev-id="ev11">转换为图片</button>
                     <div id="base64-error" class="error-message" style="display: none;"></div>
                 </div>
 
@@ -463,8 +466,8 @@
                         <div class="output-header">
                             <h3>操作</h3>
                             <div class="output-actions">
-                                <button class="btn btn-primary" onclick="downloadBase64Image()">下载图片</button>
-                                <button class="btn btn-secondary" onclick="resetBase64Preview()">重新转换</button>
+                                <button class="btn btn-primary" data-ev-id="ev12">下载图片</button>
+                                <button class="btn btn-secondary" data-ev-id="ev13">重新转换</button>
                             </div>
                         </div>
                     </div>
@@ -774,7 +777,24 @@
                 }
             });
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { setMode('image-to-base64'); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { setMode('base64-to-image'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { document.getElementById('file-input').click(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('change', function(event) { handleFile(this.files[0]); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { copyBase64(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { downloadBase64(); });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('click', function(event) { reset(); });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('change', function(event) { updateOutput(); });
+  document.querySelector('[data-ev-id="ev9"]')?.addEventListener('change', function(event) { updateOutput(); });
+  document.querySelector('[data-ev-id="ev10"]')?.addEventListener('click', function(event) { clearBase64Input(); });
+  document.querySelector('[data-ev-id="ev11"]')?.addEventListener('click', function(event) { convertBase64ToImage(); });
+  document.querySelector('[data-ev-id="ev12"]')?.addEventListener('click', function(event) { downloadBase64Image(); });
+  document.querySelector('[data-ev-id="ev13"]')?.addEventListener('click', function(event) { resetBase64Preview(); });
+})();
+</script>
     
 </body>
 </html>

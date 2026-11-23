@@ -116,6 +116,9 @@ footer{display:flex; align-items:center; gap:14px; height:28px; padding:0 12px; 
 .inline-edit{position:absolute; background:#0F1722; color:var(--fg); border:1px solid var(--accent);
   font-size:14px; padding:2px 4px; z-index:10; outline:none;}
 ::-webkit-scrollbar{width:9px;height:9px;} ::-webkit-scrollbar-thumb{background:#2C3E5A;border-radius:5px;}
+
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -239,11 +242,11 @@ footer{display:flex; align-items:center; gap:14px; height:28px; padding:0 12px; 
 </main>
 
 <footer>
-  <span id="status-msg">就绪</span>
-  <span id="status-pos"></span>
-  <span id="status-zoom">100%</span>
+  <span id="status-msg" role="status">就绪</span>
+  <span id="status-pos" role="status"></span>
+  <span id="status-zoom" role="status">100%</span>
 </footer>
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 
 <script>
 "use strict";
@@ -3404,13 +3407,29 @@ function fallbackCopy(s){
   const ta = document.createElement("textarea");
   ta.value = s; ta.style.position="fixed"; ta.style.opacity="0";
   document.body.appendChild(ta); ta.select();
-  try{ document.execCommand("copy"); toast("SVG 代码已复制（回退方式）"); }
+  try{ try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {} toast("SVG 代码已复制（回退方式）"); }
   catch(e){ toast("复制失败，请手动复制"); }
   ta.remove();
 }
 function pasteSVGPrompt(){
-  const s = prompt("粘贴 SVG 代码：");
-  if(s && s.trim()) loadSVG(s.trim());
+  let dlg = document.getElementById('svgPasteDialog');
+  if(!dlg){
+    dlg = document.createElement('dialog');
+    dlg.id = 'svgPasteDialog';
+    dlg.style.cssText = 'padding:18px 20px;border:1px solid #d1d5db;border-radius:12px;max-width:520px;width:90vw;box-shadow:0 20px 50px rgba(0,0,0,.22);font:14px/1.5 system-ui,sans-serif;';
+    dlg.innerHTML = '<form method="dialog" style="display:flex;flex-direction:column;gap:12px;"><label for="svgPasteArea" style="font-weight:600;">粘贴 SVG 代码</label><textarea id="svgPasteArea" rows="8" aria-label="粘贴 SVG 代码" placeholder="<svg ...>...</svg>" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-family:monospace;resize:vertical;"></textarea><div style="display:flex;justify-content:flex-end;gap:8px;"><button value="cancel" type="submit" style="padding:6px 14px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;">取消</button><button value="ok" type="submit" style="padding:6px 14px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;">导入</button></div></form>';
+    dlg.addEventListener('close', () => {
+      if(dlg.returnValue === 'ok'){
+        const s = dlg.querySelector('#svgPasteArea').value;
+        if(s && s.trim()) loadSVG(s.trim());
+      }
+    });
+    document.body.appendChild(dlg);
+  }
+  const ta = dlg.querySelector('#svgPasteArea');
+  ta.value = '';
+  dlg.showModal();
+  ta.focus();
 }
 /* ================= 事件绑定 ================= */
 function setTool(t){

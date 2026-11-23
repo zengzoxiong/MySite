@@ -158,12 +158,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Meta 标签生成器</h1>
             <p>快速生成网页 SEO Meta 标签</p>
@@ -193,12 +196,12 @@
     </div>
 </div>
 <div class="form-actions">
-    <button class="btn" onclick="generateMetaTags()">生成 Meta 标签</button>
-    <button class="btn btn-secondary" onclick="clearOutput()">清空输出</button>
+    <button class="btn" data-ev-id="ev1">生成 Meta 标签</button>
+    <button class="btn btn-secondary" data-ev-id="ev2">清空输出</button>
 </div>
 <div class="output-box">
     <label>Meta 标签输出</label>
-    <textarea id="meta-output" rows="8" readonly></textarea>
+    <textarea id="meta-output" rows="8" readonly aria-label="meta-output"></textarea>
 </div>
         </div>
     </div>
@@ -227,7 +230,13 @@
             function clearOutput() {
                 document.getElementById('meta-output').value = '';
             }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { generateMetaTags(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearOutput(); });
+})();
+</script>
 
 </body>
 </html>

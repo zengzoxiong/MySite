@@ -153,12 +153,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>CSV 转 JSON</h1>
             <p>支持自定义分隔符、带表头解析</p>
@@ -175,11 +178,11 @@
             <div class="grid">
                 <div>
                     <h3 style="margin-bottom: 8px; color: #111827;">CSV 输入</h3>
-                    <textarea id="input" placeholder="name,age\nAlice,18\nBob,20"></textarea>
+                    <textarea id="input" placeholder="name,age\nAlice,18\nBob,20" aria-label="name,age\nAlice,18\nBob,20"></textarea>
                 </div>
                 <div>
                     <h3 style="margin-bottom: 8px; color: #111827;">JSON 输出</h3>
-                    <textarea id="output" readonly placeholder="结果会显示在这里"></textarea>
+                    <textarea id="output" readonly placeholder="结果会显示在这里" aria-label="结果会显示在这里"></textarea>
                 </div>
             </div>
 
@@ -189,7 +192,7 @@
                 <button class="btn secondary" id="clear-btn">清空</button>
             </div>
 
-            <div class="hint" id="status">支持双引号字段和换行。</div>
+            <div class="hint" id="status" role="status">支持双引号字段和换行。</div>
         </div>
     </div>
 
@@ -295,7 +298,7 @@
             }
             output.select();
             output.setSelectionRange(0, output.value.length);
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         }
 
         function clearAll() {

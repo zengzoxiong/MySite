@@ -216,27 +216,30 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>YAML 转 CSV</h1>
             <p>将 YAML 数据转换为 CSV</p>
         </div>
 
         <div class="card">
-            <div class="status-box" id="status-box">
-                <p id="status-message">已完成转换</p>
+            <div class="status-box" id="status-box" role="status">
+                <p id="status-message" role="status">已完成转换</p>
             </div>
 
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="convert()">立即转换</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">立即转换</button>
+                    <button class="btn btn-secondary" data-ev-id="ev2">示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev3">清空</button>
                 </div>
                 <div class="controls"></div>
             </div>
@@ -246,14 +249,14 @@
                     <div class="editor-header">
                         <span class="editor-title">输入</span>
                     </div>
-                    <textarea class="editor-textarea" id="input" placeholder="粘贴 YAML 内容..."></textarea>
+                    <textarea class="editor-textarea" id="input" placeholder="粘贴 YAML 内容..." aria-label="粘贴 YAML 内容..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">输出</span>
                     </div>
-                    <textarea class="editor-textarea" id="output" placeholder="转换后的 CSV 将显示在这里..." readonly></textarea>
+                    <textarea class="editor-textarea" id="output" placeholder="转换后的 CSV 将显示在这里..." readonly aria-label="转换后的 CSV 将显示在这里..."></textarea>
                 </div>
             </div>
         </div>
@@ -331,7 +334,14 @@
   age: 28`;
             convert();
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { convert(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { clearAll(); });
+})();
+</script>
 
 </body>
 </html>

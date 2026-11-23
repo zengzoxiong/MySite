@@ -212,12 +212,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Markdown 表格生成器</h1>
             <p>将文本快速转换为 Markdown 表格</p>
@@ -226,6 +229,9 @@
             <div>
                 <label>输入文本（每行一条记录）</label>
                 <textarea id="input" placeholder="例如：
+名称,价格,库存
+A,10,20
+B,12,8" aria-label="例如：
 名称,价格,库存
 A,10,20
 B,12,8"></textarea>
@@ -251,7 +257,7 @@ B,12,8"></textarea>
             </div>
             <div class="output-box">
                 <label>Markdown 表格</label>
-                <textarea id="output" readonly placeholder="生成的 Markdown 表格"></textarea>
+                <textarea id="output" readonly placeholder="生成的 Markdown 表格" aria-label="生成的 Markdown 表格"></textarea>
             </div>
         </div>
     </div>
@@ -307,7 +313,7 @@ B,12,8"></textarea>
         document.getElementById('copy').addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
         document.getElementById('clear').addEventListener('click', () => {
             input.value = '';

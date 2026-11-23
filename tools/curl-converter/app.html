@@ -264,10 +264,13 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
-    <div class="shell">
+    <div class="shell" role="main">
         <header>
             <div class="title-block">
                 <h1>CURL 转代码工具</h1>
@@ -294,7 +297,7 @@
                         </label>
                     </div>
                 </div>
-                <textarea id="curl-input" placeholder="在这里粘贴 curl 命令，例如:\ncurl 'https://api.example.com/items' \\\n  -H 'Authorization: Bearer token' \\\n  -H 'Content-Type: application/json' \\\n  --data-raw '{"name":"Ava"}'"></textarea>
+                <textarea id="curl-input" placeholder="在这里粘贴 curl 命令，例如:\ncurl 'https://api.example.com/items' \\\n  -H 'Authorization: Bearer token' \\\n  -H 'Content-Type: application/json' \\\n  --data-raw '{"name":"Ava"}'" aria-label="在这里粘贴 curl 命令，例如:\ncurl 'https://api.exa"></textarea>
             </section>
 
             <section class="panel">
@@ -313,7 +316,7 @@
                         <button class="btn secondary" id="copy-btn">复制代码</button>
                     </div>
                 </div>
-                <textarea id="code-output" readonly placeholder="转换后的代码将显示在这里"></textarea>
+                <textarea id="code-output" readonly placeholder="转换后的代码将显示在这里" aria-label="转换后的代码将显示在这里"></textarea>
             </section>
         </div>
 
@@ -1149,7 +1152,7 @@
                     return;
                 }
                 selectOutput();
-                const success = document.execCommand('copy');
+                let success = true; try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) { success = false; }
                 if (success) {
                     markCopied();
                 } else {

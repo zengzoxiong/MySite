@@ -246,12 +246,14 @@
             .upload-area { padding: 26px 14px; }
             .urlbar { flex-direction: column; }
         }
-    </style>
+    
+        :root { color-scheme: light; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>二维码解码器</h1>
             <p>上传图片 · 拖拽 · Ctrl+V 粘贴截图 · 摄像头扫码 · 屏幕捕获 · 图片链接，解码全在本地浏览器完成</p>
@@ -259,7 +261,7 @@
 
         <div class="panel">
             <div class="upload-area" id="upload-area" tabindex="0" role="button" aria-label="选择或粘贴图片进行识别">
-                <svg viewBox="0 0 24 24"><path d="M12 3 7 8.2h3.2V15h3.6V8.2H17zM4 17v3.2h16V17h-2v1.2H6V17z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 7 8.2h3.2V15h3.6V8.2H17zM4 17v3.2h16V17h-2v1.2H6V17z"/></svg>
                 <p><strong>点击选择图片，或把图片拖到这里</strong></p>
                 <small>截图后直接按 Ctrl+V 粘贴识别；支持 PNG / JPG / WEBP / GIF</small>
             </div>
@@ -267,19 +269,19 @@
 
             <div class="modes">
                 <button class="btn" id="btn-cam">
-                    <svg viewBox="0 0 24 24"><path d="M9.2 4 7.4 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.4L14.8 4zm2.8 4.4a5.2 5.2 0 1 1 0 10.4 5.2 5.2 0 0 1 0-10.4zm0 2.2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 4 7.4 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.4L14.8 4zm2.8 4.4a5.2 5.2 0 1 1 0 10.4 5.2 5.2 0 0 1 0-10.4zm0 2.2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
                     摄像头扫码
                 </button>
                 <button class="btn" id="btn-screen">
-                    <svg viewBox="0 0 24 24"><path d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h4v2H6v-2h4v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h16V6z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h4v2H6v-2h4v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h16V6z"/></svg>
                     屏幕捕获取帧
                 </button>
                 <button class="btn btn-danger" id="btn-stop" hidden>
-                    <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>
                     停止取景
                 </button>
                 <button class="btn" id="btn-clear">
-                    <svg viewBox="0 0 24 24"><path d="M8.4 3h7.2l1 2H21v2H3V5h4.4zM5.2 8h13.6l-1 13H6.2z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.4 3h7.2l1 2H21v2H3V5h4.4zM5.2 8h13.6l-1 13H6.2z"/></svg>
                     清空
                 </button>
             </div>
@@ -293,7 +295,7 @@
                 <video id="video" playsinline muted hidden></video>
                 <img id="preview" alt="待识别图片预览" hidden>
             </div>
-            <div class="status" id="status"></div>
+            <div class="status" id="status" role="status"></div>
         </div>
 
         <div class="panel" id="results-panel" hidden>

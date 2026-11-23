@@ -302,12 +302,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>文本对比工具</h1>
             <p>比较两段文本的差异，支持逐行对比</p>
@@ -316,13 +319,13 @@
         <div class="card">
             <div class="controls">
                 <div class="mode-selector">
-                    <button class="mode-btn active" onclick="setMode('inline')" id="mode-inline">逐行显示</button>
-                    <button class="mode-btn" onclick="setMode('side-by-side')" id="mode-side-by-side">并排显示</button>
+                    <button class="mode-btn active" id="mode-inline" data-ev-id="ev1">逐行显示</button>
+                    <button class="mode-btn" id="mode-side-by-side" data-ev-id="ev2">并排显示</button>
                 </div>
                 <div class="action-btns">
-                    <button class="btn btn-primary" onclick="compare()">开始对比</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例文本</button>
+                    <button class="btn btn-primary" data-ev-id="ev3">开始对比</button>
+                    <button class="btn btn-secondary" data-ev-id="ev4">清空</button>
+                    <button class="btn btn-secondary" data-ev-id="ev5">示例文本</button>
                 </div>
             </div>
 
@@ -331,14 +334,14 @@
                     <div class="editor-header">
                         <span class="editor-title">原始文本</span>
                     </div>
-                    <textarea class="editor-textarea" id="text1" placeholder="输入原始文本..."></textarea>
+                    <textarea class="editor-textarea" id="text1" placeholder="输入原始文本..." aria-label="输入原始文本..."></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">修改后的文本</span>
                     </div>
-                    <textarea class="editor-textarea" id="text2" placeholder="输入修改后的文本..."></textarea>
+                    <textarea class="editor-textarea" id="text2" placeholder="输入修改后的文本..." aria-label="输入修改后的文本..."></textarea>
                 </div>
             </div>
 
@@ -536,7 +539,16 @@
             div.textContent = text;
             return div.innerHTML;
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { setMode('inline'); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { setMode('side-by-side'); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { compare(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { loadSample(); });
+})();
+</script>
     
 </body>
 </html>

@@ -105,7 +105,7 @@
     .r-speed { text-align: center; margin: 4px 0 12px; }
     .r-speed b { font-size: 46px; color: var(--brand); font-variant-numeric: tabular-nums; }
     .r-speed small { font-size: 14px; color: var(--tx2); margin-left: 4px; }
-    .badge { display: inline-block; background: #f59e0b; color: #fff; font-size: 12px; line-height: 1; border-radius: 999px; padding: 4px 9px; vertical-align: 8px; margin-left: 6px; }
+    .badge { display: inline-block; background: #f59e0b; color: #111827; font-size: 12px; line-height: 1; border-radius: 999px; padding: 4px 9px; vertical-align: 8px; margin-left: 6px; }
     .r-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
     .r-box { font-size: 13px; color: var(--tx2); background: #f6f8fa; border-radius: 10px; padding: 9px 12px; margin-bottom: 8px; line-height: 1.7; }
     .r-box b { color: var(--tx); }
@@ -141,7 +141,7 @@
     <nav class="g-tool-grid" aria-label="游戏工具栏"><a class="g-tool-btn" href="../../index.html" aria-label="返回拾光集主页" title="返回主页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H10"/></svg></a><button class="g-tool-btn" id="rulesBtn" type="button" aria-label="游戏规则" title="游戏规则"><svg class="g-q" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg></button><button class="g-tool-btn g-tool-ai" type="button" disabled aria-label="本游戏未支持 AI 代玩" title="AI 代玩（本游戏未支持）">AI</button><button class="g-tool-btn" id="sfxBtn" type="button" aria-pressed="false" aria-label="静音" title="音效开关"><svg class="sfx-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.6 6a9 9 0 0 1 0 12"/></svg><svg class="sfx-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg></button></nav>
 
 
-  <div class="wrap">
+  <div class="wrap" role="main">
     <header>
       <h1>打字练习</h1>
       <p>键位 · 单词 · 文章 三关进阶，成绩本地保存，纯离线运行</p>
@@ -212,7 +212,7 @@
       <div id="textZhPart" hidden>
         <div class="src-label">中文依赖输入法，无法逐键判定：先照打原文到输入框，再点「提交对照」逐字比对</div>
         <div class="cn-src" id="textZhSrc"></div>
-        <textarea id="textZhInput" placeholder="在这里照打上方原文（建议关闭输入法联想）…" spellcheck="false"></textarea>
+        <textarea id="textZhInput" placeholder="在这里照打上方原文（建议关闭输入法联想）…" spellcheck="false" aria-label="在这里照打上方原文（建议关闭输入法联想）…"></textarea>
         <div class="cmp" id="textZhCmp"></div>
       </div>
       <div class="actions">

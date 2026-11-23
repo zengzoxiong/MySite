@@ -158,12 +158,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>随机抽取器</h1>
             <p>从列表中随机抽取项目</p>
@@ -186,32 +189,47 @@ Charlie"></textarea>
                 </div>
             </div>
             <div class="form-actions">
-                <button class="btn" onclick="pickRandomItems()">开始抽取</button>
-                <button class="btn btn-secondary" onclick="clearOutput()">清空输出</button>
+                <button class="btn" data-ev-id="ev1">开始抽取</button>
+                <button class="btn btn-secondary" data-ev-id="ev2">清空输出</button>
             </div>
             <div class="output-box">
                 <label>抽取结果</label>
-                <textarea id="picker-output" rows="4" readonly></textarea>
+                <textarea id="picker-output" rows="4" readonly aria-label="picker-output"></textarea>
             </div>
         </div>
     </div>
 
     <script>
+function showNotice(msg) {
+    let el = document.getElementById('toolNoticeAlert');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toolNoticeAlert';
+        el.setAttribute('role', 'alert');
+        el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:90vw;text-align:center;';
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
         function pickRandomItems() {
             const items = document.getElementById('picker-items').value.split(/\r?\n/).filter(Boolean);
             const count = parseInt(document.getElementById('picker-count').value, 10) || 1;
             const unique = document.getElementById('picker-unique').checked;
 
             if (items.length === 0) {
-                alert('请先输入列表');
+                showNotice('请先输入列表');
                 return;
             }
             if (count < 1) {
-                alert('抽取数量必须大于0');
+                showNotice('抽取数量必须大于0');
                 return;
             }
             if (unique && count > items.length) {
-                alert(`列表中只有 ${items.length} 项，无法抽取 ${count} 个不重复项目`);
+                showNotice(`列表中只有 ${items.length} 项，无法抽取 ${count} 个不重复项目`);
                 return;
             }
 
@@ -230,7 +248,13 @@ Charlie"></textarea>
         function clearOutput() {
             document.getElementById('picker-output').value = '';
         }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { pickRandomItems(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearOutput(); });
+})();
+</script>
 
 </body>
 </html>

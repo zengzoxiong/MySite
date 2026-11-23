@@ -1,7 +1,7 @@
 // 命令面板（Ctrl/Cmd+K）：拆分自 script.js 原第 4168–4360 行。
 // 跨块调用（视图/天气/签到/播放器）走对主 script.js 的循环导入，仅在函数体内访问
 // （约定见 js/common.js 头部）；「切换动画效果」复用 js/settings.js 的 applyAnimFromStorage。
-import { lsGet, lsSet, escapeHtml } from './common.js';
+import { lsGet, lsSet, escapeHtml, isEnterKey, setModalInert } from './common.js';
 import { applyAnimFromStorage } from './settings.js';
 import { goHome, currentView, searchInput, initWeather, isCheckedInToday, openTalisman, applyClockStyle, clockStyle, mp } from '../script.js';
 
@@ -11,6 +11,7 @@ const cmdkList = document.getElementById('cmdkList');
 
 let cmdkActive = 0;
 let cmdkCommands = [];
+let cmdkPrevFocus = null;
 
 // 面板图标统一内联 SVG（站点禁 emoji）：stroke 继承 currentColor，尺寸由 CSS 控
 const IC = {
@@ -117,10 +118,14 @@ export function toggleCmdk() {
 
 function openCmdk() {
     if (mp.fs && mp.exitFs) mp.exitFs();   // 全屏播放时命令面板浮在其上，切走视图前先退全屏
+    cmdkPrevFocus = document.activeElement;
     cmdkCommands = buildCmdkCommands();
     cmdk.hidden = false;
     void cmdk.offsetHeight;
     cmdk.classList.add('open');
+    document.body.classList.add('modal-open');
+    setModalInert(cmdk, true);
+    cmdkInput.setAttribute('aria-expanded', 'true');
     cmdkInput.value = '';
     cmdkActive = 0;
     renderCmdkList('');
@@ -129,8 +134,25 @@ function openCmdk() {
 
 function closeCmdk() {
     cmdk.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    setModalInert(cmdk, false);
+    cmdkInput.setAttribute('aria-expanded', 'false');
+    cmdkInput.removeAttribute('aria-activedescendant');
     setTimeout(() => { if (!cmdk.classList.contains('open')) cmdk.hidden = true; }, 150);
     cmdkInput.blur();
+    if (cmdkPrevFocus && typeof cmdkPrevFocus.focus === 'function') {
+        cmdkPrevFocus.focus();
+    }
+    cmdkPrevFocus = null;
+}
+
+function syncCmdkActiveDescendant() {
+    const active = cmdkList.querySelector('.active');
+    if (active && active.id) {
+        cmdkInput.setAttribute('aria-activedescendant', active.id);
+    } else {
+        cmdkInput.removeAttribute('aria-activedescendant');
+    }
 }
 
 function renderCmdkList(query) {
@@ -140,11 +162,12 @@ function renderCmdkList(query) {
         list = [{ icon: IC.search, label: '搜索：' + query, search: query }, ...list];
     }
     cmdkList.innerHTML = list.map((c, i) => `
-        <li role="option" aria-selected="${i === cmdkActive}" class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
+        <li id="cmdkOpt-${i}" role="option" aria-selected="${i === cmdkActive}" class="${i === cmdkActive ? 'active' : ''}" data-idx="${i}">${c.icon} ${escapeHtml(c.label)}</li>
     `).join('');
     cmdkList.__items = list;
     const active = cmdkList.querySelector('.active');
     if (active) active.scrollIntoView({ block: 'nearest' });
+    syncCmdkActiveDescendant();
 }
 
 function runCmdkItem(idx) {
@@ -177,7 +200,7 @@ export function initPalette() {
             e.preventDefault();
             cmdkActive = (cmdkActive - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1);
             renderCmdkList(cmdkInput.value);
-        } else if (e.key === 'Enter') {
+        } else if (isEnterKey(e)) {
             e.preventDefault();
             e.stopImmediatePropagation();
             runCmdkItem(cmdkActive);
@@ -195,8 +218,13 @@ export function initPalette() {
         const li = e.target.closest('li[data-idx]');
         if (li && !li.classList.contains('active')) {
             cmdkActive = +li.dataset.idx;
-            cmdkList.querySelectorAll('li').forEach(x => x.classList.remove('active'));
+            cmdkList.querySelectorAll('li').forEach(x => {
+                x.classList.remove('active');
+                x.setAttribute('aria-selected', 'false');
+            });
             li.classList.add('active');
+            li.setAttribute('aria-selected', 'true');
+            syncCmdkActiveDescendant();
         }
     });
     document.getElementById('cmdkBackdrop').addEventListener('click', closeCmdk);

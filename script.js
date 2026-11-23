@@ -1,6 +1,6 @@
 // 渐进式模块化试点：设置中心与命令面板拆分至 js/settings.js、js/cmdk.js，共享设施在
 // js/common.js；js/ 子模块经下方导出循环导入主模块绑定（ESM live binding，仅函数体内访问）。
-import { safeInit, lsGet, lsSet, escapeHtml, OVERLAY_IDS } from './js/common.js';
+import { safeInit, lsGet, lsSet, escapeHtml, OVERLAY_IDS, isEnterKey, setModalInert } from './js/common.js';
 import { initTheme, initAnimSetting, applyFontFromStorage, initSettingsModal } from './js/settings.js';
 import { toggleCmdk, initPalette } from './js/cmdk.js';
 import { mountTokenNebula } from './js/token-nebula.js';
@@ -1644,7 +1644,7 @@ function tuFilteredDays(days) {
 // 「模型-天」明细行，日期倒序
 function tuRows(days) {
     const rows = [];
-    [...days].reverse().forEach(d => {
+    (typeof days.toReversed === 'function' ? days.toReversed() : [...days].reverse()).forEach(d => {
         (d.models || []).forEach(m => {
             const total = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
             rows.push({ date: d.date, id: m.id, inCache: m.inCache || 0, inFresh: m.inFresh || 0, out: m.out || 0, total: total });
@@ -1964,7 +1964,7 @@ function tuPaintTrend() {
             const active = lines.filter(l => l.values[i] > 0).sort((a, b) => b.values[i] - a.values[i]);
             const daySum = active.reduce((s, l) => s + l.values[i], 0);
             tip.innerHTML =
-                `<div class="tu-tip-hd"><b>${dates[i]}</b>${daySum > 0 ? `<em>合计 ${tuUnit(daySum)}</em>` : ''}</div>` +
+                `<div class="tu-tip-hd"><b>${escapeHtml(dates[i])}</b>${daySum > 0 ? `<em>合计 ${tuUnit(daySum)}</em>` : ''}</div>` +
                 (active.length
                     ? active.map(l => `<div class="tu-tip-row"><span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)}</span><b>${tuUnit(l.values[i])}</b></div>`).join('')
                     : '<div class="tu-tip-empty">当日无用量</div>');
@@ -2098,6 +2098,7 @@ async function openTalisman() {
     void modal.offsetHeight; // 同步回流后再加类，后台标签页也能播过渡
     modal.classList.add('open');
     document.body.classList.add('modal-open');
+    setModalInert(modal, true);
     document.getElementById('talismanClose').focus();
 }
 
@@ -2106,6 +2107,7 @@ function closeTalisman() {
     if (modal.hidden) return;
     modal.classList.remove('open');
     document.body.classList.remove('modal-open');
+    setModalInert(modal, false);
     // 过渡结束后收起；期间若被重新打开（.open 已加回）就不能再藏，否则弹层凭空消失
     setTimeout(() => { if (!modal.classList.contains('open')) modal.hidden = true; }, 200);
     if (talismanLastFocus && talismanLastFocus.focus) talismanLastFocus.focus();
@@ -2349,9 +2351,9 @@ function initTodo() {
         addTodo();
     });
 
-    // 显式监听回车，避免个别环境不触发表单隐式提交
+    // 显式监听回车，避免个别环境不触发表单隐式提交；IME 组词确认期不提交
     input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (isEnterKey(e)) {
             e.preventDefault();
             addTodo();
         }
@@ -2393,9 +2395,11 @@ function initSectionToggles() {
             // 默认收起，只有显式保存过 expanded 才展开
             section.classList.add('section-collapsed');
         }
+        btn.setAttribute('aria-expanded', String(!section.classList.contains('section-collapsed')));
         btn.addEventListener('click', () => {
-            section.classList.toggle('section-collapsed');
-            lsSet(key, section.classList.contains('section-collapsed') ? 'collapsed' : 'expanded');
+            const collapsed = section.classList.toggle('section-collapsed');
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            lsSet(key, collapsed ? 'collapsed' : 'expanded');
         });
     });
 }
@@ -2678,7 +2682,7 @@ function mpRenderLyric() {
     const box = mp.el.lyricInner;
     mp.lyricLines = null;
     mp.lyricIdx = -1;
-    box.innerHTML = '';
+    box.replaceChildren();
     if (!mp.lyricMap) { box.innerHTML = '<div class="mp-ly-empty">歌词加载中…</div>'; return; }
     const parsed = mpParseLrc(mp.lyricMap[mpSongId(mp.tracks[mp.idx])] || '');
     if (!parsed.length) { box.innerHTML = '<div class="mp-ly-empty">暂无歌词</div>'; return; }
@@ -2876,8 +2880,11 @@ function initMusicPlayer() {
     mp.audio.addEventListener('ended', () => mpLoad(mpStep(1), true));
     mp.audio.addEventListener('timeupdate', () => {
         const d = mp.audio.duration || 0;
+        const pct = d ? (mp.audio.currentTime / d) * 100 : 0;
         mpTimeText();
-        mp.el.fill.style.width = (d ? (mp.audio.currentTime / d) * 100 : 0) + '%';
+        mp.el.fill.style.width = pct + '%';
+        mp.el.progress.setAttribute('aria-valuenow', String(Math.round(pct)));
+        mp.el.progress.setAttribute('aria-valuetext', mp.el.time.textContent || '0:00 / 0:00');
         mpSyncLyric();
     });
 
@@ -2885,6 +2892,19 @@ function initMusicPlayer() {
         if (!mp.audio.duration) return;
         const r = mp.el.progress.getBoundingClientRect();
         mp.audio.currentTime = ((e.clientX - r.left) / r.width) * mp.audio.duration;
+    });
+    // 播放进度条键盘控制：左右/上下 ±5 秒，Home/End 跳首尾
+    mp.el.progress.addEventListener('keydown', (e) => {
+        const d = mp.audio.duration;
+        if (!d) return;
+        let next = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = Math.min(d, mp.audio.currentTime + 5);
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = Math.max(0, mp.audio.currentTime - 5);
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = d;
+        if (next === null) return;
+        e.preventDefault();
+        mp.audio.currentTime = next;
     });
 
     // ===== 全屏播放：面板右上角进入，网易云式左右分栏；Esc 退出 =====
@@ -3861,7 +3881,7 @@ function buildLinkCard(link, i, pickMode = false) {
             : ' <span class="link-winget" title="可用 winget 命令行安装">winget</span>')
         : '';
     const iconHtml = domain
-        ? `<img src="https://favicon.im/${domain}" alt="" width="32" height="32" loading="lazy" onerror="if(this.dataset.alt!=='1'){this.dataset.alt='1';this.src='https://icons.duckduckgo.com/ip3/${domain}.ico';}else{this.hidden=true;this.nextElementSibling.hidden=false;}"><span class="fav-fallback" hidden>${fallbackHtml}</span>`
+        ? `<img src="https://favicon.im/${domain}" data-fav-domain="${escapeHtml(domain)}" alt="" width="32" height="32" loading="lazy"><span class="fav-fallback" hidden>${fallbackHtml}</span>`
         : `<span class="fav-fallback">${fallbackHtml}</span>`;
     // 批量安装模式的卡片是勾选器：点击切换选中而不是打开链接；
     // class 属性保持 "link-card" 开头，renderLinks 的动画类注入 replace 依赖这个前缀
@@ -3912,7 +3932,7 @@ function buildMediaCard(item, i) {
     <${item.url ? 'a' : 'div'} class="media-card"${item.url ? ` href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"` : ''}>
         <div class="media-cover">
             <div class="media-ph" style="background:${gradient}"><span class="ph-char">${phChar}</span><span class="ph-title">${title}</span></div>
-            ${item.cover ? `<img src="${escapeHtml(item.cover)}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
+            ${item.cover ? `<img src="${escapeHtml(item.cover)}" data-media-cover="1" alt="${title}" loading="lazy" referrerpolicy="no-referrer">` : ''}
             ${item.status ? `<span class="badge-status${statusClass}">${escapeHtml(item.status)}</span>` : ''}
             ${item.rating ? `<span class="badge-rating">★ ${escapeHtml(String(item.rating))}</span>` : ''}
             ${item.comment ? `<div class="media-overlay"><p>${escapeHtml(item.comment)}</p></div>` : ''}
@@ -4088,8 +4108,10 @@ function downloadWingetScript() {
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-// 渲染工具卡片
-function renderTools(animate = false) {
+// 渲染工具卡片（大列表分片渲染：首屏 30 张立即上屏，其余让出主线程续渲）
+let toolsRenderSeq = 0;
+async function renderTools(animate = false) {
+    const seq = ++toolsRenderSeq;
     dashboard.classList.add('hidden');
     mediaGrid.style.display = 'none';
     emptyState.style.display = 'none';
@@ -4101,12 +4123,28 @@ function renderTools(animate = false) {
     setViewHead(currentToolCategory || '在线工具',
         `${currentToolCategory ? '在线工具 · ' : ''}共 ${filteredTools.length} 个工具`);
 
-    linksGrid.style.display = 'grid';
-    linksGrid.innerHTML = filteredTools.map((tool, i) => {
+    const buildCard = (tool, i) => {
         const animClass = animate ? ' anim' : '';
         const animDelay = animate ? ` style="animation-delay:${Math.min(i * 35, 400)}ms"` : '';
         return buildToolCard(tool, i).replace('class="link-card"', `class="link-card${animClass}"${animDelay}`);
-    }).join('');
+    };
+
+    const CHUNK = 30;
+    linksGrid.style.display = 'grid';
+    linksGrid.innerHTML = filteredTools.slice(0, CHUNK).map((tool, i) => buildCard(tool, i)).join('');
+    if (filteredTools.length <= CHUNK) return;
+
+    const yieldMain = () => (typeof scheduler !== 'undefined' && typeof scheduler.yield === 'function')
+        ? scheduler.yield()
+        : new Promise(r => setTimeout(r, 0));
+
+    for (let start = CHUNK; start < filteredTools.length; start += CHUNK) {
+        await yieldMain();
+        if (seq !== toolsRenderSeq || currentView !== 'tools') return;
+        const html = filteredTools.slice(start, start + CHUNK)
+            .map((tool, j) => buildCard(tool, start + j)).join('');
+        linksGrid.insertAdjacentHTML('beforeend', html);
+    }
 }
 
 // 渲染影视记录（海报卡片墙）
@@ -4209,6 +4247,9 @@ function toggleSidebar() {
     sidebar.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-collapsed');
     const isCollapsed = sidebar.classList.contains('collapsed');
+    const tip = isCollapsed ? '展开侧栏' : '收缩侧栏';
+    sidebarCollapseBtn.title = tip;
+    sidebarCollapseBtn.setAttribute('aria-label', tip);
     lsSet('sidebarCollapsed', isCollapsed);
 }
 
@@ -4290,12 +4331,29 @@ function initEventListeners() {
         }
     });
 
-    // 搜索框回车聚焦首条结果（可设置关闭）
+    // 搜索框回车聚焦首条结果（可设置关闭；IME 组词确认期不抢焦点）
     searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (isEnterKey(e)) {
             focusFirstResult();
         }
     });
+
+    // 图片加载失败统一捕获委托（替代内联 onerror 属性，利于后续启用严格 CSP）
+    document.addEventListener('error', (e) => {
+        const img = e.target;
+        if (!img || img.tagName !== 'IMG') return;
+        if (img.dataset.favDomain) {
+            if (img.dataset.alt !== '1') {
+                img.dataset.alt = '1';
+                img.src = `https://icons.duckduckgo.com/ip3/${img.dataset.favDomain}.ico`;
+            } else {
+                img.hidden = true;
+                if (img.nextElementSibling) img.nextElementSibling.hidden = false;
+            }
+        } else if (img.dataset.mediaCover === '1') {
+            img.remove();
+        }
+    }, true);
 
     // 侧栏收缩
     sidebarCollapseBtn.addEventListener('click', toggleSidebar);
@@ -4480,9 +4538,9 @@ function initEventListeners() {
         if (e.target.closest('#fxConvSwap')) fxConvSwap();
     });
 
-    // 页码输入框回车即跳转
+    // 页码输入框回车即跳转（IME 组词确认期不触发）
     mediaGrid.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.id === 'tuPageInput') {
+        if (isEnterKey(e) && e.target.id === 'tuPageInput') {
             e.preventDefault();
             tuJumpPage();
         }

@@ -215,12 +215,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Markdown 转 HTML</h1>
             <p>实时将 Markdown 转换为 HTML 并预览</p>
@@ -229,12 +232,12 @@
         <div class="card">
             <div class="action-bar">
                 <div>
-                    <button class="btn" onclick="loadExample()">加载示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">加载示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev2">清空</button>
                 </div>
                 <div>
-                    <button class="btn" onclick="copyHTML()">复制 HTML</button>
-                    <button class="btn btn-secondary" onclick="downloadHTML()">下载 HTML</button>
+                    <button class="btn" data-ev-id="ev3">复制 HTML</button>
+                    <button class="btn btn-secondary" data-ev-id="ev4">下载 HTML</button>
                 </div>
             </div>
 
@@ -243,8 +246,8 @@
                     <div class="editor-header">
                         <span class="editor-title">Markdown 输入</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="pasteMarkdown()">粘贴</button>
-                            <button class="icon-btn" onclick="document.getElementById('markdown-input').value=''">清空</button>
+                            <button class="icon-btn" data-ev-id="ev5">粘贴</button>
+                            <button class="icon-btn" data-ev-id="ev6">清空</button>
                         </div>
                     </div>
                     <textarea class="editor-textarea" id="markdown-input" placeholder="# 在此输入 Markdown...
@@ -259,14 +262,19 @@
 `代码`
 
 [链接](https://example.com)
-" oninput="convert()"></textarea>
+" data-ev-id="ev7" aria-label="# 在此输入 Markdown...
+
+## 示例
+
+- 列表项 1
+- 列表项"></textarea>
                 </div>
 
                 <div class="editor-panel">
                     <div class="editor-header">
                         <span class="editor-title">HTML 预览</span>
                         <div class="editor-actions">
-                            <button class="icon-btn" onclick="copyHTML()">复制</button>
+                            <button class="icon-btn" data-ev-id="ev8">复制</button>
                         </div>
                     </div>
                     <div class="preview-content" id="html-preview"></div>
@@ -311,7 +319,7 @@
             html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
 
             // 链接
-            html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
             // 图片
             html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1">');
@@ -554,6 +562,18 @@ function hello() {
                 keepalive: true
             });
         })();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { loadExample(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearAll(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { copyHTML(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { downloadHTML(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('click', function(event) { pasteMarkdown(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { document.getElementById('markdown-input').value=''; });
+  document.querySelector('[data-ev-id="ev7"]')?.addEventListener('input', function(event) { convert(); });
+  document.querySelector('[data-ev-id="ev8"]')?.addEventListener('click', function(event) { copyHTML(); });
+})();
+</script>
 </body>
 </html>

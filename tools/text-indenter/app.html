@@ -212,12 +212,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>文本缩进工具</h1>
             <p>批量增加或移除文本缩进</p>
@@ -225,7 +228,7 @@
         <div class="card">
             <div>
                 <label>输入文本</label>
-                <textarea id="input" placeholder="粘贴需要处理的文本"></textarea>
+                <textarea id="input" placeholder="粘贴需要处理的文本" aria-label="粘贴需要处理的文本"></textarea>
             </div>
             <div class="row">
                 <div style="min-width: 180px;">
@@ -248,7 +251,7 @@
             </div>
             <div class="output-box">
                 <label>输出结果</label>
-                <textarea id="output" readonly placeholder="缩进后的文本"></textarea>
+                <textarea id="output" readonly placeholder="缩进后的文本" aria-label="缩进后的文本"></textarea>
             </div>
         </div>
     </div>
@@ -280,7 +283,7 @@
         document.getElementById('copy').addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
         document.getElementById('clear').addEventListener('click', () => {
             input.value = '';

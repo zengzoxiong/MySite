@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="text-scale" content="scale">
     <title>拾光集</title>
     <meta name="description" content="拾光集：个人数字花园——在线工具导航、网站收藏、影视观看记录与实时仪表盘（时钟/天气/GitHub 数据/今日一言/待办清单）。">
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
@@ -10,6 +12,7 @@
     <meta property="og:title" content="拾光集">
     <meta property="og:description" content="拾光集：个人数字花园——工具导航、网站收藏、影视记录与实时仪表盘。">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://zengzoxiong.github.io/MySite/assets/og-image.png">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
@@ -39,71 +42,79 @@
         <div class="sidebar-header">
             <span class="sidebar-logo">拾光集</span>
             <div class="header-actions">
-                <button class="home-btn" id="homeNav" title="回到首页">
+                <button class="home-btn" id="homeNav" title="回到首页" aria-label="回到首页">
                     <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 </button>
-                <button class="settings-btn" id="settingsBtn" title="设置">
+                <button class="settings-btn" id="settingsBtn" title="设置" aria-label="设置">
                     <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
                 </button>
-                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收缩侧栏">‹</button>
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="收缩侧栏" aria-label="收缩侧栏">‹</button>
             </div>
         </div>
 
-        <div class="sidebar-search">
+        <search class="sidebar-search">
             <input type="text" id="searchInput" placeholder="搜索..." autocomplete="off" aria-label="搜索网站收藏、工具与影视">
-        </div>
+        </search>
 
         <nav class="sidebar-nav">
             <div class="sidebar-section">
-                <button class="sidebar-section-title" data-section="tools" title="展开/收起工具分类">在线工具<span class="section-chevron">›</span></button>
-                <div class="section-body sidebar-tools" id="sidebarTools">
-                    <!-- JS 动态渲染 -->
+                <button class="sidebar-section-title" data-section="tools" title="展开/收起工具分类" aria-expanded="true" aria-controls="sidebarTools">在线工具<span class="section-chevron" aria-hidden="true">›</span></button>
+                <div class="section-body" id="sidebarToolsWrap">
+                    <div class="section-body-inner sidebar-tools" id="sidebarTools">
+                        <!-- JS 动态渲染 -->
+                    </div>
                 </div>
             </div>
 
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
-                <button class="sidebar-section-title" data-section="favorites" title="展开/收起收藏分类">网站收藏<span class="section-chevron">›</span></button>
-                <div class="section-body sidebar-categories" id="sidebarCategories">
-                    <!-- JS 动态渲染 -->
+                <button class="sidebar-section-title" data-section="favorites" title="展开/收起收藏分类" aria-expanded="true" aria-controls="sidebarCategories">网站收藏<span class="section-chevron" aria-hidden="true">›</span></button>
+                <div class="section-body" id="sidebarCategoriesWrap">
+                    <div class="section-body-inner sidebar-categories" id="sidebarCategories">
+                        <!-- JS 动态渲染 -->
+                    </div>
                 </div>
             </div>
 
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
-                <button class="sidebar-section-title" data-section="media" title="展开/收起影视记录">影视收藏<span class="section-chevron">›</span></button>
-                <div class="section-body sidebar-media" id="sidebarMedia">
-                    <!-- JS 动态渲染 -->
+                <button class="sidebar-section-title" data-section="media" title="展开/收起影视记录" aria-expanded="true" aria-controls="sidebarMedia">影视收藏<span class="section-chevron" aria-hidden="true">›</span></button>
+                <div class="section-body" id="sidebarMediaWrap">
+                    <div class="section-body-inner sidebar-media" id="sidebarMedia">
+                        <!-- JS 动态渲染 -->
+                    </div>
                 </div>
             </div>
 
             <div class="sidebar-divider"></div>
 
             <div class="sidebar-section">
-                <button class="sidebar-section-title" data-section="data" title="展开/收起数据看板">数据看板<span class="section-chevron">›</span></button>
-                <div class="section-body" id="sidebarData">
-                    <div class="sidebar-item" role="button" tabindex="0" data-stats="1">
-                        <span class="item-text">访问统计</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-daily="1">
-                        <span class="item-text">每日日报</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-fx="1">
-                        <span class="item-text">汇率走势</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-ghstars="1">
-                        <span class="item-text">我的 Stars</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-token="1">
-                        <span class="item-text">Token 用量</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-plugin-cat="skills">
-                        <span class="item-text">Agent Skills</span>
-                    </div>
-                    <div class="sidebar-item" role="button" tabindex="0" data-plugin-cat="mcps">
-                        <span class="item-text">Agent MCP</span>
+                <button class="sidebar-section-title" data-section="data" title="展开/收起数据看板" aria-expanded="true" aria-controls="sidebarData">数据看板<span class="section-chevron" aria-hidden="true">›</span></button>
+                <div class="section-body" id="sidebarDataWrap">
+                    <div class="section-body-inner" id="sidebarData">
+                        <button type="button" class="sidebar-item" data-stats="1">
+                            <span class="item-text">访问统计</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-daily="1">
+                            <span class="item-text">每日日报</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-fx="1">
+                            <span class="item-text">汇率走势</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-ghstars="1">
+                            <span class="item-text">我的 Stars</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-token="1">
+                            <span class="item-text">Token 用量</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-plugin-cat="skills">
+                            <span class="item-text">Agent Skills</span>
+                        </button>
+                        <button type="button" class="sidebar-item" data-plugin-cat="mcps">
+                            <span class="item-text">Agent MCP</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -128,14 +139,14 @@
             <div class="hero">
                 <div class="hero-clock" id="clockTime" role="timer" aria-label="--:--:--">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
-                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气" aria-live="polite">
-                    <div class="weather-main">
+                <button type="button" class="hero-weather" id="heroWeather" aria-label="点击刷新天气" aria-live="polite">
+                    <span class="weather-main">
                         <span class="weather-icon" id="weatherIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.2" cy="7.8" r="3"/><path d="M8.2 2.4v1.6M2.8 7.8h1.6M4.4 4l1.1 1.1M12 4l-1.1 1.1"/><path d="M16.8 19.4H8.6a3.6 3.6 0 0 1-.3-7.2 4.4 4.4 0 0 1 8.3 1.2 3 3 0 0 1 .2 6Z"/></svg></span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>
                         <span class="weather-desc" id="weatherDesc">天气获取中...</span>
-                    </div>
-                    <div class="weather-extra" id="weatherExtra"></div>
-                </div>
+                    </span>
+                    <span class="weather-extra" id="weatherExtra"></span>
+                </button>
             </div>
 
             <!-- 右上：GitHub 传送门 + 贡献热力图展开面板 -->
@@ -148,7 +159,7 @@
                         <span><b id="ghFollowers">–</b> 粉丝</span>
                     </span>
                 </a>
-                <button class="gh-expand" id="ghExpand" title="展开贡献热力图" aria-expanded="false" aria-controls="ghPanel">
+                <button class="gh-expand" id="ghExpand" title="展开贡献热力图" aria-label="展开贡献热力图" aria-expanded="false" aria-controls="ghPanel">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 <div class="gh-panel" id="ghPanel" hidden>
@@ -208,7 +219,7 @@
                             <div class="mp-lyric" id="mpLyric">
                                 <div id="mpLyricInner"></div>
                             </div>
-                            <div class="mp-progress" id="mpProgress" title="点击跳转进度">
+                            <div class="mp-progress" id="mpProgress" title="点击跳转进度" role="slider" tabindex="0" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00 / 0:00">
                                 <div class="mp-fill" id="mpFill"></div>
                             </div>
                             <div class="mp-timerow"><span class="mp-time" id="mpTime">0:00 / 0:00</span></div>
@@ -304,8 +315,8 @@
                     <div class="quote-text" id="quoteText">获取中...</div>
                     <div class="quote-foot">
                         <span class="quote-meta" id="quoteMeta"></span>
-                        <button class="quote-refresh" id="quoteRefresh" title="换一句">↻</button>
-                        <button class="quote-refresh" id="quoteTalisman" title="再看今日签">
+                        <button class="quote-refresh" id="quoteRefresh" title="换一句" aria-label="换一句">↻</button>
+                        <button class="quote-refresh" id="quoteTalisman" title="再看今日签" aria-label="再看今日签">
                             <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
                                 <rect x="4" y="1.5" width="8" height="13" rx="1.5" fill="none" stroke="currentColor" />
                                 <path d="M6 5h4M6 8h4M6 11h2.5" fill="none" stroke="currentColor" />
@@ -370,7 +381,7 @@
         <div class="cmdk" id="cmdk" hidden>
             <div class="cmdk-backdrop" id="cmdkBackdrop"></div>
             <div class="cmdk-box" role="dialog" aria-modal="true" aria-label="命令面板">
-                <input type="text" id="cmdkInput" placeholder="输入命令或搜索内容，↑↓ 选择，Enter 执行，Esc 关闭..." autocomplete="off">
+                <input type="text" id="cmdkInput" placeholder="输入命令或搜索内容，↑↓ 选择，Enter 执行，Esc 关闭..." autocomplete="off" aria-label="输入命令或搜索内容" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cmdkList">
                 <ul id="cmdkList" role="listbox"></ul>
             </div>
         </div>

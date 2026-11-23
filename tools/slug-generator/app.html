@@ -180,12 +180,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>URL Slug 生成器</h1>
             <p>将标题或文本转换为 URL 友好的 slug</p>
@@ -194,25 +197,25 @@
         <div class="card">
             <div class="input-area">
                 <label>输入标题或文本</label>
-                <textarea id="input" placeholder="输入要转换的标题，例如：如何使用 JavaScript 创建动态网页" oninput="generate()"></textarea>
+                <textarea id="input" placeholder="输入要转换的标题，例如：如何使用 JavaScript 创建动态网页" data-ev-id="ev1" aria-label="输入要转换的标题，例如：如何使用 JavaScript 创建动态网页"></textarea>
             </div>
 
             <div class="options">
                 <div class="option-item">
-                    <input type="checkbox" id="lowercase" checked onchange="generate()">
+                    <input type="checkbox" id="lowercase" checked data-ev-id="ev2">
                     <label for="lowercase">小写</label>
                 </div>
                 <div class="option-item">
-                    <input type="checkbox" id="remove-stopwords" onchange="generate()">
+                    <input type="checkbox" id="remove-stopwords" data-ev-id="ev3">
                     <label for="remove-stopwords">移除停用词</label>
                 </div>
                 <div class="option-item">
-                    <input type="checkbox" id="allow-numbers" checked onchange="generate()">
+                    <input type="checkbox" id="allow-numbers" checked data-ev-id="ev4">
                     <label for="allow-numbers">保留数字</label>
                 </div>
                 <div class="option-item">
                     <label for="separator">分隔符:</label>
-                    <select id="separator" onchange="generate()" style="padding: 6px; border-radius: 5px; border: 2px solid #e0e0e0;">
+                    <select id="separator" style="padding: 6px; border-radius: 5px; border: 2px solid #e0e0e0;" data-ev-id="ev5">
                         <option value="-">连字符 (-)</option>
                         <option value="_">下划线 (_)</option>
                     </select>
@@ -222,7 +225,7 @@
             <div class="result-area">
                 <div class="result-header">
                     <span class="result-title">生成的 Slug</span>
-                    <button class="btn" onclick="copyResult()">复制</button>
+                    <button class="btn" data-ev-id="ev6">复制</button>
                 </div>
                 <div class="result-value" id="result">等待输入...</div>
             </div>
@@ -330,7 +333,17 @@
             }
         `;
         document.head.appendChild(style);
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('input', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('change', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('change', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('change', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev5"]')?.addEventListener('change', function(event) { generate(); });
+  document.querySelector('[data-ev-id="ev6"]')?.addEventListener('click', function(event) { copyResult(); });
+})();
+</script>
     
 </body>
 </html>

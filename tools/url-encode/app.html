@@ -188,12 +188,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
 
         <div class="header">
             <h1>URL 编码解码</h1>
@@ -208,9 +211,9 @@
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title" id="input-title">输入文本</span>
-                    <button class="copy-btn" onclick="copyInput()">复制</button>
+                    <button class="copy-btn" data-ev-id="ev1">复制</button>
                 </div>
-                <textarea id="input-text" placeholder="输入要编码的文本...">https://example.com/search?q=测试&page=1</textarea>
+                <textarea id="input-text" placeholder="输入要编码的文本..." aria-label="输入要编码的文本...">https://example.com/search?q=测试&page=1</textarea>
             </div>
 
             <div class="arrow">→</div>
@@ -218,9 +221,9 @@
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title" id="output-title">编码结果</span>
-                    <button class="copy-btn" id="copy-output" onclick="copyOutput()">复制</button>
+                    <button class="copy-btn" id="copy-output" data-ev-id="ev2">复制</button>
                 </div>
-                <textarea id="output-text" readonly placeholder="编码结果将显示在这里..."></textarea>
+                <textarea id="output-text" readonly placeholder="编码结果将显示在这里..." aria-label="编码结果将显示在这里..."></textarea>
             </div>
         </div>
 
@@ -298,7 +301,13 @@
 
         // Initial conversion
         convert();
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { copyInput(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { copyOutput(); });
+})();
+</script>
     
 </body>
 </html>

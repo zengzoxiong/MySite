@@ -212,12 +212,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>Base36 解码</h1>
             <p>将 Base36 字符串还原为十进制数字</p>
@@ -233,10 +236,10 @@
                 <button class="btn btn-secondary" id="clear">清空</button>
             <button class="btn btn-secondary" id="sample">加载示例</button>
             </div>
-            <div class="status" id="status">等待输入</div>
+            <div class="status" id="status" role="status">等待输入</div>
             <div class="output-box">
                 <label>十进制输出</label>
-                <textarea id="output" readonly placeholder="十进制结果"></textarea>
+                <textarea id="output" readonly placeholder="十进制结果" aria-label="十进制结果"></textarea>
             </div>
         </div>
     </div>
@@ -281,7 +284,7 @@
         document.getElementById('copy').addEventListener('click', () => {
             if (!output.value) return;
             output.select();
-            document.execCommand('copy');
+            try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
         });
         document.getElementById('clear').addEventListener('click', () => {
             input.value = '';

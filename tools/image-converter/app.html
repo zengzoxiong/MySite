@@ -84,7 +84,7 @@
             border: none;
             border-radius: 10px;
             background: var(--accent);
-            color: #fff;
+            color: #111827;
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
@@ -136,7 +136,7 @@
         }
 
         .file-actions button:hover, .file-actions a:hover { border-color: var(--accent); color: var(--accent); }
-        .file-actions a { display: none; padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; background: var(--accent); color: #fff; border-color: var(--accent); }
+        .file-actions a { display: none; padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; background: var(--accent); color: #111827; border-color: var(--accent); }
 
         .file-item.done .file-actions button.convert { display: none; }
         .file-item.done .file-actions a { display: inline-block; }
@@ -144,17 +144,20 @@
         .hint { margin-top: 14px; font-size: 0.78rem; color: var(--text-muted); text-align: center; }
 
         .empty-tip { text-align: center; color: var(--text-muted); padding: 10px 0 4px; font-size: 0.88rem; }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>图片格式转换</h1>
             <p>PNG / JPEG / WebP 互转 · 纯浏览器本地处理，图片不上传</p>
         </div>
 
         <div class="card">
-            <div class="dropzone" id="dropzone">
+            <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="拖拽图片到此处，或按回车选择文件">
                 <div class="icon">🖼️</div>
                 <p>拖拽图片到此处，或 <strong>点击选择文件</strong></p>
                 <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
@@ -292,6 +295,12 @@
         });
 
         dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInput.click();
+            }
+        });
         fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
         dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
         dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));

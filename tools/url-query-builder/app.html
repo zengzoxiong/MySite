@@ -201,12 +201,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>URL 参数生成器</h1>
             <p>批量生成 URL 查询参数并输出完整链接</p>
@@ -221,7 +224,8 @@
                                 <label>参数列表（每行 key=value）</label>
                                 <textarea id="params" placeholder="utm_source=wechat
             utm_medium=social
-            user=chao"></textarea>
+            user=chao" aria-label="utm_source=wechat
+            utm_medium"></textarea>
                             </div>
                         </div>
                         <div class="actions">
@@ -232,7 +236,7 @@
                             <label>完整 URL</label>
                             <input type="text" id="fullUrl" readonly class="code" placeholder="生成后的完整链接">
                             <label style="margin-top: 10px; display: block;">查询字符串</label>
-                            <textarea id="queryString" readonly class="code" placeholder="?key=value&..."></textarea>
+                            <textarea id="queryString" readonly class="code" placeholder="?key=value&..." aria-label="?key=value&..."></textarea>
                         </div>
         </div>
     </div>
@@ -282,7 +286,7 @@
                     copyBtn.addEventListener('click', () => {
                         if (!fullUrlOutput.value) return;
                         fullUrlOutput.select();
-                        document.execCommand('copy');
+                        try { const __t = (document.activeElement && 'value' in document.activeElement ? document.activeElement.value : '') || (window.getSelection ? window.getSelection().toString() : ''); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(__t); } catch (e) {}
                     });
     </script>
 </body>

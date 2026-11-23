@@ -193,12 +193,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>CSS 压缩/格式化工具</h1>
             <p>压缩和美化 CSS 代码</p>
@@ -207,10 +210,10 @@
         <div class="card">
             <div class="action-bar">
                 <div class="btn-group">
-                    <button class="btn" onclick="minifyCSS()">压缩</button>
-                    <button class="btn" onclick="beautifyCSS()">格式化</button>
-                    <button class="btn btn-secondary" onclick="loadSample()">示例</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                    <button class="btn" data-ev-id="ev1">压缩</button>
+                    <button class="btn" data-ev-id="ev2">格式化</button>
+                    <button class="btn btn-secondary" data-ev-id="ev3">示例</button>
+                    <button class="btn btn-secondary" data-ev-id="ev4">清空</button>
                 </div>
             </div>
 
@@ -220,7 +223,7 @@
                         <span class="editor-title">输入 CSS</span>
                         <span class="editor-stats" id="input-stats">0 字符</span>
                     </div>
-                    <textarea class="editor-textarea" id="input" placeholder="在此输入 CSS 代码..."></textarea>
+                    <textarea class="editor-textarea" id="input" placeholder="在此输入 CSS 代码..." aria-label="在此输入 CSS 代码..."></textarea>
                 </div>
 
                 <div class="editor-panel">
@@ -228,7 +231,7 @@
                         <span class="editor-title">输出结果</span>
                         <span class="editor-stats" id="output-stats">0 字符 (减少 0%)</span>
                     </div>
-                    <textarea class="editor-textarea" id="output" placeholder="处理后的 CSS 将显示在这里..." readonly></textarea>
+                    <textarea class="editor-textarea" id="output" placeholder="处理后的 CSS 将显示在这里..." readonly aria-label="处理后的 CSS 将显示在这里..."></textarea>
                 </div>
             </div>
         </div>
@@ -366,7 +369,15 @@
         document.getElementById('input').addEventListener('input', function() {
             updateStats('', 0);
         });
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { minifyCSS(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { beautifyCSS(); });
+  document.querySelector('[data-ev-id="ev3"]')?.addEventListener('click', function(event) { loadSample(); });
+  document.querySelector('[data-ev-id="ev4"]')?.addEventListener('click', function(event) { clearAll(); });
+})();
+</script>
     
 </body>
 </html>

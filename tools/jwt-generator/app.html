@@ -158,12 +158,15 @@
             border-color: rgba(15, 23, 42, 0.2);
             transform: translateY(-1px);
         }
-    </style>
+    
+        :root { color-scheme: light; }
+        :focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+</style>
 </head>
 <body>
     <a class="tool-home-link" href="../../index.html">首页</a>
     <a class="tool-doc-link" href="index.html">说明</a>
-    <div class="container">
+    <div class="container" role="main">
         <div class="header">
             <h1>JWT 生成器</h1>
             <p>生成 JSON Web Token（支持 HS256/384/512）</p>
@@ -193,17 +196,32 @@
     </div>
 </div>
 <div class="form-actions">
-    <button class="btn" onclick="generateJWT()">生成 JWT</button>
-    <button class="btn btn-secondary" onclick="clearOutput()">清空输出</button>
+    <button class="btn" data-ev-id="ev1">生成 JWT</button>
+    <button class="btn btn-secondary" data-ev-id="ev2">清空输出</button>
 </div>
 <div class="output-box">
     <label>JWT 输出</label>
-    <textarea id="jwt-output" rows="5" readonly></textarea>
+    <textarea id="jwt-output" rows="5" readonly aria-label="jwt-output"></textarea>
 </div>
         </div>
     </div>
 
     <script>
+function showNotice(msg) {
+    let el = document.getElementById('toolNoticeAlert');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'toolNoticeAlert';
+        el.setAttribute('role', 'alert');
+        el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-width:90vw;text-align:center;';
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
         function base64UrlEncode(input) {
     const bytes = new TextEncoder().encode(input);
     let binary = '';
@@ -235,7 +253,7 @@ async function generateJWT() {
     const output = document.getElementById('jwt-output');
 
     if (!secret) {
-        alert('请输入签名密钥');
+        showNotice('请输入签名密钥');
         return;
     }
 
@@ -251,14 +269,20 @@ async function generateJWT() {
         const signature = await hmacSign(data, secret, alg);
         output.value = `${data}.${signature}`;
     } catch (error) {
-        alert('解析 JSON 失败: ' + error.message);
+        showNotice('解析 JSON 失败: ' + error.message);
     }
 }
 
 function clearOutput() {
     document.getElementById('jwt-output').value = '';
 }
-    </script>
+    
+/* 迁移自内联事件属性：统一使用 addEventListener 绑定 */
+(function(){
+  document.querySelector('[data-ev-id="ev1"]')?.addEventListener('click', function(event) { generateJWT(); });
+  document.querySelector('[data-ev-id="ev2"]')?.addEventListener('click', function(event) { clearOutput(); });
+})();
+</script>
 
 </body>
 </html>
