@@ -1921,6 +1921,31 @@
       "cover": "assets/media/zhongguo-jiuhu-s1.jpg"
     },
     {
+      "title": "大海啸之鲨口逃生",
+      "type": "电影",
+      "status": "看过",
+      "rating": 5.6,
+      "release": "2012-09-05",
+      "url": "https://www.themoviedb.org/movie/118957",
+      "cover": "assets/media/dahaixiao-shakou-taosheng.jpg"
+    },
+    {
+      "title": "闪闪的儿科医生 第四季",
+      "type": "纪录片",
+      "status": "在看",
+      "release": "2026-05-29",
+      "url": "https://www.themoviedb.org/tv/226796/season/4",
+      "cover": "assets/media/shanshan-erke-yisheng-s4.jpg"
+    },
+    {
+      "title": "闪闪的儿科医生 第三季",
+      "type": "纪录片",
+      "status": "看过",
+      "release": "2025-06-20",
+      "url": "https://www.themoviedb.org/tv/226796/season/3",
+      "cover": "assets/media/shanshan-erke-yisheng-s3.jpg"
+    },
+    {
       "title": "闪闪的儿科医生 第二季",
       "type": "纪录片",
       "status": "看过",
