@@ -41,46 +41,45 @@ function makeRng(seed) {
     };
 }
 
-// Token 数值紧凑格式化（亿 / 万 / 原数）
+// Token 数值紧凑格式化（与全页统计口径一致：K / M / B，去尾零）
 function fmtToken(n) {
-    if (n >= 1e8) return (n / 1e8).toFixed(2) + ' 亿';
-    if (n >= 1e4) return (n / 1e4).toFixed(1) + ' 万';
+    n = n || 0;
+    const units = [['B', 1e9], ['M', 1e6], ['K', 1e3]];
+    for (let i = 0; i < units.length; i++) {
+        const [suffix, base] = units[i];
+        if (n < base) continue;
+        const v = parseFloat((n / base).toFixed(2));
+        if (v >= 1000 && i > 0) {
+            const [prevSuffix, prevBase] = units[i - 1];
+            return parseFloat((n / prevBase).toFixed(2)) + prevSuffix;
+        }
+        return v + suffix;
+    }
     return Math.round(n).toLocaleString('zh-CN');
-}
-
-// 占比格式化（极小占比不显示 0.0%）
-function fmtPct(p) {
-    if (p <= 0) return '0%';
-    if (p < 0.01) return '<0.01%';
-    if (p < 0.1) return p.toFixed(2) + '%';
-    return p.toFixed(1) + '%';
 }
 
 // 从 days 聚合全量模型统计，按累计 Token 降序排定 rank
 function aggregateModels(days) {
     const map = new Map();
-    let grandTotal = 0;
     for (const d of (days || [])) {
         const date = d.date || '';
         for (const m of (d.models || [])) {
             const total = Number(m.total) || 0;
             if (!m.id || total <= 0) continue;
-            grandTotal += total;
             let rec = map.get(m.id);
             if (!rec) {
-                rec = { id: m.id, vendor: vendorKeyOf(m.id), total: 0, daySet: new Set(), first: date, last: date };
+                rec = { id: m.id, vendor: vendorKeyOf(m.id), total: 0, first: date, last: date };
                 map.set(m.id, rec);
             }
             rec.total += total;
             if (date) {
-                rec.daySet.add(date);
                 if (!rec.first || date < rec.first) rec.first = date;
                 if (!rec.last || date > rec.last) rec.last = date;
             }
         }
     }
     const list = [...map.values()].sort((a, b) => b.total - a.total);
-    if (!list.length) return { models: [], grandTotal: 0 };
+    if (!list.length) return { models: [] };
 
     // 对数尺度映射泡泡基准半径，兼顾 6 个数量级差异
     const logs = list.map(m => Math.log10(Math.max(100, m.total)));
@@ -92,14 +91,12 @@ function aggregateModels(days) {
         id: m.id,
         vendor: m.vendor,
         total: m.total,
-        days: m.daySet.size || 1,
         first: m.first,
         last: m.last,
         rank: idx + 1,
-        pct: grandTotal > 0 ? (m.total / grandTotal) * 100 : 0,
-        baseR: list.length === 1 ? 24 : 11 + 21 * ((logs[idx] - minL) / span)
+        baseR: list.length === 1 ? 26 : 13 + 21 * ((logs[idx] - minL) / span)
     }));
-    return { models, grandTotal };
+    return { models };
 }
 
 // 为所有模型计算确定性三维星云坐标 + 同厂商最小生成树连线
@@ -111,9 +108,9 @@ function buildNebulaLayout(models) {
     activeVendors.forEach((v, i) => {
         const theta = (i / Math.max(1, nV)) * Math.PI * 2 + 0.35;
         const yNorm = nV <= 2 ? 0 : (((i % 2 === 0 ? 1 : -1) * 0.34) + (i / nV - 0.5) * 0.25);
-        const r = 205;
+        const r = 230;
         const horiz = Math.sqrt(Math.max(0.25, 1 - yNorm * yNorm)) * r;
-        centers[v.key] = { x: Math.cos(theta) * horiz * 1.12, y: yNorm * r * 0.78, z: Math.sin(theta) * horiz };
+        centers[v.key] = { x: Math.cos(theta) * horiz * 1.15, y: yNorm * r * 0.72, z: Math.sin(theta) * horiz };
     });
 
     // 为每个模型分配簇内初始坐标
@@ -203,14 +200,15 @@ function hexAlpha(hex, alpha) {
     return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// 计算将某个 3D 目标点转到镜头正前方所需的 yaw / pitch
+// 计算将某个 3D 目标点转到镜头正前方（z1 最小且 x1=0, y2=0）所需的 yaw / pitch
 function anglesForPoint(pt) {
     const len = Math.hypot(pt.x, pt.y, pt.z) || 1;
-    // 投影公式为 X = x*cos(y) - z*sin(y), Z = x*sin(y) + z*cos(y)
-    // 让目标转到 z 轴负方向（最靠近相机，Z 最小）：atan2(-x, -z)
-    const yaw = Math.atan2(pt.x, -pt.z);
+    // 投影公式：x1 = x*cos(yaw) - z*sin(yaw), z1 = x*sin(yaw) + z*cos(yaw)
+    // 取 yaw = atan2(-x, -z) 使 x1 = 0 且 z1 = -hypot(x, z)（最靠近相机前侧）
+    const yaw = Math.atan2(-pt.x, -pt.z);
     const horiz = Math.hypot(pt.x, pt.z) || 1;
-    const pitch = Math.max(-0.85, Math.min(0.85, Math.atan2(pt.y, horiz) * 0.72));
+    // y2 = y*cos(pitch) - z1*sin(pitch) = y*cos(pitch) + horiz*sin(pitch) = 0
+    const pitch = Math.max(-0.85, Math.min(0.85, Math.atan2(-pt.y, horiz) * 0.72));
     return { yaw, pitch, len };
 }
 
@@ -227,9 +225,10 @@ function shortestAngleDelta(from, to) {
  * @param {HTMLElement} container 容器元素
  * @param {Array} days tokenUsage.days 数据数组
  * @param {Object|null} savedState 可选，重渲染时恢复的视角/选中状态
+ * @param {Function|null} onModeChange 可选，切换星云/排行模式时的回调
  * @returns {{ destroy: Function, getState: Function, count: number }}
  */
-export function mountTokenNebula(container, days, savedState = null) {
+export function mountTokenNebula(container, days, savedState = null, onModeChange = null) {
     const { models } = aggregateModels(days);
     if (!models.length) {
         container.innerHTML = '<div class="fx-placeholder">暂无模型用量数据</div>';
@@ -238,23 +237,31 @@ export function mountTokenNebula(container, days, savedState = null) {
 
     const { nodes, edges, activeVendors, vendorCenters } = buildNebulaLayout(models);
 
-    // 渲染骨架 DOM：画布 + 右上角控制钮 + 右侧精简铭牌 + 底部厂商聚焦胶囊
+    // 渲染骨架 DOM：星云画布 + 同框双栏排行榜 + 右上角单点切换图标/缩放钮 + 右侧精简铭牌 + 底部厂商聚焦胶囊
     container.innerHTML = `
         <div class="tu-nebula-stage">
             <canvas class="tu-nebula-canvas" aria-label="模型星云藏品柜，拖拽可旋转，点击泡泡查看模型信息"></canvas>
-            <div class="tu-nebula-ctrls" role="group" aria-label="星云视角控制">
-                <button class="tu-nebula-ctrl" type="button" data-act="in" title="放大" aria-label="放大">
-                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>
+            <div class="tu-nebula-rank" hidden aria-label="模型用量排行榜">
+                <div class="tu-nr-list"></div>
+            </div>
+            <div class="tu-nebula-ctrls" role="group" aria-label="视图切换与星云视角控制">
+                <button class="tu-nebula-ctrl tu-nm-toggle" type="button" data-act="toggleMode" title="切换至模型用量排行榜" aria-label="切换至模型用量排行榜">
+                    <svg class="tu-nm-ic-rank" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h8M2.5 12h5.5"/></svg>
+                    <svg class="tu-nm-ic-nebula" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" hidden><circle cx="6" cy="6.5" r="3"/><circle cx="11.5" cy="5.5" r="1.8"/><circle cx="10.2" cy="11.2" r="2.2"/></svg>
                 </button>
-                <button class="tu-nebula-ctrl" type="button" data-act="out" title="缩小" aria-label="缩小">
-                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 8h9"/></svg>
-                </button>
-                <button class="tu-nebula-ctrl" type="button" data-act="reset" title="复位视角" aria-label="复位视角">
-                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 0 1.4-3.5L3 6"/><path d="M3 3v3h3"/></svg>
-                </button>
+                <div class="tu-nebula-zoom-grp">
+                    <button class="tu-nebula-ctrl" type="button" data-act="in" title="放大" aria-label="放大">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></svg>
+                    </button>
+                    <button class="tu-nebula-ctrl" type="button" data-act="out" title="缩小" aria-label="缩小">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 8h9"/></svg>
+                    </button>
+                    <button class="tu-nebula-ctrl" type="button" data-act="reset" title="复位视角" aria-label="复位视角">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 0 1.4-3.5L3 6"/><path d="M3 3v3h3"/></svg>
+                    </button>
+                </div>
             </div>
             <aside class="tu-nebula-card" aria-live="polite" hidden></aside>
-            <div class="tu-nebula-hint">拖拽旋转 · 点击泡泡查看</div>
         </div>
         <div class="tu-nebula-vendors" role="group" aria-label="按厂商聚焦">
             ${activeVendors.map(v => {
@@ -267,11 +274,18 @@ export function mountTokenNebula(container, days, savedState = null) {
     const stage = container.querySelector('.tu-nebula-stage');
     const canvas = container.querySelector('.tu-nebula-canvas');
     const ctx = canvas.getContext('2d');
+    const rankEl = container.querySelector('.tu-nebula-rank');
+    const rankListEl = container.querySelector('.tu-nr-list');
+    const zoomGrpEl = container.querySelector('.tu-nebula-zoom-grp');
+    const toggleBtn = container.querySelector('.tu-nm-toggle');
+    const icRank = toggleBtn.querySelector('.tu-nm-ic-rank');
+    const icNebula = toggleBtn.querySelector('.tu-nm-ic-nebula');
     const cardEl = container.querySelector('.tu-nebula-card');
     const chips = [...container.querySelectorAll('.tu-nebula-chip')];
 
     // 状态（可从 savedState 恢复）
     const st = {
+        mode: savedState && savedState.mode === 'rank' ? 'rank' : 'nebula',
         yaw: savedState ? savedState.yaw : 0.35,
         pitch: savedState ? savedState.pitch : -0.22,
         zoom: savedState ? savedState.zoom : 1,
@@ -329,7 +343,7 @@ export function mountTokenNebula(container, days, savedState = null) {
         st.targetShiftX = (st.selectedId && width > 680) ? -Math.min(115, width * 0.13) : 0;
     }
 
-    // 投影单个三维点到画布平面
+    // 投影单个三维点到画布平面（宽屏下适度舒展横向跨度，球体本身仍保持正圆）
     function project(x, y, z) {
         const cy = Math.cos(st.yaw), sy = Math.sin(st.yaw);
         const cp = Math.cos(st.pitch), sp = Math.sin(st.pitch);
@@ -337,12 +351,13 @@ export function mountTokenNebula(container, days, savedState = null) {
         const z1 = x * sy + z * cy;
         const y2 = y * cp - z1 * sp;
         const z2 = y * sp + z1 * cp;
-        const focal = Math.min(width, height) * 1.25 * st.zoom;
+        const focal = Math.min(width, height) * 1.28 * st.zoom;
         const camDist = 660;
         const depth = z2 + camDist;
         const k = focal / Math.max(80, depth);
+        const xStretch = Math.min(1.85, Math.max(1, width / (height * 1.45)));
         return {
-            x: width / 2 + st.shiftX + x1 * k,
+            x: width / 2 + st.shiftX + x1 * k * xStretch,
             y: height / 2 + y2 * k,
             k,
             z: depth
@@ -442,7 +457,6 @@ export function mountTokenNebula(container, days, savedState = null) {
             return;
         }
         const v = VENDOR_MAP[m.vendor] || VENDOR_MAP.other;
-        const dateRange = m.first === m.last ? m.first : `${m.first} — ${m.last}`;
         cardEl.innerHTML = `
             <div class="tu-nc-head">
                 <div class="tu-nc-title">${escapeHtml(m.id)}</div>
@@ -457,15 +471,15 @@ export function mountTokenNebula(container, days, savedState = null) {
             <div class="tu-nc-grid">
                 <div class="tu-nc-row">
                     <span>累计 Token</span>
-                    <strong>${fmtToken(m.total)}<em>${fmtPct(m.pct)}</em></strong>
+                    <strong>${fmtToken(m.total)}</strong>
                 </div>
                 <div class="tu-nc-row">
-                    <span>活跃天数</span>
-                    <strong>${m.days} 天</strong>
+                    <span>首次使用日期</span>
+                    <strong class="tu-nc-dates">${escapeHtml(m.first)}</strong>
                 </div>
                 <div class="tu-nc-row">
-                    <span>使用日期</span>
-                    <strong class="tu-nc-dates">${escapeHtml(dateRange)}</strong>
+                    <span>最后使用日期</span>
+                    <strong class="tu-nc-dates">${escapeHtml(m.last)}</strong>
                 </div>
             </div>
         `;
@@ -483,6 +497,54 @@ export function mountTokenNebula(container, days, savedState = null) {
         }
     }
 
+    // 渲染同框双栏模型用量排行榜（联动底部厂商胶囊筛选，框内可自由滚动）
+    function renderRankList() {
+        const list = st.focusVendor ? models.filter(m => m.vendor === st.focusVendor) : models;
+        const maxTotal = list.length ? Math.max(1, list[0].total) : 1;
+        rankListEl.innerHTML = list.map(m => {
+            const v = VENDOR_MAP[m.vendor] || VENDOR_MAP.other;
+            const ratio = m.total / maxTotal;
+            const barPct = Math.max(2, Math.min(100, (Math.pow(ratio, 0.32) * 100))).toFixed(1);
+            const topCls = m.rank <= 3 ? ` is-top${m.rank}` : '';
+            return `
+                <div class="tu-nr-row" style="--vc-dark:${v.dark};--vc-light:${v.light}">
+                    <span class="tu-nr-num${topCls}">#${m.rank}</span>
+                    <div class="tu-nr-main">
+                        <div class="tu-nr-top">
+                            <span class="tu-nr-name" title="${escapeHtml(m.id)}">${escapeHtml(m.id)}</span>
+                            <span class="tu-nr-vendor"><i class="tu-nebula-dot"></i>${escapeHtml(v.name)}</span>
+                            <strong class="tu-nr-val">${fmtToken(m.total)}</strong>
+                        </div>
+                        <div class="tu-nr-bar"><i style="width:${barPct}%"></i></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 同步星云 / 排行榜双态视图，切到排行时暂停星云动画循环并通知外层标题同步
+    function syncMode() {
+        const isRank = st.mode === 'rank';
+        canvas.hidden = isRank;
+        rankEl.hidden = !isRank;
+        zoomGrpEl.hidden = isRank;
+        icRank.toggleAttribute('hidden', isRank);
+        icNebula.toggleAttribute('hidden', !isRank);
+        const tip = isRank ? '切换至模型藏品星云' : '切换至模型用量排行榜';
+        toggleBtn.title = tip;
+        toggleBtn.setAttribute('aria-label', tip);
+        if (onModeChange) onModeChange(st.mode);
+        if (isRank) {
+            cardEl.hidden = true;
+            cardEl.classList.remove('is-open');
+            if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+            renderRankList();
+        } else {
+            syncCard();
+            requestRedraw();
+        }
+    }
+
     // 镜头平滑转向指定三维点
     function focusPoint(pt) {
         const { yaw, pitch } = anglesForPoint(pt);
@@ -495,7 +557,7 @@ export function mountTokenNebula(container, days, savedState = null) {
 
     // 主绘制帧
     function renderFrame(now) {
-        if (destroyed) return;
+        if (destroyed || st.mode === 'rank') { rafId = 0; return; }
         // 双重保险：容器脱离文档后自动终止动画循环
         if (!container.isConnected) {
             destroy();
@@ -613,7 +675,7 @@ export function mountTokenNebula(container, days, savedState = null) {
     }
 
     function requestRedraw() {
-        if (destroyed) return;
+        if (destroyed || st.mode === 'rank') return;
         if (isReducedMotion()) {
             renderFrame(performance.now());
         } else if (!rafId) {
@@ -721,11 +783,16 @@ export function mountTokenNebula(container, days, savedState = null) {
         }
     }
 
-    // 角落控制按钮：缩放 / 复位
+    // 角落控制按钮：单点模式切换 / 缩放 / 复位
     function onCtrlClick(e) {
         const btn = e.target.closest('.tu-nebula-ctrl');
         if (!btn) return;
         const act = btn.dataset.act;
+        if (act === 'toggleMode') {
+            st.mode = st.mode === 'rank' ? 'nebula' : 'rank';
+            syncMode();
+            return;
+        }
         if (act === 'in') {
             st.targetZoom = Math.min(1.65, st.targetZoom * 1.18);
         } else if (act === 'out') {
@@ -744,7 +811,7 @@ export function mountTokenNebula(container, days, savedState = null) {
         requestRedraw();
     }
 
-    // 底部厂商聚焦胶囊点击
+    // 底部厂商聚焦胶囊点击（星云态转向该簇，排行态筛选该厂商）
     function onVendorClick(e) {
         const chip = e.target.closest('.tu-nebula-chip');
         if (!chip) return;
@@ -757,7 +824,12 @@ export function mountTokenNebula(container, days, savedState = null) {
             if (center) focusPoint(center);
         }
         syncChips();
-        requestRedraw();
+        if (st.mode === 'rank') {
+            renderRankList();
+            rankListEl.scrollTop = 0;
+        } else {
+            requestRedraw();
+        }
     }
 
     // 铭牌关闭按钮
@@ -805,8 +877,7 @@ export function mountTokenNebula(container, days, savedState = null) {
     // 初始挂载
     resize();
     syncChips();
-    syncCard();
-    requestRedraw();
+    syncMode();
 
     function destroy() {
         if (destroyed) return;
@@ -828,6 +899,7 @@ export function mountTokenNebula(container, days, savedState = null) {
 
     function getState() {
         return {
+            mode: st.mode,
             yaw: st.yaw,
             pitch: st.pitch,
             zoom: st.targetZoom,

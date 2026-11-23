@@ -1523,7 +1523,7 @@ function statsPaintChart() {
         `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>` +
         `<text class="fx-axis" x="${padL - 8}" y="${(padT + innerH * t + 3).toFixed(1)}" text-anchor="end">${statsAxisText(maxV * (1 - t))}</text>`).join('');
     const pts = days.map((d, i) => [X(i), Y(d.v)]);
-    const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+    const line = tuSmoothPath(pts);
     const area = `${line} L${X(n - 1).toFixed(1)} ${(padT + innerH).toFixed(1)} L${X(0).toFixed(1)} ${(padT + innerH).toFixed(1)} Z`;
     // x 轴日期抽稀（≤7 个，末位必出，相邻去重）
     const labelStep = Math.max(1, Math.ceil(n / 7));
@@ -1592,7 +1592,6 @@ function ensureStats() {
 // { updated, days: [{ date, models: [{ id, inCache, inFresh, out, total }] }] }（date 升序；total 可省略，前端按三项求和兜底）
 let tokenUsage = null;
 let tokenUsageLoading = false;
-let tuCurrentModel = ''; // '' = 全部模型
 let tuRangeDays = 30; // 趋势图时间范围：7 / 30 / 0=全部
 let tuPage = 1; // 明细表当前页（1 起）
 let tuPageSize = 20; // 每页条数：10 / 20 / 50
@@ -1629,12 +1628,11 @@ function tuUnit(n) {
     return tuFmt(n);
 }
 
-// 按当前模型筛选 days：返回每天的合计 [{ date, inCache, inFresh, out, total }]
+// 按天汇总用量：返回每天的合计 [{ date, inCache, inFresh, out, total }]
 function tuFilteredDays(days) {
     return days.map(d => {
         let cache = 0, fresh = 0, out = 0;
         (d.models || []).forEach(m => {
-            if (tuCurrentModel && m.id !== tuCurrentModel) return;
             cache += m.inCache || 0;
             fresh += m.inFresh || 0;
             out += m.out || 0;
@@ -1648,22 +1646,11 @@ function tuRows(days) {
     const rows = [];
     [...days].reverse().forEach(d => {
         (d.models || []).forEach(m => {
-            if (tuCurrentModel && m.id !== tuCurrentModel) return;
             const total = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
             rows.push({ date: d.date, id: m.id, inCache: m.inCache || 0, inFresh: m.inFresh || 0, out: m.out || 0, total: total });
         });
     });
     return rows;
-}
-
-// 全量模型清单，按总用量降序
-function tuModelList(days) {
-    const tot = {};
-    days.forEach(d => (d.models || []).forEach(m => {
-        const t = m.total != null ? m.total : (m.inCache || 0) + (m.inFresh || 0) + (m.out || 0);
-        tot[m.id] = (tot[m.id] || 0) + t;
-    }));
-    return Object.entries(tot).filter(([, t]) => t > 0).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
 }
 
 // 自定义页码跳转：越界收敛到 [1, 总页数]，非法输入清空不动
@@ -1728,9 +1715,44 @@ function tuHeatHtml(days) {
     </div>`;
 }
 
-// 折线路径（直连，不做平滑：Catmull-Rom 类曲线会在低谷处向下过冲、越出绘图区底部）
-function tuLinePath(pts) {
-    return pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join('');
+// 单调三次样条曲线（Fritsch-Carlson 保形插值）：丝滑过渡且绝不在低谷处向下过冲
+function tuSmoothPath(pts) {
+    const n = pts.length;
+    if (!n) return '';
+    if (n === 1) return `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    if (n === 2) return `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}L${pts[1][0].toFixed(1)} ${pts[1][1].toFixed(1)}`;
+    const d = [], m = new Array(n);
+    for (let i = 0; i < n - 1; i++) {
+        const dx = pts[i + 1][0] - pts[i][0] || 1;
+        d.push((pts[i + 1][1] - pts[i][1]) / dx);
+    }
+    m[0] = d[0];
+    m[n - 1] = d[n - 2];
+    for (let i = 1; i < n - 1; i++) {
+        if (d[i - 1] * d[i] <= 0) {
+            m[i] = 0;
+        } else {
+            const dx0 = pts[i][0] - pts[i - 1][0] || 1;
+            const dx1 = pts[i + 1][0] - pts[i][0] || 1;
+            const w0 = 2 * dx1 + dx0, w1 = dx1 + 2 * dx0;
+            m[i] = (w0 + w1) / (w0 / d[i - 1] + w1 / d[i]);
+        }
+    }
+    // 端点斜率钳制，防止首尾段过冲
+    if (m[0] * d[0] <= 0) m[0] = 0;
+    else if (Math.abs(m[0]) > 3 * Math.abs(d[0])) m[0] = 3 * d[0];
+    if (m[n - 1] * d[n - 2] <= 0) m[n - 1] = 0;
+    else if (Math.abs(m[n - 1]) > 3 * Math.abs(d[n - 2])) m[n - 1] = 3 * d[n - 2];
+
+    let path = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < n - 1; i++) {
+        const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
+        const dx = (x1 - x0) / 3;
+        const cx1 = x0 + dx, cy1 = y0 + m[i] * dx;
+        const cx2 = x1 - dx, cy2 = y1 - m[i + 1] * dx;
+        path += `C${cx1.toFixed(1)} ${cy1.toFixed(1)},${cx2.toFixed(1)} ${cy2.toFixed(1)},${x1.toFixed(1)} ${y1.toFixed(1)}`;
+    }
+    return path;
 }
 
 // 每日 Token 趋势（ZCode 式多模型彩色折线）：全部模型时画 Top7 各一线 + 其余合并；
@@ -1757,20 +1779,15 @@ function tuTrendLines(days) {
         dates.push(t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'));
     }
     if (dates.length < 2) return null;
-    let lines;
-    if (tuCurrentModel) {
-        lines = [{ id: tuCurrentModel, cls: 'tu-c0', values: dates.map(k => (byDate[k] || {})[tuCurrentModel] || 0) }];
-    } else {
-        // Top7 按「当前时间窗」内的用量选：窗口内没用过的模型不进折线/图例（否则切到近 7 天会有一排 0% 死行）
-        const rangeTot = {};
-        dates.forEach(k => Object.entries(byDate[k] || {}).forEach(([id, v]) => { rangeTot[id] = (rangeTot[id] || 0) + v; }));
-        const top = Object.entries(rangeTot).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 7).map(([id]) => id);
-        const topSet = new Set(top);
-        lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: dates.map(k => (byDate[k] || {})[id] || 0) }));
-        const others = dates.map(k => Object.entries(byDate[k] || {})
-            .reduce((s, [id, v]) => s + (topSet.has(id) ? 0 : v), 0));
-        if (others.some(v => v > 0)) lines.push({ id: '其他', cls: 'tu-c-other', values: others });
-    }
+    // Top7 按「当前时间窗」内的用量选：窗口内没用过的模型不进曲线/图例
+    const rangeTot = {};
+    dates.forEach(k => Object.entries(byDate[k] || {}).forEach(([id, v]) => { rangeTot[id] = (rangeTot[id] || 0) + v; }));
+    const top = Object.entries(rangeTot).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 7).map(([id]) => id);
+    const topSet = new Set(top);
+    const lines = top.map((id, i) => ({ id: id, cls: 'tu-c' + i, values: dates.map(k => (byDate[k] || {})[id] || 0) }));
+    const others = dates.map(k => Object.entries(byDate[k] || {})
+        .reduce((s, [id, v]) => s + (topSet.has(id) ? 0 : v), 0));
+    if (others.some(v => v > 0)) lines.push({ id: '其他', cls: 'tu-c-other', values: others });
     return { dates: dates, lines: lines };
 }
 
@@ -1814,65 +1831,161 @@ function tuPaintTrend() {
     if (!box || !tuTrendGeom) return;
     const { dates, lines } = tuTrendGeom;
     const w = Math.max(box.clientWidth || 0, 320);
-    // 高度向右侧「模型用量」栏看齐，尽量占满卡片（减去底部折线图例行占位）
+    // 高度向右侧「模型用量」栏看齐，尽量占满卡片（减去底部图例胶囊占位）
     const rightBox = document.querySelector('.tu-trend-right');
     const rightH = rightBox ? rightBox.clientHeight : 0;
-    const h = Math.max(280, rightH - 32);
-    const padL = 14, padR = 16, padT = 14, padB = 28;
+    const h = Math.max(290, rightH - 36);
+    const padL = 46, padR = 16, padT = 16, padB = 28;
     const innerH = h - padT - padB;
-    const maxV = Math.max(1, ...lines.flatMap(l => l.values)) * 1.08;
+    const baseY = padT + innerH;
+    const rawMax = Math.max(1, ...lines.flatMap(l => l.values));
+    // 向上取整到清爽的刻度上限
+    const mag = Math.pow(10, Math.floor(Math.log10(rawMax)));
+    const maxV = Math.ceil((rawMax * 1.08) / (mag / 2)) * (mag / 2);
     const n = dates.length;
     const step = n > 1 ? (w - padL - padR) / (n - 1) : 0;
     const X = i => padL + step * i;
     const Y = v => padT + innerH * (1 - v / maxV);
-    // 只保留水平网格线，纵轴数值不再标注（读数值看 hover tooltip）
-    const grid = [0, 0.25, 0.5, 0.75, 1].map(t =>
-        `<line class="fx-grid" x1="${padL}" y1="${(padT + innerH * t).toFixed(1)}" x2="${w - padR}" y2="${(padT + innerH * t).toFixed(1)}"></line>`).join('');
+
+    // 水平虚线网格 + 左侧轻刻度
+    const ticks = [0, 0.25, 0.5, 0.75, 1];
+    const grid = ticks.map(t => {
+        const y = (padT + innerH * (1 - t)).toFixed(1);
+        const val = maxV * t;
+        const lbl = t === 0 ? '0' : tuUnit(val);
+        return `<line class="tu-grid${t === 0 ? ' is-base' : ''}" x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}"></line>` +
+            `<text class="tu-yaxis" x="${padL - 8}" y="${(Number(y) + 3.5).toFixed(1)}" text-anchor="end">${escapeHtml(lbl)}</text>`;
+    }).join('');
+
     const labelStep = Math.max(1, Math.ceil(n / 7));
     const xLabels = [];
     let lastLabel = '';
     for (let i = 0; i < n; i += labelStep) {
         const label = dates[i].slice(5).replace('-', '/');
-        if (label !== lastLabel) { xLabels.push(`<text class="fx-axis" x="${X(i).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(label)}</text>`); lastLabel = label; }
+        if (label !== lastLabel) {
+            xLabels.push(`<text class="fx-axis" x="${X(i).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(label)}</text>`);
+            lastLabel = label;
+        }
     }
     const lastDate = dates[n - 1].slice(5).replace('-', '/');
-    if (lastLabel !== lastDate) xLabels.push(`<text class="fx-axis" x="${X(n - 1).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(lastDate)}</text>`);
-    const paths = lines.map(l => `<path class="tu-line ${l.cls}" d="${tuLinePath(l.values.map((v, i) => [X(i), Y(v)]))}"></path>`).join('');
+    if (lastLabel !== lastDate) {
+        xLabels.push(`<text class="fx-axis" x="${X(n - 1).toFixed(1)}" y="${h - 8}" text-anchor="middle">${escapeHtml(lastDate)}</text>`);
+    }
+
+    // 为每条曲线生成渐变面积定义、单调平滑曲线路径与面积路径
+    const defs = lines.map((l, idx) =>
+        `<linearGradient id="tuGrad${idx}" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0%" class="tu-grad-top ${l.cls}"/>` +
+        `<stop offset="100%" class="tu-grad-bot ${l.cls}"/>` +
+        `</linearGradient>`
+    ).join('');
+
+    const seriesSvg = lines.map((l, idx) => {
+        const pts = l.values.map((v, i) => [X(i), Y(v)]);
+        const dLine = tuSmoothPath(pts);
+        const dArea = `${dLine}L${X(n - 1).toFixed(1)} ${baseY.toFixed(1)}L${X(0).toFixed(1)} ${baseY.toFixed(1)}Z`;
+        return `<g class="tu-series" data-si="${idx}">` +
+            `<path class="tu-area" d="${dArea}" fill="url(#tuGrad${idx})"></path>` +
+            `<path class="tu-line ${l.cls}" d="${dLine}"></path>` +
+            `</g>`;
+    }).join('');
+
+    const dotsSvg = lines.map((l, idx) =>
+        `<circle class="tu-dot ${l.cls}" data-si="${idx}" r="4.5" style="display:none"></circle>`
+    ).join('');
+
     box.innerHTML = `
         <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="每日 Token 趋势图">
-            ${grid}${xLabels}${paths}
-            <line class="tu-cross" y1="${padT}" y2="${padT + innerH}" style="display:none"></line>
+            <defs>${defs}</defs>
+            ${grid}${xLabels}
+            <g class="tu-series-group">${seriesSvg}</g>
+            <line class="tu-cross" y1="${padT}" y2="${baseY}" style="display:none"></line>
+            <g class="tu-dots">${dotsSvg}</g>
         </svg>
         <div class="tu-tip" hidden></div>
-        <div class="tu-legend-line">${lines.map(l => `<span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)}</span>`).join('')}</div>`;
-    // hover：竖十字线 + 当日各线值 tooltip（鼠标/触摸共用）
+        <div class="tu-legend-line">${lines.map((l, idx) =>
+            `<button class="tu-lg-btn" type="button" data-si="${idx}"><i class="lg ${l.cls}"></i><span>${escapeHtml(l.id)}</span></button>`
+        ).join('')}</div>`;
+
     const svg = box.querySelector('svg');
     const tip = box.querySelector('.tu-tip');
     const cross = box.querySelector('.tu-cross');
+    const seriesEls = [...svg.querySelectorAll('.tu-series')];
+    const dotEls = [...svg.querySelectorAll('.tu-dot')];
+    const lgBtns = [...box.querySelectorAll('.tu-lg-btn')];
+
+    // 图例悬停/点击聚焦某条模型曲线
+    let lockedIdx = -1;
+    let hoverIdx = -1;
+    const applyFocus = () => {
+        const activeIdx = hoverIdx >= 0 ? hoverIdx : lockedIdx;
+        seriesEls.forEach((el, idx) => {
+            el.classList.toggle('is-focus', activeIdx === idx);
+            el.classList.toggle('is-dim', activeIdx >= 0 && activeIdx !== idx);
+        });
+        lgBtns.forEach((btn, idx) => {
+            btn.classList.toggle('is-locked', lockedIdx === idx);
+            btn.classList.toggle('is-dim', activeIdx >= 0 && activeIdx !== idx);
+        });
+    };
+    lgBtns.forEach((btn, idx) => {
+        btn.addEventListener('mouseenter', () => { hoverIdx = idx; applyFocus(); });
+        btn.addEventListener('mouseleave', () => { hoverIdx = -1; applyFocus(); });
+        btn.addEventListener('click', () => {
+            lockedIdx = lockedIdx === idx ? -1 : idx;
+            applyFocus();
+        });
+    });
+
+    // hover：垂直参考线 + 跟随数据点 + 当日各模型用量与合计 tooltip
     let lastI = -1;
     const show = (clientX) => {
         const rect = svg.getBoundingClientRect();
-        let i = step ? Math.round((clientX - rect.left - padL * (rect.width / w)) / (step * rect.width / w)) : 0;
+        const scale = rect.width / w || 1;
+        let i = step ? Math.round((clientX - rect.left - padL * scale) / (step * scale)) : 0;
         i = Math.max(0, Math.min(n - 1, i));
         if (i !== lastI) {
             lastI = i;
-            const px = (X(i) * rect.width / w).toFixed(1);
-            cross.setAttribute('x1', px);
-            cross.setAttribute('x2', px);
-            // 只列当日有量的模型；按当日用量降序；数值用 K/M/B 缩写（tuUnit）
+            const vx = X(i).toFixed(1);
+            cross.setAttribute('x1', vx);
+            cross.setAttribute('x2', vx);
+            const focusIdx = hoverIdx >= 0 ? hoverIdx : lockedIdx;
+            lines.forEach((l, idx) => {
+                const v = l.values[i];
+                const dot = dotEls[idx];
+                if (v > 0 && (focusIdx < 0 || focusIdx === idx)) {
+                    dot.setAttribute('cx', vx);
+                    dot.setAttribute('cy', Y(v).toFixed(1));
+                    dot.style.display = '';
+                } else {
+                    dot.style.display = 'none';
+                }
+            });
             const active = lines.filter(l => l.values[i] > 0).sort((a, b) => b.values[i] - a.values[i]);
-            tip.innerHTML = `<b>${dates[i]}</b>` + (active.length
-                ? active.map(l => `<span><i class="lg ${l.cls}"></i><b>${escapeHtml(l.id)}</b> · ${tuUnit(l.values[i])}</span>`).join('')
-                : '<span>当日无用量</span>');
+            const daySum = active.reduce((s, l) => s + l.values[i], 0);
+            tip.innerHTML =
+                `<div class="tu-tip-hd"><b>${dates[i]}</b>${daySum > 0 ? `<em>合计 ${tuUnit(daySum)}</em>` : ''}</div>` +
+                (active.length
+                    ? active.map(l => `<div class="tu-tip-row"><span><i class="lg ${l.cls}"></i>${escapeHtml(l.id)}</span><b>${tuUnit(l.values[i])}</b></div>`).join('')
+                    : '<div class="tu-tip-empty">当日无用量</div>');
         }
         cross.style.display = '';
         tip.hidden = false;
-        // 按 tooltip 实际宽度夹紧（固定 90px 假设会把贴近右缘的宽内容挤成窄柱换行）
-        const half = tip.offsetWidth / 2 + 2;
+        // 智能左右避让，不压住指针和垂直线
         const rel = clientX - rect.left;
-        tip.style.left = Math.min(Math.max(rel, half), Math.max(half, rect.width - half)) + 'px';
+        const tw = tip.offsetWidth || 160;
+        const gap = 14;
+        const left = rel + gap + tw > rect.width - 6
+            ? Math.max(6, rel - gap - tw)
+            : rel + gap;
+        tip.style.left = left + 'px';
     };
-    const hide = () => { cross.style.display = 'none'; tip.hidden = true; };
+    const hide = () => {
+        lastI = -1;
+        cross.style.display = 'none';
+        dotEls.forEach(d => { d.style.display = 'none'; });
+        tip.hidden = true;
+    };
     svg.addEventListener('mousemove', e => show(e.clientX));
     svg.addEventListener('mouseleave', hide);
     svg.addEventListener('touchstart', e => show(e.touches[0].clientX), { passive: true });
@@ -1897,7 +2010,6 @@ function renderTokenUsage(animate = false) {
         tuNebula = null;
     }
     const days = tokenUsage.days || [];
-    const modelList = tuModelList(days);
     const rows = tuRows(days);
     setViewHead('Token 用量', '', 'API Token 消耗' + (tokenUsage.updated ? ' · 更新于 ' + tokenUsage.updated : ''));
     // 分页边界
@@ -1906,14 +2018,8 @@ function renderTokenUsage(animate = false) {
     tuPageCount = pageCount;
     const pageRows = rows.slice((tuPage - 1) * tuPageSize, tuPage * tuPageSize);
     tuTrendGeom = tuTrendLines(days);
+    const nebulaTitle = tuNebulaState && tuNebulaState.mode === 'rank' ? '模型用量排行榜' : '模型藏品星云';
     mediaGrid.innerHTML = `
-        <div class="tu-toolbar">
-            <label class="media-sort">模型
-                <select id="tuModel">${[''].concat(modelList.map(m => m.id)
-                    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))).map(id =>
-                    `<option value="${escapeHtml(id)}"${id === tuCurrentModel ? ' selected' : ''}>${id ? escapeHtml(id) : '全部模型'}</option>`).join('')}</select>
-            </label>
-        </div>
         <div class="tu-sec"><span class="t">Token 活动</span></div>
         <div class="stats-chart">${tuHeatHtml(days)}</div>
         <div class="tu-sec"><span class="t">每日 Token 趋势</span>
@@ -1924,7 +2030,7 @@ function renderTokenUsage(animate = false) {
             <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
             <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
         </div>
-        <div class="tu-sec"><span class="t">模型藏品星云</span><span class="tu-nebula-count">共 ${modelList.length} 个模型</span></div>
+        <div class="tu-sec"><span class="t" id="tuNebulaTitle">${nebulaTitle}</span></div>
         <div class="stats-chart tu-nebula-box" id="tuNebulaBox"></div>
         ${rows.length ? `
         <div class="tu-sec"><span class="t">详细用量记录</span></div>
@@ -1952,8 +2058,11 @@ function renderTokenUsage(animate = false) {
     `;
     tuPaintTrend(); // 容器已入 DOM，实测宽度画趋势图
     const nebulaBox = document.getElementById('tuNebulaBox');
+    const nebulaTitleEl = document.getElementById('tuNebulaTitle');
     if (nebulaBox) {
-        tuNebula = mountTokenNebula(nebulaBox, days, tuNebulaState);
+        tuNebula = mountTokenNebula(nebulaBox, days, tuNebulaState, mode => {
+            if (nebulaTitleEl) nebulaTitleEl.textContent = mode === 'rank' ? '模型用量排行榜' : '模型藏品星云';
+        });
     }
 }
 
@@ -4421,10 +4530,6 @@ function initEventListeners() {
         } else if (e.target.id === 'starsSort') {
             starsSort = e.target.value;
             renderGhStars(false);
-        } else if (e.target.id === 'tuModel') {
-            tuCurrentModel = e.target.value;
-            tuPage = 1;
-            renderTokenUsage(false);
         } else if (e.target.id === 'tuPageSize') {
             tuPageSize = Number(e.target.value);
             tuPage = 1;
