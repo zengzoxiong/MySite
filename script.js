@@ -3,6 +3,7 @@
 import { safeInit, lsGet, lsSet, escapeHtml, OVERLAY_IDS } from './js/common.js';
 import { initTheme, initAnimSetting, applyFontFromStorage, initSettingsModal } from './js/settings.js';
 import { toggleCmdk, initPalette } from './js/cmdk.js';
+import { mountTokenNebula } from './js/token-nebula.js';
 
 // 供 js/ 子模块循环导入的共享绑定（let/const 声明保持原位，此处只做链接）
 export { currentView, clockStyle, lastWeatherRaw, searchInput, mp, applyClockStyle, initWeather, updateTodoCount, goHome, isCheckedInToday, openTalisman };
@@ -1597,6 +1598,8 @@ let tuPage = 1; // 明细表当前页（1 起）
 let tuPageSize = 20; // 每页条数：10 / 20 / 50
 let tuPageCount = 1; // 明细表总页数（渲染时刷新，供页码跳转校验）
 let tuTrendGeom = null; // 趋势图 hover 用几何信息
+let tuNebula = null; // 模型星云藏品柜实例
+let tuNebulaState = null; // 重渲染时保留视角与选中态
 
 function tuFmt(n) {
     return (n || 0).toLocaleString('zh-CN');
@@ -1888,6 +1891,11 @@ function renderTokenUsage(animate = false) {
         ensureTokenUsage();
         return;
     }
+    if (tuNebula) {
+        tuNebulaState = tuNebula.getState();
+        tuNebula.destroy();
+        tuNebula = null;
+    }
     const days = tokenUsage.days || [];
     const modelList = tuModelList(days);
     const rows = tuRows(days);
@@ -1916,6 +1924,8 @@ function renderTokenUsage(animate = false) {
             <div class="tu-trend-left" id="tuTrendBox">${tuTrendGeom ? '' : '<div class="fx-placeholder">该区间数据不足</div>'}</div>
             <div class="tu-trend-right">${tuDonutHtml(tuTrendGeom && tuTrendGeom.lines)}</div>
         </div>
+        <div class="tu-sec"><span class="t">模型藏品星云</span><span class="tu-nebula-count">共 ${modelList.length} 个模型</span></div>
+        <div class="stats-chart tu-nebula-box" id="tuNebulaBox"></div>
         ${rows.length ? `
         <div class="tu-sec"><span class="t">详细用量记录</span></div>
         <div class="tu-table-wrap">
@@ -1941,6 +1951,10 @@ function renderTokenUsage(animate = false) {
         </div>` : '<div class="media-count" style="margin-top:16px">暂无用量数据，待导入 API 用量日志</div>'}
     `;
     tuPaintTrend(); // 容器已入 DOM，实测宽度画趋势图
+    const nebulaBox = document.getElementById('tuNebulaBox');
+    if (nebulaBox) {
+        tuNebula = mountTokenNebula(nebulaBox, days, tuNebulaState);
+    }
 }
 
 function ensureTokenUsage() {
@@ -3815,6 +3829,12 @@ function setViewHead(title, sub, meta) {
     // 「批量安装」入口默认收起：只有「常用软件下载」分类的 renderLinks 会重新显示，
     // 防止切到工具/影视等其他视图时按钮残留在共用标题条上
     document.getElementById('wingetModeBtn').hidden = true;
+    // 切离 Token 用量视图时释放星云动画循环
+    if (currentView !== 'tokens' && tuNebula) {
+        tuNebulaState = tuNebula.getState();
+        tuNebula.destroy();
+        tuNebula = null;
+    }
 }
 
 function renderLinks(animate = false) {

@@ -4778,3 +4778,247 @@ body.no-anim .music-wrap.fs .music-player { animation: none; }
 .tu-table .tu-model { color: var(--text-secondary); }
 .tu-table tbody tr:hover { background: color-mix(in srgb, var(--accent-color) 7%, transparent); }
 .tu-table tbody tr:last-child td { border-bottom: none; }
+
+/* ===== 模型藏品星云（液态玻璃三维泡泡池） ===== */
+.tu-nebula-count {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+.tu-nebula-box { padding: 12px 14px 14px; }
+/* 覆盖 .stats-chart svg 的 160px 全局高度，避免控制钮图标被拉大 */
+.tu-nebula-box svg { width: auto; height: auto; }
+.tu-nebula-stage {
+    position: relative;
+    height: 420px;
+    border-radius: 12px;
+    overflow: hidden;
+    background:
+        radial-gradient(560px 320px at 26% 18%, color-mix(in srgb, var(--accent-color) 11%, transparent), transparent 68%),
+        radial-gradient(500px 300px at 78% 82%, color-mix(in srgb, var(--accent-2) 11%, transparent), transparent 70%),
+        rgba(255, 255, 255, 0.28);
+    border: 1px solid color-mix(in srgb, var(--glass-border) 85%, var(--border-color));
+}
+[data-theme="dark"] .tu-nebula-stage {
+    background:
+        radial-gradient(560px 320px at 26% 18%, color-mix(in srgb, var(--accent-color) 15%, transparent), transparent 68%),
+        radial-gradient(500px 300px at 78% 82%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 70%),
+        rgba(6, 9, 16, 0.42);
+}
+.tu-nebula-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+}
+.tu-nebula-canvas.is-dragging { cursor: grabbing; }
+
+/* 角落缩放与复位控制钮 */
+.tu-nebula-ctrls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    z-index: 3;
+}
+.tu-nebula-ctrl {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+[data-theme="dark"] .tu-nebula-ctrl { background: rgba(20, 24, 34, 0.62); }
+.tu-nebula-ctrl:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-color);
+}
+.tu-nebula-hint {
+    position: absolute;
+    left: 14px;
+    bottom: 10px;
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* 右侧固定停靠液态玻璃铭牌 */
+.tu-nebula-card {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    width: 242px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+    color: var(--text-primary);
+    z-index: 4;
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+[data-theme="dark"] .tu-nebula-card {
+    background: rgba(16, 20, 30, 0.82);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+}
+.tu-nebula-card.is-open {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+.tu-nc-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+.tu-nc-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+}
+.tu-nc-close {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin: -3px -4px 0 0;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.tu-nc-close:hover {
+    background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
+    color: var(--text-primary);
+}
+.tu-nc-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 6px 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.75rem;
+}
+.tu-nc-vendor {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+.tu-nc-rank {
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
+}
+.tu-nc-grid { display: grid; gap: 8px; }
+.tu-nc-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.78rem;
+}
+.tu-nc-row > span { color: var(--text-secondary); flex: none; }
+.tu-nc-row > strong {
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.tu-nc-row em {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    margin-left: 5px;
+}
+.tu-nc-dates { font-size: 0.74rem; color: var(--text-primary); }
+
+/* 底部厂商聚焦胶囊 */
+.tu-nebula-vendors {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+.tu-nebula-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.tu-nebula-chip:hover {
+    color: var(--text-primary);
+    border-color: var(--vc-light);
+}
+[data-theme="dark"] .tu-nebula-chip:hover { border-color: var(--vc-dark); }
+.tu-nebula-chip.active {
+    color: var(--text-primary);
+    border-color: var(--vc-light);
+    background: color-mix(in srgb, var(--vc-light) 14%, var(--card-bg));
+}
+[data-theme="dark"] .tu-nebula-chip.active {
+    border-color: var(--vc-dark);
+    background: color-mix(in srgb, var(--vc-dark) 18%, var(--card-bg));
+}
+.tu-nebula-chip em {
+    font-style: normal;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+.tu-nebula-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--vc-light);
+    display: inline-block;
+    flex: none;
+}
+[data-theme="dark"] .tu-nebula-dot { background: var(--vc-dark); }
+
+@media (max-width: 680px) {
+    .tu-nebula-stage { height: 370px; }
+    .tu-nebula-card {
+        top: auto;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        transform: translateY(10px);
+    }
+    .tu-nebula-card.is-open { transform: translateY(0); }
+    .tu-nebula-hint { display: none; }
+}

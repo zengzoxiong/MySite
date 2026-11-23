@@ -1,5 +1,5 @@
 /* Service Worker：PWA 离线缓存（数据文件与页面导航网络优先，其余骨架 stale-while-revalidate） */
-const CACHE = 'mysite-v21'; // v21: script.js 模块化拆分（js/common|settings|cmdk.js 进预缓存）+ 工具离线包（TOOLS_CACHE 随 tools.json 的 offline 标记同步）
+const CACHE = 'mysite-v22'; // v22: 新增 Token 用量「模型藏品星云」（js/token-nebula.js 进预缓存）
 // 工具离线包缓存：独立于主 CACHE，activate 时白名单保留、不随版本 bump 清空。
 // 条目来自 data/tools.json 里 offline:true 的工具页（scripts/check_offline.py 维护标记），
 // 每次激活只补缺不重复下载，页面内容更新由访问时的 SWR 自愈；标记页离线导航
@@ -23,6 +23,7 @@ const PRECACHE = [
     './js/common.js',
     './js/settings.js',
     './js/cmdk.js',
+    './js/token-nebula.js',
     './assets/appearance.js',
     './data/links.json',
     './data/tools.json',
