@@ -1,101 +1,175 @@
 {
-  "note": "Agent Plugin 数据：skills 为技能注册表（安装命令指向上游作者仓库）；mcps 为站点主人正在使用的 MCP 服务器，config 为脱敏后的接入配置示例（密钥用占位符）。",
+  "note": "Agent Plugin 数据：skills 为技能注册表（安装命令指向上游作者仓库，path 为上游子目录，local-only 为本地自持）；mcps 为站点主人正在使用的 MCP 服务器（upstream 为上游仓库，可为空），config 为脱敏后的接入配置示例（密钥用占位符）。",
+  "updated": "2026-11-23",
   "skills": {
     "groups": [
       {
         "group": "工作流与规划",
         "items": [
           {
+            "name": "api-documentation-generator",
+            "upstream": "sickn33/agentic-awesome-skills",
+            "path": "skills/api-documentation-generator"
+          },
+          {
             "name": "brainstorming",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/brainstorming"
+          },
+          {
+            "name": "code-graph",
+            "upstream": "alinaqi/maggy",
+            "path": "skills/code-graph"
           },
           {
             "name": "codebase-design",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/codebase-design"
           },
           {
             "name": "dispatching-parallel-agents",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/dispatching-parallel-agents"
           },
           {
             "name": "domain-modeling",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/domain-modeling"
           },
           {
             "name": "executing-plans",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/executing-plans"
           },
           {
             "name": "find-skills",
-            "upstream": "vercel-labs/skills"
+            "upstream": "vercel-labs/skills",
+            "path": "skills/find-skills"
           },
           {
             "name": "finishing-a-development-branch",
-            "upstream": "obra/superpowers"
-          },
-          {
-            "name": "grill-me",
-            "upstream": "mattpocock/skills"
+            "upstream": "obra/superpowers",
+            "path": "skills/finishing-a-development-branch"
           },
           {
             "name": "grilling",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/productivity/grilling"
           },
           {
             "name": "implement-spec",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/implement-spec"
           },
           {
             "name": "receiving-code-review",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/receiving-code-review"
           },
           {
             "name": "requesting-code-review",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/requesting-code-review"
           },
           {
-            "name": "review-agent",
-            "upstream": "local-only"
+            "name": "research",
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/research"
           },
           {
             "name": "subagent-driven-development",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/subagent-driven-development"
           },
           {
             "name": "systematic-debugging",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/systematic-debugging"
           },
           {
             "name": "test-driven-development",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/test-driven-development"
           },
           {
             "name": "to-spec",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/to-spec"
           },
           {
             "name": "to-tickets",
-            "upstream": "mattpocock/skills"
+            "upstream": "mattpocock/skills",
+            "path": "skills/engineering/to-tickets"
+          },
+          {
+            "name": "understand",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand"
+          },
+          {
+            "name": "understand-chat",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-chat"
+          },
+          {
+            "name": "understand-dashboard",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-dashboard"
+          },
+          {
+            "name": "understand-diff",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-diff"
+          },
+          {
+            "name": "understand-domain",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-domain"
+          },
+          {
+            "name": "understand-explain",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-explain"
+          },
+          {
+            "name": "understand-figma",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-figma"
+          },
+          {
+            "name": "understand-knowledge",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-knowledge"
+          },
+          {
+            "name": "understand-onboard",
+            "upstream": "Egonex-AI/Understand-Anything",
+            "path": "understand-anything-plugin/skills/understand-onboard"
           },
           {
             "name": "using-git-worktrees",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/using-git-worktrees"
           },
           {
             "name": "using-superpowers",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/using-superpowers"
           },
           {
             "name": "verification-before-completion",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/verification-before-completion"
           },
           {
             "name": "writing-plans",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/writing-plans"
           },
           {
             "name": "writing-skills",
-            "upstream": "obra/superpowers"
+            "upstream": "obra/superpowers",
+            "path": "skills/writing-skills"
           }
         ]
       },
@@ -104,43 +178,43 @@
         "items": [
           {
             "name": "docx",
-            "upstream": "anthropics/skills"
+            "upstream": "anthropics/skills",
+            "path": "skills/docx"
           },
           {
             "name": "humanizer-zh",
             "upstream": "op7418/Humanizer-zh"
           },
           {
-            "name": "imagegen",
-            "upstream": "openai/skills"
-          },
-          {
             "name": "pdf",
-            "upstream": "anthropics/skills"
+            "upstream": "anthropics/skills",
+            "path": "skills/pdf"
           },
           {
             "name": "planning-with-files-zh",
-            "upstream": "OthmanAdi/planning-with-files"
+            "upstream": "OthmanAdi/planning-with-files",
+            "path": "skills/i18n/planning-with-files-zh",
+            "ref": "master"
           },
           {
             "name": "ppt-master",
-            "upstream": "hugohe3/ppt-master"
+            "upstream": "hugohe3/ppt-master",
+            "path": "skills/ppt-master"
           },
           {
             "name": "pptx",
-            "upstream": "anthropics/skills"
+            "upstream": "anthropics/skills",
+            "path": "skills/pptx"
           },
           {
             "name": "skill-creator",
-            "upstream": "anthropics/skills"
-          },
-          {
-            "name": "skill-installer",
-            "upstream": "openai/skills"
+            "upstream": "anthropics/skills",
+            "path": "skills/skill-creator"
           },
           {
             "name": "xlsx",
-            "upstream": "anthropics/skills"
+            "upstream": "anthropics/skills",
+            "path": "skills/xlsx"
           }
         ]
       },
@@ -149,55 +223,73 @@
         "items": [
           {
             "name": "banner-design",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/banner-design"
           },
           {
             "name": "brand",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/brand"
           },
           {
             "name": "design",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/design"
           },
           {
             "name": "design-system",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/design-system"
+          },
+          {
+            "name": "modern-web-guidance",
+            "upstream": "GoogleChrome/modern-web-guidance",
+            "path": "skills/modern-web-guidance"
           },
           {
             "name": "ponytail",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail"
           },
           {
             "name": "ponytail-audit",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail-audit"
           },
           {
             "name": "ponytail-debt",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail-debt"
           },
           {
             "name": "ponytail-gain",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail-gain"
           },
           {
             "name": "ponytail-help",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail-help"
           },
           {
             "name": "ponytail-review",
-            "upstream": "DietrichGebert/ponytail"
+            "upstream": "DietrichGebert/ponytail",
+            "path": "skills/ponytail-review"
           },
           {
             "name": "slides",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/slides"
           },
           {
             "name": "ui-styling",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": "cli/assets/skills/ui-styling"
           },
           {
             "name": "ui-ux-pro-max",
-            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill"
+            "upstream": "nextlevelbuilder/ui-ux-pro-max-skill",
+            "path": ".claude/skills/ui-ux-pro-max"
           }
         ]
       },
@@ -206,63 +298,178 @@
         "items": [
           {
             "name": "academic-search",
-            "upstream": "claude-office-skills/skills"
+            "upstream": "claude-office-skills/skills",
+            "path": "academic-search"
           },
           {
-            "name": "api-documentation-generator",
-            "upstream": "sickn33/agentic-awesome-skills"
+            "name": "nature-academic-search",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-academic-search"
           },
           {
-            "name": "code-graph",
-            "upstream": "alinaqi/maggy"
+            "name": "nature-citation",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-citation"
           },
+          {
+            "name": "nature-data",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-data"
+          },
+          {
+            "name": "nature-downloader",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-downloader"
+          },
+          {
+            "name": "nature-experiment-log",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-experiment-log"
+          },
+          {
+            "name": "nature-figure",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-figure"
+          },
+          {
+            "name": "nature-image2ppt",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-image2ppt"
+          },
+          {
+            "name": "nature-literature-pipeline",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-literature-pipeline"
+          },
+          {
+            "name": "nature-paper-card",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper-card"
+          },
+          {
+            "name": "nature-paper-to-patent",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper-to-patent"
+          },
+          {
+            "name": "nature-paper-trans",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper-trans"
+          },
+          {
+            "name": "nature-paper-xray",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper-xray"
+          },
+          {
+            "name": "nature-paper2ppt",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper2ppt"
+          },
+          {
+            "name": "nature-paper2word",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-paper2word"
+          },
+          {
+            "name": "nature-polishing",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-polishing"
+          },
+          {
+            "name": "nature-proposal-writer",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-proposal-writer"
+          },
+          {
+            "name": "nature-reader",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-reader"
+          },
+          {
+            "name": "nature-ref-verifier",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-ref-verifier"
+          },
+          {
+            "name": "nature-response",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-response"
+          },
+          {
+            "name": "nature-reviewer",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-reviewer"
+          },
+          {
+            "name": "nature-shared",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-shared"
+          },
+          {
+            "name": "nature-social-science",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-social-science"
+          },
+          {
+            "name": "nature-statistics",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-statistics"
+          },
+          {
+            "name": "nature-writing",
+            "upstream": "Yuan1z0825/nature-skills",
+            "path": "skills/nature-writing"
+          },
+          {
+            "name": "research-writing-skill",
+            "upstream": "zLanqing/codex-claude-academic-skills",
+            "path": "research-writing-skill"
+          },
+          {
+            "name": "scientific-thinking-literature-review",
+            "upstream": "affaan-m/ECC",
+            "path": "skills/scientific-thinking-literature-review"
+          }
+        ]
+      },
+      {
+        "group": "工具与逆向",
+        "items": [
           {
             "name": "drawio",
-            "upstream": "jgraph/drawio-mcp"
+            "upstream": "jgraph/drawio-mcp",
+            "path": "plugins/codex/drawio/skills/drawio"
+          },
+          {
+            "name": "reverse-engineer-anything",
+            "upstream": "morluto/rea",
+            "path": "skills/reverse-engineer-anything"
+          }
+        ]
+      },
+      {
+        "group": "本地自持",
+        "items": [
+          {
+            "name": "imagegen",
+            "upstream": "local-only"
+          },
+          {
+            "name": "noj-platform",
+            "upstream": "local-only"
           },
           {
             "name": "openai-docs",
-            "upstream": "openai/skills"
+            "upstream": "local-only"
           },
           {
-            "name": "research",
-            "upstream": "mattpocock/skills"
+            "name": "review-agent",
+            "upstream": "local-only"
           },
           {
-            "name": "understand",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-chat",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-dashboard",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-diff",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-domain",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-explain",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-figma",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-knowledge",
-            "upstream": "Egonex-AI/Understand-Anything"
-          },
-          {
-            "name": "understand-onboard",
-            "upstream": "Egonex-AI/Understand-Anything"
+            "name": "skill-installer",
+            "upstream": "local-only"
           }
         ]
       }
@@ -273,6 +480,7 @@
       "name": "Baidu Search",
       "type": "http",
       "desc": "百度网页搜索，中文信息检索首选。",
+      "upstream": "",
       "homepage": "https://cloud.baidu.com/product/qianfan_mcp",
       "config": {
         "type": "http",
@@ -283,9 +491,45 @@
       }
     },
     {
+      "name": "Github",
+      "type": "stdio",
+      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
+      "upstream": "github/github-mcp-server",
+      "homepage": "https://github.com/github/github-mcp-server",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的 GitHub PAT>"
+        }
+      }
+    },
+    {
+      "name": "Markitdown",
+      "type": "stdio",
+      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。",
+      "upstream": "microsoft/markitdown",
+      "homepage": "https://github.com/microsoft/markitdown",
+      "config": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "markitdown-mcp-npx"
+        ]
+      }
+    },
+    {
       "name": "chrome-devtools",
       "type": "stdio",
       "desc": "Chrome DevTools 协议控制浏览器与性能分析。",
+      "upstream": "ChromeDevTools/chrome-devtools-mcp",
       "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
       "config": {
         "command": "cmd",
@@ -299,6 +543,7 @@
       "name": "codebase-memory",
       "type": "stdio",
       "desc": "代码库索引与知识图谱，架构/调用链分析（本地自部署）。",
+      "upstream": "DeusData/codebase-memory-mcp",
       "homepage": "https://github.com/DeusData/codebase-memory-mcp",
       "config": {
         "command": "<本地 codebase-memory-mcp 可执行文件路径>"
@@ -308,6 +553,7 @@
       "name": "context7",
       "type": "stdio",
       "desc": "第三方编程库的最新官方文档实时查询。",
+      "upstream": "upstash/context7",
       "homepage": "https://github.com/upstash/context7",
       "config": {
         "command": "cmd",
@@ -323,6 +569,7 @@
       "name": "deepseek-search",
       "type": "stdio",
       "desc": "DeepSeek 官方 Search/Fetch 接口，实时网页搜索与网页正文抓取（需 DeepSeek API Key）。",
+      "upstream": "zengzoxiong/deepseek-search-mcp",
       "homepage": "https://github.com/zengzoxiong/deepseek-search-mcp",
       "config": {
         "command": "cmd",
@@ -339,6 +586,7 @@
       "name": "drawio",
       "type": "stdio",
       "desc": "生成与编辑 draw.io 图表文件。",
+      "upstream": "jgraph/drawio-mcp",
       "homepage": "https://github.com/jgraph/drawio-mcp",
       "config": {
         "command": "cmd",
@@ -351,91 +599,10 @@
       }
     },
     {
-      "name": "git",
-      "type": "stdio",
-      "desc": "本地 Git 仓库操作（状态/提交/分支/差异）。",
-      "homepage": "https://github.com/kwanLeeFrmVi/mcp-git",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "mcp-git"
-        ]
-      }
-    },
-    {
-      "name": "Github",
-      "type": "stdio",
-      "desc": "GitHub 全功能操作：仓库、Issue、PR、文件读写。",
-      "homepage": "https://github.com/github/github-mcp-server",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@modelcontextprotocol/server-github"
-        ],
-        "env": {
-          "GITHUB_PERSONAL_ACCESS_TOKEN": "<你的 GitHub PAT>"
-        }
-      }
-    },
-    {
-      "name": "google-search",
-      "type": "stdio",
-      "desc": "Google 网页搜索（需 Google API Key 与搜索引擎 ID）。",
-      "homepage": "https://github.com/adenot/mcp-google-search",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@adenot/mcp-google-search"
-        ],
-        "env": {
-          "GOOGLE_API_KEY": "<你的 Google API Key>",
-          "GOOGLE_SEARCH_ENGINE_ID": "<你的搜索引擎 ID>"
-        }
-      }
-    },
-    {
-      "name": "Markitdown",
-      "type": "stdio",
-      "desc": "多格式文件转 Markdown（PDF/DOCX/XLSX/图片等）。",
-      "homepage": "https://github.com/microsoft/markitdown",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "markitdown-mcp-npx"
-        ]
-      }
-    },
-    {
-      "name": "memory",
-      "type": "stdio",
-      "desc": "持久化知识图谱记忆，跨会话保存实体与关系。",
-      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@modelcontextprotocol/server-memory"
-        ]
-      }
-    },
-    {
       "name": "playwright",
       "type": "stdio",
       "desc": "Playwright 浏览器自动化与页面测试。",
+      "upstream": "microsoft/playwright-mcp",
       "homepage": "https://github.com/microsoft/playwright-mcp",
       "config": {
         "command": "cmd",
@@ -448,39 +615,30 @@
       }
     },
     {
-      "name": "sequential-thinking",
+      "name": "rea",
       "type": "stdio",
-      "desc": "动态分步推理与复杂问题分解。",
-      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "desc": "逆向工程一条龙：静态分析、动态插桩、固件解包（npm rea-agents，本地自部署）。",
+      "upstream": "morluto/rea",
+      "homepage": "https://github.com/morluto/rea",
       "config": {
         "command": "cmd",
         "args": [
           "/c",
-          "npx",
-          "-y",
-          "@modelcontextprotocol/server-sequential-thinking"
-        ]
-      }
-    },
-    {
-      "name": "time",
-      "type": "stdio",
-      "desc": "时间查询、时区换算、Unix 时间戳。",
-      "homepage": "https://github.com/mcpcentral-io/mcp-time",
-      "config": {
-        "command": "cmd",
-        "args": [
-          "/c",
-          "npx",
-          "-y",
-          "@mcpcentral/mcp-time"
-        ]
+          "node",
+          "<rea-agents 安装目录>/scripts/rea.mjs",
+          "mcp"
+        ],
+        "env": {
+          "JAVA_HOME": "<JDK 21 路径>",
+          "REA_JADX_MCP_JAR": "<JADX MCP JAR 路径>"
+        }
       }
     },
     {
       "name": "windows-mcp",
       "type": "stdio",
-      "desc": "Windows 桌面自动化：UIA 元素树感知 + 键鼠操作，20 工具含文件/注册表/进程，AI 操作时用户可随时接管（要求 Python 3.14+，uvx 自动托管运行时）。",
+      "desc": "Windows 桌面自动化：UIA 元素树感知 + 键鼠操作，20 工具含文件/注册表/进程。",
+      "upstream": "CursorTouch/Windows-MCP",
       "homepage": "https://github.com/CursorTouch/Windows-MCP",
       "config": {
         "command": "uvx",

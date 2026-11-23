@@ -3720,17 +3720,17 @@ function starCardHtml(r) {
 
 // 技能卡片构建（视图与搜索复用）：与收藏卡片同一极简语言
 function skillCardHtml(s) {
-    const install = s.upstream === 'local-only'
-        ? ''
-        : `npx skills add ${escapeHtml(s.upstream)}${s.local ? '/' + escapeHtml(s.name) : ''}`;
-    const link = s.upstream === 'local-only' ? ''
-        : `<a class="skill-link" href="https://github.com/${escapeHtml(s.upstream)}${s.local ? '/tree/main/skills/' + escapeHtml(s.name) : ''}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
+    const isLocal = s.upstream === 'local-only' || !s.upstream;
+    const repoPath = `${s.upstream}${s.path ? '/' + s.path : ''}${s.ref ? '/tree/' + s.ref : ''}`;
+    const install = isLocal ? '' : `npx skills add ${escapeHtml(repoPath)}`;
+    const link = isLocal ? ''
+        : `<a class="skill-link" href="https://github.com/${escapeHtml(repoPath)}" target="_blank" rel="noopener noreferrer">来源仓库 ↗</a>`;
     return `
     <div class="skill-card">
         <div class="skill-title-row">
             <span class="skill-name">${escapeHtml(s.name)}</span>
-            ${s.group ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
-            ${s.local ? '<span class="skill-tag">本地镜像</span>' : ''}
+            ${s.group && s.group !== '本地自持' ? `<span class="skill-tag">${escapeHtml(s.group)}</span>` : ''}
+            ${isLocal ? '<span class="skill-tag">本地自持</span>' : ''}
             ${install ? `<button class="copy-btn" data-cmd="${escapeHtml(install)}">复制</button>` : ''}
         </div>
         ${install ? `<div class="skill-cmd"><code>${escapeHtml(install)}</code></div>` : '<div class="skill-cmd"><code>本地技能</code></div>'}
@@ -3738,9 +3738,12 @@ function skillCardHtml(s) {
     </div>`;
 }
 
-// MCP 卡片构建：说明 + 可展开配置 + 官方页面
+// MCP 卡片构建：说明 + 可展开配置 + 上游仓库/官方页面
 function mcpCardHtml(m) {
     const configText = escapeHtml(JSON.stringify(m.config, null, 2));
+    const repoLink = m.upstream
+        ? `<a class="skill-link" href="https://github.com/${escapeHtml(m.upstream)}" target="_blank" rel="noopener noreferrer">上游仓库 ↗</a>`
+        : '';
     const home = m.homepage
         ? `<a class="skill-link" href="${escapeHtml(m.homepage)}" target="_blank" rel="noopener noreferrer">官方页面 ↗</a>`
         : '<span class="skill-link">本地自部署</span>';
@@ -3755,7 +3758,7 @@ function mcpCardHtml(m) {
             <summary>配置方法</summary>
             <pre>${configText}</pre>
         </details>
-        <div class="skill-meta">${home}</div>
+        <div class="skill-meta">${repoLink}${home}</div>
     </div>`;
 }
 
