@@ -4,12 +4,14 @@ import { escapeHtml } from './common.js';
 
 // 厂商配置：按模型 ID 小写前缀匹配，同时提供深色与浅色主题下的专属气泡色
 const VENDORS = [
-    { key: 'glm',      name: '智谱 GLM',   dark: '#7b8cff', light: '#4f62e8' },
-    { key: 'mimo',     name: '小米 MiMo',  dark: '#ff9450', light: '#ea6a1e' },
-    { key: 'deepseek', name: 'DeepSeek',   dark: '#3fb2ff', light: '#0284c7' },
-    { key: 'gpt',      name: 'OpenAI GPT', dark: '#3ad6a0', light: '#059669' },
-    { key: 'qwen',     name: '通义 Qwen',  dark: '#c08cff', light: '#7c3aed' },
-    { key: 'other',    name: '其他',       dark: '#a3abba', light: '#64748b' }
+    { key: 'glm',      name: '智谱 GLM',         dark: '#7b8cff', light: '#4f62e8' },
+    { key: 'mimo',     name: '小米 MiMo',        dark: '#ff9450', light: '#ea6a1e' },
+    { key: 'deepseek', name: 'DeepSeek',         dark: '#3fb2ff', light: '#0284c7' },
+    { key: 'gpt',      name: 'OpenAI GPT',       dark: '#3ad6a0', light: '#059669' },
+    { key: 'qwen',     name: '通义 Qwen',        dark: '#c08cff', light: '#7c3aed' },
+    { key: 'gemini',   name: 'Google Gemini',    dark: '#2dd4bf', light: '#0d9488' },
+    { key: 'claude',   name: 'Anthropic Claude', dark: '#fb7185', light: '#e11d48' },
+    { key: 'other',    name: '其他',             dark: '#a3abba', light: '#64748b' }
 ];
 const VENDOR_MAP = Object.fromEntries(VENDORS.map(v => [v.key, v]));
 

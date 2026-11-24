@@ -94,27 +94,27 @@
                 <button class="sidebar-section-title" data-section="data" title="展开/收起数据看板" aria-expanded="true" aria-controls="sidebarData">数据看板<span class="section-chevron" aria-hidden="true">›</span></button>
                 <div class="section-body" id="sidebarDataWrap">
                     <div class="section-body-inner" id="sidebarData">
-                        <button type="button" class="sidebar-item" data-stats="1">
+                        <div class="sidebar-item" role="button" tabindex="0" data-stats="1">
                             <span class="item-text">访问统计</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-daily="1">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-daily="1">
                             <span class="item-text">每日日报</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-fx="1">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-fx="1">
                             <span class="item-text">汇率走势</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-ghstars="1">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-ghstars="1">
                             <span class="item-text">我的 Stars</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-token="1">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-token="1">
                             <span class="item-text">Token 用量</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-plugin-cat="skills">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-plugin-cat="skills">
                             <span class="item-text">Agent Skills</span>
-                        </button>
-                        <button type="button" class="sidebar-item" data-plugin-cat="mcps">
+                        </div>
+                        <div class="sidebar-item" role="button" tabindex="0" data-plugin-cat="mcps">
                             <span class="item-text">Agent MCP</span>
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,14 +139,14 @@
             <div class="hero">
                 <div class="hero-clock" id="clockTime" role="timer" aria-label="--:--:--">--:--:--</div>
                 <div class="hero-date" id="clockDate">&nbsp;</div>
-                <button type="button" class="hero-weather" id="heroWeather" aria-label="点击刷新天气" aria-live="polite">
-                    <span class="weather-main">
+                <div class="hero-weather" id="heroWeather" role="button" tabindex="0" aria-label="点击刷新天气" aria-live="polite">
+                    <div class="weather-main">
                         <span class="weather-icon" id="weatherIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.2" cy="7.8" r="3"/><path d="M8.2 2.4v1.6M2.8 7.8h1.6M4.4 4l1.1 1.1M12 4l-1.1 1.1"/><path d="M16.8 19.4H8.6a3.6 3.6 0 0 1-.3-7.2 4.4 4.4 0 0 1 8.3 1.2 3 3 0 0 1 .2 6Z"/></svg></span>
                         <span class="weather-temp" id="weatherTemp">--°C</span>
                         <span class="weather-desc" id="weatherDesc">天气获取中...</span>
-                    </span>
-                    <span class="weather-extra" id="weatherExtra"></span>
-                </button>
+                    </div>
+                    <div class="weather-extra" id="weatherExtra"></div>
+                </div>
             </div>
 
             <!-- 右上：GitHub 传送门 + 贡献热力图展开面板 -->
