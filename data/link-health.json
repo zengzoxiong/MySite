@@ -1,8 +1,8 @@
 {
   "counts": {
     "total": 56,
-    "ok": 50,
-    "suspect": 5,
+    "ok": 51,
+    "suspect": 4,
     "dead": 1
   },
   "results": {
@@ -252,11 +252,11 @@
       "checkedAt": "2026-09-25"
     },
     "https://openai.com/chatgpt/download/": {
-      "status": 403,
+      "status": 200,
       "reason": "http",
-      "state": "suspect",
-      "finalUrl": "",
-      "checkedAt": "2026-09-25"
+      "state": "ok",
+      "finalUrl": "https://chatgpt.com/download/",
+      "checkedAt": "2026-11-24"
     },
     "https://tool.fologde.com/": {
       "status": 200,
