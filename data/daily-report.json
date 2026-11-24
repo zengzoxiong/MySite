@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "sections": {
     "trending": [
       {
-        "name": "ItsNotRexed/Leonida",
-        "url": "https://github.com/ItsNotRexed/Leonida",
-        "desc": "Leonida Is A Native PC Recompilation Of The Xbox Version Of Grand Theft Auto 6",
-        "stars": 14925,
-        "language": "Python"
+        "name": "Marvisak/VIctory",
+        "url": "https://github.com/Marvisak/VIctory",
+        "desc": "An attempt at running GTA VI on PC",
+        "stars": 4318,
+        "language": "Rust"
       },
       {
-        "name": "bookwjitchieni1986/blender-ai-mcp-addon",
-        "url": "https://github.com/bookwjitchieni1986/blender-ai-mcp-addon",
-        "desc": "AI assistant and MCP server for Blender: visual chat, scene tools, multi-agent workflows. Works with ChatGPT/GPT, Claude, Gemini, Ollama, OpenCode. Blender AI a",
-        "stars": 2746,
-        "language": ""
-      },
-      {
-        "name": "iamajmeena/neonclipping",
-        "url": "https://github.com/iamajmeena/neonclipping",
-        "desc": "Paste a link, get captioned 9:16 clips in ~2 min. Free, local, open-source clipping engine (audio-first, YouTube captions, local LLM).",
-        "stars": 2094,
-        "language": "Python"
+        "name": "ivall/xcl",
+        "url": "https://github.com/ivall/xcl",
+        "desc": "Xbox Series compatibility layer for Windows - runs console game code natively, reimplements the console system libraries and recompiles RDNA2 shaders to DXIL",
+        "stars": 3949,
+        "language": "Rust"
       },
       {
         "name": "EL4CTEO/fast-anything",
         "url": "https://github.com/EL4CTEO/fast-anything",
         "desc": "Don't rewrite it in Rust. Rewrite the 5% that's slow: profile Python, Node or Ruby apps, port the hot functions with your coding agent, prove they behave the sa",
-        "stars": 1884,
+        "stars": 3235,
         "language": "Rust"
+      },
+      {
+        "name": "AFK-surf/xnulinux",
+        "url": "https://github.com/AFK-surf/xnulinux",
+        "desc": "XNU as a loadable kernel module inside Linux (macOS personality for arm64 Linux)",
+        "stars": 2352,
+        "language": "Objective-C++"
+      },
+      {
+        "name": "iamajmeena/neonclipping",
+        "url": "https://github.com/iamajmeena/neonclipping",
+        "desc": "Paste a link, get captioned 9:16 clips in ~2 min. Free, local, open-source clipping engine (audio-first, YouTube captions, local LLM).",
+        "stars": 2322,
+        "language": "Python"
       },
       {
         "name": "omonkeyz/xbox-emulator",
         "url": "https://github.com/omonkeyz/xbox-emulator",
         "desc": "Progress notes for running Xbox Series X|S builds on PC (TomBox + rage9)",
-        "stars": 1310,
+        "stars": 1705,
         "language": "Rust"
       },
       {
         "name": "R0Y00/Xbox2Windows",
         "url": "https://github.com/R0Y00/Xbox2Windows",
-        "desc": "GTA VI static recompilation research for x64 Windows. Source-built EXEs run on Windows, and two translated pixel shaders match reference outputs on hardware and",
-        "stars": 1303,
+        "desc": "Static recompilation research for Xbox Series X|S software on x64 Windows, with source-built CPU and GPU tests. Full-game startup is unverified.",
+        "stars": 1607,
         "language": "Python"
       },
       {
-        "name": "Lemxy/WinRust",
-        "url": "https://github.com/Lemxy/WinRust",
-        "desc": "Windows shell replacement in Rust: taskbar, file manager, NTFS search, task manager, disk cleaner. One installer exe.",
-        "stars": 1230,
-        "language": "Rust"
+        "name": "os6/nospeaker",
+        "url": "https://github.com/os6/nospeaker",
+        "desc": "make your macbook's trackpad talk using its haptic motor",
+        "stars": 1508,
+        "language": "Swift"
       },
       {
-        "name": "MSNightmare/FastUnlock",
-        "url": "https://github.com/MSNightmare/FastUnlock",
-        "desc": "FastUnlock : Windows Narrator LockScreen Bypass 0day Vulnerability",
-        "stars": 679,
-        "language": ""
-      },
-      {
-        "name": "0xkaka/homeport",
-        "url": "https://github.com/0xkaka/homeport",
-        "desc": "",
-        "stars": 623,
-        "language": "HTML"
+        "name": "4lwayz/portwatch-vi",
+        "url": "https://github.com/4lwayz/portwatch-vi",
+        "desc": "Does GTA VI run on PC yet? A live tracker of community recompilation and emulation efforts, updated daily.",
+        "stars": 971,
+        "language": "JavaScript"
       },
       {
         "name": "leanprover-community/riemann-hypothesis",
         "url": "https://github.com/leanprover-community/riemann-hypothesis",
         "desc": "Independent Comparator setup for the Lean formalization of the Riemann Hypothesis (Alpöge, 2026-11-20)",
-        "stars": 619,
+        "stars": 895,
         "language": "Lean"
       }
     ],
     "hn": [
       {
-        "id": 50605045,
-        "title": "Progress map for the Lean formalization of Alessandro Masullo's manuscript",
-        "url": "https://claude.ai/artifact/CtQyX8qfYAF822bgHJHHE3",
-        "hn": "https://news.ycombinator.com/item?id=50605045",
-        "score": 94,
-        "comments": 44
+        "id": 50611576,
+        "title": "Nvidia Reinstates Jensen Huang as CEO",
+        "url": "https://www.cnbc.com/2026/11/23/nvidia-jensen-huang-ceo.html",
+        "hn": "https://news.ycombinator.com/item?id=50611576",
+        "score": 2289,
+        "comments": 3297
       },
       {
-        "id": 50603845,
-        "title": "A Beginner's Guide to Local AI with Inkling, Qwen, and Unsloth",
-        "url": "https://www.gpupartner.com/blog/beginners-guide-local-ai-inkling-qwen-unsloth",
-        "hn": "https://news.ycombinator.com/item?id=50603845",
-        "score": 156,
-        "comments": 57
+        "id": 50620349,
+        "title": "Stalwart is now a drop-in replacement for Microsoft Exchange",
+        "url": "https://stalw.art/blog/microsoft-exchange-replacement/",
+        "hn": "https://news.ycombinator.com/item?id=50620349",
+        "score": 292,
+        "comments": 140
       },
       {
-        "id": 50602843,
-        "title": "The Birds of GTA 6: A Field Guide to Vice City and Leonida's Wildlife",
-        "url": "https://www.audubon.org/magazine/birds-of-gta-6-field-guide-vice-city-wildlife",
-        "hn": "https://news.ycombinator.com/item?id=50602843",
-        "score": 314,
-        "comments": 131
+        "id": 50614249,
+        "title": "Ladybird is now in alpha",
+        "url": "https://ladybird.org/posts/alpha/",
+        "hn": "https://news.ycombinator.com/item?id=50614249",
+        "score": 1574,
+        "comments": 373
       },
       {
-        "id": 50605479,
-        "title": "Nespresso's project to reduce grams of coffee per capsule",
-        "url": "https://alvinbunk.wordpress.com/2026/11/01/nespresso-project-olympus/",
-        "hn": "https://news.ycombinator.com/item?id=50605479",
-        "score": 19,
+        "id": 50622769,
+        "title": "New York Bans Subscription and Post-Purchase Fees on Cars",
+        "url": "https://wgna.com/car-bill-extra-fees/",
+        "hn": "https://news.ycombinator.com/item?id=50622769",
+        "score": 30,
+        "comments": 4
+      },
+      {
+        "id": 50620831,
+        "title": "The search for a top dark matter candidate",
+        "url": "https://www.smithsonianmag.com/science-nature/the-search-for-a-top-dark-matter-candidate-was-losing-hope-then-came-a-potential-signal-will-it-be-enough-to-energize-the-struggling-field-180989923/",
+        "hn": "https://news.ycombinator.com/item?id=50620831",
+        "score": 30,
+        "comments": 6
+      },
+      {
+        "id": 50619103,
+        "title": "GPUI is getting its own repository",
+        "url": "https://github.com/zed-industries/gpui",
+        "hn": "https://news.ycombinator.com/item?id=50619103",
+        "score": 181,
+        "comments": 62
+      },
+      {
+        "id": 50619207,
+        "title": "Bored.com: Fun, interesting and cool websites to explore when bored",
+        "url": "https://www.bored.com/",
+        "hn": "https://news.ycombinator.com/item?id=50619207",
+        "score": 159,
+        "comments": 34
+      },
+      {
+        "id": 50617499,
+        "title": "Per Arm's request, this site will be discontinued on 4 December 2026 :(",
+        "url": "https://arm.jonpalmisc.com/",
+        "hn": "https://news.ycombinator.com/item?id=50617499",
+        "score": 927,
+        "comments": 215
+      },
+      {
+        "id": 50615308,
+        "title": "\"Dario is hyping the dangers so OSS models are illegal and he stays in control\"",
+        "url": "https://twitter.com/ylecun/status/2124550037912920090",
+        "hn": "https://news.ycombinator.com/item?id=50615308",
+        "score": 1350,
+        "comments": 748
+      },
+      {
+        "id": 50620721,
+        "title": "Freeing the iPod Nano 5G",
+        "url": "https://viktorkrapivin.com/blog/nano5g-priv-prvd",
+        "hn": "https://news.ycombinator.com/item?id=50620721",
+        "score": 65,
         "comments": 8
-      },
-      {
-        "id": 50547698,
-        "title": "Cathedral floor emerges in Sudan, revealing one of the biggest medieval churches",
-        "url": "https://apnews.com/article/sudan-antiquities-nubia-cathedral-1b16f67da881ee5592de4481ee55c527",
-        "hn": "https://news.ycombinator.com/item?id=50547698",
-        "score": 68,
-        "comments": 1
-      },
-      {
-        "id": 50604988,
-        "title": "GL.iNet Security Notice 2026-11-20",
-        "url": "https://www.gl-inet.com/en-us/blogs/blog/glinet-security-notice-2026-11-20",
-        "hn": "https://news.ycombinator.com/item?id=50604988",
-        "score": 42,
-        "comments": 17
-      },
-      {
-        "id": 50604472,
-        "title": "The Usefulness of Useless Knowledge [pdf] (1939)",
-        "url": "https://www.ias.edu/sites/default/files/library/UsefulnessHarpers.pdf",
-        "hn": "https://news.ycombinator.com/item?id=50604472",
-        "score": 43,
-        "comments": 7
-      },
-      {
-        "id": 50603589,
-        "title": "A miniature San Francisco with live buses, planes and boats",
-        "url": "https://smallsf.com/",
-        "hn": "https://news.ycombinator.com/item?id=50603589",
-        "score": 109,
-        "comments": 47
-      },
-      {
-        "id": 50603465,
-        "title": "Nyx, the Oldest Internet Service Provider",
-        "url": "https://nyx.net/",
-        "hn": "https://news.ycombinator.com/item?id=50603465",
-        "score": 80,
-        "comments": 8
-      },
-      {
-        "id": 50601525,
-        "title": "Perplexity and Intelligence",
-        "url": "https://openai.com/index/perplexity-and-intelligence/",
-        "hn": "https://news.ycombinator.com/item?id=50601525",
-        "score": 456,
-        "comments": 308
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "thinkingmachines/Inkling-2-Mini",
         "url": "https://huggingface.co/thinkingmachines/Inkling-2-Mini",
         "task": "image-text-to-text",
-        "downloads": 23543,
-        "likes": 4964
+        "downloads": 41888,
+        "likes": 5528
       },
       {
         "id": "unsloth/Inkling-2-Mini-GGUF",
         "url": "https://huggingface.co/unsloth/Inkling-2-Mini-GGUF",
         "task": "image-text-to-text",
-        "downloads": 805993,
-        "likes": 876
+        "downloads": 1292888,
+        "likes": 1133
       },
       {
         "id": "inworld/voice-isolator",
         "url": "https://huggingface.co/inworld/voice-isolator",
         "task": "audio-to-audio",
         "downloads": 0,
-        "likes": 633
-      },
-      {
-        "id": "tencent/Hy4-flash",
-        "url": "https://huggingface.co/tencent/Hy4-flash",
-        "task": "image-text-to-text",
-        "downloads": 6617,
-        "likes": 620
-      },
-      {
-        "id": "harness-hub/Qwen3.8-27B-pi-adapted",
-        "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
-        "task": "image-text-to-text",
-        "downloads": 2831,
-        "likes": 992
+        "likes": 747
       },
       {
         "id": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
         "url": "https://huggingface.co/AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
         "task": "image-text-to-text",
-        "downloads": 129693,
-        "likes": 485
+        "downloads": 329497,
+        "likes": 667
+      },
+      {
+        "id": "harness-hub/Qwen3.8-27B-pi-adapted",
+        "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
+        "task": "image-text-to-text",
+        "downloads": 3132,
+        "likes": 1044
       },
       {
         "id": "higurashi-ai/Haru-4B",
         "url": "https://huggingface.co/higurashi-ai/Haru-4B",
         "task": "audio-to-audio",
-        "downloads": 8608,
-        "likes": 893
+        "downloads": 9087,
+        "likes": 943
       },
       {
-        "id": "apple/DepthPro2",
-        "url": "https://huggingface.co/apple/DepthPro2",
-        "task": "depth-estimation",
-        "downloads": 0,
-        "likes": 283
-      },
-      {
-        "id": "Qwen/Qwen3.8-27B",
-        "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+        "id": "tencent/Hy4-flash",
+        "url": "https://huggingface.co/tencent/Hy4-flash",
         "task": "image-text-to-text",
-        "downloads": 6297396,
-        "likes": 20886
+        "downloads": 7696,
+        "likes": 656
+      },
+      {
+        "id": "SulphurAI/Sulphur-3",
+        "url": "https://huggingface.co/SulphurAI/Sulphur-3",
+        "task": "",
+        "downloads": 133732,
+        "likes": 860
       },
       {
         "id": "sensenova/SenseNova-Loop-9B",
         "url": "https://huggingface.co/sensenova/SenseNova-Loop-9B",
         "task": "image-text-to-text",
-        "downloads": 1863,
-        "likes": 538
+        "downloads": 2036,
+        "likes": 648
+      },
+      {
+        "id": "apple/FastFrames-L",
+        "url": "https://huggingface.co/apple/FastFrames-L",
+        "task": "text-to-video",
+        "downloads": 0,
+        "likes": 573
       }
     ],
     "weibo": [
       {
-        "word": "私闯果园糟蹋水果主播下架所有视频",
-        "num": 1237839,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%A7%81%E9%97%AF%E6%9E%9C%E5%9B%AD%E7%B3%9F%E8%B9%8B%E6%B0%B4%E6%9E%9C%E4%B8%BB%E6%92%AD%E4%B8%8B%E6%9E%B6%E6%89%80%E6%9C%89%E8%A7%86%E9%A2%91%23"
-      },
-      {
-        "word": "樊振东1比3约内斯库",
-        "num": 849755,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%A8%8A%E6%8C%AF%E4%B8%9C1%E6%AF%943%E7%BA%A6%E5%86%85%E6%96%AF%E5%BA%93%23"
-      },
-      {
-        "word": "一图解读我国消费市场多元图景",
-        "num": 669272,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%80%E5%9B%BE%E8%A7%A3%E8%AF%BB%E6%88%91%E5%9B%BD%E6%B6%88%E8%B4%B9%E5%B8%82%E5%9C%BA%E5%A4%9A%E5%85%83%E5%9B%BE%E6%99%AF%23"
-      },
-      {
-        "word": "这下换厉娜画地为牢了",
-        "num": 536250,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%BF%99%E4%B8%8B%E6%8D%A2%E5%8E%89%E5%A8%9C%E7%94%BB%E5%9C%B0%E4%B8%BA%E7%89%A2%E4%BA%86%23"
-      },
-      {
-        "word": "主播糟蹋千斤苹果仅赔6000元",
-        "num": 488374,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%BB%E6%92%AD%E7%B3%9F%E8%B9%8B%E5%8D%83%E6%96%A4%E8%8B%B9%E6%9E%9C%E4%BB%85%E8%B5%946000%E5%85%83%23"
-      },
-      {
-        "word": "青稚直播30万人",
-        "num": 468330,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E9%9D%92%E7%A8%9A%E7%9B%B4%E6%92%AD30%E4%B8%87%E4%BA%BA%23"
-      },
-      {
-        "word": "主播私闯果园带货系找错地点",
-        "num": 419501,
+        "word": "巴基斯坦航天员普通话自我介绍",
+        "num": 1431341,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%BB%E6%92%AD%E7%A7%81%E9%97%AF%E6%9E%9C%E5%9B%AD%E5%B8%A6%E8%B4%A7%E7%B3%BB%E6%89%BE%E9%94%99%E5%9C%B0%E7%82%B9%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E8%88%AA%E5%A4%A9%E5%91%98%E6%99%AE%E9%80%9A%E8%AF%9D%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D%23"
       },
       {
-        "word": "特朗普发APEC合照配文GOAT",
-        "num": 415361,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%89%B9%E6%9C%97%E6%99%AE%E5%8F%91APEC%E5%90%88%E7%85%A7%E9%85%8D%E6%96%87GOAT%23"
+        "word": "婆婆拎10万现金铺满产妇病床",
+        "num": 909666,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A9%86%E5%A9%86%E6%8B%8E10%E4%B8%87%E7%8E%B0%E9%87%91%E9%93%BA%E6%BB%A1%E4%BA%A7%E5%A6%87%E7%97%85%E5%BA%8A%23"
       },
       {
-        "word": "血压这个区间不再视作接近正常",
-        "num": 365294,
+        "word": "智能穿戴打开消费新空间",
+        "num": 725177,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%A1%80%E5%8E%8B%E8%BF%99%E4%B8%AA%E5%8C%BA%E9%97%B4%E4%B8%8D%E5%86%8D%E8%A7%86%E4%BD%9C%E6%8E%A5%E8%BF%91%E6%AD%A3%E5%B8%B8%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%99%BA%E8%83%BD%E7%A9%BF%E6%88%B4%E6%89%93%E5%BC%80%E6%B6%88%E8%B4%B9%E6%96%B0%E7%A9%BA%E9%97%B4%23"
       },
       {
-        "word": "华鼎奖",
-        "num": 361932,
+        "word": "猝死女教师校方是上海单体最大学校",
+        "num": 642436,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E7%8C%9D%E6%AD%BB%E5%A5%B3%E6%95%99%E5%B8%88%E6%A0%A1%E6%96%B9%E6%98%AF%E4%B8%8A%E6%B5%B7%E5%8D%95%E4%BD%93%E6%9C%80%E5%A4%A7%E5%AD%A6%E6%A0%A1%23"
+      },
+      {
+        "word": "34米路仅12秒绿灯已调整为28秒",
+        "num": 585512,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%8D%8E%E9%BC%8E%E5%A5%96%23"
+        "url": "https://s.weibo.com/weibo?q=%2334%E7%B1%B3%E8%B7%AF%E4%BB%8512%E7%A7%92%E7%BB%BF%E7%81%AF%E5%B7%B2%E8%B0%83%E6%95%B4%E4%B8%BA28%E7%A7%92%23"
+      },
+      {
+        "word": "光遇",
+        "num": 578761,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%85%89%E9%81%87%23"
+      },
+      {
+        "word": "年轻人开始劝父母卖县城空房收息",
+        "num": 446340,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%B9%B4%E8%BD%BB%E4%BA%BA%E5%BC%80%E5%A7%8B%E5%8A%9D%E7%88%B6%E6%AF%8D%E5%8D%96%E5%8E%BF%E5%9F%8E%E7%A9%BA%E6%88%BF%E6%94%B6%E6%81%AF%23"
+      },
+      {
+        "word": "法院回应34米路绿灯12秒行人被撞亡",
+        "num": 416320,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%B3%95%E9%99%A2%E5%9B%9E%E5%BA%9434%E7%B1%B3%E8%B7%AF%E7%BB%BF%E7%81%AF12%E7%A7%92%E8%A1%8C%E4%BA%BA%E8%A2%AB%E6%92%9E%E4%BA%A1%23"
+      },
+      {
+        "word": "暮光之城",
+        "num": 329301,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9A%AE%E5%85%89%E4%B9%8B%E5%9F%8E%23"
+      },
+      {
+        "word": "文吉儿迟到一直在说对不起",
+        "num": 290907,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%96%87%E5%90%89%E5%84%BF%E8%BF%9F%E5%88%B0%E4%B8%80%E7%9B%B4%E5%9C%A8%E8%AF%B4%E5%AF%B9%E4%B8%8D%E8%B5%B7%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2026,
-        "text": "美军空袭委内瑞拉，并俘虏总统尼古拉斯·马杜罗。",
-        "title": "尼古拉斯·马杜罗",
-        "url": "https://zh.wikipedia.org/wiki/%E5%B0%BC%E5%8F%A4%E6%8B%89%E6%96%AF%C2%B7%E9%A9%AC%E6%9D%9C%E7%BD%97"
+        "year": 2024,
+        "text": "中华台北在世界棒球12强赛决赛以4比0击败日本，历史性取得首个世界赛冠军。",
+        "title": "中華民國棒球代表隊",
+        "url": "https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E6%A3%92%E7%90%83%E4%BB%A3%E8%A1%A8%E9%9A%8A"
+      },
+      {
+        "year": 2022,
+        "text": "希望联盟主席安华与今日在国家皇宫宣誓成为第十任首相。",
+        "title": "希望聯盟",
+        "url": "https://zh.wikipedia.org/wiki/%E5%B8%8C%E6%9C%9B%E8%81%AF%E7%9B%9F"
+      },
+      {
+        "year": 2022,
+        "text": "中国新疆乌鲁木齐天山区吉祥苑小区发生重大火灾，楼内居民因严重特殊传染性肺炎封控措施无法逃生，消防救援人员也不能及时展开救援，最终造成致10死9伤，并引发后续白纸运动。",
+        "title": "新疆维吾尔自治区",
+        "url": "https://zh.wikipedia.org/wiki/%E6%96%B0%E7%96%86%E7%BB%B4%E5%90%BE%E5%B0%94%E8%87%AA%E6%B2%BB%E5%8C%BA"
       },
       {
         "year": 2021,
-        "text": "保加利亚西部佩尔尼克州A3高速公路发生巴士车祸，造成46人死亡。",
-        "title": "保加利亚",
-        "url": "https://zh.wikipedia.org/wiki/%E4%BF%9D%E5%8A%A0%E5%88%A9%E4%BA%9A"
+        "text": "美国国家航空航天局发射将撞击小行星65803的双小行星改道测试探测器，借此测试避免小行星撞击技术。",
+        "title": "美国国家航空航天局",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E5%9B%BD%E5%AE%B6%E8%88%AA%E7%A9%BA%E8%88%AA%E5%A4%A9%E5%B1%80"
       },
       {
-        "year": 2018,
-        "text": "巴基斯坦西北部城镇一个露天市集发生爆炸，至少30人死亡，40人受伤。",
-        "title": "巴基斯坦",
-        "url": "https://zh.wikipedia.org/wiki/%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6"
+        "year": 2021,
+        "text": "瑞典议会选出社会民主工人党领袖玛格达莱娜·安德松为新任首相，但在数个小时后辞职下台。",
+        "title": "瑞典議會",
+        "url": "https://zh.wikipedia.org/wiki/%E7%91%9E%E5%85%B8%E8%AD%B0%E6%9C%83"
       },
       {
-        "year": 2011,
-        "text": "经过近一年的反政府示威后，也门总统阿里·阿布杜拉·沙雷签署协议，同意交出权力。",
-        "title": "2011年葉門反政府示威",
-        "url": "https://zh.wikipedia.org/wiki/2011%E5%B9%B4%E8%91%89%E9%96%80%E5%8F%8D%E6%94%BF%E5%BA%9C%E7%A4%BA%E5%A8%81"
-      },
-      {
-        "year": 2010,
-        "text": "韩国延坪岛事件，朝鲜趁着韩国在边境演习以火炮炮轰延坪岛，造成4名韩国军人死亡、19人受伤。",
-        "title": "大韩民国",
-        "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%9F%A9%E6%B0%91%E5%9B%BD"
-      },
-      {
-        "year": 2009,
-        "text": "一群人在前往登记艾斯梅尔·曼古达图（英语：Esmael Mangudadatu）参选菲律宾马京达瑙省省长的途中，遭到其竞争对手的支持者绑架和杀害，造成58人死亡。",
-        "title": "馬京達瑙省",
-        "url": "https://zh.wikipedia.org/wiki/%E9%A6%AC%E4%BA%AC%E9%81%94%E7%91%99%E7%9C%81"
+        "year": 2019,
+        "text": "2019年香港区议会选举，选举人数创下香港史上新高，共有2,943,842名登记选民投票，投票率71.23%，民主派在高投票率下，亦首次压倒性在多个选区大获全胜，取得全港整体过半数议席（389席）；而建制派和乡事派则遭遇空前惨败（59席）。",
+        "title": "2019年香港區議會選舉",
+        "url": "https://zh.wikipedia.org/wiki/2019%E5%B9%B4%E9%A6%99%E6%B8%AF%E5%8D%80%E8%AD%B0%E6%9C%83%E9%81%B8%E8%88%89"
       }
     ]
   }
