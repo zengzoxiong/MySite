@@ -1960,6 +1960,22 @@
       "release": "2023-04-29",
       "url": "https://www.themoviedb.org/tv/226796/season/1",
       "cover": "assets/media/shanshan-erke-yisheng-s1.jpg"
+    },
+    {
+      "title": "你好，12315 第一季",
+      "type": "纪录片",
+      "status": "看过",
+      "release": "2025-03-14",
+      "url": "https://www.bilibili.com/bangumi/play/ss88835",
+      "cover": "assets/media/nihao-12315-s1.png"
+    },
+    {
+      "title": "你好，12315 第二季",
+      "type": "纪录片",
+      "status": "在看",
+      "release": "2026-03-14",
+      "url": "https://www.bilibili.com/bangumi/play/ss172429",
+      "cover": "assets/media/nihao-12315-s2.png"
     }
   ]
 }
