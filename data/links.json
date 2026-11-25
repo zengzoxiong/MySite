@@ -417,6 +417,41 @@
       "description": "初音未来优质插画收录站，插画来自 Pixiv、由站长手动精选更新，可按横图竖图浏览，点击即可保存无水印高清原图。",
       "category": "资源",
       "icon": "🎵"
+    },
+    {
+      "title": "CSS-Inspiration",
+      "url": "https://chokcoco.github.io/CSS-Inspiration/#/",
+      "description": "纯 CSS 布局与特效灵感演示站，按布局、毛玻璃背景、渐变边框、阴影、滤镜、动画等分类，实时预览并一键复制纯 HTML/CSS 源码。",
+      "category": "代码工具",
+      "icon": "🎨"
+    },
+    {
+      "title": "You-need-to-know-css",
+      "url": "https://lhammer.cn/You-need-to-know-css/#/",
+      "description": "全中文纯 CSS 技巧与组件在线手册，内置大量可交互演示，涵盖毛玻璃、自定义滚动条、布局排版、折叠面板、气泡提示与按钮微交互。",
+      "category": "代码工具",
+      "icon": "📘"
+    },
+    {
+      "title": "LuLu UI",
+      "url": "https://lulu.ui.yuewen.com/theme/edge/",
+      "description": "张鑫旭主导开源的原生 HTML/CSS/JS 组件库，Edge 主题基于现代原生 CSS 与 ES Module、免构建工具，内置无障碍 ARIA 与键盘导航支持。",
+      "category": "代码工具",
+      "icon": "🧩"
+    },
+    {
+      "title": "Layui",
+      "url": "https://layui.dev/docs/2/",
+      "description": "经典国产原生 HTML/CSS/JS 组件库，全中文文档，内置栅格布局、卡片面板、折叠面板、表格、表单与弹层，支持在线演示和直接复制代码。",
+      "category": "代码工具",
+      "icon": "📐"
+    },
+    {
+      "title": "JZTHEME",
+      "url": "https://www.jztheme.com/",
+      "description": "中文纯 HTML/CSS 小组件交互站，按按钮、卡片、输入框、悬浮提示、加载动画等分类展示，支持在线编辑代码、切换预览背景并免登录一键复制源码。",
+      "category": "代码工具",
+      "icon": "✨"
     }
   ]
 }
