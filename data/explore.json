@@ -3,7 +3,7 @@
   "source": {
     "provider": "网易云音乐",
     "board": "云音乐飙升榜",
-    "date": "2026-11-25",
+    "date": "2026-11-26",
     "count": 50
   },
   "tracks": [
@@ -18,21 +18,21 @@
       "title": "Hong Kong (feat. 王菲季候风)",
       "artist": "The Weeknd",
       "src": "https://music.163.com/song/media/outer/url?id=3456047164.mp3",
-      "cover": "https://p3.music.126.net/12-Tl1d-BT-_AwXMl7-MzQ==/109951174206326909.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/12-Tl1d-BT-_AwXMl7-MzQ==/109951174206326909.jpg?param=400y400",
       "dur": 217
     },
     {
       "title": "慌啥子嘛",
       "artist": "赵本山",
       "src": "https://music.163.com/song/media/outer/url?id=3461001565.mp3",
-      "cover": "https://p3.music.126.net/UVHiS8ZOW0aGFKjmJXFDeQ==/109951174276161468.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/UVHiS8ZOW0aGFKjmJXFDeQ==/109951174276161468.jpg?param=400y400",
       "dur": 190
     },
     {
       "title": "污点证人 (Live)",
       "artist": "薛之谦",
       "src": "https://music.163.com/song/media/outer/url?id=3463213367.mp3",
-      "cover": "https://p4.music.126.net/oYj7YvZmoqIvjSuEA_0q7Q==/109951174310441223.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/oYj7YvZmoqIvjSuEA_0q7Q==/109951174310441223.jpg?param=400y400",
       "dur": 260
     },
     {
@@ -43,18 +43,18 @@
       "dur": 177
     },
     {
-      "title": "雪化作泪滴 (Old Tape)",
-      "artist": "Cheeze / Trazzy / 雾明",
-      "src": "https://music.163.com/song/media/outer/url?id=3455079379.mp3",
-      "cover": "https://p4.music.126.net/E1O_Vqj8BFZWf-WxiOHJRw==/109951174189111463.jpg?param=400y400",
-      "dur": 168
-    },
-    {
       "title": "你的不经意",
       "artist": "Fozik佛子克",
       "src": "https://music.163.com/song/media/outer/url?id=3453962065.mp3",
-      "cover": "https://p4.music.126.net/qXtvpDCeIwVfxBwMi7Oqaw==/109951174174967843.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/qXtvpDCeIwVfxBwMi7Oqaw==/109951174174967843.jpg?param=400y400",
       "dur": 192
+    },
+    {
+      "title": "雪化作泪滴 (Old Tape)",
+      "artist": "Cheeze / Trazzy / 雾明",
+      "src": "https://music.163.com/song/media/outer/url?id=3455079379.mp3",
+      "cover": "https://p3.music.126.net/E1O_Vqj8BFZWf-WxiOHJRw==/109951174189111463.jpg?param=400y400",
+      "dur": 168
     },
     {
       "title": "烂奇迹(不小心惹了上帝)",
@@ -67,7 +67,7 @@
       "title": "成全",
       "artist": "江辰",
       "src": "https://music.163.com/song/media/outer/url?id=3462903358.mp3",
-      "cover": "https://p4.music.126.net/KEyTobXu64eE_5XKe1Wtsw==/109951174306188045.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/KEyTobXu64eE_5XKe1Wtsw==/109951174306188045.jpg?param=400y400",
       "dur": 221
     },
     {
@@ -78,20 +78,6 @@
       "dur": 245
     },
     {
-      "title": "1000 winters",
-      "artist": "小北LinY",
-      "src": "https://music.163.com/song/media/outer/url?id=3461036786.mp3",
-      "cover": "https://p4.music.126.net/xMNGbrZzSk8TKOGZdA1Bsw==/109951174276872441.jpg?param=400y400",
-      "dur": 175
-    },
-    {
-      "title": "死神在揣着玫瑰",
-      "artist": "金金金金金",
-      "src": "https://music.163.com/song/media/outer/url?id=3459358959.mp3",
-      "cover": "https://p3.music.126.net/_6lozRXHGGuxLIsgkSwDdA==/109951174255622821.jpg?param=400y400",
-      "dur": 215
-    },
-    {
       "title": "Letting Go",
       "artist": "那英 / 蔡健雅",
       "src": "https://music.163.com/song/media/outer/url?id=3460509141.mp3",
@@ -99,24 +85,24 @@
       "dur": 337
     },
     {
-      "title": "DEPENDS",
-      "artist": "XG",
-      "src": "https://music.163.com/song/media/outer/url?id=3455518907.mp3",
-      "cover": "https://p4.music.126.net/S5CbtJaJK3jVWQt2ZWfKZg==/109951174195394642.jpg?param=400y400",
+      "title": "晚风",
+      "artist": "鹿晗",
+      "src": "https://music.163.com/song/media/outer/url?id=3464778163.mp3",
+      "cover": "https://p3.music.126.net/rfIkd9tZ5CWuZAa96RO0Vg==/109951174335618128.jpg?param=400y400",
       "dur": 185
     },
     {
-      "title": "季候风1997",
-      "artist": "曾舜晞",
-      "src": "https://music.163.com/song/media/outer/url?id=3463361754.mp3",
-      "cover": "https://p4.music.126.net/BEOCJfI9uiEkhEtVEv_kwg==/109951174318142472.jpg?param=400y400",
-      "dur": 228
+      "title": "DEPENDS",
+      "artist": "XG",
+      "src": "https://music.163.com/song/media/outer/url?id=3455518907.mp3",
+      "cover": "https://p3.music.126.net/S5CbtJaJK3jVWQt2ZWfKZg==/109951174195394642.jpg?param=400y400",
+      "dur": 185
     },
     {
       "title": "Light the night",
       "artist": "小恐龙",
       "src": "https://music.163.com/song/media/outer/url?id=3459859021.mp3",
-      "cover": "https://p4.music.126.net/hs4PgYqdz3CNIUe-Dn2FhA==/109951174261551299.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/hs4PgYqdz3CNIUe-Dn2FhA==/109951174261551299.jpg?param=400y400",
       "dur": 170
     },
     {
@@ -127,24 +113,31 @@
       "dur": 138
     },
     {
+      "title": "1000 winters",
+      "artist": "小北LinY",
+      "src": "https://music.163.com/song/media/outer/url?id=3461036786.mp3",
+      "cover": "https://p3.music.126.net/xMNGbrZzSk8TKOGZdA1Bsw==/109951174276872441.jpg?param=400y400",
+      "dur": 175
+    },
+    {
+      "title": "死神在揣着玫瑰",
+      "artist": "金金金金金",
+      "src": "https://music.163.com/song/media/outer/url?id=3459358959.mp3",
+      "cover": "https://p4.music.126.net/_6lozRXHGGuxLIsgkSwDdA==/109951174255622821.jpg?param=400y400",
+      "dur": 215
+    },
+    {
       "title": "无中生有 Ex Nihilo",
       "artist": "HOYO-MiX / 當山みれい",
       "src": "https://music.163.com/song/media/outer/url?id=3458373098.mp3",
-      "cover": "https://p4.music.126.net/pvktHNC7hTN_2dKL7Is0kw==/109951174237859282.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/pvktHNC7hTN_2dKL7Is0kw==/109951174237859282.jpg?param=400y400",
       "dur": 217
-    },
-    {
-      "title": "Cherry Candy",
-      "artist": "Lunak",
-      "src": "https://music.163.com/song/media/outer/url?id=3451570714.mp3",
-      "cover": "https://p3.music.126.net/geIUgfHRN9iWEIo-uWSTSQ==/109951174140300294.jpg?param=400y400",
-      "dur": 141
     },
     {
       "title": "譬如我 (枕头下发霉的梦)",
       "artist": "洛天依Official / 姜洄",
       "src": "https://music.163.com/song/media/outer/url?id=3460564497.mp3",
-      "cover": "https://p3.music.126.net/Ybu2XCDs-TqRq7Q9CB0gEA==/109951174300586244.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/Ybu2XCDs-TqRq7Q9CB0gEA==/109951174300586244.jpg?param=400y400",
       "dur": 154
     },
     {
@@ -158,36 +151,15 @@
       "title": "MR.SAYLESS",
       "artist": "THOME / 黄格雷",
       "src": "https://music.163.com/song/media/outer/url?id=3459350102.mp3",
-      "cover": "https://p4.music.126.net/RcX7rPxi9gtMbrAOR4hZlw==/109951174255162100.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/RcX7rPxi9gtMbrAOR4hZlw==/109951174255162100.jpg?param=400y400",
       "dur": 174
     },
     {
       "title": "The Moment You Saw Me",
       "artist": "米卡",
       "src": "https://music.163.com/song/media/outer/url?id=3459147602.mp3",
-      "cover": "https://p3.music.126.net/o74jl5jQSvZXsZ-McHxMXA==/109951174294959076.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/o74jl5jQSvZXsZ-McHxMXA==/109951174294959076.jpg?param=400y400",
       "dur": 183
-    },
-    {
-      "title": "City Blue",
-      "artist": "Mili",
-      "src": "https://music.163.com/song/media/outer/url?id=3457169400.mp3",
-      "cover": "https://p4.music.126.net/8NxvvQOfIeDGVcisIqNGAQ==/109951174221541968.jpg?param=400y400",
-      "dur": 179
-    },
-    {
-      "title": "湿吻",
-      "artist": "亿轩_Kingston / 彭梓烨_Leo",
-      "src": "https://music.163.com/song/media/outer/url?id=3459392798.mp3",
-      "cover": "https://p4.music.126.net/sEpDBsJxef9m0mk9ABzdLQ==/109951174276837392.jpg?param=400y400",
-      "dur": 164
-    },
-    {
-      "title": "任天堂",
-      "artist": "G.E.M.邓紫棋",
-      "src": "https://music.163.com/song/media/outer/url?id=3461983295.mp3",
-      "cover": "https://p4.music.126.net/2pTiu2UgleLAA5r3J0H3XA==/109951174293999594.jpg?param=400y400",
-      "dur": 214
     },
     {
       "title": "在流水平静之前",
@@ -197,13 +169,6 @@
       "dur": 189
     },
     {
-      "title": "后会友期 (综艺《后会友期》片尾曲)",
-      "artist": "许飞",
-      "src": "https://music.163.com/song/media/outer/url?id=3455592377.mp3",
-      "cover": "https://p4.music.126.net/LaM56ialqlXN7_HwL0Zt2Q==/109951174196108267.jpg?param=400y400",
-      "dur": 217
-    },
-    {
       "title": "你猜",
       "artist": "刘回",
       "src": "https://music.163.com/song/media/outer/url?id=3462231723.mp3",
@@ -211,11 +176,53 @@
       "dur": 180
     },
     {
-      "title": "回到你身边 (不插电)",
-      "artist": "h3R3",
-      "src": "https://music.163.com/song/media/outer/url?id=3461007770.mp3",
-      "cover": "https://p4.music.126.net/NATCr9m970rbX0FHJEbScw==/109951174276609108.jpg?param=400y400",
-      "dur": 183
+      "title": "小熊",
+      "artist": "金志文",
+      "src": "https://music.163.com/song/media/outer/url?id=3459498739.mp3",
+      "cover": "https://p3.music.126.net/oVzAwLO_rt1dpg0PVJGeKg==/109951174257598135.jpg?param=400y400",
+      "dur": 229
+    },
+    {
+      "title": "季候风1997",
+      "artist": "曾舜晞",
+      "src": "https://music.163.com/song/media/outer/url?id=3463361754.mp3",
+      "cover": "https://p3.music.126.net/BEOCJfI9uiEkhEtVEv_kwg==/109951174318142472.jpg?param=400y400",
+      "dur": 228
+    },
+    {
+      "title": "City Blue",
+      "artist": "Mili",
+      "src": "https://music.163.com/song/media/outer/url?id=3457169400.mp3",
+      "cover": "https://p4.music.126.net/8NxvvQOfIeDGVcisIqNGAQ==/109951174221541968.jpg?param=400y400",
+      "dur": 179
+    },
+    {
+      "title": "任天堂",
+      "artist": "G.E.M.邓紫棋",
+      "src": "https://music.163.com/song/media/outer/url?id=3461983295.mp3",
+      "cover": "https://p4.music.126.net/2pTiu2UgleLAA5r3J0H3XA==/109951174293999594.jpg?param=400y400",
+      "dur": 214
+    },
+    {
+      "title": "仓央情歌",
+      "artist": "许飞",
+      "src": "https://music.163.com/song/media/outer/url?id=3464754830.mp3",
+      "cover": "https://p3.music.126.net/-qk6aKVJckYcFZOBY6Unpw==/109951174339478385.jpg?param=400y400",
+      "dur": 299
+    },
+    {
+      "title": "湿吻",
+      "artist": "亿轩_Kingston / 彭梓烨_Leo",
+      "src": "https://music.163.com/song/media/outer/url?id=3459392798.mp3",
+      "cover": "https://p4.music.126.net/sEpDBsJxef9m0mk9ABzdLQ==/109951174276837392.jpg?param=400y400",
+      "dur": 164
+    },
+    {
+      "title": "后会友期 (综艺《后会友期》片尾曲)",
+      "artist": "许飞",
+      "src": "https://music.163.com/song/media/outer/url?id=3455592377.mp3",
+      "cover": "https://p3.music.126.net/LaM56ialqlXN7_HwL0Zt2Q==/109951174196108267.jpg?param=400y400",
+      "dur": 217
     },
     {
       "title": "燃 (Live)",
@@ -225,39 +232,25 @@
       "dur": 202
     },
     {
-      "title": "小熊",
-      "artist": "金志文",
-      "src": "https://music.163.com/song/media/outer/url?id=3459498739.mp3",
-      "cover": "https://p4.music.126.net/oVzAwLO_rt1dpg0PVJGeKg==/109951174257598135.jpg?param=400y400",
-      "dur": 229
-    },
-    {
-      "title": "我将奔向世界尽头爱你",
-      "artist": "张卓尔",
-      "src": "https://music.163.com/song/media/outer/url?id=3464380904.mp3",
-      "cover": "https://p3.music.126.net/mr-TEseggcI-j9mGmlY3eQ==/109951174329340502.jpg?param=400y400",
-      "dur": 301
+      "title": "回到你身边 (不插电)",
+      "artist": "h3R3",
+      "src": "https://music.163.com/song/media/outer/url?id=3461007770.mp3",
+      "cover": "https://p3.music.126.net/NATCr9m970rbX0FHJEbScw==/109951174276609108.jpg?param=400y400",
+      "dur": 183
     },
     {
       "title": "爱而不得 (Live)",
       "artist": "薛之谦 / 黄子弘凡",
       "src": "https://music.163.com/song/media/outer/url?id=3457799633.mp3",
-      "cover": "https://p3.music.126.net/OwhAt4JhyU4BsiWjQOajxg==/109951174236495541.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/OwhAt4JhyU4BsiWjQOajxg==/109951174236495541.jpg?param=400y400",
       "dur": 187
     },
     {
-      "title": "最熟悉的陌生人 (live)",
-      "artist": "毛不易",
-      "src": "https://music.163.com/song/media/outer/url?id=3463595675.mp3",
-      "cover": "https://p4.music.126.net/DZMvbet176lJwYxBW8xYkA==/109951174311276563.jpg?param=400y400",
-      "dur": 281
-    },
-    {
-      "title": "罗马议事会(THE FORUM OF ROME)",
-      "artist": "皇昶枢（MULA SAKEE）",
-      "src": "https://music.163.com/song/media/outer/url?id=3456676436.mp3",
-      "cover": "https://p4.music.126.net/_58kOd-o06DtQmO2TSpMmQ==/109951174215305236.jpg?param=400y400",
-      "dur": 154
+      "title": "day after day",
+      "artist": "Venoflame",
+      "src": "https://music.163.com/song/media/outer/url?id=3460996188.mp3",
+      "cover": "https://p3.music.126.net/yaqDu7UvysfEH2qPunVFLA==/109951174276455483.jpg?param=400y400",
+      "dur": 133
     },
     {
       "title": "Light the night（点亮夜晚）",
@@ -265,6 +258,13 @@
       "src": "https://music.163.com/song/media/outer/url?id=3462115230.mp3",
       "cover": "https://p3.music.126.net/hs4PgYqdz3CNIUe-Dn2FhA==/109951174261551299.jpg?param=400y400",
       "dur": 172
+    },
+    {
+      "title": "罗马议事会(THE FORUM OF ROME)",
+      "artist": "皇昶枢（MULA SAKEE）",
+      "src": "https://music.163.com/song/media/outer/url?id=3456676436.mp3",
+      "cover": "https://p3.music.126.net/_58kOd-o06DtQmO2TSpMmQ==/109951174215305236.jpg?param=400y400",
+      "dur": 154
     },
     {
       "title": "回声 (live)",
@@ -277,36 +277,64 @@
       "title": "《爱笑的天使》20周年合唱版",
       "artist": "李嫣 / 窦靖童 / 王菲",
       "src": "https://music.163.com/song/media/outer/url?id=3463602387.mp3",
-      "cover": "https://p4.music.126.net/PnnNeFA7EhcMqvTPtQtiqw==/109951174316518058.jpg?param=400y400",
+      "cover": "https://p3.music.126.net/PnnNeFA7EhcMqvTPtQtiqw==/109951174316518058.jpg?param=400y400",
       "dur": 216
     },
     {
       "title": "无人知晓的我",
       "artist": "周兴哲",
       "src": "https://music.163.com/song/media/outer/url?id=3464724982.mp3",
-      "cover": "https://p3.music.126.net/8gKnFrcRpPJd08RVfd1_Ag==/109951174339429334.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/8gKnFrcRpPJd08RVfd1_Ag==/109951174339429334.jpg?param=400y400",
       "dur": 214
     },
     {
-      "title": "Crazy For You",
-      "artist": "Lana Del Rey",
-      "src": "https://music.163.com/song/media/outer/url?id=3463216379.mp3",
-      "cover": "https://p3.music.126.net/IdCObjRMK1T_clBgqsu3pA==/109951174310462630.jpg?param=400y400",
-      "dur": 224
+      "title": "重蹈覆辙 again&again (feat. 华云龙KLE)",
+      "artist": "刀脚 / 华云龙KLE",
+      "src": "https://music.163.com/song/media/outer/url?id=3464238054.mp3",
+      "cover": "https://p4.music.126.net/0-l0Chjpt0D_mFppJEc5MQ==/109951174326612215.jpg?param=400y400",
+      "dur": 142
+    },
+    {
+      "title": "最熟悉的陌生人 (live)",
+      "artist": "毛不易",
+      "src": "https://music.163.com/song/media/outer/url?id=3463595675.mp3",
+      "cover": "https://p4.music.126.net/DZMvbet176lJwYxBW8xYkA==/109951174311276563.jpg?param=400y400",
+      "dur": 281
+    },
+    {
+      "title": "Public Figure",
+      "artist": "Lil Tjay",
+      "src": "https://music.163.com/song/media/outer/url?id=3459752209.mp3",
+      "cover": "https://p3.music.126.net/bd0BJAkWG9Vg39R72Ebt6g==/109951174268844505.jpg?param=400y400",
+      "dur": 182
     },
     {
       "title": "Love Love Love (live)",
       "artist": "刘耀文",
       "src": "https://music.163.com/song/media/outer/url?id=3463596854.mp3",
-      "cover": "https://p3.music.126.net/DZMvbet176lJwYxBW8xYkA==/109951174311276563.jpg?param=400y400",
+      "cover": "https://p4.music.126.net/DZMvbet176lJwYxBW8xYkA==/109951174311276563.jpg?param=400y400",
       "dur": 187
     },
     {
-      "title": "day after day",
-      "artist": "Venoflame",
-      "src": "https://music.163.com/song/media/outer/url?id=3460996188.mp3",
-      "cover": "https://p4.music.126.net/yaqDu7UvysfEH2qPunVFLA==/109951174276455483.jpg?param=400y400",
-      "dur": 133
+      "title": "Crazy For You",
+      "artist": "Lana Del Rey",
+      "src": "https://music.163.com/song/media/outer/url?id=3463216379.mp3",
+      "cover": "https://p4.music.126.net/IdCObjRMK1T_clBgqsu3pA==/109951174310462630.jpg?param=400y400",
+      "dur": 224
+    },
+    {
+      "title": "Intentions",
+      "artist": "宇多田ヒカル",
+      "src": "https://music.163.com/song/media/outer/url?id=3456892236.mp3",
+      "cover": "https://p4.music.126.net/-xTxKIO97rmZQj5WZWPK9w==/109951174218577422.jpg?param=400y400",
+      "dur": 217
+    },
+    {
+      "title": "​雁南飞​",
+      "artist": "王齐铭WatchMe / 热单间HEATROOM",
+      "src": "https://music.163.com/song/media/outer/url?id=3451947890.mp3",
+      "cover": "https://p4.music.126.net/g8xwJyF0jdwB_azNcVjLxA==/109951174144675406.jpg?param=400y400",
+      "dur": 210
     },
     {
       "title": "女鞋 (Live)",
@@ -316,11 +344,11 @@
       "dur": 272
     },
     {
-      "title": "​雁南飞​",
-      "artist": "王齐铭WatchMe / 热单间HEATROOM",
-      "src": "https://music.163.com/song/media/outer/url?id=3451947890.mp3",
-      "cover": "https://p3.music.126.net/g8xwJyF0jdwB_azNcVjLxA==/109951174144675406.jpg?param=400y400",
-      "dur": 210
+      "title": "钱没得，命一条 (feat. 雾都L4WUDU & 王齐铭WatchMe)",
+      "artist": "刀脚 / 王齐铭WatchMe / 雾都L4WUDU",
+      "src": "https://music.163.com/song/media/outer/url?id=3464238887.mp3",
+      "cover": "https://p4.music.126.net/0-l0Chjpt0D_mFppJEc5MQ==/109951174326612215.jpg?param=400y400",
+      "dur": 180
     },
     {
       "title": "七宗罪·色欲",
@@ -328,34 +356,6 @@
       "src": "https://music.163.com/song/media/outer/url?id=3454352927.mp3",
       "cover": "https://p4.music.126.net/EmzFaVGwEfBMvoS3j4FXAw==/109951174179913529.jpg?param=400y400",
       "dur": 111
-    },
-    {
-      "title": "Stop Running",
-      "artist": "落日飞车",
-      "src": "https://music.163.com/song/media/outer/url?id=3463686513.mp3",
-      "cover": "https://p4.music.126.net/1qWPUq_lxpYUHUeRmzjEhw==/109951174317495478.jpg?param=400y400",
-      "dur": 179
-    },
-    {
-      "title": "不知名关系",
-      "artist": "Y55",
-      "src": "https://music.163.com/song/media/outer/url?id=3459744321.mp3",
-      "cover": "https://p3.music.126.net/PfhquV-FZq23ayG6LAp5-w==/109951174260154024.jpg?param=400y400",
-      "dur": 165
-    },
-    {
-      "title": "特效药",
-      "artist": "江辰",
-      "src": "https://music.163.com/song/media/outer/url?id=3457879473.mp3",
-      "cover": "https://p3.music.126.net/9Qb9HPMHMoZDPLXDxFrPLA==/109951174230598796.jpg?param=400y400",
-      "dur": 198
-    },
-    {
-      "title": "最重要的听众",
-      "artist": "法老 / 泠风",
-      "src": "https://music.163.com/song/media/outer/url?id=3455149415.mp3",
-      "cover": "https://p4.music.126.net/FEc7v3I3YXHMDu31NJwuLg==/109951174185039781.jpg?param=400y400",
-      "dur": 334
     }
   ]
 }
