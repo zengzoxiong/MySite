@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24",
+ "updated": "2026-11-25",
  "note": "API Token 用量统计（模型×天聚合，按北京时间归日）。早期历史数据来自桌面导出合并，当前同步口径：ZCode 本地会话库（仅计 completed，去渠道前缀并统一小写）与 CC-Switch 本地数据库（按 request_id 去重，semantics=1 按 input−cache_read 计 inFresh，semantics=2 按 input 计 inFresh；Gemini/Claude 系列统一采用可读模型名）。",
  "sources": [
   "ZCode 本地会话库（~/.zcode/cli/db/db.sqlite）",
@@ -2313,6 +2313,25 @@
      "inFresh": 175494,
      "out": 1249,
      "total": 1741095
+    }
+   ]
+  },
+  {
+   "date": "2026-11-25",
+   "models": [
+    {
+     "id": "Gemini 4 Neon",
+     "inCache": 23700367,
+     "inFresh": 2087694,
+     "out": 175759,
+     "total": 25963820
+    },
+    {
+     "id": "Gemini 4 Hydrogen",
+     "inCache": 411471,
+     "inFresh": 155132,
+     "out": 14365,
+     "total": 580968
     }
    ]
   }
