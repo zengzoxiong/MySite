@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/microsoft/winget-pkgs",
-  "checkedAt": "2026-11-26",
+  "checkedAt": "2026-11-27",
   "packages": {
     "7zip.7zip": {
       "ok": true,
@@ -34,13 +34,13 @@
     },
     "Microsoft.VisualStudioCode": {
       "ok": true,
-      "checkedAt": "2026-11-13",
-      "latest": "1.146.0"
+      "checkedAt": "2026-11-27",
+      "latest": "1.148.0"
     },
     "NetEase.UURemote": {
       "ok": true,
-      "checkedAt": "2026-11-25",
-      "latest": "4.48.4.6020"
+      "checkedAt": "2026-11-27",
+      "latest": "4.49.0.6162"
     },
     "Obsidian.Obsidian": {
       "ok": true,
@@ -59,8 +59,8 @@
     },
     "Tencent.TencentMeeting": {
       "ok": true,
-      "checkedAt": "2026-11-10",
-      "latest": "3.48.0.443"
+      "checkedAt": "2026-11-27",
+      "latest": "3.49.1.410"
     },
     "Tencent.WeChat.Universal": {
       "ok": true,
