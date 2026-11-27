@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "sections": {
     "trending": [
       {
         "name": "Marvisak/VIctory",
         "url": "https://github.com/Marvisak/VIctory",
         "desc": "An attempt at running GTA VI on PC",
-        "stars": 12647,
-        "language": "Rust"
-      },
-      {
-        "name": "xcl-dev/xcl",
-        "url": "https://github.com/xcl-dev/xcl",
-        "desc": "Xbox Series compatibility layer for Windows - runs console game code natively, reimplements the console system libraries and recompiles RDNA2 shaders to DXIL",
-        "stars": 8331,
+        "stars": 13397,
         "language": "Rust"
       },
       {
         "name": "4lwayz/portwatch-vi",
         "url": "https://github.com/4lwayz/portwatch-vi",
         "desc": "Does GTA VI run on PC yet? A live tracker of community recompilation and emulation efforts, updated daily.",
-        "stars": 4241,
+        "stars": 5888,
         "language": "JavaScript"
       },
       {
         "name": "EL4CTEO/fast-anything",
         "url": "https://github.com/EL4CTEO/fast-anything",
         "desc": "Don't rewrite it in Rust. Rewrite the 5% that's slow: profile Python, Node or Ruby apps, port the hot functions with your coding agent, prove they behave the sa",
-        "stars": 3990,
+        "stars": 4252,
         "language": "Rust"
-      },
-      {
-        "name": "AFK-surf/xnulinux",
-        "url": "https://github.com/AFK-surf/xnulinux",
-        "desc": "XNU as a loadable kernel module inside Linux (macOS personality for arm64 Linux)",
-        "stars": 3968,
-        "language": "C"
       },
       {
         "name": "fxceless/victory-fork",
         "url": "https://github.com/fxceless/victory-fork",
         "desc": "Work-in-progress fork of VIctory: getting an Xbox Series title to render and run on a Windows PC. No game files.",
-        "stars": 3090,
+        "stars": 3282,
+        "language": "Rust"
+      },
+      {
+        "name": "Belobug/VIctory-Belobug-AMD",
+        "url": "https://github.com/Belobug/VIctory-Belobug-AMD",
+        "desc": "",
+        "stars": 3098,
         "language": "Rust"
       },
       {
         "name": "ubiquitarianism/leonida",
         "url": "https://github.com/ubiquitarianism/leonida",
         "desc": "A continuation of Leonida, the Xbox > PC port interface for GTA VI",
-        "stars": 2349,
-        "language": "Python"
-      },
-      {
-        "name": "R0Y00/Xbox2Windows",
-        "url": "https://github.com/R0Y00/Xbox2Windows",
-        "desc": "Static recompilation research for Xbox Series X|S software on x64 Windows, with source-built CPU and GPU tests. Full-game startup is unverified.",
-        "stars": 1957,
+        "stars": 2536,
         "language": "Python"
       },
       {
         "name": "os6/nospeaker",
         "url": "https://github.com/os6/nospeaker",
         "desc": "make your macbook's trackpad talk using its haptic motor",
-        "stars": 1893,
+        "stars": 1958,
         "language": "Swift"
       },
       {
         "name": "omonkeyz/xbox-emulator",
         "url": "https://github.com/omonkeyz/xbox-emulator",
         "desc": "Progress notes for running Xbox Series X|S builds on PC (TomBox + rage9)",
-        "stars": 1849,
+        "stars": 1852,
         "language": "Rust"
+      },
+      {
+        "name": "avatarmanz/VIctory-7900XTX",
+        "url": "https://github.com/avatarmanz/VIctory-7900XTX",
+        "desc": "Goal: an Xbox Series title (your own dump) on PC as the Series X version at 4K with ray tracing, picture matching the Xbox first (textures, lighting), then 30+ ",
+        "stars": 1852,
+        "language": "Rust"
+      },
+      {
+        "name": "crhywun/g1-acq",
+        "url": "https://github.com/crhywun/g1-acq",
+        "desc": "",
+        "stars": 1653,
+        "language": "JavaScript"
       }
     ],
     "hn": [
       {
-        "id": 50644817,
-        "title": "1Password Security Incident",
-        "url": "https://1password.com/blog/update-on-nov-2026-security-incident",
-        "hn": "https://news.ycombinator.com/item?id=50644817",
-        "score": 1175,
-        "comments": 502
+        "id": 50660180,
+        "title": "AI made self-hosting fun again",
+        "url": "https://janlukas.blog/posts/ai-self-hosting",
+        "hn": "https://news.ycombinator.com/item?id=50660180",
+        "score": 325,
+        "comments": 171
       },
       {
-        "id": 50646108,
-        "title": "Holy shit holy shit holy shit holy shit: The magnitude of what’s now happening",
-        "url": "https://scottaaronson.blog/?p=10379",
-        "hn": "https://news.ycombinator.com/item?id=50646108",
-        "score": 928,
-        "comments": 773
+        "id": 50659841,
+        "title": "Kamil Khan Mumtaz: Pakistani architect, admired at home, almost invisible abroad",
+        "url": "https://worksinprogress.co/issue/the-greatest-architect-youve-never-heard-of-is-in-pakistan/",
+        "hn": "https://news.ycombinator.com/item?id=50659841",
+        "score": 249,
+        "comments": 49
       },
       {
-        "id": 50648050,
-        "title": "Much shorter version of GRH Lean verification from Anthropic",
-        "url": "https://github.com/lsernau/grh-lean",
-        "hn": "https://news.ycombinator.com/item?id=50648050",
+        "id": 50657530,
+        "title": "YouTube Ad Punisher – Auto-reloads YouTube pages when an ad plays",
+        "url": "https://github.com/antonpictures/youtube-punisher",
+        "hn": "https://news.ycombinator.com/item?id=50657530",
+        "score": 276,
+        "comments": 345
+      },
+      {
+        "id": 50657265,
+        "title": "AMD-specific fork of llama.cpp",
+        "url": "https://devnull.land/amd-specific-llama-cpp",
+        "hn": "https://news.ycombinator.com/item?id=50657265",
         "score": 288,
-        "comments": 134
+        "comments": 71
       },
       {
-        "id": 50649864,
-        "title": "Tell HN: Lots of Ask HNs again",
-        "url": "https://news.ycombinator.com/item?id=50649864",
-        "hn": "https://news.ycombinator.com/item?id=50649864",
-        "score": 79,
-        "comments": 36
+        "id": 50657645,
+        "title": "CTO of 'RansomwareHelp' indicted for wire fraud",
+        "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/",
+        "hn": "https://news.ycombinator.com/item?id=50657645",
+        "score": 216,
+        "comments": 95
       },
       {
-        "id": 50601280,
-        "title": "GPT-6.2 Astra is the first model to beat Googlers' code golf records",
-        "url": "https://bjin.github.io/go-codegolf-benchmark/#leaderboard",
-        "hn": "https://news.ycombinator.com/item?id=50601280",
-        "score": 255,
-        "comments": 72
+        "id": 50660273,
+        "title": "Novita, StreamLake, etc. are ByteDance Ark wrappers",
+        "url": "https://kendell.dev/blog/arkwrapper/",
+        "hn": "https://news.ycombinator.com/item?id=50660273",
+        "score": 45,
+        "comments": 7
       },
       {
-        "id": 50647181,
-        "title": "Slow Ubuntu security response times",
-        "url": "https://www.openwall.com/lists/oss-security/2026/11/25/9",
-        "hn": "https://news.ycombinator.com/item?id=50647181",
-        "score": 148,
-        "comments": 65
+        "id": 50653667,
+        "title": "Intel One Mono font (2023)",
+        "url": "https://github.com/intel/intel-one-mono",
+        "hn": "https://news.ycombinator.com/item?id=50653667",
+        "score": 471,
+        "comments": 239
       },
       {
-        "id": 50647673,
-        "title": "The New York Times warns photographers not to update Photoshop over AI features",
-        "url": "https://www.theverge.com/ai-artificial-intelligence/1041227/the-new-york-times-warns-photographers-not-to-update-photoshop-over-ai-features",
-        "hn": "https://news.ycombinator.com/item?id=50647673",
-        "score": 207,
-        "comments": 163
+        "id": 50658632,
+        "title": "Rvoip: VoIP stack in Rust",
+        "url": "https://github.com/eisenzopf/rvoip",
+        "hn": "https://news.ycombinator.com/item?id=50658632",
+        "score": 91,
+        "comments": 18
       },
       {
-        "id": 50645541,
-        "title": "Multiagent coding is the future",
-        "url": "https://www.kalzumeus.com/2026/11/25/multiagent-coding-is-the-future/",
-        "hn": "https://news.ycombinator.com/item?id=50645541",
-        "score": 39,
-        "comments": 19
+        "id": 50659640,
+        "title": "Company Culture = Slack Emoji ÷ √Headcount",
+        "url": "https://lia.mg/posts/measuring-company-culture-with-slack-emoji/",
+        "hn": "https://news.ycombinator.com/item?id=50659640",
+        "score": 115,
+        "comments": 30
       },
       {
-        "id": 50643129,
-        "title": "A few questions for the guy who went snorkeling in a Home Depot retention pond",
-        "url": "https://www.vox.com/down-to-earth/511999/home-depot-retention-pond-snorkel-joseph-ricketts",
-        "hn": "https://news.ycombinator.com/item?id=50643129",
-        "score": 443,
-        "comments": 107
-      },
-      {
-        "id": 50647161,
-        "title": "Nfs2root: A 12-year-old pre-auth remote root in the Linux kernel's NFS server",
-        "url": "https://opensec.in/blog/nfs2root-cve-2026-99362",
-        "hn": "https://news.ycombinator.com/item?id=50647161",
-        "score": 88,
-        "comments": 28
+        "id": 50658193,
+        "title": "Largest 2D Chart library in the world using BUI: BlenderUI",
+        "url": "https://bui.preetham.top/charts/",
+        "hn": "https://news.ycombinator.com/item?id=50658193",
+        "score": 61,
+        "comments": 10
       }
     ],
     "hf_models": [
@@ -162,170 +162,170 @@
         "url": "https://huggingface.co/thinkingmachines/Inkling-2-Mini",
         "task": "image-text-to-text",
         "downloads": 96527,
-        "likes": 6043
+        "likes": 6264
       },
       {
         "id": "unsloth/Inkling-2-Mini-GGUF",
         "url": "https://huggingface.co/unsloth/Inkling-2-Mini-GGUF",
         "task": "image-text-to-text",
         "downloads": 2445633,
-        "likes": 1378
-      },
-      {
-        "id": "inworld/voice-isolator",
-        "url": "https://huggingface.co/inworld/voice-isolator",
-        "task": "audio-to-audio",
-        "downloads": 15244,
-        "likes": 897
+        "likes": 1499
       },
       {
         "id": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
         "url": "https://huggingface.co/AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
         "task": "image-text-to-text",
         "downloads": 762491,
-        "likes": 841
+        "likes": 938
+      },
+      {
+        "id": "inworld/voice-isolator",
+        "url": "https://huggingface.co/inworld/voice-isolator",
+        "task": "audio-to-audio",
+        "downloads": 15244,
+        "likes": 966
       },
       {
         "id": "SulphurAI/Sulphur-3",
         "url": "https://huggingface.co/SulphurAI/Sulphur-3",
         "task": "",
         "downloads": 189735,
-        "likes": 1086
+        "likes": 1216
       },
       {
         "id": "prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
         "url": "https://huggingface.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
         "task": "text-generation",
         "downloads": 59366,
-        "likes": 342
+        "likes": 529
       },
       {
-        "id": "apple/DepthPro2",
-        "url": "https://huggingface.co/apple/DepthPro2",
-        "task": "depth-estimation",
-        "downloads": 0,
-        "likes": 1254
+        "id": "Lightricks/LTX-2.5",
+        "url": "https://huggingface.co/Lightricks/LTX-2.5",
+        "task": "image-to-video",
+        "downloads": 3041405,
+        "likes": 13598
       },
       {
         "id": "llamaindex/OCRia-nano-1",
         "url": "https://huggingface.co/llamaindex/OCRia-nano-1",
         "task": "image-to-text",
         "downloads": 126,
-        "likes": 234
+        "likes": 285
       },
       {
-        "id": "inclusionAI/Ling-3.2-air",
-        "url": "https://huggingface.co/inclusionAI/Ling-3.2-air",
-        "task": "",
-        "downloads": 1467,
-        "likes": 235
+        "id": "nvidia/Nemotron-Labs-Image-30B-A3B",
+        "url": "https://huggingface.co/nvidia/Nemotron-Labs-Image-30B-A3B",
+        "task": "text-to-image",
+        "downloads": 218,
+        "likes": 282
       },
       {
-        "id": "harness-hub/Qwen3.8-27B-pi-adapted",
-        "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-pi-adapted",
-        "task": "image-text-to-text",
-        "downloads": 3844,
-        "likes": 1118
+        "id": "apple/DepthPro2",
+        "url": "https://huggingface.co/apple/DepthPro2",
+        "task": "depth-estimation",
+        "downloads": 0,
+        "likes": 1321
       }
     ],
     "weibo": [
       {
-        "word": "蔡磊已进渐冻症终末期",
-        "num": 2512408,
-        "label": "热",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E7%A3%8A%E5%B7%B2%E8%BF%9B%E6%B8%90%E5%86%BB%E7%97%87%E7%BB%88%E6%9C%AB%E6%9C%9F%23"
-      },
-      {
-        "word": "美术生不是被AI干掉的",
-        "num": 998804,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%BE%8E%E6%9C%AF%E7%94%9F%E4%B8%8D%E6%98%AF%E8%A2%ABAI%E5%B9%B2%E6%8E%89%E7%9A%84%23"
-      },
-      {
-        "word": "神24乘组进驻天宫",
-        "num": 876665,
+        "word": "中国十大最宜居城市",
+        "num": 1652321,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%A5%9E24%E4%B9%98%E7%BB%84%E8%BF%9B%E9%A9%BB%E5%A4%A9%E5%AE%AB%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E5%8D%81%E5%A4%A7%E6%9C%80%E5%AE%9C%E5%B1%85%E5%9F%8E%E5%B8%82%23"
       },
       {
-        "word": "田淼直播说徐若晗演戏不用心",
-        "num": 841229,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E7%94%B0%E6%B7%BC%E7%9B%B4%E6%92%AD%E8%AF%B4%E5%BE%90%E8%8B%A5%E6%99%97%E6%BC%94%E6%88%8F%E4%B8%8D%E7%94%A8%E5%BF%83%23"
-      },
-      {
-        "word": "妻子与蔡磊见面全程没说话",
-        "num": 614652,
+        "word": "患者用豆包质疑医生诊断",
+        "num": 887761,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%A6%BB%E5%AD%90%E4%B8%8E%E8%94%A1%E7%A3%8A%E8%A7%81%E9%9D%A2%E5%85%A8%E7%A8%8B%E6%B2%A1%E8%AF%B4%E8%AF%9D%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%82%A3%E8%80%85%E7%94%A8%E8%B1%86%E5%8C%85%E8%B4%A8%E7%96%91%E5%8C%BB%E7%94%9F%E8%AF%8A%E6%96%AD%23"
       },
       {
-        "word": "厉娜被雪藏的那一年长这样",
-        "num": 584224,
+        "word": "服务贸易发展十五五规划来了",
+        "num": 731925,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%8E%89%E5%A8%9C%E8%A2%AB%E9%9B%AA%E8%97%8F%E7%9A%84%E9%82%A3%E4%B8%80%E5%B9%B4%E9%95%BF%E8%BF%99%E6%A0%B7%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%8D%E5%8A%A1%E8%B4%B8%E6%98%93%E5%8F%91%E5%B1%95%E5%8D%81%E4%BA%94%E4%BA%94%E8%A7%84%E5%88%92%E6%9D%A5%E4%BA%86%23"
       },
       {
-        "word": "蔡磊",
-        "num": 516935,
+        "word": "走错果园摘走数百斤蜜桔仅留下10元",
+        "num": 623438,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%B5%B0%E9%94%99%E6%9E%9C%E5%9B%AD%E6%91%98%E8%B5%B0%E6%95%B0%E7%99%BE%E6%96%A4%E8%9C%9C%E6%A1%94%E4%BB%85%E7%95%99%E4%B8%8B10%E5%85%83%23"
+      },
+      {
+        "word": "厉娜身上有非常重的重建痕迹",
+        "num": 569578,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8E%89%E5%A8%9C%E8%BA%AB%E4%B8%8A%E6%9C%89%E9%9D%9E%E5%B8%B8%E9%87%8D%E7%9A%84%E9%87%8D%E5%BB%BA%E7%97%95%E8%BF%B9%23"
+      },
+      {
+        "word": "Viper跟观众告别",
+        "num": 558298,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23Viper%E8%B7%9F%E8%A7%82%E4%BC%97%E5%91%8A%E5%88%AB%23"
+      },
+      {
+        "word": "许飞这段反应可以进北影教材了",
+        "num": 556232,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E7%A3%8A%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B8%E9%A3%9E%E8%BF%99%E6%AE%B5%E5%8F%8D%E5%BA%94%E5%8F%AF%E4%BB%A5%E8%BF%9B%E5%8C%97%E5%BD%B1%E6%95%99%E6%9D%90%E4%BA%86%23"
       },
       {
-        "word": "蔡磊融资失败妻子放弃事业全职直播",
-        "num": 464411,
+        "word": "警方回应50余人摘蜜桔仅留下10元",
+        "num": 488531,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E7%A3%8A%E8%9E%8D%E8%B5%84%E5%A4%B1%E8%B4%A5%E5%A6%BB%E5%AD%90%E6%94%BE%E5%BC%83%E4%BA%8B%E4%B8%9A%E5%85%A8%E8%81%8C%E7%9B%B4%E6%92%AD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%AD%A6%E6%96%B9%E5%9B%9E%E5%BA%9450%E4%BD%99%E4%BA%BA%E6%91%98%E8%9C%9C%E6%A1%94%E4%BB%85%E7%95%99%E4%B8%8B10%E5%85%83%23"
       },
       {
-        "word": "蔡磊语言功能已彻底丧失",
-        "num": 462481,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%94%A1%E7%A3%8A%E8%AF%AD%E8%A8%80%E5%8A%9F%E8%83%BD%E5%B7%B2%E5%BD%BB%E5%BA%95%E4%B8%A7%E5%A4%B1%23"
-      },
-      {
-        "word": "梁文锋成全球最富AI模型创始人",
-        "num": 379489,
+        "word": "三只松鼠致歉声明",
+        "num": 289418,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%A2%81%E6%96%87%E9%94%8B%E6%88%90%E5%85%A8%E7%90%83%E6%9C%80%E5%AF%8CAI%E6%A8%A1%E5%9E%8B%E5%88%9B%E5%A7%8B%E4%BA%BA%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%89%E5%8F%AA%E6%9D%BE%E9%BC%A0%E8%87%B4%E6%AD%89%E5%A3%B0%E6%98%8E%23"
+      },
+      {
+        "word": "中国男篮曾98比10胜沙特",
+        "num": 257740,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E7%94%B7%E7%AF%AE%E6%9B%BE98%E6%AF%9410%E8%83%9C%E6%B2%99%E7%89%B9%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2025,
-        "text": "香港大埔宏福苑发生五级大火，造成至少168人死亡，包括一名消防员，另外79人受伤。",
-        "title": "大埔區",
-        "url": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E5%9F%94%E5%8D%80"
+        "year": 2022,
+        "text": "为响应此前于乌鲁木齐爆发的抗议，反对“动态清零”政策，上海民众聚集于同名的乌鲁木齐中路进行抗议。",
+        "title": "2022年乌鲁木齐抗议",
+        "url": "https://zh.wikipedia.org/wiki/2022%E5%B9%B4%E4%B9%8C%E9%B2%81%E6%9C%A8%E9%BD%90%E6%8A%97%E8%AE%AE"
       },
       {
         "year": 2022,
-        "text": "台湾九合一选举投票。",
-        "title": "2022年中華民國地方公職人員選舉",
-        "url": "https://zh.wikipedia.org/wiki/2022%E5%B9%B4%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E5%9C%B0%E6%96%B9%E5%85%AC%E8%81%B7%E4%BA%BA%E5%93%A1%E9%81%B8%E8%88%89"
+        "text": "香港港铁新车率先于观塘线营运。",
+        "title": "港鐵",
+        "url": "https://zh.wikipedia.org/wiki/%E6%B8%AF%E9%90%B5"
       },
       {
-        "year": 2022,
-        "text": "疫情封控措施生效期间，中国新疆乌鲁木齐一座高层住宅楼发生火灾事故，造成10人死亡、9人受伤。事件发生后，当地民众聚集抗议，向政府表达不满。抗议浪潮随后扩散到中国各地，发展成“白纸革命”。",
-        "title": "2019冠狀病毒病中國大陸疫區封鎖措施",
-        "url": "https://zh.wikipedia.org/wiki/2019%E5%86%A0%E7%8B%80%E7%97%85%E6%AF%92%E7%97%85%E4%B8%AD%E5%9C%8B%E5%A4%A7%E9%99%B8%E7%96%AB%E5%8D%80%E5%B0%81%E9%8E%96%E6%8E%AA%E6%96%BD"
+        "year": 2020,
+        "text": "被视为伊朗核计划负责人的核物理学家穆赫辛·法克里扎德遭暗杀，据称是摩萨德所为。",
+        "title": "伊朗核问题",
+        "url": "https://zh.wikipedia.org/wiki/%E4%BC%8A%E6%9C%97%E6%A0%B8%E9%97%AE%E9%A2%98"
       },
       {
-        "year": 2018,
-        "text": "洞察号火星探测器于火星的埃律西昂平原着陆。",
-        "title": "洞察号火星探测器",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B4%9E%E5%AF%9F%E5%8F%B7%E7%81%AB%E6%98%9F%E6%8E%A2%E6%B5%8B%E5%99%A8"
+        "year": 2019,
+        "text": "美国总统特朗普正式签署《香港人权与民主法案》及《禁止向香港警察商业出口涵盖军用品法案》。",
+        "title": "美国总统",
+        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E6%80%BB%E7%BB%9F"
       },
       {
-        "year": 2014,
-        "text": "欧洲空间局的菲莱登陆器降落在楚留莫夫-格拉希门克彗星上。",
-        "title": "欧洲空间局",
-        "url": "https://zh.wikipedia.org/wiki/%E6%AC%A7%E6%B4%B2%E7%A9%BA%E9%97%B4%E5%B1%80"
+        "year": 2010,
+        "text": "中华民国直辖市市长暨市议员选举。",
+        "title": "2010年中華民國直轄市市長選舉",
+        "url": "https://zh.wikipedia.org/wiki/2010%E5%B9%B4%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E7%9B%B4%E8%BD%84%E5%B8%82%E5%B8%82%E9%95%B7%E9%81%B8%E8%88%89"
       },
       {
-        "year": 2011,
-        "text": "美国火星科学实验室发射好奇号。",
-        "title": "火星科学实验室",
-        "url": "https://zh.wikipedia.org/wiki/%E7%81%AB%E6%98%9F%E7%A7%91%E5%AD%A6%E5%AE%9E%E9%AA%8C%E5%AE%A4"
+        "year": 2007,
+        "text": "亚洲棒球锦标赛于中华民国台中市举行。",
+        "title": "2007年亞洲棒球錦標賽",
+        "url": "https://zh.wikipedia.org/wiki/2007%E5%B9%B4%E4%BA%9E%E6%B4%B2%E6%A3%92%E7%90%83%E9%8C%A6%E6%A8%99%E8%B3%BD"
       }
     ]
   }
