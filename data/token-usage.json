@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25",
+ "updated": "2026-11-27",
  "note": "API Token 用量统计（模型×天聚合，按北京时间归日）。早期历史数据来自桌面导出合并，当前同步口径：ZCode 本地会话库（仅计 completed，去渠道前缀并统一小写）与 CC-Switch 本地数据库（按 request_id 去重，semantics=1 按 input−cache_read 计 inFresh，semantics=2 按 input 计 inFresh；Gemini/Claude 系列统一采用可读模型名）。",
  "sources": [
   "ZCode 本地会话库（~/.zcode/cli/db/db.sqlite）",
@@ -2332,6 +2332,58 @@
      "inFresh": 155132,
      "out": 14365,
      "total": 580968
+    }
+   ]
+  },
+  {
+   "date": "2026-11-26",
+   "models": [
+    {
+     "id": "Gemini 4 Carbon",
+     "inCache": 5969981,
+     "inFresh": 2162140,
+     "out": 445841,
+     "total": 8577962
+    },
+    {
+     "id": "Gemini 4 Neon",
+     "inCache": 6242239,
+     "inFresh": 982951,
+     "out": 61372,
+     "total": 7286562
+    },
+    {
+     "id": "Claude Sonnet5.5",
+     "inCache": 2917020,
+     "inFresh": 688095,
+     "out": 23727,
+     "total": 3628842
+    }
+   ]
+  },
+  {
+   "date": "2026-11-27",
+   "models": [
+    {
+     "id": "Gemini 4 Neon",
+     "inCache": 124040286,
+     "inFresh": 2865290,
+     "out": 792659,
+     "total": 127698235
+    },
+    {
+     "id": "glm-5.4",
+     "inCache": 1856704,
+     "inFresh": 509447,
+     "out": 10150,
+     "total": 2376301
+    },
+    {
+     "id": "deepseek-v4.1-flash",
+     "inCache": 748800,
+     "inFresh": 199864,
+     "out": 2516,
+     "total": 951180
     }
    ]
   }
