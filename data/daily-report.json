@@ -1,159 +1,159 @@
 {
   "note": "数据看板「每日日报」数据，由 GitHub Actions 每日同步；勿手改。",
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "sections": {
     "trending": [
       {
         "name": "Marvisak/VIctory",
         "url": "https://github.com/Marvisak/VIctory",
         "desc": "An attempt at running GTA VI on PC",
-        "stars": 13397,
+        "stars": 13831,
         "language": "Rust"
       },
       {
-        "name": "4lwayz/portwatch-vi",
-        "url": "https://github.com/4lwayz/portwatch-vi",
-        "desc": "Does GTA VI run on PC yet? A live tracker of community recompilation and emulation efforts, updated daily.",
-        "stars": 5888,
-        "language": "JavaScript"
-      },
-      {
-        "name": "EL4CTEO/fast-anything",
-        "url": "https://github.com/EL4CTEO/fast-anything",
-        "desc": "Don't rewrite it in Rust. Rewrite the 5% that's slow: profile Python, Node or Ruby apps, port the hot functions with your coding agent, prove they behave the sa",
-        "stars": 4252,
+        "name": "trustno1-coder/VIctory-NVIDIA",
+        "url": "https://github.com/trustno1-coder/VIctory-NVIDIA",
+        "desc": "VIctory (Xbox Series compatibility layer) tuned for NVIDIA RTX cards: Series X at 2560x1440 with DLSS, about 26-30 fps on an RTX 5070, DLSS frame generation 2x-",
+        "stars": 3506,
         "language": "Rust"
       },
       {
         "name": "fxceless/victory-fork",
         "url": "https://github.com/fxceless/victory-fork",
         "desc": "Work-in-progress fork of VIctory: getting an Xbox Series title to render and run on a Windows PC. No game files.",
-        "stars": 3282,
+        "stars": 3362,
         "language": "Rust"
       },
       {
-        "name": "Belobug/VIctory-Belobug-AMD",
-        "url": "https://github.com/Belobug/VIctory-Belobug-AMD",
-        "desc": "",
-        "stars": 3098,
-        "language": "Rust"
-      },
-      {
-        "name": "ubiquitarianism/leonida",
-        "url": "https://github.com/ubiquitarianism/leonida",
+        "name": "ProjectLeonida/mandy",
+        "url": "https://github.com/ProjectLeonida/mandy",
         "desc": "A continuation of Leonida, the Xbox > PC port interface for GTA VI",
-        "stars": 2536,
+        "stars": 2909,
         "language": "Python"
+      },
+      {
+        "name": "nexu-io/opengame",
+        "url": "https://github.com/nexu-io/opengame",
+        "desc": "The Super Game Agent — the Unity & Unreal for AI agents, with 100+ viral games to remix. Turn 20+ coding agents (Claude Code, Codex, DeepSeek, etc.) into a full",
+        "stars": 2292,
+        "language": "TypeScript"
+      },
+      {
+        "name": "alesha-pro/llm.asm",
+        "url": "https://github.com/alesha-pro/llm.asm",
+        "desc": "Qwen3-0.6B inference (12 KB), bare-metal bootable OS (22 KB), and from-scratch Mini-GPT trainer with live Braille TUI (32 KB) in 100% pure x86-64 NASM assembly.",
+        "stars": 2242,
+        "language": "Assembly"
       },
       {
         "name": "os6/nospeaker",
         "url": "https://github.com/os6/nospeaker",
         "desc": "make your macbook's trackpad talk using its haptic motor",
-        "stars": 1958,
+        "stars": 1992,
         "language": "Swift"
-      },
-      {
-        "name": "omonkeyz/xbox-emulator",
-        "url": "https://github.com/omonkeyz/xbox-emulator",
-        "desc": "Progress notes for running Xbox Series X|S builds on PC (TomBox + rage9)",
-        "stars": 1852,
-        "language": "Rust"
-      },
-      {
-        "name": "avatarmanz/VIctory-7900XTX",
-        "url": "https://github.com/avatarmanz/VIctory-7900XTX",
-        "desc": "Goal: an Xbox Series title (your own dump) on PC as the Series X version at 4K with ray tracing, picture matching the Xbox first (textures, lighting), then 30+ ",
-        "stars": 1852,
-        "language": "Rust"
       },
       {
         "name": "crhywun/g1-acq",
         "url": "https://github.com/crhywun/g1-acq",
         "desc": "",
-        "stars": 1653,
+        "stars": 1796,
         "language": "JavaScript"
+      },
+      {
+        "name": "Reukix/Reloc",
+        "url": "https://github.com/Reukix/Reloc",
+        "desc": "iOS accessory-level location simulator over local loopback (iAP2 / MFi-v3 / NMEA)",
+        "stars": 1684,
+        "language": "Swift"
+      },
+      {
+        "name": "Avaneesh-Inamdar/Stream-Tube-Desktop",
+        "url": "https://github.com/Avaneesh-Inamdar/Stream-Tube-Desktop",
+        "desc": "Native YouTube client for Windows in Rust, with SponsorBlock, DeArrow and Return YouTube Dislike built in",
+        "stars": 1657,
+        "language": "Rust"
       }
     ],
     "hn": [
       {
-        "id": 50660180,
-        "title": "AI made self-hosting fun again",
-        "url": "https://janlukas.blog/posts/ai-self-hosting",
-        "hn": "https://news.ycombinator.com/item?id=50660180",
-        "score": 325,
-        "comments": 171
+        "id": 50672565,
+        "title": "Google's DeepCrossAttention achieves comparable model quality up to 3x faster",
+        "url": "https://research.google/blog/supercharging-transformer-residual-connections/",
+        "hn": "https://news.ycombinator.com/item?id=50672565",
+        "score": 95,
+        "comments": 25
       },
       {
-        "id": 50659841,
-        "title": "Kamil Khan Mumtaz: Pakistani architect, admired at home, almost invisible abroad",
-        "url": "https://worksinprogress.co/issue/the-greatest-architect-youve-never-heard-of-is-in-pakistan/",
-        "hn": "https://news.ycombinator.com/item?id=50659841",
-        "score": 249,
-        "comments": 49
+        "id": 50643158,
+        "title": "GPT 6.2 Astra Solves a Historical Mystery",
+        "url": "https://generativehistory.substack.com/p/gpt-62-astra-solves-a-historical",
+        "hn": "https://news.ycombinator.com/item?id=50643158",
+        "score": 322,
+        "comments": 197
       },
       {
-        "id": 50657530,
-        "title": "YouTube Ad Punisher – Auto-reloads YouTube pages when an ad plays",
-        "url": "https://github.com/antonpictures/youtube-punisher",
-        "hn": "https://news.ycombinator.com/item?id=50657530",
-        "score": 276,
-        "comments": 345
+        "id": 50657346,
+        "title": "The Balatro Timeline",
+        "url": "https://localthunk.com/blog/balatro-timeline-3aarh",
+        "hn": "https://news.ycombinator.com/item?id=50657346",
+        "score": 65,
+        "comments": 9
       },
       {
-        "id": 50657265,
-        "title": "AMD-specific fork of llama.cpp",
-        "url": "https://devnull.land/amd-specific-llama-cpp",
-        "hn": "https://news.ycombinator.com/item?id=50657265",
-        "score": 288,
-        "comments": 71
+        "id": 50668145,
+        "title": "Credit card skimming scripts using WebRTC found on popular shopping sites",
+        "url": "https://www.infohawk.com/news/2026-11-27-black-friday-webrtc-skimmer",
+        "hn": "https://news.ycombinator.com/item?id=50668145",
+        "score": 434,
+        "comments": 226
       },
       {
-        "id": 50657645,
-        "title": "CTO of 'RansomwareHelp' indicted for wire fraud",
-        "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/",
-        "hn": "https://news.ycombinator.com/item?id=50657645",
-        "score": 216,
-        "comments": 95
+        "id": 50669765,
+        "title": "Convex skills send the user's app idea to a remote server without telling them",
+        "url": "https://github.com/convex/convex-backend-skill/issues/64",
+        "hn": "https://news.ycombinator.com/item?id=50669765",
+        "score": 234,
+        "comments": 75
       },
       {
-        "id": 50660273,
-        "title": "Novita, StreamLake, etc. are ByteDance Ark wrappers",
-        "url": "https://kendell.dev/blog/arkwrapper/",
-        "hn": "https://news.ycombinator.com/item?id=50660273",
-        "score": 45,
+        "id": 50672008,
+        "title": "9/UX: a Macintosh-inspired desktop for 9front",
+        "url": "https://progrium.github.io/9ux/",
+        "hn": "https://news.ycombinator.com/item?id=50672008",
+        "score": 78,
+        "comments": 14
+      },
+      {
+        "id": 50662313,
+        "title": "Citroën Hydraulic System",
+        "url": "https://www.citroenet.org.uk/miscellaneous/hydraulics/hydraulics-1.html",
+        "hn": "https://news.ycombinator.com/item?id=50662313",
+        "score": 135,
+        "comments": 50
+      },
+      {
+        "id": 50644213,
+        "title": "Cyberpunk Television Shows",
+        "url": "https://shellzine.net/cyberpunk-television/",
+        "hn": "https://news.ycombinator.com/item?id=50644213",
+        "score": 8,
+        "comments": 6
+      },
+      {
+        "id": 50672835,
+        "title": "Passkey blues",
+        "url": "https://ssg.dev/passkey-blues/",
+        "hn": "https://news.ycombinator.com/item?id=50672835",
+        "score": 31,
         "comments": 7
       },
       {
-        "id": 50653667,
-        "title": "Intel One Mono font (2023)",
-        "url": "https://github.com/intel/intel-one-mono",
-        "hn": "https://news.ycombinator.com/item?id=50653667",
-        "score": 471,
-        "comments": 239
-      },
-      {
-        "id": 50658632,
-        "title": "Rvoip: VoIP stack in Rust",
-        "url": "https://github.com/eisenzopf/rvoip",
-        "hn": "https://news.ycombinator.com/item?id=50658632",
-        "score": 91,
-        "comments": 18
-      },
-      {
-        "id": 50659640,
-        "title": "Company Culture = Slack Emoji ÷ √Headcount",
-        "url": "https://lia.mg/posts/measuring-company-culture-with-slack-emoji/",
-        "hn": "https://news.ycombinator.com/item?id=50659640",
-        "score": 115,
-        "comments": 30
-      },
-      {
-        "id": 50658193,
-        "title": "Largest 2D Chart library in the world using BUI: BlenderUI",
-        "url": "https://bui.preetham.top/charts/",
-        "hn": "https://news.ycombinator.com/item?id=50658193",
-        "score": 61,
-        "comments": 10
+        "id": 50631823,
+        "title": "Build your own amp modeler: $78 DIY pedal kit from TONE3000",
+        "url": "https://www.guitarworld.com/gear/guitar-pedals/tone3000-daisy-audio-diy-pedal-kit",
+        "hn": "https://news.ycombinator.com/item?id=50631823",
+        "score": 44,
+        "comments": 12
       }
     ],
     "hf_models": [
@@ -161,171 +161,171 @@
         "id": "thinkingmachines/Inkling-2-Mini",
         "url": "https://huggingface.co/thinkingmachines/Inkling-2-Mini",
         "task": "image-text-to-text",
-        "downloads": 96527,
-        "likes": 6264
+        "downloads": 155741,
+        "likes": 6471
       },
       {
         "id": "unsloth/Inkling-2-Mini-GGUF",
         "url": "https://huggingface.co/unsloth/Inkling-2-Mini-GGUF",
         "task": "image-text-to-text",
-        "downloads": 2445633,
-        "likes": 1499
-      },
-      {
-        "id": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
-        "url": "https://huggingface.co/AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
-        "task": "image-text-to-text",
-        "downloads": 762491,
-        "likes": 938
-      },
-      {
-        "id": "inworld/voice-isolator",
-        "url": "https://huggingface.co/inworld/voice-isolator",
-        "task": "audio-to-audio",
-        "downloads": 15244,
-        "likes": 966
+        "downloads": 3302340,
+        "likes": 1614
       },
       {
         "id": "SulphurAI/Sulphur-3",
         "url": "https://huggingface.co/SulphurAI/Sulphur-3",
         "task": "",
-        "downloads": 189735,
-        "likes": 1216
+        "downloads": 539421,
+        "likes": 1369
+      },
+      {
+        "id": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
+        "url": "https://huggingface.co/AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
+        "task": "image-text-to-text",
+        "downloads": 1059763,
+        "likes": 1038
       },
       {
         "id": "prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
         "url": "https://huggingface.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
         "task": "text-generation",
-        "downloads": 59366,
-        "likes": 529
+        "downloads": 382546,
+        "likes": 639
+      },
+      {
+        "id": "inworld/voice-isolator",
+        "url": "https://huggingface.co/inworld/voice-isolator",
+        "task": "audio-to-audio",
+        "downloads": 20510,
+        "likes": 1015
       },
       {
         "id": "Lightricks/LTX-2.5",
         "url": "https://huggingface.co/Lightricks/LTX-2.5",
         "task": "image-to-video",
-        "downloads": 3041405,
-        "likes": 13598
+        "downloads": 3080701,
+        "likes": 13731
       },
       {
         "id": "llamaindex/OCRia-nano-1",
         "url": "https://huggingface.co/llamaindex/OCRia-nano-1",
         "task": "image-to-text",
-        "downloads": 126,
-        "likes": 285
+        "downloads": 626,
+        "likes": 358
       },
       {
         "id": "nvidia/Nemotron-Labs-Image-30B-A3B",
         "url": "https://huggingface.co/nvidia/Nemotron-Labs-Image-30B-A3B",
         "task": "text-to-image",
-        "downloads": 218,
-        "likes": 282
+        "downloads": 1692,
+        "likes": 341
       },
       {
-        "id": "apple/DepthPro2",
-        "url": "https://huggingface.co/apple/DepthPro2",
-        "task": "depth-estimation",
-        "downloads": 0,
-        "likes": 1321
+        "id": "ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF",
+        "url": "https://huggingface.co/ISTA-DASLab/Inkling-2-Mini-GSQ-RCO-GGUF",
+        "task": "text-generation",
+        "downloads": 24931,
+        "likes": 282
       }
     ],
     "weibo": [
       {
-        "word": "中国十大最宜居城市",
-        "num": 1652321,
+        "word": "董明珠现场发火魏建军解围",
+        "num": 1158642,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E5%8D%81%E5%A4%A7%E6%9C%80%E5%AE%9C%E5%B1%85%E5%9F%8E%E5%B8%82%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E8%91%A3%E6%98%8E%E7%8F%A0%E7%8E%B0%E5%9C%BA%E5%8F%91%E7%81%AB%E9%AD%8F%E5%BB%BA%E5%86%9B%E8%A7%A3%E5%9B%B4%23"
       },
       {
-        "word": "患者用豆包质疑医生诊断",
-        "num": 887761,
+        "word": "千万不要用纸巾包贵重物品",
+        "num": 825759,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%82%A3%E8%80%85%E7%94%A8%E8%B1%86%E5%8C%85%E8%B4%A8%E7%96%91%E5%8C%BB%E7%94%9F%E8%AF%8A%E6%96%AD%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E5%8D%83%E4%B8%87%E4%B8%8D%E8%A6%81%E7%94%A8%E7%BA%B8%E5%B7%BE%E5%8C%85%E8%B4%B5%E9%87%8D%E7%89%A9%E5%93%81%23"
       },
       {
-        "word": "服务贸易发展十五五规划来了",
-        "num": 731925,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%8D%E5%8A%A1%E8%B4%B8%E6%98%93%E5%8F%91%E5%B1%95%E5%8D%81%E4%BA%94%E4%BA%94%E8%A7%84%E5%88%92%E6%9D%A5%E4%BA%86%23"
-      },
-      {
-        "word": "走错果园摘走数百斤蜜桔仅留下10元",
-        "num": 623438,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%B5%B0%E9%94%99%E6%9E%9C%E5%9B%AD%E6%91%98%E8%B5%B0%E6%95%B0%E7%99%BE%E6%96%A4%E8%9C%9C%E6%A1%94%E4%BB%85%E7%95%99%E4%B8%8B10%E5%85%83%23"
-      },
-      {
-        "word": "厉娜身上有非常重的重建痕迹",
-        "num": 569578,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E5%8E%89%E5%A8%9C%E8%BA%AB%E4%B8%8A%E6%9C%89%E9%9D%9E%E5%B8%B8%E9%87%8D%E7%9A%84%E9%87%8D%E5%BB%BA%E7%97%95%E8%BF%B9%23"
-      },
-      {
-        "word": "Viper跟观众告别",
-        "num": 558298,
-        "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23Viper%E8%B7%9F%E8%A7%82%E4%BC%97%E5%91%8A%E5%88%AB%23"
-      },
-      {
-        "word": "许飞这段反应可以进北影教材了",
-        "num": 556232,
+        "word": "180秒回顾神24发射任务",
+        "num": 686644,
         "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B8%E9%A3%9E%E8%BF%99%E6%AE%B5%E5%8F%8D%E5%BA%94%E5%8F%AF%E4%BB%A5%E8%BF%9B%E5%8C%97%E5%BD%B1%E6%95%99%E6%9D%90%E4%BA%86%23"
+        "url": "https://s.weibo.com/weibo?q=%23180%E7%A7%92%E5%9B%9E%E9%A1%BE%E7%A5%9E24%E5%8F%91%E5%B0%84%E4%BB%BB%E5%8A%A1%23"
       },
       {
-        "word": "警方回应50余人摘蜜桔仅留下10元",
-        "num": 488531,
+        "word": "朋友借网贷被拒后说我小气",
+        "num": 398526,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%9C%8B%E5%8F%8B%E5%80%9F%E7%BD%91%E8%B4%B7%E8%A2%AB%E6%8B%92%E5%90%8E%E8%AF%B4%E6%88%91%E5%B0%8F%E6%B0%94%23"
+      },
+      {
+        "word": "央行新规取消贷款罚息利率上下限",
+        "num": 376607,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%A4%AE%E8%A1%8C%E6%96%B0%E8%A7%84%E5%8F%96%E6%B6%88%E8%B4%B7%E6%AC%BE%E7%BD%9A%E6%81%AF%E5%88%A9%E7%8E%87%E4%B8%8A%E4%B8%8B%E9%99%90%23"
+      },
+      {
+        "word": "武契奇称一旦绝食将不接受救治",
+        "num": 364867,
+        "label": "热",
+        "url": "https://s.weibo.com/weibo?q=%23%E6%AD%A6%E5%A5%91%E5%A5%87%E7%A7%B0%E4%B8%80%E6%97%A6%E7%BB%9D%E9%A3%9F%E5%B0%86%E4%B8%8D%E6%8E%A5%E5%8F%97%E6%95%91%E6%B2%BB%23"
+      },
+      {
+        "word": "许飞 天娱前员工",
+        "num": 351864,
+        "label": "",
+        "url": "https://s.weibo.com/weibo?q=%23%E8%AE%B8%E9%A3%9E%20%E5%A4%A9%E5%A8%B1%E5%89%8D%E5%91%98%E5%B7%A5%23"
+      },
+      {
+        "word": "陆翊称拒绝调解文吉儿王子璇",
+        "num": 343494,
         "label": "新",
-        "url": "https://s.weibo.com/weibo?q=%23%E8%AD%A6%E6%96%B9%E5%9B%9E%E5%BA%9450%E4%BD%99%E4%BA%BA%E6%91%98%E8%9C%9C%E6%A1%94%E4%BB%85%E7%95%99%E4%B8%8B10%E5%85%83%23"
+        "url": "https://s.weibo.com/weibo?q=%23%E9%99%86%E7%BF%8A%E7%A7%B0%E6%8B%92%E7%BB%9D%E8%B0%83%E8%A7%A3%E6%96%87%E5%90%89%E5%84%BF%E7%8E%8B%E5%AD%90%E7%92%87%23"
       },
       {
-        "word": "三只松鼠致歉声明",
-        "num": 289418,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%89%E5%8F%AA%E6%9D%BE%E9%BC%A0%E8%87%B4%E6%AD%89%E5%A3%B0%E6%98%8E%23"
+        "word": "三星堆金面具正在变脆",
+        "num": 311849,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%89%E6%98%9F%E5%A0%86%E9%87%91%E9%9D%A2%E5%85%B7%E6%AD%A3%E5%9C%A8%E5%8F%98%E8%84%86%23"
       },
       {
-        "word": "中国男篮曾98比10胜沙特",
-        "num": 257740,
-        "label": "",
-        "url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E7%94%B7%E7%AF%AE%E6%9B%BE98%E6%AF%9410%E8%83%9C%E6%B2%99%E7%89%B9%23"
+        "word": "国考公共科目笔试",
+        "num": 262425,
+        "label": "新",
+        "url": "https://s.weibo.com/weibo?q=%23%E5%9B%BD%E8%80%83%E5%85%AC%E5%85%B1%E7%A7%91%E7%9B%AE%E7%AC%94%E8%AF%95%23"
       }
     ],
     "onthisday": [
       {
-        "year": 2022,
-        "text": "为响应此前于乌鲁木齐爆发的抗议，反对“动态清零”政策，上海民众聚集于同名的乌鲁木齐中路进行抗议。",
-        "title": "2022年乌鲁木齐抗议",
-        "url": "https://zh.wikipedia.org/wiki/2022%E5%B9%B4%E4%B9%8C%E9%B2%81%E6%9C%A8%E9%BD%90%E6%8A%97%E8%AE%AE"
+        "year": 2016,
+        "text": "国际纯化学和应用化学联合会正式通过人工合成元素Nh、Mc、Ts和Og的命名提案。",
+        "title": "國際純化學和應用化學聯合會",
+        "url": "https://zh.wikipedia.org/wiki/%E5%9C%8B%E9%9A%9B%E7%B4%94%E5%8C%96%E5%AD%B8%E5%92%8C%E6%87%89%E7%94%A8%E5%8C%96%E5%AD%B8%E8%81%AF%E5%90%88%E6%9C%83"
       },
       {
-        "year": 2022,
-        "text": "香港港铁新车率先于观塘线营运。",
-        "title": "港鐵",
-        "url": "https://zh.wikipedia.org/wiki/%E6%B8%AF%E9%90%B5"
+        "year": 2016,
+        "text": "拉米亚航空2933号班机在哥伦比亚麦德林附近坠毁，造成71人死亡，其中许多人是沙佩科恩斯足球俱乐部的球员。",
+        "title": "拉米亞航空2933號班機空難",
+        "url": "https://zh.wikipedia.org/wiki/%E6%8B%89%E7%B1%B3%E4%BA%9E%E8%88%AA%E7%A9%BA2933%E8%99%9F%E7%8F%AD%E6%A9%9F%E7%A9%BA%E9%9B%A3"
       },
       {
-        "year": 2020,
-        "text": "被视为伊朗核计划负责人的核物理学家穆赫辛·法克里扎德遭暗杀，据称是摩萨德所为。",
-        "title": "伊朗核问题",
-        "url": "https://zh.wikipedia.org/wiki/%E4%BC%8A%E6%9C%97%E6%A0%B8%E9%97%AE%E9%A2%98"
+        "year": 2011,
+        "text": "《联合国气候变化框架公约》第十七次缔约方大会暨《京都议定书》第七次缔约方会议在南非港口城市德班召开。",
+        "title": "联合国气候变化框架公约",
+        "url": "https://zh.wikipedia.org/wiki/%E8%81%94%E5%90%88%E5%9B%BD%E6%B0%94%E5%80%99%E5%8F%98%E5%8C%96%E6%A1%86%E6%9E%B6%E5%85%AC%E7%BA%A6"
       },
       {
-        "year": 2019,
-        "text": "美国总统特朗普正式签署《香港人权与民主法案》及《禁止向香港警察商业出口涵盖军用品法案》。",
-        "title": "美国总统",
-        "url": "https://zh.wikipedia.org/wiki/%E7%BE%8E%E5%9B%BD%E6%80%BB%E7%BB%9F"
+        "year": 2004,
+        "text": "中国陕西铜川矿务局陈家山煤矿发生瓦斯爆炸，166人死亡。",
+        "title": "陕西省",
+        "url": "https://zh.wikipedia.org/wiki/%E9%99%95%E8%A5%BF%E7%9C%81"
       },
       {
-        "year": 2010,
-        "text": "中华民国直辖市市长暨市议员选举。",
-        "title": "2010年中華民國直轄市市長選舉",
-        "url": "https://zh.wikipedia.org/wiki/2010%E5%B9%B4%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E7%9B%B4%E8%BD%84%E5%B8%82%E5%B8%82%E9%95%B7%E9%81%B8%E8%88%89"
+        "year": 2000,
+        "text": "乌克兰总统列昂尼德·库奇马被检控，涉嫌因录音丑闻而下令绑架并杀害记者格奥尔基·贡加泽。",
+        "title": "烏克蘭總統",
+        "url": "https://zh.wikipedia.org/wiki/%E7%83%8F%E5%85%8B%E8%98%AD%E7%B8%BD%E7%B5%B1"
       },
       {
-        "year": 2007,
-        "text": "亚洲棒球锦标赛于中华民国台中市举行。",
-        "title": "2007年亞洲棒球錦標賽",
-        "url": "https://zh.wikipedia.org/wiki/2007%E5%B9%B4%E4%BA%9E%E6%B4%B2%E6%A3%92%E7%90%83%E9%8C%A6%E6%A8%99%E8%B3%BD"
+        "year": 1991,
+        "text": "香港政府开始强制收楼清拆九龙城寨，破门入屋，将拒绝搬走的住户抬走，当日港府一共收回12个单位。",
+        "title": "英屬香港",
+        "url": "https://zh.wikipedia.org/wiki/%E8%8B%B1%E5%B1%AC%E9%A6%99%E6%B8%AF"
       }
     ]
   }
